@@ -1,0 +1,57 @@
+import { db } from "@/lib/db";
+import { usersTable, type User, type NewUser } from "./user.schema";
+import { eq } from "drizzle-orm";
+
+export const userRepository = {
+  /**
+   * Find user by Firebase UID.
+   */
+  async findById(id: string): Promise<User | undefined> {
+    return db.query.usersTable.findFirst({
+      where: eq(usersTable.id, id),
+    });
+  },
+
+  /**
+   * Find user by email.
+   */
+  async findByEmail(email: string): Promise<User | undefined> {
+    return db.query.usersTable.findFirst({
+      where: eq(usersTable.email, email),
+    });
+  },
+
+  /**
+   * Create or update user (Upsert).
+   * Useful for syncing Firebase Auth data on login.
+   */
+  async upsert(user: NewUser): Promise<User> {
+    const [inserted] = await db
+      .insert(usersTable)
+      .values(user)
+      .onConflictDoUpdate({
+        target: usersTable.id,
+        set: {
+          name: user.name,
+          email: user.email,
+          photoUrl: user.photoUrl,
+          googleLinked: user.googleLinked,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return inserted;
+  },
+
+  /**
+   * Update specific user fields.
+   */
+  async update(id: string, data: Partial<NewUser>): Promise<User | undefined> {
+    const [updated] = await db
+      .update(usersTable)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(usersTable.id, id))
+      .returning();
+    return updated;
+  },
+};
