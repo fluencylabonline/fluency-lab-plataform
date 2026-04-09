@@ -1,0 +1,51 @@
+{
+  "Common": {
+    "success": "Operation completed successfully",
+    "error": "An error occurred. Please try again.",
+    "unauthorized": "You do not have permission to perform this action.",
+    "notFound": "Resource not found.",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "noResults": "No results found.",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close"
+  },
+  "Auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "signInWithGoogle": "Sign in with Google",
+    "signInWithEmail": "Sign in with email",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "forgotPassword": "Forgot your password?",
+    "resetPassword": "Reset password",
+    "createPassword": "Create password",
+    "orContinueWithGoogle": "Or continue with Google",
+    "welcomeTitle": "Welcome to FluencyLab",
+    "welcomeSubtitle": "Sign in to access the platform",
+    "invalidCredentials": "Invalid email or password.",
+    "emailNotFound": "This email is not registered.",
+    "userNotRegistered": "This email is not registered on the platform. Please contact your administrator.",
+    "accountSuspended": "Your account has been suspended. Please contact your administrator.",
+    "passwordResetSent": "Password reset email sent successfully.",
+    "passwordCreated": "Password created successfully!",
+    "googleLinkSuccess": "Google account linked successfully!",
+    "logoutSuccess": "You have been signed out."
+  },
+  "Validation": {
+    "required": "This field is required.",
+    "emailInvalid": "Invalid email.",
+    "passwordMin": "Password must be at least 8 characters.",
+    "passwordMismatch": "Passwords do not match.",
+    "nameMin": "Name must be at least 2 characters.",
+    "nameMax": "Name must be at most 100 characters."
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "Common": {
+    "success": "Operação realizada com sucesso",
+    "error": "Ocorreu um erro. Tente novamente.",
+    "unauthorized": "Você não tem permissão para realizar esta ação.",
+    "notFound": "Recurso não encontrado.",
+    "loading": "Carregando...",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "confirm": "Confirmar",
+    "edit": "Editar",
+    "create": "Criar",
+    "search": "Buscar",
+    "noResults": "Nenhum resultado encontrado.",
+    "back": "Voltar",
+    "next": "Próximo",
+    "close": "Fechar"
+  },
+  "Auth": {
+    "signIn": "Entrar",
+    "signOut": "Sair",
+    "signInWithGoogle": "Entrar com Google",
+    "signInWithEmail": "Entrar com e-mail",
+    "email": "E-mail",
+    "password": "Senha",
+    "confirmPassword": "Confirmar senha",
+    "forgotPassword": "Esqueceu a senha?",
+    "resetPassword": "Redefinir senha",
+    "createPassword": "Criar senha",
+    "orContinueWithGoogle": "Ou continue com Google",
+    "welcomeTitle": "Bem-vindo à FluencyLab",
+    "welcomeSubtitle": "Faça login para acessar a plataforma",
+    "invalidCredentials": "E-mail ou senha inválidos.",
+    "emailNotFound": "Este e-mail não está cadastrado.",
+    "userNotRegistered": "Este e-mail não está cadastrado na plataforma. Entre em contato com o administrador.",
+    "accountSuspended": "Sua conta foi suspensa. Entre em contato com o administrador.",
+    "passwordResetSent": "E-mail de redefinição enviado com sucesso.",
+    "passwordCreated": "Senha criada com sucesso!",
+    "googleLinkSuccess": "Conta Google vinculada com sucesso!",
+    "logoutSuccess": "Você saiu da plataforma."
+  },
+  "Validation": {
+    "required": "Este campo é obrigatório.",
+    "emailInvalid": "E-mail inválido.",
+    "passwordMin": "A senha deve ter no mínimo 8 caracteres.",
+    "passwordMismatch": "As senhas não coincidem.",
+    "nameMin": "O nome deve ter no mínimo 2 caracteres.",
+    "nameMax": "O nome deve ter no máximo 100 caracteres."
+  }
+}
