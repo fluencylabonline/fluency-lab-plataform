@@ -1,10 +1,30 @@
 {
   "version": 1,
   "skills": {
+    "firebase-auth-basics": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "computedHash": "a8fb7b1bfaf9f7d1bd1ebd7e1d2718f42f51361c8b2776ed1cdc17548334fe51"
+    },
+    "firebase-basics": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "computedHash": "13b74b8f7a751a359a11cff2d20968b94c93cb394f88bf3ffbce477376414fac"
+    },
+    "firestore-security-rules-auditor": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "computedHash": "173b38a87198e9ac1a2ffc62a4a9525f444a98ead46bdb255395fd81499d33b3"
+    },
     "neon-postgres": {
       "source": "neondatabase/agent-skills",
       "sourceType": "github",
       "computedHash": "574cf4b7c901ebc7d88d34e2c3e3d08fdec127bd0047f888de148ff0af787d4e"
+    },
+    "tiptap": {
+      "source": "ueberdosis/tiptap",
+      "sourceType": "github",
+      "computedHash": "60765ba8cb8a71503e6f14bb3a7a6ee77b34b1d98cd04b60b1bfcbb7c41ba9c7"
     }
   }
 }

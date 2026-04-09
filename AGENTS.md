@@ -4,63 +4,226 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
-# FLUENCYLAB ARCHITECTURE & RULES
+# FLUENCYLAB — Agent Instructions
 
-Você é um Engenheiro de Software Sênior especialista em Next.js (App Router), React Server Components (RSC), Drizzle ORM e TailwindCSS. Siga estas regras ESTRITAMENTE ao gerar ou refatorar código.
-
-## 1. O Paradigma: Thin Client, Fat Server
-- **Client (Frontend):** É "burro". Ele não calcula nada, não valida regras de negócio e não conhece o banco de dados. Sua única função é renderizar UI e capturar intenções do usuário (cliques, forms).
-- **Server (Backend):** É "gordo". Toda a inteligência, controle de acesso (RBAC) e segurança vivem nas Server Actions e Services.
-
-## 2. O Padrão "Sanduíche" (Rendering & Data Flow)
-A arquitetura da FluencyLab exige uma separação estrita entre Servidor e Cliente. Siga este fluxo:
-- **Server (Read):** A página (`page.tsx`) busca os dados no banco (Drizzle).
-- **Client (Interact):** A página passa os dados via props para um Client Component (folha da árvore).
-- **Server (Write):** O Client Component executa mutações chamando uma Server Action.
-
-## 3. Regras de Diretórios e Estrutura (Pragmatic DDD)
-- **Bounded Contexts:** Um módulo (ex: `finance`) NÃO PODE acessar o banco de dados diretamente de outro módulo (ex: `user`). Use o Service do módulo correspondente.
-- **Divisão Vertical:** O código é fatiado verticalmente por domínio em `/modules/` (ex: `/modules/class/class.service.ts`, `/modules/class/class.schema.ts`).
-- **Pages & Layouts:** SEMPRE RSC. NUNCA use `"use client"` neles. Faça fecthing via Services na `page.tsx`.
-- **Client Components (The pages):** Em `components/page/{name}`. Empurre `"use client"` o mais baixo possível. Use SWR para hidratação/revalidação.
-- **Shared UI:** `/components/ui/` (Shadcn). Nunca use shadows em lugar nenhum.
-
-## 4. Primitivas de Código
-- **Repositories (`[domain].repository.ts`):** Comunicação Pura com o Banco (Drizzle). Sem login checks, sem Zod, sem business logic.
-- **Services (`[domain].service.ts`):** O Coração do Negócio. Orquestra Repositories, aplica algoritmos, verifica RBAC/Autorização. Não conhece Next.js (Request/Response).
-- **Server Actions (`[domain].actions.ts`):** Porteiro de Entrada. Valida payload com Zod. Pega usuário logado. Repassa para Service. Catch e Error Masking via `safe-action.ts`. Revalida cache.
-- **APIs (`/app/api/...`):** Webhooks externos (PaymentGateway, EmailProvider, VideoCallProvider) e Cron Jobs. Retorna JSON.
-- **Hooks (`use*.ts`):** Gerenciamento de Estado de UI e Fetching. Usa `SWR` para dados e `Zustand`/`useState` para UI (loading, sidebar). Zero lógica de negócio.
-
-
-## 5. Design System & UI/UX
-- **Mobile-First:** Programe sempre a versão mobile primeiro. Touch targets >= 44x44px.
-- **8px System:** Espaçamento `p-2, m-4, gap-4`.
-- **Alerts, Confirmations, Modais & Drawers:** NUNCA use Dialogs normais. Use SEMPRE Vaults/Drawers. No PWA, eles devem ser "floaty". //TODO, CRIAR O DRAWER PADRAO
-- **Sticky Header:** Header é sempre sticky. Sub-Header não é.
-- **Feedback:** Botões com spinner em loading. Toasts (`sonner`) após Server Actions.
-- **Empty States:** Sempre mostre `<EmptyState />` se não houver dados.
-
-## 6. Segurança e Fronteira
-- NUNCA confie no input do cliente. Zod parsing SEMPRE na entrada.
-- RBAC e Autorização acontecem ESTRITAMENTE na camada de Service.
-- **Error Masking:** Nunca retorne erros crus de banco. Retorne `{ success: false, error: string }`.
+> **Leia PRIMEIRO. Este é o índice mestre do projeto.** As regras detalhadas vivem nos arquivos de `rules/`, as skills em `skills/` e o contexto em `docs/`. Este arquivo conecta tudo e resolve ambiguidades.
 
 ---
 
-## 🤖 Manual de Habilidades (Skills)
+## 🚫 O Que NUNCA Fazer (Anti-Patterns)
 
-Sempre que for realizar uma tarefa, utilize as skills e workflows abaixo como referência de implementação:
+1. **NUNCA** use `"use client"` em `page.tsx` ou `layout.tsx`.
+2. **NUNCA** acesse o Repository de um módulo a partir de outro módulo. Use o Service.
+3. **NUNCA** retorne erros crus de banco para o cliente. Use Error Masking via `safe-action.ts`.
+4. **NUNCA** escreva lógica de negócio em Hooks, Components ou Actions.
+5. **NUNCA** use Dialogs/Modais normais. Use sempre **Vaults/Drawers**.
+6. **NUNCA** use shadows nos componentes.
+7. **NUNCA** crie pastas globais como `/services` ou `/repositories`. Use Vertical Slicing em `/modules/`.
+8. **NUNCA** busque dados no Client Component diretamente (a menos que encapsulado em SWR).
 
-### 🛠️ Skills de Desenvolvimento
-- **[Model & Schema](file:///.agents/skills/model-writer.md):** Definição de DB e Zod (Drizzle).
-- **[Service Layer](file:///.agents/skills/service-writer.md):** Lógica de negócio e RBAC (O Coração).
-- **[Server Actions](file:///.agents/skills/action-writer.md):** Porteiros de entrada e mutações seguras.
-- **[UI Hooks](file:///.agents/skills/hook-writer.md):** Lógica de interface e fetching (SWR/Zustand).
-- **[External Boundaries](file:///.agents/skills/route-writer.md):** Webhooks e integrações (AbacatePay/Resend).
-- **[Testing](file:///.agents/skills/test-writer.md):** Testes unitários de lógica e permissões.
+---
 
-### 🔄 Workflows de Processo
-- **[Planejamento](file:///.agents/workflows/plan.md):** Como arquitetar uma nova feature.
-- **[Execução](file:///.agents/workflows/execute.md):** Padronização de escrita de código.
-- **[Especificação](file:///.agents/workflows/spec.md):** Criação de Specs técnicas (DDD).
+## 🏗️ Arquitetura: Thin Client, Fat Server
+
+```
+Client = "Burro" → Renderiza UI + captura intenções do usuário
+Server = "Gordo" → Toda inteligência, RBAC, segurança, regras de negócio
+```
+
+### O Padrão "Sanduíche" (Data Flow)
+
+```
+1. Server (Read)    → page.tsx busca dados via Service
+2. Client (Interact) → page.tsx passa dados via props para _components/
+3. Server (Write)   → Client Component chama Server Action para mutações
+```
+
+### Exemplo Canônico Completo
+
+```
+app/(hub)/student/my-classes/
+├── page.tsx                    ← RSC: busca dados, verifica sessão
+└── _components/
+    ├── NextClassCard.tsx       ← "use client": renderiza UI, chama Actions
+    └── CancelClassDrawer.tsx   ← "use client": Vault/Drawer, chama Actions
+
+modules/class/
+├── class.schema.ts             ← Drizzle tables + Zod via drizzle-zod
+├── class.repository.ts         ← Queries puras (db.query, db.insert)
+├── class.service.ts            ← RBAC + regras de negócio
+├── class.actions.ts            ← Zod validation + safe-action wrapper
+└── class.types.ts              ← Tipos exportados
+```
+
+#### page.tsx (RSC — NUNCA "use client")
+```tsx
+// app/(hub)/student/my-classes/page.tsx
+import { classService } from "@/modules/class/class.service";
+import { getCurrentUser } from "@/lib/auth-server";
+import { NextClassCard } from "./_components/NextClassCard";
+
+export default async function MyClassesPage() {
+  const user = await getCurrentUser();
+  const classes = await classService.getStudentClasses(user.id);
+  return <NextClassCard initialData={classes} />;
+}
+```
+
+#### Client Component (_components/ — "use client" aqui)
+```tsx
+// app/(hub)/student/my-classes/_components/NextClassCard.tsx
+"use client";
+import { cancelClassAction } from "@/modules/class/class.actions";
+import { toast } from "sonner";
+
+export function NextClassCard({ initialData }) {
+  const handleCancel = async (classId: string) => {
+    const result = await cancelClassAction({ classId });
+    if (result.success) toast.success("Aula cancelada!");
+    else toast.error(result.error);
+  };
+  return (/* UI com botão que chama handleCancel */);
+}
+```
+
+#### Server Action (Porteiro — thin, sem lógica)
+```tsx
+// modules/class/class.actions.ts
+"use server";
+import { protectedAction } from "@/lib/safe-action";
+import { cancelClassSchema } from "./class.schema";
+import { classService } from "./class.service";
+
+export const cancelClassAction = protectedAction
+  .schema(cancelClassSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    await classService.cancelClass(ctx.user.id, parsedInput.classId);
+    revalidatePath("/student/my-classes");
+    return { success: true };
+  });
+```
+
+#### Service (O Coração — toda a inteligência aqui)
+```tsx
+// modules/class/class.service.ts
+import { classRepository } from "./class.repository";
+
+export const classService = {
+  async cancelClass(userId: string, classId: string) {
+    const cls = await classRepository.findById(classId);
+    if (!cls) throw new Error("Aula não encontrada");
+    if (cls.studentId !== userId) throw new Error("Sem permissão"); // ABAC
+    if (cls.startsAt < new Date()) throw new Error("Aula já começou"); // Business rule
+    await classRepository.updateStatus(classId, "cancelled");
+  },
+};
+```
+
+#### Repository (DB puro — sem lógica, sem checks)
+```tsx
+// modules/class/class.repository.ts
+import { db } from "@/lib/db";
+import { classesTable } from "./class.schema";
+import { eq } from "drizzle-orm";
+
+export const classRepository = {
+  async findById(id: string) {
+    return db.query.classesTable.findFirst({ where: eq(classesTable.id, id) });
+  },
+  async updateStatus(id: string, status: string) {
+    await db.update(classesTable).set({ status }).where(eq(classesTable.id, id));
+  },
+};
+```
+
+---
+
+## 📐 Regras Detalhadas (Referências)
+
+As regras completas vivem em arquivos separados. **Leia-os quando for implementar:**
+
+| Arquivo | Conteúdo | Quando ler |
+|---|---|---|
+| `.agents/rules/architecture.md` | Paradigma Thin/Fat, Bounded Contexts, Segurança | Sempre |
+| `.agents/rules/structure.md` | Padrão Sanduíche, regras de RSC, Client Components, Server Actions, Diretórios | Sempre |
+| `.agents/rules/primitives.md` | O que cada camada FAZ e NÃO FAZ (Repository, Service, Action, Hook, Component) | Ao criar qualquer arquivo |
+| `.agents/rules/design.md` | Mobile-First, Responsive Behavior, Header, Drawers/Vaults, Theming | Ao criar UI |
+
+---
+
+## 📚 Contexto do Projeto (Documentação)
+
+| Arquivo | Conteúdo | Quando ler |
+|---|---|---|
+| `.agents/docs/RBAC.md` | Permissões detalhadas por role (Admin, Teacher, Student, Manager) | Ao implementar RBAC no Service |
+
+---
+
+## 🛠️ Skills — Quando Usar Qual
+
+Cada skill é um manual especializado. **Use a skill correspondente ao tipo de arquivo que está criando:**
+
+| Quando o pedido envolve... | Skill | Arquivo |
+|---|---|---|
+| Criar/alterar tabelas ou validações | **Model & Schema** | `.agents/skills/model-writer.md` |
+| Implementar regras de negócio, RBAC | **Service Layer** | `.agents/skills/service-writer.md` |
+| Criar endpoint de mutação (Server Action) | **Server Actions** | `.agents/skills/action-writer.md` |
+| Lógica de UI, fetching, estado | **UI Hooks** | `.agents/skills/hook-writer.md` |
+| Webhooks, integrações externas | **External Boundaries** | `.agents/skills/route-writer.md` |
+| Testes unitários | **Testing** | `.agents/skills/test-writer.md` |
+
+---
+
+## 🔄 Workflows — Ciclo de Desenvolvimento
+
+| Slash Command | Quando usar | Arquivo |
+|---|---|---|
+| `/plan` | Arquitetar nova feature — mapear módulos, fluxo e segurança | `.agents/workflows/plan.md` |
+| `/execute` | Implementar seguindo o padrão Sanduíche e Pragmatic DDD | `.agents/workflows/execute.md` |
+| `/spec` | Criar especificação técnica detalhada (DDD + Security) | `.agents/workflows/spec.md` |
+| `/break` | Quebrar feature grande em subtarefas atômicas | `.agents/workflows/break.md` |
+| `/test` | Gerar testes unitários para Services e Actions | `.agents/workflows/test.md` |
+
+---
+
+## 📏 Convenções de Naming
+
+```
+modules/[domain]/[domain].schema.ts      → Tabelas Drizzle + Zod
+modules/[domain]/[domain].repository.ts  → Queries puras
+modules/[domain]/[domain].service.ts     → Lógica de negócio + RBAC
+modules/[domain]/[domain].actions.ts     → Server Actions (porteiro)
+modules/[domain]/[domain].types.ts       → Tipos compartilhados
+
+app/(hub)/[role]/[feature]/page.tsx      → RSC (NUNCA "use client")
+app/(hub)/[role]/[feature]/_components/  → Client Components locais
+
+hooks/use[Name].ts                       → Lógica de UI (SWR, Zustand)
+components/ui/                           → Design System (Shadcn)
+components/layout/                       → Header, Sidebar, Navigation
+lib/                                     → Singletons e configs globais
+utils/                                   → Funções puras (date, format, sanitize)
+```
+
+---
+
+## ⚡ Quick Reference: Camadas e Responsabilidades
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ page.tsx (RSC)          → Busca dados, verifica sessão          │
+│   └─ _components/*.tsx  → "use client", renderiza, chama Actions│
+│        └─ Action        → Valida Zod, pega user, chama Service  │
+│             └─ Service  → RBAC, regras de negócio, orquestra    │
+│                  └─ Repository → Drizzle queries puras          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+| Camada | Conhece Next.js? | Conhece Banco? | Tem Lógica de Negócio? |
+|---|---|---|---|
+| page.tsx | ✅ | Via Service | ❌ |
+| _components/ | ✅ | ❌ | ❌ |
+| Action | ✅ (revalidate) | ❌ | ❌ |
+| Service | ❌ | Via Repository | ✅ |
+| Repository | ❌ | ✅ (Drizzle) | ❌ |
+| Hook | ✅ | ❌ | ❌ |

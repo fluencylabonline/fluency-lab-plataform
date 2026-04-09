@@ -14,13 +14,13 @@ A arquitetura da FluencyLab exige uma separação estrita entre Servidor e Clien
 
 ## 2. Regras Estritas para `page.tsx` e `layout.tsx` (RSC)
 - NUNCA use a diretiva `"use client"` no topo de um arquivo `page.tsx` ou `layout.tsx`. Eles devem ser SEMPRE React Server Components.
-- Faça o fetch de dados iniciais (Drizzle queries via Services) diretamente na `page.tsx`.
+- Faça o fetching de dados iniciais (Drizzle queries via Services) diretamente na `page.tsx`.
 - Lide com a autorização e validação de sessão (RBAC) no servidor antes de renderizar a página.
 - Não use hooks (useState, useEffect) nestes arquivos.
 
-## 3. Regras Estritas para Client Components (`components/pages/`)
+## 3. Regras Estritas para Client Components (`_components/`)
 - Empurre o `"use client"` o mais para baixo possível na árvore de componentes.
-- Crie componentes cliente em uma pasta `components/page/{name}`.
+- Crie componentes cliente em uma pasta `_components/` dentro da rota (ex: `app/(hub)/student/my-classes/_components/`).
 - Client Components recebem dados iniciais (`initialData`) via props do Server Component pai.
 - Use SWR para hidratação e background-revalidation (apenas quando o dado mudar com frequência).
 - Use Zustand APENAS para estado global de UI (ex: sidebar aberta), nunca para regras de negócio.
@@ -29,7 +29,7 @@ A arquitetura da FluencyLab exige uma separação estrita entre Servidor e Clien
 - Mutações e envios de formulário são FEITOS EXCLUSIVAMENTE via Server Actions.
 - As Server Actions residem na pasta do módulo (`/modules/[domain]/[domain].actions.ts`).
 - Server Actions DEVEM SEMPRE validar o input usando Zod e verificar a autenticação ANTES de executar a regra de negócio.
-- Nunca retorne erros crus do banco de dados para o cliente. Use o padrão de Error Masking (retorne um objeto `{ success: boolean, error?: string }`). *Use o arquivo `safe-action.ts` para isso.* para lidar com Error Leaking
+- Nunca retorne erros crus do banco de dados para o cliente. Use o padrão de Error Masking (retorne um objeto `{ success: boolean, error?: string }`). Use o arquivo `safe-action.ts` para lidar com Error Leaking.
 
 ## 5. Estrutura de Diretórios (Pragmatic DDD)
 - Não crie pastas globais como `/services` ou `/repositories`.
@@ -39,6 +39,8 @@ A arquitetura da FluencyLab exige uma separação estrita entre Servidor e Clien
 
 ## 6. Exemplo de Implementação Padrão
 Se o usuário pedir "Crie a tela de alunos", você deve gerar:
-1. `app/(dashboard)/students/page.tsx` (Server Component, DB fetch).
-2. `components/pages/students/StudentsList.tsx` (Client Component, SWR, UI state).
-3. `modules/student/student.actions.ts` (Server Actions para criar/deletar alunos).
+1. `app/(hub)/admin/users/page.tsx` (Server Component, DB fetch via Service).
+2. `app/(hub)/admin/users/_components/StudentsList.tsx` (Client Component, SWR, UI state).
+3. `modules/user/user.actions.ts` (Server Actions para criar/deletar alunos).
+4. `modules/user/user.service.ts` (Lógica de negócio e RBAC).
+5. `modules/user/user.repository.ts` (Queries Drizzle puras).
