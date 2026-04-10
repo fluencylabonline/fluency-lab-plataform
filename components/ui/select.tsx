@@ -63,7 +63,6 @@ const Select = ({
         const map: Record<string, React.ReactNode> = {};
         const traverse = (node: React.ReactNode) => {
             React.Children.forEach(node, (child) => {
-                // Tipagem correta para evitar 'any' acessando as props de um elemento React
                 if (
                     React.isValidElement<{ value?: string; children?: React.ReactNode }>(
                         child

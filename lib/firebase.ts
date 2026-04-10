@@ -11,7 +11,6 @@ const firebaseConfig = {
   appId: env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase for the client side
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 

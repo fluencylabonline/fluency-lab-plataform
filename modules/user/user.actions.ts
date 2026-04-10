@@ -13,15 +13,17 @@ export const loginAction = actionClient
   .inputSchema(
     z.object({
       idToken: z.string().min(1),
+      rememberMe: z.boolean().optional().default(false),
     })
   )
-  .action(async ({ parsedInput: { idToken } }) => {
+  .action(async ({ parsedInput: { idToken, rememberMe } }) => {
     try {
       const sessionCookie = await userService.createSessionCookie(idToken);
       const cookieStore = await cookies();
+      const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24; // 30 days vs 1 day
 
       cookieStore.set("session", sessionCookie, {
-        maxAge: 60 * 60 * 24 * 5, // 5 days
+        maxAge: maxAge,
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         path: "/",

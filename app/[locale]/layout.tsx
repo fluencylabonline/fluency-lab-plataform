@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
-import { ThemeProvider } from "next-themes";
 import { cookies } from "next/headers";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "@/components/ui/toaster";
+import { Providers } from "@/components/layout/providers";
 
-import "./globals.css";
+import "../globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -37,20 +34,16 @@ export default async function RootLayout({
       lang={locale}
       className={`theme-${themeColor} ${inter.variable} h-full antialiased`}
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
     >
       <body className={`${inter.className} min-h-full flex flex-col`}>
-        <NextIntlClientProvider messages={messages}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme={themeMode}
-            enableSystem
-          >
-            <TooltipProvider>
-              {children}
-            </TooltipProvider>
-          </ThemeProvider>
-          <Toaster />
-        </NextIntlClientProvider>
+        <Providers
+          locale={locale}
+          messages={messages}
+          themeMode={themeMode}
+        >
+          {children}
+        </Providers>
       </body>
     </html>
   );

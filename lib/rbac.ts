@@ -44,7 +44,6 @@ export enum UserRoles {
   TEACHER = "teacher",
 }
 
-
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   admin: [
     "user.create",
