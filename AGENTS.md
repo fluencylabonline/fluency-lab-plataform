@@ -16,7 +16,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 2. **NUNCA** acesse o Repository de um módulo a partir de outro módulo. Use o Service.
 3. **NUNCA** retorne erros crus de banco para o cliente. Use Error Masking via `safe-action.ts`.
 4. **NUNCA** escreva lógica de negócio em Hooks, Components ou Actions.
-5. **NUNCA** use Dialogs/Modais normais. Use sempre **Vaults/Drawers**.
+5. **NUNCA** use Dialogs/Modais normais. Use sempre **Vaults**. (Componente correto em components/ui/vault)
 6. **NUNCA** use shadows nos componentes.
 7. **NUNCA** crie pastas globais como `/services` ou `/repositories`. Use Vertical Slicing em `/modules/`.
 8. **NUNCA** busque dados no Client Component diretamente (a menos que encapsulado em SWR).
@@ -45,7 +45,7 @@ app/(hub)/student/my-classes/
 ├── page.tsx                    ← RSC: busca dados, verifica sessão
 └── _components/
     ├── NextClassCard.tsx       ← "use client": renderiza UI, chama Actions
-    └── CancelClassDrawer.tsx   ← "use client": Vault/Drawer, chama Actions
+    └── CancelClassVault.tsx   ← "use client": Vault, chama Actions
 
 modules/class/
 ├── class.schema.ts             ← Drizzle tables + Zod via drizzle-zod
@@ -147,7 +147,7 @@ As regras completas vivem em arquivos separados. **Leia-os quando for implementa
 | `.agents/rules/architecture.md` | Paradigma Thin/Fat, Bounded Contexts, Segurança | Sempre |
 | `.agents/rules/structure.md` | Padrão Sanduíche, regras de RSC, Client Components, Server Actions, Diretórios | Sempre |
 | `.agents/rules/primitives.md` | O que cada camada FAZ e NÃO FAZ (Repository, Service, Action, Hook, Component) | Ao criar qualquer arquivo |
-| `.agents/rules/design.md` | Mobile-First, Responsive Behavior, Header, Drawers/Vaults, Theming | Ao criar UI |
+| `.agents/rules/design.md` | Mobile-First, Responsive Behavior, Header, Vaults, Theming | Ao criar UI |
 
 ---
 

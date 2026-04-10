@@ -37,6 +37,13 @@ export type Permission =
   | "material.view";
 
 export type Role = "admin" | "teacher" | "student" | "manager";
+export enum UserRoles {
+  ADMIN = "admin",
+  MANAGER = "manager",
+  STUDENT = "student",
+  TEACHER = "teacher",
+}
+
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   admin: [

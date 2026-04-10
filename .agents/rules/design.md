@@ -1,27 +1,31 @@
+---
+trigger: always_on
+---
+
 # DESIGN SYSTEM & UI/UX RULES (FLUENCYLAB)
 
 ## 1. Princípios Básicos
 - **Mobile-First Real:** Programe sempre a versão mobile primeiro (`className="flex flex-col md:flex-row"`) use touch targets >= 44x44px.
 - **Espaçamento e Tipografia:** Use o sistema de 8px (Tailwind `p-2`, `m-4`, `gap-4`). Use fontes e cores baseadas no Tailwind e na configuração global do `theme`.
 - **Nunca use shadow nos componentes**
-- **Nunca use Dialog ou Modais normais, eles sempre são Vaults/Drawers**
-- **Drawer/Vaults funcionam normais no Desktop/Tablet/Mobile, mas no PWA eles devem ser floaty (Separados dos cantos)**
+- **Nunca use Dialog ou Modais normais, sempre use o Vault component**
+- **Vaults funcionam normais no Desktop/Tablet/Mobile, mas no PWA eles devem ser floaty (Separados dos cantos)**
 
 ## 2. Componentes Adaptativos (Regra de Ouro)
 ### Responsive Behavior
 * **Sidebar:**
     * **Desktop:** Left side Collapsible with icons and SidebarTrigger.
-    * **Mobile:** Bottom side Drawer with trigger.
-* **Dropdowns:**
+    * **Mobile:** Bottom side Vault with trigger.
+* **Dropdowns:** (Já existe em components/ui/dropdown-menu)
     * **Desktop:** Default.
-    * **Mobile:** Drawer.
-* **Dialogs/Alerts/Confirmation:** Always Drawer.
+    * **Mobile:** Vault.
+* **Dialogs/Alerts/Confirmation:** Always Vault. (Já existe em components/ui/vault)
 * **Forms:** ShadCN + ReactHookForm.
 
 ### Search UX
 * Always include empty states components when using it.
 
-### Header Component
+### Header Component (Já existe em components/layout/header)
 * **Desktop:** * *Left:* BackButton when in sub-page.
     * *Center:* Title.
     * *Right:* ThemeToggle, Notification and Avatar (Logout and Profile).
