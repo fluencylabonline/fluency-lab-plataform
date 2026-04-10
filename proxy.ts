@@ -33,7 +33,7 @@ export function proxy(request: NextRequest) {
   // 3. Route Protection Logic
   const isAuthPage = AUTH_PAGES.some((page) => pathname.startsWith(page));
 
-  if (!session && !isAuthPage) {
+  if (!session && !isAuthPage && pathname !== "/") {
     // Redirect unauthenticated users to signin
     const signInUrl = new URL("/signin", request.url);
     // Store original URL to redirect back after login
@@ -47,7 +47,10 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // 4. Continue with i18n handling
+  // 4. Continue with i18n handling TEMPORARY
+  if (pathname === "/") {
+    return NextResponse.next();
+  }
   return handleIntl(request);
 }
 

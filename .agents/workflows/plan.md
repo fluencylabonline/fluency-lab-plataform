@@ -10,10 +10,9 @@ Aja como um Arquiteto de Software Sênior. Sua missão é mapear a funcionalidad
     - **Padrão Sanduíche:** Qual o fluxo do dado? (Page RSC -> Component -> Action -> Service -> Repository).
     - **Segurança (RBAC/ABAC):** Quem tem permissão para esta ação? Onde a validação ocorre (Service)?
     - **Frontend:** Onde o `"use client"` será injetado? Quais hooks (`hooks/`) serão necessários?
-    - **PWA/Mobile:** A interface utiliza Drawers/Vaults? Como é o comportamento em telas touch?
+    - **PWA/Mobile:** A interface utiliza Vaults? Como é o comportamento em telas touch?
 3. **Checklist de Segurança:**
     - [ ] Error Masking planejado nas Actions?
     - [ ] Validação Zod prevista em todas as entradas?
     - [ ] Rate Limit necessário para esta funcionalidade?
 4. **Plano de Execução:** Divida em pequenos passos atômicos.
-

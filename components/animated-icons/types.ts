@@ -1,0 +1,12 @@
+export interface AnimatedIconProps {
+    size?: number | string;
+    color?: string;
+    strokeWidth?: number;
+    className?: string;
+    onClick?: () => void;
+}
+
+export interface AnimatedIconHandle {
+    startAnimation: () => void;
+    stopAnimation: () => void;
+}

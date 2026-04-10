@@ -1,15 +1,24 @@
+
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
+import { ColorSwitcher } from "@/components/ui/color-switcher";
 import { getTranslations } from "next-intl/server";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default async function Home() {
   const t = await getTranslations("Auth");
 
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-center py-32 px-16 bg-white dark:bg-black">
-        <h1 className="text-3xl font-semibold tracking-tight text-black dark:text-zinc-50">
+    <div className="flex flex-col flex-1 items-center justify-center bg-background font-sans text-center">
+      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-center py-32 px-16 gap-4">
+        <ThemeSwitcher />
+        <ColorSwitcher />
+        <Avatar>
+          <AvatarFallback name="User" />
+        </Avatar>
+        <h1 className="text-3xl font-semibold tracking-tight text-primary">
           {t("welcomeTitle")}
         </h1>
-        <p className="mt-2 text-lg text-zinc-600 dark:text-zinc-400">
+        <p className="mt-2 text-lg text-muted-foreground">
           {t("welcomeSubtitle")}
         </p>
       </main>
