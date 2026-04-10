@@ -5,7 +5,7 @@ import { routing } from "./i18n/routing";
 
 const handleIntl = createIntlMiddleware(routing);
 
-const AUTH_PAGES = ["/signin", "/invite", "/reset-password", "/create-password"];
+const AUTH_PAGES = ["/signin", "/invite", "/reset-password", "/create-password", "/forgot-password"];
 const PUBLIC_API_ROUTES = ["/api/webhooks"];
 
 /**
@@ -31,9 +31,11 @@ export function proxy(request: NextRequest) {
   }
 
   // 3. Route Protection Logic
-  const isAuthPage = AUTH_PAGES.some((page) => pathname.startsWith(page));
+  // Normalize pathname to remove locale prefix (e.g. /pt-BR/signin -> /signin)
+  const normalizedPath = pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?\//, "/") || "/";
+  const isAuthPage = AUTH_PAGES.some((page) => normalizedPath.startsWith(page) || normalizedPath === page);
 
-  if (!session && !isAuthPage && pathname !== "/") {
+  if (!session && !isAuthPage && normalizedPath !== "/") {
     // Redirect unauthenticated users to signin
     const signInUrl = new URL("/signin", request.url);
     // Store original URL to redirect back after login
@@ -47,10 +49,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // 4. Continue with i18n handling TEMPORARY
-  if (pathname === "/") {
-    return NextResponse.next();
-  }
+  // 4. Continue with i18n handling
   return handleIntl(request);
 }
 

@@ -6,7 +6,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # FLUENCYLAB — Agent Instructions
 
-> **Leia PRIMEIRO. Este é o índice mestre do projeto.** As regras detalhadas vivem nos arquivos de `rules/`, as skills em `skills/` e o contexto em `docs/`. Este arquivo conecta tudo e resolve ambiguidades.
+> **Leia PRIMEIRO. Este é o índice mestre do projeto.** As regras detalhadas vivem nos arquivos de `rules/`, as skills em `skills/`. Este arquivo conecta tudo e resolve ambiguidades.
+> Preferencialmente sempre verifique 'rules' e as 'skills' apenas quando for necessário.
 
 ---
 
@@ -20,6 +21,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 6. **NUNCA** use shadows nos componentes.
 7. **NUNCA** crie pastas globais como `/services` ou `/repositories`. Use Vertical Slicing em `/modules/`.
 8. **NUNCA** busque dados no Client Component diretamente (a menos que encapsulado em SWR).
+9. **NUNCA** use `try/catch` em Components para capturar erros do `authClient`. O `authClient` retorna `AuthResult` — nunca lança. Exiba erros via `notify.error()` (Toast), nunca com estado inline (`setLocalError`).
+10. **NUNCA** faça `fetch("/api/auth/...")` direto do frontend. Use Server Actions via `authClient`.
+11. **NUNCA** gerencie estado de formulários complexos manualmente com `useState`. Use **React Hook Form** + **Zod** para validação e consistência.
 
 ---
 
@@ -74,15 +78,16 @@ export default async function MyClassesPage() {
 // app/(hub)/student/my-classes/_components/NextClassCard.tsx
 "use client";
 import { cancelClassAction } from "@/modules/class/class.actions";
-import { toast } from "sonner";
+import { notify } from "@/components/ui/toaster";
 
 export function NextClassCard({ initialData }) {
   const handleCancel = async (classId: string) => {
     const result = await cancelClassAction({ classId });
-    if (result.success) toast.success("Aula cancelada!");
-    else toast.error(result.error);
+    if (result.success) notify.success("Aula cancelada!");
+    else notify.error(result.error);
   };
   return (/* UI com botão que chama handleCancel */);
+  // i18n sempre deve ter fallback, ex: t("key") || "fallback"
 }
 ```
 

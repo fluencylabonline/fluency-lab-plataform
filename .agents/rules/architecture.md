@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # ARCHITECTURE & MENTAL MODEL (FLUENCYLAB)
 
 ## 1. O Paradigma: Thin Client, Fat Server
@@ -11,4 +15,4 @@
 ## 3. Segurança e Fronteira
 - NUNCA confie no input do cliente. Toda Server Action e API DEVE começar com um parsing estrito usando Zod.
 - O RBAC (Role-Based Access Control) e a Autorização acontecem ESTRITAMENTE na camada de Service, nunca na UI.
-- Padrão de Error Masking: O cliente nunca recebe erros crus (ex: falhas de SQL ou de banco de dados). Ele recebe mensagens sanitizadas via `{ success: false, error: string }`.
+- Padrão de Error Masking: O cliente nunca recebe erros crus (ex: falhas de SQL ou de banco de dados). Ele recebe mensagens sanitizadas via `{ success: false, error: string }`. Use const actionClient = createSafeActionClient

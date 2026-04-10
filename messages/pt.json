@@ -15,7 +15,8 @@
     "noResults": "Nenhum resultado encontrado.",
     "back": "Voltar",
     "next": "Próximo",
-    "close": "Fechar"
+    "close": "Fechar",
+    "switchLanguage": "Alternar idioma"
   },
   "Auth": {
     "signIn": "Entrar",
@@ -26,6 +27,8 @@
     "password": "Senha",
     "confirmPassword": "Confirmar senha",
     "forgotPassword": "Esqueceu a senha?",
+    "forgotPasswordSubtitle": "Não se preocupe, nós ajudamos você.",
+    "createPasswordSubtitle": "Escolha uma nova senha forte.",
     "resetPassword": "Redefinir senha",
     "createPassword": "Criar senha",
     "orContinueWithGoogle": "Ou continue com Google",
@@ -38,7 +41,11 @@
     "passwordResetSent": "E-mail de redefinição enviado com sucesso.",
     "passwordCreated": "Senha criada com sucesso!",
     "googleLinkSuccess": "Conta Google vinculada com sucesso!",
-    "logoutSuccess": "Você saiu da plataforma."
+    "logoutSuccess": "Você saiu da plataforma.",
+    "back": "Voltar",
+    "backToLogin": "Voltar para Login",
+    "rememberMe": "Permanecer logado",
+    "error": "Ocorreu um erro. Tente novamente."
   },
   "Validation": {
     "required": "Este campo é obrigatório.",

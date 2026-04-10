@@ -35,6 +35,7 @@ yarn-error.log*
 /.agents/docs
 serviceAccountKey.json
 implementation
+scripts
 
 # vercel
 .vercel

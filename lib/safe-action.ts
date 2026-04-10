@@ -1,6 +1,5 @@
 import { createSafeActionClient } from "next-safe-action";
 import { getTranslations } from "next-intl/server";
-
 import { getCurrentUser } from "./auth-server";
 
 /**

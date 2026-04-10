@@ -3,6 +3,7 @@ import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { ColorSwitcher } from "@/components/ui/color-switcher";
 import { getTranslations } from "next-intl/server";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import Link from "next/link";
 
 export default async function Home() {
   const t = await getTranslations("Auth");
@@ -21,6 +22,7 @@ export default async function Home() {
         <p className="mt-2 text-lg text-muted-foreground">
           {t("welcomeSubtitle")}
         </p>
+        <Link href="/signin">Login</Link>
       </main>
     </div>
   );

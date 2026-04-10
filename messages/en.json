@@ -15,7 +15,8 @@
     "noResults": "No results found.",
     "back": "Back",
     "next": "Next",
-    "close": "Close"
+    "close": "Close",
+    "switchLanguage": "Switch language"
   },
   "Auth": {
     "signIn": "Sign in",
@@ -26,6 +27,8 @@
     "password": "Password",
     "confirmPassword": "Confirm password",
     "forgotPassword": "Forgot your password?",
+    "forgotPasswordSubtitle": "Don't worry, we'll help you.",
+    "createPasswordSubtitle": "Choose a new strong password.",
     "resetPassword": "Reset password",
     "createPassword": "Create password",
     "orContinueWithGoogle": "Or continue with Google",
@@ -38,7 +41,11 @@
     "passwordResetSent": "Password reset email sent successfully.",
     "passwordCreated": "Password created successfully!",
     "googleLinkSuccess": "Google account linked successfully!",
-    "logoutSuccess": "You have been signed out."
+    "logoutSuccess": "You have been signed out.",
+    "back": "Back",
+    "backToLogin": "Back to Login",
+    "rememberMe": "Remember me",
+    "error": "An error occurred. Please try again."
   },
   "Validation": {
     "required": "This field is required.",

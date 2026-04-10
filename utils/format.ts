@@ -7,11 +7,11 @@ import type { Locale } from "@/i18n/config";
  */
 export function formatCurrency(
   valueInCents: number,
-  locale: Locale = "pt-BR"
+  locale: Locale = "pt"
 ): string {
   return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: locale === "pt-BR" ? "BRL" : "USD",
+    currency: locale === "pt" ? "BRL" : "USD",
   }).format(valueInCents / 100);
 }
 
