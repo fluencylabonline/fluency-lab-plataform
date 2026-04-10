@@ -1,9 +1,6 @@
 import { forwardRef, useImperativeHandle, useCallback } from "react";
-import type {
-  AnimatedIconHandle,
-  AnimatedIconProps,
-} from "../../types/animated/types";
 import { motion, useAnimate } from "motion/react";
+import { AnimatedIconHandle, AnimatedIconProps } from "./types";
 
 const LayoutSidebarRightIcon = forwardRef<
   AnimatedIconHandle,
