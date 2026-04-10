@@ -46,6 +46,15 @@
     "backToLogin": "Back to Login",
     "rememberMe": "Remember me",
     "notInvited": "This email has not been invited to the platform. Please contact your administrator.",
+    "loading": "Loading...",
+    "checkYourEmail": "Check your email",
+    "passwordResetSentDescription": "We've sent instructions to reset your password.",
+    "twoFactorTitle": "Two-factor verification",
+    "twoFactorSubtitle": "Enter the 6-digit code from your authenticator app",
+    "signingInAs": "Signing in as:",
+    "verifying": "Verifying...",
+    "verifyButton": "Verify",
+    "useDifferentAccount": "Use a different account",
     "error": "An error occurred. Please try again."
   },
   "Validation": {

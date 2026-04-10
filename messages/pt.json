@@ -47,6 +47,15 @@
     "rememberMe": "Permanecer logado",
     "notInvited": "Este e-mail não foi convidado para a plataforma. Entre em contato com o administrador.",
     "accountExistsWithDifferentCredential": "Já existe uma conta com este e-mail usando outro método de login (ex: Google). Gostaria de vincular suas contas?",
+    "loading": "Carregando...",
+    "checkYourEmail": "Verifique seu e-mail",
+    "passwordResetSentDescription": "Enviamos instruções para redefinir sua senha.",
+    "twoFactorTitle": "Verificação em duas etapas",
+    "twoFactorSubtitle": "Insira o código de 6 dígitos do seu aplicativo autenticador",
+    "signingInAs": "Entrando como:",
+    "verifying": "Verificando...",
+    "verifyButton": "Verificar",
+    "useDifferentAccount": "Usar outra conta",
     "error": "Ocorreu um erro. Tente novamente."
   },
   "Validation": {
