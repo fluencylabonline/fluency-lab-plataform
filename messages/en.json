@@ -64,5 +64,215 @@
     "passwordMismatch": "Passwords do not match.",
     "nameMin": "Name must be at least 2 characters.",
     "nameMax": "Name must be at most 100 characters."
+  },
+  "PwaWelcome": {
+    "title": "Welcome to FluencyLab!",
+    "description": "Your journey to fluency starts here.",
+    "enterButton": "Enter",
+    "logoAlt": "FluencyLab Logo"
+  },
+  "LandingPage": {
+    "title": "Learn a language for real, without giving up halfway",
+    "subtitle": "Personalized classes with dedicated tutors, natural method without rote memorization.",
+    "primaryCta": "Book your class",
+    "secondaryCta": "Methodology",
+    "heroSubtitle": "A platform that follows <br> every step of your progress. Simple as that.",
+    "nav": {
+      "about": "About Us",
+      "plans": "Plans",
+      "team": "Our Team",
+      "faq": "FAQ",
+      "login": "Login",
+      "continue": "Continuar",
+      "switchAccount": "Sign in with another account",
+      "menu": "Menu",
+      "signOut": "Sign out"
+    },
+    "heroCard": {
+      "greeting": {
+        "morning": "Good morning,",
+        "afternoon": "Good afternoon,",
+        "night": "Good evening,"
+      },
+      "defaultName": "John",
+      "lessonLabel": "LESSON OF THE DAY",
+      "lessonTitle": "Coffee Shop in Paris",
+      "lessonSubtitle": "Intermediate Level • 15 min",
+      "reviewTitle": "Review",
+      "reviewCount": "3 words",
+      "progressTitle": "Total Fluency",
+      "progressGrowth": "+4% this week",
+      "words": {
+        "water": "Água",
+        "waterTrans": "Water",
+        "bread": "Pão",
+        "breadTrans": "Bread"
+      }
+    },
+    "Comparison": {
+      "badge": "Differentials",
+      "title": "Why is Fluency Lab different?",
+      "description": "You've tried learning with apps and gave up. Or you took generic classes that went nowhere. We know — and we've created something entirely different.",
+      "mobileSwipe": "Swipe to see more →",
+      "items": {
+        "apps": {
+          "title": "Apps (Duolingo, Babbel)",
+          "problemTitle": "The Problem with Apps",
+          "problems": "Repetitive exercises,Memorizing isolated words,No real follow-up,90% give up halfway",
+          "solutionTitle": "Fluency Lab Natural Method",
+          "solutions": "Learn how you learned Portuguese,No forced memorization,Dedicated tutor who knows you,Anti-dropout planning"
+        },
+        "marketplaces": {
+          "title": "Marketplaces (Preply, iTalki)",
+          "problemTitle": "The Problem with Marketplaces",
+          "problems": "Each class is isolated,No structured curriculum,You have to manage everything",
+          "solutionTitle": "Personalized Curriculum",
+          "solutions": "Plan made 100% for you,Schedule based on your objectives,We manage your learning"
+        },
+        "traditional": {
+          "title": "Traditional Schools",
+          "problemTitle": "The Problem with Online Schools",
+          "problems": "Fixed-pace classes,Generic content for everyone,Inflexible schedules",
+          "solutionTitle": "Entirely Yours",
+          "solutions": "Pace adapted to you,Themes you enjoy,Schedules that work for you"
+        }
+      },
+      "labels": {
+        "others": "Others",
+        "fluencyLab": "Fluency Lab"
+      }
+    },
+    "Team": {
+      "badge": "Our Experts",
+      "title": "Meet our team of <primary>professionals</primary>",
+      "description": "Dedicated tutors ready to personalize your learning journey based on your real goals. We aren't just teachers, we are partners in your evolution.",
+      "cta": "I want to book a trial lesson",
+      "mobileSwipe": "Swipe to see →",
+      "stats": {
+        "tutors": "+150",
+        "tutorsLabel": "Native Tutors",
+        "rating": "4.9/5",
+        "ratingLabel": "Average Rating"
+      },
+      "members": {
+        "ana": {
+          "name": "Ana Silva",
+          "role": "Head of Methodology",
+          "bio": "Neuro-linguistics specialist with 10 years of experience in adaptive teaching."
+        },
+        "mark": {
+          "name": "Mark Miller",
+          "role": "English Lead",
+          "bio": "London native, focused on Business English and corporate communication."
+        },
+        "sofia": {
+          "name": "Sofia Martinez",
+          "role": "Spanish Tutor",
+          "bio": "Argentine journalist who teaches through culture and current events."
+        },
+        "lucas": {
+          "name": "Lucas Oliveira",
+          "role": "Student Coordinator",
+          "bio": "Ensures your study plan is always aligned with your routine."
+        }
+      }
+    },
+    "HowItWorks": {
+      "title": "How it works",
+      "plus": "+",
+      "learnMore": "Learn more",
+      "steps": {
+        "personalized": {
+          "id": "01",
+          "title": "Personalized Plan",
+          "subtitle": "Your schedule, your goals",
+          "description": "No 'standard' classes here. We build a unique study plan for you: based on your current level, your goals (travel? work? exam?), your deadlines, and even the subjects you enjoy. Want to learn English talking about technology? Let's go."
+        },
+        "natural": {
+          "id": "02",
+          "title": "Natural Method",
+          "subtitle": "Learn without memorizing",
+          "description": "Do you know how you learned your first language? Without memorizing conjugations and vocabulary lists. Our method is the same: you acquire the language naturally, through real conversations, context, and immersion. No boring flashcards."
+        },
+        "complete": {
+          "id": "03",
+          "title": "Complete Platform",
+          "subtitle": "See your progress happening",
+          "description": "Everything you learn is recorded on our platform: mastered vocabulary, studied topics, evolution over time. Plus: there are recorded video lessons for you to review any subject whenever you want."
+        },
+        "dedicated": {
+          "id": "04",
+          "title": "Dedicated Tutors",
+          "subtitle": "We don't let you give up",
+          "description": "It's not just 'book a class and goodbye'. Your tutor knows you, remembers your goals, adjusts the plan when needed, and provides a thought-out service to keep you going. It's like having a personal trainer for the language."
+        }
+      }
+    },
+    "Footer": {
+      "newsletter": {
+        "title": "Ready for fluency?",
+        "description": "Receive exclusive content and news about the natural method.",
+        "placeholder": "your@email.com",
+        "button": "Subscribe"
+      },
+      "brand": {
+        "description": "Transforming language learning into a natural, human experience adapted to your pace."
+      },
+      "sections": {
+        "student": {
+          "title": "Student",
+          "links": {
+            "certificate": "Validate certificate",
+            "rescheduling": "Rescheduling",
+            "portal": "Student Portal"
+          }
+        },
+        "about": {
+          "title": "About",
+          "links": {
+            "methodology": "Methodology",
+            "careers": "Careers",
+            "terms": "Terms of Use"
+          }
+        },
+        "support": {
+          "title": "Support",
+          "links": {
+            "contact": "Contact Us",
+            "faq": "FAQ"
+          }
+        },
+        "social": {
+          "title": "Social"
+        }
+      },
+      "copyright": "© 2026 FluencyLab. All rights reserved.",
+      "backToTop": "Back to top"
+    }
+  },
+  "PathScreen": {
+    "unit": "Unit 4"
+  },
+  "EditScreen": {
+    "header": {
+      "collabWriting": "Collaborative Writing",
+      "unit": "Unit 4: Social Media",
+      "share": "Share"
+    },
+    "document": {
+      "title": "Living abroad vs. Living in your home country",
+      "p1Part1": "Nowadays, many people dream of living abroad. However,",
+      "p1Highlight": "it's not always a bed of roses.",
+      "teacherName": "Teacher Sarah",
+      "p1Part2": "Culture shock and language barriers are real challenges.",
+      "p2Text": "On the other hand, staying in your country",
+      "p2Placeholder": " allows you to keep your roots... ",
+      "p3": "In conclusion, both options have pros and cons.",
+      "p4": "What do you think about it?"
+    },
+    "suggestion": {
+      "title": "Suggestion",
+      "text": "Try to use more connecting words like 'furthermore' or 'nevertheless'."
+    }
   }
 }

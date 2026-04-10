@@ -50,7 +50,6 @@ const AvatarFallback = React.forwardRef<
 
     React.useEffect(() => {
         async function loadImages() {
-            // Busca as imagens direto da Action
             const images = await getFallbackImages();
             if (images.length > 0) {
                 setSrc(getOrSetFallbackImage(images));

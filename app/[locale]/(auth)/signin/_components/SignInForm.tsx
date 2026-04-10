@@ -44,9 +44,8 @@ export function SignInForm() {
     setIsLoading(true);
     setIsCredentialsLoading(true);
 
-    // 1. Authenticate with Firebase (Email/Password)
     const signInResult = await authClient.signIn(data.email, data.password);
-    
+
     if (!signInResult.success) {
       if (signInResult.error) {
         notify.error(t(signInResult.error) || t("error") || "Erro ao fazer login");
@@ -56,16 +55,14 @@ export function SignInForm() {
       return;
     }
 
-    // 2. Create Session & Sync Profile (Atomic on Server)
     const user = signInResult.data!;
     const sessionResult = await authClient.createSession(user, data.rememberMe);
 
     if (!sessionResult.success) {
-      // Handle the case where Firebase login worked but the user is not invited in our DB
-      const errorMsg = sessionResult.error === "notInvited" 
-        ? t("notInvited") 
+      const errorMsg = sessionResult.error === "notInvited"
+        ? t("notInvited")
         : (t("error") || "Erro ao criar sessão");
-        
+
       notify.error(errorMsg);
       setIsLoading(false);
       setIsCredentialsLoading(false);
@@ -82,9 +79,8 @@ export function SignInForm() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
 
-    // 1. Authenticate with Firebase (Google)
     const signInResult = await authClient.signInWithGoogle();
-    
+
     if (!signInResult.success) {
       if (signInResult.error) {
         notify.error(t(signInResult.error) || t("error") || "Erro ao fazer login com Google");
@@ -93,14 +89,12 @@ export function SignInForm() {
       return;
     }
 
-    // 2. Create Session & Sync Profile (Atomic on Server)
     const user = signInResult.data!;
     const sessionResult = await authClient.createSession(user, false);
 
     if (!sessionResult.success) {
-      // Handle the case where Google login worked but the user is not invited in our DB
-      const errorMsg = sessionResult.error === "notInvited" 
-        ? t("notInvited") 
+      const errorMsg = sessionResult.error === "notInvited"
+        ? t("notInvited")
         : (t("error") || "Erro ao criar sessão");
 
       notify.error(errorMsg);
@@ -116,7 +110,7 @@ export function SignInForm() {
 
   return (
     <div className="max-w-md mx-auto w-full">
-      <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+      <h2 className="text-3xl lg:text-4xl font-bold text-text mb-2">
         {t("signIn") || "Entrar"}
       </h2>
       <p className="text-gray-600 dark:text-gray-300 mb-8">
@@ -217,7 +211,7 @@ export function SignInForm() {
         </Button>
       </form>
 
-      <div className="flex flex-col items-center mt-12">
+      <div className="flex flex-col items-center mt-8">
         <a
           href={`/${locale}/forgot-password`}
           className="text-sm text-primary hover:underline font-medium"

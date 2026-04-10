@@ -65,5 +65,215 @@
     "passwordMismatch": "As senhas não coincidem.",
     "nameMin": "O nome deve ter no mínimo 2 caracteres.",
     "nameMax": "O nome deve ter no máximo 100 caracteres."
+  },
+  "PwaWelcome": {
+    "title": "Bem-vindo à FluencyLab!",
+    "description": "Sua jornada para a fluência começa aqui.",
+    "enterButton": "Entrar",
+    "logoAlt": "Logo da FluencyLab"
+  },
+  "LandingPage": {
+    "title": "Aprenda um idioma de verdade, sem desistir no meio do caminho",
+    "subtitle": "Aulas personalizadas com tutores dedicados, método natural sem decoreba.",
+    "primaryCta": "Agende sua aula",
+    "secondaryCta": "Metodologia",
+    "heroSubtitle": "Uma plataforma que acompanha <br> cada passo do seu progresso. Simples assim.",
+    "nav": {
+      "about": "Quem somos",
+      "plans": "Planos",
+      "team": "Nosso Time",
+      "faq": "Perguntas Frequentes",
+      "login": "Login",
+      "continue": "Continuar",
+      "switchAccount": "Entrar com outra conta",
+      "menu": "Menu",
+      "signOut": "Sair da conta"
+    },
+    "heroCard": {
+      "greeting": {
+        "morning": "Bom dia,",
+        "afternoon": "Boa tarde,",
+        "night": "Boa noite,"
+      },
+      "defaultName": "João",
+      "lessonLabel": "AULA DO DIA",
+      "lessonTitle": "Cafeteria em Paris",
+      "lessonSubtitle": "Nível Intermediário • 15 min",
+      "reviewTitle": "Revisão",
+      "reviewCount": "3 palavras",
+      "progressTitle": "Fluência Total",
+      "progressGrowth": "+4% essa semana",
+      "words": {
+        "water": "Water",
+        "waterTrans": "Água",
+        "bread": "Bread",
+        "breadTrans": "Pão"
+      }
+    },
+    "Comparison": {
+      "badge": "Diferenciais",
+      "title": "Por que a Fluency Lab é diferente?",
+      "description": "Você já tentou aprender com apps e desistiu. Ou fez aulas genéricas que não levaram a lugar nenhum. A gente sabe — e criamos algo totalmente diferente.",
+      "mobileSwipe": "Deslize para ver mais →",
+      "items": {
+        "apps": {
+          "title": "Apps (Duolingo, Babbel)",
+          "problemTitle": "O Problema dos Apps",
+          "problems": "Exercícios repetitivos,Decorar palavras soltas,Sem acompanhamento real,90% desistem no caminho",
+          "solutionTitle": "Método Natural Fluency Lab",
+          "solutions": "Aprenda como aprendeu português,Sem decoreba forçada,Tutor dedicado que te conhece,Planejamento anti-desistência"
+        },
+        "marketplaces": {
+          "title": "Marketplaces (Preply, iTalki)",
+          "problemTitle": "O Problema dos Marketplaces",
+          "problems": "Cada aula é isolada,Sem currículo estruturado,Você que tem que gerenciar tudo",
+          "solutionTitle": "Currículo Personalizado",
+          "solutions": "Plano feito 100% para você,Cronograma baseado nos seus objetivos,A gente gerencia seu aprendizado"
+        },
+        "traditional": {
+          "title": "Escolas Tradicionais",
+          "problemTitle": "O Problema das Escolas Online",
+          "problems": "Turmas com ritmo fixo,Conteúdo genérico para todos,Horários inflexíveis",
+          "solutionTitle": "Totalmente Seu",
+          "solutions": "Ritmo adaptado a você,Temas que você gosta,Horários que funcionam pra você"
+        }
+      },
+      "labels": {
+        "others": "Outros",
+        "fluencyLab": "Fluency Lab"
+      }
+    },
+    "Team": {
+      "badge": "Nossos Experts",
+      "title": "Conheça nosso time de <primary>profissionais</primary>",
+      "description": "Tutores dedicados prontos para personalizar sua jornada de aprendizado baseada nos seus objetivos reais. Não somos apenas professores, somos parceiros na sua evolução.",
+      "cta": "Quero marcar uma aula teste",
+      "mobileSwipe": "Deslize para ver →",
+      "stats": {
+        "tutors": "+150",
+        "tutorsLabel": "Tutores Nativos",
+        "rating": "4.9/5",
+        "ratingLabel": "Avaliação Média"
+      },
+      "members": {
+        "ana": {
+          "name": "Ana Silva",
+          "role": "Head de Metodologia",
+          "bio": "Especialista em neurolinguística com 10 anos de experiência em ensino adaptativo."
+        },
+        "mark": {
+          "name": "Mark Miller",
+          "role": "English Lead",
+          "bio": "Nativo de Londres, focado em Business English e comunicação corporativa."
+        },
+        "sofia": {
+          "name": "Sofia Martinez",
+          "role": "Tutora de Espanhol",
+          "bio": "Jornalista argentina que ensina através da cultura e atualidades."
+        },
+        "lucas": {
+          "name": "Lucas Oliveira",
+          "role": "Coordenador de Alunos",
+          "bio": "Garante que seu plano de estudos esteja sempre alinhado com sua rotina."
+        }
+      }
+    },
+    "HowItWorks": {
+      "title": "Como funciona",
+      "plus": "+",
+      "learnMore": "Saber mais",
+      "steps": {
+        "personalized": {
+          "id": "01",
+          "title": "Plano Personalizado",
+          "subtitle": "Seu cronograma, seus objetivos",
+          "description": "Não tem aula 'padrão' aqui. A gente monta um plano de estudos único pra você: baseado no seu nível atual, suas metas (viagem? trabalho? prova?), seus prazos, e até nos assuntos que você curte. Quer aprender inglês falando sobre tecnologia? Bora."
+        },
+        "natural": {
+          "id": "02",
+          "title": "Método Natural",
+          "subtitle": "Aprenda sem decorar",
+          "description": "Sabe como você aprendeu português? Sem ficar decorando conjugação e listinha de vocabulário. Nosso método é o mesmo: você adquire o idioma naturalmente, através de conversas reais, contexto, e imersão. Nada de flashcards chatos."
+        },
+        "complete": {
+          "id": "03",
+          "title": "Plataforma Completa",
+          "subtitle": "Veja seu progresso acontecendo",
+          "description": "Tudo que você aprende fica registrado na nossa plataforma: vocabulário dominado, tópicos estudados, evolução ao longo do tempo. Mais: tem videoaulas gravadas pra você revisar qualquer assunto quando quiser."
+        },
+        "dedicated": {
+          "id": "04",
+          "title": "Tutores Dedicados",
+          "subtitle": "A gente não deixa você desistir",
+          "description": "Não é só 'marcar aula e tchau'. Seu tutor te conhece, lembra dos seus objetivos, ajusta o plano quando precisa, e faz um atendimento pensado para você continuar. É tipo ter um personal trainer do idioma."
+        }
+      }
+    },
+    "Footer": {
+      "newsletter": {
+        "title": "Pronto para fluência?",
+        "description": "Receba conteúdos exclusivos e novidades sobre o método natural.",
+        "placeholder": "seu@email.com",
+        "button": "Assinar"
+      },
+      "brand": {
+        "description": "Transformando o aprendizado de idiomas em uma experiência natural, humana e adaptada ao seu ritmo."
+      },
+      "sections": {
+        "student": {
+          "title": "Aluno",
+          "links": {
+            "certificate": "Validar certificado",
+            "rescheduling": "Remarcações",
+            "portal": "Portal do Aluno"
+          }
+        },
+        "about": {
+          "title": "Sobre",
+          "links": {
+            "methodology": "Metodologia",
+            "careers": "Carreiras",
+            "terms": "Termos de Uso"
+          }
+        },
+        "support": {
+          "title": "Suporte",
+          "links": {
+            "contact": "Fale Conosco",
+            "faq": "FAQ"
+          }
+        },
+        "social": {
+          "title": "Social"
+        }
+      },
+      "copyright": "© 2026 FluencyLab. Todos os direitos reservados.",
+      "backToTop": "Voltar ao topo"
+    }
+  },
+  "PathScreen": {
+    "unit": "Unidade 4"
+  },
+  "EditScreen": {
+    "header": {
+      "collabWriting": "Escrita Colaborativa",
+      "unit": "Unidade 4: Redes Sociais",
+      "share": "Compartilhar"
+    },
+    "document": {
+      "title": "Morar fora vs. Morar no seu país de origem",
+      "p1Part1": "Hoje em dia, muitas pessoas sonham em morar fora. No entanto,",
+      "p1Highlight": "nem tudo são flores.",
+      "teacherName": "Professora Sarah",
+      "p1Part2": "O choque cultural e as barreiras linguísticas são desafios reais.",
+      "p2Text": "Por outro lado, ficar no seu país",
+      "p2Placeholder": " permite que você mantenha suas raízes... ",
+      "p3": "Em conclusão, ambas as opções têm prós e contras.",
+      "p4": "O que você acha sobre isso?"
+    },
+    "suggestion": {
+      "title": "Sugestão",
+      "text": "Tente usar mais conectivos como 'além disso' ou 'no entanto'."
+    }
   }
 }
