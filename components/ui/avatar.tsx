@@ -66,7 +66,7 @@ const AvatarFallback = React.forwardRef<
             {...props}
         >
             {src ? (
-                <Image src={src} alt="Avatar" width={100} height={100} className="object-cover" unoptimized />
+                <Image src={src} alt="Avatar" width={100} height={100} className="object-cover" priority loading="eager" />
             ) : (
                 <span className="text-muted-foreground uppercase font-medium">
                     {name?.charAt(0) || "?"}

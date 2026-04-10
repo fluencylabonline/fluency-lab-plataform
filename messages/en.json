@@ -45,6 +45,7 @@
     "back": "Back",
     "backToLogin": "Back to Login",
     "rememberMe": "Remember me",
+    "notInvited": "This email has not been invited to the platform. Please contact your administrator.",
     "error": "An error occurred. Please try again."
   },
   "Validation": {

@@ -30,10 +30,10 @@ export const userRepository = {
       .insert(usersTable)
       .values(user)
       .onConflictDoUpdate({
-        target: usersTable.id,
+        target: usersTable.email,
         set: {
+          id: user.id, // This allows claiming/swapping UIDs
           name: user.name,
-          email: user.email,
           photoUrl: user.photoUrl,
           googleLinked: user.googleLinked,
           updatedAt: new Date(),

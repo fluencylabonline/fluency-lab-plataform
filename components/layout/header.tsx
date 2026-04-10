@@ -20,7 +20,7 @@ export interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {
     user?: {
         name: string | null;
         email: string | null;
-        image?: string | null;
+        photoUrl?: string | null;
         role?: string;
     };
 }

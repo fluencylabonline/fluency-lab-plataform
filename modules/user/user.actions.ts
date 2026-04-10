@@ -6,6 +6,9 @@ import { userService } from "./user.service";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
+import { adminAuth } from "@/lib/firebase-admin";
+import { NewUser } from "./user.schema";
+
 /**
  * Login action — creates a session cookie from a Firebase ID Token.
  */
@@ -14,10 +17,36 @@ export const loginAction = actionClient
     z.object({
       idToken: z.string().min(1),
       rememberMe: z.boolean().optional().default(false),
+      // Relaxed profile data validation to avoid social login URL issues
+      name: z.string().optional().nullable(),
+      photoUrl: z.string().optional().nullable(),
+      googleLinked: z.boolean().optional(),
     })
   )
-  .action(async ({ parsedInput: { idToken, rememberMe } }) => {
+  .action(async ({ parsedInput: { idToken, rememberMe, ...profileData } }) => {
     try {
+      // 1. Double check the token is valid and get UID
+      const decodedToken = await adminAuth.verifyIdToken(idToken);
+      const { uid, email } = decodedToken;
+
+      // 2. Sync with Neon DB (Gatekeeper)
+      // This will throw NOT_INVITED if the email is not in our database
+      try {
+        // Sanitize data: remove nulls to avoid TS errors with NOT NULL fields
+        const sanitizedData: Partial<NewUser> = { email: email! };
+        if (profileData.name) sanitizedData.name = profileData.name;
+        if (profileData.photoUrl) sanitizedData.photoUrl = profileData.photoUrl;
+        if (typeof profileData.googleLinked === "boolean") sanitizedData.googleLinked = profileData.googleLinked;
+
+        await userService.syncUser(uid, sanitizedData);
+      } catch (error) {
+        if ((error as Error).message === "NOT_INVITED") {
+          return { success: false, error: "notInvited" };
+        }
+        throw error;
+      }
+
+      // 3. Create Session Cookie
       const sessionCookie = await userService.createSessionCookie(idToken);
       const cookieStore = await cookies();
       const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24; // 30 days vs 1 day
@@ -33,7 +62,7 @@ export const loginAction = actionClient
       return { success: true };
     } catch (error) {
       console.error("[loginAction] Error:", error);
-      throw new Error("Failed to create session");
+      return { success: false, error: "error" };
     }
   });
 

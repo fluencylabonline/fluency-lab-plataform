@@ -49,13 +49,13 @@ export const insertUserSchema = createInsertSchema(usersTable);
 
 // Auth Form Schemas
 export const signInSchema = z.object({
-  email: z.email("Validation.emailInvalid"),
+  email: z.string().email("Validation.emailInvalid"),
   password: z.string().min(8, "Validation.passwordMin"),
   rememberMe: z.boolean(),
 });
 
 export const forgotPasswordSchema = z.object({
-  email: z.email("Validation.emailInvalid"),
+  email: z.string().email("Validation.emailInvalid"),
 });
 
 export const resetPasswordSchema = z

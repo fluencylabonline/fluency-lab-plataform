@@ -27,7 +27,7 @@ interface UserMenuProps {
     user: {
         name: string | null;
         email: string | null;
-        image?: string | null;
+        photoUrl?: string | null;
         role?: string;
     };
 }
@@ -54,7 +54,7 @@ export function UserMenu({ user }: UserMenuProps) {
 
     const Trigger = (
         <Avatar size="xs" className="cursor-pointer border border-border">
-            {user.image && <AvatarImage src={user.image} alt={user.name || "User"} />}
+            {user.photoUrl && <AvatarImage src={user.photoUrl} alt={user.name || "User"} />}
             <AvatarFallback name={user.name || "U"} />
         </Avatar>
     );
@@ -91,7 +91,7 @@ export function UserMenu({ user }: UserMenuProps) {
                                     {item.label}
                                 </Link>
                             ))}
-                            
+
                             {/* Mobile Placeholders for Theme and Notification */}
                             <button className="flex items-center gap-3 px-2 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-colors text-left">
                                 <Sun className="h-4 w-4" />

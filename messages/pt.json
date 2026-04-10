@@ -45,6 +45,8 @@
     "back": "Voltar",
     "backToLogin": "Voltar para Login",
     "rememberMe": "Permanecer logado",
+    "notInvited": "Este e-mail não foi convidado para a plataforma. Entre em contato com o administrador.",
+    "accountExistsWithDifferentCredential": "Já existe uma conta com este e-mail usando outro método de login (ex: Google). Gostaria de vincular suas contas?",
     "error": "Ocorreu um erro. Tente novamente."
   },
   "Validation": {

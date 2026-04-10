@@ -44,7 +44,9 @@ export function SignInForm() {
     setIsLoading(true);
     setIsCredentialsLoading(true);
 
+    // 1. Authenticate with Firebase (Email/Password)
     const signInResult = await authClient.signIn(data.email, data.password);
+    
     if (!signInResult.success) {
       if (signInResult.error) {
         notify.error(t(signInResult.error) || t("error") || "Erro ao fazer login");
@@ -54,13 +56,17 @@ export function SignInForm() {
       return;
     }
 
+    // 2. Create Session & Sync Profile (Atomic on Server)
     const user = signInResult.data!;
-    const idToken = await user.getIdToken();
-    await authClient.syncUser(user);
+    const sessionResult = await authClient.createSession(user, data.rememberMe);
 
-    const sessionResult = await authClient.createSession(idToken, data.rememberMe);
     if (!sessionResult.success) {
-      notify.error(t("error") || "Erro ao criar sessão");
+      // Handle the case where Firebase login worked but the user is not invited in our DB
+      const errorMsg = sessionResult.error === "notInvited" 
+        ? t("notInvited") 
+        : (t("error") || "Erro ao criar sessão");
+        
+      notify.error(errorMsg);
       setIsLoading(false);
       setIsCredentialsLoading(false);
       return;
@@ -76,7 +82,9 @@ export function SignInForm() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
 
+    // 1. Authenticate with Firebase (Google)
     const signInResult = await authClient.signInWithGoogle();
+    
     if (!signInResult.success) {
       if (signInResult.error) {
         notify.error(t(signInResult.error) || t("error") || "Erro ao fazer login com Google");
@@ -85,19 +93,22 @@ export function SignInForm() {
       return;
     }
 
+    // 2. Create Session & Sync Profile (Atomic on Server)
     const user = signInResult.data!;
-    const idToken = await user.getIdToken();
-    await authClient.syncUser(user);
+    const sessionResult = await authClient.createSession(user, false);
 
-    // Using false as default for Google Sign In session duration, or could be true
-    const sessionResult = await authClient.createSession(idToken, false);
     if (!sessionResult.success) {
-      notify.error(t("error") || "Erro ao criar sessão");
+      // Handle the case where Google login worked but the user is not invited in our DB
+      const errorMsg = sessionResult.error === "notInvited" 
+        ? t("notInvited") 
+        : (t("error") || "Erro ao criar sessão");
+
+      notify.error(errorMsg);
       setIsLoading(false);
       return;
     }
 
-    notify.success(t("googleLinkSuccess") || "Login com Google realizado com sucesso!");
+    notify.success(t("welcomeTitle") || "Login bem-sucedido!");
     router.push(`/${locale}`);
     router.refresh();
     setIsLoading(false);

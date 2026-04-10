@@ -78,11 +78,26 @@ export const authClient = {
    * 3. Create a server-side session cookie from a Firebase ID Token
    * Uses Server Action loginAction (never fetch /api)
    */
-  async createSession(idToken: string, rememberMe = false): Promise<AuthResult> {
+  async createSession(user: FirebaseUser, rememberMe = false): Promise<AuthResult> {
     try {
+      const idToken = await user.getIdToken();
       const { loginAction } = await import("@/modules/user/user.actions");
-      const result = await loginAction({ idToken, rememberMe });
-      if (!result?.data?.success) return { success: false, error: "error" };
+      
+      const result = await loginAction({ 
+        idToken, 
+        rememberMe,
+        name: user.displayName || undefined,
+        photoUrl: user.photoURL || undefined,
+        googleLinked: user.providerData.some((p) => p.providerId === "google.com"),
+      });
+
+      if (!result?.data?.success) {
+        return { 
+          success: false, 
+          error: result?.data?.error || "error" 
+        };
+      }
+
       return { success: true };
     } catch {
       return { success: false, error: "error" };
