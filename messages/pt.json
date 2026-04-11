@@ -16,7 +16,45 @@
     "back": "Voltar",
     "next": "Próximo",
     "close": "Fechar",
-    "switchLanguage": "Alternar idioma"
+    "switchLanguage": "Alternar idioma",
+    "or": "Ou"
+  },
+  "UserManagement": {
+    "createUserTitle": "Criar Novo Usuário",
+    "createUserDescription": "Preencha os dados abaixo para cadastrar um novo usuário e enviar o convite por e-mail.",
+    "fullName": "Nome Completo",
+    "fullNamePlaceholder": "Ex: João Silva",
+    "email": "E-mail",
+    "emailPlaceholder": "Ex: joao@email.com",
+    "type": "Tipo de Usuário",
+    "classesStartDate": "Data de Início das Aulas",
+    "classesStartDatePlaceholder": "Selecione a data",
+    "studyingLanguages": "Idiomas de Estudo",
+    "createUser": "Criar Usuário",
+    "cancel": "Cancelar",
+    "validation": {
+      "errorTitle": "Erro de Validação",
+      "errorDescription": "Verifique os campos obrigatórios.",
+      "nameRequired": "Nome é obrigatório.",
+      "emailRequired": "E-mail é obrigatório.",
+      "emailInvalid": "E-mail inválido.",
+      "roleRequired": "Tipo de usuário é obrigatório.",
+      "startDateRequired": "Data de início é obrigatória."
+    },
+    "toasts": {
+      "creatingUser": "Criando usuário...",
+      "processing": "Processando convite e enviando e-mail.",
+      "successTitle": "Usuário criado!",
+      "successDescription": "O convite foi enviado para {email}.",
+      "errorTitle": "Falha na criação",
+      "errorDescription": "Não foi possível criar o usuário. Tente novamente."
+    }
+  },
+  "UserRoles": {
+    "admin": "Administrador",
+    "teacher": "Professor",
+    "student": "Aluno",
+    "manager": "Gerente"
   },
   "Auth": {
     "signIn": "Entrar",
@@ -30,7 +68,6 @@
     "forgotPasswordSubtitle": "Não se preocupe, nós ajudamos você.",
     "createPasswordSubtitle": "Escolha uma nova senha forte.",
     "resetPassword": "Redefinir senha",
-    "createPassword": "Criar senha",
     "orContinueWithGoogle": "Ou continue com Google",
     "welcomeTitle": "Bem-vindo à FluencyLab",
     "welcomeSubtitle": "Faça login para acessar a plataforma",
@@ -58,7 +95,42 @@
     "useDifferentAccount": "Usar outra conta",
     "unauthorized": "Não autorizado",
     "rateLimitExceeded": "Limite de tentativas excedido. Tente novamente em alguns minutos.",
-    "error": "Ocorreu um erro. Tente novamente."
+    "error": "Ocorreu um erro. Tente novamente.",
+    "createPassword": {
+      "title": "Definir sua senha",
+      "description": "Crie sua senha de acesso para começar a usar a plataforma.",
+      "resendPrompt": "Insira seu e-mail abaixo para enviarmos um novo link de acesso.",
+      "successMessage": "Agora você já pode fazer login com sua nova senha e acessar sua conta.",
+      "creatingFor": "Criando senha para:"
+    },
+    "errors": {
+      "invalidLink": "Link inválido: código inexistente.",
+      "linkExpired": "Este link expirou ou já foi utilizado.",
+      "verificationError": "Erro ao verificar o link de criação de senha.",
+      "error": "Não foi possível definir sua senha. Tente novamente.",
+      "weakPassword": "Senha muito fraca. Escolha uma senha mais forte.",
+      "googleError": "Erro ao entrar com Google"
+    },
+    "notifications": {
+      "passwordSet": "Senha definida!",
+      "passwordSetSuccess": "Senha definida com sucesso!",
+      "resendSuccess": "Novo link enviado! Verifique sua caixa de entrada."
+    },
+    "buttons": {
+      "resendLink": "Enviar novo link",
+      "backToLogin": "Voltar para Login",
+      "goToLogin": "Ir para o login",
+      "setPassword": "Definir minha senha"
+    },
+    "labels": {
+      "newPassword": "Nova senha",
+      "confirmPassword": "Confirmar senha"
+    },
+    "placeholders": {
+      "email": "Seu e-mail cadastrado",
+      "passwordMin": "Mínimo de 8 caracteres",
+      "repeatPassword": "Repita a senha"
+    }
   },
   "Hub": {
     "Profile": {
@@ -83,7 +155,8 @@
     "passwordMin": "A senha deve ter no mínimo 8 caracteres.",
     "passwordMismatch": "As senhas não coincidem.",
     "nameMin": "O nome deve ter no mínimo 2 caracteres.",
-    "nameMax": "O nome deve ter no máximo 100 caracteres."
+    "nameMax": "O nome deve ter no máximo 100 caracteres.",
+    "invalid2faCode": "Código de 2FA inválido."
   },
   "PwaWelcome": {
     "title": "Bem-vindo à FluencyLab!",

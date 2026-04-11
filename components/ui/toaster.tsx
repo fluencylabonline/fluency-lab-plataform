@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     CircleCheckIcon,
     InfoIcon,
@@ -27,36 +27,74 @@ interface NotificationData {
     type: NotificationType;
     title: string;
     description?: string;
+    id?: string | number;
 }
 
 const notificationEmitter = new EventTarget();
 
+const generateId = () => Math.random().toString(36).substring(2, 9);
+
 export const notify = {
-    success: (title: string, description?: string) =>
+    loading: (title: string, description?: string, id?: string | number) =>
         notificationEmitter.dispatchEvent(
             new CustomEvent<NotificationData>("notify", {
-                detail: { type: "success", title, description },
+                detail: { type: "loading", title, description, id },
             })
         ),
-    error: (title: string, description?: string) =>
+    success: (title: string, description?: string, id?: string | number) =>
         notificationEmitter.dispatchEvent(
             new CustomEvent<NotificationData>("notify", {
-                detail: { type: "error", title, description },
+                detail: { type: "success", title, description, id },
             })
         ),
-    info: (title: string, description?: string) =>
+    error: (title: string, description?: string, id?: string | number) =>
         notificationEmitter.dispatchEvent(
             new CustomEvent<NotificationData>("notify", {
-                detail: { type: "info", title, description },
+                detail: { type: "error", title, description, id },
             })
         ),
-    warning: (title: string, description?: string) =>
+    info: (title: string, description?: string, id?: string | number) =>
         notificationEmitter.dispatchEvent(
             new CustomEvent<NotificationData>("notify", {
-                detail: { type: "warning", title, description },
+                detail: { type: "info", title, description, id },
             })
         ),
-    // Expõe o Sonner nativo caso precise forçar um toast comum mesmo no PWA
+    warning: (title: string, description?: string, id?: string | number) =>
+        notificationEmitter.dispatchEvent(
+            new CustomEvent<NotificationData>("notify", {
+                detail: { type: "warning", title, description, id },
+            })
+        ),
+
+    promise: <T,>(
+        promise: Promise<T> | (() => Promise<T>),
+        opts: {
+            loading: string;
+            success: string | ((data: T) => string);
+            error: string | ((error: unknown) => string);
+        }
+    ) => {
+        const id = generateId();
+
+        notify.loading(opts.loading, undefined, id);
+
+        const p = typeof promise === "function" ? promise() : promise;
+
+        p.then((result) => {
+            try {
+                const message = typeof opts.success === "function" ? opts.success(result) : opts.success;
+                notify.success(message, undefined, id);
+            } catch (err) {
+                const message = typeof opts.error === "function" ? opts.error(err) : opts.error;
+                notify.error(message, undefined, id);
+            }
+        }).catch((err) => {
+            const message = typeof opts.error === "function" ? opts.error(err) : opts.error;
+            notify.error(message, undefined, id);
+        });
+
+        return p;
+    },
     sonner: sonnerToast,
 };
 
@@ -70,25 +108,28 @@ const Toaster = ({ ...props }: ToasterProps) => {
 
     useEffect(() => {
         const handleNotify = (e: Event) => {
-            const { type, title, description } = (e as CustomEvent<NotificationData>).detail;
+            const { type, title, description, id } = (e as CustomEvent<NotificationData>).detail;
 
-            if (isStandalone && type !== "loading") {
-                setVaultData({ type, title, description });
+            if (isStandalone) {
+                setVaultData({ type, title, description, id });
                 setIsVaultOpen(true);
             } else {
                 switch (type) {
+                    case "loading":
+                        sonnerToast.loading(title, { description, id });
+                        break;
                     case "success":
-                        sonnerToast.success(title, { description });
+                        sonnerToast.success(title, { description, id });
                         break;
                     case "error":
-                        sonnerToast.error(title, { description });
+                        sonnerToast.error(title, { description, id });
                         break;
                     case "warning":
-                        sonnerToast.warning(title, { description });
+                        sonnerToast.warning(title, { description, id });
                         break;
                     case "info":
                     default:
-                        sonnerToast.info(title, { description });
+                        sonnerToast.info(title, { description, id });
                         break;
                 }
             }
@@ -129,11 +170,17 @@ const Toaster = ({ ...props }: ToasterProps) => {
 
             <Vault open={isVaultOpen} onOpenChange={setIsVaultOpen}>
                 <VaultContent>
-                    <VaultHeader showCloseButton={false}>
+                    <VaultHeader showCloseButton={vaultData?.type !== "loading"}>
                         {vaultData && (
                             <>
-                                <VaultIcon type={vaultData.type as "success" | "error" | "info" | "warning"} />
+                                {vaultData.type === "loading" ? (
+                                    <Loader2Icon className="size-10 animate-spin text-primary mx-auto mb-4" />
+                                ) : (
+                                    <VaultIcon type={vaultData.type as "success" | "error" | "info" | "warning"} />
+                                )}
+
                                 <VaultTitle>{vaultData.title}</VaultTitle>
+
                                 {vaultData.description && (
                                     <VaultDescription>{vaultData.description}</VaultDescription>
                                 )}

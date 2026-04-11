@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -14,7 +14,6 @@ import { twoFactorSchema, type TwoFactorValues } from "@/modules/user/user.schem
 export function TwoFactorForm({ email }: { email?: string }) {
   const t = useTranslations("Auth");
   const tv = useTranslations("Validation");
-  const locale = useLocale();
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -40,7 +39,7 @@ export function TwoFactorForm({ email }: { email?: string }) {
 
       // Simulate success
       notify.success(t("welcomeTitle") || "Bem-vindo!");
-      router.push(`/${locale}`);
+      router.push(`/hub`);
     } catch (err) {
       const error = err as Error;
       notify.error(error.message || "Invalid 2FA code");
@@ -106,7 +105,7 @@ export function TwoFactorForm({ email }: { email?: string }) {
               try {
                 sessionStorage.removeItem("temp-2fa-data");
               } catch { }
-              router.push(`/${locale}/signin`);
+              router.push(`/signin`);
             }}
             className="text-sm"
             disabled={isLoading}

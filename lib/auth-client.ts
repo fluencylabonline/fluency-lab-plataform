@@ -3,7 +3,10 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   signOut as firebaseSignOut,
-  User as FirebaseUser
+  User as FirebaseUser,
+  verifyPasswordResetCode,
+  confirmPasswordReset as firebaseConfirmPasswordReset,
+  sendPasswordResetEmail
 } from "firebase/auth";
 import { auth } from "./firebase";
 
@@ -33,6 +36,9 @@ function getFirebaseErrorMessage(error: unknown): string | null {
     }
     if (code === "auth/too-many-requests") return "tooManyRequests";
     if (code === "auth/user-disabled") return "userDisabled";
+    if (code === "auth/expired-action-code") return "linkExpired";
+    if (code === "auth/invalid-action-code") return "invalidLink";
+    if (code === "auth/weak-password") return "weakPassword";
   }
   return "error";
 }
@@ -140,6 +146,46 @@ export const authClient = {
       console.error("[authClient.signOut] Error:", error);
     } finally {
       window.location.href = "/signin";
+    }
+  },
+
+  /**
+   * 6. Verify password reset code (oobCode)
+   * Returns the email address associated with the code.
+   */
+  async verifyPasswordReset(oobCode: string): Promise<AuthResult<string>> {
+    try {
+      const email = await verifyPasswordResetCode(auth, oobCode);
+      return { success: true, data: email };
+    } catch (error) {
+      const key = getFirebaseErrorMessage(error);
+      return { success: false, error: key || "error" };
+    }
+  },
+
+  /**
+   * 7. Confirm password reset
+   */
+  async confirmPasswordReset(oobCode: string, password: string): Promise<AuthResult> {
+    try {
+      await firebaseConfirmPasswordReset(auth, oobCode, password);
+      return { success: true };
+    } catch (error) {
+      const key = getFirebaseErrorMessage(error);
+      return { success: false, error: key || "error" };
+    }
+  },
+
+  /**
+   * 8. Send password reset email
+   */
+  async sendPasswordReset(email: string): Promise<AuthResult> {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return { success: true };
+    } catch (error) {
+      const key = getFirebaseErrorMessage(error);
+      return { success: false, error: key || "error" };
     }
   },
 };

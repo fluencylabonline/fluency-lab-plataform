@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth-server";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
@@ -12,18 +11,17 @@ interface HubLayoutProps {
 
 export default async function HubLayout({ children }: HubLayoutProps) {
     const user = await getCurrentUser();
-    const locale = await getLocale();
 
     if (!user) {
-        redirect(`/${locale}/signin`);
+        redirect(`/signin`);
     }
 
     if (!user.isActive) {
-        redirect(`/${locale}/signin?error=suspended`);
+        redirect(`/signin?error=suspended`); // TODO: Implementar página de suspensão
     }
 
-    const role = (user.role as UserRoles) || UserRoles.STUDENT;
-    const menuItems = getSidebarItemsByRole(role, locale);
+    const role = user.role as UserRoles;
+    const menuItems = getSidebarItemsByRole(role);
 
     return (
         <div className="flex h-dvh w-full overflow-hidden bg-background">

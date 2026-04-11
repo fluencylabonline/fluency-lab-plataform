@@ -23,7 +23,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 8. **NUNCA** busque dados no Client Component diretamente (a menos que encapsulado em SWR).
 9. **NUNCA** use `try/catch` em Components para capturar erros do `authClient`. O `authClient` retorna `AuthResult` — nunca lança. Exiba erros via `notify.error()` (Toast), nunca com estado inline (`setLocalError`).
 10. **NUNCA** faça `fetch("/api/auth/...")` direto do frontend. Use Server Actions via `authClient`.
-11. **NUNCA** gerencie estado de formulários complexos manualmente com `useState`. Use **React Hook Form** + **Zod** para validação e consistência.
+11. **NUNCA** gerencie estado de formulários complexos manualmente com `useState`. Use **React Hook Form** + **Zod** para validação e consistência. (Dica: Use `z.input<typeof schema>` para exportar tipos de form e evitar erros com campos `.default()`).
 
 ---
 

@@ -111,7 +111,7 @@ export function Wizard({
                             exit={{ scale: 0.5, opacity: 0, rotate: 20 }}
                             transition={{ type: "spring", stiffness: 300, damping: 20 }}
                             className={cn(
-                                "p-4 rounded-full bg-white dark:bg-background shadow-sm z-10",
+                                "p-4 rounded-full bg-white dark:bg-background z-10",
                                 stepData.iconColor || "text-gray-900",
                             )}
                         >

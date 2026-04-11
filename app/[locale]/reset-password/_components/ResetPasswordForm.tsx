@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { confirmPasswordReset } from "firebase/auth";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,7 +17,6 @@ import { resetPasswordSchema, type ResetPasswordValues } from "@/modules/user/us
 export function ResetPasswordForm() {
   const t = useTranslations("Auth");
   const tv = useTranslations("Validation");
-  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
   const oobCode = searchParams.get("oobCode");
@@ -66,7 +65,7 @@ export function ResetPasswordForm() {
           </div>
         </div>
         <h2 className="text-2xl font-bold">{t("passwordCreated")}</h2>
-        <Button onClick={() => router.push(`/${locale}/signin`)} className="w-full">
+        <Button onClick={() => router.push(`/signin`)} className="w-full">
           {t("signIn") || "Entrar"}
         </Button>
       </div>
@@ -93,10 +92,10 @@ export function ResetPasswordForm() {
           />
         </div>
         {errors.password && (
-            <p className="text-xs font-medium text-destructive">
-              {tv(errors.password.message?.split(".")[1] || "") || errors.password.message}
-            </p>
-          )}
+          <p className="text-xs font-medium text-destructive">
+            {tv(errors.password.message?.split(".")[1] || "") || errors.password.message}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -112,10 +111,10 @@ export function ResetPasswordForm() {
           />
         </div>
         {errors.confirmPassword && (
-            <p className="text-xs font-medium text-destructive">
-              {tv(errors.confirmPassword.message?.split(".")[1] || "") || errors.confirmPassword.message}
-            </p>
-          )}
+          <p className="text-xs font-medium text-destructive">
+            {tv(errors.confirmPassword.message?.split(".")[1] || "") || errors.confirmPassword.message}
+          </p>
+        )}
       </div>
 
       <Button type="submit" disabled={isLoading} className="w-full h-12 mt-2" size="lg">

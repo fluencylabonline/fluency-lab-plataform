@@ -99,7 +99,7 @@ export function ProfileCard({ user, isLoading = false }: ProfileCardProps) {
             <button
               onClick={handleAvatarClick}
               disabled={isUploading || isLoading}
-              className="absolute -bottom-1 -right-1 p-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-lg disabled:opacity-50 ring-4 ring-background"
+              className="absolute -bottom-1 -right-1 p-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 ring-4 ring-background"
               title={t("changeProfilePicture")}
               data-shimmer-ignore
             >

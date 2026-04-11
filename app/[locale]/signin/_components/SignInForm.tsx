@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { DoorOpen as DoorOpenIcon } from "lucide-react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +21,6 @@ export function SignInForm() {
   const t = useTranslations("Auth");
   const tv = useTranslations("Validation");
   const tc = useTranslations("Common");
-  const locale = useLocale();
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +69,7 @@ export function SignInForm() {
     }
 
     notify.success(t("welcomeTitle") || "Bem-vindo!");
-    router.push(`/${locale}`);
+    router.push(`/hub`);
     router.refresh();
     setIsLoading(false);
     setIsCredentialsLoading(false);
@@ -103,7 +102,7 @@ export function SignInForm() {
     }
 
     notify.success(t("welcomeTitle") || "Login bem-sucedido!");
-    router.push(`/${locale}`);
+    router.push(`/hub`);
     router.refresh();
     setIsLoading(false);
   };
@@ -213,7 +212,7 @@ export function SignInForm() {
 
       <div className="flex flex-col items-center mt-8">
         <a
-          href={`/${locale}/forgot-password`}
+          href={`/forgot-password`}
           className="text-sm text-primary hover:underline font-medium"
         >
           {t("forgotPassword") || "Esqueci minha senha"}

@@ -24,7 +24,7 @@ A arquitetura da FluencyLab exige uma separação estrita entre Servidor e Clien
 - Client Components recebem dados iniciais (`initialData`) via props do Server Component pai.
 - Use SWR para hidratação e background-revalidation (apenas quando o dado mudar com frequência). Sempre implemente **Shimmer Skeletons** para estados de loading (ver @/.agents/skills/shimmer-skeleton.md).
 - Use Zustand APENAS para estado global de UI (ex: sidebar aberta), nunca para regras de negócio.
-- **Formulários**: Use sempre **React Hook Form** + **Zod** para gerenciamento de estado e validação de inputs no frontend.
+- **Formulários**: Use sempre **React Hook Form** + **Zod**. Para evitar erros de TypeScript com valores padrão (`.default()`), SEMPRE exponha os tipos usando `z.input<typeof schema>` em vez de `z.infer`. O React Hook Form lida com os dados de entrada, e `z.infer` retorna o tipo de saída (pós-processado), o que causa mismatch em campos opcionais com default.
 
 ## 4. Regras Estritas para Mutações (Server Actions)
 - Mutações e envios de formulário são FEITOS EXCLUSIVAMENTE via Server Actions.

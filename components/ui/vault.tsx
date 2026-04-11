@@ -122,7 +122,7 @@ const VaultContent = React.forwardRef<
                     }
                 }}
                 className={twMerge(
-                    "fixed z-50 flex flex-col bg-background backdrop-blur-xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 outline-none",
+                    "fixed z-50 flex flex-col bg-background backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 outline-none",
 
                     isStandalone
                         ? "bottom-4 inset-x-4 w-auto rounded-2xl after:!hidden mt-24"

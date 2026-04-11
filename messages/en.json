@@ -16,7 +16,45 @@
     "back": "Back",
     "next": "Next",
     "close": "Close",
-    "switchLanguage": "Switch language"
+    "switchLanguage": "Switch language",
+    "or": "Or"
+  },
+  "UserManagement": {
+    "createUserTitle": "Create New User",
+    "createUserDescription": "Fill in the details below to register a new user and send the email invitation.",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "e.g., John Doe",
+    "email": "Email",
+    "emailPlaceholder": "e.g., john@email.com",
+    "type": "User Type",
+    "classesStartDate": "Classes Start Date",
+    "classesStartDatePlaceholder": "Select the date",
+    "studyingLanguages": "Studying Languages",
+    "createUser": "Create User",
+    "cancel": "Cancel",
+    "validation": {
+      "errorTitle": "Validation Error",
+      "errorDescription": "Please check the required fields.",
+      "nameRequired": "Name is required.",
+      "emailRequired": "Email is required.",
+      "emailInvalid": "Invalid email address.",
+      "roleRequired": "User type is required.",
+      "startDateRequired": "Start date is required."
+    },
+    "toasts": {
+      "creatingUser": "Creating user...",
+      "processing": "Processing invitation and sending email.",
+      "successTitle": "User created!",
+      "successDescription": "The invitation has been sent to {email}.",
+      "errorTitle": "Creation failed",
+      "errorDescription": "Could not create the user. Please try again."
+    }
+  },
+  "UserRoles": {
+    "admin": "Administrator",
+    "teacher": "Teacher",
+    "student": "Student",
+    "manager": "Manager"
   },
   "Auth": {
     "signIn": "Sign in",
@@ -30,7 +68,6 @@
     "forgotPasswordSubtitle": "Don't worry, we'll help you.",
     "createPasswordSubtitle": "Choose a new strong password.",
     "resetPassword": "Reset password",
-    "createPassword": "Create password",
     "orContinueWithGoogle": "Or continue with Google",
     "welcomeTitle": "Welcome to FluencyLab",
     "welcomeSubtitle": "Sign in to access the platform",
@@ -57,7 +94,42 @@
     "useDifferentAccount": "Use a different account",
     "unauthorized": "Unauthorized",
     "rateLimitExceeded": "Rate limit exceeded. Please try again in a few minutes.",
-    "error": "An error occurred. Please try again."
+    "error": "An error occurred. Please try again.",
+    "createPassword": {
+      "title": "Set your password",
+      "description": "Create your access password to start using the platform.",
+      "resendPrompt": "Enter your email below to send a new access link.",
+      "successMessage": "You can now log in with your new password and access your account.",
+      "creatingFor": "Creating password for:"
+    },
+    "errors": {
+      "invalidLink": "Invalid link: nonexistent code.",
+      "linkExpired": "This link has expired or has already been used.",
+      "verificationError": "Error verifying password creation link.",
+      "error": "Could not set your password. Please try again.",
+      "weakPassword": "Password too weak. Choose a stronger password.",
+      "googleError": "Error signing in with Google"
+    },
+    "notifications": {
+      "passwordSet": "Password set!",
+      "passwordSetSuccess": "Password set successfully!",
+      "resendSuccess": "New link sent! Check your inbox."
+    },
+    "buttons": {
+      "resendLink": "Send new link",
+      "backToLogin": "Back to Login",
+      "goToLogin": "Go to login",
+      "setPassword": "Set my password"
+    },
+    "labels": {
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password"
+    },
+    "placeholders": {
+      "email": "Your registered email",
+      "passwordMin": "Minimum 8 characters",
+      "repeatPassword": "Repeat password"
+    }
   },
   "Hub": {
     "Profile": {
@@ -82,7 +154,8 @@
     "passwordMin": "Password must be at least 8 characters.",
     "passwordMismatch": "Passwords do not match.",
     "nameMin": "Name must be at least 2 characters.",
-    "nameMax": "Name must be at most 100 characters."
+    "nameMax": "Name must be at most 100 characters.",
+    "invalid2faCode": "Invalid 2FA code."
   },
   "PwaWelcome": {
     "title": "Welcome to FluencyLab!",

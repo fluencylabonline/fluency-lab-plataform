@@ -210,15 +210,15 @@ export const sidebarItemsByRole: Record<string, MenuItemType[]> = {
 };
 
 // Helper to build locale-aware hrefs
-function buildHrefWithLocale(href: string, locale: string): string {
+function buildHrefWithLocale(href: string): string {
     if (!href) return href;
     // Replace explicit [locale] placeholder when present
     if (href.startsWith("/[locale]")) {
-        return href.replace("/[locale]", `/${locale}`);
+        return href.replace("/[locale]", `/hub`);
     }
     // Prefix root-based paths with locale
     if (href.startsWith("/")) {
-        return `/${locale}${href}`;
+        return `/hub${href}`;
     }
     // Leave relative or external URLs untouched
     return href;
@@ -227,16 +227,15 @@ function buildHrefWithLocale(href: string, locale: string): string {
 // Public API: get items by role with locale-aware hrefs
 export function getSidebarItemsByRole(
     role: UserRoles | string,
-    locale: string,
 ): MenuItemType[] {
     const raw = sidebarItemsByRole[role] || [];
     return raw.map((it) => ({
         ...it,
-        href: buildHrefWithLocale(it.href, locale),
+        href: buildHrefWithLocale(it.href),
         subItems: it.subItems
             ? it.subItems.map((sub) => ({
                 ...sub,
-                href: buildHrefWithLocale(sub.href, locale),
+                href: buildHrefWithLocale(sub.href),
             }))
             : undefined,
     }));
