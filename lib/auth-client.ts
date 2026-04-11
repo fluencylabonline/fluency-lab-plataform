@@ -132,6 +132,10 @@ export const authClient = {
       await firebaseSignOut(auth);
       const { logoutAction } = await import("@/modules/user/user.actions");
       await logoutAction();
+
+      // Clear the persistent user store
+      const { useUserStore } = await import("@/modules/user/user.store");
+      useUserStore.getState().clearUser();
     } catch (error) {
       console.error("[authClient.signOut] Error:", error);
     } finally {

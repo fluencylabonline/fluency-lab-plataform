@@ -82,3 +82,15 @@ export type SignInValues = z.infer<typeof signInSchema>;
 export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 export type TwoFactorValues = z.infer<typeof twoFactorSchema>;
+
+// Rate Limiting Table TEMPORARY
+export const rateLimitsTable = pgTable("rate_limits", {
+  key: text("key").primaryKey(),
+  points: integer("points").notNull().default(0),
+  resetAt: timestamp("reset_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});

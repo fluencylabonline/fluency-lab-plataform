@@ -40,11 +40,11 @@ trigger: always_on
 
 **🪝 Hooks (`use*.ts`)**
 - **Regra:** Gerenciamento de Estado de UI e Fetching.
-- **O que faz:** Usa `SWR` para buscar dados (read) e cache. Usa `Zustand` ou `useState` para controlar se uma sidebar está aberta ou um botão está em *loading*.
+- **O que faz:** Usa `SWR` para buscar dados (read) e cache. Usa `Zustand` ou `useState` para controlar se uma sidebar está aberta ou um botão está em *loading*. Deve expor `isLoading` para disparar os **Shimmer Skeletons** (ver @/.agents/skills/shimmer-skeleton.md).
 - **O que NÃO faz:** Zero lógica de negócio (não calcula se o usuário tem saldo para agendar aula).
 
 **🧩 Components (`.tsx`)**
 - **Regra:** Renderização Pura e Estúpida ("Dumb Components").
-- **O que faz:** Recebe dados via `props` do servidor. Renderiza Tailwind e Shadcn. Aciona eventos via `onClick` que chamam as Server Actions ou Hooks.
+- **O que faz:** Recebe dados via `props` do servidor. Renderiza Tailwind e Shadcn. Aciona eventos via `onClick` que chamam as Server Actions ou Hooks. Implementa **Shimmer Skeletons** via componente `<Shimmer>` para feedback visual.
 - **O que NÃO faz:** Não busca dados sozinhos (a menos que seja um Client Component encapsulando SWR), não gerencia segredos e **NÃO TEM `try/catch` para erros de autenticação** — isso é responsabilidade do `authClient`.
 - **Erros:** SEMPRE use `notify.error()` (Toast). **NUNCA** use estado de erro inline (`setLocalError`) para erros de autenticação.

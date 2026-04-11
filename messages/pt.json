@@ -56,7 +56,26 @@
     "verifying": "Verificando...",
     "verifyButton": "Verificar",
     "useDifferentAccount": "Usar outra conta",
+    "unauthorized": "Não autorizado",
+    "rateLimitExceeded": "Limite de tentativas excedido. Tente novamente em alguns minutos.",
     "error": "Ocorreu um erro. Tente novamente."
+  },
+  "Hub": {
+    "Profile": {
+      "title": "Perfil",
+      "changeProfilePicture": "Alterar foto de perfil",
+      "profilePicture": "Foto de perfil",
+      "logout": "Sair",
+      "success": "Perfil atualizado com sucesso",
+      "error": "Erro ao atualizar perfil",
+      "rateLimitExceeded": "Muitas tentativas. Tente novamente mais tarde.",
+      "roles": {
+        "admin": "Administrador",
+        "teacher": "Professor",
+        "student": "Aluno",
+        "manager": "Gerente"
+      }
+    }
   },
   "Validation": {
     "required": "Este campo é obrigatório.",

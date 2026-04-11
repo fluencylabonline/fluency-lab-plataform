@@ -17,7 +17,6 @@ export const loginAction = actionClient
     z.object({
       idToken: z.string().min(1),
       rememberMe: z.boolean().optional().default(false),
-      // Relaxed profile data validation to avoid social login URL issues
       name: z.string().optional().nullable(),
       photoUrl: z.string().optional().nullable(),
       googleLinked: z.boolean().optional(),
@@ -25,14 +24,10 @@ export const loginAction = actionClient
   )
   .action(async ({ parsedInput: { idToken, rememberMe, ...profileData } }) => {
     try {
-      // 1. Double check the token is valid and get UID
       const decodedToken = await adminAuth.verifyIdToken(idToken);
       const { uid, email } = decodedToken;
 
-      // 2. Sync with Neon DB (Gatekeeper)
-      // This will throw NOT_INVITED if the email is not in our database
       try {
-        // Sanitize data: remove nulls to avoid TS errors with NOT NULL fields
         const sanitizedData: Partial<NewUser> = { email: email! };
         if (profileData.name) sanitizedData.name = profileData.name;
         if (profileData.photoUrl) sanitizedData.photoUrl = profileData.photoUrl;
@@ -46,10 +41,9 @@ export const loginAction = actionClient
         throw error;
       }
 
-      // 3. Create Session Cookie
       const sessionCookie = await userService.createSessionCookie(idToken);
       const cookieStore = await cookies();
-      const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24; // 30 days vs 1 day
+      const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24;
 
       cookieStore.set("session", sessionCookie, {
         maxAge: maxAge,
@@ -83,6 +77,8 @@ export const logoutAction = protectedAction.action(async ({ ctx }) => {
   }
 });
 
+import { rateLimit } from "@/lib/rate-limit";
+
 /**
  * Sync user profile action — updates DB with fresh data from Firebase.
  */
@@ -96,10 +92,16 @@ export const syncUserAction = protectedAction
   )
   .action(async ({ parsedInput, ctx }) => {
     try {
+      // Rate limit: Max 5 updates per hour per user
+      await rateLimit(`${ctx.user.id}:sync_profile`, 5, 3600);
+
       await userService.syncUser(ctx.user.id, parsedInput);
       revalidatePath("/");
       return { success: true };
     } catch (error) {
+      if ((error as Error).message === "RATE_LIMIT_EXCEEDED") {
+        return { success: false, error: "rateLimitExceeded" };
+      }
       console.error("[syncUserAction] Error:", error);
       throw new Error("Failed to sync profile");
     }

@@ -22,7 +22,7 @@ A arquitetura da FluencyLab exige uma separação estrita entre Servidor e Clien
 - Empurre o `"use client"` o mais para baixo possível na árvore de componentes.
 - Crie componentes cliente em uma pasta `_components/` dentro da rota (ex: `app/(hub)/student/my-classes/_components/`).
 - Client Components recebem dados iniciais (`initialData`) via props do Server Component pai.
-- Use SWR para hidratação e background-revalidation (apenas quando o dado mudar com frequência).
+- Use SWR para hidratação e background-revalidation (apenas quando o dado mudar com frequência). Sempre implemente **Shimmer Skeletons** para estados de loading (ver @/.agents/skills/shimmer-skeleton.md).
 - Use Zustand APENAS para estado global de UI (ex: sidebar aberta), nunca para regras de negócio.
 - **Formulários**: Use sempre **React Hook Form** + **Zod** para gerenciamento de estado e validação de inputs no frontend.
 

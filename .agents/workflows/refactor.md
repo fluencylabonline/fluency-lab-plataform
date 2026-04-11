@@ -19,7 +19,9 @@ Use this workflow to refactor any existing or "dirty" component into FluencyLab 
     - Import from `@/components/ui/vault`.
 - **Buttons**: Use `@/components/ui/button`.
 - **Notify**: Replace `console.log` or local error states for Auth/Business logic with `notify.error()` or `notify.success()`.
-- **Loading**: Ensure all mutations (Server Actions) show a loading state (spinner).
+- **Loading**: 
+    - Mutações (Server Actions) devem mostrar um loading state (spinner).
+    - Data Fetching (SWR ou carregamento inicial no Client) deve usar **Shimmer Skeletons** (ver @/.agents/skills/shimmer-skeleton.md).
 - **Forms & Validation**:
     - **React Hook Form**: Never manage complex form state manually with `useState`. Always use `react-hook-form` for consistency.
     - **Zod**: Always use Zod schemas for form validation and server-side input parsing.

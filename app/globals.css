@@ -128,7 +128,7 @@
 }
 
 .card {
-  @apply duration-100 ease-in-out transition-all rounded-lg border border-slate-200/50 dark:border-slate-700/50 bg-slate-300/20 dark:bg-slate-900/80 hover:border-slate-600/10 dark:hover:border-slate-600/50;
+  @apply duration-150 ease-in-out transition-all rounded-md border border-slate-200/50 dark:border-slate-700/50 bg-white/15 dark:bg-slate-950/40 hover:border-slate-500/30 dark:hover:border-slate-900 hover:bg-white/5 dark:hover:bg-gray-950/50;
 }
 
 .item {

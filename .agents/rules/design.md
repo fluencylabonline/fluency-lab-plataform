@@ -47,6 +47,7 @@ trigger: always_on
 
 ## 3. Interação e Feedback
 - Todo botão ou link DEVE ter um estado de *loading* claro (spinner) durante mutações via Server Actions.
+- **Shimmer Skeleton:** Para fetching de dados (SWR ou carregamento inicial no Client), use SEMPRE a técnica de **Shimmer From Structure**. Veja @/.agents/skills/shimmer-skeleton.md para guidelines de implementação (templateProps, sincronização de estrutura).
 - Animações (Framer Motion) devem ser curtas (< 200ms) e objetivas, evitando exageros visuais.
 - Sempre mostre um Toast (`sonner`) após o retorno de uma Server Action (sucesso ou erro).
 

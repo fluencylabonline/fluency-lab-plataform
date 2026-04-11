@@ -57,3 +57,26 @@ Podes controlar o comportamento do Shimmer diretamente no JSX usando atributos `
 * **Medição Única:** A medição do layout só é disparada uma vez quando a prop `loading` transita para `true`.
 * **Skip de Elementos Ocultos:** Elementos com `display: none` ou dimensões zero são ignorados automaticamente para poupar processamento.
 * **APIs Nativas:** Utiliza `ResizeObserver` e `getComputedStyle` para garantir que a sobreposição do skeleton seja leve e eficiente.
+
+## 💻 Exemplo de Implementação Base
+
+```tsx
+import { Suspense } from 'react';
+import { Shimmer } from 'shimmer-from-structure/react';
+import { UserProfile } from './UserProfile';
+
+// 1. Defina as props mockadas
+const mockUser = {
+  name: "Carregando...",
+  avatarUrl: "",
+  bio: "Carregando a biografia do usuário..."
+};
+
+export function ProfileSection({ isLoading, userData }) {
+  return (
+    // 2. Envolva o componente com o Shimmer
+    <Shimmer loading={isLoading} templateProps={{ user: mockUser }}>
+      <UserProfile user={userData} />
+    </Shimmer>
+  );
+}
