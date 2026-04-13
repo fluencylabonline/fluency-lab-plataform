@@ -2,14 +2,14 @@
   "name": "FluencyLab",
   "short_name": "FluencyLab",
   "description": "Plataforma de ensino de idiomas",
-  "start_url": "/",
+  "start_url": "/signin",
   "scope": "/",
   "display": "standalone",
   "display_override": [
     "standalone",
     "window-controls-overlay"
   ],
-  "background_color": "#ffffff",
+  "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "portrait",
   "categories": [
