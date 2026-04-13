@@ -4,6 +4,9 @@ import { NextIntlClientProvider, AbstractIntlMessages } from "next-intl";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
+import { PwaHandler } from "./pwa-handler";
+import { NotificationPermissionVault } from "@/modules/notification/_components/NotificationPermissionVault";
+import { PwaVault } from "@/modules/pwa/_components/PwaVault";
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -25,8 +28,10 @@ export function Providers({ children, locale, messages, themeMode }: ProvidersPr
           {children}
         </TooltipProvider>
         <Toaster />
+        <PwaHandler />
+        <NotificationPermissionVault />
+        <PwaVault />
       </ThemeProvider>
     </NextIntlClientProvider>
-
   );
 }

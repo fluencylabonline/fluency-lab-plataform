@@ -18,6 +18,11 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: z.string().min(1),
     GOOGLE_CLIENT_SECRET: z.string().min(1),
 
+    // Web Push (VAPID)
+    VAPID_PUBLIC_KEY: z.string().min(1),
+    VAPID_PRIVATE_KEY: z.string().min(1),
+    VAPID_SUBJECT: z.string().min(1),
+
     // Node
     NODE_ENV: z
       .enum(["development", "production", "test"])
@@ -33,6 +38,9 @@ export const env = createEnv({
     NEXT_PUBLIC_FIREBASE_APP_ID: z.string().min(1),
     NEXT_PUBLIC_FIREBASE_DATABASE_URL: z.string().min(1),
 
+    // Web Push
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string().min(1),
+
     //URL
     NEXT_PUBLIC_APP_URL: z.string().min(1),
   },
@@ -45,6 +53,9 @@ export const env = createEnv({
     FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY,
+    VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
+    VAPID_SUBJECT: process.env.VAPID_SUBJECT,
     NODE_ENV: process.env.NODE_ENV,
 
     // Client
@@ -59,6 +70,7 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
     NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
     NEXT_PUBLIC_FIREBASE_DATABASE_URL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   },
 });

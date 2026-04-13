@@ -12,6 +12,15 @@ const quicksand = Quicksand({
 export const metadata: Metadata = {
   title: "FluencyLab",
   description: "Plataforma de ensino de idiomas",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "FluencyLab",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export const viewport: Viewport = {

@@ -363,6 +363,22 @@
   "PathScreen": {
     "unit": "Unit 4"
   },
+  "AdminNotifications": {
+    "title": "Notifications",
+    "subtitle": "Manage sending alerts to users",
+    "sendSuccess": "Notifications sent successfully!"
+  },
+  "Offline": {
+    "title": "You are offline",
+    "description": "It seems you don't have an internet connection. Check your network and try again.",
+    "retry": "Try again"
+  },
+  "Notification": {
+    "validation": {
+      "titleRequired": "Title is required.",
+      "bodyRequired": "Message is required."
+    }
+  },
   "EditScreen": {
     "header": {
       "collabWriting": "Collaborative Writing",
@@ -384,5 +400,20 @@
       "title": "Suggestion",
       "text": "Try to use more connecting words like 'furthermore' or 'nevertheless'."
     }
+  },
+  "NotificationPermission": {
+    "title": "Enable Notifications",
+    "description": "Receive alerts for your classes, messages and important updates directly in your browser.",
+    "allowButton": "Enable",
+    "notNowButton": "Not now"
+  },
+  "PwaVault": {
+    "installTitle": "Install FluencyLab",
+    "installDescription": "Install our application for fast access and a better learning experience.",
+    "installButton": "Install App",
+    "updateTitle": "New Version Available",
+    "updateDescription": "A new version of the app is ready. Update now to receive the latest improvements.",
+    "updateButton": "Update Now",
+    "notNowButton": "Not now"
   }
 }

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Search, X, Bell } from "lucide-react";
+import { ArrowLeft, Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserMenu } from "./user-menu";
 import { ThemeSwitcher } from "../ui/theme-switcher";
+import { NotificationBell } from "@/modules/notification/_components/NotificationBell";
 
 export interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {
     title: string;
@@ -120,14 +121,13 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                             </Button>
                                         )}
                                         {actionButton}
+                                        <NotificationBell />
                                         {user && <UserMenu user={user} />}
                                     </>
                                 ) : (
                                     <>
                                         <ThemeSwitcher />
-                                        <Button variant="ghost" size="icon" className="rounded-full">
-                                            <Bell className="h-5 w-5" />
-                                        </Button>
+                                        <NotificationBell />
                                         {user && <UserMenu user={user} />}
                                     </>
                                 )}
