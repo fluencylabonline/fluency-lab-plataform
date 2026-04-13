@@ -7,9 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { LogIn } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 
 export function PwaWelcomeScreen() {
     const t = useTranslations("PwaWelcome");
+    const router = useRouter();
+    const goToSignIn = () => {
+        router.push("/signin");
+    };
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4 relative overflow-hidden">
@@ -38,12 +43,10 @@ export function PwaWelcomeScreen() {
                         </div>
 
                         <div className="w-full pt-4">
-                            <Link href="/signin" className="w-full">
-                                <Button className="w-full font-medium gap-2">
-                                    <LogIn className="w-4 h-4 mr-2" />
-                                    {t("enterButton") || "Entrar"}
-                                </Button>
-                            </Link>
+                            <Button onClick={goToSignIn} className="w-full font-medium gap-2">
+                                <LogIn className="w-4 h-4 mr-2" />
+                                {t("enterButton") || "Entrar"}
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>
