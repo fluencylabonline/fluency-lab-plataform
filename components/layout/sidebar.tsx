@@ -2,12 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { usePathname } from "next/navigation";
-import { useIsMobile } from "@/hooks/ui/useMobile";
-import { usePWA } from "@/hooks/ui/usePWA";
-
 import { twMerge } from "tailwind-merge";
 import { motion } from "framer-motion";
-
 import SidebarItem from "./sidebar-item";
 import VaultItem from "./vault-item";
 import { VaultBar } from "./vaultbar";
@@ -26,9 +22,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
     const isCollapsed = useCollapsedStore((state) => state.isCollapsed);
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const isMobile = useIsMobile();
-    const { isStandalone } = usePWA();
-
     const mobileItems = useMemo(
         () => items.filter((item) => !item.subItems),
         [items],
@@ -50,7 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
         <>
             <motion.aside
                 animate={{
-                    width: isCollapsed ? 48 : 256,
+                    width: isCollapsed ? 54 : 256,
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="hidden md:flex flex-col items-center max-h-full"
@@ -74,7 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
                             "flex items-center mb-4 transition-all duration-300",
                             isCollapsed ? "justify-center" : "px-3 justify-between"
                         )}>
-                            {!isCollapsed && <span className="text-xs font-bold text-muted-foreground tracking-widest uppercase">Menu</span>}
+                            {!isCollapsed && <span className="text-xs font-bold text-muted-foreground tracking-widest uppercase">FluencyLab</span>}
                             <SidebarTrigger />
                         </div>
 
@@ -94,11 +87,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
 
             <motion.nav
                 key="mobile-navbar"
-                className={twMerge(
-                    "md:hidden fixed bottom-0 left-0 right-0 px-4 py-2 z-40 flex items-center justify-between",
-                    isStandalone && "bg-slate-200 dark:bg-slate-900 border-none",
-                    isMobile && "bg-slate-100 dark:bg-slate-950 border-t border-border",
-                )}
+                className="vault-bar-layout md:hidden fixed bottom-0 left-0 right-0 px-4 py-2 z-40 flex items-center justify-between"
             >
                 <motion.div className="flex items-center justify-between w-full">
                     {mobileVisibleItems.map((item) => (

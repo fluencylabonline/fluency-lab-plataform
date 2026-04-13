@@ -3,13 +3,13 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant pwa (@media (display-mode: standalone));
 
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --color-sidebar: var(--sidebar);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -30,6 +30,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  --color-content-color: var(--base-content);
+  --color-header-color: var(--base-header);
 }
 
 :root {
@@ -52,10 +55,9 @@
   --border: oklch(0.92 0.004 286.32);
   --input: oklch(0.92 0.004 286.32);
   --ring: oklch(0.702 0.183 293.541);
-  --sidebar: oklch(0.985 0 0);
-  --content-color: oklch(55.4% 0.042 264 / 0.08);
-  --header-color: oklch(55.4% 0.042 264 / 0.08);
-  --sidebar-color: oklch(99.385% 0.00297 264.8);
+
+  --base-content: oklch(100% 0.00011 271.152);
+  --base-header: oklch(70.9% 0.00008 271.152);
 }
 
 .dark {
@@ -77,83 +79,68 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.38 0.189 293.745);
-  --sidebar: oklch(0.21 0.006 285.885);
-  --content-color: oklch(0.13 0.04 265);
-  --header-color: oklch(17.8% 0.031 264);
-  --sidebar-color: oklch(7.4% 0.02 264);
+
+  --base-content: oklch(17.8% 0.031 264);
+  --base-header: oklch(12.048% 0.02283 254.114);
 }
 
-.theme-violet {
-  --primary: oklch(0.541 0.281 293.009);
-  --primary-foreground: oklch(0.969 0.016 293.756);
-  --ring: oklch(0.702 0.183 293.541);
-}
+@layer components {
+  .header-layout {
+    @apply lg:bg-content-color lg:border-b lg:border-b-3 lg:border-b-background lg:rounded-t-xl md:bg-content-color md:rounded-t-none md:border-b-0 bg-header-color rounded-t-none border-b border-b-primary lg:pwa:bg-content-color lg:pwa:border-b-3 lg:pwa:border-b-background lg:pwa:rounded-t-xl md:pwa:bg-content-color md:pwa:border-b-1 md:pwa:border-b-background md:pwa:rounded-t-xl pwa:bg-header-color pwa:rounded-t-none pwa:border-b-0 backdrop-blur;
+  }
 
-.theme-rose {
-  --primary: oklch(0.69 0.25 22);
-  --primary-foreground: oklch(0.985 0 0);
-  --ring: oklch(0.69 0.25 22);
-}
+  .sub-header-layout {
+    @apply bg-content-color;
+  }
 
-.theme-indigo {
-  --primary: oklch(0.45 0.24 270);
-  --primary-foreground: oklch(0.985 0 0);
-  --ring: oklch(0.45 0.24 270);
-}
+  .vault-bar-layout {
+    @apply bg-header-color border-t border-t-primary pwa:border-none rounded-none;
+  }
 
-.theme-yellow {
-  --primary: oklch(82.8% 0.189 84.429);
-  --primary-foreground: oklch(0.21 0.006 285.885);
-  --ring: oklch(82.8% 0.189 84.429);
-}
+  .content-layout {
+    @apply bg-content-color lg:rounded-b-xl md:rounded-b-none rounded-b-none;
+  }
 
-.theme-green {
-  --primary: oklch(59.6% 0.145 163.225);
-  --primary-foreground: oklch(0.985 0 0);
-  --ring: oklch(59.6% 0.145 163.225);
-}
+  /* --- Layout Geral --- */
+  .container {
+    @apply p-2.5 md:p-4 lg:px-6 lg:py-4 min-w-full;
+  }
 
-/* --- Layout --- */
+  .card {
+    @apply duration-150 ease-in-out transition-all rounded-md border border-slate-200/50 dark:border-slate-700/50 bg-white/15 dark:bg-slate-950/40 hover:border-slate-500/30 dark:hover:border-slate-900 hover:bg-white/5 dark:hover:bg-gray-950/50;
+  }
 
-.sidebar {
-  @apply bg-[var(--sidebar-color)] dark:bg-[var(--sidebar-color)];
-}
+  .item {
+    @apply duration-150 ease-in-out transition-all rounded-md border border-slate-200/50 dark:border-slate-700/50 bg-white/15 dark:bg-slate-950/40 hover:border-slate-500/30 dark:hover:border-slate-600 hover:bg-white/5 dark:hover:bg-gray-950/50;
+  }
 
-.container {
-  @apply p-2.5 md:p-4 lg:p-4 bg-[var(--content-color)] dark:bg-[var(--content-color)];
-}
+  .input {
+    @apply duration-150 ease-in-out transition-all rounded-md border border-slate-200/50 dark:border-slate-700/50 bg-white/20 dark:bg-slate-900/35 hover:border-slate-500/30 dark:hover:border-slate-600 placeholder:text-gray-500 dark:placeholder:text-gray-400 font-normal data-[placeholder]:text-gray-500 dark:data-[placeholder]:text-gray-400 hover:bg-white/5 dark:hover:bg-gray-800 focus:bg-white/25 dark:focus:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/20 dark:focus-visible:ring-blue-400/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-gray-900;
+  }
 
-.header {
-  @apply bg-[var(--header-color)] dark:bg-[var(--header-color)];
-}
+  .title {
+    @apply text-2xl font-bold text-primary;
+  }
 
-.card {
-  @apply duration-150 ease-in-out transition-all rounded-md border border-slate-200/50 dark:border-slate-700/50 bg-white/15 dark:bg-slate-950/40 hover:border-slate-500/30 dark:hover:border-slate-900 hover:bg-white/5 dark:hover:bg-gray-950/50;
-}
+  .subtitle {
+    @apply text-lg font-semibold text-secondary-foreground;
+  }
 
-.item {
-  @apply duration-150 ease-in-out transition-all rounded-md border border-slate-200/50 dark:border-slate-700/50 bg-white/15 dark:bg-slate-950/40 hover:border-slate-500/30 dark:hover:border-slate-600 hover:bg-white/5 dark:hover:bg-gray-950/50;
-}
-
-.input {
-  @apply duration-150 ease-in-out transition-all rounded-md border border-slate-200/50 dark:border-slate-700/50 bg-white/20 dark:bg-slate-900/35 hover:border-slate-500/30 dark:hover:border-slate-600 placeholder:text-gray-500 dark:placeholder:text-gray-400 font-normal data-[placeholder]:text-gray-500 dark:data-[placeholder]:text-gray-400 hover:bg-white/5 dark:hover:bg-gray-800 focus:bg-white/25 dark:focus:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/20 dark:focus-visible:ring-blue-400/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-gray-900;
-}
-
-.title {
-  @apply text-2xl font-bold text-primary;
-}
-
-.subtitle {
-  @apply text-lg font-semibold text-secondary-foreground;
-}
-
-.paragraph {
-  @apply text-xs font-medium text-secondary-foreground/80;
+  .paragraph {
+    @apply text-xs font-medium text-secondary-foreground/80;
+  }
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
+
+    /* Impede o "Pull-to-refresh" (Puxar para baixo para recarregar a página) 
+          e aquele efeito "elástico" chato no fim da página no iOS */
+    overscroll-behavior-y: none;
+
+    /* Impede o "Double-tap to zoom" (Zoom ao dar dois toques rápidos) */
+    touch-action: manipulation;
   }
 
   * {
@@ -169,10 +156,89 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+
+    /* 3. Tira o azul feio de clique (você já tinha, mas reforçando) */
+    -webkit-tap-highlight-color: transparent;
+
+    /* 4. Impede que o usuário selecione/copie o texto da interface sem querer ao segurar o dedo */
+    -webkit-user-select: none;
+    user-select: none;
+
+    /* 5. Impede que apareça aquele menu de contexto nativo do iOS (Copiar/Salvar) 
+          quando o usuário segura o dedo em uma imagem ou link */
+    -webkit-touch-callout: none;
   }
 
   body {
     @apply bg-background text-foreground;
     -webkit-tap-highlight-color: transparent;
   }
+
+  /* 6. EXTREMAMENTE IMPORTANTE: Devolve a capacidade de selecionar 
+        e digitar texto apenas onde é necessário (inputs e textareas) */
+  input,
+  textarea,
+  [contenteditable="true"] {
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+
+  /* =========================================
+     SUPORTE AO NOTCH (Safe Areas do iPhone)
+     ========================================= */
+  /* Se você tiver um Header ou Bottom Bar colado na borda, use isso para 
+     evitar que fique debaixo da câmera ou da barra de navegação do iPhone */
+  .safe-padding-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-padding-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* TEMAS */
+.theme-violet {
+  --primary: oklch(0.541 0.281 293.009);
+  --primary-foreground: oklch(0.969 0.016 293.756);
+  --ring: oklch(0.702 0.183 293.541);
+  --sidebar-primary: oklch(0.541 0.281 293.009);
+  --sidebar-primary-foreground: oklch(0.969 0.016 293.756);
+  --sidebar-ring: oklch(0.702 0.183 293.541);
+}
+
+.theme-rose {
+  --primary: oklch(0.69 0.25 22);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.69 0.25 22);
+  --sidebar-primary: oklch(0.69 0.25 22);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-ring: oklch(0.69 0.25 22);
+}
+
+.theme-indigo {
+  --primary: oklch(0.45 0.24 270);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.45 0.24 270);
+  --sidebar-primary: oklch(0.45 0.24 270);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-ring: oklch(0.45 0.24 270);
+}
+
+.theme-yellow {
+  --primary: oklch(82.8% 0.189 84.429);
+  --primary-foreground: oklch(0.21 0.006 285.885);
+  --ring: oklch(82.8% 0.189 84.429);
+  --sidebar-primary: oklch(82.8% 0.189 84.429);
+  --sidebar-primary-foreground: oklch(0.21 0.006 285.885);
+  --sidebar-ring: oklch(82.8% 0.189 84.429);
+}
+
+.theme-green {
+  --primary: oklch(59.6% 0.145 163.225);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(59.6% 0.145 163.225);
+  --sidebar-primary: oklch(59.6% 0.145 163.225);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-ring: oklch(59.6% 0.145 163.225);
 }

@@ -14,6 +14,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { notify } from "@/components/ui/toaster";
 import { User } from "../user.schema";
+import { Button } from "@/components/ui/button";
 
 interface ProfileCardProps {
   user?: User | null;
@@ -114,7 +115,7 @@ export function ProfileCard({ user, isLoading = false }: ProfileCardProps) {
             <p className="font-semibold text-lg capitalize text-foreground">
               {displayUser.name}
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground truncate max-w-[150px] sm:max-w-none">
               {displayUser.email}
             </p>
             <Badge variant="default" className="mt-2 px-3">
@@ -126,7 +127,7 @@ export function ProfileCard({ user, isLoading = false }: ProfileCardProps) {
         <button
           onClick={onLogout}
           disabled={isLoading}
-          className="p-3 rounded-md bg-destructive/10 hover:bg-destructive/20 text-destructive transition-colors shrink-0 disabled:opacity-50"
+          className="hidden sm:block p-3 rounded-md bg-destructive/10 hover:bg-destructive/20 text-destructive transition-colors shrink-0 disabled:opacity-50"
           title={t("logout")}
           data-shimmer-ignore
         >
@@ -142,6 +143,10 @@ export function ProfileCard({ user, isLoading = false }: ProfileCardProps) {
           disabled={isUploading || isLoading}
         />
       </div>
+
+      <Button>
+        Botão de teste
+      </Button>
     </Shimmer>
   );
 }

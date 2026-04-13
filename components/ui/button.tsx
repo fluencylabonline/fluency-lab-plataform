@@ -1,8 +1,13 @@
-import * as React from "react"
-import { Button as ButtonPrimitive } from "@base-ui/react/button"
-import { cva, type VariantProps } from "class-variance-authority"
+"use client";
 
-import { cn } from "@/lib/utils"
+import { forwardRef, useEffect, useState } from "react";
+import { Button as ButtonPrimitive } from "@base-ui/react/button";
+import { cva, type VariantProps } from "class-variance-authority";
+import { motion, AnimatePresence } from "framer-motion";
+
+import { cn } from "@/lib/utils";
+import { usePWA } from "@/hooks/ui/usePWA";
+
 
 const buttonVariants = cva(
   "relative group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 after:absolute after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:h-[max(100%,44px)] after:w-[max(100%,44px)] after:content-['']",
@@ -44,7 +49,13 @@ const buttonVariants = cva(
       fullWidth: false,
     },
   }
-)
+);
+
+interface RippleType {
+  x: number;
+  y: number;
+  id: number;
+}
 
 export interface ButtonProps
   extends React.ComponentPropsWithoutRef<typeof ButtonPrimitive>,
@@ -54,7 +65,7 @@ export interface ButtonProps
   rightIcon?: React.ReactNode;
 }
 
-const Button = React.forwardRef<React.ElementRef<typeof ButtonPrimitive>, ButtonProps>(
+const Button = forwardRef<React.ComponentRef<typeof ButtonPrimitive>, ButtonProps>(
   (
     {
       className,
@@ -67,23 +78,97 @@ const Button = React.forwardRef<React.ElementRef<typeof ButtonPrimitive>, Button
       rightIcon,
       children,
       disabled,
+      onClick,
       ...props
     },
     ref
   ) => {
+    const { isStandalone } = usePWA();
+    const [os, setOs] = useState<"ios" | "android" | "other" | null>(null);
+    const [ripples, setRipples] = useState<RippleType[]>([]);
+
+    useEffect(() => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      let detectedOs: "ios" | "android" | "other" = "other";
+
+      if (/iphone|ipad|ipod/.test(userAgent)) {
+        detectedOs = "ios";
+      } else if (/android/.test(userAgent)) {
+        detectedOs = "android";
+      }
+
+      const frame = requestAnimationFrame(() => setOs(detectedOs));
+      return () => cancelAnimationFrame(frame);
+    }, []);
+
+    const handleInteraction = (e: Parameters<NonNullable<React.ComponentPropsWithoutRef<typeof ButtonPrimitive>["onClick"]>>[0]) => {
+      if (isStandalone && os === "android" && !disabled && !isLoading) {
+        const button = e.currentTarget;
+        const rect = button.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        setRipples((prev) => [...prev, { x, y, id: Date.now() }]);
+      }
+
+      if (onClick) {
+        onClick(e);
+      }
+    };
+
     const showLeftIcon = !isLoading && leftIcon;
     const showRightIcon = !isLoading && rightIcon;
     const isIconOnly = size === "icon";
     const showChildren = !isIconOnly || !isLoading;
+
+    const isNativeIOS = isStandalone && os === "ios";
 
     return (
       <ButtonPrimitive
         ref={ref}
         data-slot="button"
         disabled={isLoading || disabled}
-        className={cn(buttonVariants({ variant, size, fullWidth, animation, className }))}
+        onClick={handleInteraction}
+        className={cn(
+          buttonVariants({
+            variant,
+            size,
+            fullWidth,
+            animation: isNativeIOS ? "none" : animation,
+            className
+          }),
+          isNativeIOS && "active:scale-[0.96] active:opacity-80 duration-100 ease-in-out"
+        )}
         {...props}
       >
+        {isStandalone && os === "android" && (
+          <span className="absolute inset-0 overflow-hidden rounded-[inherit] pointer-events-none">
+            <AnimatePresence>
+              {ripples.map((ripple) => (
+                <motion.span
+                  key={ripple.id}
+                  initial={{ scale: 0, opacity: 0.3 }}
+                  animate={{ scale: 4, opacity: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  onAnimationComplete={() => {
+                    setRipples((prev) => prev.filter((r) => r.id !== ripple.id));
+                  }}
+                  className="absolute rounded-full bg-foreground/20 dark:bg-foreground/30"
+                  style={{
+                    top: ripple.y,
+                    left: ripple.x,
+                    width: "100px",
+                    height: "100px",
+                    marginTop: "-50px",
+                    marginLeft: "-50px",
+                  }}
+                />
+              ))}
+            </AnimatePresence>
+          </span>
+        )}
+
         {isLoading && (
           <svg
             className="animate-spin relative z-10"
@@ -130,10 +215,10 @@ const Button = React.forwardRef<React.ElementRef<typeof ButtonPrimitive>, Button
           </span>
         )}
       </ButtonPrimitive>
-    )
+    );
   }
-)
+);
 
-Button.displayName = "Button"
+Button.displayName = "Button";
 
-export { Button, buttonVariants }
+export { Button, buttonVariants };

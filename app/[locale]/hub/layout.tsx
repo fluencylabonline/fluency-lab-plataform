@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
 import { Sidebar } from "@/components/layout/sidebar";
-import { Header } from "@/components/layout/header";
 import { getSidebarItemsByRole } from "@/components/layout/navigations";
 import { UserRoles } from "@/lib/rbac";
 
@@ -24,11 +23,10 @@ export default async function HubLayout({ children }: HubLayoutProps) {
     const menuItems = getSidebarItemsByRole(role);
 
     return (
-        <div className="flex h-dvh w-full overflow-hidden bg-background">
+        <div className="flex h-dvh w-full overflow-hidden">
             <Sidebar items={menuItems} />
-            <main className="flex-1 flex flex-col min-w-0 relative overflow-hidden text-foreground">
-                <Header title="Hub" user={user ?? undefined} />
-                <div className="flex-1 overflow-y-auto overflow-x-hidden">
+            <main className="flex-1 flex flex-col min-w-0 relative overflow-hidden lg:p-2 md:p-0 p-0">
+                <div className="content-layout rounded-none lg:rounded-xl w-full h-full">
                     {children}
                 </div>
             </main>

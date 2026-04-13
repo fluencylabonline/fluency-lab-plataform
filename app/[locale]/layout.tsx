@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { getLocale, getMessages } from "next-intl/server";
 import { cookies } from "next/headers";
 import { Providers } from "@/components/layout/providers";
@@ -12,6 +12,17 @@ const quicksand = Quicksand({
 export const metadata: Metadata = {
   title: "FluencyLab",
   description: "Plataforma de ensino de idiomas",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "oklch(70.9% 0.00008 271.152)" }, //header-base
+    { media: "(prefers-color-scheme: dark)", color: "oklch(12.048% 0.02283 254.114)" }, //header-base
+  ],
 };
 
 export default async function RootLayout({
