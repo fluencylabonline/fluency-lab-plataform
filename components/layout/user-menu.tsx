@@ -1,8 +1,6 @@
 "use client";
-
-import * as React from "react";
 import Link from "next/link";
-import { User, Settings, LogOut, Sun, Bell } from "lucide-react";
+import { User, Settings, LogOut } from "lucide-react";
 import { useIsMobile } from "@/hooks/ui/useMobile";
 import { authClient } from "@/lib/auth-client";
 import {
@@ -91,16 +89,6 @@ export function UserMenu({ user }: UserMenuProps) {
                                     {item.label}
                                 </Link>
                             ))}
-
-                            {/* Mobile Placeholders for Theme and Notification */}
-                            <button className="flex items-center gap-3 px-2 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-colors text-left">
-                                <Sun className="h-4 w-4" />
-                                <span>Alternar Tema</span>
-                            </button>
-                            <button className="flex items-center gap-3 px-2 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-colors text-left">
-                                <Bell className="h-4 w-4" />
-                                <span>Notificações</span>
-                            </button>
                         </div>
 
                         <Button
