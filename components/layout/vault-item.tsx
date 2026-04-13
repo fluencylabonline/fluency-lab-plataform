@@ -3,6 +3,7 @@ import { MenuItemType } from "@/components/layout/types";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { twMerge } from "tailwind-merge";
 
 interface VaultItemProps {
@@ -12,6 +13,7 @@ interface VaultItemProps {
 export default function VaultItem({
   item,
 }: VaultItemProps) {
+  const t = useTranslations("Navigation");
   const pathname = usePathname();
   const isActive = isPathActive(pathname, item.href);
 
@@ -48,7 +50,7 @@ export default function VaultItem({
               exit={{ opacity: 0, width: 0 }}
               className="text-sm font-medium text-foreground whitespace-nowrap overflow-hidden ml-2"
             >
-              {item.labelKey ? (item.labelKey) : item.label}
+              {item.labelKey ? t(item.labelKey) : item.label}
             </motion.span>
           )}
         </AnimatePresence>

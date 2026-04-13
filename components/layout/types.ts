@@ -1,6 +1,7 @@
 export interface SubMenuItem {
     href: string;
     label: string;
+    labelKey?: string;
     icon?: React.ReactNode;
 }
 

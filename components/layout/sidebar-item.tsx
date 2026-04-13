@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { twMerge } from "tailwind-merge";
 import { useRef } from "react";
 
@@ -19,6 +20,7 @@ interface AnimatedIconHandle {
 }
 
 export default function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
+  const t = useTranslations("Navigation");
   const pathname = usePathname();
   const isActive =
     isPathActive(pathname, item.href) ||
@@ -77,7 +79,7 @@ export default function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
                   exit={{ opacity: 0, width: 0 }}
                   className="ml-3 flex-1 whitespace-nowrap text-left overflow-hidden flex items-center justify-between"
                 >
-                  {item.labelKey ? (item.labelKey) : item.label}
+                  {item.labelKey ? t(item.labelKey) : item.label}
                   {item.badgeCount && item.badgeCount > 0 ? (
                     <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                       {item.badgeCount > 99 ? "99+" : item.badgeCount}
@@ -136,7 +138,7 @@ export default function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
                         exit={{ opacity: 0 }}
                         className="ml-3 whitespace-nowrap"
                       >
-                        {subItem.label}
+                        {subItem.labelKey ? t(subItem.labelKey) : subItem.label}
                       </motion.span>
                     )}
                   </AnimatePresence>
@@ -181,7 +183,7 @@ export default function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
               exit={{ opacity: 0, width: 0 }}
               className="ml-3 flex-1 whitespace-nowrap overflow-hidden flex items-center justify-between"
             >
-              {item.labelKey ? (item.labelKey) : item.label}
+              {item.labelKey ? t(item.labelKey) : item.label}
               {item.badgeCount && item.badgeCount > 0 ? (
                 <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                   {item.badgeCount > 99 ? "99+" : item.badgeCount}

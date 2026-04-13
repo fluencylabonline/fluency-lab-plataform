@@ -143,10 +143,6 @@ export function ProfileCard({ user, isLoading = false }: ProfileCardProps) {
           disabled={isUploading || isLoading}
         />
       </div>
-
-      <Button>
-        Botão de teste
-      </Button>
     </Shimmer>
   );
 }

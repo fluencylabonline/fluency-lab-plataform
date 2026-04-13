@@ -1,4 +1,22 @@
 {
+  "Navigation": {
+    "myProfile": "My Profile",
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "finances": "Finances",
+    "courses": "Courses",
+    "notifications": "Notifications",
+    "tasks": "Tasks",
+    "settings": "Settings",
+    "students": "Students",
+    "mySchedule": "My Schedule",
+    "workbooks": "Study Materials",
+    "chat": "Chats",
+    "notebook": "Notebook",
+    "calendar": "Calendar",
+    "immersion": "Immersion",
+    "menuDescription": "Navigation Menu"
+  },
   "Common": {
     "success": "Operation completed successfully",
     "error": "An error occurred. Please try again.",

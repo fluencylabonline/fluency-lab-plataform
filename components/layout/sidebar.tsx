@@ -10,7 +10,6 @@ import { VaultBar } from "./vaultbar";
 import { MenuItemType } from "@/components/layout/types";
 import { useCollapsedStore } from "./collapsed-store";
 import { SidebarTrigger } from "./sidebar-trigger";
-
 import { ArrowUp } from "lucide-react";
 
 export interface SidebarProps {
@@ -43,10 +42,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
         <>
             <motion.aside
                 animate={{
-                    width: isCollapsed ? 54 : 256,
+                    width: isCollapsed ? 48 : 256,
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="hidden md:flex flex-col items-center max-h-full"
+                className="hidden md:flex flex-col items-center mx-1 max-h-full"
             >
                 <motion.div
                     layout

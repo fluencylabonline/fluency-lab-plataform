@@ -4,6 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 import { Vault, VaultContent } from "@/components/ui/vault";
 import { isPathActive } from "@/utils/pathname";
@@ -23,6 +24,7 @@ export const VaultBar: React.FC<VaultBarProps> = ({
     onOpenChange,
     items,
 }) => {
+    const t = useTranslations("Navigation");
     const pathname = usePathname();
     const [openSection, setOpenSection] = useState<string | null>(null);
 
@@ -45,7 +47,7 @@ export const VaultBar: React.FC<VaultBarProps> = ({
                 className="h-[85vh] max-h-[85vh] flex flex-col p-0"
             >
                 <div className="flex items-center justify-center border-b border-border/50 shrink-0 px-4 py-4">
-                    <h2 className="text-base font-semibold text-foreground">Menu de Navegação</h2>
+                    <h2 className="text-base font-semibold text-foreground">{t("menuDescription")}</h2>
                 </div>
 
                 <div className="overflow-y-auto flex-1 p-0 no-scrollbar">
@@ -82,7 +84,7 @@ export const VaultBar: React.FC<VaultBarProps> = ({
                                                             {iconNode}
                                                         </div>
                                                         <span className="font-medium text-foreground">
-                                                            {item.label}
+                                                            {item.labelKey ? t(item.labelKey) : item.label}
                                                         </span>
                                                     </div>
                                                     <motion.div
@@ -126,7 +128,9 @@ export const VaultBar: React.FC<VaultBarProps> = ({
                                                                             <div className="w-4 h-4 flex items-center justify-center">
                                                                                 {subItem.icon}
                                                                             </div>
-                                                                            <span className="text-sm">{subItem.label}</span>
+                                                                            <span className="text-sm">
+                                                                                {subItem.labelKey ? t(subItem.labelKey) : subItem.label}
+                                                                            </span>
                                                                         </Link>
                                                                     </motion.div>
                                                                 );
@@ -149,7 +153,9 @@ export const VaultBar: React.FC<VaultBarProps> = ({
                                                 <div className="w-5 h-5 flex items-center justify-center">
                                                     {iconNode}
                                                 </div>
-                                                <span className="font-medium">{item.label}</span>
+                                                <span className="font-medium">
+                                                    {item.labelKey ? t(item.labelKey) : item.label}
+                                                </span>
                                             </Link>
                                         )}
                                     </motion.li>
