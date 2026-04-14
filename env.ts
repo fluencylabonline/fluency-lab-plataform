@@ -27,6 +27,13 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "production", "test"])
       .default("development"),
+
+    // AbacatePay
+    ABACATEPAY_API_KEY: z.string().min(1),
+    ABACATEPAY_WEBHOOK_SECRET: z.string().min(1),
+
+    // Automation
+    CRON_SECRET: z.string().min(1),
   },
   client: {
     // Firebase Client (public)
@@ -57,6 +64,13 @@ export const env = createEnv({
     VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
     VAPID_SUBJECT: process.env.VAPID_SUBJECT,
     NODE_ENV: process.env.NODE_ENV,
+
+    // AbacatePay
+    ABACATEPAY_API_KEY: process.env.ABACATEPAY_API_KEY,
+    ABACATEPAY_WEBHOOK_SECRET: process.env.ABACATEPAY_WEBHOOK_SECRET,
+
+    // Automation
+    CRON_SECRET: process.env.CRON_SECRET,
 
     // Client
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,

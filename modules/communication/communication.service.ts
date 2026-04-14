@@ -7,6 +7,11 @@ import type { ReactElement } from "react";
 //Templates
 import { WelcomeEmail } from "./templates/WelcomeEmail";
 import { ResendInviteEmail } from "./templates/ResendInviteEmail";
+import { PaymentConfirmedEmail } from "./templates/PaymentConfirmedEmail";
+import { NewInvoiceEmail } from "./templates/NewInvoiceEmail";
+import { BillingReminderEmail } from "./templates/BillingReminderEmail";
+import { BillingDueDateEmail } from "./templates/BillingDueDateEmail";
+import { BillingOverdueEmail } from "./templates/BillingOverdueEmail";
 
 interface SendEmailOptions {
   to: string | string[];
@@ -89,6 +94,66 @@ export class CommunicationService {
   async sendClassScheduledEmail() { /* TODO */ }
   async sendClassRescheduledEmail() { /* TODO */ }
   async sendClassCanceledEmail() { /* TODO */ }
+
+  async sendPaymentConfirmedEmail(email: string, data: { studentName: string; amount: number }) {
+    try {
+      await this.sendEmail({
+        to: email,
+        subject: "\u2705 Pagamento confirmado! Boas aulas.",
+        template: React.createElement(PaymentConfirmedEmail, data),
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendPaymentConfirmedEmail] Error:", error);
+    }
+  }
+
+  async sendNewInvoiceEmail(email: string, data: { studentName: string; amount: number; dueDate: Date; checkoutUrl: string }) {
+    try {
+      await this.sendEmail({
+        to: email,
+        subject: "\uD83D\uDCC4 Sua fatura da Fluency Lab est\u00e1 dispon\u00edvel",
+        template: React.createElement(NewInvoiceEmail, data),
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendNewInvoiceEmail] Error:", error);
+    }
+  }
+
+  async sendBillingReminderEmail(email: string, data: { studentName: string; amount: number; dueDate: Date; checkoutUrl: string }) {
+    try {
+      await this.sendEmail({
+        to: email,
+        subject: "\u23F3 Lembrete: Sua fatura vence em 2 dias",
+        template: React.createElement(BillingReminderEmail, data),
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendBillingReminderEmail] Error:", error);
+    }
+  }
+
+  async sendBillingDueDateEmail(email: string, data: { studentName: string; amount: number; checkoutUrl: string }) {
+    try {
+      await this.sendEmail({
+        to: email,
+        subject: "\u23F0 Aten\u00e7\u00e3o: Sua fatura vence hoje",
+        template: React.createElement(BillingDueDateEmail, data),
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendBillingDueDateEmail] Error:", error);
+    }
+  }
+
+  async sendBillingOverdueEmail(email: string, data: { studentName: string; amount: number; checkoutUrl: string }) {
+    try {
+      await this.sendEmail({
+        to: email,
+        subject: "\u26A0\uFE0F Sua fatura est\u00e1 em atraso",
+        template: React.createElement(BillingOverdueEmail, data),
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendBillingOverdueEmail] Error:", error);
+    }
+  }
 
   /**
    * Utilitários Privados

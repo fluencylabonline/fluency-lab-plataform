@@ -21,18 +21,37 @@ export const emailStyles = {
     height: "40px",
     margin: "0 auto",
   } as CSSProperties,
-  heading: {
+  h1: {
     fontSize: "24px",
     fontWeight: "bold",
     color: "#1a1a1a",
     textAlign: "center" as const,
     marginBottom: "24px",
   } as CSSProperties,
+  heading: {
+    fontSize: "20px",
+    fontWeight: "bold",
+    color: "#1a1a1a",
+    marginBottom: "16px",
+  } as CSSProperties,
+  text: {
+    fontSize: "16px",
+    lineHeight: "26px",
+    color: "#484848",
+    margin: "16px 0",
+  } as CSSProperties,
   paragraph: {
     fontSize: "16px",
     lineHeight: "26px",
     color: "#484848",
     margin: "16px 0",
+  } as CSSProperties,
+  footer: {
+    fontSize: "14px",
+    lineHeight: "22px",
+    color: "#8898aa",
+    margin: "32px 0 0",
+    textAlign: "center" as const,
   } as CSSProperties,
   footerParagraph: {
     fontSize: "14px",
@@ -41,12 +60,20 @@ export const emailStyles = {
     margin: "32px 0 0",
     textAlign: "center" as const,
   } as CSSProperties,
+  section: {
+    margin: "24px 0",
+  } as CSSProperties,
+  buttonContainer: {
+    textAlign: "center" as const,
+    marginTop: "32px",
+    marginBottom: "32px",
+  } as CSSProperties,
   buttonSection: {
     textAlign: "center" as const,
     marginTop: "32px",
   } as CSSProperties,
   button: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#000000",
     borderRadius: "5px",
     color: "#fff",
     fontSize: "16px",

@@ -3,6 +3,7 @@ import { adminAuth } from "@/lib/firebase-admin";
 import type { User, NewUser } from "./user.schema";
 import { env } from "@/env";
 import { communicationService } from "@/modules/communication/communication.service";
+import { abacate } from "@/lib/abacate-pay";
 
 export const userService = {
   async syncUser(uid: string, data: Partial<NewUser>): Promise<User> {
@@ -92,7 +93,32 @@ export const userService = {
       user.name,
       actionLink
     );
+    
+    // Sync with AbacatePay immediately
+    await this.syncAbacatePayCustomer(user.id);
 
     return user;
+  },
+
+  async syncAbacatePayCustomer(userId: string): Promise<string> {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new Error("Usuário não encontrado");
+
+    if (user.abacatePayCustomerId) return user.abacatePayCustomerId;
+
+    // Create in AbacatePay
+    const customer = await abacate.customers.create({
+      name: user.name,
+      email: user.email,
+      taxId: user.taxId || "00000000000", // Fallback for testing, but should be required in prod
+      cellphone: user.cellphone || "00000000000",
+      metadata: { userId: user.id } as Record<string, string | number | boolean>,
+    });
+
+    await userRepository.update(user.id, {
+      abacatePayCustomerId: customer.id,
+    });
+
+    return customer.id;
   },
 };

@@ -26,12 +26,15 @@ export const usersTable = pgTable("users", {
   isActive: boolean("is_active").notNull().default(true),
   onboarded: boolean("onboarded").notNull().default(false),
 
-  // Profile & Contact
+  // Contact & Billing
   phone: text("phone"),
+  cellphone: text("cellphone"),
+  taxId: text("tax_id"),
 
   // Student details
   classesStartDate: timestamp("classes_start_date"),
   languages: text("languages").array().notNull().default(sql`'{}'`),
+  abacatePayCustomerId: text("abacate_pay_customer_id"),
 
   // Audit
   lastLoginAt: timestamp("last_login_at"),
