@@ -1,8 +1,11 @@
+import { Permission } from "@/lib/rbac";
+
 export interface SubMenuItem {
     href: string;
     label: string;
     labelKey?: string;
     icon?: React.ReactNode;
+    permission?: Permission;
 }
 
 export interface MenuItemType {
@@ -14,4 +17,5 @@ export interface MenuItemType {
     iconProps?: Record<string, unknown>;
     subItems?: SubMenuItem[];
     badgeCount?: number;
+    permission?: Permission;
 }

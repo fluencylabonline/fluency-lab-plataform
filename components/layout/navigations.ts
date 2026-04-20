@@ -11,7 +11,7 @@ import { SettingsIcon } from "@/components/animated-icons/settings";
 import { ClapIcon } from "@/components/animated-icons/video";
 import { WavesLadderIcon } from "@/components/animated-icons/waves-ladder";
 import { MenuItemType } from "@/components/layout/types";
-import { UserRoles } from "@/lib/rbac";
+import { UserRoles, hasPermission, type UserRoleInfo } from "@/lib/rbac";
 
 const adminItems: MenuItemType[] = [
     {
@@ -20,6 +20,7 @@ const adminItems: MenuItemType[] = [
         labelKey: "myProfile",
         Icon: UserIcon,
         iconProps: { size: 20 },
+        permission: "profile.update.self",
     },
     {
         href: "/[locale]/hub/admin/dashboard",
@@ -27,6 +28,7 @@ const adminItems: MenuItemType[] = [
         labelKey: "dashboard",
         Icon: LayoutDashboardIcon,
         iconProps: { size: 20 },
+        permission: "class.view.all",
     },
     {
         href: "/[locale]/hub/admin/users",
@@ -34,6 +36,7 @@ const adminItems: MenuItemType[] = [
         labelKey: "users",
         Icon: PeopleIcon,
         iconProps: { size: 20 },
+        permission: "user.create",
     },
     {
         href: "/[locale]/hub/admin/finances",
@@ -41,6 +44,7 @@ const adminItems: MenuItemType[] = [
         labelKey: "finances",
         Icon: DollarSignIcon,
         iconProps: { size: 20 },
+        permission: "payment.manage",
     },
     {
         href: "/[locale]/hub/admin/courses",
@@ -48,6 +52,7 @@ const adminItems: MenuItemType[] = [
         labelKey: "courses",
         Icon: ClapIcon,
         iconProps: { size: 20 },
+        permission: "material.view",
     },
     {
         href: "/[locale]/hub/admin/notification",
@@ -86,6 +91,7 @@ const teacherItems: MenuItemType[] = [
         labelKey: "students",
         Icon: PeopleIcon,
         iconProps: { size: 20 },
+        permission: "class.view.assigned",
     },
     {
         href: "/[locale]/hub/teacher/my-schedule",
@@ -93,6 +99,7 @@ const teacherItems: MenuItemType[] = [
         labelKey: "mySchedule",
         Icon: CalendarDaysIcon,
         iconProps: { size: 20 },
+        permission: "class.view.assigned",
     },
     {
         href: "/[locale]/hub/teacher/workbooks",
@@ -100,6 +107,7 @@ const teacherItems: MenuItemType[] = [
         labelKey: "workbooks",
         Icon: LayoutDashboardIcon,
         iconProps: { size: 20 },
+        permission: "material.view",
     },
     {
         href: "/[locale]/hub/teacher/my-chat",
@@ -138,6 +146,7 @@ const studentItems: MenuItemType[] = [
         labelKey: "calendar",
         Icon: CalendarDaysIcon,
         iconProps: { size: 20 },
+        permission: "class.view",
     },
     {
         href: "/[locale]/hub/student/my-courses",
@@ -145,6 +154,7 @@ const studentItems: MenuItemType[] = [
         labelKey: "courses",
         Icon: ClapIcon,
         iconProps: { size: 20 },
+        permission: "material.view",
     },
     {
         href: "/[locale]/hub/student/my-immersion",
@@ -169,7 +179,7 @@ const studentItems: MenuItemType[] = [
     },
 ];
 
-const managerItems = [
+const managerItems: MenuItemType[] = [
     {
         href: "/[locale]/hub/manager/my-profile",
         label: "Meu Perfil",
@@ -183,6 +193,7 @@ const managerItems = [
         labelKey: "students",
         Icon: PeopleIcon,
         iconProps: { size: 20 },
+        permission: "student.support",
     },
     {
         href: "/[locale]/hub/manager/tasks",
@@ -190,6 +201,7 @@ const managerItems = [
         labelKey: "tasks",
         Icon: CircleCheckIcon,
         iconProps: { size: 20 },
+        permission: "report.view.limited",
     },
     {
         href: "/[locale]/hub/manager/settings",
@@ -224,19 +236,25 @@ function buildHrefWithLocale(href: string): string {
     return href;
 }
 
-// Public API: get items by role with locale-aware hrefs
+// Public API: get items by role with locale-aware hrefs and permission filtering
 export function getSidebarItemsByRole(
-    role: UserRoles | string,
+    user: UserRoleInfo,
 ): MenuItemType[] {
+    const role = user.role;
     const raw = sidebarItemsByRole[role] || [];
-    return raw.map((it) => ({
-        ...it,
-        href: buildHrefWithLocale(it.href),
-        subItems: it.subItems
-            ? it.subItems.map((sub) => ({
-                ...sub,
-                href: buildHrefWithLocale(sub.href),
-            }))
-            : undefined,
-    }));
+    
+    return raw
+        .filter((item) => !item.permission || hasPermission(user, item.permission))
+        .map((it) => ({
+            ...it,
+            href: buildHrefWithLocale(it.href),
+            subItems: it.subItems
+                ? it.subItems
+                    .filter((sub) => !sub.permission || hasPermission(user, sub.permission))
+                    .map((sub) => ({
+                        ...sub,
+                        href: buildHrefWithLocale(sub.href),
+                    }))
+                : undefined,
+        }));
 }

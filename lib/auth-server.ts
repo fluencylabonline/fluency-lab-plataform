@@ -2,7 +2,7 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { adminAuth } from "./firebase-admin";
 import { userRepository } from "@/modules/user/user.repository";
-import { ROLE_PERMISSIONS, type Permission } from "./rbac";
+import { type Permission, hasPermission } from "./rbac";
 import type { User } from "@/modules/user/user.schema";
 
 /**
@@ -31,19 +31,6 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
     return null;
   }
 });
-
-/**
- * Check if a user has a specific permission based on their role.
- */
-export function hasPermission(user: User | null, permission: Permission): boolean {
-  if (!user) return false;
-  
-  // Admin role bypasses all checks
-  if (user.role === "admin") return true;
-
-  const permissions = ROLE_PERMISSIONS[user.role as keyof typeof ROLE_PERMISSIONS] || [];
-  return permissions.includes(permission);
-}
 
 /**
  * Server-side check for permission.

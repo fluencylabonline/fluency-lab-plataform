@@ -1,10 +1,11 @@
 import { getCurrentUser } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
 import { UsersPageClient } from "./_components/UsersPageClient";
+import { hasPermission } from "@/lib/rbac";
 
 export default async function AdminUsersPage() {
   const user = await getCurrentUser();
-  if (!user || user.role !== "admin") {
+  if (!user || !hasPermission(user, "class.view.all")) {
     redirect("/signin");
   }
 

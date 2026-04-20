@@ -1,6 +1,7 @@
 import { createSafeActionClient } from "next-safe-action";
 import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "./auth-server";
+import { hasPermission, type Permission } from "./rbac";
 
 /**
  * Base action client — for public actions (e.g. login, forgot-password).
@@ -43,3 +44,17 @@ export const adminAction = protectedAction.use(async ({ next, ctx }) => {
 
   return next({ ctx });
 });
+
+/**
+ * Permission action client — requires a specific permission.
+ * Usage: permissionAction("user.create").schema(...).action(...)
+ */
+export const permissionAction = (permission: Permission) =>
+  protectedAction.use(async ({ next, ctx }) => {
+    if (!hasPermission(ctx.user, permission)) {
+      const t = await getTranslations("Common");
+      throw new Error(t("unauthorized"));
+    }
+
+    return next({ ctx });
+  });

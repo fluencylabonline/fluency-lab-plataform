@@ -93,3 +93,26 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "material.view",
   ],
 };
+
+/**
+ * Common interface for anything that has a role.
+ * Simplifies dependency between rbac and other modules.
+ */
+export interface UserRoleInfo {
+  role: Role;
+}
+
+/**
+ * Check if a role has a specific permission.
+ * Admin role bypasses all checks.
+ */
+export function hasPermission(
+  user: UserRoleInfo | null | undefined,
+  permission: Permission
+): boolean {
+  if (!user) return false;
+  if (user.role === "admin") return true;
+
+  const permissions = ROLE_PERMISSIONS[user.role] || [];
+  return permissions.includes(permission);
+}

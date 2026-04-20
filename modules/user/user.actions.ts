@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { actionClient, protectedAction, adminAction } from "@/lib/safe-action";
+import { actionClient, protectedAction, permissionAction } from "@/lib/safe-action";
 import { userService } from "./user.service";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
@@ -106,7 +106,7 @@ export const syncUserAction = protectedAction
     }
   });
 
-export const createUserAction = adminAction
+export const createUserAction = permissionAction("user.create")
   .inputSchema(createUserSchema)
   .action(async ({ parsedInput }) => {
     try {
@@ -126,7 +126,7 @@ export const createUserAction = adminAction
     }
   });
 
-export const resendInviteAction = adminAction
+export const resendInviteAction = permissionAction("user.create")
   .inputSchema(
     z.object({
       email: z.string().email(),
