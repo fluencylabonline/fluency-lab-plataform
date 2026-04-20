@@ -6,7 +6,7 @@ import { routing } from "./i18n/routing";
 const handleIntl = createIntlMiddleware(routing);
 
 const AUTH_PAGES = ["/signin", "/invite", "/reset-password", "/create-password", "/forgot-password"];
-const PUBLIC_API_ROUTES = ["/api/webhooks"];
+const PUBLIC_API_ROUTES = ["/api/"];
 
 /**
  * Next.js 16 Proxy (formerly Middleware).
