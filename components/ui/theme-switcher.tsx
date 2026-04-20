@@ -12,12 +12,53 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function ThemeSwitcher() {
-    const { setTheme } = useTheme();
+    const { setTheme, theme } = useTheme();
     const { mode, setMode } = useAppearanceStore();
 
-    const handleModeChange = (newMode: "light" | "dark" | "system") => {
-        setMode(newMode);
-        setTheme(newMode);
+    const handleModeChange = (newMode: "light" | "dark" | "system", e?: React.MouseEvent) => {
+        // Função que efetivamente troca o tema
+        const updateTheme = () => {
+            setMode(newMode);
+            setTheme(newMode);
+        };
+
+        // Se o navegador não suportar View Transitions (ou não passarmos o evento), troca seco.
+        if (!document.startViewTransition || !e) {
+            updateTheme();
+            return;
+        }
+
+        // 1. Pegamos a posição exata de onde o usuário clicou
+        const x = e.clientX;
+        const y = e.clientY;
+
+        // 2. Calculamos o tamanho máximo que o círculo precisa ter para cobrir a tela toda
+        const endRadius = Math.hypot(
+            Math.max(x, window.innerWidth - x),
+            Math.max(y, window.innerHeight - y)
+        );
+
+        // 3. Iniciamos a transição nativa
+        const transition = document.startViewTransition(updateTheme);
+
+        // 4. Quando o DOM do novo tema estiver pronto, rodamos a animação de clip-path
+        transition.ready.then(() => {
+            const clipPath = [
+                `circle(0px at ${x}px ${y}px)`,
+                `circle(${endRadius}px at ${x}px ${y}px)`,
+            ];
+
+            // Injetamos a animação direto na raiz do documento
+            document.documentElement.animate(
+                { clipPath },
+                {
+                    duration: 500, // Duração em ms
+                    easing: "ease-in-out",
+                    // Isso aplica a animação no "print" da nova tela
+                    pseudoElement: "::view-transition-new(root)",
+                }
+            );
+        });
     };
 
     const modes = [
@@ -38,8 +79,9 @@ export function ThemeSwitcher() {
                 {modes.map(({ value, label, icon: Icon }) => (
                     <DropdownMenuItem
                         key={value}
-                        onClick={() => handleModeChange(value)}
-                        className="flex items-center justify-between"
+                        // Aqui passamos o evento 'e' para podermos pegar o x e y do clique
+                        onClick={(e) => handleModeChange(value, e)}
+                        className="flex items-center justify-between cursor-pointer"
                     >
                         <div className="flex items-center">
                             <Icon className="mr-2 h-4 w-4" />
