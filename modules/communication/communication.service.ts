@@ -12,6 +12,7 @@ import { NewInvoiceEmail } from "./templates/NewInvoiceEmail";
 import { BillingReminderEmail } from "./templates/BillingReminderEmail";
 import { BillingDueDateEmail } from "./templates/BillingDueDateEmail";
 import { BillingOverdueEmail } from "./templates/BillingOverdueEmail";
+import { ClassOverdueTeacherEmail } from "./templates/ClassOverdueTeacherEmail";
 
 interface SendEmailOptions {
   to: string | string[];
@@ -152,6 +153,18 @@ export class CommunicationService {
       });
     } catch (error) {
       console.error("[CommunicationService.sendBillingOverdueEmail] Error:", error);
+    }
+  }
+
+  async sendClassOverdueTeacherEmail(email: string, data: { teacherName: string; classDate: string }) {
+    try {
+      await this.sendEmail({
+        to: email,
+        subject: "\u26A0\uFE0F Aten\u00e7\u00e3o: Aula n\u00e3o atualizada no sistema",
+        template: React.createElement(ClassOverdueTeacherEmail, data),
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendClassOverdueTeacherEmail] Error:", error);
     }
   }
 

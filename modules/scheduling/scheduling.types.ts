@@ -1,0 +1,47 @@
+import { 
+  usersTable 
+} from "@/modules/user/user.schema";
+import { 
+  recurrenceRules, 
+  studentCredits, 
+  slotInstances,
+  rescheduleWithCreditSchema,
+  cancelClassSchema,
+  allocateStudentSchema,
+  updateSlotStatusSchema,
+  grantCreditSchema,
+  schedulingAuditLogs
+} from "./scheduling.schema";
+import { z } from "zod";
+
+export type RecurrenceRule = typeof recurrenceRules.$inferSelect;
+export type NewRecurrenceRule = typeof recurrenceRules.$inferInsert;
+
+export type StudentCredit = typeof studentCredits.$inferSelect;
+export type NewStudentCredit = typeof studentCredits.$inferInsert;
+
+export type SlotInstance = typeof slotInstances.$inferSelect;
+export type NewSlotInstance = typeof slotInstances.$inferInsert;
+
+export type SchedulingAuditLog = typeof schedulingAuditLogs.$inferSelect;
+export type NewSchedulingAuditLog = typeof schedulingAuditLogs.$inferInsert;
+
+
+export type UserProfile = typeof usersTable.$inferSelect;
+
+// DTO Types (using z.input to support .default() and optional fields in forms)
+export type RescheduleWithCreditValues = z.input<typeof rescheduleWithCreditSchema>;
+export type CancelClassValues = z.input<typeof cancelClassSchema>;
+export type AllocateStudentValues = z.input<typeof allocateStudentSchema>;
+export type UpdateSlotStatusValues = z.input<typeof updateSlotStatusSchema>;
+export type GrantCreditValues = z.input<typeof grantCreditSchema>;
+
+// Complex return types
+export type StudentCreditWithDetails = StudentCredit & {
+  class?: SlotInstance | null;
+};
+
+export type SlotInstanceWithDetails = SlotInstance & {
+  rule?: RecurrenceRule | null;
+  credit?: StudentCredit | null;
+};

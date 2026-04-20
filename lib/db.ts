@@ -1,12 +1,24 @@
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import { Pool, neonConfig } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-serverless";
+import ws from "ws";
 import { env } from "@/env";
 import * as userSchema from "@/modules/user/user.schema";
 import * as notificationSchema from "@/modules/notification/notification.schema";
 import * as billingSchema from "@/modules/billing/billing.schema";
+import * as schedulingSchema from "@/modules/scheduling/scheduling.schema";
 
-const sql = neon(env.DATABASE_URL);
+// Required for Node.js environments when using WebSockets
+if (typeof window === "undefined") {
+  neonConfig.webSocketConstructor = ws;
+}
 
-export const db = drizzle(sql, {
-  schema: { ...userSchema, ...notificationSchema, ...billingSchema },
+const pool = new Pool({ connectionString: env.DATABASE_URL });
+
+export const db = drizzle(pool, {
+  schema: { 
+    ...userSchema, 
+    ...notificationSchema, 
+    ...billingSchema, 
+    ...schedulingSchema 
+  },
 });

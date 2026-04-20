@@ -69,6 +69,11 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "material.update",
     "material.delete",
     "material.view",
+    "class.view.all",
+    "class.update.any",
+    "credits.manage",
+    "credits.grant",
+    "credits.view.all",
   ],
   teacher: [
     "class.view.assigned",

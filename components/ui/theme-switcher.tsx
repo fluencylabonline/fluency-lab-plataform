@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function ThemeSwitcher() {
-    const { setTheme, theme } = useTheme();
+    const { setTheme } = useTheme();
     const { mode, setMode } = useAppearanceStore();
 
     const handleModeChange = (newMode: "light" | "dark" | "system", e?: React.MouseEvent) => {

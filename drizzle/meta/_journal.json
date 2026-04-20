@@ -15,6 +15,13 @@
       "when": 1776181666409,
       "tag": "0001_abnormal_radioactive_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776705330430,
+      "tag": "0002_salty_skin",
+      "breakpoints": true
     }
   ]
 }
