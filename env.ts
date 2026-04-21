@@ -34,6 +34,11 @@ export const env = createEnv({
 
     // Automation
     CRON_SECRET: z.string().min(1),
+
+    // AI & External Services
+    GEMINI_API_KEY: z.string().min(1),
+    UNSPLASH_ACCESS_KEY: z.string().min(1),
+    UNSPLASH_SECRET_KEY: z.string().min(1),
   },
   client: {
     // Firebase Client (public)
@@ -71,6 +76,11 @@ export const env = createEnv({
 
     // Automation
     CRON_SECRET: process.env.CRON_SECRET,
+
+    // AI & External Services
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    UNSPLASH_ACCESS_KEY: process.env.UNSPLASH_ACCESS_KEY,
+    UNSPLASH_SECRET_KEY: process.env.UNSPLASH_SECRET_KEY,
 
     // Client
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,

@@ -51,4 +51,21 @@ self.addEventListener("notificationclick", (event: NotificationEvent) => {
   );
 });
 
+interface SyncEvent extends ExtendableEvent {
+  readonly tag: string;
+}
+
+// Background Sync support
+self.addEventListener("sync", (event: SyncEvent) => {
+  if (event.tag === "sync-practice-queue") {
+    event.waitUntil(
+      self.clients.matchAll().then((clients) => {
+        clients.forEach((client) => {
+          client.postMessage({ type: "SYNC_QUEUE" });
+        });
+      })
+    );
+  }
+});
+
 serwist.addEventListeners();

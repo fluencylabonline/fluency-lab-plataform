@@ -9,7 +9,7 @@ import { adminAuth } from "@/lib/firebase-admin";
 import { NewUser, createUserSchema, requestNewInviteSchema } from "./user.schema";
 import { env } from "@/env";
 import { communicationService } from "@/modules/communication/communication.service";
-import { rateLimit } from "@/lib/rate-limit";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { locales } from "@/i18n/config";
 
 // --- Funções Auxiliares Privadas ---
@@ -94,7 +94,8 @@ export const syncUserAction = protectedAction
   )
   .action(async ({ parsedInput, ctx }) => {
     try {
-      await rateLimit(`${ctx.user.id}:sync_profile`, 5, 3600);
+      const limit = await checkRateLimit("sync_profile", ctx.user.id, 5, 3600 * 1000);
+      if (!limit.success) throw new Error("RATE_LIMIT_EXCEEDED");
       await userService.syncUser(ctx.user.id, parsedInput);
 
       revalidatePath("/");
@@ -152,7 +153,8 @@ export const requestNewInviteAction = actionClient
   .inputSchema(requestNewInviteSchema)
   .action(async ({ parsedInput }) => {
     try {
-      await rateLimit(`resend_invite:${parsedInput.email}`, 2, 300);
+      const limit = await checkRateLimit("resend_invite", parsedInput.email, 2, 300 * 1000);
+      if (!limit.success) throw new Error("RATE_LIMIT_EXCEEDED");
 
       const user = await userService.getUserByEmail(parsedInput.email);
       if (!user) return { success: false, error: "userNotFound" };

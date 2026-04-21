@@ -1,6 +1,5 @@
 import { billingRepository } from "./billing.repository";
 import { abacate } from "@/lib/abacate-pay";
-// PaymentMethod enum is missing from SDK runtime, using strings instead
 import { userService } from "../user/user.service";
 import { communicationService } from "../communication/communication.service";
 import { notificationService } from "../notification/notification.service";
@@ -47,15 +46,15 @@ export const billingService = {
     // Generate N empty installments
     const installments = [];
     const currentDate = new Date();
-    
+
     for (let i = 1; i <= plan.durationMonths; i++) {
       // Set the due date based on the dueDay
       const dueDate = setDate(addMonths(currentDate, i - 1), dueDay);
-      
+
       // If today is past the dueDay of this month, the first installment is for next month?
       // Or if it's the first month, maybe we charge now.
       // Rule: Let's just generate them sequentially.
-      
+
       installments.push({
         subscriptionId: subscription.id,
         status: "pending" as const,
@@ -82,7 +81,7 @@ export const billingService = {
 
       const hasOverdue = await billingRepository.hasOverduePayments(sub.id);
       const hasPending = await billingRepository.hasPendingPayments(sub.id);
-      
+
       if (hasOverdue || hasPending) continue;
 
       const student = await userService.getUser(sub.studentId);
@@ -90,7 +89,7 @@ export const billingService = {
 
       // Ensure student has required data for Transparent PIX
       if (!student.taxId || !student.cellphone) {
-        continue; 
+        continue;
       }
 
       const pix = await abacate.pix.create({
@@ -141,9 +140,9 @@ export const billingService = {
 
     if (!isLastMonth && sub.plan) {
       const feeAmount = Math.floor(sub.plan.price * 0.5);
-      
+
       const student = await userService.getUser(sub.studentId);
-      
+
       // Create Fee via Transparent PIX (allows custom amount)
       const pix = await abacate.pix.create({
         amount: Math.round(feeAmount * 100),
@@ -165,10 +164,10 @@ export const billingService = {
         cancellationFeeInstallmentId: pix.id,
       });
 
-      return { 
+      return {
         success: true,
         pixCode: pix.brCode,
-        pixImage: pix.brCodeBase64 
+        pixImage: pix.brCodeBase64
       };
     }
 
@@ -212,13 +211,13 @@ export const billingService = {
   // 6. Webhook logic
   async processWebhook(payload: import("@abacatepay/types/v2").WebhookEvent) {
     const event = payload; // Already verified by route
-    
+
     if (event.event === "billing.paid") {
       const data = event.data;
       const resource = "billing" in data ? data.billing : data.pixQrCode;
       const metadata = (resource as { metadata?: Record<string, string> }).metadata;
       const installmentId = metadata?.installmentId;
-      
+
       if (installmentId) {
         await billingRepository.updateInstallment(installmentId, {
           status: "paid",
@@ -267,7 +266,7 @@ export const billingService = {
     const reminder2d = await billingRepository.findInstallmentsInDateRange(twoDaysFromNowStart, twoDaysFromNowEnd);
     for (const inst of reminder2d) {
       if (inst.notified2dAt || !inst.subscription.student) continue;
-      
+
       const student = inst.subscription.student;
       const amountStr = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(inst.amount / 100);
 
@@ -327,9 +326,9 @@ export const billingService = {
       const amountStr = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(inst.amount / 100);
 
       // Update status to overdue
-      await billingRepository.updateInstallment(inst.id, { 
+      await billingRepository.updateInstallment(inst.id, {
         status: "overdue",
-        notifiedOverdueAt: new Date() 
+        notifiedOverdueAt: new Date()
       });
 
       await communicationService.sendBillingOverdueEmail(student.email, {

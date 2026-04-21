@@ -22,6 +22,20 @@
       "when": 1776705330430,
       "tag": "0002_salty_skin",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1776718683592,
+      "tag": "0003_bizarre_psynapse",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1776737338115,
+      "tag": "0004_boring_madripoor",
+      "breakpoints": true
     }
   ]
 }

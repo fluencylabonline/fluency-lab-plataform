@@ -6,6 +6,8 @@ import * as userSchema from "@/modules/user/user.schema";
 import * as notificationSchema from "@/modules/notification/notification.schema";
 import * as billingSchema from "@/modules/billing/billing.schema";
 import * as schedulingSchema from "@/modules/scheduling/scheduling.schema";
+import * as curriculumSchema from "@/modules/curriculum/curriculum.schema";
+import * as learningSchema from "@/modules/learning/learning.schema";
 
 // Required for Node.js environments when using WebSockets
 if (typeof window === "undefined") {
@@ -19,6 +21,8 @@ export const db = drizzle(pool, {
     ...userSchema, 
     ...notificationSchema, 
     ...billingSchema, 
-    ...schedulingSchema 
+    ...schedulingSchema,
+    ...curriculumSchema,
+    ...learningSchema,
   },
 });

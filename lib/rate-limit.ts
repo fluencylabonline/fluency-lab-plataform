@@ -1,59 +1,53 @@
 import { db } from "./db";
-import { rateLimitsTable } from "@/modules/user/user.schema";
-import { eq } from "drizzle-orm";
+import { rateLimits } from "@/modules/curriculum/curriculum.schema";
+import { and, eq, sql } from "drizzle-orm";
 
-/**
- * TEMPORARY: This is a database-backed rate limiter.
- * This will be replaced by Upstash/Redis in the future for better performance
- * and lower latency in serverless environments.
- * 
- * @param key Unique identifier for the action (e.g., "userId:action_name")
- * @param limit Maximum number of points allowed in the window
- * @param windowSeconds Window size in seconds
- * @throws Error if rate limit is exceeded
- */
-export async function rateLimit(key: string, limit: number, windowSeconds: number) {
+export async function checkRateLimit(
+  serviceName: string,
+  identifier: string,
+  limit: number,
+  windowMs: number = 24 * 60 * 60 * 1000 // Default 24h
+) {
   const now = new Date();
-  
-  // 1. Find existing record
-  const current = await db.query.rateLimitsTable.findFirst({
-    where: eq(rateLimitsTable.key, key),
-  });
+  const windowStart = new Date(now.getTime() - windowMs);
 
-  // 2. If no record or expired, reset
-  if (!current || now > current.resetAt) {
-    const resetAt = new Date(now.getTime() + windowSeconds * 1000);
-    
-    await db.insert(rateLimitsTable)
+  // 1. Get or create record for this window
+  let [record] = await db.select()
+    .from(rateLimits)
+    .where(
+      and(
+        eq(rateLimits.serviceName, serviceName),
+        eq(rateLimits.identifier, identifier)
+      )
+    );
+
+  if (!record || record.windowStart < windowStart) {
+    // Reset or initial
+    [record] = await db.insert(rateLimits)
       .values({
-        key,
-        points: 1,
-        resetAt,
+        serviceName,
+        identifier,
+        windowStart: now,
+        count: 1,
       })
       .onConflictDoUpdate({
-        target: rateLimitsTable.key,
-        set: {
-          points: 1,
-          resetAt,
-          updatedAt: now,
-        },
-      });
-      
+        target: rateLimits.id,
+        set: { windowStart: now, count: 1 }
+      })
+      .returning();
+    
     return { success: true, remaining: limit - 1 };
   }
 
-  // 3. Check if limit exceeded
-  if (current.points >= limit) {
-    throw new Error("RATE_LIMIT_EXCEEDED");
+  if (record.count >= limit) {
+    return { success: false, remaining: 0 };
   }
 
-  // 4. Increment points
-  await db.update(rateLimitsTable)
-    .set({
-      points: current.points + 1,
-      updatedAt: now,
-    })
-    .where(eq(rateLimitsTable.key, key));
+  // 2. Increment
+  const [updated] = await db.update(rateLimits)
+    .set({ count: sql`${rateLimits.count} + 1` })
+    .where(eq(rateLimits.id, record.id))
+    .returning();
 
-  return { success: true, remaining: limit - (current.points + 1) };
+  return { success: true, remaining: limit - updated.count };
 }
