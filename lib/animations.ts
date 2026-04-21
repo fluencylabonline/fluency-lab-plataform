@@ -47,3 +47,8 @@ export const fadeInUp = {
     visible: { opacity: 1, y: 0, scale: 1 },
     exit: { opacity: 0, y: -20, scale: 0.95 },
 };
+
+// ─── Animações centralizadas do Stepper ──────────────────────────────────────────────────
+
+export const SPRING = { type: "spring", stiffness: 380, damping: 28 } as const;
+export const EASE_LINE = { duration: 0.45, ease: [0.4, 0, 0.2, 1] } as const;
