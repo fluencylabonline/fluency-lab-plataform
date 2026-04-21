@@ -7,7 +7,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
 export const createPlanAction = adminAction
-  .schema(createPlanSchema)
+  .inputSchema(createPlanSchema)
   .action(async ({ parsedInput }) => {
     await billingService.createPlan(parsedInput);
     revalidatePath("/admin/billing");
@@ -15,7 +15,7 @@ export const createPlanAction = adminAction
   });
 
 export const createSubscriptionAction = adminAction
-  .schema(createSubscriptionSchema)
+  .inputSchema(createSubscriptionSchema)
   .action(async ({ parsedInput }) => {
     await billingService.createSubscription(
       parsedInput.studentId,
@@ -27,7 +27,7 @@ export const createSubscriptionAction = adminAction
   });
 
 export const cancelSubscriptionAction = protectedAction
-  .schema(z.object({ subscriptionId: z.string().uuid() }))
+  .inputSchema(z.object({ subscriptionId: z.uuid() }))
   .action(async ({ parsedInput, ctx }) => {
     // ABAC: Student can only cancel their own, Admin can cancel any
     if (ctx.user.role !== "admin") {

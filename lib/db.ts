@@ -9,6 +9,7 @@ import * as schedulingSchema from "@/modules/scheduling/scheduling.schema";
 import * as curriculumSchema from "@/modules/curriculum/curriculum.schema";
 import * as learningSchema from "@/modules/learning/learning.schema";
 import * as placementSchema from "@/modules/placement/placement.schema";
+import * as contractSchema from "@/modules/contract/contract.schema";
 
 // Required for Node.js environments when using WebSockets
 if (typeof window === "undefined") {
@@ -26,5 +27,6 @@ export const db = drizzle(pool, {
     ...curriculumSchema,
     ...learningSchema,
     ...placementSchema,
+    ...contractSchema,
   },
 });

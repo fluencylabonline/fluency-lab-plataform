@@ -1,14 +1,12 @@
-import { db } from "@/lib/db";
 import { placementRepository } from "./placement.repository";
 import { userRepository } from "../user/user.repository";
 import { calculateElo } from "@/lib/adaptive-scoring";
-import { Question, PlacementTest, placementTestsTable } from "./placement.schema";
+import { Question, PlacementTest } from "./placement.schema";
 import { curriculumService } from "../curriculum/curriculum.service";
 import { curriculumRepository } from "../curriculum/curriculum.repository";
 import { aiService } from "../ai/ai.service";
 import { learningService } from "../learning/learning.service";
 import { CEFRLevel } from "../curriculum/curriculum.types";
-import { and, eq } from "drizzle-orm";
 
 const PLACEMENT_TEST_LESSON_ID = "00000000-0000-0000-0000-000000000000"; // Mock ID for diagnostic records
 
@@ -85,13 +83,7 @@ export const placementService = {
     // 1. Verify user owns this test
     // We don't have languageId in the answer payload, but the test table has it.
     // We just find any active test for this user.
-    const test = await db.query.placementTestsTable.findFirst({
-      where: and(
-        eq(placementTestsTable.id, data.testId),
-        eq(placementTestsTable.userId, userId),
-        eq(placementTestsTable.status, "in_progress")
-      )
-    });
+    const test = await placementRepository.getActiveTestById(data.testId, userId);
 
     if (!test) {
       throw new Error("Active test not found or belongs to another user.");

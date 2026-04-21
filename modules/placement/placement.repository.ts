@@ -14,6 +14,16 @@ export const placementRepository = {
     });
   },
 
+  async getActiveTestById(testId: number, userId: string): Promise<PlacementTest | undefined> {
+    return db.query.placementTestsTable.findFirst({
+      where: and(
+        eq(placementTestsTable.id, testId),
+        eq(placementTestsTable.userId, userId),
+        eq(placementTestsTable.status, "in_progress")
+      ),
+    });
+  },
+
   async createNewTest(userId: string, languageId: string, initialEloScore: number): Promise<PlacementTest> {
     const [test] = await db.insert(placementTestsTable).values({
       userId,

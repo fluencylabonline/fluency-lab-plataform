@@ -18,6 +18,7 @@ vi.mock("../placement.repository", () => ({
     insertTestAnswer: vi.fn(),
     updateQuestionCalibration: vi.fn(),
     completeTest: vi.fn(),
+    getActiveTestById: vi.fn(),
   }
 }));
 
@@ -107,7 +108,7 @@ describe("PlacementService", () => {
       const activeTest = { id: 99, initialEloScore: 500 };
       const question = { id: 10, correctOptionId: "A", difficultyLevel: 500, timesAnswered: 0 };
       
-      vi.mocked(placementRepository.getActiveTest).mockResolvedValueOnce(activeTest as unknown as PlacementTest);
+      vi.mocked(placementRepository.getActiveTestById).mockResolvedValueOnce(activeTest as unknown as PlacementTest);
       vi.mocked(placementRepository.getQuestionById).mockResolvedValueOnce(question as unknown as Question);
       vi.mocked(placementRepository.countTestAnswers).mockResolvedValueOnce(0);
       vi.mocked(placementRepository.getLastAnswerScore).mockResolvedValueOnce(undefined);
@@ -135,7 +136,7 @@ describe("PlacementService", () => {
       const activeTest = { id: 99, initialEloScore: 500 };
       const question = { id: 10, correctOptionId: "A", difficultyLevel: 500, timesAnswered: 100 };
       
-      vi.mocked(placementRepository.getActiveTest).mockResolvedValueOnce(activeTest as unknown as PlacementTest);
+      vi.mocked(placementRepository.getActiveTestById).mockResolvedValueOnce(activeTest as unknown as PlacementTest);
       vi.mocked(placementRepository.getQuestionById).mockResolvedValueOnce(question as unknown as Question);
       
       // 24 questions answered previously

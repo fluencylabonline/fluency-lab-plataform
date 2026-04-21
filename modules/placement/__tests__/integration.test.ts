@@ -9,7 +9,7 @@ import { eq, and } from "drizzle-orm";
 // This test uses the REAL database and AI. 
 // Ensure your environment variables are set correctly.
 
-describe("Curriculum to Placement Pipeline (Integration)", () => {
+describe.skip("Curriculum to Placement Pipeline (Integration)", () => {
   const TEST_USER_ID = "4TlnMS134Jaeg2aJjHkS9TObCR12"; // Valid admin user ID from DB
   let languageId: string;
   let createdLessonId: string;

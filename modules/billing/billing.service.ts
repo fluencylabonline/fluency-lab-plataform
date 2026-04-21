@@ -250,6 +250,18 @@ export const billingService = {
           }
         }
       }
+
+      // Handle Cancellation Fee
+      const type = metadata?.type;
+      const subId = metadata?.subscriptionId;
+      if (type === "cancellation_fee" && subId) {
+        const { contractService } = await import("../contract/contract.service");
+        const { contractRepository } = await import("../contract/contract.repository");
+        const contract = await contractRepository.findInstanceBySubscriptionId(subId);
+        if (contract) {
+          await contractService.finalizeCancellation(contract.id);
+        }
+      }
     }
   },
 

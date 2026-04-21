@@ -39,6 +39,9 @@ export const env = createEnv({
     GEMINI_API_KEY: z.string().min(1),
     UNSPLASH_ACCESS_KEY: z.string().min(1),
     UNSPLASH_SECRET_KEY: z.string().min(1),
+
+    // Security
+    ENCRYPTION_KEY: z.string().length(64), // 32 bytes in hex
   },
   client: {
     // Firebase Client (public)
@@ -81,6 +84,7 @@ export const env = createEnv({
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     UNSPLASH_ACCESS_KEY: process.env.UNSPLASH_ACCESS_KEY,
     UNSPLASH_SECRET_KEY: process.env.UNSPLASH_SECRET_KEY,
+    ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
 
     // Client
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
