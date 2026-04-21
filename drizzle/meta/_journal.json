@@ -36,6 +36,13 @@
       "when": 1776737338115,
       "tag": "0004_boring_madripoor",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776773576991,
+      "tag": "0005_jittery_mad_thinker",
+      "breakpoints": true
     }
   ]
 }

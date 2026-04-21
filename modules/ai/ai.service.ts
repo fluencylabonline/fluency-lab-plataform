@@ -5,6 +5,28 @@ import { checkRateLimit } from "@/lib/rate-limit";
 
 const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
 
+/**
+ * Robustly cleans a JSON string that might be wrapped in markdown blocks
+ * or contain leading/trailing whitespace/text.
+ */
+function cleanJsonString(str: string): string {
+  // Remove markdown code blocks if present
+  const markdownMatch = str.match(/```(?:json)?([\s\S]*?)```/);
+  const content = (markdownMatch ? markdownMatch[1] : str).trim();
+
+  // Find first occurrence of { or [
+  const start = content.search(/[\[\{]/);
+  if (start === -1) return content;
+
+  const startChar = content[start];
+  const endChar = startChar === "{" ? "}" : "]";
+  const lastIndex = content.lastIndexOf(endChar);
+
+  if (lastIndex === -1) return content.substring(start);
+
+  return content.substring(start, lastIndex + 1);
+}
+
 export const aiService = {
   /**
    * Generates embeddings for a given text using text-embedding-004.
@@ -29,7 +51,7 @@ export const aiService = {
       const limit = await checkRateLimit("gemini_parse", userId, 50);
       if (!limit.success) throw new Error("Rate limit exceeded for AI parsing");
     }
-    const model = genAI.getGenerativeModel({ 
+    const model = genAI.getGenerativeModel({
       model: "models/gemini-3.1-pro-preview",
       generationConfig: {
         responseMimeType: "application/json",
@@ -83,13 +105,14 @@ export const aiService = {
     targetLanguage: string,
     nativeLanguage: string,
     translationInstruction: string,
+    level?: string,
     userId?: string
   ) {
     if (userId) {
       const limit = await checkRateLimit("gemini_enrich", userId, 50); // Batch consumes 1 limit
       if (!limit.success) throw new Error("Rate limit exceeded for AI enrichment");
     }
-    const model = genAI.getGenerativeModel({ 
+    const model = genAI.getGenerativeModel({
       model: "models/gemini-3.1-pro-preview",
       generationConfig: {
         responseMimeType: "application/json"
@@ -117,7 +140,7 @@ export const aiService = {
     }`;
 
     const result = await model.generateContent(prompt);
-    return JSON.parse(result.response.text());
+    return JSON.parse(cleanJsonString(result.response.text()));
   },
 
   /**
@@ -130,7 +153,7 @@ export const aiService = {
       if (!limit.success) throw new Error("Rate limit exceeded for AI quiz generation");
     }
 
-    const model = genAI.getGenerativeModel({ 
+    const model = genAI.getGenerativeModel({
       model: "models/gemini-3.1-pro-preview",
       generationConfig: {
         responseMimeType: "application/json"
@@ -165,7 +188,7 @@ export const aiService = {
       if (!limit.success) throw new Error("Rate limit exceeded for AI transcription");
     }
 
-    const model = genAI.getGenerativeModel({ 
+    const model = genAI.getGenerativeModel({
       model: "models/gemini-1.5-pro",
       generationConfig: {
         responseMimeType: "application/json"
@@ -314,5 +337,69 @@ export const aiService = {
     }
 
     return JSON.parse(fullText);
+  },
+
+  /**
+   * Generates a single placement test question based on a curriculum learning item.
+   * This is part of the administrative diagnostic loop.
+   */
+  async generatePlacementQuestionFromItem(
+    item: { lemma: string; type: string; metadata: Record<string, unknown> },
+    cefrLevel: CEFRLevel,
+    skill: "grammar" | "vocabulary" | "reading" | "listening",
+    userId?: string
+  ) {
+    if (userId) {
+      const limit = await checkRateLimit("gemini_placement_gen", userId, 50);
+      if (!limit.success) throw new Error("Rate limit exceeded for AI generation");
+    }
+
+    const model = genAI.getGenerativeModel({
+      model: "models/gemini-2.0-flash", // Use fast model for single question generation
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            content: { type: SchemaType.STRING },
+            context: { type: SchemaType.STRING },
+            audio_script: { type: SchemaType.STRING }, // Used if skill is listening
+            options: {
+              type: SchemaType.ARRAY,
+              items: {
+                type: SchemaType.OBJECT,
+                properties: {
+                  id: { type: SchemaType.STRING },
+                  text: { type: SchemaType.STRING }
+                },
+                required: ["id", "text"]
+              }
+            },
+            correct_option_id: { type: SchemaType.STRING }
+          },
+          required: ["content", "options", "correct_option_id"]
+        }
+      }
+    });
+
+    const isListening = skill === "listening";
+    const meta = item.metadata as { meanings?: Array<{ definition: string }> };
+    const prompt = `Gere uma questão de múltipla escolha para um teste de nivelamento adaptativo.
+    Idioma: Inglês.
+    Nível Alvo: ${cefrLevel}.
+    Habilidade: ${skill}.
+    Conceito Base: "${item.lemma}" (${item.type}).
+    Definição: ${JSON.stringify(meta.meanings?.[0]?.definition || "")}.
+    
+    Regras:
+    1. A questão deve ser impossível de responder sem entender o conceito base.
+    2. Gere 4 opções. Os IDs das opções devem ser "a", "b", "c", "d".
+    ${isListening ? "3. Como a habilidade é LISTENING, gere um 'audio_script' (um monólogo curto e simples) que o aluno ouviria. O 'content' deve ser a pergunta sobre o que foi ouvido." : "3. O 'content' é o texto da pergunta."}
+    4. Forneça um 'context' opcional se ajudar na compreensão da situação da pergunta.
+    
+    Retorne apenas o JSON.`;
+
+    const result = await model.generateContent(prompt);
+    return JSON.parse(result.response.text());
   }
 };

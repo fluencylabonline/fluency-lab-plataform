@@ -43,6 +43,10 @@ export const usersTable = pgTable("users", {
     .notNull()
     .defaultNow()
     .$onUpdate(() => new Date()),
+
+  // Placement
+  lastPlacementTestDate: timestamp("last_placement_test_date"),
+  currentEloScore: integer("current_elo_score").notNull().default(600),
 });
 
 // Schemas

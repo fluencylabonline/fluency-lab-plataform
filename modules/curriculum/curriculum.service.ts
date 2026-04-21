@@ -131,6 +131,7 @@ export const curriculumService = {
         targetLanguageName,
         nativeLanguageName,
         translationPrompt,
+        difficulty,
         userId
       );
 
@@ -153,6 +154,9 @@ export const curriculumService = {
         }
 
         const itemId = `${targetLang.toUpperCase()}_${item.lemma.toLowerCase().replace(/\s+/g, '_')}_${item.type}`;
+
+        // Force level to lesson difficulty to ensure they are found for this level's diagnostic test
+        metadata.level = difficulty;
 
         await curriculumRepository.upsertLearningItem({
           id: itemId,
@@ -367,6 +371,10 @@ export const curriculumService = {
     await curriculumRepository.deleteLesson(oldLesson.id);
 
     return newLesson;
+  },
+
+  async getRandomItemsByLevel(languageId: string, cefrLevel: string, limit: number) {
+    return curriculumRepository.getRandomItemsByLevel(languageId, cefrLevel, limit);
   }
 };
 

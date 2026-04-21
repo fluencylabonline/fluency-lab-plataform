@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import {
   languages, media, learningItems, lessons, lessonLearningItems
 } from "./curriculum.schema";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, sql } from "drizzle-orm";
 
 export const curriculumRepository = {
   // Languages
@@ -13,6 +13,12 @@ export const curriculumRepository = {
   async findLanguageByCode(code: string) {
     return db.query.languages.findFirst({
       where: eq(languages.code, code),
+    });
+  },
+
+  async findLanguageById(id: string) {
+    return db.query.languages.findFirst({
+      where: eq(languages.id, id),
     });
   },
 
@@ -51,6 +57,17 @@ export const curriculumRepository = {
         set: { ...data, updatedAt: new Date() },
       })
       .returning();
+  },
+
+  async getRandomItemsByLevel(languageId: string, cefrLevel: string, limit: number) {
+    return db.select()
+      .from(learningItems)
+      .where(and(
+        eq(learningItems.languageId, languageId),
+        sql`${learningItems.metadata}->>'level' = ${cefrLevel}`
+      ))
+      .orderBy(sql`RANDOM()`)
+      .limit(limit);
   },
 
   // Lessons
