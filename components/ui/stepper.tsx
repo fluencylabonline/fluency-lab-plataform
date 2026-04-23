@@ -1,10 +1,16 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EASE_LINE, SPRING } from "@/lib/animations";
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    type CarouselApi,
+} from "@/components/ui/carousel";
 import { Shimmer } from "@shimmer-from-structure/react";
 
 export interface Step {
@@ -20,6 +26,7 @@ interface StepperProps {
     variant?: "default" | "sidebar";
     className?: string;
     loading?: boolean;
+    onStepClick?: (stepId: number) => void;
 }
 
 const FALLBACK_STEPS: Step[] = [
@@ -28,40 +35,6 @@ const FALLBACK_STEPS: Step[] = [
     { id: 3, title: "Carregando...", subtitle: "Aguarde um momento" },
 ];
 
-// ─── Dots de progresso (scroll indicator) ────────────────────────────────────
-
-function ScrollDots({
-    steps,
-    activeIndex,
-}: {
-    steps: Step[];
-    activeIndex: number;
-}) {
-    return (
-        <div className="flex justify-center gap-1.5 mt-2.5 sm:hidden">
-            {steps.map((_, i) => (
-                <motion.div
-                    key={i}
-                    animate={{
-                        width: i === activeIndex ? 16 : 5,
-                        background:
-                            i === activeIndex
-                                ? "var(--color-fg, currentColor)"
-                                : undefined,
-                    }}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    className={cn(
-                        "h-[5px] rounded-full transition-colors duration-300",
-                        i === activeIndex
-                            ? "bg-foreground"
-                            : "bg-border"
-                    )}
-                    style={{ width: i === activeIndex ? 16 : 5 }}
-                />
-            ))}
-        </div>
-    );
-}
 
 // ─── Linha de progresso ───────────────────────────────────────────────────────
 
@@ -124,7 +97,7 @@ function StepCircle({
                 "bg-foreground border-foreground text-background ring-4 ring-foreground/10",
                 isCompleted &&
                 !isActive &&
-                "bg-muted border-border text-muted-foreground",
+                "bg-muted border-emerald-500 text-emerald-500",
                 !isActive &&
                 !isCompleted &&
                 "bg-transparent border-border text-muted-foreground/60"
@@ -167,145 +140,97 @@ export function Stepper(props: StepperProps) {
         variant = "default",
         className,
         loading = false,
+        onStepClick,
     } = props;
     const isVertical = orientation === "vertical";
     const isSidebar = variant === "sidebar";
 
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const [visibleIndex, setVisibleIndex] = useState(currentStep - 1);
-
-    // Scroll automático para o passo ativo no mobile
-    useEffect(() => {
-        if (isVertical) return;
-        const el = scrollRef.current;
-        if (!el) return;
-
-        const activeEl = el.children[currentStep - 1] as HTMLElement | undefined;
-        if (!activeEl) return;
-
-        const offset =
-            activeEl.offsetLeft -
-            el.clientWidth / 2 +
-            activeEl.offsetWidth / 2;
-
-        el.scrollTo({ left: offset, behavior: "smooth" });
-    }, [currentStep, isVertical]);
-
-    // Atualiza fades e dot ativo ao rolar
-    const handleScroll = useCallback(() => {
-        const el = scrollRef.current;
-        if (!el) return;
-
-        // Dot mais próximo do centro
-        const center = el.getBoundingClientRect().left + el.clientWidth / 2;
-        let closest = 0;
-        let minDist = Infinity;
-        Array.from(el.children).forEach((child, i) => {
-            const r = child.getBoundingClientRect();
-            const dist = Math.abs(r.left + r.width / 2 - center);
-            if (dist < minDist) {
-                minDist = dist;
-                closest = i;
-            }
-        });
-        setVisibleIndex(closest);
-    }, []);
+    const [api, setApi] = useState<CarouselApi>();
 
     // No estado de loading, usamos os fallback steps e resetamos o progresso
     const displaySteps = loading ? FALLBACK_STEPS : steps;
     const displayCurrentStep = loading ? 0 : currentStep;
 
-    // Inicializa fades após render
+    // Sincroniza o carousel com o passo atual
     useEffect(() => {
-        if (isVertical) return;
-        const el = scrollRef.current;
-        if (!el) return;
-        
-        const frame = requestAnimationFrame(() => {
-            handleScroll();
-        });
-        return () => cancelAnimationFrame(frame);
-    }, [displaySteps, isVertical, handleScroll]);
+        if (!api || isVertical) return;
+        api.scrollTo(currentStep - 1);
+    }, [api, currentStep, isVertical]);
 
     // ── Horizontal ──────────────────────────────────────────────────────────────
     const horizontalContent = (
         <div className={cn("w-full ", className)}>
-            <div
-                ref={scrollRef}
-                role="list"
-                aria-label="Progress steps"
-                onScroll={handleScroll}
-                className={cn(
-                    "flex flex-row overflow-x-auto justify-center",
-                    // Snap apenas no mobile
-                    "sm:overflow-x-visible",
-                    "scroll-smooth snap-x snap-mandatory sm:snap-none",
-                    "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                )}
+            <Carousel
+                setApi={setApi}
+                className="w-full"
+                opts={{
+                    align: "center",
+                    containScroll: false
+                }}
             >
-                {displaySteps.map((step, index) => {
-                    const isActive = displayCurrentStep === step.id;
-                    const isCompleted = displayCurrentStep > step.id;
-                    const isLast = index === displaySteps.length - 1;
+                <CarouselContent className="ml-0 flex md:justify-center">
+                    {displaySteps.map((step, index) => {
+                        const isActive = displayCurrentStep === step.id;
+                        const isCompleted = displayCurrentStep > step.id;
+                        const isLast = index === displaySteps.length - 1;
 
-                    return (
-                        <motion.div
-                            key={step.id}
-                            role="listitem"
-                            aria-current={isActive ? "step" : undefined}
-                            aria-label={`Step ${step.id}: ${step.title}${isCompleted ? " (concluído)" : isActive ? " (atual)" : ""}`}
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3, delay: index * 0.06 }}
-                            className={cn(
-                                "relative flex flex-col items-center",
-                                // Mobile: largura fixa com snap
-                                "flex-shrink-0 w-[100px] snap-center",
-                                // Desktop: cresce para preencher
-                                "sm:flex-1 sm:w-auto sm:flex-shrink",
-                                "py-1"
-                            )}
-                        >
-                            {!isLast && (
-                                <ProgressLine isCompleted={isCompleted} direction="h" />
-                            )}
-
-                            <StepCircle
-                                step={step}
-                                isActive={isActive}
-                                isCompleted={isCompleted}
-                            />
-
-                            <div className="flex flex-col items-center text-center mt-2.5 px-1">
-                                <span
+                        return (
+                            <CarouselItem
+                                key={step.id}
+                                className="pl-0 basis-[100px] md:flex-1 md:basis-auto"
+                            >
+                                <motion.div
+                                    role="listitem"
+                                    aria-current={isActive ? "step" : undefined}
+                                    aria-label={`Step ${step.id}: ${step.title}${isCompleted ? " (concluído)" : isActive ? " (atual)" : ""}`}
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.3, delay: index * 0.06 }}
                                     className={cn(
-                                        "text-[13px] font-medium leading-snug transition-colors duration-300",
-                                        isActive
-                                            ? "text-foreground"
-                                            : isCompleted
-                                                ? "text-foreground/55"
-                                                : "text-foreground/35"
+                                        "relative flex flex-col items-center py-1",
+                                        onStepClick && "cursor-pointer"
                                     )}
+                                    onClick={() => onStepClick?.(step.id)}
                                 >
-                                    {step.title}
-                                </span>
-                                {step.subtitle && (
-                                    <motion.span
-                                        animate={{ opacity: isActive ? 1 : 0.5 }}
-                                        transition={{ duration: 0.3 }}
-                                        className="text-[11px] text-muted-foreground mt-0.5 leading-snug max-w-[88px]"
-                                    >
-                                        {step.subtitle}
-                                    </motion.span>
-                                )}
-                            </div>
-                        </motion.div>
-                    );
-                })}
-            </div>
+                                    {!isLast && (
+                                        <ProgressLine isCompleted={isCompleted} direction="h" />
+                                    )}
 
-            {/* Dots — só no mobile */}
-            <ScrollDots steps={displaySteps} activeIndex={visibleIndex} />
+                                    <StepCircle
+                                        step={step}
+                                        isActive={isActive}
+                                        isCompleted={isCompleted}
+                                    />
+
+                                    <div className="flex flex-col items-center text-center mt-2.5 px-1">
+                                        <span
+                                            className={cn(
+                                                "text-[13px] font-medium leading-snug transition-colors duration-300",
+                                                isActive
+                                                    ? "text-foreground"
+                                                    : isCompleted
+                                                        ? "text-foreground/55"
+                                                        : "text-foreground/35"
+                                            )}
+                                        >
+                                            {step.title}
+                                        </span>
+                                        {step.subtitle && (
+                                            <motion.span
+                                                animate={{ opacity: isActive ? 1 : 0.5 }}
+                                                transition={{ duration: 0.3 }}
+                                                className="text-[11px] text-muted-foreground mt-0.5 leading-snug max-w-[88px]"
+                                            >
+                                                {step.subtitle}
+                                            </motion.span>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            </CarouselItem>
+                        );
+                    })}
+                </CarouselContent>
+            </Carousel>
         </div>
     );
 
@@ -331,8 +256,10 @@ export function Stepper(props: StepperProps) {
                         transition={{ duration: 0.3, delay: index * 0.06 }}
                         className={cn(
                             "relative flex flex-row items-start gap-4",
-                            !isLast && "pb-7"
+                            !isLast && "pb-7",
+                            onStepClick && "cursor-pointer"
                         )}
+                        onClick={() => onStepClick?.(step.id)}
                     >
                         {!isLast && (
                             <ProgressLine isCompleted={isCompleted} direction="v" />

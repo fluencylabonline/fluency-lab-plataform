@@ -2,7 +2,8 @@ import { curriculumRepository } from "./curriculum.repository";
 import { aiService } from "@/modules/ai/ai.service";
 import { mediaService } from "@/modules/media/media.service";
 import crypto from "crypto";
-import { CEFRLevel, LearningItemMetadata, PracticeItem } from "./curriculum.types";
+import { CEFRLevel, LearningItemMetadata, PracticeItem, VocabMetadata, StructureMetadata, AnalysisResult, QuizData } from "./curriculum.types";
+import { lessons, media } from "./curriculum.schema";
 
 export const curriculumService = {
   /**
@@ -20,71 +21,91 @@ export const curriculumService = {
   /**
    * Step 2: Processes lesson media and generates transcription.
    */
-  async processLessonMedia(lessonId: string, mediaUrl: string, userId?: string) {
+  async processLessonMedia(lessonId: string, mediaUrl: string) {
     const lesson = await curriculumRepository.findLessonById(lessonId);
     if (!lesson) throw new Error("Lesson not found");
 
-    await curriculumRepository.updateLesson(lessonId, {
-      status: "processing_items", // Temporary logic status
-      creationStep: 2
-    });
-
-    try {
-      // 1. Transcribe
-      const transcription = await aiService.transcribeMedia(mediaUrl, "video", userId);
-
-      // 2. Create Media record
-      const media = await curriculumRepository.createMedia({
+    // 1. Create or reuse Media record (persist URL before transcription)
+    let mediaRecord = lesson.media;
+    if (!mediaRecord || mediaRecord.url !== mediaUrl) {
+      mediaRecord = await curriculumRepository.createMedia({
         url: mediaUrl,
-        transcriptionText: transcription.full_text,
-        transcriptionTimestamps: transcription.segments,
         status: "pending_review"
       });
-
-      // 3. Update Lesson
+      // Link media to lesson immediately
       await curriculumRepository.updateLesson(lessonId, {
-        mediaId: media.id,
-        contentText: transcription.full_text,
-        status: "draft", // Reset to draft for next manual review/step
-        creationStep: 2
+        mediaId: mediaRecord.id,
       });
-
-      return { media, transcription };
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Unknown error during transcription";
-      await curriculumRepository.updateLesson(lessonId, {
-        status: "error",
-        errorMessage: `Transcription failed: ${message}`
-      });
-      throw error;
     }
+
+    // 2. Set lesson status to transcribing and return
+    // The actual transcription will be triggered via SSE for real-time feedback
+    await curriculumRepository.updateLesson(lessonId, {
+      status: "transcribing",
+      creationStep: 2,
+      errorMessage: null,
+    });
+
+    return { media: mediaRecord };
   },
 
   /**
-   * Step 3: Analyzes lesson content and suggests learning items.
+   * Step 3: Analyzes transcription or lesson content and suggests learning items.
    */
   async analyzeLesson(lessonId: string, userId?: string) {
     const lesson = await curriculumRepository.findLessonById(lessonId);
-    if (!lesson || !lesson.contentText) throw new Error("Lesson or content not found");
+    if (!lesson) throw new Error("Lesson not found");
+
+    // Determine the source based on the current step
+    // Step 4: Analyzes Transcription
+    // Step 6: Analyzes Lesson Content
+    const sourceText = lesson.creationStep === 3 || lesson.creationStep === 4
+      ? lesson.media?.transcriptionText
+      : lesson.contentText;
+
+    if (!sourceText) throw new Error("No source text available for analysis");
 
     await curriculumRepository.updateLesson(lessonId, { status: "analyzing" });
 
     try {
       const { vocabulary, structures } = await aiService.parseLessonContent(
-        lesson.contentText,
+        sourceText,
         lesson.difficulty as CEFRLevel,
         userId
       );
 
-      // We don't save them automatically to LearningItems yet,
-      // we just return them for the manager to review (Step 4).
-      // But we update the lesson step.
-      await curriculumRepository.updateLesson(lessonId, {
-        status: "reviewing",
-        creationStep: 3
+      // Merge with existing items if any
+      const existingJson = (lesson.analysisResultJson as unknown as AnalysisResult) || { vocabulary: [], structures: [] };
+
+      const mergedVocabulary = [...(existingJson.vocabulary || [])];
+      const mergedStructures = [...(existingJson.structures || [])];
+
+      // Simple deduplication based on lemma
+      vocabulary.forEach((v) => {
+        if (!mergedVocabulary.find((mv) => mv.lemma === v.lemma)) {
+          mergedVocabulary.push(v);
+        }
       });
 
-      return { vocabulary, structures };
+      structures.forEach((s) => {
+        if (!mergedStructures.find((ms) => ms.name === s.name)) {
+          mergedStructures.push({
+            name: s.name,
+            type: s.type,
+            example_from_text: s.example_from_text
+          });
+        }
+      });
+
+      const nextStep = (lesson.creationStep === 3 || lesson.creationStep === 4) ? 5 : 7;
+
+      await curriculumRepository.updateLesson(lessonId, {
+        status: "reviewing",
+        creationStep: nextStep,
+        analysisResultJson: { vocabulary: mergedVocabulary, structures: mergedStructures }
+      });
+
+      return { vocabulary: mergedVocabulary, structures: mergedStructures };
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Parsing failed";
       await curriculumRepository.updateLesson(lessonId, {
@@ -96,15 +117,16 @@ export const curriculumService = {
   },
 
   /**
-   * Step 5: Enriches selected learning items with metadata and images.
+   * Step 8: Enriches selected learning items with metadata and images.
+   * Now optimized for batch processing.
    */
-  async enrichItems(lessonId: string, items: Array<{ lemma: string, type: string, contextual_meaning: string }>, userId?: string) {
+  async enrichItems(lessonId: string, items: Array<{ lemma: string, type: string, context?: string, contextual_meaning?: string, processed?: boolean }>, userId?: string) {
     const lesson = await curriculumRepository.findLessonById(lessonId);
     if (!lesson) throw new Error("Lesson not found");
 
     await curriculumRepository.updateLesson(lessonId, {
       status: "processing_items",
-      creationStep: 4
+      creationStep: 8
     });
 
     try {
@@ -123,7 +145,7 @@ export const curriculumService = {
       const mappedItemsToEnrich = items.map(item => ({
         lemma: item.lemma,
         type: item.type,
-        context: item.contextual_meaning
+        context: item.contextual_meaning || item.context || ""
       }));
 
       const batchResponse = await aiService.enrichBatchLearningItems(
@@ -143,13 +165,17 @@ export const curriculumService = {
 
         if (!metadata) continue; // Safety check
 
-        // Search and attach image if visual
-        if (metadata.is_visual && metadata.key_image_words) {
-          try {
-            const imageUrl = await mediaService.searchImage(metadata.key_image_words, userId);
-            metadata.image_url = imageUrl;
-          } catch (e) {
-            console.error("Failed to get image", e);
+        const isVocab = item.type !== "STRUCTURE" && item.type !== "structure";
+
+        if (isVocab) {
+          const vocabMeta = metadata as VocabMetadata;
+          if (vocabMeta.is_visual && vocabMeta.key_image_words) {
+            try {
+              const imageUrl = await mediaService.searchImage(vocabMeta.key_image_words, userId);
+              vocabMeta.image_url = imageUrl;
+            } catch (e) {
+              console.error("Failed to get image", e);
+            }
           }
         }
 
@@ -161,7 +187,7 @@ export const curriculumService = {
         await curriculumRepository.upsertLearningItem({
           id: itemId,
           languageId: lesson.languageId,
-          type: item.type.toUpperCase() as "VOCABULARY" | "STRUCTURE",
+          type: (item.type === "STRUCTURE" || item.type === "structure") ? "STRUCTURE" : "VOCABULARY",
           lemma: item.lemma,
           translation: (isA1A2 || isB1) ? metadata.translation : null,
           metadata: metadata,
@@ -178,32 +204,109 @@ export const curriculumService = {
       });
       throw error;
     }
-
-    await curriculumRepository.updateLesson(lessonId, {
-      status: "analyzing", // Moving to Quiz generation step
-      creationStep: 5
-    });
   },
 
   /**
-   * Step 6: Generates a complete quiz for the lesson.
+   * Step 8 (entry): Enrich items from analysisResultJson in batches.
+   * Acts as a queue processor.
+   */
+  async enrichLinkedItems(lessonId: string, userId?: string, batchSize: number = 31) {
+    const lesson = await curriculumRepository.findLessonById(lessonId);
+    if (!lesson) throw new Error("Lesson not found");
+
+    const analysisResult = lesson.analysisResultJson as unknown as AnalysisResult | null;
+
+    if (!analysisResult) throw new Error("No analysis result found. Run Step 7 first.");
+
+    // 1. Normalize and identify pending items
+    const pendingVocab = (analysisResult.vocabulary || [])
+      .map((v, index) => ({
+        ...v,
+        originalIndex: index,
+        queueType: 'vocabulary' as const,
+        lemma: typeof v === "string" ? v : v.lemma,
+        type: typeof v === "string" ? "noun" : (v.type || "noun"),
+        context: typeof v === "string" ? "" : (v.contextual_meaning || v.context || "")
+      }))
+      .filter(v => !v.processed);
+
+    const pendingStructures = (analysisResult.structures ?? [])
+      .map((s, index) => ({
+        ...s,
+        originalIndex: index,
+        queueType: 'structures' as const,
+        lemma: typeof s === "string" ? s : s.name,
+        type: "STRUCTURE",
+        context: typeof s === "string" ? "" : (s.example_from_text || s.context || "")
+      }))
+      .filter(s => !s.processed);
+
+    const totalCount = (analysisResult.vocabulary?.length || 0) + (analysisResult.structures?.length || 0);
+    const allPending = [...pendingVocab, ...pendingStructures];
+
+    if (allPending.length === 0) {
+      await curriculumRepository.updateLesson(lessonId, { creationStep: 8 });
+      return { success: true, processed: 0, total: totalCount, remaining: 0 };
+    }
+
+    // 2. Take the first batch
+    const batchToProcess = allPending.slice(0, batchSize);
+
+    // 3. Enrich them
+    await this.enrichItems(lessonId, batchToProcess, userId);
+
+    // 4. Update the "queue" (analysisResultJson) marking them as processed
+    batchToProcess.forEach(item => {
+      if (item.queueType === 'vocabulary') {
+        analysisResult.vocabulary[item.originalIndex].processed = true;
+      } else {
+        analysisResult.structures[item.originalIndex].processed = true;
+      }
+    });
+
+    await curriculumRepository.updateLesson(lessonId, {
+      analysisResultJson: analysisResult,
+      status: allPending.length <= batchSize ? "analyzing" : "processing_items"
+    });
+
+    return {
+      success: true,
+      processed: batchToProcess.length,
+      total: totalCount,
+      remaining: allPending.length - batchToProcess.length
+    };
+  },
+
+  /**
+   * Step 8 (exit): Bulk-update the CORE/SECONDARY priority for all linked lesson items.
+   */
+  async updateItemsPriority(lessonId: string, priorities: Array<{ itemId: string; priority: "CORE" | "SECONDARY" }>) {
+    for (const { itemId, priority } of priorities) {
+      await curriculumRepository.linkItemToLesson(lessonId, itemId, priority);
+    }
+    await curriculumRepository.updateLesson(lessonId, { creationStep: 9 });
+  },
+
+  /**
+   * Step 9: Generates a complete quiz for the lesson.
    */
   async generateQuiz(lessonId: string, userId?: string) {
     const lesson = await curriculumRepository.findLessonById(lessonId);
     if (!lesson || !lesson.contentText) throw new Error("Lesson or content not found");
 
     try {
-      const quiz = await aiService.generateQuiz(
-        lesson.contentText,
-        lesson.media?.transcriptionText ? [] : [], // Simplified for now, or use real segments
-        lesson.difficulty as CEFRLevel,
+      const quiz = await aiService.generateQuiz({
+        contentText: lesson.contentText,
+        items: lesson.items || [],
+        level: lesson.difficulty as CEFRLevel,
+        transcriptionSegments: (lesson.media?.config as { segments?: Array<{ word: string, start: number, end: number }> })?.segments || lesson.media?.transcriptionTimestamps || [],
         userId
-      );
+      });
 
       await curriculumRepository.updateLesson(lessonId, {
         quizData: quiz,
         status: "reviewing_quiz",
-        creationStep: 6
+        creationStep: 10
       });
 
       return quiz;
@@ -215,6 +318,13 @@ export const curriculumService = {
       });
       throw error;
     }
+  },
+
+  async updateLessonQuiz(lessonId: string, quizData: QuizData) {
+    await curriculumRepository.updateLesson(lessonId, {
+      quizData,
+      creationStep: 11
+    });
   },
 
   /**
@@ -231,7 +341,8 @@ export const curriculumService = {
       const item = lessonItem.item;
 
       if (item.type === "VOCABULARY") {
-        const meta = item.metadata as LearningItemMetadata;
+        const meta = item.metadata as VocabMetadata;
+        const translation = meta.translation || (meta.meanings?.[0]?.translation) || "";
 
         // Flashcard (Deterministic)
         practiceItems.push({
@@ -241,15 +352,16 @@ export const curriculumService = {
           mainText: item.lemma,
           flashcard: {
             front: item.lemma,
-            back: meta.meanings?.[0]?.definition || "",
-            imageUrl: meta.image_url,
+            back: meta.meanings?.[0]?.definition || translation || "",
+            imageUrl: meta.image_url || null,
             useTTS: true
           }
         });
 
         // Gap Fill (Deterministic from Examples)
-        if (meta.examples?.length > 0) {
-          const gapFill = generateGapFillListening(meta.examples[0]);
+        const firstExample = meta.examples?.[0];
+        if (firstExample?.text) {
+          const gapFill = generateGapFillListening(firstExample.text);
 
           practiceItems.push({
             id: `${item.id}_gap`,
@@ -264,11 +376,22 @@ export const curriculumService = {
           });
         }
       } else if (item.type === "STRUCTURE") {
-        const meta = item.metadata as { example_from_text?: string };
-        // Unscramble (Deterministic from Phrases)
-        const phrase = meta.example_from_text || "";
-        if (phrase) {
-          const words = phrase.split(" ");
+        const meta = item.metadata as StructureMetadata;
+
+        // Use the new structured examples if available
+        const firstExample = meta.examples?.[0];
+
+        // Priority 1: Use word_order mapping for exact word/role alignment
+        const hasMapping = !!firstExample?.word_order && firstExample.word_order.length > 0;
+        const sortedMapping = hasMapping ? [...firstExample!.word_order!].sort((a, b) => a.index - b.index) : [];
+
+        const words = hasMapping
+          ? sortedMapping.map(wo => wo.word)
+          : (firstExample?.text || (meta as unknown as { example_from_text?: string }).example_from_text || "").split(" ").filter(Boolean);
+
+        const phrase = firstExample?.text || (meta as unknown as { example_from_text?: string }).example_from_text || words.join(" ");
+
+        if (words.length > 0) {
           const scrambled = [...words].sort(() => Math.random() - 0.5);
 
           practiceItems.push({
@@ -278,7 +401,8 @@ export const curriculumService = {
             mainText: phrase,
             unscramble: {
               scrambledWords: scrambled,
-              correctOrder: words
+              correctOrder: words,
+              wordRoles: hasMapping ? sortedMapping.map(wo => wo.role) : undefined
             }
           });
         }
@@ -288,9 +412,9 @@ export const curriculumService = {
     try {
       const contentText = lesson.contentText || "";
       const currentHash = crypto.createHash("sha256").update(contentText).digest("hex");
-      
+
       let embedding = lesson.embedding;
-      
+
       if (!embedding || lesson.contentHash !== currentHash) {
         embedding = await aiService.getEmbeddings(contentText);
       }
@@ -299,7 +423,7 @@ export const curriculumService = {
         embedding: embedding,
         contentHash: currentHash,
         status: "ready",
-        creationStep: 9
+        creationStep: 12
       });
 
       return { practiceItems };
@@ -311,17 +435,6 @@ export const curriculumService = {
       });
       throw error;
     }
-  },
-
-  /**
-   * Step 7: Updates quiz data after manual review.
-   */
-  async updateLessonQuiz(lessonId: string, quizData: unknown) {
-    await curriculumRepository.updateLesson(lessonId, {
-      quizData,
-      status: "reviewing_quiz",
-      creationStep: 7
-    });
   },
 
   /**
@@ -362,8 +475,10 @@ export const curriculumService = {
 
     // 2. Clone learning items relationships
     for (const link of oldLesson.items) {
-      const itemId = link.item ? link.item.id : link.itemId;
-      await curriculumRepository.linkItemToLesson(newLesson.id, itemId, link.priority || "CORE");
+      const itemId = link.item?.id || link.itemId;
+      if (!itemId) continue;
+
+      await curriculumRepository.linkItemToLesson(newLesson.id, itemId, link.priority);
     }
 
     // 3. Mark old as soft-deleted (so it stops appearing for new assignments)
@@ -375,8 +490,75 @@ export const curriculumService = {
 
   async getRandomItemsByLevel(languageId: string, cefrLevel: string, limit: number) {
     return curriculumRepository.getRandomItemsByLevel(languageId, cefrLevel, limit);
-  }
+  },
+
+  async findAllLanguages() {
+    return curriculumRepository.findAllLanguages();
+  },
+
+  async getReadyLessons(languageId: string) {
+    return curriculumRepository.findAllReady(languageId);
+  },
+
+  async getAllLessons() {
+    return curriculumRepository.findAllLessons();
+  },
+
+  async updateMedia(id: string, data: Partial<typeof media.$inferInsert>) {
+    return await curriculumRepository.updateMedia(id, data);
+  },
+
+  async updateLesson(id: string, data: Partial<typeof lessons.$inferInsert>) {
+    return await curriculumRepository.updateLesson(id, data);
+  },
+
+  async findLessonById(id: string) {
+    return await curriculumRepository.findLessonById(id);
+  },
+
+  // Language Management
+  async createLanguage(data: { name: string, code: string }) {
+    return await curriculumRepository.createLanguage(data);
+  },
+
+  async deleteLanguage(id: string) {
+    return await curriculumRepository.deleteLanguage(id);
+  },
+
+  // Media Library Management
+  async getAllMedia() {
+    return await curriculumRepository.findAllMedia();
+  },
+
+  async deleteMedia(id: string) {
+    return await curriculumRepository.deleteMedia(id);
+  },
+
+  async createMedia(url: string) {
+    return await curriculumRepository.createMedia({
+      url,
+      status: "pending_review",
+    });
+  },
+
+  async transcribeMediaStandalone(mediaId: string, userId?: string) {
+    const mediaRecord = await curriculumRepository.findMediaById(mediaId);
+    if (!mediaRecord) throw new Error("Media not found");
+
+    const { full_text, segments } = await aiService.transcribeMedia(
+      mediaRecord.url,
+      "audio",
+      userId
+    );
+
+    return await curriculumRepository.updateMedia(mediaId, {
+      transcriptionText: full_text,
+      transcriptionTimestamps: segments,
+      status: "approved",
+    });
+  },
 };
+
 
 function generateGapFillListening(example: string): { sentenceWithGap: string, correctAnswer: string } {
   const words = example.split(" ");

@@ -54,4 +54,25 @@ export const userRepository = {
       .returning();
     return updated;
   },
+
+  /**
+   * Search users by name, email or ID.
+   */
+  async searchByTerm(term: string, role?: User["role"]): Promise<User[]> {
+    const searchPattern = `%${term}%`;
+    
+    return db.query.usersTable.findMany({
+      where: (table, { or, ilike, eq, and }) => {
+        const searchFilters = or(
+          ilike(table.name, searchPattern),
+          ilike(table.email, searchPattern),
+          eq(table.id, term)
+        );
+        
+        return role ? and(eq(table.role, role), searchFilters) : searchFilters;
+      },
+      limit: 10,
+    });
+  },
 };
+

@@ -121,4 +121,8 @@ export const userService = {
 
     return customer.id;
   },
-};
+
+  async searchStudents(term: string): Promise<User[]> {
+    return userRepository.searchByTerm(term, "student");
+  },
+};

@@ -3,16 +3,16 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
-import { 
-  Vault, 
-  VaultContent, 
-  VaultHeader, 
-  VaultTitle, 
-  VaultDescription, 
-  VaultFooter, 
-  VaultIcon, 
-  VaultPrimaryButton, 
-  VaultSecondaryButton 
+import {
+  Vault,
+  VaultContent,
+  VaultHeader,
+  VaultTitle,
+  VaultDescription,
+  VaultFooter,
+  VaultIcon,
+  VaultPrimaryButton,
+  VaultSecondaryButton
 } from "@/components/ui/vault";
 import { usePwaStore } from "@/hooks/ui/use-pwa-store";
 
@@ -25,8 +25,6 @@ export function PwaVault() {
 
   useEffect(() => {
     const checkState = () => {
-      console.log("[PWA Vault] Checking state:", { updateAvailable, deferredPrompt: !!deferredPrompt, isStandalone, pathname });
-
       // 1. Check for Update (Global Priority)
       if (updateAvailable) {
         setType("update");

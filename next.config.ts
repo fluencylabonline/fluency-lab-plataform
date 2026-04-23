@@ -7,13 +7,19 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 const withSerwist = withSerwistInit({
   swSrc: "sw.ts",
   swDest: "public/sw.js",
-  disable: false, // Required for PWA testing via dev:pwa (must use --webpack)
-  // Precache the offline page
+  disable: false,
   additionalPrecacheEntries: [{ url: "/offline", revision: "1" }],
 });
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
+  },
 };
 
 export default withNextIntl(withSerwist(nextConfig));

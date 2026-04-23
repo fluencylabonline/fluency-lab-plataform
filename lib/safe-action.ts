@@ -46,6 +46,18 @@ export const adminAction = protectedAction.use(async ({ next, ctx }) => {
 });
 
 /**
+ * Manager action client — requires admin or manager role.
+ */
+export const managerAction = protectedAction.use(async ({ next, ctx }) => {
+  if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+    const t = await getTranslations("Common");
+    throw new Error(t("unauthorized"));
+  }
+
+  return next({ ctx });
+});
+
+/**
  * Permission action client — requires a specific permission.
  * Usage: permissionAction("user.create").schema(...).action(...)
  */

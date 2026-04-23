@@ -2,12 +2,22 @@ import { db } from "@/lib/db";
 import {
   languages, media, learningItems, lessons, lessonLearningItems
 } from "./curriculum.schema";
+import { LessonWithDetails, LessonSummary } from "./curriculum.types";
 import { eq, and, isNull, sql } from "drizzle-orm";
 
 export const curriculumRepository = {
   // Languages
   async findAllLanguages() {
-    return db.query.languages.findMany();
+    return db.query.languages.findMany({
+      with: {
+        lessons: {
+          where: isNull(lessons.deletedAt),
+          columns: {
+            id: true,
+          }
+        }
+      }
+    });
   },
 
   async findLanguageByCode(code: string) {
@@ -20,6 +30,16 @@ export const curriculumRepository = {
     return db.query.languages.findFirst({
       where: eq(languages.id, id),
     });
+  },
+
+  async createLanguage(data: typeof languages.$inferInsert) {
+    const [result] = await db.insert(languages).values(data).returning();
+    return result;
+  },
+
+  async deleteLanguage(id: string) {
+    const [result] = await db.delete(languages).where(eq(languages.id, id)).returning();
+    return result;
   },
 
   // Media
@@ -39,6 +59,26 @@ export const curriculumRepository = {
       .set({ ...data, updatedAt: new Date() })
       .where(eq(media.id, id))
       .returning();
+    return result;
+  },
+
+  async findAllMedia() {
+    return db.query.media.findMany({
+      orderBy: [sql`${media.createdAt} DESC`],
+      with: {
+        lessons: {
+          where: isNull(lessons.deletedAt),
+          columns: {
+            id: true,
+            title: true,
+          }
+        }
+      }
+    });
+  },
+
+  async deleteMedia(id: string) {
+    const [result] = await db.delete(media).where(eq(media.id, id)).returning();
     return result;
   },
 
@@ -71,7 +111,7 @@ export const curriculumRepository = {
   },
 
   // Lessons
-  async findLessonById(id: string) {
+  async findLessonById(id: string): Promise<LessonWithDetails | null> {
     return db.query.lessons.findFirst({
       where: and(eq(lessons.id, id), isNull(lessons.deletedAt)),
       with: {
@@ -83,7 +123,7 @@ export const curriculumRepository = {
         media: true,
         language: true
       }
-    });
+    }) as Promise<LessonWithDetails | null>;
   },
 
   async createLesson(data: typeof lessons.$inferInsert) {
@@ -117,7 +157,47 @@ export const curriculumRepository = {
       });
   },
 
+  async unlinkItemFromLesson(lessonId: string, itemId: string) {
+    return db.delete(lessonLearningItems).where(
+      and(
+        eq(lessonLearningItems.lessonId, lessonId),
+        eq(lessonLearningItems.itemId, itemId)
+      )
+    );
+  },
+
   async unlinkItemsFromLesson(lessonId: string) {
     return db.delete(lessonLearningItems).where(eq(lessonLearningItems.lessonId, lessonId));
+  },
+
+  async findAllReady(languageId: string) {
+    return db.query.lessons.findMany({
+      where: and(
+        eq(lessons.languageId, languageId),
+        eq(lessons.status, "ready"),
+        isNull(lessons.deletedAt)
+      ),
+      orderBy: [sql`${lessons.createdAt} DESC`]
+    });
+  },
+
+  async findAllLessons(): Promise<LessonSummary[]> {
+    return db.query.lessons.findMany({
+      where: isNull(lessons.deletedAt),
+      orderBy: [sql`${lessons.createdAt} DESC`],
+      with: {
+        language: true,
+        media: true
+      }
+    }) as unknown as Promise<LessonSummary[]>;
+  },
+
+  async findLessonItems(lessonId: string) {
+    return db.query.lessonLearningItems.findMany({
+      where: eq(lessonLearningItems.lessonId, lessonId),
+      with: {
+        item: true
+      }
+    });
   }
 };

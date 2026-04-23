@@ -3,6 +3,15 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { usersTable } from "@/modules/user/user.schema";
+import type { 
+  Segment, 
+  MediaConfig, 
+  LearningItemMetadata, 
+  AnalysisResult, 
+  QualityResult, 
+  QuizData 
+} from "./curriculum.types";
+import type { JSONContent } from "@tiptap/core";
 
 // ================= ENUMS =================
 
@@ -14,6 +23,7 @@ export const mediaStatusEnum = pgEnum("media_status", ["pending_review", "approv
 
 export const lessonStatusEnum = pgEnum("lesson_status", [
   "draft",
+  "transcribing",
   "analyzing",
   "processing_items",
   "reviewing",
@@ -39,7 +49,8 @@ export const media = pgTable("curriculum_media", {
   id: uuid("id").primaryKey().defaultRandom(),
   url: varchar("url", { length: 255 }).notNull(),
   transcriptionText: text("transcription_text"),
-  transcriptionTimestamps: jsonb("transcription_timestamps").$type<Array<{ word: string, start: number, end: number }>>(),
+  transcriptionTimestamps: jsonb("transcription_timestamps").$type<Segment[]>(),
+  config: jsonb("config").$type<MediaConfig | null>(),
   status: mediaStatusEnum("status").default("pending_review").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -55,7 +66,7 @@ export const learningItems = pgTable("curriculum_learning_items", {
 
   // Vocab: { definition, phonetic, level, key_image_words, is_visual, meanings, forms }
   // Structure: { LearningStructureType, name }
-  metadata: jsonb("metadata").notNull(),
+  metadata: jsonb("metadata").$type<LearningItemMetadata>().notNull(),
 
   // Array of chunks for structures: [{ phrase, vocab_ids, order, grammatical_roles }]
   structureChunks: jsonb("structure_chunks").$type<Array<{
@@ -77,11 +88,13 @@ export const lessons = pgTable("curriculum_lessons", {
   title: varchar("title", { length: 255 }).notNull(),
   difficulty: cefrLevelEnum("difficulty").notNull(),
   contentText: text("content_text"),
-  contentJson: jsonb("content_json"), // Tiptap content or rich structure
+  contentJson: jsonb("content_json").$type<JSONContent | null>(), // Tiptap content or rich structure
+  analysisResultJson: jsonb("analysis_result_json").$type<AnalysisResult | null>(), // Merged vocab/structures (transcription + lesson)
+  qualityAnalysisJson: jsonb("quality_analysis_json").$type<QualityResult | null>(), // Pedagogical audit (score, sections)
 
   // Embedding for RAG
   embedding: vector("embedding", { dimensions: 3072 }),
-  quizData: jsonb("quiz_data"),
+  quizData: jsonb("quiz_data").$type<QuizData | null>(),
   status: lessonStatusEnum("status").default("draft").notNull(),
   creationStep: integer("creation_step").default(1).notNull(), // Steps 1 to 9
   errorMessage: text("error_message"),
@@ -117,6 +130,7 @@ export const rateLimits = pgTable("curriculum_rate_limits", {
 
 export const languagesRelations = relations(languages, ({ many }) => ({
   learningItems: many(learningItems),
+  lessons: many(lessons),
 }));
 
 export const mediaRelations = relations(media, ({ many }) => ({

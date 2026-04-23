@@ -169,3 +169,11 @@ export const requestNewInviteAction = actionClient
       return { success: false, error: "error" };
     }
   });
+
+export const searchStudentsAction = permissionAction("material.view")
+  .inputSchema(z.object({ term: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const results = await userService.searchStudents(parsedInput.term);
+    console.log(`[searchStudentsAction] term="${parsedInput.term}", found ${results.length} students:`, results.map(s => s.name));
+    return results;
+  });

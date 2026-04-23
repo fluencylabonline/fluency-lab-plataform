@@ -1,9 +1,10 @@
 "use server";
 
-import { protectedAction } from "@/lib/safe-action";
+import { protectedAction, permissionAction } from "@/lib/safe-action";
 import { learningService } from "./learning.service";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+
 
 // ================= SCHEMAS =================
 
@@ -29,6 +30,37 @@ const syncPracticeBatchSchema = z.object({
     practicedAt: z.coerce.date(),
   })),
 });
+
+const createPlanTemplateSchema = z.object({
+  name: z.string().min(3),
+  languageId: z.string().uuid(),
+  description: z.string().optional(),
+});
+
+const assignPlanSchema = z.object({
+  templateId: z.string().uuid(),
+  studentId: z.string(),
+});
+
+const getStudentPlanGapSchema = z.object({
+  studentId: z.string(),
+});
+
+const reorderLessonsSchema = z.object({
+  planId: z.string().uuid(),
+  lessonIds: z.array(z.string().uuid()),
+});
+
+const addLessonToPlanSchema = z.object({
+  planId: z.string().uuid(),
+  lessonId: z.string().uuid(),
+});
+
+const removeLessonFromPlanSchema = z.object({
+  planId: z.string().uuid(),
+  lessonId: z.string().uuid(),
+});
+
 
 // ================= ACTIONS =================
 
@@ -96,3 +128,77 @@ export const syncPracticeBatchAction = protectedAction
     
     return result;
   });
+
+/**
+ * Action for managers to create a generic plan template.
+ */
+export const createPlanTemplateAction = permissionAction("material.create")
+  .schema(createPlanTemplateSchema)
+  .action(async ({ parsedInput }) => {
+    const plan = await learningService.createPlanTemplate(parsedInput);
+    revalidatePath("/hub/manager/learning");
+    return { success: true, planId: plan.id };
+  });
+
+/**
+ * Action for managers to assign a plan to a student.
+ */
+export const assignPlanAction = permissionAction("material.create")
+  .schema(assignPlanSchema)
+  .action(async ({ parsedInput }) => {
+    const plan = await learningService.assignPlanToStudent(parsedInput.templateId, parsedInput.studentId);
+    revalidatePath("/hub/manager/learning");
+    return { success: true, planId: plan.id };
+  });
+
+/**
+ * Action to get plan gap analysis for a student.
+ */
+export const getStudentPlanGapAction = permissionAction("material.view")
+  .schema(getStudentPlanGapSchema)
+  .action(async ({ parsedInput }) => {
+    return await learningService.getStudentCurriculumGap(parsedInput.studentId);
+  });
+
+/**
+ * Action to fetch all templates for the manager hub.
+ */
+export const getTemplatesAction = permissionAction("material.view")
+  .schema(z.object({}))
+  .action(async () => {
+    return await learningService.getTemplatesForHub();
+  });
+
+/**
+ * Action to reorder lessons in a plan.
+ */
+export const reorderLessonsAction = permissionAction("material.create")
+  .schema(reorderLessonsSchema)
+  .action(async ({ parsedInput }) => {
+    await learningService.reorderLessons(parsedInput.planId, parsedInput.lessonIds);
+    revalidatePath(`/hub/manager/learning/${parsedInput.planId}`);
+    return { success: true };
+  });
+
+/**
+ * Action to add a lesson to a plan.
+ */
+export const addLessonToPlanAction = permissionAction("material.create")
+  .schema(addLessonToPlanSchema)
+  .action(async ({ parsedInput }) => {
+    await learningService.addLessonToPlan(parsedInput.planId, parsedInput.lessonId);
+    revalidatePath(`/hub/manager/learning/${parsedInput.planId}`);
+    return { success: true };
+  });
+
+/**
+ * Action to remove a lesson from a plan.
+ */
+export const removeLessonFromPlanAction = permissionAction("material.create")
+  .schema(removeLessonFromPlanSchema)
+  .action(async ({ parsedInput }) => {
+    await learningService.removeLessonFromPlan(parsedInput.planId, parsedInput.lessonId);
+    revalidatePath(`/hub/manager/learning/${parsedInput.planId}`);
+    return { success: true };
+  });
+

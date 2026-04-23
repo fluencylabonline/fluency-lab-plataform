@@ -121,7 +121,6 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                             </Button>
                                         )}
                                         {actionButton}
-                                        <NotificationBell />
                                         {user && <UserMenu user={user} />}
                                     </>
                                 ) : (
@@ -141,11 +140,11 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                 <div className="sub-header-layout flex px-4 py-4 md:px-6 w-full">
                     {isMobile ? (
                         <div className="flex flex-col w-full">
-                            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                            <h1 className="text-xl font-bold tracking-tight text-foreground">
                                 {title}
                             </h1>
                             {subtitle && (
-                                <p className="text-sm text-muted-foreground mt-1">
+                                <p className="text-sm text-muted-foreground">
                                     {subtitle}
                                 </p>
                             )}
@@ -154,7 +153,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                         <div className="flex items-center justify-between w-full min-h-[40px] gap-4">
                             <div className="flex-1 truncate">
                                 {subtitle && (
-                                    <p className="text-sm md:text-base text-muted-foreground truncate">
+                                    <p className="text-sm md:text-xl text-text truncate">
                                         {subtitle}
                                     </p>
                                 )}

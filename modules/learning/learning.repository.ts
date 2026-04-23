@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { 
   studentProfiles, studentItemProgress, learningPlans, planLessons 
 } from "./learning.schema";
-import { eq, and, asc, sql } from "drizzle-orm";
+import { eq, and, asc, sql, isNull } from "drizzle-orm";
 
 export const learningRepository = {
   // Profiles
@@ -46,12 +46,9 @@ export const learningRepository = {
   },
 
   // Plans
-  async findActivePlan(studentId: string) {
+  async findPlanWithLessons(planId: string) {
     return db.query.learningPlans.findFirst({
-      where: and(
-        eq(learningPlans.studentId, studentId),
-        eq(learningPlans.status, "active")
-      ),
+      where: eq(learningPlans.id, planId),
       with: {
         lessons: {
           orderBy: [asc(planLessons.order)],
@@ -63,10 +60,64 @@ export const learningRepository = {
     });
   },
 
+  async findAllTemplates() {
+    return db.query.learningPlans.findMany({
+      where: isNull(learningPlans.studentId),
+      with: {
+        language: true,
+        lessons: true
+      },
+      orderBy: [asc(learningPlans.createdAt)]
+    });
+  },
+
   async createPlan(data: typeof learningPlans.$inferInsert) {
     const [result] = await db.insert(learningPlans).values(data).returning();
     return result;
   },
+
+  async updatePlan(id: string, data: Partial<typeof learningPlans.$inferInsert>) {
+    const [result] = await db.update(learningPlans)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(learningPlans.id, id))
+      .returning();
+    return result;
+  },
+
+  async clonePlanWithLessons(templateId: string, targetStudentId: string) {
+    return db.transaction(async (tx) => {
+      // 1. Fetch template
+      const template = await tx.query.learningPlans.findFirst({
+        where: eq(learningPlans.id, templateId),
+        with: { lessons: true }
+      });
+
+      if (!template) throw new Error("Template not found");
+
+      // 2. Insert new plan
+      const [newPlan] = await tx.insert(learningPlans).values({
+        name: template.name,
+        description: template.description,
+        languageId: template.languageId,
+        studentId: targetStudentId,
+        status: "active",
+      }).returning();
+
+      // 3. Clone lessons
+      if (template.lessons.length > 0) {
+        await tx.insert(planLessons).values(
+          template.lessons.map(l => ({
+            planId: newPlan.id,
+            lessonId: l.lessonId,
+            order: l.order,
+          }))
+        );
+      }
+
+      return newPlan;
+    });
+  },
+
 
   async addLessonToPlan(planId: string, lessonId: string, order: number) {
     return db.insert(planLessons).values({ planId, lessonId, order });
@@ -95,5 +146,27 @@ export const learningRepository = {
     `);
     
     return result.rows[0] || { total: 0, failures: 0 };
+  },
+
+  async removeLessonFromPlan(planId: string, lessonId: string) {
+    return db.delete(planLessons)
+      .where(and(eq(planLessons.planId, planId), eq(planLessons.lessonId, lessonId)));
+  },
+
+  async reorderPlanLessons(planId: string, lessonIds: string[]) {
+    return db.transaction(async (tx) => {
+      for (let i = 0; i < lessonIds.length; i++) {
+        await tx.update(planLessons)
+          .set({ order: i })
+          .where(and(eq(planLessons.planId, planId), eq(planLessons.lessonId, lessonIds[i])));
+      }
+    });
+  },
+
+  async getMaxLessonOrder(planId: string) {
+    const result = await db.select({ max: sql<number>`max(${planLessons.order})` })
+      .from(planLessons)
+      .where(eq(planLessons.planId, planId));
+    return result[0]?.max ?? -1;
   }
 };
