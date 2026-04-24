@@ -33,12 +33,19 @@ self.addEventListener("message", (event) => {
 self.addEventListener("push", (event: PushEvent) => {
   const data = event.data?.json();
   if (data) {
-    const { title, body, icon, url } = data;
+    const title = data.title || "Notificação";
+    const body = data.body || "";
+    const icon = data.icon || "/icons/android/android-launchericon-192-192.png";
+    const badge = data.badge || "/icons/android/android-launchericon-96-96.png";
+    const url = data.url || "/hub";
+    const type = data.type || "info";
+
     event.waitUntil(
       self.registration.showNotification(title, {
         body,
-        icon: icon || "/icons/android/android-launchericon-192-192.png",
-        data: { url },
+        icon,
+        badge,
+        data: { url, type },
       })
     );
   }

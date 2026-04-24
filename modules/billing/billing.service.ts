@@ -300,6 +300,17 @@ export const billingService = {
         actionUrl: "/student/billing",
       });
 
+      // WhatsApp
+      if (student.cellphone && inst.pixPayload) {
+        await communicationService.sendPaymentReminderWhatsApp({
+          cellphone: student.cellphone,
+          studentName: student.name,
+          amount: inst.amount,
+          dueDate: inst.dueDate,
+          pixPayload: inst.pixPayload,
+        });
+      }
+
       await billingRepository.updateInstallment(inst.id, { notified2dAt: new Date() });
     }
 
@@ -357,6 +368,15 @@ export const billingService = {
         channels: { inApp: true, push: true },
         actionUrl: "/student/billing",
       });
+
+      // WhatsApp
+      if (student.cellphone) {
+        await communicationService.sendPaymentOverdueWhatsApp({
+          cellphone: student.cellphone,
+          studentName: student.name,
+          amount: inst.amount,
+        });
+      }
     }
   }
 };

@@ -42,6 +42,11 @@ export const env = createEnv({
 
     // Security
     ENCRYPTION_KEY: z.string().length(64), // 32 bytes in hex
+
+    // WhatsApp Business API
+    WHATSAPP_ACCESS_TOKEN: z.string().min(1),
+    WHATSAPP_PHONE_NUMBER_ID: z.string().min(1),
+    WHATSAPP_BUSINESS_ACCOUNT_ID: z.string().optional(),
   },
   client: {
     // Firebase Client (public)
@@ -85,6 +90,9 @@ export const env = createEnv({
     UNSPLASH_ACCESS_KEY: process.env.UNSPLASH_ACCESS_KEY,
     UNSPLASH_SECRET_KEY: process.env.UNSPLASH_SECRET_KEY,
     ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
+    WHATSAPP_ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN,
+    WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID,
+    WHATSAPP_BUSINESS_ACCOUNT_ID: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
 
     // Client
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,

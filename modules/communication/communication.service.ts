@@ -13,7 +13,7 @@ import { BillingReminderEmail } from "./templates/BillingReminderEmail";
 import { BillingDueDateEmail } from "./templates/BillingDueDateEmail";
 import { BillingOverdueEmail } from "./templates/BillingOverdueEmail";
 import { ClassOverdueTeacherEmail } from "./templates/ClassOverdueTeacherEmail";
-import { 
+import {
   ContractSignedEmail,
 } from "./templates/ContractSignedEmail";
 import {
@@ -21,6 +21,13 @@ import {
   ContractExpiringEmail,
   ContractRenewedEmail,
 } from "./templates/ContractStatusEmails";
+import type { 
+  SendWhatsAppTemplateOptions, 
+  WhatsAppResponse, 
+  WhatsAppRequestBody,
+  WhatsAppTemplate,
+  WhatsAppTemplateListResponse
+} from "./communication.types";
 
 interface SendEmailOptions {
   to: string | string[];
@@ -235,6 +242,263 @@ export class CommunicationService {
       });
     } catch (error) {
       console.error("[CommunicationService.sendContractRenewedEmail] Error:", error);
+    }
+  }
+
+  // --- WHATSAPP METHODS ---
+
+  /**
+   * Envia um lembrete de pagamento via WhatsApp.
+   */
+  async sendPaymentReminderWhatsApp(data: {
+    cellphone: string;
+    studentName: string;
+    amount: number;
+    dueDate: Date;
+    pixPayload: string;
+  }) {
+    try {
+      const amountStr = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      }).format(data.amount / 100);
+
+      const dateStr = data.dueDate.toLocaleDateString("pt-BR");
+
+      return await this.sendWhatsAppTemplate({
+        to: data.cellphone,
+        templateName: "payment_reminder",
+        components: [
+          {
+            type: "body",
+            parameters: [
+              { type: "text", parameter_name: "student_name", text: data.studentName },
+              { type: "text", parameter_name: "amount", text: amountStr },
+              { type: "text", parameter_name: "due_date", text: dateStr },
+              { type: "text", parameter_name: "pix_payload", text: data.pixPayload },
+            ]
+          },
+          {
+            type: "button",
+            sub_type: "copy_code",
+            index: "0",
+            parameters: [
+              { type: "text", text: data.pixPayload }
+            ]
+          }
+        ]
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendPaymentReminderWhatsApp] Error:", error);
+    }
+  }
+
+  /**
+   * Envia um alerta de fatura em atraso via WhatsApp.
+   */
+  async sendPaymentOverdueWhatsApp(data: {
+    cellphone: string;
+    studentName: string;
+    amount: number;
+  }) {
+    try {
+      const amountStr = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      }).format(data.amount / 100);
+
+      return await this.sendWhatsAppTemplate({
+        to: data.cellphone,
+        templateName: "payment_overdue",
+        components: [
+          {
+            type: "body",
+            parameters: [
+              { type: "text", parameter_name: "student_name", text: data.studentName },
+              { type: "text", parameter_name: "amount", text: amountStr },
+            ]
+          }
+        ]
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendPaymentOverdueWhatsApp] Error:", error);
+    }
+  }
+
+  /**
+   * Envia mensagem de boas-vindas e definição de senha via WhatsApp.
+   * Template: "Hi {{texto}}, Your new account has been created successfully. Please verify {{texto}}..."
+   */
+  async sendWelcomeWhatsApp(data: {
+    cellphone: string;
+    name: string;
+    actionLink: string;
+  }) {
+    try {
+      // Extrai o código de ação do link do Firebase
+      const u = new URL(data.actionLink);
+      const oobCode = u.searchParams.get("oobCode");
+
+      // O link final que o botão do WhatsApp vai abrir
+      // Nota: No dashboard da Meta, o botão deve estar configurado como URL dinâmica.
+      // Ex: https://seu-app.com/create-password?oobCode={{1}}
+      const dynamicUrlSuffix = `?oobCode=${oobCode}`;
+
+      return await this.sendWhatsAppTemplate({
+        to: data.cellphone,
+        templateName: "finalize_account_setup", // Nome do modelo pronto da Meta
+        components: [
+          {
+            type: "body",
+            parameters: [
+              { type: "text", parameter_name: "name", text: data.name },
+              { type: "text", parameter_name: "detail", text: "your account" },
+            ]
+          },
+          {
+            type: "button",
+            sub_type: "url",
+            index: "0",
+            parameters: [
+              { type: "text", text: dynamicUrlSuffix }
+            ]
+          }
+        ]
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendWelcomeWhatsApp] Error:", error);
+    }
+  }
+
+  /**
+   * Método base para envio de templates do WhatsApp.
+   */
+  async sendWhatsAppTemplate(options: SendWhatsAppTemplateOptions): Promise<WhatsAppResponse | null> {
+    const { to, templateName, components, languageCode = "pt_BR" } = options;
+
+    // Formata o número (garantindo que tenha o código do país e sem caracteres especiais)
+    const formattedPhone = to.replace(/\D/g, "");
+
+    return this.sendWhatsAppRequest({
+      messaging_product: "whatsapp",
+      to: formattedPhone,
+      type: "template",
+      template: {
+        name: templateName,
+        language: { code: languageCode },
+        components: components
+      }
+    });
+  }
+
+  /**
+   * Busca templates na Graph API da Meta.
+   */
+  async getWhatsAppTemplates(): Promise<WhatsAppTemplate[]> {
+    if (!env.WHATSAPP_BUSINESS_ACCOUNT_ID) return [];
+    
+    try {
+      const response = await fetch(
+        `https://graph.facebook.com/v20.0/${env.WHATSAPP_BUSINESS_ACCOUNT_ID}/message_templates`,
+        {
+          headers: {
+            "Authorization": `Bearer ${env.WHATSAPP_ACCESS_TOKEN}`,
+          },
+        }
+      );
+
+      const data = await response.json() as WhatsAppTemplateListResponse;
+      return data.data || [];
+    } catch (error) {
+      console.error("[CommunicationService.getWhatsAppTemplates] Error:", error);
+      return [];
+    }
+  }
+
+  /**
+   * Cria um novo template na Meta.
+   */
+  async createWhatsAppTemplate(data: Omit<WhatsAppTemplate, "id" | "status">) {
+    if (!env.WHATSAPP_BUSINESS_ACCOUNT_ID) throw new Error("WABA_ID not configured");
+
+    try {
+      const response = await fetch(
+        `https://graph.facebook.com/v20.0/${env.WHATSAPP_BUSINESS_ACCOUNT_ID}/message_templates`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${env.WHATSAPP_ACCESS_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error?.message || "Failed to create template");
+      
+      return result;
+    } catch (error) {
+      console.error("[CommunicationService.createWhatsAppTemplate] Error:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remove um template na Meta.
+   */
+  async deleteWhatsAppTemplate(name: string) {
+    if (!env.WHATSAPP_BUSINESS_ACCOUNT_ID) throw new Error("WABA_ID not configured");
+
+    try {
+      const response = await fetch(
+        `https://graph.facebook.com/v20.0/${env.WHATSAPP_BUSINESS_ACCOUNT_ID}/message_templates?name=${name}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${env.WHATSAPP_ACCESS_TOKEN}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error?.message || "Failed to delete template");
+      
+      return result;
+    } catch (error) {
+      console.error("[CommunicationService.deleteWhatsAppTemplate] Error:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Utilitário Privado para chamadas à Graph API da Meta.
+   */
+  private async sendWhatsAppRequest(body: WhatsAppRequestBody): Promise<WhatsAppResponse | null> {
+    try {
+      const response = await fetch(
+        `https://graph.facebook.com/v20.0/${env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${env.WHATSAPP_ACCESS_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("[CommunicationService.sendWhatsAppRequest] API Error:", data);
+        return null;
+      }
+
+      return data as WhatsAppResponse;
+    } catch (error) {
+      console.error("[CommunicationService.sendWhatsAppRequest] Network Error:", error);
+      return null;
     }
   }
 

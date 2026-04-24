@@ -1,0 +1,295 @@
+"use client";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Vault,
+  VaultContent,
+  VaultHeader,
+  VaultTitle,
+  VaultDescription,
+  VaultBody,
+  VaultFooter,
+  VaultPrimaryButton,
+  VaultSecondaryButton,
+  VaultForm,
+  VaultField,
+  VaultInput
+} from "@/components/ui/vault";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { sendNotificationSchema, SendNotificationValues } from "@/modules/notification/notification.schema";
+import { sendNotificationAction } from "@/modules/notification/notification.actions";
+import { searchUsersAction } from "@/modules/user/user.actions";
+import { notify } from "@/components/ui/toaster";
+import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { SearchBar } from "@/components/ui/search-bar";
+import { Badge } from "@/components/ui/badge";
+import { EmptyResults } from "@/components/ui/empty";
+import { X, Search, User as UserIcon, Check } from "lucide-react";
+import { User } from "@/modules/user/user.schema";
+
+interface SendNotificationVaultProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function SendNotificationVault({ open, onOpenChange }: SendNotificationVaultProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+
+  const { register, handleSubmit, watch, setValue, formState: { errors }, reset } = useForm<SendNotificationValues>({
+    resolver: zodResolver(sendNotificationSchema),
+    defaultValues: {
+      targetType: "all",
+      channels: {
+        push: true,
+        inApp: true,
+      }
+    }
+  });
+
+  const targetType = watch("targetType");
+
+  // Busca usuários via Server Action com debounce manual via useEffect
+  useEffect(() => {
+    if (searchTerm.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const result = await searchUsersAction({ term: searchTerm });
+        if (result?.data) {
+          setSearchResults(result.data);
+        }
+      } catch (error) {
+        console.error("Search error:", error);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const toggleUser = (user: User) => {
+    const isSelected = selectedUsers.find(u => u.id === user.id);
+    let newSelection;
+    if (isSelected) {
+      newSelection = selectedUsers.filter(u => u.id !== user.id);
+    } else {
+      newSelection = [...selectedUsers, user];
+    }
+    setSelectedUsers(newSelection);
+    setValue("userIds", newSelection.map(u => u.id));
+  };
+
+  const removeUser = (userId: string) => {
+    const newSelection = selectedUsers.filter(u => u.id !== userId);
+    setSelectedUsers(newSelection);
+    setValue("userIds", newSelection.map(u => u.id));
+  };
+
+  const onSubmit = async (data: SendNotificationValues) => {
+    setIsLoading(true);
+    try {
+      const result = await sendNotificationAction(data);
+      if (result?.data?.success) {
+        notify.success("Notificação disparada com sucesso!");
+        reset();
+        setSelectedUsers([]);
+        onOpenChange(false);
+      } else {
+        notify.error("Erro ao enviar notificação");
+      }
+    } catch {
+      notify.error("Erro inesperado");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Vault open={open} onOpenChange={onOpenChange}>
+      <VaultContent>
+        <VaultHeader>
+          <VaultTitle>Disparar Notificação</VaultTitle>
+          <VaultDescription>Envie uma mensagem instantânea via In-App e Push para seus usuários.</VaultDescription>
+        </VaultHeader>
+
+        <VaultBody>
+          <VaultForm onSubmit={handleSubmit(onSubmit)}>
+            <VaultField label="Título" error={errors.title?.message}>
+              <VaultInput {...register("title")} placeholder="Ex: Nova Aula Disponível" />
+            </VaultField>
+
+            <VaultField label="Mensagem" error={errors.body?.message}>
+              <Textarea
+                {...register("body")}
+                placeholder="Descreva o conteúdo da notificação..."
+                className="rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 min-h-[100px]"
+              />
+            </VaultField>
+
+            <div className="grid grid-cols-2 gap-4">
+              <VaultField label="Público-Alvo">
+                <Select
+                  onValueChange={(val) => setValue("targetType", val as SendNotificationValues["targetType"])}
+                  defaultValue="all"
+                >
+                  <SelectTrigger className="rounded-xl h-10">
+                    <SelectValue placeholder="Selecione..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Usuários</SelectItem>
+                    <SelectItem value="role">Por Role (Cargo)</SelectItem>
+                    <SelectItem value="specific">Usuários Específicos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </VaultField>
+
+              {targetType === "role" && (
+                <VaultField label="Selecione a Role">
+                  <Select onValueChange={(val) => setValue("targetRole", val as SendNotificationValues["targetRole"])}>
+                    <SelectTrigger className="rounded-xl h-10">
+                      <SelectValue placeholder="Role..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="student">Alunos</SelectItem>
+                      <SelectItem value="teacher">Professores</SelectItem>
+                      <SelectItem value="manager">Gestores</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </VaultField>
+              )}
+            </div>
+
+            {targetType === "specific" && (
+              <VaultField label="Destinatários" error={errors.userIds?.message}>
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-2 min-h-[40px] p-2 rounded-xl border border-dashed border-muted-foreground/30">
+                    {selectedUsers.length === 0 ? (
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Search className="w-3 h-3" /> Nenhum usuário selecionado
+                      </span>
+                    ) : (
+                      selectedUsers.map(user => (
+                        <Badge key={user.id} variant="secondary" className="pl-1 pr-0 py-0 flex items-center gap-1 group">
+                          <span className="max-w-[120px] truncate">{user.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeUser(user.id)}
+                            className="p-1 hover:bg-destructive/10 hover:text-destructive rounded-full transition-colors"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </Badge>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <SearchBar
+                      placeholder="Procurar usuários por nome, email ou ID..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="rounded-xl"
+                    />
+
+                    {(searchResults.length > 0 || isSearching) && (
+                      <div className="max-h-[200px] overflow-y-auto rounded-xl border border-border bg-card p-1 shadow-sm">
+                        {isSearching ? (
+                          <div className="p-4 text-center text-xs text-muted-foreground italic">
+                            Buscando usuários...
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 gap-1">
+                            {searchResults.map((user) => {
+                              const isSelected = selectedUsers.find(u => u.id === user.id);
+                              return (
+                                <button
+                                  key={user.id}
+                                  type="button"
+                                  onClick={() => toggleUser(user)}
+                                  className={cn(
+                                    "flex items-center gap-3 p-2 rounded-lg text-left transition-colors hover:bg-accent",
+                                    isSelected && "bg-accent/50"
+                                  )}
+                                >
+                                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <UserIcon className="w-4 h-4 text-primary" />
+                                  </div>
+                                  <div className="flex flex-col flex-1 min-w-0">
+                                    <span className="text-sm font-medium truncate">{user.name}</span>
+                                    <span className="text-[10px] text-muted-foreground truncate">{user.email}</span>
+                                  </div>
+                                  {isSelected ? (
+                                    <Check className="w-4 h-4 text-primary" />
+                                  ) : (
+                                    <Badge variant="outline" className="text-[8px] h-4">Selecionar</Badge>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {searchTerm.length >= 2 && !isSearching && searchResults.length === 0 && (
+                      <EmptyResults
+                        searchQuery={searchTerm}
+                        title="Nenhum usuário encontrado"
+                        description="Tente ajustar os termos da sua busca ou verifique se o usuário existe."
+                      />
+                    )}
+                  </div>
+                </div>
+              </VaultField>
+            )}
+
+            <div className="flex gap-6 pt-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="inApp"
+                  defaultChecked
+                  onChange={(e) => setValue("channels.inApp", e.target.checked)}
+                />
+                <Label htmlFor="inApp" className="text-sm cursor-pointer">In-App</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="push"
+                  defaultChecked
+                  onChange={(e) => setValue("channels.push", e.target.checked)}
+                />
+                <Label htmlFor="push" className="text-sm cursor-pointer">Push Notification</Label>
+              </div>
+            </div>
+          </VaultForm>
+        </VaultBody>
+
+        <VaultFooter>
+          <VaultSecondaryButton onClick={() => onOpenChange(false)}>
+            Cancelar
+          </VaultSecondaryButton>
+          <VaultPrimaryButton
+            onClick={handleSubmit(onSubmit)}
+            disabled={isLoading}
+          >
+            {isLoading ? "Enviando..." : "Enviar Agora"}
+          </VaultPrimaryButton>
+        </VaultFooter>
+      </VaultContent>
+    </Vault>
+  );
+}

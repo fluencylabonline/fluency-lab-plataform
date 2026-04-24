@@ -6,14 +6,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAction } from "next-safe-action/hooks";
 import { useTranslations } from "next-intl";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -132,21 +124,21 @@ export function CreatePasswordForm() {
 
   return (
     <div className="min-h-screen min-w-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-      <Card className="w-full max-w-[500px] border-none rounded-3xl overflow-hidden">
-        <CardHeader className="text-center space-y-2 pt-10 px-8">
+      <div className="card w-full max-w-[500px] border-none rounded-3xl overflow-hidden">
+        <div className="text-center space-y-2 pt-10 px-8">
           <div className="flex items-center justify-center gap-2">
             <LanguageSwitcher />
             <ThemeSwitcher />
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">
+          <h3 className="text-2xl font-bold tracking-tight">
             {t("Auth.createPassword.title") || "Definir sua senha"}
-          </CardTitle>
-          <CardDescription className="text-gray-500">
+          </h3>
+          <p className="text-gray-500">
             {t("Auth.createPassword.description") || "Crie sua senha de acesso para começar a usar a plataforma."}
-          </CardDescription>
-        </CardHeader>
+          </p>
+        </div>
 
-        <CardContent className="p-8">
+        <div className="p-8">
           {loading ? (
             <div className="space-y-4 animate-pulse">
               <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mx-auto" />
@@ -305,8 +297,8 @@ export function CreatePasswordForm() {
               </Button>
             </form>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

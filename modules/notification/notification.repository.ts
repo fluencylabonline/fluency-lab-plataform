@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { notificationsTable, pushSubscriptionsTable } from "./notification.schema";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, desc } from "drizzle-orm";
 import { usersTable } from "../user/user.schema";
 
 export const notificationRepository = {
@@ -81,5 +81,21 @@ export const notificationRepository = {
   async findAllUserIds() {
     const result = await db.select({ id: usersTable.id }).from(usersTable);
     return result.map((r) => r.id);
+  },
+
+  async findGlobalHistory(limit = 100) {
+    return db
+      .select({
+        id: notificationsTable.id,
+        title: notificationsTable.title,
+        body: notificationsTable.body,
+        createdAt: notificationsTable.createdAt,
+        userId: notificationsTable.userId,
+        userName: usersTable.name,
+      })
+      .from(notificationsTable)
+      .leftJoin(usersTable, eq(notificationsTable.userId, usersTable.id))
+      .orderBy((notifications) => [desc(notifications.createdAt)])
+      .limit(limit);
   },
 };

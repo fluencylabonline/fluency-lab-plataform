@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { XCircle, CheckCircle2, ArrowRight } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Carousel,
@@ -29,7 +28,7 @@ const ComparisonCard = ({
   item: ComparisonItem;
   labels: { others: string; fluencyLab: string }
 }) => (
-  <Card className="h-full flex flex-col overflow-hidden border-slate-200 dark:border-slate-800 transition-colors duration-300">
+  <div className="card h-full flex flex-col overflow-hidden border-slate-200 dark:border-slate-800 transition-colors duration-300">
     <div className="bg-slate-100/50 dark:bg-slate-900/50 p-6 flex-1 border-b border-slate-100 dark:border-slate-800">
       <div className="flex items-center gap-2 mb-4">
         <Badge
@@ -85,7 +84,7 @@ const ComparisonCard = ({
         ))}
       </ul>
     </div>
-  </Card>
+  </div>
 );
 
 export default function ComparisonSection() {

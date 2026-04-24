@@ -176,4 +176,12 @@ export const searchStudentsAction = permissionAction("material.view")
     const results = await userService.searchStudents(parsedInput.term);
     console.log(`[searchStudentsAction] term="${parsedInput.term}", found ${results.length} students:`, results.map(s => s.name));
     return results;
-  });
+  });
+
+export const searchUsersAction = protectedAction
+  .inputSchema(z.object({ term: z.string().min(1) }))
+  .action(async ({ parsedInput, ctx }) => {
+    // Apenas admin pode buscar todos os usuários
+    if (ctx.user.role !== "admin") throw new Error("UNAUTHORIZED");
+    return userService.searchUsers(parsedInput.term);
+  });

@@ -93,6 +93,15 @@ export const userService = {
       user.name,
       actionLink
     );
+
+    // Enviar convite via WhatsApp (se houver telefone)
+    if (user.cellphone) {
+      await communicationService.sendWelcomeWhatsApp({
+        cellphone: user.cellphone,
+        name: user.name,
+        actionLink
+      });
+    }
     
     // Sync with AbacatePay immediately
     await this.syncAbacatePayCustomer(user.id);
@@ -125,4 +134,8 @@ export const userService = {
   async searchStudents(term: string): Promise<User[]> {
     return userRepository.searchByTerm(term, "student");
   },
-};
+
+  async searchUsers(term: string): Promise<User[]> {
+    return userRepository.searchByTerm(term);
+  },
+};

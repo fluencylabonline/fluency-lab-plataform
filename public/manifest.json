@@ -9,8 +9,8 @@
     "standalone",
     "window-controls-overlay"
   ],
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "black",
+  "theme_color": "black",
   "orientation": "portrait",
   "categories": [
     "education",

@@ -37,3 +37,8 @@ export const getMyNotificationsAction = protectedAction
   .action(async ({ ctx }) => {
     return await notificationService.getUserNotifications(ctx.user.id);
   });
+
+export const getGlobalHistoryAction = adminAction
+  .action(async () => {
+    return await notificationService.getGlobalHistory();
+  });

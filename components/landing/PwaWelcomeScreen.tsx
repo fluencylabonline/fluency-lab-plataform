@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import Logo from "@/public/brand/logo.png";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { LogIn } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -16,8 +15,8 @@ export function PwaWelcomeScreen() {
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-100 dark:opacity-[0.15] pointer-events-none" />
 
             <div className="w-full max-w-md relative z-10">
-                <Card className="card border-none rounded-xl backdrop-blur-sm">
-                    <CardContent className="flex flex-col items-center pt-10 pb-10 px-6 text-center space-y-6">
+                <div className="card border-none rounded-xl backdrop-blur-sm">
+                    <div className="flex flex-col items-center pt-10 pb-10 px-6 text-center space-y-6">
                         <div className="relative w-42 h-20 mb-2">
                             <Image
                                 src={Logo}
@@ -46,8 +45,8 @@ export function PwaWelcomeScreen() {
                                 </Button>
                             </Link>
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
             </div>
 
             <div className="absolute bottom-6 text-center text-xs text-muted-foreground/50">
