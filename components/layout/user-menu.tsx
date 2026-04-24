@@ -84,7 +84,7 @@ export function UserMenu({ user }: UserMenuProps) {
     ];
 
     const AvatarEl = (
-        <Avatar size="xs" className="cursor-pointer border border-border">
+        <Avatar size="xs" className="cursor-pointer border border-primary/50">
             {user.photoUrl && <AvatarImage src={user.photoUrl} alt={user.name || "User"} />}
             <AvatarFallback name={user.name || "U"} />
         </Avatar>
@@ -221,8 +221,8 @@ export function UserMenu({ user }: UserMenuProps) {
                                     key={value}
                                     onClick={() => handleModeChange(value)}
                                     className={`flex flex-col items-center gap-1.5 py-2.5 rounded-lg text-xs font-medium transition-all ${mode === value
-                                            ? "bg-primary text-primary-foreground"
-                                            : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                                        ? "bg-primary text-primary-foreground"
+                                        : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                                         }`}
                                 >
                                     <Icon className="h-4 w-4" />
@@ -243,8 +243,8 @@ export function UserMenu({ user }: UserMenuProps) {
                                     key={lang.id}
                                     onClick={() => toggleLocale(lang.id)}
                                     className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-medium transition-all ${locale === lang.id
-                                            ? "bg-primary text-primary-foreground"
-                                            : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                                        ? "bg-primary text-primary-foreground"
+                                        : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                                         }`}
                                 >
                                     <span className="text-base leading-none">{lang.flag}</span>

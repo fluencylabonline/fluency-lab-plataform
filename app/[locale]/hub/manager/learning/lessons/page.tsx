@@ -17,12 +17,10 @@ export default async function LessonsListPage() {
     ]);
 
     return (
-        <main className="flex flex-col min-h-screen ">
-            <LessonsPageContent
-                user={user}
-                initialLessons={lessons}
-                languages={languages}
-            />
-        </main>
+        <LessonsPageContent
+            user={user}
+            initialLessons={lessons}
+            languages={languages}
+        />
     );
 }

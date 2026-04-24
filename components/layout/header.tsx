@@ -74,7 +74,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                     variant={isMobileSlot ? "ghost" : "default"}
                     size={isMobileSlot ? "icon" : "default"}
                 >
-                    {action.icon}
+                    <p className="mr-1">{action.icon}</p>
                     {!isMobileSlot && <span>{action.label}</span>}
                 </Button>
             );

@@ -41,10 +41,10 @@ export function LessonsPageContent({ user, initialLessons, languages }: LessonsP
                 className="contents"
             />
 
-            <CreateLessonVault 
-                languages={languages} 
-                open={isVaultOpen} 
-                onOpenChange={setIsVaultOpen} 
+            <CreateLessonVault
+                languages={languages}
+                open={isVaultOpen}
+                onOpenChange={setIsVaultOpen}
             />
 
             <main className="container">

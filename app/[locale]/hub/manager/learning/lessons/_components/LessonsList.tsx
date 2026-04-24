@@ -11,14 +11,13 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
-import { 
-    Empty, 
-    EmptyHeader, 
-    EmptyTitle, 
+import {
+    Empty,
+    EmptyHeader,
+    EmptyTitle,
     EmptyDescription,
-    EmptyMedia 
+    EmptyMedia
 } from "@/components/ui/empty";
-
 import { LessonSummary } from "@/modules/curriculum/curriculum.types";
 
 interface LessonsListProps {

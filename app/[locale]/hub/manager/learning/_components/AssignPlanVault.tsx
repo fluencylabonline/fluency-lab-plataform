@@ -10,10 +10,16 @@ import {
     Vault,
     VaultContent,
     VaultHeader,
+    VaultTitle,
+    VaultDescription,
     VaultBody,
+    VaultForm,
     VaultField,
     VaultInput,
-    VaultPrimaryButton
+    VaultPrimaryButton,
+    VaultSecondaryButton,
+    VaultFooter,
+    VaultIcon
 } from "@/components/ui/vault";
 import { notify } from "@/components/ui/toaster";
 import { useState, useTransition, useEffect, useCallback } from "react";
@@ -101,14 +107,15 @@ export function AssignPlanVault({ templateId, open, onOpenChange }: AssignPlanVa
 
     return (
         <Vault open={open} onOpenChange={onOpenChange}>
-            <VaultContent noPadding>
-                <div className="flex flex-col h-full bg-white dark:bg-gray-950">
-                    <VaultHeader
-                        title={t("assign_plan")}
-                    // subtitle={t("assign_plan_desc")}
-                    />
+            <VaultContent>
+                <VaultHeader>
+                    <VaultIcon type="user" />
+                    <VaultTitle>{t("assign_plan")}</VaultTitle>
+                    <VaultDescription>{t("assign_plan_desc")}</VaultDescription>
+                </VaultHeader>
 
-                    <VaultBody className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+                <VaultForm onSubmit={form.handleSubmit(onSubmit)}>
+                    <VaultBody className="space-y-6">
                         {/* Search Block */}
                         {!selectedStudent ? (
                             <VaultField
@@ -158,7 +165,7 @@ export function AssignPlanVault({ templateId, open, onOpenChange }: AssignPlanVa
                                                         setStudents([]);
                                                         setSearchTerm("");
                                                     }}
-                                                    className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors text-left"
+                                                    className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors text-left group/item"
                                                 >
                                                     <Avatar className="size-10">
                                                         <AvatarImage src={student.photoUrl || undefined} />
@@ -167,10 +174,10 @@ export function AssignPlanVault({ templateId, open, onOpenChange }: AssignPlanVa
                                                         </AvatarFallback>
                                                     </Avatar>
                                                     <div className="flex flex-col flex-1">
-                                                        <span className="font-semibold text-foreground">{student.name}</span>
+                                                        <span className="font-semibold text-foreground group-hover/item:text-primary transition-colors">{student.name}</span>
                                                         <span className="text-xs text-muted-foreground">{student.email}</span>
                                                     </div>
-                                                    <div className="size-8 rounded-full bg-primary/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <div className="size-8 rounded-full bg-primary/5 flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity">
                                                         <Check className="size-4 text-primary" />
                                                     </div>
                                                 </button>
@@ -199,13 +206,10 @@ export function AssignPlanVault({ templateId, open, onOpenChange }: AssignPlanVa
                             </VaultField>
                         ) : (
                             /* Selected Student Card */
-                            <div className="space-y-3">
-                                <label className="text-sm font-medium text-muted-foreground px-1">
-                                    {t("student")}
-                                </label>
-                                <div className="flex items-center justify-between p-4 bg-primary/5 dark:bg-primary/10 border-2 border-primary/20 rounded-2xl animate-in zoom-in-95">
+                            <VaultField label={t("student")}>
+                                <div className="flex items-center justify-between p-4 bg-primary/5 dark:bg-primary/10 border-2 border-primary/20 rounded-2xl animate-in zoom-in-95 group">
                                     <div className="flex items-center gap-4">
-                                        <Avatar className="size-12 border-2 border-white dark:border-gray-900 shadow-sm">
+                                        <Avatar className="size-12 border-2 border-white dark:border-gray-900 shadow-sm transition-transform group-hover:scale-105">
                                             <AvatarImage src={selectedStudent.photoUrl || undefined} />
                                             <AvatarFallback className="bg-primary/20 text-primary font-black">
                                                 {selectedStudent.name.substring(0, 2).toUpperCase()}
@@ -216,43 +220,45 @@ export function AssignPlanVault({ templateId, open, onOpenChange }: AssignPlanVa
                                             <span className="text-sm text-primary/70">{selectedStudent.email}</span>
                                         </div>
                                     </div>
-                                    <button
+                                    <VaultSecondaryButton
                                         type="button"
                                         onClick={() => {
                                             setSelectedStudent(null);
                                             form.setValue("studentId", "");
                                         }}
-                                        className="p-2 hover:bg-primary/10 rounded-xl text-primary transition-colors font-medium text-sm flex items-center gap-1"
+                                        className="h-9 px-3 text-xs bg-white dark:bg-gray-950"
                                     >
-                                        {t("change") || "Change"}
-                                    </button>
+                                        {t("change")}
+                                    </VaultSecondaryButton>
                                 </div>
-                            </div>
+                            </VaultField>
                         )}
 
-                        <div className="p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-900/30 flex gap-3">
+                        <div className="p-4 bg-amber-50/50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-900/30 flex gap-3">
                             <Info className="size-5 text-amber-500 shrink-0" />
-                            <p className="text-sm text-amber-900/80 dark:text-amber-200/60 leading-relaxed">
+                            <p className="text-sm text-amber-900/80 dark:text-amber-200/60 leading-relaxed italic">
                                 {t("assignment_note")}
                             </p>
                         </div>
                     </VaultBody>
 
-                    <VaultPrimaryButton
-                        onClick={form.handleSubmit(onSubmit)}
-                        className="w-full h-14 rounded-2xl text-lg font-bold shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                        disabled={isPending || !selectedStudent}
-                    >
-                        {isPending ? (
-                            <div className="flex items-center gap-2">
-                                <div className="size-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                                <span>{t("assign")}...</span>
-                            </div>
-                        ) : (
-                            t("assign")
-                        )}
-                    </VaultPrimaryButton>
-                </div>
+                    <VaultFooter>
+                        <VaultPrimaryButton
+                            type="submit"
+                            className="w-full"
+                            disabled={isPending || !selectedStudent}
+                        >
+                            {isPending ? (
+                                <>
+                                    <div className="size-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <span>{t("assigning")}...</span>
+                                </>
+                            ) : (
+                                t("assign")
+                            )}
+                        </VaultPrimaryButton>
+                    </VaultFooter>
+                </VaultForm>
             </VaultContent>
         </Vault>
     );

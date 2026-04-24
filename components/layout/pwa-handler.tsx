@@ -26,13 +26,12 @@ export function PwaHandler() {
     if (typeof window === "undefined") return;
 
     const mediaQuery = window.matchMedia("(display-mode: standalone)");
-    
+
     const checkStandalone = () => {
-      const isStandaloneMode = 
-        mediaQuery.matches || 
+      const isStandaloneMode =
+        mediaQuery.matches ||
         (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
-      
-      console.log("[PWA] Standalone mode:", isStandaloneMode);
+
       setStandalone(isStandaloneMode);
     };
 
@@ -56,9 +55,7 @@ export function PwaHandler() {
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       const initPwaSupport = async () => {
         try {
-          console.log("[PWA] Waiting for service worker ready...");
           const registration = await navigator.serviceWorker.ready;
-          console.log("[PWA] Service worker ready and registered");
           setRegistration(registration);
 
           // Detect Updates

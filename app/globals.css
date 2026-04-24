@@ -37,7 +37,7 @@
 
 :root {
   --radius: 0.65rem;
-  --background: oklch(1 0 0);
+  --background: oklch(95.815% 0.00011 271.152);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.141 0.005 285.823);
@@ -57,7 +57,7 @@
   --ring: oklch(0.702 0.183 293.541);
 
   --base-content: oklch(100% 0.00011 271.152);
-  --base-header: oklch(70.9% 0.00008 271.152);
+  --base-header: oklch(95.514% 0.00011 271.152);
 }
 
 .dark {
@@ -107,7 +107,7 @@
   }
 
   .card {
-    @apply duration-150 ease-in-out transition-all rounded-md border border-slate-200/50 dark:border-slate-700/50 bg-white/15 dark:bg-slate-950/40 hover:border-slate-500/30 dark:hover:border-slate-900 hover:bg-white/5 dark:hover:bg-gray-950/50;
+    @apply duration-150 ease-in-out transition-all rounded-md border border-slate-200/50 dark:border-slate-700/50 bg-slate-100/35 dark:bg-slate-950/40 hover:border-slate-500/30 dark:hover:border-slate-900 hover:bg-slate-100/80 dark:hover:bg-gray-950/50;
   }
 
   .step-content {

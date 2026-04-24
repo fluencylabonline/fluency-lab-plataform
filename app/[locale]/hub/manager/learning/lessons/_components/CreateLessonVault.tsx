@@ -48,8 +48,7 @@ export function CreateLessonVault({ languages, open, onOpenChange }: CreateLesso
     return (
         <Vault>
             <VaultTrigger asChild>
-                <Button>
-                    <Plus className="w-5 h-5" />
+                <Button leftIcon={<Plus />}>
                     <span className="hidden sm:inline">{t("create_lesson") || "Create Lesson"}</span>
                 </Button>
             </VaultTrigger>

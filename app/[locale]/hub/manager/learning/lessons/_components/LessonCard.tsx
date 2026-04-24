@@ -88,7 +88,7 @@ export function LessonCard({ lesson }: LessonCardProps) {
     ];
 
     return (
-        <div className="group relative flex flex-col bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 hover:border-primary/50 transition-all duration-300">
+        <div className="group relative flex flex-col card p-5">
             {/* Header Info */}
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
