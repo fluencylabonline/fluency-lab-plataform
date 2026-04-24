@@ -109,6 +109,22 @@ export const curriculumRepository = {
       .orderBy(sql`RANDOM()`)
       .limit(limit);
   },
+  
+  async findLearningItems(params: { languageId: string, type?: "VOCABULARY" | "STRUCTURE", search?: string, limit: number }) {
+    const { languageId, type, search, limit } = params;
+    const filters = [eq(learningItems.languageId, languageId)];
+
+    if (type) filters.push(eq(learningItems.type, type));
+    if (search) {
+      filters.push(sql`${learningItems.lemma} ILIKE ${`%${search}%`}`);
+    }
+
+    return db.query.learningItems.findMany({
+      where: and(...filters),
+      limit: limit,
+      orderBy: [sql`${learningItems.createdAt} DESC`]
+    });
+  },
 
   // Lessons
   async findLessonById(id: string): Promise<LessonWithDetails | null> {

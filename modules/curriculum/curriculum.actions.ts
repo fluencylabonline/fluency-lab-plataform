@@ -330,4 +330,18 @@ export const transcribeMediaAction = managerAction
     return result;
   });
 
+/**
+ * Action to get learning items with filters.
+ */
+export const getLearningItemsAction = managerAction
+  .inputSchema(z.object({
+    languageId: z.string().uuid(),
+    type: z.enum(["VOCABULARY", "STRUCTURE"]).optional(),
+    search: z.string().optional(),
+    limit: z.number().optional().default(50),
+  }))
+  .action(async ({ parsedInput }) => {
+    return await curriculumService.getLearningItems(parsedInput);
+  });
+
 

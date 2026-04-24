@@ -557,6 +557,15 @@ export const curriculumService = {
       status: "approved",
     });
   },
+
+  async getLearningItems(params: { languageId: string, type?: "VOCABULARY" | "STRUCTURE", search?: string, limit?: number }) {
+    return await curriculumRepository.findLearningItems({
+      languageId: params.languageId,
+      type: params.type,
+      search: params.search,
+      limit: params.limit || 50
+    });
+  },
 };
 
 

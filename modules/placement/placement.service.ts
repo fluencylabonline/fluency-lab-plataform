@@ -6,7 +6,8 @@ import { curriculumService } from "../curriculum/curriculum.service";
 import { curriculumRepository } from "../curriculum/curriculum.repository";
 import { aiService } from "../ai/ai.service";
 import { learningService } from "../learning/learning.service";
-import { CEFRLevel } from "../curriculum/curriculum.types";
+import { CEFRLevel, LearningItemMetadata } from "../curriculum/curriculum.types";
+import { questionsTable } from "./placement.schema";
 
 const PLACEMENT_TEST_LESSON_ID = "00000000-0000-0000-0000-000000000000"; // Mock ID for diagnostic records
 
@@ -240,16 +241,210 @@ export const placementService = {
   },
 
   /**
-   * Administrative review of draft questions.
+   * Get questions for management.
    */
-  async reviewQuestion(questionId: number, status: "active" | "archived") {
-    return placementRepository.updateQuestionStatus(questionId, status);
+  async getQuestions(filters: {
+    languageId?: string;
+    cefrLevel?: string;
+    skill?: string;
+    status?: string;
+    type?: string;
+    limit?: number;
+    offset?: number;
+  }) {
+    return placementRepository.getQuestionsWithFilters(filters);
   },
 
   /**
-   * Get draft questions for review.
+   * Get placement stats.
    */
-  async getDraftQuestions(languageId: string) {
-    return placementRepository.getQuestionsByStatus(languageId, "draft");
+  async getStats(languageId: string) {
+    return placementRepository.getPlacementStats(languageId);
+  },
+
+  /**
+   * Deletes a question.
+   */
+  async deleteQuestion(id: number) {
+    return placementRepository.deleteQuestion(id);
+  },
+
+  /**
+   * Updates a question.
+   */
+  async updateQuestion(id: number, data: Partial<typeof questionsTable.$inferInsert>) {
+    return placementRepository.updateQuestion(id, data);
+  },
+
+  /**
+   * Deterministic gap fill generation from a sentence.
+   */
+  generateDeterministicGapFill(sentence: string): { sentenceWithGap: string, correctAnswer: string } {
+    const words = sentence.trim().split(/\s+/);
+    if (words.length < 2) return { sentenceWithGap: "____", correctAnswer: sentence };
+
+    const gapIndex = Math.floor(Math.random() * words.length);
+    const correctAnswer = words[gapIndex].replace(/[.,!?;:]/g, ""); // Clean punctuation
+    const sentenceWithGap = words.map((w, i) => i === gapIndex ? "____" : w).join(" ");
+
+    return { sentenceWithGap, correctAnswer };
+  },
+
+  /**
+   * Orchestrates batch generation based on multiple items and audios.
+   */
+  async generateBatch(
+    languageId: string,
+    itemIds: string[],
+    mediaIds: string[],
+    types: string[],
+    userId?: string
+  ) {
+    const questions: (typeof questionsTable.$inferInsert)[] = [];
+
+    // 1. Fetch Items and Media
+    const items = await Promise.all(itemIds.map(id => curriculumRepository.findItemById(id)));
+    const medias = await Promise.all(mediaIds.map(id => curriculumRepository.findMediaById(id)));
+
+    const validItems = items.filter((i): i is NonNullable<typeof i> => !!i);
+    const validMedias = medias.filter((m): m is NonNullable<typeof m> => !!m);
+
+    console.log(`[PlacementService] Generating batch for types: ${types.join(", ")}`);
+    console.log(`[PlacementService] Selected items: ${validItems.length}, Selected medias: ${validMedias.length}`);
+
+    // 2. Generation Logic per Type
+    for (const type of types) {
+      console.log(`[PlacementService] Processing type: ${type}`);
+      
+      if (type === "writing" && validMedias.length > 0) {
+        let deterministicCount = 0;
+        for (const mediaRecord of validMedias) {
+          const segments = mediaRecord.config?.segments || [];
+          if (segments.length === 0) continue;
+
+          // Use the segments as sentences
+          const selection = segments.sort(() => 0.5 - Math.random()).slice(0, 5);
+          
+          for (const s of selection) {
+            const { sentenceWithGap, correctAnswer } = this.generateDeterministicGapFill(s.word);
+            questions.push({
+              languageId,
+              type: "writing",
+              skill: "listening",
+              content: "Ouça o áudio e escreva a palavra que falta:",
+              context: sentenceWithGap,
+              correctOptionId: "gap",
+              options: [{ id: "gap", text: correctAnswer }],
+              cefrLevel: "A1",
+              difficultyLevel: 1000,
+              sourceMediaId: mediaRecord.id,
+              metadata: {
+                audioRange: { start: s.start, end: s.end },
+                mediaUrl: mediaRecord.url,
+                gapFillData: { sentenceWithGap, correctAnswer }
+              }
+            });
+            deterministicCount++;
+          }
+        }
+        if (deterministicCount > 0) {
+          console.log(`[PlacementService] Generated ${deterministicCount} deterministic writing questions`);
+          continue; // Only skip AI if we actually generated deterministic ones
+        }
+      }
+
+      if (type === "unscramble") {
+        for (const item of validItems) {
+          if (item.type !== "STRUCTURE") continue;
+          const meta = item.metadata as LearningItemMetadata;
+          const example = meta.examples?.[0];
+          if (!example) continue;
+
+          const words = example.text.split(/\s+/).filter(Boolean);
+          // Create objects with unique IDs to handle duplicate words correctly
+          const indexedWords = words.map((word, originalIndex) => ({
+            word,
+            originalIndex,
+          }));
+
+          const shuffledWordsWithMeta = [...indexedWords].sort(() => 0.5 - Math.random());
+          const shuffledWords = shuffledWordsWithMeta.map(w => w.word);
+          
+          // correctOrder[i] is the index in shuffledWords that holds the word originally at words[i]
+          const correctOrder = indexedWords.map(original => 
+            shuffledWordsWithMeta.findIndex(shuffled => shuffled.originalIndex === original.originalIndex)
+          );
+
+          questions.push({
+            languageId,
+            type: "unscramble",
+            skill: "grammar",
+            content: "Reordene as palavras para formar a frase correta:",
+            context: example.text,
+            correctOptionId: "unscramble",
+            options: [{ id: "unscramble", text: example.text }],
+            cefrLevel: meta.level || "A1",
+            difficultyLevel: 1000,
+            learningItemId: item.id,
+            metadata: {
+              unscrambleData: { words: shuffledWords, correctOrder }
+            }
+          });
+        }
+      }
+
+      if (type === "grammar" || type === "context" || type === "multiple_choice" || type === "writing") {
+        const skillMap: Record<string, "grammar" | "vocabulary" | "reading" | "listening"> = {
+          grammar: "grammar",
+          context: "vocabulary",
+          multiple_choice: "reading",
+          writing: "listening"
+        };
+
+        const skill = skillMap[type] || "grammar";
+        console.log(`[PlacementService] AI Batch Generation starting for ${type} with ${validItems.length} items`);
+        
+        // Group items in batches of 5 to optimize API calls and respect quotas
+        const batchSize = 5;
+        for (let i = 0; i < validItems.length; i += batchSize) {
+          const itemBatch = validItems.slice(i, i + batchSize);
+          try {
+            const aiQuestions = await aiService.generatePlacementQuestionsBatch(
+              itemBatch as Array<{ lemma: string; type: string; metadata: Record<string, unknown> }>,
+              "A1", // Target level, could be dynamic
+              skill,
+              userId
+            );
+
+            for (const aiQ of aiQuestions) {
+              const originalItem = itemBatch.find(it => it.lemma === aiQ.learningItemId);
+              questions.push({
+                languageId,
+                type: type as 'multiple_choice' | 'unscramble' | 'audio_comprehension' | 'grammar' | 'context' | 'writing',
+                skill,
+                content: aiQ.content,
+                context: aiQ.context,
+                correctOptionId: aiQ.correct_option_id,
+                options: aiQ.options,
+                cefrLevel: ((originalItem?.metadata as LearningItemMetadata)?.level as string) || "A1",
+                difficultyLevel: 1000,
+                learningItemId: originalItem?.id,
+                metadata: {
+                  aiGenerated: true,
+                  audioScript: aiQ.audio_script
+                }
+              });
+            }
+            console.log(`[PlacementService] AI Batch Success: ${i + itemBatch.length}/${validItems.length}`);
+          } catch (error) {
+            console.error(`[PlacementService] AI Batch Error for items starting at ${i}:`, error);
+          }
+        }
+        console.log(`[PlacementService] AI Generation finished for ${type}`);
+      }
+    }
+
+    console.log(`[PlacementService] Total questions generated: ${questions.length}`);
+    return questions;
   }
 };

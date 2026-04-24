@@ -61,7 +61,7 @@ export const aiService = {
       if (!limit.success) throw new Error("Rate limit exceeded for AI parsing");
     }
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.5-pro",
+      model: "models/gemini-2.0-flash",
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -128,7 +128,7 @@ export const aiService = {
       if (!limit.success) throw new Error("Rate limit exceeded for AI enrichment");
     }
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.5-pro",
+      model: "models/gemini-2.0-flash",
       generationConfig: {
         responseMimeType: "application/json"
       }
@@ -330,7 +330,7 @@ export const aiService = {
     }
 
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.5-pro",
+      model: "models/gemini-2.0-flash",
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -413,7 +413,7 @@ export const aiService = {
     };
 
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.5-pro",
+      model: "models/gemini-2.0-flash",
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -517,7 +517,7 @@ ${contentText.slice(0, 30000)}
     }
 
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.5-pro",
+      model: "models/gemini-2.0-flash",
       generationConfig: {
         responseMimeType: "application/json"
       }
@@ -575,9 +575,78 @@ ${contentText.slice(0, 30000)}
   },
 
   /**
-   * Generates a single placement test question based on a curriculum learning item.
-   * This is part of the administrative diagnostic loop.
+   * Generates a batch of placement test questions in a single AI call.
+   * This is much more efficient for API quotas than generating one by one.
    */
+  async generatePlacementQuestionsBatch(
+    items: Array<{ lemma: string; type: string; metadata: Record<string, unknown> }>,
+    cefrLevel: CEFRLevel,
+    skill: "grammar" | "vocabulary" | "reading" | "listening",
+    userId?: string
+  ) {
+    if (userId) {
+      const limit = await checkRateLimit("gemini_placement_gen", userId, 500);
+      if (!limit.success) throw new Error("Rate limit exceeded for AI generation");
+    }
+
+    const model = genAI.getGenerativeModel({
+      model: "models/gemini-2.0-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            questions: {
+              type: SchemaType.ARRAY,
+              items: {
+                type: SchemaType.OBJECT,
+                properties: {
+                  learningItemId: { type: SchemaType.STRING },
+                  content: { type: SchemaType.STRING },
+                  context: { type: SchemaType.STRING },
+                  audio_script: { type: SchemaType.STRING },
+                  options: {
+                    type: SchemaType.ARRAY,
+                    items: {
+                      type: SchemaType.OBJECT,
+                      properties: {
+                        id: { type: SchemaType.STRING },
+                        text: { type: SchemaType.STRING }
+                      },
+                      required: ["id", "text"]
+                    }
+                  },
+                  correct_option_id: { type: SchemaType.STRING }
+                },
+                required: ["content", "options", "correct_option_id"]
+              }
+            }
+          },
+          required: ["questions"]
+        }
+      }
+    });
+
+    const prompt = `Gere um lote de questões de múltipla escolha para um teste de nivelamento de Inglês.
+    Nível Alvo: ${cefrLevel}.
+    Habilidade: ${skill}.
+    
+    Itens de Aprendizado:
+    ${items.map(item => `- ${item.lemma} (${item.type})`).join("\n")}
+    
+    Regras:
+    1. Gere EXATAMENTE uma questão para cada item da lista acima.
+    2. O campo "learningItemId" deve ser o "lemma" correspondente para mapeamento.
+    3. Cada questão deve ter 4 opções (ids: a, b, c, d).
+    4. ${skill === "listening" ? "Gere um 'audio_script' para cada questão." : "O 'content' deve ser a pergunta."}
+    
+    Retorne o JSON no formato especificado.`;
+
+    const result = await model.generateContent(prompt);
+    const data = JSON.parse(result.response.text());
+    return data.questions;
+  },
+
   async generatePlacementQuestionFromItem(
     item: { lemma: string; type: string; metadata: Record<string, unknown> },
     cefrLevel: CEFRLevel,
@@ -664,7 +733,7 @@ ${contentText.slice(0, 30000)}
     }
 
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.0-flash",
+      model: "models/gemini-1.5-flash",
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {

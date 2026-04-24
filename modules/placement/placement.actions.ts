@@ -1,6 +1,6 @@
 "use server";
 
-import { adminAction, protectedAction } from "@/lib/safe-action";
+import { protectedAction, managerAction } from "@/lib/safe-action";
 import { placementService } from "./placement.service";
 import { insertQuestionSchema, submitAnswerSchema } from "./placement.schema";
 import { db } from "@/lib/db";
@@ -52,42 +52,67 @@ export const submitPlacementAnswerAction = protectedAction
     };
   });
 
-export const generateBulkPlacementQuestionsAction = adminAction
+export const generateBatchPlacementQuestionsAction = managerAction
   .schema(z.object({
     languageId: z.string().uuid(),
-    cefrLevel: z.enum(['A1', 'A2', 'B1', 'B2', 'C1', 'C2']),
-    count: z.number().min(4).max(50)
+    itemIds: z.array(z.string()),
+    mediaIds: z.array(z.string().uuid()),
+    types: z.array(z.string())
   }))
   .action(async ({ parsedInput, ctx }) => {
-    const questions = await placementService.generateBulkQuestions(
+    return await placementService.generateBatch(
       parsedInput.languageId,
-      parsedInput.cefrLevel,
-      parsedInput.count,
+      parsedInput.itemIds,
+      parsedInput.mediaIds,
+      parsedInput.types,
       ctx.user.id
     );
-    return { count: questions.length };
   });
 
-export const reviewPlacementQuestionAction = adminAction
+export const commitBatchPlacementQuestionsAction = managerAction
+  .schema(z.array(insertQuestionSchema))
+  .action(async ({ parsedInput }) => {
+    const results = [];
+    for (const q of parsedInput) {
+      const [created] = await db.insert(questionsTable).values(q).returning();
+      results.push(created);
+    }
+    return { count: results.length };
+  });
+
+export const getPlacementQuestionsAction = managerAction
   .schema(z.object({
-    questionId: z.number(),
-    status: z.enum(['active', 'archived'])
+    languageId: z.string().uuid(),
+    cefrLevel: z.string().optional(),
+    skill: z.string().optional(),
+    status: z.string().optional(),
+    type: z.string().optional(),
+    limit: z.number().optional(),
+    offset: z.number().optional(),
   }))
   .action(async ({ parsedInput }) => {
-    await placementService.reviewQuestion(parsedInput.questionId, parsedInput.status);
+    return await placementService.getQuestions(parsedInput);
+  });
+
+export const deletePlacementQuestionAction = managerAction
+  .schema(z.object({ id: z.number() }))
+  .action(async ({ parsedInput }) => {
+    await placementService.deleteQuestion(parsedInput.id);
     return { success: true };
   });
 
-export const getDraftQuestionsAction = adminAction
-  .schema(z.object({ languageId: z.string().uuid() }))
+export const updatePlacementQuestionAction = managerAction
+  .schema(z.object({
+    id: z.number(),
+    data: insertQuestionSchema.partial()
+  }))
   .action(async ({ parsedInput }) => {
-    const questions = await placementService.getDraftQuestions(parsedInput.languageId);
-    return { questions };
+    await placementService.updateQuestion(parsedInput.id, parsedInput.data);
+    return { success: true };
   });
 
-export const createManualQuestionAction = adminAction
-  .schema(insertQuestionSchema)
+export const getPlacementStatsAction = managerAction
+  .schema(z.object({ languageId: z.string().uuid() }))
   .action(async ({ parsedInput }) => {
-    const [question] = await db.insert(questionsTable).values(parsedInput).returning();
-    return { question };
+    return await placementService.getStats(parsedInput.languageId);
   });

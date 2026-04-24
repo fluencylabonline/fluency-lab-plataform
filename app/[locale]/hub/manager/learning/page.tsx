@@ -65,6 +65,13 @@ export default async function LearningPage() {
                         </div>
                         <span className="text-sm font-semibold">{t("analytics") || "Analytics"}</span>
                     </Link>
+
+                    <Link href={`/hub/manager/learning/placement`} className="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md hover:border-primary/50 transition-all group">
+                        <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl mb-3 group-hover:scale-110 transition-transform">
+                            <BookPlus className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <span className="text-sm font-semibold">Placement</span>
+                    </Link>
                 </div>
 
                 {/* Templates Section */}

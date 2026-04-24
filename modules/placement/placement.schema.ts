@@ -2,25 +2,37 @@ import { pgTable, text, timestamp, boolean, pgEnum, integer, serial, jsonb, uuid
 import { usersTable } from "../user/user.schema";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { languages, learningItems } from "../curriculum/curriculum.schema";
+import { languages, learningItems, media } from "../curriculum/curriculum.schema";
 
 export const skillTypeEnum = pgEnum("skill_type", ['grammar', 'vocabulary', 'reading', 'listening']);
 export const testStatusEnum = pgEnum("test_status", ['in_progress', 'completed', 'abandoned']);
 export const questionStatusEnum = pgEnum("question_status", ['draft', 'active', 'archived']);
+export const questionTypeEnum = pgEnum("placement_question_type", ['multiple_choice', 'unscramble', 'audio_comprehension', 'grammar', 'context', 'writing']);
 
 export const questionsTable = pgTable("questions", {
   id: serial("id").primaryKey(),
   content: text("content").notNull(),
   context: text("context"), 
-  options: jsonb("options").notNull(), // { text: string, id: string }[]
+  options: jsonb("options").$type<{ text: string, id: string }[]>().notNull(),
   correctOptionId: text("correct_option_id").notNull(),
   skill: skillTypeEnum("skill").notNull(),
+  type: questionTypeEnum("type").default("multiple_choice").notNull(),
   difficultyLevel: integer("difficulty_level").notNull(), 
   cefrLevel: text("cefr_level").notNull(), // A1, A2, B1, B2, C1, C2
   languageId: uuid("language_id").references(() => languages.id).notNull(),
   status: questionStatusEnum("status").default("draft").notNull(),
   audioScript: text("audio_script"), // For browser TTS
   learningItemId: varchar("learning_item_id", { length: 255 }).references(() => learningItems.id),
+  sourceMediaId: uuid("source_media_id").references(() => media.id),
+  metadata: jsonb("metadata").$type<{
+    audioRange?: { start: number, end: number };
+    mediaUrl?: string;
+    unscrambleData?: { words: string[], correctOrder: number[] };
+    gapFillData?: { sentenceWithGap: string, correctAnswer: string };
+    subType?: string;
+    aiGenerated?: boolean;
+    audioScript?: string;
+  }>(),
   timesAnswered: integer("times_answered").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });

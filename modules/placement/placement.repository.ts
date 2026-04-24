@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { placementTestsTable, questionsTable, testAnswersTable, Question, PlacementTest, TestAnswer } from "./placement.schema";
 import { eq, and, notInArray, desc, sql } from "drizzle-orm";
+import { media } from "../curriculum/curriculum.schema";
 
 export const placementRepository = {
   // Test Management
@@ -164,5 +165,81 @@ export const placementRepository = {
 
   async createQuestion(data: typeof questionsTable.$inferInsert) {
     return db.insert(questionsTable).values(data).returning();
+  },
+
+  async deleteQuestion(id: number) {
+    await db.delete(questionsTable).where(eq(questionsTable.id, id));
+  },
+
+  async updateQuestion(id: number, data: Partial<typeof questionsTable.$inferInsert>) {
+    return db.update(questionsTable).set(data).where(eq(questionsTable.id, id)).returning();
+  },
+
+  async getQuestionsWithFilters(filters: {
+    languageId?: string;
+    cefrLevel?: string;
+    skill?: string;
+    status?: string;
+    type?: string;
+    limit?: number;
+    offset?: number;
+  }) {
+    const conditions = [];
+    if (filters.languageId) conditions.push(eq(questionsTable.languageId, filters.languageId));
+    if (filters.cefrLevel) conditions.push(eq(questionsTable.cefrLevel, filters.cefrLevel));
+    if (filters.skill) conditions.push(eq(questionsTable.skill, filters.skill as 'grammar' | 'vocabulary' | 'reading' | 'listening'));
+    if (filters.status) conditions.push(eq(questionsTable.status, filters.status as 'draft' | 'active' | 'archived'));
+    if (filters.type) conditions.push(eq(questionsTable.type, filters.type as 'multiple_choice' | 'unscramble' | 'audio_comprehension' | 'grammar' | 'context' | 'writing'));
+
+    const result = await db.select({
+      id: questionsTable.id,
+      content: questionsTable.content,
+      context: questionsTable.context,
+      options: questionsTable.options,
+      correctOptionId: questionsTable.correctOptionId,
+      skill: questionsTable.skill,
+      type: questionsTable.type,
+      difficultyLevel: questionsTable.difficultyLevel,
+      cefrLevel: questionsTable.cefrLevel,
+      languageId: questionsTable.languageId,
+      status: questionsTable.status,
+      audioScript: questionsTable.audioScript,
+      learningItemId: questionsTable.learningItemId,
+      sourceMediaId: questionsTable.sourceMediaId,
+      metadata: questionsTable.metadata,
+      createdAt: questionsTable.createdAt,
+      mediaUrl: media.url,
+    })
+      .from(questionsTable)
+      .leftJoin(media, eq(questionsTable.sourceMediaId, media.id))
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(questionsTable.createdAt))
+      .limit(filters.limit ?? 50)
+      .offset(filters.offset ?? 0);
+
+    return result;
+  },
+
+  async getPlacementStats(languageId: string) {
+    const result = await db.select({
+      status: questionsTable.status,
+      count: sql<number>`count(*)`
+    })
+      .from(questionsTable)
+      .where(eq(questionsTable.languageId, languageId))
+      .groupBy(questionsTable.status);
+
+    const cefrResult = await db.select({
+      cefrLevel: questionsTable.cefrLevel,
+      count: sql<number>`count(*)`
+    })
+      .from(questionsTable)
+      .where(eq(questionsTable.languageId, languageId))
+      .groupBy(questionsTable.cefrLevel);
+
+    return {
+      byStatus: result,
+      byLevel: cefrResult
+    };
   }
 };
