@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import {
     Select,
@@ -33,25 +32,21 @@ export function PlacementClient({ user, languages, initialStats }: PlacementClie
     const [selectedLanguage, setSelectedLanguage] = useState(languages[0]?.id || "");
     const [isWizardOpen, setIsWizardOpen] = useState(false);
 
-    const headerActions = (
-        <div className="flex items-center gap-2">
-            <Button onClick={() => setIsWizardOpen(true)} className="gap-2">
-                <Plus className="w-4 h-4" />
-                {t("generate_questions") || "Generate Questions"}
-            </Button>
-        </div>
-    );
-
     return (
-        <main>
+        <main className="h-full overflow-y-auto custom-scrollbar no-scrollbar">
             <Header
                 title={t("manager_title") || "Placement Management"}
                 subtitle={t("manager_desc") || "Manage adaptive diagnostic questions and audio-based challenges."}
                 user={user}
-                actionButton={headerActions}
+                action={{
+                    label: t("generate_questions") || "Generate Questions",
+                    icon: <Plus className="w-5 h-5" />,
+                    onClick: () => setIsWizardOpen(true)
+                }}
+                className="contents"
             />
 
-            <div className="container py-8">
+            <div className="container">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div className="flex items-center gap-4">
                         <div className="flex flex-col gap-1">

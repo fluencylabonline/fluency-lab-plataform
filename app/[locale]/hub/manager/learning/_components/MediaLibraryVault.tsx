@@ -140,7 +140,7 @@ export function MediaLibraryVault() {
         <>
             <Vault open={isOpen} onOpenChange={setIsOpen}>
                 <VaultTrigger asChild>
-                    <button className="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md hover:border-primary/50 transition-all group w-full">
+                    <button className="card flex flex-col items-center justify-center p-4 group w-full">
                         <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl mb-3 group-hover:scale-110 transition-transform">
                             <FileAudio className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                         </div>

@@ -3,6 +3,7 @@
 import { Header } from "@/components/layout/header";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { Plus } from "lucide-react";
 import { LessonsList } from "./LessonsList";
 import { CreateLessonVault } from "./CreateLessonVault";
 import { LessonSummary } from "@/modules/curriculum/curriculum.types";
@@ -17,10 +18,7 @@ interface LessonsPageContentProps {
 export function LessonsPageContent({ user, initialLessons, languages }: LessonsPageContentProps) {
     const t = useTranslations("Learning");
     const [searchQuery, setSearchQuery] = useState("");
-
-    const headerActions = (
-        <CreateLessonVault languages={languages} />
-    );
+    const [isVaultOpen, setIsVaultOpen] = useState(false);
 
     return (
         <>
@@ -35,16 +33,27 @@ export function LessonsPageContent({ user, initialLessons, languages }: LessonsP
                 } : undefined}
                 backHref="/hub/manager/learning"
                 onSearchChange={setSearchQuery}
-                actionButton={headerActions}
+                action={{
+                    label: t("create_lesson") || "Create Lesson",
+                    icon: <Plus className="w-5 h-5" />,
+                    onClick: () => setIsVaultOpen(true)
+                }}
+                className="contents"
             />
 
-            <div className="container">
+            <CreateLessonVault 
+                languages={languages} 
+                open={isVaultOpen} 
+                onOpenChange={setIsVaultOpen} 
+            />
+
+            <main className="container">
                 <LessonsList
                     initialLessons={initialLessons}
                     languages={languages}
                     searchQuery={searchQuery}
                 />
-            </div>
+            </main>
         </>
     );
 }

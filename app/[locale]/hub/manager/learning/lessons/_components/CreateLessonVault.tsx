@@ -12,33 +12,48 @@ import {
 import { CreateLessonForm } from "./CreateLessonForm";
 import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface CreateLessonVaultProps {
     languages: { id: string; name: string }[];
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
-export function CreateLessonVault({ languages }: CreateLessonVaultProps) {
+export function CreateLessonVault({ languages, open, onOpenChange }: CreateLessonVaultProps) {
     const t = useTranslations("Learning");
+
+    const vaultContent = (
+        <VaultContent>
+            <VaultHeader>
+                <VaultTitle>{t("create_lesson") || "Create Lesson"}</VaultTitle>
+                <VaultDescription>
+                    {t("steps.1.desc") || "Start by giving your lesson a title and selecting the target language and difficulty."}
+                </VaultDescription>
+            </VaultHeader>
+            <VaultBody>
+                <CreateLessonForm languages={languages} />
+            </VaultBody>
+        </VaultContent>
+    );
+
+    if (open !== undefined && onOpenChange !== undefined) {
+        return (
+            <Vault open={open} onOpenChange={onOpenChange}>
+                {vaultContent}
+            </Vault>
+        );
+    }
 
     return (
         <Vault>
             <VaultTrigger asChild>
-                <button className="flex items-center gap-2 px-2 sm:px-4 py-2 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all font-semibold shadow-sm">
+                <Button>
                     <Plus className="w-5 h-5" />
                     <span className="hidden sm:inline">{t("create_lesson") || "Create Lesson"}</span>
-                </button>
+                </Button>
             </VaultTrigger>
-            <VaultContent>
-                <VaultHeader>
-                    <VaultTitle>{t("create_lesson") || "Create Lesson"}</VaultTitle>
-                    <VaultDescription>
-                        {t("steps.1.desc") || "Start by giving your lesson a title and selecting the target language and difficulty."}
-                    </VaultDescription>
-                </VaultHeader>
-                <VaultBody>
-                    <CreateLessonForm languages={languages} />
-                </VaultBody>
-            </VaultContent>
+            {vaultContent}
         </Vault>
     );
 }

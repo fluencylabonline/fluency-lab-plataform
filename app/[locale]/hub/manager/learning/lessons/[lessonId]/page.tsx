@@ -23,6 +23,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
                 title={lesson.title}
                 backHref="/hub/manager/learning/lessons"
                 showSubHeader={false}
+                className="contents"
             />
             <LessonEditor lesson={lesson} />
         </div>

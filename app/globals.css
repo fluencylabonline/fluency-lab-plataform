@@ -103,7 +103,7 @@
 
   /* --- Layout Geral --- */
   .container {
-    @apply p-2.5 md:p-4 lg:px-6 lg:py-4 min-w-full;
+    @apply p-2.5 md:p-4 lg:px-6 lg:py-4 min-w-full pb-24;
   }
 
   .card {

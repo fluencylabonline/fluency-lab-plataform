@@ -19,33 +19,29 @@ export default async function PlanEditorPage({ params }: PlanEditorPageProps) {
 
     if (!user) redirect(`/${locale}/signin`);
 
-    // Fetch Plan Data
     const plan = await learningService.getPlanById(planId);
     if (!plan) notFound();
-
-    // Fetch All Available Lessons for this language
     const availableLessons = await curriculumService.getReadyLessons(plan.languageId);
 
     return (
-        <main className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-transparent pb-20">
+        <main>
             <Header
                 title={plan.name}
                 subtitle={plan.description || t("path_editor_subtitle") || "Organize the sequence of lessons for this plan."}
                 user={user}
                 backHref={`/hub/manager/learning`}
+                className="contents"
             />
 
-            <div className="flex-1 px-4 py-8 md:px-6">
-                <div className="max-w-4xl mx-auto">
-                    <PathEditor
-                        plan={JSON.parse(JSON.stringify(plan))}
-                        availableLessons={availableLessons.map(l => ({
-                            id: l.id,
-                            title: l.title,
-                            difficulty: l.difficulty
-                        }))}
-                    />
-                </div>
+            <div className="container">
+                <PathEditor
+                    plan={JSON.parse(JSON.stringify(plan))}
+                    availableLessons={availableLessons.map(l => ({
+                        id: l.id,
+                        title: l.title,
+                        difficulty: l.difficulty
+                    }))}
+                />
             </div>
         </main>
     );

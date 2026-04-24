@@ -35,7 +35,17 @@
     "next": "Next",
     "close": "Close",
     "switchLanguage": "Switch language",
-    "or": "Or"
+    "language": "Language",
+    "or": "Or",
+    "appearance": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "profile": "Profile",
+    "settings": "Settings",
+    "allCaughtUp": "All caught up",
+    "unreadSuffix": "{count} unread",
+    "notifications": "Notifications"
   },
   "UserManagement": {
     "createUserTitle": "Create New User",

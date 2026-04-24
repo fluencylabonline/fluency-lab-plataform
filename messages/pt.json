@@ -35,7 +35,17 @@
     "next": "Próximo",
     "close": "Fechar",
     "switchLanguage": "Alternar idioma",
-    "or": "Ou"
+    "language": "Idioma",
+    "or": "Ou",
+    "appearance": "Aparência",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema",
+    "profile": "Perfil",
+    "settings": "Configurações",
+    "allCaughtUp": "Tudo em dia",
+    "unreadSuffix": "{count} {count, plural, one {não lida} other {não lidas}}",
+    "notifications": "Notificações"
   },
   "UserManagement": {
     "createUserTitle": "Criar Novo Usuário",

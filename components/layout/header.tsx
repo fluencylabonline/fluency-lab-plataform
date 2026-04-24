@@ -12,14 +12,22 @@ import { Input } from "@/components/ui/input";
 import { UserMenu } from "./user-menu";
 import { ThemeSwitcher } from "../ui/theme-switcher";
 import { NotificationBell } from "@/modules/notification/_components/NotificationBell";
+import { SearchBar } from "../ui/search-bar";
+
+export interface HeaderAction {
+    label: string;
+    icon: React.ReactNode;
+    onClick: () => void;
+}
 
 export interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {
     title: string;
     subtitle?: string;
     backHref?: string;
     onSearchChange?: (value: string) => void;
-    actionButton?: React.ReactNode;
+    action?: HeaderAction;
     showSubHeader?: boolean;
+    showHeader?: boolean;
     user?: {
         name: string | null;
         email: string | null;
@@ -33,8 +41,9 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
     subtitle,
     backHref,
     onSearchChange,
-    actionButton,
+    action,
     showSubHeader = true,
+    showHeader = true,
     user,
     className,
     ...props
@@ -55,86 +64,111 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
         onSearchChange?.("");
     };
 
+    const renderAction = (isMobileSlot: boolean) => {
+        if (!action) return null;
+
+        if (action) {
+            const button = (
+                <Button
+                    onClick={action.onClick}
+                    variant={isMobileSlot ? "ghost" : "default"}
+                    size={isMobileSlot ? "icon" : "default"}
+                >
+                    {action.icon}
+                    {!isMobileSlot && <span>{action.label}</span>}
+                </Button>
+            );
+
+            return button;
+        }
+
+        return null;
+    };
+
     return (
         <div ref={ref} className={cn("w-full flex flex-col", className)} {...props}>
-            <header className="header-layout sticky top-0 z-40 flex h-14 w-full items-center justify-between px-4 md:px-6">
-                <AnimatePresence mode="wait">
-                    {isMobile && isSearchOpen ? (
-                        <motion.div
-                            key="mobile-search"
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="flex w-full items-center gap-2 h-full"
-                        >
-                            <Search className="h-5 w-5 text-muted-foreground shrink-0" />
-                            <Input
-                                autoFocus
-                                value={searchValue}
-                                onChange={handleSearch}
-                                placeholder="Buscar..."
-                                className="flex-1 border-none bg-transparent shadow-none focus-visible:ring-0 px-1 text-base"
-                            />
-                            <Button variant="ghost" size="icon" onClick={closeSearch} className="shrink-0">
-                                <X className="h-5 w-5" />
-                            </Button>
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="normal-header"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="flex w-full items-center justify-between h-full"
-                        >
-                            <div className="flex items-center w-1/4 sm:w-1/3">
-                                {backHref && (
-                                    <Link
-                                        href={backHref}
-                                        className={buttonVariants({
-                                            variant: "ghost",
-                                            size: "icon",
-                                            className: "shrink-0 -ml-2 rounded-full",
-                                        })}
-                                    >
-                                        <ArrowLeft className="h-5 w-5" />
-                                        <span className="sr-only">Voltar</span>
-                                    </Link>
-                                )}
-                            </div>
-
-                            {!isMobile && (
-                                <div className="flex w-2/4 sm:w-1/3 justify-center items-center overflow-hidden">
-                                    <h1 className="text-lg font-semibold tracking-tight truncate">
-                                        {title}
-                                    </h1>
+            {showHeader && (
+                <header className="header-layout sticky top-0 z-40 flex h-14 w-full items-center justify-between px-4 md:px-6">
+                    <AnimatePresence mode="wait">
+                        {isMobile && isSearchOpen ? (
+                            <motion.div
+                                key="mobile-search"
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.2 }}
+                                className="flex w-full items-center gap-2 h-full"
+                            >
+                                <Search className="h-5 w-5 text-muted-foreground shrink-0" />
+                                <Input
+                                    autoFocus
+                                    value={searchValue}
+                                    onChange={handleSearch}
+                                    placeholder="Buscar..."
+                                    className="flex-1 border-none bg-transparent shadow-none focus-visible:ring-0 px-1 text-base"
+                                />
+                                <Button variant="ghost" size="icon" onClick={closeSearch} className="shrink-0">
+                                    <X className="h-5 w-5" />
+                                </Button>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="normal-header"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="flex w-full items-center justify-between h-full"
+                            >
+                                <div className="flex items-center w-1/4 sm:w-1/3">
+                                    {backHref ? (
+                                        <Link
+                                            href={backHref}
+                                            className={buttonVariants({
+                                                variant: "ghost",
+                                                size: "icon",
+                                                className: "shrink-0 -ml-2 rounded-full",
+                                            })}
+                                        >
+                                            <ArrowLeft className="h-5 w-5" />
+                                            <span className="sr-only">Voltar</span>
+                                        </Link>
+                                    ) : (
+                                        isMobile ? renderAction(true) : null
+                                    )}
                                 </div>
-                            )}
 
-                            <div className="flex w-3/4 sm:w-1/3 items-center justify-end gap-1 sm:gap-2">
-                                {isMobile ? (
-                                    <>
-                                        {onSearchChange && (
-                                            <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)}>
-                                                <Search className="h-5 w-5" />
-                                            </Button>
-                                        )}
-                                        {actionButton}
-                                        {user && <UserMenu user={user} />}
-                                    </>
-                                ) : (
-                                    <>
-                                        <ThemeSwitcher />
-                                        <NotificationBell />
-                                        {user && <UserMenu user={user} />}
-                                    </>
+                                {!isMobile && (
+                                    <div className="flex w-2/4 sm:w-1/3 justify-center items-center overflow-hidden">
+                                        <h1 className="text-lg font-semibold tracking-tight truncate">
+                                            {title}
+                                        </h1>
+                                    </div>
                                 )}
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </header>
+
+                                <div className="flex w-3/4 sm:w-1/3 items-center justify-end gap-1 sm:gap-2">
+                                    {isMobile ? (
+                                        <>
+                                            {onSearchChange && (
+                                                <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)}>
+                                                    <Search className="h-5 w-5" />
+                                                </Button>
+                                            )}
+                                            {backHref ? renderAction(true) : null}
+                                            {user && <UserMenu user={user} />}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ThemeSwitcher />
+                                            <NotificationBell />
+                                            {user && <UserMenu user={user} />}
+                                        </>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </header>
+            )}
 
             {showSubHeader && (
                 <div className="sub-header-layout flex px-4 py-4 md:px-6 w-full">
@@ -173,13 +207,11 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                                     className="flex items-center"
                                                 >
                                                     <div className="relative w-full">
-                                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                        <Input
+                                                        <SearchBar
                                                             autoFocus
                                                             value={searchValue}
                                                             onChange={handleSearch}
                                                             placeholder="Buscar..."
-                                                            className="pl-9 pr-10 w-full rounded-full bg-muted/50"
                                                         />
                                                         <Button
                                                             variant="ghost"
@@ -199,7 +231,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                                     exit={{ opacity: 0 }}
                                                 >
                                                     <Button
-                                                        variant="outline"
+                                                        variant="ghost"
                                                         size="icon"
                                                         className="rounded-full"
                                                         onClick={() => setIsSearchOpen(true)}
@@ -213,7 +245,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                 )}
 
                                 <div className={cn("transition-all duration-300", isSearchOpen && subtitle ? "hidden lg:block" : "block")}>
-                                    {actionButton}
+                                    {renderAction(false)}
                                 </div>
                             </div>
                         </div>
