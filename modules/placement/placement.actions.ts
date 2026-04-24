@@ -116,3 +116,15 @@ export const getPlacementStatsAction = managerAction
   .action(async ({ parsedInput }) => {
     return await placementService.getStats(parsedInput.languageId);
   });
+
+export const getPlacementDashboardAction = protectedAction
+  .schema(z.void())
+  .action(async ({ ctx }) => {
+    return await placementService.getPlacementDashboard(ctx.user.id);
+  });
+
+export const getTestResultAction = protectedAction
+  .schema(z.object({ testId: z.number() }))
+  .action(async ({ parsedInput, ctx }) => {
+    return await placementService.getTestResult(parsedInput.testId, ctx.user.id);
+  });

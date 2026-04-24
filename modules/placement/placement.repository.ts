@@ -241,5 +241,48 @@ export const placementRepository = {
       byStatus: result,
       byLevel: cefrResult
     };
+  },
+
+  async getTestHistory(userId: string) {
+    return db.query.placementTestsTable.findMany({
+      where: eq(placementTestsTable.userId, userId),
+      with: {
+        language: true,
+      },
+      orderBy: [desc(placementTestsTable.startedAt)],
+    });
+  },
+
+  async getActiveTests(userId: string) {
+    return db.query.placementTestsTable.findMany({
+      where: and(
+        eq(placementTestsTable.userId, userId),
+        eq(placementTestsTable.status, "in_progress")
+      ),
+      with: {
+        language: true,
+      }
+    });
+  },
+
+  async getTestById(testId: number, userId: string) {
+    return db.query.placementTestsTable.findFirst({
+      where: and(
+        eq(placementTestsTable.id, testId),
+        eq(placementTestsTable.userId, userId)
+      ),
+      with: {
+        language: true,
+      }
+    });
+  },
+
+  async getTestAnswers(testId: number) {
+    return db.query.testAnswersTable.findMany({
+      where: eq(testAnswersTable.testId, testId),
+      with: {
+        question: true,
+      }
+    });
   }
 };

@@ -1,4 +1,5 @@
 import { pgTable, text, timestamp, boolean, pgEnum, integer, serial, jsonb, uuid, varchar } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { usersTable } from "../user/user.schema";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -57,6 +58,37 @@ export const testAnswersTable = pgTable("test_answers", {
   eloScoreAfterAnswer: integer("elo_score_after_answer").notNull(),
   answeredAt: timestamp("answered_at").defaultNow(),
 });
+
+// Relations
+export const placementTestsRelations = relations(placementTestsTable, ({ one, many }) => ({
+  user: one(usersTable, {
+    fields: [placementTestsTable.userId],
+    references: [usersTable.id],
+  }),
+  language: one(languages, {
+    fields: [placementTestsTable.languageId],
+    references: [languages.id],
+  }),
+  answers: many(testAnswersTable),
+}));
+
+export const testAnswersRelations = relations(testAnswersTable, ({ one }) => ({
+  test: one(placementTestsTable, {
+    fields: [testAnswersTable.testId],
+    references: [placementTestsTable.id],
+  }),
+  question: one(questionsTable, {
+    fields: [testAnswersTable.questionId],
+    references: [questionsTable.id],
+  }),
+}));
+
+export const questionsRelations = relations(questionsTable, ({ one }) => ({
+  language: one(languages, {
+    fields: [questionsTable.languageId],
+    references: [languages.id],
+  }),
+}));
 
 // Zod Schemas
 export const selectQuestionSchema = createSelectSchema(questionsTable);

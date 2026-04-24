@@ -181,7 +181,7 @@ const studentItems: MenuItemType[] = [
 
 const managerItems: MenuItemType[] = [
     {
-        href: "/[locale]/hub/manager/my-profile",
+        href: "/manager/profile",
         label: "Meu Perfil",
         labelKey: "myProfile",
         Icon: UserIcon,
@@ -194,6 +194,14 @@ const managerItems: MenuItemType[] = [
         Icon: PeopleIcon,
         iconProps: { size: 20 },
         permission: "student.support",
+    },
+    {
+        href: "/manager/learning",
+        label: "Aprendizado",
+        labelKey: "learning",
+        Icon: ClapIcon,
+        iconProps: { size: 20 },
+        permission: "material.view",
     },
     {
         href: "/[locale]/hub/manager/tasks",
@@ -242,7 +250,7 @@ export function getSidebarItemsByRole(
 ): MenuItemType[] {
     const role = user.role;
     const raw = sidebarItemsByRole[role] || [];
-    
+
     return raw
         .filter((item) => !item.permission || hasPermission(user, item.permission))
         .map((it) => ({

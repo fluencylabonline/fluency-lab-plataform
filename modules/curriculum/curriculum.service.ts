@@ -525,6 +525,10 @@ export const curriculumService = {
     return await curriculumRepository.deleteLanguage(id);
   },
 
+  async findLanguageById(id: string) {
+    return await curriculumRepository.findLanguageById(id);
+  },
+
   // Media Library Management
   async getAllMedia() {
     return await curriculumRepository.findAllMedia();

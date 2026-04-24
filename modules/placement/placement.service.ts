@@ -1,6 +1,6 @@
 import { placementRepository } from "./placement.repository";
 import { userRepository } from "../user/user.repository";
-import { calculateElo } from "@/lib/adaptive-scoring";
+import { calculateElo, mapEloToCEFR } from "@/lib/adaptive-scoring";
 import { Question, PlacementTest } from "./placement.schema";
 import { curriculumService } from "../curriculum/curriculum.service";
 import { curriculumRepository } from "../curriculum/curriculum.repository";
@@ -60,11 +60,23 @@ export const placementService = {
    */
   async getNextQuestion(userId: string, testId: number, languageId: string, currentElo: number, answeredCount: number): Promise<Question | null> {
     const skills: Array<"grammar" | "vocabulary" | "reading" | "listening"> = ["grammar", "vocabulary", "reading", "listening"];
+    
+    // 1. Try the ideal skill in rotation
     const targetSkill = skills[answeredCount % 4];
-
     const excludeIds = await placementRepository.getAnsweredQuestionIds(testId);
 
-    const question = await placementRepository.getNextAdaptiveQuestion(languageId, targetSkill, currentElo, excludeIds);
+    let question = await placementRepository.getNextAdaptiveQuestion(languageId, targetSkill, currentElo, excludeIds);
+
+    // 2. If not found, try other skills in order
+    if (!question) {
+      console.log(`[PlacementService] No questions found for target skill ${targetSkill}. Trying other skills...`);
+      for (const skill of skills) {
+        if (skill === targetSkill) continue;
+        question = await placementRepository.getNextAdaptiveQuestion(languageId, skill, currentElo, excludeIds);
+        if (question) break;
+      }
+    }
+
     return question ?? null;
   },
 
@@ -96,7 +108,23 @@ export const placementService = {
       throw new Error("Question not found.");
     }
 
-    const isCorrect = question.correctOptionId === data.selectedOptionId;
+    let isCorrect = false;
+
+    const textTypes = ["unscramble", "writing", "gapfill"];
+
+    if (textTypes.includes(question.type || "")) {
+      // Normalize both strings: lowercase, remove punctuation, trim extra spaces
+      const normalize = (s: string) => s.toLowerCase().replace(/[.,!?;:]/g, "").replace(/\s+/g, " ").trim();
+      
+      // For writing/gapfill, the correct answer might be in correctOptionId (as string) or context
+      const expected = question.type === "unscramble" 
+        ? (question.context || "") 
+        : (question.correctOptionId || "");
+        
+      isCorrect = normalize(data.selectedOptionId) === normalize(expected);
+    } else {
+      isCorrect = question.correctOptionId === data.selectedOptionId;
+    }
 
     // 3. Get current progress to calculate dynamic K-Factors
     const studentQuestionsAnswered = await placementRepository.countTestAnswers(test.id);
@@ -315,7 +343,7 @@ export const placementService = {
     // 2. Generation Logic per Type
     for (const type of types) {
       console.log(`[PlacementService] Processing type: ${type}`);
-      
+
       if (type === "writing" && validMedias.length > 0) {
         let deterministicCount = 0;
         for (const mediaRecord of validMedias) {
@@ -324,7 +352,7 @@ export const placementService = {
 
           // Use the segments as sentences
           const selection = segments.sort(() => 0.5 - Math.random()).slice(0, 5);
-          
+
           for (const s of selection) {
             const { sentenceWithGap, correctAnswer } = this.generateDeterministicGapFill(s.word);
             questions.push({
@@ -369,9 +397,9 @@ export const placementService = {
 
           const shuffledWordsWithMeta = [...indexedWords].sort(() => 0.5 - Math.random());
           const shuffledWords = shuffledWordsWithMeta.map(w => w.word);
-          
+
           // correctOrder[i] is the index in shuffledWords that holds the word originally at words[i]
-          const correctOrder = indexedWords.map(original => 
+          const correctOrder = indexedWords.map(original =>
             shuffledWordsWithMeta.findIndex(shuffled => shuffled.originalIndex === original.originalIndex)
           );
 
@@ -403,7 +431,7 @@ export const placementService = {
 
         const skill = skillMap[type] || "grammar";
         console.log(`[PlacementService] AI Batch Generation starting for ${type} with ${validItems.length} items`);
-        
+
         // Group items in batches of 5 to optimize API calls and respect quotas
         const batchSize = 5;
         for (let i = 0; i < validItems.length; i += batchSize) {
@@ -446,5 +474,79 @@ export const placementService = {
 
     console.log(`[PlacementService] Total questions generated: ${questions.length}`);
     return questions;
+  },
+
+  /**
+   * Gets all necessary data for the placement dashboard.
+   */
+  async getPlacementDashboard(userId: string) {
+    const [history, activeTests, languages] = await Promise.all([
+      placementRepository.getTestHistory(userId),
+      placementRepository.getActiveTests(userId),
+      curriculumService.findAllLanguages(),
+    ]);
+
+    // Enhance languages with information about available questions
+    const availableLanguages = await Promise.all(languages.map(async (lang) => {
+      const stats = await placementRepository.getPlacementStats(lang.id);
+      const activeCount = stats.byStatus.find(s => s.status === 'active')?.count || 0;
+      return {
+        ...lang,
+        hasActiveTest: activeCount >= 20
+      };
+    }));
+
+    const user = await userRepository.findById(userId);
+    const lastDate = user?.lastPlacementTestDate;
+    let nextEligibleDate = null;
+    let isEligible = true;
+
+    if (lastDate) {
+      const nextDate = new Date(lastDate);
+      nextDate.setMonth(nextDate.getMonth() + 6);
+      nextEligibleDate = nextDate;
+      isEligible = new Date() >= nextDate;
+    }
+
+    return {
+      history,
+      activeTests,
+      availableLanguages: availableLanguages.filter(l => l.hasActiveTest),
+      eligibility: {
+        isEligible,
+        nextEligibleDate,
+        lastTestDate: lastDate
+      }
+    };
+  },
+
+  /**
+   * Gets the detailed results of a completed test.
+   */
+  async getTestResult(testId: number, userId: string) {
+    const test = await placementRepository.getTestById(testId, userId);
+    if (!test) throw new Error("Test not found");
+
+    const answers = await placementRepository.getTestAnswers(testId);
+
+    // Calculate skill scores (0-100)
+    const skills = ['grammar', 'vocabulary', 'reading', 'listening'];
+    const skillStats = skills.map(skill => {
+      const skillAnswers = answers.filter(a => a.question?.skill === skill);
+      const correct = skillAnswers.filter(a => a.isCorrect).length;
+      const total = skillAnswers.length;
+      const score = total > 0 ? (correct / total) * 100 : 0;
+      return { subject: skill, score, fullMark: 100 };
+    });
+
+    return {
+      level: mapEloToCEFR(test.finalEloScore || 600),
+      score: test.finalEloScore,
+      skillStats,
+      totalQuestions: answers.length,
+      correctAnswers: answers.filter(a => a.isCorrect).length,
+      startedAt: test.startedAt,
+      completedAt: test.completedAt,
+    };
   }
 };
