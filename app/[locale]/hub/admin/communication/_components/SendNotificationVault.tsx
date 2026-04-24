@@ -23,10 +23,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { sendNotificationSchema, SendNotificationValues } from "@/modules/notification/notification.schema";
 import { sendNotificationAction } from "@/modules/notification/notification.actions";
 import { searchUsersAction } from "@/modules/user/user.actions";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem
+} from "@/components/ui/command";
 import { notify } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { SearchBar } from "@/components/ui/search-bar";
 import { Badge } from "@/components/ui/badge";
 import { EmptyResults } from "@/components/ui/empty";
 import { X, Search, User as UserIcon, Check } from "lucide-react";
@@ -198,60 +205,62 @@ export function SendNotificationVault({ open, onOpenChange }: SendNotificationVa
                   </div>
 
                   <div className="space-y-2">
-                    <SearchBar
-                      placeholder="Procurar usuários por nome, email ou ID..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="rounded-xl"
-                    />
-
-                    {(searchResults.length > 0 || isSearching) && (
-                      <div className="max-h-[200px] overflow-y-auto rounded-xl border border-border bg-card p-1 shadow-sm">
-                        {isSearching ? (
+                    <Command 
+                      shouldFilter={false} 
+                      className="rounded-xl border border-gray-200/50 dark:border-gray-700/50"
+                    >
+                      <CommandInput
+                        placeholder="Procurar usuários por nome, email ou ID..."
+                        value={searchTerm}
+                        onValueChange={setSearchTerm}
+                      />
+                      <CommandList className="max-h-[200px]">
+                        {isSearching && (
                           <div className="p-4 text-center text-xs text-muted-foreground italic">
                             Buscando usuários...
                           </div>
-                        ) : (
-                          <div className="grid grid-cols-1 gap-1">
-                            {searchResults.map((user) => {
-                              const isSelected = selectedUsers.find(u => u.id === user.id);
-                              return (
-                                <button
-                                  key={user.id}
-                                  type="button"
-                                  onClick={() => toggleUser(user)}
-                                  className={cn(
-                                    "flex items-center gap-3 p-2 rounded-lg text-left transition-colors hover:bg-accent",
-                                    isSelected && "bg-accent/50"
-                                  )}
-                                >
-                                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                    <UserIcon className="w-4 h-4 text-primary" />
-                                  </div>
-                                  <div className="flex flex-col flex-1 min-w-0">
-                                    <span className="text-sm font-medium truncate">{user.name}</span>
-                                    <span className="text-[10px] text-muted-foreground truncate">{user.email}</span>
-                                  </div>
-                                  {isSelected ? (
-                                    <Check className="w-4 h-4 text-primary" />
-                                  ) : (
-                                    <Badge variant="outline" className="text-[8px] h-4">Selecionar</Badge>
-                                  )}
-                                </button>
-                              );
-                            })}
-                          </div>
                         )}
-                      </div>
-                    )}
 
-                    {searchTerm.length >= 2 && !isSearching && searchResults.length === 0 && (
-                      <EmptyResults
-                        searchQuery={searchTerm}
-                        title="Nenhum usuário encontrado"
-                        description="Tente ajustar os termos da sua busca ou verifique se o usuário existe."
-                      />
-                    )}
+                        {!isSearching && searchTerm.length >= 2 && searchResults.length === 0 && (
+                          <CommandEmpty className="p-0">
+                            <EmptyResults
+                              searchQuery={searchTerm}
+                              title="Nenhum usuário encontrado"
+                              className="py-4"
+                            />
+                          </CommandEmpty>
+                        )}
+
+                        <CommandGroup>
+                          {searchResults.map((user) => {
+                            const isSelected = selectedUsers.find(u => u.id === user.id);
+                            return (
+                              <CommandItem
+                                key={user.id}
+                                onSelect={() => toggleUser(user)}
+                                className={cn(
+                                  "flex items-center gap-3 p-2 rounded-lg cursor-pointer",
+                                  isSelected && "bg-primary/5"
+                                )}
+                              >
+                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                  <UserIcon className="w-4 h-4 text-primary" />
+                                </div>
+                                <div className="flex flex-col flex-1 min-w-0">
+                                  <span className="text-sm font-medium truncate">{user.name}</span>
+                                  <span className="text-[10px] text-muted-foreground truncate">{user.email}</span>
+                                </div>
+                                {isSelected ? (
+                                  <Check className="w-4 h-4 text-primary" />
+                                ) : (
+                                  <Badge variant="outline" className="text-[8px] h-4">Selecionar</Badge>
+                                )}
+                              </CommandItem>
+                            );
+                          })}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
                   </div>
                 </div>
               </VaultField>

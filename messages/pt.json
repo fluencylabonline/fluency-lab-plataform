@@ -48,6 +48,11 @@
     "unreadSuffix": "{count} {count, plural, one {não lida} other {não lidas}}",
     "notifications": "Notificações"
   },
+  "EmptyResults": {
+    "withSearch": "Nenhum resultado encontrado para sua busca.",
+    "withoutSearch": "Nenhum dado disponível no momento.",
+    "adjustSearch": "Tente ajustar seus termos de busca."
+  },
   "UserManagement": {
     "createUserTitle": "Criar Novo Usuário",
     "createUserDescription": "Preencha os dados abaixo para cadastrar um novo usuário e enviar o convite por e-mail.",

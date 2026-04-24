@@ -48,6 +48,11 @@
     "unreadSuffix": "{count} unread",
     "notifications": "Notifications"
   },
+  "EmptyResults": {
+    "withSearch": "No results found for your search.",
+    "withoutSearch": "No data available at the moment.",
+    "adjustSearch": "Try adjusting your search terms."
+  },
   "UserManagement": {
     "createUserTitle": "Create New User",
     "createUserDescription": "Fill in the details below to register a new user and send the email invitation.",
