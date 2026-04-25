@@ -400,7 +400,16 @@ export const billingService = {
     if (event.event === "billing.paid") {
       const data = event.data;
       const resource = "billing" in data ? data.billing : data.pixQrCode;
-      const metadata = (resource as { metadata?: Record<string, any> }).metadata;
+      const metadata = (resource as { 
+        metadata?: { 
+          installmentId?: string;
+          installment?: { id?: string };
+          subscriptionId?: string;
+          subscription?: { id?: string };
+          type?: string;
+          info?: { type?: string };
+        } 
+      }).metadata;
 
       const installmentId = metadata?.installmentId || metadata?.installment?.id;
       const subscriptionId = metadata?.subscriptionId || metadata?.subscription?.id;

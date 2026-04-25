@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { User } from "@/modules/user/user.schema";
+import { type OnboardingData } from "./OnboardingFlow";
 import type { Plan } from "@/modules/billing/billing.schema";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -25,7 +26,7 @@ export function StepPayment({
     onBack,
     user,
 }: {
-    onNext: (data: any) => void;
+    onNext: (data: OnboardingData) => void;
     onBack: () => void;
     user: User;
 }) {
@@ -125,7 +126,7 @@ export function StepPayment({
                 t("payment.invoiceGenerated") || "Cobrança gerada com sucesso!"
             );
         } else {
-            notify.error((result?.data as any)?.error || "Erro ao gerar cobrança");
+            notify.error((result?.data as { error?: string })?.error || "Erro ao gerar cobrança");
         }
     };
 

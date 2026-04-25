@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
@@ -8,6 +8,7 @@ import { onboardingWelcomeAction } from "@/modules/onboarding/onboarding.actions
 import { notify } from "@/components/ui/toaster";
 import { useState } from "react";
 import { Loader2, ArrowRight } from "lucide-react";
+import { type OnboardingData } from "./OnboardingFlow";
 
 const welcomeSchema = z.object({
     name: z.string().min(2, "Nome muito curto"),
@@ -24,7 +25,7 @@ interface FieldProps {
     inputClass?: string;
 }
 
-function Field({ label, error, children, inputClass }: FieldProps) {
+function Field({ label, error, children }: FieldProps) {
     return (
         <div className="space-y-2">
             <label className="block text-[11px] font-medium uppercase tracking-widest text-slate-500">
@@ -43,8 +44,8 @@ export function StepWelcome({
     initialData,
     inputClass,
 }: {
-    onNext: (data: any) => void;
-    initialData: any;
+    onNext: (data: OnboardingData) => void;
+    initialData: OnboardingData;
     inputClass?: string;
 }) {
     const t = useTranslations("Onboarding");
@@ -53,7 +54,7 @@ export function StepWelcome({
     const {
         register,
         handleSubmit,
-        watch,
+        control,
         formState: { errors },
     } = useForm<WelcomeForm>({
         resolver: zodResolver(welcomeSchema),
@@ -66,8 +67,8 @@ export function StepWelcome({
         },
     });
 
-    const name = watch("name");
-    const birthDate = watch("birthDate");
+    const name = useWatch({ control, name: "name" });
+    const birthDate = useWatch({ control, name: "birthDate" });
     const isComplete = name?.length >= 2 && birthDate;
 
     const onSubmit = async (data: WelcomeForm) => {
@@ -76,7 +77,10 @@ export function StepWelcome({
         setLoading(false);
 
         if (result?.data?.success) {
-            onNext(data);
+            onNext({
+                ...data,
+                birthDate: new Date(data.birthDate)
+            });
         } else {
             notify.error(result?.data?.error || "Erro ao salvar");
         }

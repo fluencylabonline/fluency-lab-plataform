@@ -16,6 +16,20 @@ import { cn } from "@/lib/utils";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
+export interface OnboardingData extends Partial<User> {
+    zipCode?: string;
+    street?: string;
+    number?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
+    guardianData?: {
+        name?: string;
+        taxId?: string;
+        relationship?: string;
+    };
+}
+
 interface OnboardingFlowProps {
     user: User;
 }
@@ -31,8 +45,8 @@ const inputClass = cn(
 
 export function OnboardingFlow({ user }: OnboardingFlowProps) {
     const t = useTranslations("Onboarding");
-    const [currentStep, setCurrentStep] = useState(5);
-    const [onboardingData, setOnboardingData] = useState<Partial<User>>(user);
+    const [currentStep, setCurrentStep] = useState(1);
+    const [onboardingData, setOnboardingData] = useState<OnboardingData>(user);
 
     const steps = [
         { id: 1, title: t("steps.welcome") },
@@ -44,7 +58,7 @@ export function OnboardingFlow({ user }: OnboardingFlowProps) {
 
     const progress = (currentStep / steps.length) * 100;
 
-    const nextStep = (data?: Partial<User>) => {
+    const nextStep = (data?: OnboardingData) => {
         if (data) {
             setOnboardingData((prev) => ({ ...prev, ...data }));
         }

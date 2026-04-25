@@ -50,7 +50,6 @@ export function PlansPageClient({ initialPlans, user }: PlansPageClientProps) {
         handleSuccess(result.data.plan as Plan);
         notify.success(t("statusUpdated") || "Status atualizado!");
       } else {
-        // @ts-ignore
         notify.error(result?.data?.error || t("statusUpdateError") || "Erro ao atualizar status");
       }
     } finally {

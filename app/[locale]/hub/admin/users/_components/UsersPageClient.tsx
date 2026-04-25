@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Plus, Mail, Shield, Circle } from "lucide-react";
 import { CreateUserVault } from "./CreateUserVault";
 import { Header } from "@/components/layout/header";
-import { hasPermission } from "@/lib/rbac";
+import { hasPermission, Role } from "@/lib/rbac";
 import type { User } from "@/modules/user/user.schema";
 import {
   Select,
@@ -130,7 +130,7 @@ export function UsersPageClient({ initialData, currentUser }: UsersPageClientPro
                 <div className="flex items-center justify-between pt-2 border-t mt-auto">
                   <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                     <Shield className="w-3.5 h-3.5 text-primary/60" />
-                    {tRoles(user.role as any)}
+                    {tRoles(user.role as Role)}
                   </div>
 
                   <div className="flex items-center gap-1 text-[10px] text-muted-foreground">

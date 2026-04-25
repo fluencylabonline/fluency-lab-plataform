@@ -82,6 +82,7 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
 
   const role = useWatch({ control, name: "role" });
   const selectedLanguages = useWatch({ control, name: "languages" }) || [];
+  const assignedPlanId = useWatch({ control, name: "assignedPlanId" });
 
   const onSubmit: SubmitHandler<CreateUserValues> = async (data) => {
     const promise = createUserAction({
@@ -186,12 +187,12 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
 
                 <VaultField label={t("assignedPlan")} error={errors.assignedPlanId?.message}>
                   <div className="space-y-2">
-                    {form.watch("assignedPlanId") ? (
+                    {assignedPlanId ? (
                       <div className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
                         <div className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-primary" />
                           <span className="text-sm font-medium">
-                            {plans.find((p) => p.id === form.getValues("assignedPlanId"))?.name}
+                            {plans.find((p) => p.id === assignedPlanId)?.name}
                           </span>
                         </div>
                         <Button

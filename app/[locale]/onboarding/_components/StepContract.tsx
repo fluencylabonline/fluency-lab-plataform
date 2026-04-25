@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { Loader2, ArrowLeft, CheckCircle2, Download, ArrowRight, FileText } from "lucide-react";
 import { injectTemplateData } from "@/modules/contract/contract.service.utils";
 import type { User } from "@/modules/user/user.schema";
+import type { ContractInstance, ContractTemplate } from "@/modules/contract/contract.schema";
 
 export function StepContract({
     onNext,
@@ -21,7 +22,7 @@ export function StepContract({
     const t = useTranslations("Onboarding");
     const [loading, setLoading] = useState(false);
     const [contractLoading, setContractLoading] = useState(true);
-    const [contract, setContract] = useState<any>(null);
+    const [contract, setContract] = useState<(ContractInstance & { template?: ContractTemplate }) | null>(null);
     const [signed, setSigned] = useState(false);
     const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
 

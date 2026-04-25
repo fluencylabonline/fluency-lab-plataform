@@ -9,6 +9,8 @@ import { notify } from "@/components/ui/toaster";
 import { useState } from "react";
 import { Loader2, ArrowLeft, ArrowRight, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { User } from "@/modules/user/user.schema";
+import { type OnboardingData } from "./OnboardingFlow";
 import {
     Select,
     SelectContent,
@@ -39,10 +41,9 @@ interface FieldProps {
     error?: string;
     children: React.ReactNode;
     className?: string;
-    inputClass?: string;
 }
 
-function Field({ label, error, children, className, inputClass }: FieldProps) {
+function Field({ label, error, children, className }: FieldProps) {
     return (
         <div className={cn("space-y-2", className)}>
             <label className="block text-[11px] font-medium uppercase tracking-widest text-slate-500">
@@ -60,9 +61,9 @@ export function StepAddress({
     initialData,
     inputClass,
 }: {
-    onNext: (data: any) => void;
+    onNext: (data: OnboardingData) => void;
     onBack: () => void;
-    initialData: any;
+    initialData: OnboardingData;
     inputClass?: string;
 }) {
     const t = useTranslations("Onboarding");
@@ -81,6 +82,7 @@ export function StepAddress({
 
     const minor = isMinor();
 
+    const initial = initialData;
     const {
         register,
         handleSubmit,
@@ -90,18 +92,18 @@ export function StepAddress({
     } = useForm<AddressForm>({
         resolver: zodResolver(addressFormSchema),
         defaultValues: {
-            nationality: initialData.nationality || "brazilian",
-            taxId: initialData.taxId || "",
-            cellphone: initialData.cellphone || "",
-            zipCode: initialData.zipCode || "",
-            street: initialData.street || "",
-            number: initialData.number || "",
-            neighborhood: initialData.neighborhood || "",
-            city: initialData.city || "",
-            state: initialData.state || "",
-            guardianName: initialData.guardianData?.name || "",
-            guardianTaxId: initialData.guardianData?.taxId || "",
-            guardianRelationship: initialData.guardianData?.relationship || "",
+            nationality: initial.nationality || "brazilian",
+            taxId: initial.taxId || "",
+            cellphone: initial.cellphone || "",
+            zipCode: initial.zipCode || "",
+            street: initial.street || "",
+            number: initial.number || "",
+            neighborhood: initial.neighborhood || "",
+            city: initial.city || "",
+            state: initial.state || "",
+            guardianName: initial.guardianData?.name || initial.guardianName || "",
+            guardianTaxId: initial.guardianData?.taxId || initial.guardianTaxId || "",
+            guardianRelationship: initial.guardianData?.relationship || initial.guardianRelationship || "",
         },
     });
 
@@ -135,7 +137,7 @@ export function StepAddress({
         setLoading(false);
 
         if (result?.data?.success) {
-            onNext(payload);
+            onNext(payload as unknown as Partial<User>);
         } else {
             notify.error(result?.data?.error || "Error");
         }

@@ -2,7 +2,6 @@ import { CalendarDaysIcon } from "@/components/animated-icons/calendar";
 import { CircleCheckIcon } from "@/components/animated-icons/circle-check";
 import { DollarSignIcon } from "@/components/animated-icons/finances";
 import LayoutDashboardIcon from "@/components/animated-icons/layout-dashboard-icon";
-import { MessageSquareIcon } from "@/components/animated-icons/message-square";
 import { LayoutPanelTopIcon } from "@/components/animated-icons/notebook";
 import { BellIcon } from "@/components/animated-icons/notification";
 import { PeopleIcon } from "@/components/animated-icons/people";

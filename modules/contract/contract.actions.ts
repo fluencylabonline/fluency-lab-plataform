@@ -1,7 +1,7 @@
 "use server";
 
 import { protectedAction } from "@/lib/safe-action";
-import { signContractSchema } from "./contract.schema";
+import { signContractSchema, type ContractInstance } from "./contract.schema";
 import { contractService } from "./contract.service";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
@@ -86,5 +86,5 @@ export const getPendingContractAction = protectedAction
       success: true, 
       data: instance,
       downloadUrl 
-    } as { success: boolean; error?: string; data?: any; downloadUrl?: string };
+    } as { success: boolean; error?: string; data?: ContractInstance | null; downloadUrl?: string };
   });
