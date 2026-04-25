@@ -74,5 +74,13 @@ export const userRepository = {
       limit: 10,
     });
   },
-};
 
+  /**
+   * Get all users.
+   */
+  async findAll(): Promise<User[]> {
+    return db.query.usersTable.findMany({
+      orderBy: (table, { desc }) => [desc(table.createdAt)],
+    });
+  },
+};

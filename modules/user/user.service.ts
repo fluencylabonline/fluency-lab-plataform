@@ -148,4 +148,8 @@ export const userService = {
   async searchUsers(term: string): Promise<User[]> {
     return userRepository.searchByTerm(term);
   },
+
+  async getAllUsers(): Promise<User[]> {
+    return userRepository.findAll();
+  },
 };

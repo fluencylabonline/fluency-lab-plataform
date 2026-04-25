@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
 import { UsersPageClient } from "./_components/UsersPageClient";
 import { hasPermission } from "@/lib/rbac";
+import { userService } from "@/modules/user/user.service";
 
 export default async function AdminUsersPage() {
   const user = await getCurrentUser();
@@ -9,11 +10,9 @@ export default async function AdminUsersPage() {
     redirect("/signin");
   }
 
+  const users = await userService.getAllUsers();
+
   return (
-    <div className="flex flex-col h-full">
-      <main className="flex-1 p-6">
-        <UsersPageClient />
-      </main>
-    </div>
+    <UsersPageClient initialData={users} currentUser={user} />
   );
 }

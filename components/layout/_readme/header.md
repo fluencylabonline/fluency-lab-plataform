@@ -6,12 +6,6 @@ Componente de cabeçalho adaptativo com suporte a busca expansível, botão de a
 
 ## Instalação
 
-O componente depende dos seguintes pacotes e utilitários internos:
-
-```bash
-npm install framer-motion lucide-react
-```
-
 Dependências internas necessárias:
 
 ```
@@ -57,12 +51,22 @@ export default function Page() {
 | `subtitle` | `string` | — | Descrição exibida no sub-header. |
 | `backHref` | `string` | — | Exibe botão de voltar com link. |
 | `onSearchChange` | `(value: string) => void` | — | Ativa o campo de busca quando fornecido. |
-| `actionButton` | `React.ReactNode` | — | Botão ou elemento de ação no canto direito. |
+| `action` | `HeaderAction` | — | Objeto com label, ícone e callback de clique. |
 | `showSubHeader` | `boolean` | `true` | Exibe ou oculta a faixa inferior com subtitle e ações. |
 | `user` | `UserObject` | — | Dados do usuário para o `UserMenu`. |
 | `className` | `string` | — | Classes extras no wrapper externo. |
 
 Aceita também todas as props nativas de `HTMLDivElement` via `...props`.
+
+### Tipo `HeaderAction`
+
+```ts
+{
+  label: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+}
+```
 
 ### Tipo `UserObject`
 
@@ -147,25 +151,29 @@ const filtered = users.filter((u) =>
 <Header
   title="Produtos"
   subtitle="Gerencie o catálogo"
-  actionButton={
-    <Button onClick={() => router.push("/produtos/novo")}>
-      Novo produto
-    </Button>
-  }
+  action={{
+    label: "Novo produto",
+    icon: <Plus className="w-4 h-4" />,
+    onClick: () => router.push("/produtos/novo")
+  }}
   user={currentUser}
 />
 ```
 
 ### Com busca e ação combinadas
 
-No desktop, quando a busca está aberta e há um `subtitle`, o `actionButton` se oculta automaticamente em telas menores que `lg` para evitar estouro de layout. Em `lg:` ele reaparece.
+No desktop, quando a busca está aberta e há um `subtitle`, a ação se oculta automaticamente em telas menores que `lg` para evitar estouro de layout. Em `lg:` ela reaparece.
 
 ```tsx
 <Header
   title="Clientes"
   subtitle="Lista completa de clientes ativos"
   onSearchChange={setQuery}
-  actionButton={<Button>Exportar</Button>}
+  action={{
+    label: "Exportar",
+    icon: <Download className="w-4 h-4" />,
+    onClick: handleExport
+  }}
   user={currentUser}
 />
 ```
@@ -195,7 +203,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           subtitle="Bem-vindo de volta"
           user={currentUser}
         />
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="container overflow-y-auto">
           {children}
         </main>
       </div>
@@ -257,40 +265,44 @@ const [query, setQuery] = useState("");
 const [open, setOpen] = useState(false); // não há como passar isso
 ```
 
-### `actionButton` deve ser um elemento já configurado
+### `action` deve ser um objeto configurado
 
-Não passe handlers ou lógica de navegação dentro do Header — passe o botão pronto.
+Não passe handlers complexos ou lógica de navegação dentro do Header — prefira passar o callback já pronto.
 
 ```tsx
-// ✅ botão pronto
+// ✅ correto
 <Header
-  actionButton={<Button onClick={handleCreate}>Criar</Button>}
+  action={{
+    label: "Criar",
+    icon: <Plus className="w-4 h-4" />,
+    onClick: handleCreate
+  }}
 />
 
-// ❌ evite lógica de negócio dentro do nó
+// ❌ evite lógica de negócio extensa dentro do nó
 <Header
-  actionButton={
-    <Button onClick={() => {
+  action={{
+    label: "Criar",
+    icon: <Plus />,
+    onClick: () => {
       validatePermissions();
       router.push("/novo");
-    }}>
-      Criar
-    </Button>
-  }
+    }
+  }}
 />
 // extraia a função para fora
 ```
 
 ### Use `backHref` apenas para navegação real
 
-O botão de voltar usa `<Link href>`, não `router.back()`. Use somente quando a URL de destino for fixa e conhecida. Para histórico dinâmico, implemente o botão no `actionButton` ou fora do Header.
+O botão de voltar usa `<Link href>`, não `router.back()`. Use somente quando a URL de destino for fixa e conhecida. Para histórico dinâmico, implemente o botão no `action` ou fora do Header.
 
 ```tsx
 // ✅ URL fixa
 <Header backHref="/pedidos" title="Detalhes" />
 
 // ❌ para histórico dinâmico, não use backHref
-// implemente fora do Header
+// implemente fora do Header ou via action.onClick com router.back()
 <button onClick={() => router.back()}>Voltar</button>
 ```
 
