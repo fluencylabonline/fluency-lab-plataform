@@ -6,7 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { cn } from "@/lib/utils";
-import { usePWA } from "@/hooks/ui/usePWA";
+import { useDevice } from "@/hooks/ui/use-device";
 
 
 const buttonVariants = cva(
@@ -83,7 +83,7 @@ const Button = forwardRef<React.ComponentRef<typeof ButtonPrimitive>, ButtonProp
     },
     ref
   ) => {
-    const { isStandalone } = usePWA();
+    const { isStandalone } = useDevice();
     const [os, setOs] = useState<"ios" | "android" | "other" | null>(null);
     const [ripples, setRipples] = useState<RippleType[]>([]);
 

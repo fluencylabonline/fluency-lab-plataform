@@ -9,29 +9,40 @@ export interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
-interface PwaStore {
+interface DeviceStore {
+  // PWA State
   deferredPrompt: BeforeInstallPromptEvent | null;
   updateAvailable: boolean;
   isStandalone: boolean;
   registration: ServiceWorkerRegistration | null;
+  
+  // Device State
+  isMobile: boolean;
+
+  // Actions
   setDeferredPrompt: (prompt: BeforeInstallPromptEvent | null) => void;
   setUpdateAvailable: (available: boolean) => void;
   setStandalone: (isStandalone: boolean) => void;
   setRegistration: (reg: ServiceWorkerRegistration | null) => void;
+  setIsMobile: (isMobile: boolean) => void;
+  
+  // Operations
   install: () => Promise<void>;
   update: () => void;
 }
 
-export const usePwaStore = create<PwaStore>((set, get) => ({
+export const useDeviceStore = create<DeviceStore>((set, get) => ({
   deferredPrompt: null,
   updateAvailable: false,
   isStandalone: false,
   registration: null,
+  isMobile: false,
 
   setDeferredPrompt: (prompt) => set({ deferredPrompt: prompt }),
   setUpdateAvailable: (available) => set({ updateAvailable: available }),
   setStandalone: (isStandalone) => set({ isStandalone }),
   setRegistration: (reg) => set({ registration: reg }),
+  setIsMobile: (isMobile) => set({ isMobile }),
 
   install: async () => {
     const { deferredPrompt } = get();
@@ -59,3 +70,25 @@ export const usePwaStore = create<PwaStore>((set, get) => ({
     });
   },
 }));
+
+/**
+ * Unified hook for Device and PWA state
+ */
+export function useDevice() {
+  const store = useDeviceStore();
+  
+  return {
+    // Device
+    isMobile: store.isMobile,
+    
+    // PWA
+    isStandalone: store.isStandalone,
+    isInstallable: !!store.deferredPrompt,
+    updateAvailable: store.updateAvailable,
+    install: store.install,
+    update: store.update,
+  };
+}
+
+// Backward compatibility or for specific mobile usage
+export const useIsMobile = () => useDeviceStore((state) => state.isMobile);

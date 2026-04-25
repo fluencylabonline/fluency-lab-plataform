@@ -10,7 +10,7 @@ import {
     VaultTitle,
 } from "@/components/ui/vault";
 import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/ui/useMobile";
+import { useIsMobile } from "@/hooks/ui/use-device";
 import { motion } from "framer-motion";
 
 type SelectContextType = {

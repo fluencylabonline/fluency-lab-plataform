@@ -1,5 +1,5 @@
 "use client";
-import { usePWA } from "@/hooks/ui/usePWA";
+import { useDevice } from "@/hooks/ui/use-device";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { PwaWelcomeScreen } from "@/components/landing/PwaWelcomeScreen";
@@ -11,7 +11,7 @@ import Footer from "@/components/landing/Footer";
 import { User } from "@/modules/user/user.schema";
 
 export function LandingView({ user }: { user: User | null }) {
-  const { isStandalone } = usePWA();
+  const { isStandalone } = useDevice();
   return (
     <>
       {!isStandalone ? (

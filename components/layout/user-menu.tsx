@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { User, Settings, LogOut } from "lucide-react";
-import { useIsMobile } from "@/hooks/ui/useMobile";
+import { useIsMobile } from "@/hooks/ui/use-device";
 import { authClient } from "@/lib/auth-client";
 import {
     DropdownMenu,

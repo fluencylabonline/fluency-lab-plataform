@@ -12,7 +12,7 @@ import {
     VaultTrigger,
 } from "@/components/ui/vault";
 import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/ui/useMobile";
+import { useIsMobile } from "@/hooks/ui/use-device";
 
 type DropdownMenuContextType = {
     isMobile: boolean;

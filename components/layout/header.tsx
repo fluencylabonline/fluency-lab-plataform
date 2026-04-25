@@ -6,7 +6,7 @@ import { ArrowLeft, Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/ui/useMobile";
+import { useIsMobile } from "@/hooks/ui/use-device";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserMenu } from "./user-menu";

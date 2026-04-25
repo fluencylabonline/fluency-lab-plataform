@@ -14,12 +14,12 @@ import {
   VaultPrimaryButton,
   VaultSecondaryButton
 } from "@/components/ui/vault";
-import { usePwaStore } from "@/hooks/ui/use-pwa-store";
+import { useDevice } from "@/hooks/ui/use-device";
 
 export function PwaVault() {
   const t = useTranslations("PwaVault");
   const pathname = usePathname();
-  const { deferredPrompt, updateAvailable, isStandalone, install, update } = usePwaStore();
+  const { isStandalone, isInstallable, updateAvailable, install, update } = useDevice();
   const [isOpen, setIsOpen] = useState(false);
   const [type, setType] = useState<"install" | "update" | null>(null);
 
@@ -34,7 +34,7 @@ export function PwaVault() {
 
       // 2. Check for Install (Only on Profile Page and NOT standalone)
       const isProfilePage = pathname?.includes("/profile");
-      if (deferredPrompt && isProfilePage && !isStandalone) {
+      if (isInstallable && isProfilePage && !isStandalone) {
         setType("install");
         setIsOpen(true);
         return;
@@ -47,7 +47,7 @@ export function PwaVault() {
 
     const timer = setTimeout(checkState, 500); // Small delay to allow hydration
     return () => clearTimeout(timer);
-  }, [deferredPrompt, updateAvailable, isStandalone, pathname]);
+  }, [isInstallable, updateAvailable, isStandalone, pathname]);
 
   const handleAction = async () => {
     if (type === "install") {

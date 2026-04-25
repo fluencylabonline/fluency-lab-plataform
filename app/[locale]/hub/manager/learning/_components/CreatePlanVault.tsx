@@ -31,7 +31,7 @@ import {
     SelectValue
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useIsMobile } from "@/hooks/ui/useMobile";
+import { useIsMobile } from "@/hooks/ui/use-device";
 
 const createPlanSchema = z.object({
     name: z.string().min(3, { message: "Name must be at least 3 characters" }),

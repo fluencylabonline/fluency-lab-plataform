@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { usePWA } from "@/hooks/ui/usePWA";
+import { useDevice } from "@/hooks/ui/use-device";
 import { Drawer } from "vaul";
 import { twMerge } from "tailwind-merge";
 import { cn } from "@/lib/utils";
@@ -93,7 +93,7 @@ const VaultContent = React.forwardRef<
         noPadding?: boolean;
     }
 >(({ className, children, showHandle = true, noPadding = false, onOpenAutoFocus, ...props }, ref) => {
-    const { isStandalone } = usePWA();
+    const { isStandalone } = useDevice();
 
     return (
         <Drawer.Portal>

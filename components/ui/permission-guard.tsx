@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { Shimmer } from "@shimmer-from-structure/react";
-import { useRBAC } from "@/hooks/use-permission";
+import { useRBAC } from "@/hooks/rbac/use-permission";
 import { Permission } from "@/lib/rbac";
 
 interface PermissionGuardProps {

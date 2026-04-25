@@ -17,16 +17,27 @@ function urlBase64ToUint8Array(base64String: string) {
   return outputArray;
 }
 
-import { usePwaStore, type BeforeInstallPromptEvent } from "@/hooks/ui/use-pwa-store";
+import { useDeviceStore, type BeforeInstallPromptEvent } from "@/hooks/ui/use-device";
+
+const MOBILE_BREAKPOINT = 768;
 
 export function PwaHandler() {
-  const { setDeferredPrompt, setUpdateAvailable, setRegistration, setStandalone } = usePwaStore();
+  const { setDeferredPrompt, setUpdateAvailable, setRegistration, setStandalone, setIsMobile } = useDeviceStore();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const mediaQuery = window.matchMedia("(display-mode: standalone)");
+    // Mobile Detection
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
 
+    checkMobile();
+    mql.addEventListener("change", checkMobile);
+
+    // Standalone Detection
+    const mediaQuery = window.matchMedia("(display-mode: standalone)");
     const checkStandalone = () => {
       const isStandaloneMode =
         mediaQuery.matches ||
@@ -38,8 +49,11 @@ export function PwaHandler() {
     checkStandalone();
     mediaQuery.addEventListener("change", checkStandalone);
 
-    return () => mediaQuery.removeEventListener("change", checkStandalone);
-  }, [setStandalone]);
+    return () => {
+      mql.removeEventListener("change", checkMobile);
+      mediaQuery.removeEventListener("change", checkStandalone);
+    };
+  }, [setStandalone, setIsMobile]);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {

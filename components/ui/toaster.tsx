@@ -10,8 +10,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Toaster as Sonner, type ToasterProps, toast as sonnerToast } from "sonner";
-import { usePWA } from "@/hooks/ui/usePWA";
-import { useIsMobile } from "@/hooks/ui/useMobile";
+import { useDevice, useIsMobile } from "@/hooks/ui/use-device";
 import {
     Vault,
     VaultContent,
@@ -100,7 +99,7 @@ export const notify = {
 
 const Toaster = ({ ...props }: ToasterProps) => {
     const { theme } = useTheme();
-    const { isStandalone } = usePWA();
+    const { isStandalone } = useDevice();
     const isMobile = useIsMobile();
 
     const [vaultData, setVaultData] = useState<NotificationData | null>(null);
