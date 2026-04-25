@@ -1024,5 +1024,11 @@
       "help": "Precisa de ajuda?",
       "contact": "Fale conosco"
     }
+  },
+  "Suspended": {
+    "title": "Sentiremos sua falta!",
+    "description": "Você se despediu, mas saiba que as portas estarão sempre abertas. Sua jornada de aprendizado pode continuar quando você estiver pronto.",
+    "talkToUs": "Falar com a gente",
+    "backToLogin": "Voltar para o login"
   }
 }

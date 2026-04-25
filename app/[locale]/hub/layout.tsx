@@ -15,11 +15,9 @@ export default async function HubLayout({ children }: HubLayoutProps) {
     }
 
     if (!user.isActive) {
-        redirect(`/signin?error=suspended`); // TODO: Implementar página de suspensão
+        redirect(`/suspended`);
     }
 
-    //APENAS TEACHERS E STUDENTS VÃO TER ONBOARDING
-    //TODO: Implementar onboarding para teachers
     if (user.role === "student" && !user.onboarded) {
         redirect(`/onboarding`);
     }

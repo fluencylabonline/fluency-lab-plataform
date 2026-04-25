@@ -1013,5 +1013,11 @@
       "help": "Need help?",
       "contact": "Contact us"
     }
+  },
+  "Suspended": {
+    "title": "We'll miss you!",
+    "description": "You've said goodbye, but know that our doors will always be open. Your learning journey can continue whenever you're ready.",
+    "talkToUs": "Talk to us",
+    "backToLogin": "Back to login"
   }
 }
