@@ -9,13 +9,13 @@ export default async function OnboardingPage() {
         redirect("/signin");
     }
 
-    // if (user.role !== "student") {
-    //     redirect("/hub");
-    // }
+    if (user.role !== "student") {
+        redirect("/hub");
+    }
 
-    // if (user.onboarded) {
-    //     redirect("/hub");
-    // }
+    if (user.onboarded) {
+        redirect("/hub");
+    }
 
     return (
         <main className="w-full h-full min-h-screen">
