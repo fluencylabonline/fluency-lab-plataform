@@ -923,19 +923,22 @@
       "contract": "Contrato",
       "finish": "Boas Práticas",
       "next": "Próximo",
-      "back": "Voltar"
+      "back": "Voltar",
+      "progress": "Progresso"
     },
     "name": "Nome Completo",
     "welcome": {
-      "title": "Bem-vindo!",
+      "title": "Bem-vindo à sua nova fase.",
       "subtitle": "Conte-nos um pouco sobre você.",
+      "description": "Estamos empolgados em começar. Complete seu perfil para que possamos personalizar sua experiência.",
       "nickname": "Como quer ser chamado?",
       "birthDate": "Data de Nascimento",
       "minorWarning": "Como você é menor de idade, precisaremos dos dados do seu responsável legal no próximo passo."
     },
     "address": {
-      "title": "Endereço e Documentos",
+      "title": "Sua segurança é nossa prioridade.",
       "subtitle": "Precisamos de algumas informações para sua matrícula.",
+      "description": "Precisamos validar alguns dados básicos para garantir que tudo esteja correto em seu contrato.",
       "nationality": "Nacionalidade",
       "nationalityPlaceholder": "Selecione",
       "nationalities": {
@@ -961,8 +964,9 @@
       "relationshipPlaceholder": "Ex: Pai, Mãe, Tutor"
     },
     "payment": {
-      "title": "Plano e Pagamento",
+      "title": "Escolha como quer evoluir.",
       "subtitle": "Confirme seu plano e escolha o melhor dia para vencimento.",
+      "description": "Configure seu dia de vencimento e confirme seu plano de estudos.",
       "planSummary": "Resumo do Plano",
       "totalValue": "Valor Mensal",
       "firstPayment": "Primeiro Pagamento (Proporcional)",
@@ -980,8 +984,9 @@
       "payLaterWarning": "Você pode pagar agora ou depois. O acesso será liberado assim que o sistema identificar o pagamento."
     },
     "contract": {
-      "title": "Contrato",
+      "title": "Vamos oficializar sua jornada.",
       "subtitle": "Leia e assine o contrato para finalizar sua matrícula.",
+      "description": "Leia e assine o contrato digitalmente. É rápido, seguro e sem papel.",
       "signButton": "Concordar e Assinar",
       "success": "Matrícula finalizada com sucesso!"
     },
@@ -1002,8 +1007,9 @@
       "stateRequired": "Estado é obrigatório"
     },
     "finish": {
-      "title": "Tudo pronto para começar!",
+      "title": "Você está pronto para voar!",
       "subtitle": "Siga estas boas práticas para acelerar sua fluência.",
+      "description": "Seu onboarding foi concluído! Agora você tem acesso total à plataforma.",
       "appTitle": "Baixe o App",
       "appDesc": "Instale nosso PWA para receber notificações de aulas e praticar em qualquer lugar.",
       "groupTitle": "Grupo da Turma",
@@ -1013,6 +1019,10 @@
       "environmentTitle": "Ambiente Calmo",
       "environmentDesc": "Para melhor aproveitamento, use fones de ouvido e esteja em um local silencioso.",
       "button": "Entrar na Plataforma"
+    },
+    "support": {
+      "help": "Precisa de ajuda?",
+      "contact": "Fale conosco"
     }
   }
 }

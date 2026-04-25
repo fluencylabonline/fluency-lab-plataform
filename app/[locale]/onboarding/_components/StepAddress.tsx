@@ -5,14 +5,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
 import { onboardingAddressAction } from "@/modules/onboarding/onboarding.actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { notify } from "@/components/ui/toaster";
 import { useState } from "react";
-import { Loader2, ArrowLeft, Info } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Loader2, ArrowLeft, ArrowRight, Info } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 const addressFormSchema = z.object({
     nationality: z.string().min(1),
@@ -31,9 +34,40 @@ const addressFormSchema = z.object({
 
 type AddressForm = z.input<typeof addressFormSchema>;
 
-export function StepAddress({ onNext, onBack, initialData }: { onNext: (data: any) => void; onBack: () => void; initialData: any }) {
+interface FieldProps {
+    label: string;
+    error?: string;
+    children: React.ReactNode;
+    className?: string;
+    inputClass?: string;
+}
+
+function Field({ label, error, children, className, inputClass }: FieldProps) {
+    return (
+        <div className={cn("space-y-2", className)}>
+            <label className="block text-[11px] font-medium uppercase tracking-widest text-slate-500">
+                {label}
+            </label>
+            {children}
+            {error && <p className="text-xs text-red-400/80">{error}</p>}
+        </div>
+    );
+}
+
+export function StepAddress({
+    onNext,
+    onBack,
+    initialData,
+    inputClass,
+}: {
+    onNext: (data: any) => void;
+    onBack: () => void;
+    initialData: any;
+    inputClass?: string;
+}) {
     const t = useTranslations("Onboarding");
     const [loading, setLoading] = useState(false);
+    const [isFetchingZip, setIsFetchingZip] = useState(false);
 
     const isMinor = () => {
         if (!initialData.birthDate) return false;
@@ -41,15 +75,19 @@ export function StepAddress({ onNext, onBack, initialData }: { onNext: (data: an
         const birth = new Date(initialData.birthDate);
         let age = today.getFullYear() - birth.getFullYear();
         const m = today.getMonth() - birth.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-            age--;
-        }
+        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
         return age < 18;
     };
 
     const minor = isMinor();
 
-    const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<AddressForm>({
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        watch,
+        formState: { errors },
+    } = useForm<AddressForm>({
         resolver: zodResolver(addressFormSchema),
         defaultValues: {
             nationality: initialData.nationality || "brazilian",
@@ -64,7 +102,7 @@ export function StepAddress({ onNext, onBack, initialData }: { onNext: (data: an
             guardianName: initialData.guardianData?.name || "",
             guardianTaxId: initialData.guardianData?.taxId || "",
             guardianRelationship: initialData.guardianData?.relationship || "",
-        }
+        },
     });
 
     const nationality = watch("nationality");
@@ -84,11 +122,13 @@ export function StepAddress({ onNext, onBack, initialData }: { onNext: (data: an
                 city: data.city,
                 state: data.state,
             },
-            guardianData: minor ? {
-                name: data.guardianName!,
-                taxId: data.guardianTaxId!,
-                relationship: data.guardianRelationship!,
-            } : undefined
+            guardianData: minor
+                ? {
+                    name: data.guardianName!,
+                    taxId: data.guardianTaxId!,
+                    relationship: data.guardianRelationship!,
+                }
+                : undefined,
         };
 
         const result = await onboardingAddressAction(payload);
@@ -101,129 +141,206 @@ export function StepAddress({ onNext, onBack, initialData }: { onNext: (data: an
         }
     };
 
-    // CEP lookup helper (simple)
-    // TODO: passar para contract.utils.ts e melhorar UI enquanto carrega
     const handleZipCodeBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
-        const value = e.target.value.replace(/\D/g, '');
+        const value = e.target.value.replace(/\D/g, "");
         if (value.length === 8 && nationality === "brazilian") {
+            setIsFetchingZip(true);
             try {
                 const res = await fetch(`https://viacep.com.br/ws/${value}/json/`);
                 const data = await res.json();
                 if (!data.erro) {
-                    setValue("street", data.logradouro);
-                    setValue("neighborhood", data.bairro);
-                    setValue("city", data.localidade);
-                    setValue("state", data.uf);
+                    setValue("street", data.logradouro, { shouldValidate: true });
+                    setValue("neighborhood", data.bairro, { shouldValidate: true });
+                    setValue("city", data.localidade, { shouldValidate: true });
+                    setValue("state", data.uf, { shouldValidate: true });
                 }
             } catch {
                 console.error("CEP lookup failed");
+            } finally {
+                setIsFetchingZip(false);
             }
         }
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-2">
-                <h2 className="text-2xl font-bold">{t("address.title")}</h2>
-                <p className="text-muted-foreground">{t("address.subtitle")}</p>
-            </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
 
+            {/* Minor warning */}
             {minor && (
-                <Alert variant="default" className="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50">
-                    <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                    <AlertTitle className="text-amber-800 dark:text-amber-300">{t("guardian.title")}</AlertTitle>
-                    <AlertDescription className="text-amber-700 dark:text-amber-400/80">
-                        {t("welcome.minorWarning")}
-                    </AlertDescription>
-                </Alert>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label>{t("address.nationality")}</Label>
-                    <Select onValueChange={(v) => setValue("nationality", v)} defaultValue={nationality}>
-                        <SelectTrigger>
-                            <SelectValue placeholder={t("address.nationalityPlaceholder")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="brazilian">{t("address.nationalities.brazilian")}</SelectItem>
-                            <SelectItem value="foreign">{t("address.nationalities.foreign")}</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div className="space-y-2">
-                    <Label htmlFor="taxId">{nationality === "brazilian" ? t("address.taxId") : t("address.taxIdForeign")}</Label>
-                    <Input id="taxId" {...register("taxId")} />
-                    {errors.taxId && <p className="text-sm text-destructive">{errors.taxId.message}</p>}
-                </div>
-
-                <div className="space-y-2">
-                    <Label htmlFor="cellphone">{t("address.cellphone")}</Label>
-                    <Input id="cellphone" {...register("cellphone")} placeholder="+55 (11) 99999-9999" />
-                    {errors.cellphone && <p className="text-sm text-destructive">{errors.cellphone.message}</p>}
-                </div>
-
-                <div className="space-y-2">
-                    <Label htmlFor="zipCode">{nationality === "brazilian" ? t("address.zipCode") : t("address.zipCodeForeign")}</Label>
-                    <Input id="zipCode" {...register("zipCode")} onBlur={handleZipCodeBlur} />
-                    {errors.zipCode && <p className="text-sm text-destructive">{errors.zipCode.message}</p>}
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-2 space-y-2">
-                    <Label htmlFor="street">{t("address.street")}</Label>
-                    <Input id="street" {...register("street")} />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="number">{t("address.number")}</Label>
-                    <Input id="number" {...register("number")} />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="neighborhood">{t("address.neighborhood")}</Label>
-                    <Input id="neighborhood" {...register("neighborhood")} />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="city">{t("address.city")}</Label>
-                    <Input id="city" {...register("city")} />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="state">{t("address.state")}</Label>
-                    <Input id="state" {...register("state")} />
-                </div>
-            </div>
-
-            {minor && (
-                <div className="space-y-4 pt-4 border-t border-border">
-                    <h3 className="font-semibold">{t("guardian.title")}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="guardianName">{t("guardian.name")}</Label>
-                            <Input id="guardianName" {...register("guardianName")} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="guardianTaxId">{t("guardian.taxId")}</Label>
-                            <Input id="guardianTaxId" {...register("guardianTaxId")} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="guardianRelationship">{t("guardian.relationship")}</Label>
-                            <Input id="guardianRelationship" {...register("guardianRelationship")} placeholder={t("guardian.relationshipPlaceholder")} />
-                        </div>
+                <div className="flex gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.07] px-4 py-3.5">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                    <div className="space-y-0.5">
+                        <p className="text-sm font-medium text-amber-400">
+                            {t("guardian.title")}
+                        </p>
+                        <p className="text-xs text-amber-500/70">
+                            {t("welcome.minorWarning")}
+                        </p>
                     </div>
                 </div>
             )}
 
-            <div className="flex gap-4">
-                <Button type="button" variant="outline" className="flex-1" onClick={onBack} disabled={loading}>
-                    <ArrowLeft className="mr-2 h-4 w-4" /> {t("steps.back") || "Voltar"}
-                </Button>
-                <Button type="submit" className="flex-[2]" disabled={loading}>
-                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t("steps.next") || "Próximo"}
-                </Button>
+            {/* Nationality + Tax ID */}
+            <div className="grid grid-cols-2 gap-3">
+                <Field label={t("address.nationality")} error={errors.nationality?.message}>
+                    <Select
+                        value={nationality}
+                        onValueChange={(value) => setValue("nationality", value)}
+                    >
+                        <SelectTrigger className={cn(inputClass, "cursor-pointer")}>
+                            <SelectValue placeholder={t("address.nationality")} />
+                        </SelectTrigger>
+                        <SelectContent className="border-white/[0.08] bg-slate-950 text-slate-200">
+                            <SelectItem value="brazilian">
+                                {t("address.nationalities.brazilian")}
+                            </SelectItem>
+                            <SelectItem value="foreign">
+                                {t("address.nationalities.foreign")}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                </Field>
+
+                <Field
+                    label={nationality === "brazilian" ? t("address.taxId") : t("address.taxIdForeign")}
+                    error={errors.taxId?.message}
+                >
+                    <input
+                        {...register("taxId")}
+                        className={inputClass}
+                        placeholder={nationality === "brazilian" ? "000.000.000-00" : ""}
+                    />
+                </Field>
+            </div>
+
+            {/* Cellphone + ZIP */}
+            <div className="grid grid-cols-2 gap-3">
+                <Field label={t("address.cellphone")} error={errors.cellphone?.message}>
+                    <input
+                        {...register("cellphone")}
+                        placeholder="+55 (11) 99999-9999"
+                        className={inputClass}
+                    />
+                </Field>
+
+                <Field
+                    label={nationality === "brazilian" ? t("address.zipCode") : t("address.zipCodeForeign")}
+                    error={errors.zipCode?.message}
+                >
+                    <input
+                        {...register("zipCode")}
+                        onBlur={handleZipCodeBlur}
+                        placeholder="00000-000"
+                        className={inputClass}
+                    />
+                </Field>
+            </div>
+
+            {/* Street + Number */}
+            <div className="grid grid-cols-3 gap-3">
+                <Field
+                    label={t("address.street")}
+                    error={errors.street?.message}
+                    className="col-span-2"
+                >
+                    <input {...register("street")} className={inputClass} />
+                </Field>
+
+                <Field label={t("address.number")} error={errors.number?.message}>
+                    <input {...register("number")} className={inputClass} />
+                </Field>
+            </div>
+
+            {/* Neighborhood + City + State */}
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <Field label={t("address.neighborhood")} error={errors.neighborhood?.message}>
+                    <input {...register("neighborhood")} className={inputClass} disabled={isFetchingZip} />
+                </Field>
+
+                <Field label={t("address.city")} error={errors.city?.message}>
+                    <div className="relative">
+                        <input {...register("city")} className={inputClass} disabled={isFetchingZip} />
+                        {isFetchingZip && (
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                <Loader2 className="h-4 w-4 animate-spin text-violet-500" />
+                            </div>
+                        )}
+                    </div>
+                </Field>
+
+                <Field label={t("address.state")} error={errors.state?.message}>
+                    <div className="relative">
+                        <input
+                            {...register("state")}
+                            maxLength={2}
+                            className={cn(inputClass, "uppercase")}
+                            disabled={isFetchingZip}
+                        />
+                        {isFetchingZip && (
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                <Loader2 className="h-4 w-4 animate-spin text-violet-500" />
+                            </div>
+                        )}
+                    </div>
+                </Field>
+            </div>
+
+            {/* Guardian section (minors only) */}
+            {minor && (
+                <div className="space-y-5 border-t border-white/[0.06] pt-6">
+                    <p className="text-[11px] font-medium uppercase tracking-widest text-slate-500">
+                        {t("guardian.title")}
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <Field label={t("guardian.name")} error={errors.guardianName?.message}>
+                            <input {...register("guardianName")} className={inputClass} />
+                        </Field>
+
+                        <Field label={t("guardian.taxId")} error={errors.guardianTaxId?.message}>
+                            <input {...register("guardianTaxId")} className={inputClass} />
+                        </Field>
+                    </div>
+
+                    <Field
+                        label={t("guardian.relationship")}
+                        error={errors.guardianRelationship?.message}
+                    >
+                        <input
+                            {...register("guardianRelationship")}
+                            placeholder={t("guardian.relationshipPlaceholder")}
+                            className={inputClass}
+                        />
+                    </Field>
+                </div>
+            )}
+
+            {/* Navigation */}
+            <div className="flex gap-3 pt-1">
+                <button
+                    type="button"
+                    onClick={onBack}
+                    disabled={loading}
+                    className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-white/[0.08] text-sm text-slate-500 transition-all hover:border-white/[0.14] hover:text-slate-300 disabled:opacity-40"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    {t("steps.back") || "Voltar"}
+                </button>
+
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex h-11 flex-[2] items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
+                >
+                    {loading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                        <>
+                            {t("steps.next") || "Próximo"}
+                            <ArrowRight className="h-4 w-4" />
+                        </>
+                    )}
+                </button>
             </div>
         </form>
     );

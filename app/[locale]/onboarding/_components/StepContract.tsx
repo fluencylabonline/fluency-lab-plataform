@@ -2,15 +2,22 @@
 
 import { useTranslations } from "next-intl";
 import { signContractAction, getPendingContractAction } from "@/modules/contract/contract.actions";
-import { Button } from "@/components/ui/button";
 import { notify } from "@/components/ui/toaster";
 import { useState, useEffect } from "react";
-import { Loader2, ArrowLeft, CheckCircle2, Download, ArrowRight } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { motion } from "framer-motion";
+import { Loader2, ArrowLeft, CheckCircle2, Download, ArrowRight, FileText } from "lucide-react";
 import { injectTemplateData } from "@/modules/contract/contract.service.utils";
 import type { User } from "@/modules/user/user.schema";
 
-export function StepContract({ onNext, onBack, user }: { onNext: () => void; onBack: () => void; user: User }) {
+export function StepContract({
+    onNext,
+    onBack,
+    user,
+}: {
+    onNext: () => void;
+    onBack: () => void;
+    user: User;
+}) {
     const t = useTranslations("Onboarding");
     const [loading, setLoading] = useState(false);
     const [contractLoading, setContractLoading] = useState(true);
@@ -23,7 +30,6 @@ export function StepContract({ onNext, onBack, user }: { onNext: () => void; onB
             const result = await getPendingContractAction();
             if (result?.data?.success && result.data?.data) {
                 setContract(result.data.data);
-                // Check if already signed
                 if (result.data.data.status === "signed") {
                     setSigned(true);
                     setDownloadUrl(result.data?.downloadUrl || null);
@@ -40,11 +46,13 @@ export function StepContract({ onNext, onBack, user }: { onNext: () => void; onB
 
         const signResult = await signContractAction({
             instanceId: contract.id,
-            guardianData: user.guardianName ? {
-                name: user.guardianName,
-                taxId: user.guardianTaxId || "",
-                relationship: user.guardianRelationship || "",
-            } : undefined
+            guardianData: user.guardianName
+                ? {
+                    name: user.guardianName,
+                    taxId: user.guardianTaxId || "",
+                    relationship: user.guardianRelationship || "",
+                }
+                : undefined,
         });
 
         setLoading(false);
@@ -58,87 +66,140 @@ export function StepContract({ onNext, onBack, user }: { onNext: () => void; onB
         }
     };
 
+    // ── Loading ──
     if (contractLoading) {
-        return <div className="flex justify-center p-10"><Loader2 className="animate-spin" /></div>;
-    }
-
-    if (signed) {
         return (
-            <div className="flex flex-col items-center justify-center space-y-8 py-10 animate-in fade-in zoom-in duration-500">
-                <div className="bg-emerald-100 dark:bg-emerald-900/40 p-4 rounded-full">
-                    <CheckCircle2 className="h-16 w-16 text-emerald-500" />
-                </div>
-                <div className="text-center space-y-2">
-                    <h2 className="text-3xl font-bold">{t("contract.success") || "Contrato Assinado!"}</h2>
-                    <p className="text-muted-foreground">Sua assinatura foi processada e registrada com sucesso.</p>
-                </div>
-
-                <div className="flex flex-col w-full gap-4 pt-4">
-                    {downloadUrl && (
-                        <Button variant="outline" className="h-12">
-                            <a href={downloadUrl} target="_blank" rel="noopener noreferrer">
-                                <Download className="mr-2 h-4 w-4" />
-                                Baixar Contrato (PDF)
-                            </a>
-                        </Button>
-                    )}
-                    <Button onClick={onNext} className="h-12 text-lg font-bold">
-                        {t("steps.next") || "Próximo"}
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                </div>
+            <div className="flex items-center justify-center py-16">
+                <Loader2 className="h-6 w-6 animate-spin text-primary/60" />
             </div>
         );
     }
 
-    // Prepare preview content
-    const previewContent = contract?.template ? injectTemplateData(contract.template.content, {
-        user: {
-            name: user.name || "",
-            email: user.email || "",
-            taxId: user.taxId || "",
-        },
-        guardian: user.guardianName ? {
-            name: user.guardianName,
-            taxId: user.guardianTaxId || "",
-            relationship: user.guardianRelationship || "",
-        } : undefined,
-        school: {
-            name: "FluencyLab",
-            legalName: "FluencyLab LTDA",
-            taxId: "00.000.000/0001-00",
-            representativeName: "Diretoria",
-        },
-        date: new Date().toLocaleDateString("pt-BR"),
-    }) : "";
+    // ── Signed state ──
+    if (signed) {
+        return (
+            <motion.div
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+                className="flex flex-col items-center gap-6 py-8 text-center"
+            >
+                <div className="flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10">
+                    <CheckCircle2 className="h-8 w-8 text-emerald-400" />
+                </div>
+
+                <div className="space-y-1.5">
+                    <p className="text-xl font-semibold text-emerald-300">
+                        {t("contract.success") || "Contrato assinado!"}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                        Sua assinatura foi processada e registrada com sucesso.
+                    </p>
+                </div>
+
+                <div className="flex w-full flex-col gap-3 pt-2">
+                    {downloadUrl && (
+                        <a
+                            href={downloadUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] text-sm text-slate-400 transition-all hover:border-white/[0.14] hover:text-slate-200"
+                        >
+                            <Download className="h-4 w-4" />
+                            Baixar contrato (PDF)
+                        </a>
+                    )}
+                    <button
+                        onClick={onNext}
+                        className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500"
+                    >
+                        {t("steps.next") || "Próximo"}
+                        <ArrowRight className="h-4 w-4" />
+                    </button>
+                </div>
+            </motion.div>
+        );
+    }
+
+    // ── Contract preview ──
+    const previewContent = contract?.template
+        ? injectTemplateData(contract.template.content, {
+            user: {
+                name: user.name || "",
+                email: user.email || "",
+                taxId: user.taxId || "",
+            },
+            guardian: user.guardianName
+                ? {
+                    name: user.guardianName,
+                    taxId: user.guardianTaxId || "",
+                    relationship: user.guardianRelationship || "",
+                }
+                : undefined,
+            school: {
+                name: "FluencyLab",
+                legalName: "FluencyLab LTDA",
+                taxId: "00.000.000/0001-00",
+                representativeName: "Diretoria",
+            },
+            date: new Date().toLocaleDateString("pt-BR"),
+        })
+        : "";
 
     return (
         <div className="space-y-6">
-            <div className="space-y-2">
-                <h2 className="text-2xl font-bold">{t("contract.title")}</h2>
-                <p className="text-muted-foreground">{t("contract.subtitle")}</p>
-            </div>
 
+            {/* Contract scroll area */}
             {contract ? (
-                <div className="border border-border rounded-xl overflow-hidden bg-white dark:bg-black/20 shadow-inner">
-                    <ScrollArea className="h-[400px] p-6">
+                <div className="overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.03]">
+                    {/* Header */}
+                    <div className="flex items-center gap-2.5 border-b border-white/[0.06] px-5 py-3.5">
+                        <FileText className="h-4 w-4 text-violet-400" />
+                        <span className="text-sm font-medium text-slate-400">
+                            {t("contract.title")}
+                        </span>
+                    </div>
+
+                    {/* Content */}
+                    <div className="h-[380px] overflow-y-auto px-6 py-5 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent]">
                         <div
-                            className="prose dark:prose-invert max-w-none text-sm text-foreground/80 leading-relaxed"
+                            className="prose prose-sm prose-invert max-w-none text-slate-400 leading-relaxed
+                                prose-headings:text-slate-300 prose-headings:font-medium
+                                prose-strong:text-slate-300 prose-strong:font-medium
+                                prose-p:text-slate-500"
                             dangerouslySetInnerHTML={{ __html: previewContent }}
                         />
-                    </ScrollArea>
+                    </div>
                 </div>
             ) : (
-                <p className="text-destructive">Erro ao carregar contrato. Entre em contato com o suporte.</p>
+                <p className="text-sm text-red-400/80">
+                    Erro ao carregar contrato. Entre em contato com o suporte.
+                </p>
             )}
 
-            <div className="flex gap-4">
-                <Button type="button" variant="outline" className="flex-1" onClick={onBack} disabled={loading}>
-                    <ArrowLeft className="mr-2 h-4 w-4" /> {t("steps.back") || "Voltar"}
-                </Button>
-                <Button onClick={onSign} className="flex-[2]" disabled={loading || !contract}>
-                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t("contract.signButton")}
-                </Button>
+            {/* Navigation */}
+            <div className="flex gap-3">
+                <button
+                    type="button"
+                    onClick={onBack}
+                    disabled={loading}
+                    className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-white/[0.08] text-sm text-slate-500 transition-all hover:border-white/[0.14] hover:text-slate-300 disabled:opacity-40"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    {t("steps.back") || "Voltar"}
+                </button>
+
+                <button
+                    onClick={onSign}
+                    disabled={loading || !contract}
+                    className="flex h-11 flex-[2] items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
+                >
+                    {loading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                        t("contract.signButton")
+                    )}
+                </button>
             </div>
         </div>
     );

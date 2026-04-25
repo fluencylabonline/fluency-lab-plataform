@@ -920,20 +920,24 @@
       "documents": "Documents",
       "payment": "Payment",
       "contract": "Contract",
+      "finish": "Best Practices",
       "next": "Next",
-      "back": "Back"
+      "back": "Back",
+      "progress": "Progress"
     },
     "name": "Full Name",
     "welcome": {
-      "title": "Welcome!",
+      "title": "Welcome to your new phase.",
       "subtitle": "Tell us a bit about yourself.",
+      "description": "We're excited to get started. Complete your profile so we can personalize your experience.",
       "nickname": "What should we call you?",
       "birthDate": "Birth Date",
       "minorWarning": "Since you are a minor, we will need your legal guardian's information in the next step."
     },
     "address": {
-      "title": "Address and Documents",
+      "title": "Your safety is our priority.",
       "subtitle": "We need some information for your enrollment.",
+      "description": "We need to validate some basic data to ensure everything is correct in your contract.",
       "nationality": "Nationality",
       "nationalityPlaceholder": "Select",
       "nationalities": {
@@ -959,8 +963,9 @@
       "relationshipPlaceholder": "e.g., Father, Mother, Guardian"
     },
     "payment": {
-      "title": "Plan and Payment",
+      "title": "Choose how you want to evolve.",
       "subtitle": "Confirm your plan and choose the best due day.",
+      "description": "Set up your due date and confirm your study plan.",
       "planSummary": "Plan Summary",
       "totalValue": "Monthly Value",
       "firstPayment": "First Payment (Pro-rata)",
@@ -968,8 +973,9 @@
       "prorataWarning": "Since the chosen due day has already passed, your first monthly fee will be pro-rated until the end of this month."
     },
     "contract": {
-      "title": "Contract",
+      "title": "Let's formalize your journey.",
       "subtitle": "Read and sign the contract to finalize your enrollment.",
+      "description": "Read and sign the contract digitally. It's fast, secure, and paperless.",
       "signButton": "Agree and Sign",
       "success": "Enrollment completed successfully!"
     },
@@ -988,6 +994,24 @@
       "neighborhoodRequired": "Neighborhood is required",
       "cityRequired": "City is required",
       "stateRequired": "State is required"
+    },
+    "finish": {
+      "title": "You're ready to fly!",
+      "subtitle": "Follow these best practices to accelerate your fluency.",
+      "description": "Your onboarding is complete! You now have full access to the platform.",
+      "appTitle": "Download the App",
+      "appDesc": "Install our PWA to receive class notifications and practice anywhere.",
+      "groupTitle": "Class Group",
+      "groupDesc": "You will receive the WhatsApp link by email. Join to interact with your tutor.",
+      "punctualityTitle": "Punctuality",
+      "punctualityDesc": "Our classes are short and productive. Try to join 2 minutes early.",
+      "environmentTitle": "Quiet Environment",
+      "environmentDesc": "For better performance, use headphones and be in a quiet place.",
+      "button": "Enter Platform"
+    },
+    "support": {
+      "help": "Need help?",
+      "contact": "Contact us"
     }
   }
 }
