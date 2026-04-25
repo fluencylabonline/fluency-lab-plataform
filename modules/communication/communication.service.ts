@@ -21,9 +21,9 @@ import {
   ContractExpiringEmail,
   ContractRenewedEmail,
 } from "./templates/ContractStatusEmails";
-import type { 
-  SendWhatsAppTemplateOptions, 
-  WhatsAppResponse, 
+import type {
+  SendWhatsAppTemplateOptions,
+  WhatsAppResponse,
   WhatsAppRequestBody,
   WhatsAppTemplate,
   WhatsAppTemplateListResponse
@@ -287,6 +287,7 @@ export class CommunicationService {
 
   /**
    * Envia um alerta de fatura em atraso via WhatsApp.
+   * TODO: preciso criar o template ainda
    */
   async sendPaymentOverdueWhatsApp(data: {
     cellphone: string;
@@ -338,13 +339,14 @@ export class CommunicationService {
 
       return await this.sendWhatsAppTemplate({
         to: data.cellphone,
-        templateName: "finalize_account_setup", // Nome do modelo pronto da Meta
+        templateName: "welcome", // Nome do modelo pronto da Meta
+        languageCode: "en_US",
         components: [
           {
             type: "body",
             parameters: [
-              { type: "text", parameter_name: "name", text: data.name },
-              { type: "text", parameter_name: "detail", text: "your account" },
+              { type: "text", text: data.name },
+              { type: "text", text: "your account" },
             ]
           },
           {
@@ -388,7 +390,7 @@ export class CommunicationService {
    */
   async getWhatsAppTemplates(): Promise<WhatsAppTemplate[]> {
     if (!env.WHATSAPP_BUSINESS_ACCOUNT_ID) return [];
-    
+
     try {
       const response = await fetch(
         `https://graph.facebook.com/v20.0/${env.WHATSAPP_BUSINESS_ACCOUNT_ID}/message_templates`,
@@ -428,7 +430,7 @@ export class CommunicationService {
 
       const result = await response.json();
       if (!response.ok) throw new Error(result.error?.message || "Failed to create template");
-      
+
       return result;
     } catch (error) {
       console.error("[CommunicationService.createWhatsAppTemplate] Error:", error);
@@ -455,7 +457,7 @@ export class CommunicationService {
 
       const result = await response.json();
       if (!response.ok) throw new Error(result.error?.message || "Failed to delete template");
-      
+
       return result;
     } catch (error) {
       console.error("[CommunicationService.deleteWhatsAppTemplate] Error:", error);
