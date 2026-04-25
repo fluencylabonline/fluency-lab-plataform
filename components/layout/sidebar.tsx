@@ -70,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
                             <SidebarTrigger />
                         </div>
 
-                        {items.map((item, index) => (
+                        {items.filter(item => item.labelKey !== "settings").map((item, index) => (
                             <motion.div
                                 key={item.label}
                                 initial={{ opacity: 0, x: -10 }}
@@ -80,6 +80,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
                                 <SidebarItem item={item} isCollapsed={isCollapsed} />
                             </motion.div>
                         ))}
+
+                        <div className="mt-auto flex flex-col gap-2 mb-4">
+                            {items.filter(item => item.labelKey === "settings").map((item, index) => (
+                                <motion.div
+                                    key={item.label}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: (items.length - 1 + index) * 0.05 }}
+                                >
+                                    <SidebarItem item={item} isCollapsed={isCollapsed} />
+                                </motion.div>
+                            ))}
+                        </div>
                     </motion.nav>
                 </motion.div>
             </motion.aside>
