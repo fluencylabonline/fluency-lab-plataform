@@ -103,3 +103,71 @@ export function isValidTaxId(taxId: string, region: "BR" | "US", partyType: "ind
   }
   return false;
 }
+
+/**
+ * Busca geolocalização aproximada via IP (Audit)
+ */
+export async function getGeoLocationByIp(ip: string): Promise<string> {
+  if (!ip || ip === "unknown" || ip === "127.0.0.1" || ip === "::1") {
+    return "Localhost/Unknown";
+  }
+
+  try {
+    const geoResponse = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,regionName,city`);
+    const geoData = await geoResponse.json();
+    if (geoData.status === "success") {
+      return `${geoData.city}, ${geoData.regionName}, ${geoData.country}`;
+    }
+    return "unknown";
+  } catch (error) {
+    console.error("[getGeoLocationByIp] Geolocation error:", error);
+    return "unknown";
+  }
+}
+
+/**
+ * Busca endereço via CEP (Brasil)
+ */
+export async function getAddressByCep(cep: string) {
+  const cleanCep = cep.replace(/\D/g, "");
+  if (cleanCep.length !== 8) return null;
+
+  try {
+    const res = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+    const data = await res.json();
+    if (data.erro) return null;
+    return {
+      street: data.logradouro,
+      neighborhood: data.bairro,
+      city: data.localidade,
+      state: data.uf,
+    };
+  } catch (error) {
+    console.error("[getAddressByCep] CEP lookup failed:", error);
+    return null;
+  }
+}
+
+/**
+ * Calcula a idade a partir de uma data de nascimento
+ */
+export function calculateAge(birthDate: Date | string): number {
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  
+  return age;
+}
+
+/**
+ * Verifica se é menor de idade (menor que 18 anos)
+ */
+export function isMinor(birthDate: Date | string | null | undefined): boolean {
+  if (!birthDate) return false;
+  return calculateAge(birthDate) < 18;
+}

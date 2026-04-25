@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useTranslations } from "next-intl";
 import { onboardingAddressAction } from "@/modules/onboarding/onboarding.actions";
 import { notify } from "@/components/ui/toaster";
+import { getAddressByCep, isMinor as checkIsMinor, isValidTaxId, isValidCEP, isValidZipCode } from "@/modules/contract/contract.utils";
 import { useState } from "react";
 import { Loader2, ArrowLeft, ArrowRight, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,17 +22,37 @@ import {
 
 const addressFormSchema = z.object({
     nationality: z.string().min(1),
-    taxId: z.string().min(1),
-    cellphone: z.string().min(1),
-    zipCode: z.string().min(1),
-    street: z.string().min(1),
-    number: z.string().min(1),
-    neighborhood: z.string().min(1),
-    city: z.string().min(1),
-    state: z.string().min(1),
+    taxId: z.string().min(1, "Campo obrigatório"),
+    cellphone: z.string().min(1, "Campo obrigatório"),
+    zipCode: z.string().min(1, "Campo obrigatório"),
+    street: z.string().min(1, "Campo obrigatório"),
+    number: z.string().min(1, "Campo obrigatório"),
+    neighborhood: z.string().min(1, "Campo obrigatório"),
+    city: z.string().min(1, "Campo obrigatório"),
+    state: z.string().min(1, "Campo obrigatório"),
     guardianName: z.string().optional(),
     guardianTaxId: z.string().optional(),
     guardianRelationship: z.string().optional(),
+}).superRefine((data, ctx) => {
+    // 1. Validação de Tax ID (CPF ou SSN/Foreign)
+    const isBR = data.nationality === "brazilian";
+    if (!isValidTaxId(data.taxId, isBR ? "BR" : "US", "individual")) {
+        ctx.addIssue({
+            code: "custom",
+            message: isBR ? "CPF inválido" : "Tax ID inválido",
+            path: ["taxId"],
+        });
+    }
+
+    // 2. Validação de CEP ou ZIP Code
+    const isZipValid = isBR ? isValidCEP(data.zipCode) : isValidZipCode(data.zipCode);
+    if (!isZipValid) {
+        ctx.addIssue({
+            code: "custom",
+            message: isBR ? "CEP inválido" : "ZIP Code inválido",
+            path: ["zipCode"],
+        });
+    }
 });
 
 type AddressForm = z.input<typeof addressFormSchema>;
@@ -70,17 +91,7 @@ export function StepAddress({
     const [loading, setLoading] = useState(false);
     const [isFetchingZip, setIsFetchingZip] = useState(false);
 
-    const isMinor = () => {
-        if (!initialData.birthDate) return false;
-        const today = new Date();
-        const birth = new Date(initialData.birthDate);
-        let age = today.getFullYear() - birth.getFullYear();
-        const m = today.getMonth() - birth.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-        return age < 18;
-    };
-
-    const minor = isMinor();
+    const minor = checkIsMinor(initialData.birthDate);
 
     const initial = initialData;
     const {
@@ -148,13 +159,12 @@ export function StepAddress({
         if (value.length === 8 && nationality === "brazilian") {
             setIsFetchingZip(true);
             try {
-                const res = await fetch(`https://viacep.com.br/ws/${value}/json/`);
-                const data = await res.json();
-                if (!data.erro) {
-                    setValue("street", data.logradouro, { shouldValidate: true });
-                    setValue("neighborhood", data.bairro, { shouldValidate: true });
-                    setValue("city", data.localidade, { shouldValidate: true });
-                    setValue("state", data.uf, { shouldValidate: true });
+                const data = await getAddressByCep(value);
+                if (data) {
+                    setValue("street", data.street, { shouldValidate: true });
+                    setValue("neighborhood", data.neighborhood, { shouldValidate: true });
+                    setValue("city", data.city, { shouldValidate: true });
+                    setValue("state", data.state, { shouldValidate: true });
                 }
             } catch {
                 console.error("CEP lookup failed");

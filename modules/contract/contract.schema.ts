@@ -128,6 +128,7 @@ export const insertSchoolSettingsSchema = createInsertSchema(schoolSettingsTable
 
 export const signContractSchema = z.object({
   instanceId: z.uuid("ID de contrato inválido."),
+  fingerprint: z.string().optional(),
   guardianData: z.object({
     name: z.string().min(2, "Nome do responsável é obrigatório."),
     taxId: z.string().min(1, "Documento do responsável é obrigatório."),

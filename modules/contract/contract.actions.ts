@@ -6,6 +6,8 @@ import { contractService } from "./contract.service";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { UAParser } from "ua-parser-js";
+import { getGeoLocationByIp } from "./contract.utils";
 
 /**
  * Server Actions de Contratos (FluencyLab)
@@ -18,7 +20,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
  * Ação para assinar um contrato digitalmente.
  */
 export const signContractAction = protectedAction
-  .schema(signContractSchema)
+  .inputSchema(signContractSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       // 1. Rate Limiting (Segurança: Limita a 5 tentativas de assinatura por dia)
@@ -32,28 +34,42 @@ export const signContractAction = protectedAction
       const ip = h.get("x-forwarded-for")?.split(",")[0] || "unknown";
       const userAgent = h.get("user-agent") || "unknown";
 
+      const ua = new UAParser(userAgent).getResult();
+      const browser = `${ua.browser.name} ${ua.browser.version}`.trim();
+      const os = `${ua.os.name} ${ua.os.version}`.trim();
+
+      // 3. Geolocation aproximada via IP (Audit)
+      const location = await getGeoLocationByIp(ip);
+
       const result = await contractService.signContract(
-        ctx.user.id, 
-        parsedInput.instanceId, 
+        ctx.user.id,
+        parsedInput.instanceId,
         parsedInput.guardianData,
-        { ip, userAgent }
+        {
+          ip,
+          userAgent,
+          browser: browser || "unknown",
+          os: os || "unknown",
+          location,
+          fingerprint: parsedInput.fingerprint
+        }
       );
-      
+
       // Revalida as rotas que dependem do status dos contratos
       revalidatePath("/student", "layout");
       revalidatePath("/teacher", "layout");
-      
-      return { 
-        success: true, 
+
+      return {
+        success: true,
         pdfPath: result.pdfPath,
         downloadUrl: result.downloadUrl
       } as { success: boolean; error?: string; pdfPath?: string; downloadUrl?: string };
     } catch (error) {
       const err = error as Error;
       console.error("[signContractAction] Error:", err.message);
-      return { 
-        success: false, 
-        error: err.message || "Falha ao processar assinatura do contrato." 
+      return {
+        success: false,
+        error: err.message || "Falha ao processar assinatura do contrato."
       };
     }
   });
@@ -76,15 +92,15 @@ export const getMyContractsAction = protectedAction
 export const getPendingContractAction = protectedAction
   .action(async ({ ctx }) => {
     const instance = await contractService.prepareOnboardingContract(ctx.user.id);
-    
+
     let downloadUrl: string | undefined;
     if (instance && instance.status === "signed" && instance.pdfUrl) {
       downloadUrl = await contractService.getSignedUrl(instance.pdfUrl);
     }
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       data: instance,
-      downloadUrl 
+      downloadUrl
     } as { success: boolean; error?: string; data?: ContractInstance | null; downloadUrl?: string };
   });

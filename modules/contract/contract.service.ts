@@ -65,7 +65,14 @@ export const contractService = {
     userId: string, 
     instanceId: string, 
     guardianData?: GuardianData,
-    auditMetadata?: { ip: string; userAgent: string }
+    auditMetadata?: { 
+      ip: string; 
+      userAgent: string;
+      browser?: string;
+      os?: string;
+      location?: string;
+      fingerprint?: string;
+    }
   ) {
     // 1. Validações de Existência e Permissão (ABAC)
     const instance = await contractRepository.findInstanceById(instanceId);
@@ -155,6 +162,7 @@ export const contractService = {
       status: "signed",
       signedAt: new Date(),
       expiresAt: expiresAt,
+      subscriptionId: instance.subscriptionId || subscription?.id,
       signedContent: finalContent,
       integrityHash: integrityHash,
       pdfUrl: pdfPath,
@@ -167,6 +175,10 @@ export const contractService = {
         instanceId,
         ipAddress: auditMetadata.ip,
         userAgent: auditMetadata.userAgent,
+        browser: auditMetadata.browser,
+        os: auditMetadata.os,
+        location: auditMetadata.location,
+        fingerprint: auditMetadata.fingerprint,
       });
     }
 
@@ -408,16 +420,27 @@ export const contractService = {
   async prepareOnboardingContract(userId: string, region: "BR" | "US" = "BR") {
     // 1. Check if already has a pending one
     const instance = await contractRepository.findPendingOnboardingInstance(userId);
-    if (instance) return instance;
+    
+    // Get active subscription to link (both share the same validity)
+    const subscription = await billingService.getActiveSubscription(userId);
+
+    if (instance) {
+      // If we found a pending instance but it doesn't have a subscriptionId, link it now
+      if (!instance.subscriptionId && subscription) {
+        return contractRepository.updateInstance(instance.id, { subscriptionId: subscription.id });
+      }
+      return instance;
+    }
 
     // 2. Get active template for student
     const template = await contractRepository.findActiveTemplateByType("student", region);
     if (!template) throw new Error("Template de contrato não encontrado.");
 
-    // 3. Create instance
+    // 3. Create instance with the subscription link
     return contractRepository.insertInstance({
       templateId: template.id,
       userId,
+      subscriptionId: subscription?.id,
       status: "pending",
     });
   }

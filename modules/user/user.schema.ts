@@ -28,7 +28,6 @@ export const usersTable = pgTable("users", {
   onboardingStep: integer("onboarding_step").notNull().default(1),
 
   // Contact & Billing
-  phone: text("phone"),
   cellphone: text("cellphone"),
   taxId: text("tax_id"),
 
@@ -49,7 +48,7 @@ export const usersTable = pgTable("users", {
   guardianRelationship: text("guardian_relationship"),
 
   // Audit
-  lastLoginAt: timestamp("last_login_at"),
+  lastLoginAt: timestamp("last_login_at"), //TODO: Verificar se será usado
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .notNull()
@@ -67,13 +66,13 @@ export const insertUserSchema = createInsertSchema(usersTable);
 
 // Auth Form Schemas
 export const signInSchema = z.object({
-  email: z.string().email("Validation.emailInvalid"),
+  email: z.email("Validation.emailInvalid"),
   password: z.string().min(8, "Validation.passwordMin"),
   rememberMe: z.boolean(),
 });
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().email("Validation.emailInvalid"),
+  email: z.email("Validation.emailInvalid"),
 });
 
 export const resetPasswordSchema = z
@@ -94,14 +93,14 @@ export const twoFactorSchema = z.object({
 });
 
 export const requestNewInviteSchema = z.object({
-  email: z.string().email("Validation.emailInvalid"),
+  email: z.email("Validation.emailInvalid"),
   locale: z.enum(locales).optional().default("pt"),
 });
 
 // Form Schemas
 export const createUserSchema = z.object({
   name: z.string().min(2, "UserManagement.validation.nameRequired"),
-  email: z.string().email("UserManagement.validation.emailInvalid"),
+  email: z.email("UserManagement.validation.emailInvalid"),
   role: z.enum(["admin", "teacher", "student", "manager"], {
     message: "UserManagement.validation.roleRequired",
   }),

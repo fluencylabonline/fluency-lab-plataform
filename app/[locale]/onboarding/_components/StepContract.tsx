@@ -45,8 +45,17 @@ export function StepContract({
         if (!contract) return;
         setLoading(true);
 
+        // Basic fingerprint for audit
+        const fingerprint = [
+            navigator.language,
+            screen.colorDepth,
+            new Date().getTimezoneOffset(),
+            navigator.userAgent.split(" ").slice(-1)[0] // Simple UA hint
+        ].join("|");
+
         const signResult = await signContractAction({
             instanceId: contract.id,
+            fingerprint,
             guardianData: user.guardianName
                 ? {
                     name: user.guardianName,

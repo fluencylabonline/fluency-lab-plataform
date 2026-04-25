@@ -56,7 +56,6 @@ export const installmentsTable = pgTable("installments", {
   amount: integer("amount").notNull(), // in cents
   orderIndex: integer("order_index").notNull(), // 1 to 12
   abacatePayBillingId: text("abacate_pay_billing_id"), // Checkout/Billing ID from AbacatePay
-  abacatePayCheckoutUrl: text("abacate_pay_checkout_url"),
   pixPayload: text("pix_payload"), // For transparent checkout
   pixImage: text("pix_image"),     // For transparent checkout
   paidAt: timestamp("paid_at"),

@@ -90,12 +90,16 @@ export const billingService = {
       return existingSub;
     }
 
+    const startDate = new Date();
+    const endDate = addMonths(startDate, plan.durationMonths);
+
     const subscription = await billingRepository.createSubscription({
       studentId,
       planId,
       dueDay,
       status: "active",
-      startDate: new Date(),
+      startDate,
+      endDate,
     });
 
     // Generate N installments with pro-rata logic
@@ -384,7 +388,6 @@ export const billingService = {
       installmentId: installment.id,
       amount: installment.amount,
       dueDate: installment.dueDate,
-      checkoutUrl: installment.abacatePayCheckoutUrl,
       pixPayload: installment.pixPayload,
       pixImage: installment.pixImage,
       orderIndex: installment.orderIndex,

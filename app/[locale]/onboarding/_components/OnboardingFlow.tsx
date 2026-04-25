@@ -45,7 +45,7 @@ const inputClass = cn(
 
 export function OnboardingFlow({ user }: OnboardingFlowProps) {
     const t = useTranslations("Onboarding");
-    const [currentStep, setCurrentStep] = useState(1);
+    const [currentStep, setCurrentStep] = useState(user.onboardingStep | 1);
     const [onboardingData, setOnboardingData] = useState<OnboardingData>(user);
 
     const steps = [
