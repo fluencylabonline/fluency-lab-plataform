@@ -82,7 +82,15 @@
       "successDescription": "The invitation has been sent to {email}.",
       "errorTitle": "Creation failed",
       "errorDescription": "Could not create the user. Please try again."
-    }
+    },
+    "plan": "Associated Plan",
+    "planPlaceholder": "Select a plan",
+    "dueDay": "Due Day",
+    "dueDayPlaceholder": "Select a day",
+    "cellphone": "Cellphone",
+    "assignedPlan": "Assigned Plan",
+    "search": "Search plan...",
+    "noResults": "No plan found."
   },
   "UserRoles": {
     "admin": "Administrator",
@@ -877,5 +885,109 @@
     "cooldownTitle": "Time to practice!",
     "cooldownDesc": "To ensure accuracy, you can take the placement test once every 6 months. Your next test will be available on {date}.",
     "eligibilityError": "You must wait 6 months between placement tests."
+  },
+  "Billing": {
+    "plansTitle": "Plan Management",
+    "plansSubtitle": "Configure lesson packages and monthly fees",
+    "newPlan": "New Plan",
+    "createPlan": "Create Plan",
+    "editPlan": "Edit Plan",
+    "noPlansFound": "No plans found.",
+    "noPlansDesc": "Start by creating a new plan for students.",
+    "classesPerWeekLabel": "{count} classes/week",
+    "months": "{count} months",
+    "active": "Active",
+    "inactive": "Inactive",
+    "planUpdated": "Plan updated!",
+    "planCreated": "Plan created!",
+    "planVaultDescription": "Fill in the lesson plan information.",
+    "name": "Plan Name",
+    "language": "Language",
+    "classesPerWeek": "Classes per Week",
+    "durationMonths": "Duration (Months)",
+    "monthlyPrice": "Monthly Price (in cents)",
+    "description": "Description (Optional)",
+    "cancel": "Cancel",
+    "save": "Save Plan",
+    "saving": "Saving...",
+    "statusUpdated": "Status updated!",
+    "statusUpdateError": "Error updating status"
+  },
+  "Onboarding": {
+    "title": "Student Onboarding",
+    "steps": {
+      "welcome": "Welcome",
+      "documents": "Documents",
+      "payment": "Payment",
+      "contract": "Contract",
+      "next": "Next",
+      "back": "Back"
+    },
+    "name": "Full Name",
+    "welcome": {
+      "title": "Welcome!",
+      "subtitle": "Tell us a bit about yourself.",
+      "nickname": "What should we call you?",
+      "birthDate": "Birth Date",
+      "minorWarning": "Since you are a minor, we will need your legal guardian's information in the next step."
+    },
+    "address": {
+      "title": "Address and Documents",
+      "subtitle": "We need some information for your enrollment.",
+      "nationality": "Nationality",
+      "nationalityPlaceholder": "Select",
+      "nationalities": {
+        "brazilian": "Brazilian",
+        "foreign": "Foreign"
+      },
+      "taxId": "Tax ID (CPF)",
+      "taxIdForeign": "Document / Passport",
+      "zipCode": "ZIP Code",
+      "zipCodeForeign": "Postal Code",
+      "street": "Street",
+      "number": "Number",
+      "neighborhood": "Neighborhood",
+      "city": "City",
+      "state": "State",
+      "cellphone": "Cellphone"
+    },
+    "guardian": {
+      "title": "Guardian Information",
+      "name": "Guardian Name",
+      "taxId": "Guardian Tax ID (CPF)",
+      "relationship": "Relationship",
+      "relationshipPlaceholder": "e.g., Father, Mother, Guardian"
+    },
+    "payment": {
+      "title": "Plan and Payment",
+      "subtitle": "Confirm your plan and choose the best due day.",
+      "planSummary": "Plan Summary",
+      "totalValue": "Monthly Value",
+      "firstPayment": "First Payment (Pro-rata)",
+      "dueDay": "Due Day",
+      "prorataWarning": "Since the chosen due day has already passed, your first monthly fee will be pro-rated until the end of this month."
+    },
+    "contract": {
+      "title": "Contract",
+      "subtitle": "Read and sign the contract to finalize your enrollment.",
+      "signButton": "Agree and Sign",
+      "success": "Enrollment completed successfully!"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "birthDateRequired": "Birth date is required",
+      "guardianNameRequired": "Guardian name is required",
+      "guardianTaxIdRequired": "Guardian Tax ID is required",
+      "guardianRelationshipRequired": "Relationship is required",
+      "nationalityRequired": "Nationality is required",
+      "taxIdRequired": "Document is required",
+      "cellphoneRequired": "Cellphone is required",
+      "zipCodeRequired": "ZIP code is required",
+      "streetRequired": "Street is required",
+      "numberRequired": "Number is required",
+      "neighborhoodRequired": "Neighborhood is required",
+      "cityRequired": "City is required",
+      "stateRequired": "State is required"
+    }
   }
-}
+}

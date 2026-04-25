@@ -1,7 +1,7 @@
 "use server";
 
 import { adminAction, protectedAction } from "@/lib/safe-action";
-import { createPlanSchema, createSubscriptionSchema } from "./billing.schema";
+import { createPlanSchema, createSubscriptionSchema, updatePlanSchema } from "./billing.schema";
 import { billingService } from "./billing.service";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
@@ -9,9 +9,41 @@ import { revalidatePath } from "next/cache";
 export const createPlanAction = adminAction
   .inputSchema(createPlanSchema)
   .action(async ({ parsedInput }) => {
-    await billingService.createPlan(parsedInput);
-    revalidatePath("/admin/billing");
-    return { success: true };
+    try {
+      const plan = await billingService.createPlan(parsedInput);
+      revalidatePath("/admin/finances/plans");
+      return { success: true, plan };
+    } catch (error) {
+      console.error("[createPlanAction] Error:", error);
+      return { success: false, error: "Ocorreu um erro ao criar o plano" };
+    }
+  });
+
+export const updatePlanAction = adminAction
+  .inputSchema(updatePlanSchema)
+  .action(async ({ parsedInput }) => {
+    try {
+      const { id, ...data } = parsedInput;
+      const plan = await billingService.updatePlan(id, data);
+      revalidatePath("/admin/finances/plans");
+      return { success: true, plan };
+    } catch (error) {
+      console.error("[updatePlanAction] Error:", error);
+      return { success: false, error: "Ocorreu um erro ao atualizar o plano" };
+    }
+  });
+
+export const togglePlanStatusAction = adminAction
+  .inputSchema(z.object({ id: z.string(), isActive: z.boolean() }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const plan = await billingService.updatePlan(parsedInput.id, { isActive: parsedInput.isActive });
+      revalidatePath("/admin/finances/plans");
+      return { success: true, plan };
+    } catch (error) {
+      console.error("[togglePlanStatusAction] Error:", error);
+      return { success: false, error: "Ocorreu um erro ao alterar status do plano" };
+    }
   });
 
 export const createSubscriptionAction = adminAction
@@ -44,4 +76,17 @@ export const getActivePaymentAction = protectedAction
   .action(async ({ ctx }) => {
     const payment = await billingService.getActivePayment(ctx.user.id);
     return { success: true, data: payment };
+  });
+
+export const getPlansAction = protectedAction
+  .action(async () => {
+    const plans = await billingService.listActivePlans();
+    return { success: true, data: plans };
+  });
+
+export const getInstallmentStatusAction = protectedAction
+  .inputSchema(z.object({ installmentId: z.string().uuid() }))
+  .action(async ({ parsedInput }) => {
+    const installment = await billingService.getInstallmentById(parsedInput.installmentId);
+    return { success: true, data: { status: installment?.status } };
   });

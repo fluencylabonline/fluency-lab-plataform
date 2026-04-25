@@ -16,8 +16,15 @@ export const billingRepository = {
   async listActivePlans() {
     return db.select().from(plansTable).where(eq(plansTable.isActive, true));
   },
+  async listAllPlans() {
+    return db.select().from(plansTable);
+  },
   async createPlan(data: typeof plansTable.$inferInsert) {
     const [plan] = await db.insert(plansTable).values(data).returning();
+    return plan;
+  },
+  async updatePlan(id: string, data: Partial<typeof plansTable.$inferSelect>) {
+    const [plan] = await db.update(plansTable).set(data).where(eq(plansTable.id, id)).returning();
     return plan;
   },
 
@@ -51,6 +58,12 @@ export const billingRepository = {
   },
   async findInstallmentByAbacateId(abacateId: string) {
     return db.query.installmentsTable.findFirst({ where: eq(installmentsTable.abacatePayBillingId, abacateId) });
+  },
+  async findInstallmentsBySubscription(subscriptionId: string) {
+    return db.query.installmentsTable.findMany({
+      where: eq(installmentsTable.subscriptionId, subscriptionId),
+      orderBy: (table, { asc }) => [asc(table.orderIndex)]
+    });
   },
   async createInstallments(data: (typeof installmentsTable.$inferInsert)[]) {
     return db.insert(installmentsTable).values(data).returning();

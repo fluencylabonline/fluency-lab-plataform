@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, pgEnum, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, pgEnum, integer, uuid } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
 import { locales } from "@/i18n/config";
@@ -25,6 +25,7 @@ export const usersTable = pgTable("users", {
   // Auth & Onboarding
   isActive: boolean("is_active").notNull().default(true),
   onboarded: boolean("onboarded").notNull().default(false),
+  onboardingStep: integer("onboarding_step").notNull().default(1),
 
   // Contact & Billing
   phone: text("phone"),
@@ -35,6 +36,17 @@ export const usersTable = pgTable("users", {
   classesStartDate: timestamp("classes_start_date"),
   languages: text("languages").array().notNull().default(sql`'{}'`),
   abacatePayCustomerId: text("abacate_pay_customer_id"),
+  assignedPlanId: uuid("assigned_plan_id"),
+  dueDay: integer("preferred_due_day").default(10),
+
+  // Profile / Onboarding Details
+  nickname: text("nickname"),
+  birthDate: timestamp("birth_date"),
+  nationality: text("nationality"),
+  address: text("address"), // Encriptado no Service (JSON string)
+  guardianName: text("guardian_name"),
+  guardianTaxId: text("guardian_tax_id"), // Encriptado no Service
+  guardianRelationship: text("guardian_relationship"),
 
   // Audit
   lastLoginAt: timestamp("last_login_at"),
@@ -89,13 +101,51 @@ export const requestNewInviteSchema = z.object({
 // Form Schemas
 export const createUserSchema = z.object({
   name: z.string().min(2, "UserManagement.validation.nameRequired"),
-  email: z.email("UserManagement.validation.emailInvalid"),
+  email: z.string().email("UserManagement.validation.emailInvalid"),
   role: z.enum(["admin", "teacher", "student", "manager"], {
     message: "UserManagement.validation.roleRequired",
   }),
   classesStartDate: z.string().optional().nullable(),
   languages: z.array(z.string()).optional().default([]),
   locale: z.enum(locales).optional().default("pt"),
+  cellphone: z.string().optional(),
+  assignedPlanId: z.string().uuid().optional().nullable(),
+});
+
+// Onboarding Step Schemas
+export const onboardingWelcomeSchema = z.object({
+  name: z.string().min(2, "Onboarding.validation.nameRequired"),
+  nickname: z.string().optional(),
+  birthDate: z.string().min(1, "Onboarding.validation.birthDateRequired"),
+});
+
+export const onboardingGuardianSchema = z.object({
+  guardianName: z.string().min(2, "Onboarding.validation.guardianNameRequired"),
+  guardianTaxId: z.string().min(1, "Onboarding.validation.guardianTaxIdRequired"),
+  guardianRelationship: z.string().min(1, "Onboarding.validation.guardianRelationshipRequired"),
+});
+
+export const onboardingAddressSchema = z.object({
+  nationality: z.string().min(1, "Onboarding.validation.nationalityRequired"),
+  taxId: z.string().min(1, "Onboarding.validation.taxIdRequired"),
+  cellphone: z.string().min(1, "Onboarding.validation.cellphoneRequired"),
+  address: z.object({
+    zipCode: z.string().min(1, "Onboarding.validation.zipCodeRequired"),
+    street: z.string().min(1, "Onboarding.validation.streetRequired"),
+    number: z.string().min(1, "Onboarding.validation.numberRequired"),
+    neighborhood: z.string().min(1, "Onboarding.validation.neighborhoodRequired"),
+    city: z.string().min(1, "Onboarding.validation.cityRequired"),
+    state: z.string().min(1, "Onboarding.validation.stateRequired"),
+  }),
+  guardianData: z.object({
+    name: z.string().min(2),
+    taxId: z.string().min(1),
+    relationship: z.string().min(1),
+  }).optional(),
+});
+
+export const onboardingPaymentSchema = z.object({
+  dueDay: z.number().int().min(1).max(31),
 });
 
 export type CreateUserValues = z.input<typeof createUserSchema>;
@@ -107,6 +157,11 @@ export type ForgotPasswordValues = z.input<typeof forgotPasswordSchema>;
 export type ResetPasswordValues = z.input<typeof resetPasswordSchema>;
 export type TwoFactorValues = z.input<typeof twoFactorSchema>;
 export type RequestNewInviteValues = z.input<typeof requestNewInviteSchema>;
+
+export type OnboardingWelcomeValues = z.input<typeof onboardingWelcomeSchema>;
+export type OnboardingGuardianValues = z.input<typeof onboardingGuardianSchema>;
+export type OnboardingAddressValues = z.input<typeof onboardingAddressSchema>;
+export type OnboardingPaymentValues = z.input<typeof onboardingPaymentSchema>;
 
 // Rate Limiting Table 
 // TODO: TEMPORARY
@@ -120,3 +175,4 @@ export const rateLimitsTable = pgTable("rate_limits", {
     .defaultNow()
     .$onUpdate(() => new Date()),
 });
+

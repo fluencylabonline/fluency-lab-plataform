@@ -4,6 +4,7 @@ import type { User, NewUser } from "./user.schema";
 import { env } from "@/env";
 import { communicationService } from "@/modules/communication/communication.service";
 import { abacate } from "@/lib/abacate-pay";
+import { decrypt } from "@/lib/cryptography";
 
 export const userService = {
   async syncUser(uid: string, data: Partial<NewUser>): Promise<User> {
@@ -102,9 +103,6 @@ export const userService = {
         actionLink
       });
     }
-    
-    // Sync with AbacatePay immediately
-    await this.syncAbacatePayCustomer(user.id);
 
     return user;
   },
@@ -115,12 +113,24 @@ export const userService = {
 
     if (user.abacatePayCustomerId) return user.abacatePayCustomerId;
 
+    // Decrypt PII if they are encrypted
+    let taxId = user.taxId && user.taxId.includes(":") ? decrypt(user.taxId) : user.taxId;
+    const cellphone = user.cellphone && user.cellphone.includes(":") ? decrypt(user.cellphone) : user.cellphone;
+    let name = user.name;
+
+    // If minor or has guardian, use guardian data for AbacatePay billing
+    if (user.guardianTaxId) {
+      taxId = user.guardianTaxId.includes(":") ? decrypt(user.guardianTaxId) : user.guardianTaxId;
+      name = user.guardianName || user.name;
+      // Cellphone usually stays the same or can be guardian's too, but we use the one provided
+    }
+
     // Create in AbacatePay
     const customer = await abacate.customers.create({
-      name: user.name,
+      name,
       email: user.email,
-      taxId: user.taxId || "00000000000", // Fallback for testing, but should be required in prod
-      cellphone: user.cellphone || "00000000000",
+      taxId: taxId || "00000000000", 
+      cellphone: cellphone || "00000000000",
       metadata: { userId: user.id } as Record<string, string | number | boolean>,
     });
 

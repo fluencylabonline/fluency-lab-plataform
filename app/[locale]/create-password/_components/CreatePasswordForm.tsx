@@ -228,7 +228,7 @@ export function CreatePasswordForm() {
                   <Input
                     type="password"
                     placeholder={t("Auth.placeholders.passwordMin") || "Mínimo de 8 caracteres"}
-                    className={`pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 ${errors.password ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                    className={`pl-10 h-11 ${errors.password ? "border-destructive focus-visible:ring-destructive" : ""}`}
                     {...register("password")}
                   />
                 </div>
@@ -248,7 +248,7 @@ export function CreatePasswordForm() {
                   <Input
                     type="password"
                     placeholder={t("Auth.placeholders.repeatPassword") || "Repita a senha"}
-                    className={`pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 ${errors.confirmPassword ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                    className={`pl-10 h-11 ${errors.confirmPassword ? "border-destructive focus-visible:ring-destructive" : ""}`}
                     {...register("confirmPassword")}
                   />
                 </div>

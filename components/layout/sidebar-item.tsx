@@ -1,3 +1,5 @@
+"use client";
+
 import { isPathActive } from "@/utils/pathname";
 import { MenuItemType, SubMenuItem } from "@/components/layout/types";
 import * as Collapsible from "@radix-ui/react-collapsible";

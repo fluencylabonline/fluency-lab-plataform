@@ -12,6 +12,7 @@ if (!admin.apps.length) {
       clientEmail: env.FIREBASE_CLIENT_EMAIL,
       privateKey: env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
     }),
+    storageBucket: env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   });
 }
 

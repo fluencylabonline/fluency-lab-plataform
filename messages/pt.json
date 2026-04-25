@@ -82,7 +82,15 @@
       "successDescription": "O convite foi enviado para {email}.",
       "errorTitle": "Falha na criação",
       "errorDescription": "Não foi possível criar o usuário. Tente novamente."
-    }
+    },
+    "plan": "Plano Associado",
+    "planPlaceholder": "Selecione um plano",
+    "dueDay": "Dia de Vencimento",
+    "dueDayPlaceholder": "Selecione o dia",
+    "cellphone": "Celular",
+    "assignedPlan": "Plano Vinculado",
+    "search": "Buscar plano...",
+    "noResults": "Nenhum plano encontrado."
   },
   "UserRoles": {
     "admin": "Administrador",
@@ -878,5 +886,133 @@
     "cooldownTitle": "Hora de praticar!",
     "cooldownDesc": "Para garantir a precisão, você pode fazer o nivelamento uma vez a cada 6 meses. Seu próximo teste estará disponível em {date}.",
     "eligibilityError": "Você precisa esperar 6 meses entre os testes de nivelamento."
+  },
+  "Billing": {
+    "plansTitle": "Gestão de Planos",
+    "plansSubtitle": "Configure os pacotes de aulas e mensalidades",
+    "newPlan": "Novo Plano",
+    "createPlan": "Criar Plano",
+    "editPlan": "Editar Plano",
+    "noPlansFound": "Nenhum plano encontrado.",
+    "noPlansDesc": "Comece criando um novo plano para os alunos.",
+    "classesPerWeekLabel": "{count} aulas/semana",
+    "months": "{count} meses",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "planUpdated": "Plano atualizado!",
+    "planCreated": "Plano criado!",
+    "planVaultDescription": "Preencha as informações do plano de aulas.",
+    "name": "Nome do Plano",
+    "language": "Idioma",
+    "classesPerWeek": "Aulas por Semana",
+    "durationMonths": "Duração (Meses)",
+    "monthlyPrice": "Mensalidade (em centavos)",
+    "description": "Descrição (Opcional)",
+    "cancel": "Cancelar",
+    "save": "Salvar Plano",
+    "saving": "Salvando...",
+    "statusUpdated": "Status atualizado!",
+    "statusUpdateError": "Erro ao atualizar status"
+  },
+  "Onboarding": {
+    "title": "Onboarding do Aluno",
+    "steps": {
+      "welcome": "Bem-vindo",
+      "documents": "Documentos",
+      "payment": "Pagamento",
+      "contract": "Contrato",
+      "finish": "Boas Práticas",
+      "next": "Próximo",
+      "back": "Voltar"
+    },
+    "name": "Nome Completo",
+    "welcome": {
+      "title": "Bem-vindo!",
+      "subtitle": "Conte-nos um pouco sobre você.",
+      "nickname": "Como quer ser chamado?",
+      "birthDate": "Data de Nascimento",
+      "minorWarning": "Como você é menor de idade, precisaremos dos dados do seu responsável legal no próximo passo."
+    },
+    "address": {
+      "title": "Endereço e Documentos",
+      "subtitle": "Precisamos de algumas informações para sua matrícula.",
+      "nationality": "Nacionalidade",
+      "nationalityPlaceholder": "Selecione",
+      "nationalities": {
+        "brazilian": "Brasileiro",
+        "foreign": "Estrangeiro"
+      },
+      "taxId": "CPF",
+      "taxIdForeign": "Documento / Passaporte",
+      "zipCode": "CEP",
+      "zipCodeForeign": "Código Postal",
+      "street": "Rua",
+      "number": "Número",
+      "neighborhood": "Bairro",
+      "city": "Cidade",
+      "state": "Estado",
+      "cellphone": "Celular"
+    },
+    "guardian": {
+      "title": "Dados do Responsável",
+      "name": "Nome do Responsável",
+      "taxId": "CPF do Responsável",
+      "relationship": "Parentesco",
+      "relationshipPlaceholder": "Ex: Pai, Mãe, Tutor"
+    },
+    "payment": {
+      "title": "Plano e Pagamento",
+      "subtitle": "Confirme seu plano e escolha o melhor dia para vencimento.",
+      "planSummary": "Resumo do Plano",
+      "totalValue": "Valor Mensal",
+      "firstPayment": "Primeiro Pagamento (Proporcional)",
+      "dueDay": "Dia de Vencimento",
+      "prorataWarning": "Como o dia de vencimento escolhido já passou, sua primeira mensalidade será proporcional até o fim deste mês.",
+      "confirmDate": "Confirmar Data",
+      "invoiceGenerated": "Cobrança Gerada!",
+      "copied": "Copiado!",
+      "successTitle": "Pagamento Confirmado!",
+      "paidTitle": "Pagamento Recebido!",
+      "paidSubtitle": "Sua primeira mensalidade foi confirmada. Agora você pode prosseguir para o contrato.",
+      "payNowTitle": "Pagar com PIX",
+      "expiresAt": "Vencimento em",
+      "copyPaste": "Código Copia e Cola",
+      "payLaterWarning": "Você pode pagar agora ou depois. O acesso será liberado assim que o sistema identificar o pagamento."
+    },
+    "contract": {
+      "title": "Contrato",
+      "subtitle": "Leia e assine o contrato para finalizar sua matrícula.",
+      "signButton": "Concordar e Assinar",
+      "success": "Matrícula finalizada com sucesso!"
+    },
+    "validation": {
+      "nameRequired": "Nome é obrigatório",
+      "birthDateRequired": "Data de nascimento é obrigatória",
+      "guardianNameRequired": "Nome do responsável é obrigatório",
+      "guardianTaxIdRequired": "CPF do responsável é obrigatório",
+      "guardianRelationshipRequired": "Parentesco é obrigatório",
+      "nationalityRequired": "Nacionalidade é obrigatória",
+      "taxIdRequired": "Documento é obrigatório",
+      "cellphoneRequired": "Celular é obrigatório",
+      "zipCodeRequired": "CEP é obrigatório",
+      "streetRequired": "Rua é obrigatória",
+      "numberRequired": "Número é obrigatório",
+      "neighborhoodRequired": "Bairro é obrigatório",
+      "cityRequired": "Cidade é obrigatória",
+      "stateRequired": "Estado é obrigatório"
+    },
+    "finish": {
+      "title": "Tudo pronto para começar!",
+      "subtitle": "Siga estas boas práticas para acelerar sua fluência.",
+      "appTitle": "Baixe o App",
+      "appDesc": "Instale nosso PWA para receber notificações de aulas e praticar em qualquer lugar.",
+      "groupTitle": "Grupo da Turma",
+      "groupDesc": "Você receberá o link do WhatsApp por e-mail. Participe para interagir com seu tutor.",
+      "punctualityTitle": "Pontualidade",
+      "punctualityDesc": "Nossas aulas são curtas e produtivas. Tente entrar 2 minutos antes do horário.",
+      "environmentTitle": "Ambiente Calmo",
+      "environmentDesc": "Para melhor aproveitamento, use fones de ouvido e esteja em um local silencioso.",
+      "button": "Entrar na Plataforma"
+    }
   }
 }

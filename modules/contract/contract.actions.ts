@@ -45,8 +45,9 @@ export const signContractAction = protectedAction
       
       return { 
         success: true, 
-        pdfPath: result.pdfPath 
-      };
+        pdfPath: result.pdfPath,
+        downloadUrl: result.downloadUrl
+      } as { success: boolean; error?: string; pdfPath?: string; downloadUrl?: string };
     } catch (error) {
       const err = error as Error;
       console.error("[signContractAction] Error:", err.message);
@@ -70,4 +71,20 @@ export const verifyContractAction = async (hash: string) => {
 export const getMyContractsAction = protectedAction
   .action(async ({ ctx }) => {
     return await contractService.getMyContracts(ctx.user.id);
+  });
+
+export const getPendingContractAction = protectedAction
+  .action(async ({ ctx }) => {
+    const instance = await contractService.prepareOnboardingContract(ctx.user.id);
+    
+    let downloadUrl: string | undefined;
+    if (instance && instance.status === "signed" && instance.pdfUrl) {
+      downloadUrl = await contractService.getSignedUrl(instance.pdfUrl);
+    }
+
+    return { 
+      success: true, 
+      data: instance,
+      downloadUrl 
+    } as { success: boolean; error?: string; data?: any; downloadUrl?: string };
   });

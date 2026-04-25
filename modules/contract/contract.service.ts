@@ -6,6 +6,8 @@ import { adminStorage } from "@/lib/firebase-admin";
 import { injectTemplateData } from "./contract.service.utils";
 import { communicationService } from "../communication/communication.service";
 import { env } from "@/env";
+import { billingService } from "../billing/billing.service";
+import { addMonths } from "date-fns";
 import { ContractSignatureMetadata } from "./contract.schema";
 
 interface GuardianData {
@@ -21,6 +23,18 @@ interface GuardianData {
  * Segue o padrão "Fat Server".
  */
 export const contractService = {
+  /**
+   * Gera uma URL assinada para download de um arquivo do Storage.
+   */
+  async getSignedUrl(path: string): Promise<string> {
+    const bucket = adminStorage.bucket(env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
+    const [url] = await bucket.file(path).getSignedUrl({
+      action: "read",
+      expires: Date.now() + 1000 * 60 * 60, // 1 hora
+    });
+    return url;
+  },
+
   /**
    * Cria ou atualiza um template com versionamento automático.
    */
@@ -111,8 +125,9 @@ export const contractService = {
     );
     const pdfPath = `contracts/${userId}/${instanceId}_${Date.now()}.pdf`;
 
+    const bucket = adminStorage.bucket(env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
+
     try {
-      const bucket = adminStorage.bucket();
       const file = bucket.file(pdfPath);
       await file.save(Buffer.from(pdfBytes), {
         metadata: { 
@@ -129,10 +144,17 @@ export const contractService = {
       throw new Error("Erro ao salvar o arquivo PDF do contrato.");
     }
 
+    // 6.5 Calcular expiração baseada no plano
+    const subscription = await billingService.getActiveSubscription(userId);
+    const expiresAt = subscription?.plan?.durationMonths 
+      ? addMonths(new Date(), subscription.plan.durationMonths)
+      : null;
+
     // 7. Persistência Final: Transação de atualização
     await contractRepository.updateInstance(instanceId, {
       status: "signed",
       signedAt: new Date(),
+      expiresAt: expiresAt,
       signedContent: finalContent,
       integrityHash: integrityHash,
       pdfUrl: pdfPath,
@@ -148,15 +170,31 @@ export const contractService = {
       });
     }
 
-    // 8. Notificação e Envio de E-mail
-    await communicationService.sendContractSignedEmail(
-      user.email, 
-      user.name, 
-      instance.template.name, 
-      pdfBytes
-    );
+    // 8. Generate Signed URL for immediate download
+    const [downloadUrl] = await bucket.file(pdfPath).getSignedUrl({
+      action: "read",
+      expires: Date.now() + 1000 * 60 * 60, // 1 hour
+    });
 
-    return { success: true, pdfPath };
+    // 9. Notificação e Envio de E-mail
+    // Fazemos o envio em background para não travar o retorno, mas aguardamos o e-mail principal
+    try {
+      await communicationService.sendContractSignedEmail(
+        user.email, 
+        user.name, 
+        instance.template.name, 
+        pdfBytes
+      );
+    } catch (error) {
+      console.error("[ContractService.signContract] Email Error:", error);
+      // Não travamos o processo se apenas o e-mail falhar, já que o contrato está assinado e salvo
+    }
+
+    return { 
+      pdfPath,
+      downloadUrl,
+      success: true 
+    };
   },
 
   /**
@@ -365,5 +403,22 @@ export const contractService = {
    */
   async getMyContracts(userId: string) {
     return contractRepository.findUserInstances(userId);
+  },
+
+  async prepareOnboardingContract(userId: string, region: "BR" | "US" = "BR") {
+    // 1. Check if already has a pending one
+    const instance = await contractRepository.findPendingOnboardingInstance(userId);
+    if (instance) return instance;
+
+    // 2. Get active template for student
+    const template = await contractRepository.findActiveTemplateByType("student", region);
+    if (!template) throw new Error("Template de contrato não encontrado.");
+
+    // 3. Create instance
+    return contractRepository.insertInstance({
+      templateId: template.id,
+      userId,
+      status: "pending",
+    });
   }
 };

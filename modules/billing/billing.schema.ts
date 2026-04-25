@@ -15,6 +15,8 @@ export const plansTable = pgTable("plans", {
   durationMonths: integer("duration_months").notNull(),
   frequency: text("frequency").notNull().default("MONTHLY"),
   abacatePayProductId: text("abacate_pay_product_id"),
+  language: text("language"),
+  classesPerWeek: integer("classes_per_week"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
@@ -105,7 +107,13 @@ export const createPlanSchema = z.object({
   name: z.string().min(2),
   price: z.number().int().positive(),
   durationMonths: z.number().int().min(1),
+  language: z.string().min(1),
+  classesPerWeek: z.number().int().min(1),
   description: z.string().optional(),
+});
+
+export const updatePlanSchema = createPlanSchema.partial().extend({
+  id: z.string().uuid(),
 });
 
 export const createSubscriptionSchema = z.object({

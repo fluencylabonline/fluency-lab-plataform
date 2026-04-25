@@ -131,7 +131,7 @@ export class CommunicationService {
     }
   }
 
-  async sendNewInvoiceEmail(email: string, data: { studentName: string; amount: number; dueDate: Date; checkoutUrl: string }) {
+  async sendNewInvoiceEmail(email: string, data: { studentName: string; amount: number; dueDate: Date; pixPayload: string; pixImage: string; description?: string }) {
     try {
       await this.sendEmail({
         to: email,
@@ -276,14 +276,6 @@ export class CommunicationService {
               { type: "text", parameter_name: "amount", text: amountStr },
               { type: "text", parameter_name: "due_date", text: dateStr },
               { type: "text", parameter_name: "pix_payload", text: data.pixPayload },
-            ]
-          },
-          {
-            type: "button",
-            sub_type: "copy_code",
-            index: "0",
-            parameters: [
-              { type: "text", text: data.pixPayload }
             ]
           }
         ]

@@ -1,10 +1,10 @@
 import {
   Body,
-  Button,
   Container,
   Head,
   Heading,
   Html,
+  Img,
   Preview,
   Section,
   Text,
@@ -18,14 +18,18 @@ interface NewInvoiceEmailProps {
   studentName: string;
   amount: number;
   dueDate: Date;
-  checkoutUrl: string;
+  pixPayload: string;
+  pixImage: string;
+  description?: string;
 }
 
 export const NewInvoiceEmail = ({
   studentName,
   amount,
   dueDate,
-  checkoutUrl,
+  pixPayload,
+  pixImage,
+  description,
 }: NewInvoiceEmailProps) => {
   const formattedAmount = new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -43,16 +47,44 @@ export const NewInvoiceEmail = ({
           <Heading style={emailStyles.h1}>Olá, {studentName}!</Heading>
           <Section style={emailStyles.section}>
             <Text style={emailStyles.text}>
-              Sua próxima mensalidade no valor de <strong>{formattedAmount}</strong> já está disponível.
+              {description ? (
+                <>Uma nova cobrança no valor de <strong>{formattedAmount}</strong> foi gerada referente a: <strong>{description}</strong>.</>
+              ) : (
+                <>Sua próxima mensalidade no valor de <strong>{formattedAmount}</strong> já está disponível.</>
+              )}
             </Text>
             <Text style={emailStyles.text}>
-              O vencimento é dia <strong>{formattedDueDate}</strong>. Você pode realizar o pagamento via PIX ou Cartão clicando no botão abaixo:
+              O vencimento é dia <strong>{formattedDueDate}</strong>. Você pode realizar o pagamento via PIX utilizando o QR Code abaixo:
             </Text>
-            <Section style={emailStyles.buttonContainer}>
-              <Button style={emailStyles.button} href={checkoutUrl}>
-                Pagar Mensalidade
-              </Button>
+
+            <Section style={{ textAlign: "center", margin: "24px 0" }}>
+              <Img
+                src={pixImage}
+                alt="QR Code PIX"
+                width="200"
+                height="200"
+                style={{ margin: "0 auto", display: "block" }}
+              />
             </Section>
+
+            <Text style={{ ...emailStyles.text, textAlign: "center", fontSize: "14px", color: "#666" }}>
+              Ou utilize o código Copia e Cola abaixo:
+            </Text>
+
+            <Section style={{
+              backgroundColor: "#f4f4f4",
+              padding: "16px",
+              borderRadius: "8px",
+              margin: "16px 0",
+              wordBreak: "break-all",
+              fontFamily: "monospace",
+              fontSize: "12px",
+              color: "#333",
+              border: "1px solid #ddd"
+            }}>
+              {pixPayload}
+            </Section>
+
             <Text style={emailStyles.text}>
               Se tiver qualquer dúvida, estamos à disposição.
             </Text>

@@ -1,3 +1,5 @@
+"use client";
+
 import { isPathActive } from "@/utils/pathname";
 import { MenuItemType } from "@/components/layout/types";
 import { AnimatePresence, motion } from "framer-motion";

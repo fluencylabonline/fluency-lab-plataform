@@ -109,6 +109,18 @@ export const contractRepository = {
     return updated;
   },
 
+  async findPendingOnboardingInstance(userId: string) {
+    return db.query.contractInstancesTable.findFirst({
+      where: and(
+        eq(contractInstancesTable.userId, userId),
+        eq(contractInstancesTable.status, "pending")
+      ),
+      with: {
+        template: true
+      }
+    });
+  },
+
   // --- Metadados e Auditoria ---
   async saveSignatureMetadata(data: typeof contractSignaturesMetadataTable.$inferInsert) {
     return db.insert(contractSignaturesMetadataTable).values(data);

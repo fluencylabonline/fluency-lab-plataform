@@ -1,0 +1,205 @@
+"use client";
+
+import { useForm, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
+import {
+  Vault,
+  VaultHeader,
+  VaultTitle,
+  VaultDescription,
+  VaultFooter,
+  VaultContent,
+  VaultForm,
+  VaultBody,
+  VaultField,
+  VaultInput,
+  VaultPrimaryButton,
+  VaultSecondaryButton
+} from "@/components/ui/vault";
+import {
+  createPlanSchema,
+  Plan
+} from "@/modules/billing/billing.schema";
+import {
+  createPlanAction,
+  updatePlanAction
+} from "@/modules/billing/billing.actions";
+import { notify } from "@/components/ui/toaster";
+import { useEffect } from "react";
+import { z } from "zod";
+
+interface PlanVaultProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  plan?: Plan;
+  onSuccess?: (plan: Plan) => void;
+}
+
+type PlanFormValues = z.input<typeof createPlanSchema>;
+
+export function PlanVault({ open, onOpenChange, plan, onSuccess }: PlanVaultProps) {
+  const t = useTranslations("Billing");
+  const isEditing = !!plan;
+
+  const form = useForm<PlanFormValues>({
+    resolver: zodResolver(createPlanSchema),
+    defaultValues: {
+      name: "",
+      price: 0,
+      durationMonths: 12,
+      language: "",
+      classesPerWeek: 2,
+      description: "",
+    },
+  });
+
+  const { formState: { errors, isSubmitting }, handleSubmit, reset, register } = form;
+
+  useEffect(() => {
+    if (plan && open) {
+      reset({
+        name: plan.name,
+        price: plan.price,
+        durationMonths: plan.durationMonths,
+        language: plan.language || "",
+        classesPerWeek: plan.classesPerWeek || 2,
+        description: plan.description || "",
+      });
+    } else if (!plan && open) {
+      reset({
+        name: "",
+        price: 0,
+        durationMonths: 12,
+        language: "",
+        classesPerWeek: 2,
+        description: "",
+      });
+    }
+  }, [plan, reset, open]);
+
+  const onSubmit: SubmitHandler<PlanFormValues> = async (values) => {
+    let result;
+
+    if (isEditing && plan) {
+      result = await updatePlanAction({
+        id: plan.id,
+        ...values,
+      });
+    } else {
+      result = await createPlanAction(values);
+    }
+
+    if (result?.data?.success && result.data.plan) {
+      notify.success(isEditing ? t("planUpdated") || "Plano atualizado!" : t("planCreated") || "Plano criado!");
+      onSuccess?.(result.data.plan as Plan);
+      onOpenChange(false);
+      reset();
+    } else {
+      const errorMessage = result?.data?.error || result?.serverError || "Ocorreu um erro";
+      notify.error(errorMessage);
+    }
+  };
+
+  return (
+    <Vault open={open} onOpenChange={onOpenChange}>
+      <VaultContent>
+        <VaultHeader>
+          <VaultTitle>
+            {isEditing ? (t("editPlan") || "Editar Plano") : (t("createPlan") || "Criar Novo Plano")}
+          </VaultTitle>
+          <VaultDescription>
+            {t("planVaultDescription") || "Preencha as informações do plano de aulas."}
+          </VaultDescription>
+        </VaultHeader>
+
+        <VaultForm onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit(onSubmit)(e);
+        }}>
+          <VaultBody>
+            <VaultField
+              label={t("name") || "Nome do Plano"}
+              required
+              error={errors.name?.message}
+            >
+              <VaultInput
+                {...register("name")}
+                placeholder="Ex: Plano Mensal Inglês"
+              />
+            </VaultField>
+
+            <div className="grid grid-cols-2 gap-4">
+              <VaultField
+                label={t("language") || "Idioma"}
+                required
+                error={errors.language?.message}
+              >
+                <VaultInput
+                  {...register("language")}
+                  placeholder="Ex: Inglês"
+                />
+              </VaultField>
+              <VaultField
+                label={t("classesPerWeek") || "Aulas por Semana"}
+                required
+                error={errors.classesPerWeek?.message}
+              >
+                <VaultInput
+                  type="number"
+                  {...register("classesPerWeek", { valueAsNumber: true })}
+                />
+              </VaultField>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <VaultField
+                label={t("durationMonths") || "Duração (Meses)"}
+                required
+                error={errors.durationMonths?.message}
+              >
+                <VaultInput
+                  type="number"
+                  {...register("durationMonths", { valueAsNumber: true })}
+                />
+              </VaultField>
+              <VaultField
+                label={t("monthlyPrice") || "Mensalidade (em centavos)"}
+                required
+                error={errors.price?.message}
+              >
+                <VaultInput
+                  type="number"
+                  placeholder="Ex: 33000"
+                  {...register("price", { valueAsNumber: true })}
+                />
+              </VaultField>
+            </div>
+
+            <VaultField
+              label={t("description") || "Descrição (Opcional)"}
+              error={errors.description?.message}
+            >
+              <VaultInput {...register("description")} />
+            </VaultField>
+          </VaultBody>
+
+          <VaultFooter>
+            <VaultSecondaryButton
+              type="button"
+              onClick={() => onOpenChange(false)}
+            >
+              {t("cancel") || "Cancelar"}
+            </VaultSecondaryButton>
+            <VaultPrimaryButton
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (t("saving") || "Salvando...") : (t("save") || "Salvar Plano")}
+            </VaultPrimaryButton>
+          </VaultFooter>
+        </VaultForm>
+      </VaultContent>
+    </Vault>
+  );
+}

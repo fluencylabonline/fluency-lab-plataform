@@ -29,9 +29,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus } from "lucide-react";
-import { useParams } from "next/navigation";
 import { createUserSchema, type CreateUserValues } from "@/modules/user/user.schema";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Button } from "@/components/ui/button";
+import { Check, Plus, X } from "lucide-react";
+import { getPlansAction } from "@/modules/billing/billing.actions";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
 interface CreateUserVaultProps {
   open: boolean;
@@ -57,8 +61,22 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
       role: "student",
       classesStartDate: "",
       languages: [],
+      cellphone: "",
+      assignedPlanId: null,
     },
   });
+
+  const [plans, setPlans] = useState<{ id: string, name: string }[]>([]);
+
+  useEffect(() => {
+    if (open) {
+      getPlansAction().then(result => {
+        if (result?.data?.success) {
+          setPlans(result.data.data);
+        }
+      });
+    }
+  }, [open]);
 
   const { formState: { errors, isSubmitting }, handleSubmit, reset, setValue, getValues, control } = form;
 
@@ -125,6 +143,16 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
             </VaultField>
 
             <VaultField
+              label={t("cellphone")}
+              error={errors.cellphone?.message ? t(errors.cellphone.message as Parameters<typeof t>[0]) : undefined}
+            >
+              <VaultInput
+                {...form.register("cellphone")}
+                placeholder="Ex: +55 11 99999-9999"
+              />
+            </VaultField>
+
+            <VaultField
               label={t("type")}
               required
               error={errors.role?.message ? t(errors.role.message as Parameters<typeof t>[0]) : undefined}
@@ -154,6 +182,51 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
                     {...form.register("classesStartDate")}
                     className="h-10"
                   />
+                </VaultField>
+
+                <VaultField label={t("assignedPlan")} error={errors.assignedPlanId?.message}>
+                  <div className="space-y-2">
+                    {form.watch("assignedPlanId") ? (
+                      <div className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
+                        <div className="flex items-center gap-2">
+                          <Check className="w-4 h-4 text-primary" />
+                          <span className="text-sm font-medium">
+                            {plans.find((p) => p.id === form.getValues("assignedPlanId"))?.name}
+                          </span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setValue("assignedPlanId", null)}
+                          className="h-8 w-8 p-0 hover:bg-primary/10 text-primary"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Command className="rounded-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+                        <CommandInput placeholder={t("search")} />
+                        <CommandList className="max-h-[200px]">
+                          <CommandEmpty>{t("noResults")}</CommandEmpty>
+                          <CommandGroup>
+                            {plans.map((plan) => (
+                              <CommandItem
+                                key={plan.id}
+                                value={plan.name}
+                                onSelect={() => {
+                                  setValue("assignedPlanId", plan.id);
+                                }}
+                                className="rounded-lg"
+                              >
+                                {plan.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    )}
+                  </div>
                 </VaultField>
 
                 <VaultField label={t("studyingLanguages")}>
