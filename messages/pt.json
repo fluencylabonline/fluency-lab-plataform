@@ -1023,6 +1023,43 @@
     "support": {
       "help": "Precisa de ajuda?",
       "contact": "Fale conosco"
+    },
+    "teacher": {
+      "welcomeTitle": "Olá, Professor(a)!",
+      "welcomeDesc": "Estamos felizes em ter você conosco. Vamos começar sua configuração.",
+      "workCellphone": "Celular de trabalho",
+      "docsTitle": "Documentação",
+      "docsDesc": "Precisamos de alguns documentos para formalizar nossa parceria.",
+      "businessTaxId": "CNPJ (MEI)",
+      "paymentTitle": "Dados de Pagamento",
+      "paymentDesc": "Informe como prefere receber seus pagamentos mensais.",
+      "paymentNoticeTitle": "Pagamentos Mensais",
+      "paymentNoticeDesc": "O pagamento é realizado todo dia 15. Mantenha seus registros de aula atualizados para garantir o cálculo correto.",
+      "pixType": "Tipo de Chave PIX",
+      "pixKey": "Chave PIX",
+      "contractTitle": "Seu Contrato",
+      "contractDesc": "Leia e assine o contrato de prestação de serviços.",
+      "availabilityTitle": "Seus Horários",
+      "availabilityDesc": "Defina seus horários iniciais para começarmos os agendamentos.",
+      "normalSlots": "Horários Normais (Mín. 3)",
+      "makeupSlots": "Horários de Reposição (Mín. 3)",
+      "finishTitle": "Tudo pronto!",
+      "finishDesc": "Seu onboarding foi concluído com sucesso. Agora você faz parte da nossa equipe.",
+      "finishButton": "Começar",
+      "onboardingSuccess": "Onboarding finalizado!",
+      "steps": {
+        "availability": "Disponibilidade"
+      },
+      "practices": {
+        "prepTitle": "Preparação de Aula",
+        "prepDesc": "Revise o plano de aula e os materiais antes de cada encontro.",
+        "feedbackTitle": "Feedback Constante",
+        "feedbackDesc": "Forneça feedback construtivo após cada aula para o progresso do aluno.",
+        "punctualityTitle": "Pontualidade",
+        "punctualityDesc": "Esteja online 5 minutos antes do início previsto da aula.",
+        "techTitle": "Tecnologia",
+        "techDesc": "Certifique-se de que sua conexão e equipamentos estão funcionando."
+      }
     }
   },
   "Suspended": {

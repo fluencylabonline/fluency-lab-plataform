@@ -138,6 +138,8 @@ export function StepContract({
                 name: user.name || "",
                 email: user.email || "",
                 taxId: user.taxId || "",
+                businessTaxId: user.businessTaxId || "",
+                pixKey: user.pixKey || "",
             },
             guardian: user.guardianName
                 ? {

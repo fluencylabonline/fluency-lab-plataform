@@ -16,6 +16,11 @@ export default async function HubPage() {
         redirect(`/signin`);
     }
 
+    // Redirecionar para onboarding se não tiver finalizado
+    if (!user.onboarded && (user.role === UserRoles.STUDENT || user.role === UserRoles.TEACHER)) {
+        redirect(`/onboarding`);
+    }
+
     const route = roleRoutes[user.role];
 
     if (route) {

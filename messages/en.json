@@ -1012,6 +1012,43 @@
     "support": {
       "help": "Need help?",
       "contact": "Contact us"
+    },
+    "teacher": {
+      "welcomeTitle": "Hello, Teacher!",
+      "welcomeDesc": "We are happy to have you with us. Let's start your setup.",
+      "workCellphone": "Work cellphone",
+      "docsTitle": "Documentation",
+      "docsDesc": "We need some documents to formalize our partnership.",
+      "businessTaxId": "Business Tax ID (CNPJ/MEI)",
+      "paymentTitle": "Payment Info",
+      "paymentDesc": "Tell us how you prefer to receive your monthly payments.",
+      "paymentNoticeTitle": "Monthly Payments",
+      "paymentNoticeDesc": "Payments are made every 15th. Keep your class records updated to ensure correct calculation.",
+      "pixType": "PIX Key Type",
+      "pixKey": "PIX Key",
+      "contractTitle": "Your Contract",
+      "contractDesc": "Read and sign the service provision contract.",
+      "availabilityTitle": "Your Schedule",
+      "availabilityDesc": "Define your initial availability to start scheduling.",
+      "normalSlots": "Normal Slots (Min. 3)",
+      "makeupSlots": "Makeup Slots (Min. 3)",
+      "finishTitle": "All set!",
+      "finishDesc": "Your onboarding was completed successfully. You are now part of our team.",
+      "finishButton": "Get Started",
+      "onboardingSuccess": "Onboarding finalized!",
+      "steps": {
+        "availability": "Availability"
+      },
+      "practices": {
+        "prepTitle": "Class Preparation",
+        "prepDesc": "Review the lesson plan and materials before each meeting.",
+        "feedbackTitle": "Constant Feedback",
+        "feedbackDesc": "Provide constructive feedback after each class for student progress.",
+        "punctualityTitle": "Punctuality",
+        "punctualityDesc": "Be online 5 minutes before the scheduled class start.",
+        "techTitle": "Technology",
+        "techDesc": "Ensure your connection and equipment are working correctly."
+      }
     }
   },
   "Suspended": {

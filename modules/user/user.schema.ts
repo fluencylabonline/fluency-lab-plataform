@@ -30,6 +30,9 @@ export const usersTable = pgTable("users", {
   // Contact & Billing
   cellphone: text("cellphone"),
   taxId: text("tax_id"),
+  businessTaxId: text("business_tax_id"), // CNPJ (Criptografado)
+  pixKey: text("pix_key"),               // Chave PIX (Criptografado)
+  pixType: text("pix_type"),              // Tipo de chave PIX
 
   // Student details
   classesStartDate: timestamp("classes_start_date"),
@@ -147,6 +150,35 @@ export const onboardingPaymentSchema = z.object({
   dueDay: z.number().int().min(1).max(31),
 });
 
+// Teacher Onboarding Schemas
+export const teacherOnboardingWelcomeSchema = z.object({
+  name: z.string().min(2, "Nome é obrigatório"),
+  cellphone: z.string().min(1, "Celular de trabalho é obrigatório"),
+});
+
+export const teacherOnboardingDocumentsSchema = z.object({
+  taxId: z.string().min(1, "CPF é obrigatório"),
+  businessTaxId: z.string().min(1, "CNPJ é obrigatório"),
+});
+
+export const teacherOnboardingPaymentSchema = z.object({
+  pixKey: z.string().min(1, "Chave PIX é obrigatória"),
+  pixType: z.string().min(1, "Tipo de chave é obrigatório"),
+});
+
+export const teacherOnboardingAvailabilitySchema = z.object({
+  normalSlots: z.array(z.object({
+    startTime: z.string(),
+    endTime: z.string(),
+    startDate: z.date(),
+  })),
+  makeupSlots: z.array(z.object({
+    startTime: z.string(),
+    endTime: z.string(),
+    startDate: z.date(),
+  })),
+});
+
 export type CreateUserValues = z.input<typeof createUserSchema>;
 export type User = typeof usersTable.$inferSelect;
 export type NewUser = typeof usersTable.$inferInsert;
@@ -161,6 +193,11 @@ export type OnboardingWelcomeValues = z.input<typeof onboardingWelcomeSchema>;
 export type OnboardingGuardianValues = z.input<typeof onboardingGuardianSchema>;
 export type OnboardingAddressValues = z.input<typeof onboardingAddressSchema>;
 export type OnboardingPaymentValues = z.input<typeof onboardingPaymentSchema>;
+
+export type TeacherOnboardingWelcomeValues = z.input<typeof teacherOnboardingWelcomeSchema>;
+export type TeacherOnboardingDocumentsValues = z.input<typeof teacherOnboardingDocumentsSchema>;
+export type TeacherOnboardingPaymentValues = z.input<typeof teacherOnboardingPaymentSchema>;
+export type TeacherOnboardingAvailabilityValues = z.input<typeof teacherOnboardingAvailabilitySchema>;
 
 // Rate Limiting Table 
 // TODO: TEMPORARY

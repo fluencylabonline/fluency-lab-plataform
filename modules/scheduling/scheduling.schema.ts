@@ -184,13 +184,13 @@ export const grantCreditSchema = z.object({
 
 export const createRecurrenceRuleSchema = z.object({
   teacherId: z.string(),
-  studentId: z.string().optional(),
+  studentId: z.string().optional().nullable(),
   type: z.enum(slotTypeEnum.enumValues),
   frequency: z.enum(recurrenceFreqEnum.enumValues),
   startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Formato inválido (HH:mm)"),
   endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Formato inválido (HH:mm)"),
   startDate: z.date(),
-  endDate: z.date().optional(),
+  endDate: z.date().optional().nullable(),
 });
 
 export type CreateRecurrenceRuleValues = z.input<typeof createRecurrenceRuleSchema>;

@@ -7,6 +7,8 @@ interface TemplateData {
     name: string;
     taxId: string;
     email: string;
+    businessTaxId?: string;
+    pixKey?: string;
   };
   guardian?: {
     name: string;
@@ -32,6 +34,8 @@ export function injectTemplateData(template: string, data: TemplateData): string
     "user.name": data.user.name || "",
     "user.taxId": data.user.taxId || "",
     "user.email": data.user.email || "",
+    "user.businessTaxId": data.user.businessTaxId || "",
+    "user.pixKey": data.user.pixKey || "",
     "school.name": data.school.name || "",
     "school.legalName": data.school.legalName || "",
     "school.taxId": data.school.taxId || "",

@@ -432,9 +432,13 @@ export const contractService = {
       return instance;
     }
 
-    // 2. Get active template for student
-    const template = await contractRepository.findActiveTemplateByType("student", region);
-    if (!template) throw new Error("Template de contrato não encontrado.");
+    // 2. Get active template based on user role
+    const user = await userService.getUser(userId);
+    if (!user) throw new Error("Usuário não encontrado.");
+
+    const contractType = user.role === "teacher" ? "teacher" : "student";
+    const template = await contractRepository.findActiveTemplateByType(contractType, region);
+    if (!template) throw new Error(`Template de contrato (${contractType}) não encontrado.`);
 
     // 3. Create instance with the subscription link
     return contractRepository.insertInstance({

@@ -1,7 +1,17 @@
 "use server";
 
 import { protectedAction } from "@/lib/safe-action";
-import { onboardingWelcomeSchema, onboardingAddressSchema, onboardingGuardianSchema, onboardingPaymentSchema, type NewUser } from "../user/user.schema";
+import {
+  onboardingWelcomeSchema,
+  onboardingAddressSchema,
+  onboardingGuardianSchema,
+  onboardingPaymentSchema,
+  teacherOnboardingWelcomeSchema,
+  teacherOnboardingDocumentsSchema,
+  teacherOnboardingPaymentSchema,
+  teacherOnboardingAvailabilitySchema,
+  type NewUser
+} from "../user/user.schema";
 import { userRepository } from "../user/user.repository";
 import { encrypt } from "@/lib/cryptography";
 import { billingService } from "../billing/billing.service";
@@ -112,5 +122,107 @@ export const completeOnboardingAction = protectedAction
 
     revalidatePath("/onboarding");
     revalidatePath("/hub");
+    return { success: true } as { success: boolean; error?: string };
+  });
+
+// --- Teacher Onboarding Actions ---
+
+export const teacherOnboardingWelcomeAction = protectedAction
+  .inputSchema(teacherOnboardingWelcomeSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const { name, cellphone } = parsedInput;
+
+    await userRepository.update(ctx.user.id, {
+      name,
+      cellphone: encrypt(cellphone),
+      onboardingStep: 2
+    });
+
+    revalidatePath("/onboarding");
+    return { success: true } as { success: boolean; error?: string };
+  });
+
+export const teacherOnboardingDocumentsAction = protectedAction
+  .inputSchema(teacherOnboardingDocumentsSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const { taxId, businessTaxId } = parsedInput;
+
+    await userRepository.update(ctx.user.id, {
+      taxId: encrypt(taxId),
+      businessTaxId: encrypt(businessTaxId),
+      onboardingStep: 3
+    });
+
+    revalidatePath("/onboarding");
+    return { success: true } as { success: boolean; error?: string };
+  });
+
+export const teacherOnboardingPaymentAction = protectedAction
+  .inputSchema(teacherOnboardingPaymentSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const { pixKey, pixType } = parsedInput;
+
+    await userRepository.update(ctx.user.id, {
+      pixKey: encrypt(pixKey),
+      pixType,
+      onboardingStep: 4
+    });
+
+    revalidatePath("/onboarding");
+    return { success: true } as { success: boolean; error?: string };
+  });
+
+export const teacherOnboardingContractAction = protectedAction
+  .action(async ({ ctx }) => {
+    await userRepository.update(ctx.user.id, {
+      onboardingStep: 5
+    });
+
+    revalidatePath("/onboarding");
+    return { success: true } as { success: boolean; error?: string };
+  });
+
+import { schedulingService } from "../scheduling/scheduling.service";
+
+export const teacherOnboardingAvailabilityAction = protectedAction
+  .inputSchema(teacherOnboardingAvailabilitySchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const { normalSlots, makeupSlots } = parsedInput;
+
+    // Criar regras para horários normais
+    for (const slot of normalSlots) {
+      await schedulingService.createRule(
+        { id: ctx.user.id, role: ctx.user.role },
+        {
+          teacherId: ctx.user.id,
+          type: "NORMAL",
+          frequency: "WEEKLY",
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+          startDate: slot.startDate,
+        }
+      );
+    }
+
+    // Criar regras para horários de reposição
+    for (const slot of makeupSlots) {
+      await schedulingService.createRule(
+        { id: ctx.user.id, role: ctx.user.role },
+        {
+          teacherId: ctx.user.id,
+          type: "REPOSICAO",
+          frequency: "WEEKLY",
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+          startDate: slot.startDate,
+        }
+      );
+    }
+
+    await userRepository.update(ctx.user.id, {
+      onboardingStep: 6
+    });
+
+    revalidatePath("/onboarding");
     return { success: true } as { success: boolean; error?: string };
   });

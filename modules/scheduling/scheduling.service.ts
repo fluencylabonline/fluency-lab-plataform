@@ -33,8 +33,8 @@ export const schedulingService = {
     data: typeof recurrenceRules.$inferInsert
   ) {
 
-    if (!hasPermission(user, "class.update.any")) {
-      throw new Error("Unauthorized: Only Admin or Manager can create recurrence rules");
+    if (!hasPermission(user, "class.update.any") && user.id !== data.teacherId) {
+      throw new Error("Unauthorized: You can only create rules for yourself or if you are an Admin/Manager");
     }
 
     const [rule] = await db.insert(recurrenceRules).values(data).returning();

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
 import { OnboardingFlow } from "./_components/OnboardingFlow";
+import { TeacherOnboardingFlow } from "./_components/TeacherOnboardingFlow";
 
 export default async function OnboardingPage() {
     const user = await getCurrentUser();
@@ -9,7 +10,8 @@ export default async function OnboardingPage() {
         redirect("/signin");
     }
 
-    if (user.role !== "student") {
+    // Permitir apenas alunos e professores no onboarding
+    if (user.role !== "student" && user.role !== "teacher") {
         redirect("/hub");
     }
 
@@ -19,7 +21,11 @@ export default async function OnboardingPage() {
 
     return (
         <main className="w-full h-full min-h-screen">
-            <OnboardingFlow user={user} />
+            {user.role === "teacher" ? (
+                <TeacherOnboardingFlow user={user} />
+            ) : (
+                <OnboardingFlow user={user} />
+            )}
         </main>
     );
 }
