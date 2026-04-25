@@ -10,22 +10,22 @@ import { revalidatePath } from "next/cache";
 
 const recordPracticeResultSchema = z.object({
   itemId: z.string(),
-  lessonId: z.string().uuid(),
+  lessonId: z.uuid(),
   quality: z.number().int().min(0).max(5),
 });
 
 const generatePlanSchema = z.object({
-    languageId: z.string(),
+  languageId: z.string(),
 });
 
 const startLessonSchema = z.object({
-  lessonId: z.string().uuid(),
+  lessonId: z.uuid(),
 });
 
 const syncPracticeBatchSchema = z.object({
   items: z.array(z.object({
     itemId: z.string(),
-    lessonId: z.string().uuid(),
+    lessonId: z.uuid(),
     quality: z.number().int().min(0).max(5),
     practicedAt: z.coerce.date(),
   })),
@@ -33,12 +33,12 @@ const syncPracticeBatchSchema = z.object({
 
 const createPlanTemplateSchema = z.object({
   name: z.string().min(3),
-  languageId: z.string().uuid(),
+  languageId: z.uuid(),
   description: z.string().optional(),
 });
 
 const assignPlanSchema = z.object({
-  templateId: z.string().uuid(),
+  templateId: z.uuid(),
   studentId: z.string(),
 });
 
@@ -47,18 +47,18 @@ const getStudentPlanGapSchema = z.object({
 });
 
 const reorderLessonsSchema = z.object({
-  planId: z.string().uuid(),
-  lessonIds: z.array(z.string().uuid()),
+  planId: z.uuid(),
+  lessonIds: z.array(z.uuid()),
 });
 
 const addLessonToPlanSchema = z.object({
-  planId: z.string().uuid(),
-  lessonId: z.string().uuid(),
+  planId: z.uuid(),
+  lessonId: z.uuid(),
 });
 
 const removeLessonFromPlanSchema = z.object({
-  planId: z.string().uuid(),
-  lessonId: z.string().uuid(),
+  planId: z.uuid(),
+  lessonId: z.uuid(),
 });
 
 
@@ -71,15 +71,15 @@ export const recordPracticeResultAction = protectedAction
   .schema(recordPracticeResultSchema)
   .action(async ({ parsedInput, ctx }) => {
     const result = await learningService.recordPracticeResult(
-      ctx.user.id, 
-      parsedInput.itemId, 
+      ctx.user.id,
+      parsedInput.itemId,
       parsedInput.quality,
       parsedInput.lessonId
     );
-    
+
     // Revalidation logic
     revalidatePath("/student/learning");
-    
+
     return result;
   });
 
@@ -90,9 +90,9 @@ export const generatePlanAction = protectedAction
   .schema(generatePlanSchema)
   .action(async ({ parsedInput, ctx }) => {
     const plan = await learningService.generatePersonalizedPlan(ctx.user.id, parsedInput.languageId);
-    
+
     revalidatePath("/student/learning/plans");
-    
+
     return { success: true, planId: plan.id };
   });
 
@@ -114,7 +114,7 @@ export const syncPracticeBatchAction = protectedAction
   .schema(syncPracticeBatchSchema)
   .action(async ({ parsedInput, ctx }) => {
     const result = await learningService.recordBatchResult(
-      ctx.user.id, 
+      ctx.user.id,
       parsedInput.items.map(i => ({
         itemId: i.itemId,
         lessonId: i.lessonId,
@@ -122,10 +122,10 @@ export const syncPracticeBatchAction = protectedAction
         practicedAt: i.practicedAt,
       }))
     );
-    
+
     revalidatePath("/student/learning");
     revalidatePath("/student/curriculum"); // Revalidate curriculum if items status changed
-    
+
     return result;
   });
 

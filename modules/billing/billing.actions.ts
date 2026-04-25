@@ -85,7 +85,7 @@ export const getPlansAction = protectedAction
   });
 
 export const getInstallmentStatusAction = protectedAction
-  .inputSchema(z.object({ installmentId: z.string().uuid() }))
+  .inputSchema(z.object({ installmentId: z.uuid() }))
   .action(async ({ parsedInput }) => {
     const installment = await billingService.getInstallmentById(parsedInput.installmentId);
     return { success: true, data: { status: installment?.status } };

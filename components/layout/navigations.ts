@@ -15,7 +15,7 @@ import { UserRoles, hasPermission, type UserRoleInfo } from "@/lib/rbac";
 
 const adminItems: MenuItemType[] = [
     {
-        href: "/[locale]/hub/admin/my-profile",
+        href: "/admin/profile",
         label: "Meu Perfil",
         labelKey: "myProfile",
         Icon: UserIcon,
@@ -23,7 +23,7 @@ const adminItems: MenuItemType[] = [
         permission: "profile.update.self",
     },
     {
-        href: "/[locale]/hub/admin/dashboard",
+        href: "/admin/dashboard",
         label: "Dashboard",
         labelKey: "dashboard",
         Icon: LayoutDashboardIcon,
@@ -31,7 +31,7 @@ const adminItems: MenuItemType[] = [
         permission: "class.view.all",
     },
     {
-        href: "/[locale]/hub/admin/users",
+        href: "/admin/users",
         label: "Usuários",
         labelKey: "users",
         Icon: PeopleIcon,
@@ -39,7 +39,7 @@ const adminItems: MenuItemType[] = [
         permission: "user.create",
     },
     {
-        href: "/[locale]/hub/admin/finances",
+        href: "/admin/finances",
         label: "Financeiro",
         labelKey: "finances",
         Icon: DollarSignIcon,
@@ -47,7 +47,7 @@ const adminItems: MenuItemType[] = [
         permission: "payment.manage",
     },
     {
-        href: "/[locale]/hub/admin/courses",
+        href: "/admin/courses",
         label: "Cursos",
         labelKey: "courses",
         Icon: ClapIcon,
@@ -55,21 +55,21 @@ const adminItems: MenuItemType[] = [
         permission: "material.view",
     },
     {
-        href: "/[locale]/hub/admin/notification",
+        href: "/admin/communication",
         label: "Notificações",
         labelKey: "notifications",
         Icon: BellIcon,
         iconProps: { size: 20 },
     },
     {
-        href: "/[locale]/hub/admin/tasks",
+        href: "/admin/tasks",
         label: "Tarefas",
         labelKey: "tasks",
         Icon: CircleCheckIcon,
         iconProps: { size: 20 },
     },
     {
-        href: "/[locale]/hub/admin/settings",
+        href: "/admin/settings",
         label: "Configurações",
         labelKey: "settings",
         Icon: SettingsIcon,
@@ -79,14 +79,14 @@ const adminItems: MenuItemType[] = [
 
 const teacherItems: MenuItemType[] = [
     {
-        href: "/[locale]/hub/teacher/my-profile",
+        href: "/teacher/profile",
         label: "Meu Perfil",
         labelKey: "myProfile",
         Icon: UserIcon,
         iconProps: { size: 20 },
     },
     {
-        href: "/[locale]/hub/teacher/my-students",
+        href: "/teacher/my-students",
         label: "Alunos",
         labelKey: "students",
         Icon: PeopleIcon,
@@ -94,7 +94,7 @@ const teacherItems: MenuItemType[] = [
         permission: "class.view.assigned",
     },
     {
-        href: "/[locale]/hub/teacher/my-schedule",
+        href: "/teacher/schedule",
         label: "Minha Agenda",
         labelKey: "mySchedule",
         Icon: CalendarDaysIcon,
@@ -102,7 +102,7 @@ const teacherItems: MenuItemType[] = [
         permission: "class.view.assigned",
     },
     {
-        href: "/[locale]/hub/teacher/workbooks",
+        href: "/teacher/workbooks",
         label: "Material",
         labelKey: "workbooks",
         Icon: LayoutDashboardIcon,
@@ -110,14 +110,7 @@ const teacherItems: MenuItemType[] = [
         permission: "material.view",
     },
     {
-        href: "/[locale]/hub/teacher/my-chat",
-        label: "Conversas",
-        labelKey: "chat",
-        Icon: MessageSquareIcon,
-        iconProps: { size: 20 },
-    },
-    {
-        href: "/[locale]/hub/teacher/settings",
+        href: "/teacher/settings",
         label: "Configurações",
         labelKey: "settings",
         Icon: SettingsIcon,
@@ -127,21 +120,21 @@ const teacherItems: MenuItemType[] = [
 
 const studentItems: MenuItemType[] = [
     {
-        href: "/[locale]/hub/student/my-profile",
+        href: "/student/profile",
         label: "Meu Perfil",
         labelKey: "myProfile",
         Icon: UserIcon,
         iconProps: { size: 20 },
     },
     {
-        href: "/[locale]/hub/student/my-notebook",
+        href: "/student/notebook",
         label: "Caderno",
         labelKey: "notebook",
         Icon: LayoutPanelTopIcon,
         iconProps: { size: 20 },
     },
     {
-        href: "/[locale]/hub/student/my-classes",
+        href: "/student/classes",
         label: "Calendário",
         labelKey: "calendar",
         Icon: CalendarDaysIcon,
@@ -149,7 +142,7 @@ const studentItems: MenuItemType[] = [
         permission: "class.view",
     },
     {
-        href: "/[locale]/hub/student/my-courses",
+        href: "/student/courses",
         label: "Cursos",
         labelKey: "courses",
         Icon: ClapIcon,
@@ -157,21 +150,14 @@ const studentItems: MenuItemType[] = [
         permission: "material.view",
     },
     {
-        href: "/[locale]/hub/student/my-immersion",
+        href: "/student/immersion",
         label: "Imersão",
         labelKey: "immersion",
         Icon: WavesLadderIcon,
         iconProps: { size: 20 },
     },
     {
-        href: "/[locale]/hub/student/my-chat",
-        label: "Conversas",
-        labelKey: "chat",
-        Icon: MessageSquareIcon,
-        iconProps: { size: 20 },
-    },
-    {
-        href: "/[locale]/hub/student/settings",
+        href: "/student/settings",
         label: "Configurações",
         labelKey: "settings",
         Icon: SettingsIcon,
@@ -188,7 +174,7 @@ const managerItems: MenuItemType[] = [
         iconProps: { size: 20 },
     },
     {
-        href: "/[locale]/hub/manager/students",
+        href: "/manager/students",
         label: "Estudantes",
         labelKey: "students",
         Icon: PeopleIcon,
@@ -204,7 +190,7 @@ const managerItems: MenuItemType[] = [
         permission: "material.view",
     },
     {
-        href: "/[locale]/hub/manager/tasks",
+        href: "/manager/tasks",
         label: "Tarefas",
         labelKey: "tasks",
         Icon: CircleCheckIcon,
@@ -212,7 +198,7 @@ const managerItems: MenuItemType[] = [
         permission: "report.view.limited",
     },
     {
-        href: "/[locale]/hub/manager/settings",
+        href: "/manager/settings",
         label: "Configurações",
         labelKey: "settings",
         Icon: SettingsIcon,

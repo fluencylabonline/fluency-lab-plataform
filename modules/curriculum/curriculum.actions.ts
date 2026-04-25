@@ -335,7 +335,7 @@ export const transcribeMediaAction = managerAction
  */
 export const getLearningItemsAction = managerAction
   .inputSchema(z.object({
-    languageId: z.string().uuid(),
+    languageId: z.uuid(),
     type: z.enum(["VOCABULARY", "STRUCTURE"]).optional(),
     search: z.string().optional(),
     limit: z.number().optional().default(50),

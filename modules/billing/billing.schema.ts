@@ -113,7 +113,7 @@ export const createPlanSchema = z.object({
 });
 
 export const updatePlanSchema = createPlanSchema.partial().extend({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const createSubscriptionSchema = z.object({

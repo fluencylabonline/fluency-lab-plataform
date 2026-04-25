@@ -10,7 +10,7 @@ import { mapEloToCEFR } from "@/lib/adaptive-scoring";
 import { z } from "zod";
 
 export const startPlacementTestAction = protectedAction
-  .schema(z.object({ languageId: z.string().uuid() }))
+  .schema(z.object({ languageId: z.uuid() }))
   .action(async ({ parsedInput, ctx }) => {
     // 1. Will throw if not eligible
     const { test, answeredCount, currentElo } = await placementService.startOrResumeTest(ctx.user.id, parsedInput.languageId);
@@ -54,9 +54,9 @@ export const submitPlacementAnswerAction = protectedAction
 
 export const generateBatchPlacementQuestionsAction = managerAction
   .schema(z.object({
-    languageId: z.string().uuid(),
+    languageId: z.uuid(),
     itemIds: z.array(z.string()),
-    mediaIds: z.array(z.string().uuid()),
+    mediaIds: z.array(z.uuid()),
     types: z.array(z.string())
   }))
   .action(async ({ parsedInput, ctx }) => {
@@ -82,7 +82,7 @@ export const commitBatchPlacementQuestionsAction = managerAction
 
 export const getPlacementQuestionsAction = managerAction
   .schema(z.object({
-    languageId: z.string().uuid(),
+    languageId: z.uuid(),
     cefrLevel: z.string().optional(),
     skill: z.string().optional(),
     status: z.string().optional(),
@@ -112,7 +112,7 @@ export const updatePlacementQuestionAction = managerAction
   });
 
 export const getPlacementStatsAction = managerAction
-  .schema(z.object({ languageId: z.string().uuid() }))
+  .schema(z.object({ languageId: z.uuid() }))
   .action(async ({ parsedInput }) => {
     return await placementService.getStats(parsedInput.languageId);
   });

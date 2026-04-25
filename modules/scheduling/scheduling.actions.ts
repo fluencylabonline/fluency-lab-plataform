@@ -2,13 +2,13 @@
 
 import { protectedAction, permissionAction } from "@/lib/safe-action";
 import { schedulingService } from "./scheduling.service";
-import { 
-  allocateStudentSchema, 
-  updateSlotStatusSchema, 
-  grantCreditSchema, 
-  cancelClassSchema, 
+import {
+  allocateStudentSchema,
+  updateSlotStatusSchema,
+  grantCreditSchema,
+  cancelClassSchema,
   rescheduleWithCreditSchema,
-  createRecurrenceRuleSchema 
+  createRecurrenceRuleSchema
 } from "./scheduling.schema";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -90,9 +90,9 @@ export const rescheduleWithCreditAction = protectedAction
   .action(async ({ parsedInput, ctx }) => {
     try {
       await schedulingService.rescheduleWithCredit(
-        ctx.user.id, 
-        parsedInput.originalClassId, 
-        parsedInput.newSlotId, 
+        ctx.user.id,
+        parsedInput.originalClassId,
+        parsedInput.newSlotId,
         parsedInput.creditId
       );
       revalidatePath("/");
@@ -104,7 +104,7 @@ export const rescheduleWithCreditAction = protectedAction
   });
 
 export const convertToAvailableAction = protectedAction
-  .inputSchema(z.object({ classId: z.string().uuid() }))
+  .inputSchema(z.object({ classId: z.uuid() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
       await schedulingService.convertToAvailable(ctx.user, parsedInput.classId);

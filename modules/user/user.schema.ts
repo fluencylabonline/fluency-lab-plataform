@@ -109,7 +109,7 @@ export const createUserSchema = z.object({
   languages: z.array(z.string()).optional().default([]),
   locale: z.enum(locales).optional().default("pt"),
   cellphone: z.string().optional(),
-  assignedPlanId: z.string().uuid().optional().nullable(),
+  assignedPlanId: z.uuid().optional().nullable(),
 });
 
 // Onboarding Step Schemas
