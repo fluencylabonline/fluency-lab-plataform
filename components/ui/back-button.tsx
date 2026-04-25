@@ -13,15 +13,15 @@ interface BackButtonProps {
 
 export function BackButton({ href, ariaLabel, className }: BackButtonProps) {
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className={cn("rounded-full", className)}
-      aria-label={ariaLabel}
-    >
-      <Link href={href}>
+    <Link href={href}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className={cn("rounded-full", className)}
+        aria-label={ariaLabel}
+      >
         <ChevronLeft className="h-5 w-5" />
-      </Link>
-    </Button>
+      </Button>
+    </Link>
   );
 }

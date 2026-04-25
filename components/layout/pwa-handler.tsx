@@ -42,7 +42,6 @@ export function PwaHandler() {
   }, [setStandalone]);
 
   useEffect(() => {
-    // 1. Capture Install Prompt
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
       console.log("[PWA] beforeinstallprompt fired");
       e.preventDefault();
@@ -51,14 +50,12 @@ export function PwaHandler() {
 
     window.addEventListener("beforeinstallprompt" as unknown as keyof WindowEventMap, handleBeforeInstallPrompt as EventListener);
 
-    // 2. Handle Service Worker and Push
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       const initPwaSupport = async () => {
         try {
           const registration = await navigator.serviceWorker.ready;
           setRegistration(registration);
 
-          // Detect Updates
           const onUpdate = () => {
             setUpdateAvailable(true);
           };
@@ -78,7 +75,6 @@ export function PwaHandler() {
             }
           });
 
-          // Original Push Subscription logic
           let subscription = await registration.pushManager.getSubscription();
 
           if (!subscription && Notification.permission === "granted") {
@@ -94,8 +90,8 @@ export function PwaHandler() {
           if (subscription) {
             await saveSubscriptionAction({ subscription: subscription.toJSON() });
           }
-        } catch (error) {
-          console.error("PWA Handler error:", error);
+        } catch {
+          //console.error("PWA Handler error:", error);
         }
       };
 

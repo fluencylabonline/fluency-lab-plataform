@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { onboardingPaymentAction } from "@/modules/user/onboarding.actions";
+import { onboardingPaymentAction } from "@/modules/onboarding/onboarding.actions";
 import { getPlansAction, getInstallmentStatusAction, getActivePaymentAction } from "@/modules/billing/billing.actions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";

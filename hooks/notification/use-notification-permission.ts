@@ -17,10 +17,7 @@ export function useNotificationPermission() {
       };
 
       syncPermission();
-      
-      // Handle the case where the user changes permission in browser settings
       const interval = setInterval(syncPermission, 2000);
-      
       return () => clearInterval(interval);
     }
   }, []);

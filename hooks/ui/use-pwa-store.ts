@@ -39,7 +39,7 @@ export const usePwaStore = create<PwaStore>((set, get) => ({
 
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    
+
     if (outcome === "accepted") {
       set({ deferredPrompt: null });
     }
@@ -48,14 +48,12 @@ export const usePwaStore = create<PwaStore>((set, get) => ({
   update: () => {
     const { registration } = get();
     if (!registration || !registration.waiting) {
-        window.location.reload();
-        return;
+      window.location.reload();
+      return;
     }
 
-    // Send the skip waiting message to the waiting service worker
     registration.waiting.postMessage({ type: "SKIP_WAITING" });
 
-    // Listen for the controlling service worker to change and reload the page
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       window.location.reload();
     });

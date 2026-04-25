@@ -12,7 +12,7 @@ export function useNotifications() {
       return (result?.data as Notification[]) || [];
     },
     {
-      refreshInterval: 30000, // Refresh every 30 seconds
+      refreshInterval: 30000,
     }
   );
 

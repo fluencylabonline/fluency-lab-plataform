@@ -3,10 +3,20 @@
     "origin": [
       "http://localhost:3000",
       "https://fluencylab.app",
-      "https://www.fluencylab.app"
+      "https://www.fluencylab.app",
+      "https://www.fluency-lab-platform.vercel.app"
     ],
-    "method": ["GET", "PUT", "POST", "HEAD", "OPTIONS"],
+    "method": [
+      "GET",
+      "PUT",
+      "POST",
+      "HEAD",
+      "OPTIONS"
+    ],
     "maxAgeSeconds": 3600,
-    "responseHeader": ["Content-Type", "x-goog-resumable"]
+    "responseHeader": [
+      "Content-Type",
+      "x-goog-resumable"
+    ]
   }
 ]

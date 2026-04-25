@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { completeOnboardingAction } from "@/modules/user/onboarding.actions";
+import { completeOnboardingAction } from "@/modules/onboarding/onboarding.actions";
 import { Button } from "@/components/ui/button";
 import { notify } from "@/components/ui/toaster";
 import { useState } from "react";
@@ -90,9 +90,9 @@ export function StepBestPractices() {
             </div>
 
             <div className="pt-4">
-                <Button 
-                    onClick={onFinish} 
-                    className="w-full h-14 text-lg font-bold rounded-2xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]" 
+                <Button
+                    onClick={onFinish}
+                    className="w-full h-14 text-lg font-bold rounded-2xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
                     disabled={loading}
                 >
                     {loading ? (

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/vault";
 
 export default function CookieConsent() {
-    const t = useTranslations("CookieConsent"); //TODO
+    const t = useTranslations("CookieConsent"); //TODO: I just don't remember what
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
