@@ -44,4 +44,5 @@ export type StudentCreditWithDetails = StudentCredit & {
 export type SlotInstanceWithDetails = SlotInstance & {
   rule?: RecurrenceRule | null;
   credit?: StudentCredit | null;
+  student?: { name: string | null; assignedPlanId: string | null; isActive: boolean } | null;
 };

@@ -61,6 +61,9 @@ export const usersTable = pgTable("users", {
   // Placement
   lastPlacementTestDate: timestamp("last_placement_test_date"),
   currentEloScore: integer("current_elo_score").notNull().default(600),
+
+  // Payment
+  teacherHourlyRate: integer("teacher_hourly_rate").notNull().default(4200),
 });
 
 // Schemas
@@ -180,6 +183,15 @@ export const teacherOnboardingAvailabilitySchema = z.object({
 });
 
 export type CreateUserValues = z.input<typeof createUserSchema>;
+export const updateUserSchema = z.object({
+  id: z.string(),
+  name: z.string().optional(),
+  email: z.string().email().optional(),
+  role: z.enum(roleEnum.enumValues).optional(),
+  isActive: z.boolean().optional(),
+  teacherHourlyRate: z.number().int().optional(),
+});
+
 export type User = typeof usersTable.$inferSelect;
 export type NewUser = typeof usersTable.$inferInsert;
 

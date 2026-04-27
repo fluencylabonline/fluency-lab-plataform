@@ -9,11 +9,11 @@ import {
   schedulingAuditLogs
 } from "./scheduling.schema";
 import { eq, and, gte } from "drizzle-orm";
-import { 
-  addWeeks, 
-  addMonths, 
-  isAfter, 
-  isBefore, 
+import {
+  addWeeks,
+  addMonths,
+  isAfter,
+  isBefore,
   startOfDay,
   format,
   differenceInHours,
@@ -38,9 +38,9 @@ export const schedulingService = {
     }
 
     const [rule] = await db.insert(recurrenceRules).values(data).returning();
-    
-    // Auto-materialize first 4 weeks
-    await this.materializeFutureSlots(rule.id, 4);
+
+    // Auto-materialize first 24 weeks (6 months)
+    await this.materializeFutureSlots(rule.id, 24);
 
     return rule;
   },
@@ -199,25 +199,25 @@ export const schedulingService = {
       } else if (slot.studentId) {
         // Notification: Simple Cancellation
         const targetUserId = finalStatus === "no-show" ? null : (reason === "canceled-student" ? slot.teacherId : slot.studentId);
-        
+
         if (finalStatus === "no-show") {
-            // Special notification for Late Cancellation
-             await notificationService.sendNotification({
-              title: "Aula Perdida (Cancelamento Tardio)",
-              body: `Sua aula de ${format(slot.startAt, "dd/MM HH:mm")} foi marcada como No-Show devido ao aviso inferior a 4h.`,
-              targetType: "specific",
-              userIds: [slot.studentId],
-              channels: { inApp: true, push: true },
-            });
+          // Special notification for Late Cancellation
+          await notificationService.sendNotification({
+            title: "Aula Perdida (Cancelamento Tardio)",
+            body: `Sua aula de ${format(slot.startAt, "dd/MM HH:mm")} foi marcada como No-Show devido ao aviso inferior a 4h.`,
+            targetType: "specific",
+            userIds: [slot.studentId],
+            channels: { inApp: true, push: true },
+          });
         } else if (targetUserId) {
-            const roleName = reason === "canceled-student" ? "O aluno" : "O professor";
-            await notificationService.sendNotification({
-              title: "Aula Cancelada",
-              body: `${roleName} cancelou a aula agendada para ${format(slot.startAt, "dd/MM HH:mm")}.`,
-              targetType: "specific",
-              userIds: [targetUserId],
-              channels: { inApp: true, push: true },
-            });
+          const roleName = reason === "canceled-student" ? "O aluno" : "O professor";
+          await notificationService.sendNotification({
+            title: "Aula Cancelada",
+            body: `${roleName} cancelou a aula agendada para ${format(slot.startAt, "dd/MM HH:mm")}.`,
+            targetType: "specific",
+            userIds: [targetUserId],
+            channels: { inApp: true, push: true },
+          });
         }
       }
 
@@ -354,6 +354,123 @@ export const schedulingService = {
     });
   },
 
+  async deleteSlot(
+    user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
+    slotId: string,
+    scope: "single" | "future"
+  ) {
+    const slot = await schedulingRepository.findById(slotId);
+    if (!slot) throw new Error("Slot not found");
+
+    // ABAC Check: Admin/Manager or the assigned teacher
+    const isAdmin = hasPermission(user, "class.update.any");
+    const isTeacher = user.role === "teacher" && slot.teacherId === user.id;
+
+    if (!isAdmin && !isTeacher) {
+      throw new Error("Unauthorized to delete this slot");
+    }
+
+    return await db.transaction(async (tx) => {
+      if (scope === "single") {
+        await tx.delete(slotInstances).where(eq(slotInstances.id, slotId));
+      } else if (scope === "future" && slot.ruleId) {
+        // Delete this and all future materialized slots
+        await tx.delete(slotInstances)
+          .where(
+            and(
+              eq(slotInstances.ruleId, slot.ruleId),
+              gte(slotInstances.startAt, slot.startAt)
+            )
+          );
+        
+        // Update the recurrence rule to end it
+        await tx.update(recurrenceRules)
+          .set({ endDate: slot.startAt })
+          .where(eq(recurrenceRules.id, slot.ruleId));
+      }
+      
+      return { success: true };
+    });
+  },
+
+  async updateSlot(
+    user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
+    slotId: string,
+    data: Partial<typeof slotInstances.$inferInsert>,
+    scope: "single" | "future"
+  ) {
+    const slot = await schedulingRepository.findById(slotId);
+    if (!slot) throw new Error("Slot not found");
+
+    // ABAC Check
+    const isAdmin = hasPermission(user, "class.update.any");
+    const isTeacher = user.role === "teacher" && slot.teacherId === user.id;
+
+    if (!isAdmin && !isTeacher) {
+      throw new Error("Unauthorized to update this slot");
+    }
+
+    return await db.transaction(async (tx) => {
+      // 1. Time Validation
+      if (data.startAt && data.endAt) {
+        const start = new Date(data.startAt);
+        const end = new Date(data.endAt);
+        if (isBefore(end, start) || start.getTime() === end.getTime()) {
+          throw new Error("Invalid interval: End time must be after start time");
+        }
+      }
+
+      // 2. Conflict Detection (Teacher Overlap)
+      if (data.startAt || data.endAt) {
+        const checkStart = data.startAt ? new Date(data.startAt) : slot.startAt;
+        const checkEnd = data.endAt ? new Date(data.endAt) : slot.endAt;
+
+        if (scope === "single") {
+          const conflict = await schedulingRepository.findOverlappingSlot(slot.teacherId, checkStart, checkEnd, slotId);
+          if (conflict) {
+            throw new Error(`Conflict detected: Teacher already has a slot at this time (${format(conflict.startAt, "HH:mm")} - ${format(conflict.endAt, "HH:mm")})`);
+          }
+        } else if (scope === "future" && slot.ruleId) {
+          // For future, we'd need a more complex check or a warning. 
+          // For now, let's at least check the current slot's future time.
+          const conflict = await schedulingRepository.findOverlappingSlot(slot.teacherId, checkStart, checkEnd, slotId);
+           if (conflict) {
+            throw new Error(`Conflict detected in this slot: Teacher already has a slot at this time (${format(conflict.startAt, "HH:mm")} - ${format(conflict.endAt, "HH:mm")})`);
+          }
+        }
+      }
+
+      if (scope === "single") {
+        await tx.update(slotInstances)
+          .set({ ...data, updatedAt: new Date() })
+          .where(eq(slotInstances.id, slotId));
+      } else if (scope === "future" && slot.ruleId) {
+        // Update this and all future materialized slots
+        await tx.update(slotInstances)
+          .set({ ...data, updatedAt: new Date() })
+          .where(
+            and(
+              eq(slotInstances.ruleId, slot.ruleId),
+              gte(slotInstances.startAt, slot.startAt)
+            )
+          );
+        
+        // Synchronize rule template if time or basic metadata changed
+        const ruleUpdate: any = {};
+        if (data.startAt) ruleUpdate.startTime = format(new Date(data.startAt), "HH:mm");
+        if (data.endAt) ruleUpdate.endTime = format(new Date(data.endAt), "HH:mm");
+        
+        if (Object.keys(ruleUpdate).length > 0) {
+           await tx.update(recurrenceRules)
+             .set(ruleUpdate)
+             .where(eq(recurrenceRules.id, slot.ruleId));
+        }
+      }
+      
+      return { success: true };
+    });
+  },
+
   // --- Cron Tasks ---
   async materializeAllRules(weeksAhead: number = 4) {
     const rules = await schedulingRepository.findAllRules();
@@ -404,7 +521,7 @@ export const schedulingService = {
       if (isAfter(startAt, now)) {
         // 1. Check for specific materialized slot
         const exists = await schedulingRepository.findSlotByRuleAndDate(ruleId, startAt);
-        
+
         // 2. Check for ANY overlapping slot for this teacher (Conflict Prevention)
         const conflict = await schedulingRepository.findOverlappingSlot(rule.teacherId, startAt, endAt);
 
@@ -461,7 +578,7 @@ export const schedulingService = {
       // 2. Notify Teacher (InApp/Push/Email)
       const teacher = await userRepository.findById(slot.teacherId);
       if (teacher) {
-         await notificationService.sendNotification({
+        await notificationService.sendNotification({
           title: "⚠️ Aula pendente de atualização",
           body: `Sua aula de ${format(slot.startAt, "dd/MM HH:mm")} passou de 2h e não foi atualizada.`,
           targetType: "specific",
@@ -470,10 +587,10 @@ export const schedulingService = {
         });
 
         if (teacher.email) {
-            await communicationService.sendClassOverdueTeacherEmail(teacher.email, {
-                teacherName: teacher.name || "Professor",
-                classDate: format(slot.startAt, "dd/MM/yyyy HH:mm"),
-            });
+          await communicationService.sendClassOverdueTeacherEmail(teacher.email, {
+            teacherName: teacher.name || "Professor",
+            classDate: format(slot.startAt, "dd/MM/yyyy HH:mm"),
+          });
         }
       }
     }
@@ -493,7 +610,7 @@ export const schedulingService = {
     if (slots24h.length > 0) {
       for (const slot of slots24h) {
         if (!slot.studentId) continue;
-        
+
         // Notify Student
         await notificationService.sendNotification({
           title: "Lembrete de Aula (Amanhã)",
@@ -548,6 +665,12 @@ export const schedulingService = {
     }
 
     return totalSent;
-  }
+  },
+  async getTeacherCompletedClasses(teacherId: string, start: Date, end: Date) {
+    return schedulingRepository.findCompletedByTeacherInRange(teacherId, start, end);
+  },
+  async getTeacherClassesInRange(teacherId: string, start: Date, end: Date) {
+    return schedulingRepository.findByTeacherInRange(teacherId, start, end);
+  },
 };
 

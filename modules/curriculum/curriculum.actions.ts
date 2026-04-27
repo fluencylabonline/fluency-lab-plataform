@@ -344,4 +344,22 @@ export const getLearningItemsAction = managerAction
     return await curriculumService.getLearningItems(parsedInput);
   });
 
+/**
+ * Action to get lessons with filters.
+ */
+export const getLessonsAction = protectedAction
+  .inputSchema(z.object({
+    search: z.string().optional(),
+    limit: z.number().optional().default(50),
+  }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const lessons = await curriculumRepository.findLessons(parsedInput);
+      return { success: true, data: lessons };
+    } catch (error) {
+      console.error("[getLessonsAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
 

@@ -3,12 +3,17 @@ import {
   plansTable, 
   subscriptionsTable, 
   installmentsTable, 
+  billingAuditLogs,
   Subscription, 
   Installment 
 } from "./billing.schema";
 import { eq, and, lte, isNull, between } from "drizzle-orm";
 
 export const billingRepository = {
+  // Audit
+  async createAuditLog(data: typeof billingAuditLogs.$inferInsert) {
+    await db.insert(billingAuditLogs).values(data);
+  },
   // Plans
   async findPlanById(id: string) {
     return db.query.plansTable.findFirst({ where: eq(plansTable.id, id) });
@@ -42,6 +47,13 @@ export const billingRepository = {
         eq(subscriptionsTable.status, "active")
       ),
       with: { plan: true }
+    });
+  },
+  async findSubscriptionsByStudent(studentId: string) {
+    return db.query.subscriptionsTable.findMany({
+      where: eq(subscriptionsTable.studentId, studentId),
+      with: { plan: true },
+      orderBy: (table, { desc }) => [desc(table.startDate)]
     });
   },
   async createSubscription(data: typeof subscriptionsTable.$inferInsert) {

@@ -6,7 +6,7 @@ import { notificationService } from "../notification/notification.service";
 import { addMonths, startOfDay, setDate, addDays, endOfDay, endOfMonth, getDate, getDaysInMonth } from "date-fns";
 import { env } from "@/env";
 import { db } from "@/lib/db";
-import { installmentsTable } from "./billing.schema";
+import { Installment, installmentsTable } from "./billing.schema";
 import { eq, asc, and } from "drizzle-orm";
 import { decrypt } from "@/lib/cryptography";
 
@@ -396,6 +396,57 @@ export const billingService = {
     };
   },
 
+  async markInstallmentAsPaid(
+    installmentId: string, 
+    abacatePayBillingId?: string, 
+    actor?: { id: string; name: string }
+  ) {
+    const installment = await billingRepository.findInstallmentById(installmentId);
+    if (!installment) throw new Error("Parcela não encontrada");
+
+    await billingRepository.updateInstallment(installmentId, {
+      status: "paid",
+      paidAt: new Date(),
+      abacatePayBillingId: abacatePayBillingId || installment.abacatePayBillingId,
+    });
+
+    // Create Audit Log
+    await billingRepository.createAuditLog({
+      installmentId,
+      actorId: actor?.id || "system",
+      actorName: actor?.name || "AbacatePay Webhook",
+      previousStatus: installment.status,
+      newStatus: "paid",
+      previousAmount: installment.amount,
+      newAmount: installment.amount,
+      reason: actor ? "Confirmação manual de pagamento pelo admin" : "Pagamento confirmado via Webhook",
+    });
+
+    const sub = await billingRepository.findSubscriptionById(installment.subscriptionId);
+    if (sub) {
+      const student = await userService.getUser(sub.studentId);
+      if (student) {
+        // 1. Email confirmation
+        await communicationService.sendPaymentConfirmedEmail(student.email, {
+          studentName: student.name,
+          amount: installment.amount,
+        });
+
+        // 2. In-App and Push Notification
+        await notificationService.sendNotification({
+          title: "✅ Pagamento confirmado!",
+          body: `Seu pagamento de ${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(installment.amount / 100)} foi recebido com sucesso.`,
+          targetType: "specific",
+          userIds: [student.id],
+          channels: { inApp: true, push: true },
+          actionUrl: "/student/billing",
+        });
+      }
+    }
+
+    return { success: true };
+  },
+
   // 6. Webhook logic
   async processWebhook(payload: import("@abacatepay/types/v2").WebhookEvent) {
     const event = payload; // Already verified by route
@@ -403,15 +454,15 @@ export const billingService = {
     if (event.event === "billing.paid") {
       const data = event.data;
       const resource = "billing" in data ? data.billing : data.pixQrCode;
-      const metadata = (resource as { 
-        metadata?: { 
+      const metadata = (resource as {
+        metadata?: {
           installmentId?: string;
           installment?: { id?: string };
           subscriptionId?: string;
           subscription?: { id?: string };
           type?: string;
           info?: { type?: string };
-        } 
+        }
       }).metadata;
 
       const installmentId = metadata?.installmentId || metadata?.installment?.id;
@@ -419,36 +470,7 @@ export const billingService = {
       const type = metadata?.type || metadata?.info?.type;
 
       if (installmentId) {
-        await billingRepository.updateInstallment(installmentId, {
-          status: "paid",
-          paidAt: new Date(),
-          abacatePayBillingId: resource.id,
-        });
-
-        const installment = await billingRepository.findInstallmentById(installmentId);
-        if (installment) {
-          const sub = await billingRepository.findSubscriptionById(installment.subscriptionId);
-          if (sub) {
-            const student = await userService.getUser(sub.studentId);
-            if (student) {
-              // 1. Email confirmation
-              await communicationService.sendPaymentConfirmedEmail(student.email, {
-                studentName: student.name,
-                amount: installment.amount,
-              });
-
-              // 2. In-App and Push Notification
-              await notificationService.sendNotification({
-                title: "\u2705 Pagamento confirmado!",
-                body: `Seu pagamento de ${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(installment.amount / 100)} foi recebido com sucesso.`,
-                targetType: "specific",
-                userIds: [student.id],
-                channels: { inApp: true, push: true },
-                actionUrl: "/student/billing",
-              });
-            }
-          }
-        }
+        await this.markInstallmentAsPaid(installmentId, resource.id);
       }
 
       // Handle Cancellation Fee
@@ -579,6 +601,10 @@ export const billingService = {
     }
   },
 
+  async getSubscriptionsByStudent(studentId: string) {
+    return billingRepository.findSubscriptionsByStudent(studentId);
+  },
+
   async listActivePlans() {
     return billingRepository.listActivePlans();
   },
@@ -589,5 +615,27 @@ export const billingService = {
 
   async getInstallmentsBySubscriptionId(subscriptionId: string) {
     return billingRepository.findInstallmentsBySubscription(subscriptionId);
+  },
+
+  async updateInstallment(
+    id: string, 
+    data: Partial<Installment>, 
+    actor?: { id: string; name: string }
+  ) {
+    const previous = await billingRepository.findInstallmentById(id);
+    await billingRepository.updateInstallment(id, data);
+
+    if (actor && previous) {
+      await billingRepository.createAuditLog({
+        installmentId: id,
+        actorId: actor.id,
+        actorName: actor.name,
+        previousStatus: previous.status,
+        newStatus: data.status || previous.status,
+        previousAmount: previous.amount,
+        newAmount: data.amount || previous.amount,
+        reason: "Atualização manual de parcela pelo admin",
+      });
+    }
   }
 };

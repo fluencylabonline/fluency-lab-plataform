@@ -1,16 +1,18 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { actionClient, protectedAction, permissionAction } from "@/lib/safe-action";
+import { actionClient, protectedAction, permissionAction, adminAction } from "@/lib/safe-action";
 import { userService } from "./user.service";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { adminAuth } from "@/lib/firebase-admin";
-import { NewUser, createUserSchema, requestNewInviteSchema } from "./user.schema";
+import { NewUser, createUserSchema, requestNewInviteSchema, updateUserSchema } from "./user.schema";
 import { env } from "@/env";
 import { communicationService } from "@/modules/communication/communication.service";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { locales } from "@/i18n/config";
+import { decrypt } from "@/lib/cryptography";
+import { verifyPassword } from "@/lib/auth-server";
 
 // --- Funções Auxiliares Privadas ---
 const generateInviteLink = async (email: string, locale: string = "pt") => {
@@ -184,4 +186,51 @@ export const searchUsersAction = protectedAction
     // Apenas admin pode buscar todos os usuários
     if (ctx.user.role !== "admin") throw new Error("UNAUTHORIZED");
     return userService.searchUsers(parsedInput.term);
+  });
+
+export const updateUserAction = adminAction
+  .inputSchema(updateUserSchema)
+  .action(async ({ parsedInput }) => {
+    try {
+      const { id, ...data } = parsedInput;
+      await userService.updateUser(id, data);
+      revalidatePath("/hub/admin/users");
+      revalidatePath("/hub/manager/users");
+      return { success: true };
+    } catch (error) {
+      console.error("[updateUserAction] Error:", error);
+      return { success: false, error: "error" };
+    }
+  });
+
+export const revealSensitiveDataAction = adminAction
+  .inputSchema(
+    z.object({
+      userId: z.string(),
+      field: z.enum(["cellphone", "taxId", "businessTaxId", "pixKey"]),
+      password: z.string(),
+    })
+  )
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const { userId, field, password } = parsedInput;
+
+      // Verify admin password
+      const isValid = await verifyPassword(ctx.user.email, password);
+      if (!isValid) return { success: false, error: "authError" };
+
+      const user = await userService.getUserById(userId);
+      if (!user) return { success: false, error: "userNotFound" };
+
+      const value = user[field as keyof typeof user] as string | null;
+      if (!value) return { success: true, data: "" };
+
+      // Decrypt if it has the separator
+      const decryptedValue = value.includes(":") ? decrypt(value) : value;
+
+      return { success: true, data: decryptedValue };
+    } catch (error) {
+      console.error("[revealSensitiveDataAction] Error:", error);
+      return { success: false, error: "error" };
+    }
   });

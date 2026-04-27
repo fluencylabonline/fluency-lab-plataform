@@ -1,7 +1,7 @@
 "use server";
 
 import { adminAction, protectedAction } from "@/lib/safe-action";
-import { createPlanSchema, createSubscriptionSchema, updatePlanSchema } from "./billing.schema";
+import { createPlanSchema, createSubscriptionSchema, updatePlanSchema, updateInstallmentSchema } from "./billing.schema";
 import { billingService } from "./billing.service";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
@@ -54,7 +54,8 @@ export const createSubscriptionAction = adminAction
       parsedInput.planId,
       parsedInput.dueDay
     );
-    revalidatePath("/admin/users");
+    revalidatePath("/hub/admin/users");
+    revalidatePath("/hub/manager/users");
     return { success: true };
   });
 
@@ -89,4 +90,52 @@ export const getInstallmentStatusAction = protectedAction
   .action(async ({ parsedInput }) => {
     const installment = await billingService.getInstallmentById(parsedInput.installmentId);
     return { success: true, data: { status: installment?.status } };
+  });
+
+import { verifyPassword } from "@/lib/auth-server";
+
+export const updateInstallmentAction = adminAction
+  .inputSchema(updateInstallmentSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const { id, password, ...data } = parsedInput;
+
+      // Sensitive check: marking as paid manually requires password confirmation
+      if (data.status === "paid") {
+        if (!password) {
+          return { success: false, error: "A confirmação de senha é obrigatória para marcar como paga." };
+        }
+
+        const isValid = await verifyPassword(ctx.user.email, password);
+        if (!isValid) {
+          return { success: false, error: "Senha incorreta. Ação não autorizada." };
+        }
+
+        await billingService.markInstallmentAsPaid(id, undefined, {
+          id: ctx.user.id,
+          name: ctx.user.name,
+        });
+
+        // If amount was also changed, we update it too
+        if (data.amount) {
+          await billingService.updateInstallment(id, { amount: data.amount }, {
+            id: ctx.user.id,
+            name: ctx.user.name,
+          });
+        }
+      } else {
+        // Other changes (status overdue, cancelled, or amount)
+        await billingService.updateInstallment(id, data, {
+          id: ctx.user.id,
+          name: ctx.user.name,
+        });
+      }
+
+      revalidatePath("/hub/admin/users");
+      revalidatePath("/hub/manager/users");
+      return { success: true };
+    } catch (error) {
+      console.error("[updateInstallmentAction] Error:", error);
+      return { success: false, error: "Erro ao atualizar parcela" };
+    }
   });

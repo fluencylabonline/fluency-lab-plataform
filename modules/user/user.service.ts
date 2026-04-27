@@ -31,6 +31,14 @@ export const userService = {
     return userRepository.findById(id);
   },
 
+  async getUserById(id: string): Promise<User | undefined> {
+    return userRepository.findById(id);
+  },
+
+  async updateUser(id: string, data: Partial<NewUser>): Promise<User | undefined> {
+    return userRepository.update(id, data);
+  },
+
   async getUserByEmail(email: string): Promise<User | undefined> {
     return userRepository.findByEmail(email);
   },

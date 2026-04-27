@@ -5,7 +5,7 @@ import {
   slotInstances,
   schedulingAuditLogs
 } from "./scheduling.schema";
-import { eq, and, lte, gte, isNull, inArray, between } from "drizzle-orm";
+import { eq, and, lte, gte, isNull, inArray, between, ne } from "drizzle-orm";
 import {
   NewRecurrenceRule,
   NewStudentCredit,
@@ -51,6 +51,35 @@ export const schedulingRepository = {
     return db.update(slotInstances)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(slotInstances.id, id))
+      .returning();
+  },
+
+  async deleteSlot(id: string) {
+    return db.delete(slotInstances)
+      .where(eq(slotInstances.id, id))
+      .returning();
+  },
+
+  async deleteFutureSlots(ruleId: string, fromDate: Date) {
+    return db.delete(slotInstances)
+      .where(
+        and(
+          eq(slotInstances.ruleId, ruleId),
+          gte(slotInstances.startAt, fromDate)
+        )
+      )
+      .returning();
+  },
+
+  async updateFutureSlots(ruleId: string, fromDate: Date, data: Partial<typeof slotInstances.$inferInsert>) {
+    return db.update(slotInstances)
+      .set({ ...data, updatedAt: new Date() })
+      .where(
+        and(
+          eq(slotInstances.ruleId, ruleId),
+          gte(slotInstances.startAt, fromDate)
+        )
+      )
       .returning();
   },
 
@@ -123,15 +152,19 @@ export const schedulingRepository = {
     });
   },
 
-  async findOverlappingSlot(teacherId: string, startAt: Date, endAt: Date) {
+  async findOverlappingSlot(teacherId: string, startAt: Date, endAt: Date, excludeId?: string) {
+    const filters = [
+      eq(slotInstances.teacherId, teacherId),
+      lte(slotInstances.startAt, endAt),
+      gte(slotInstances.endAt, startAt),
+    ];
+
+    if (excludeId) {
+      filters.push(ne(slotInstances.id, excludeId));
+    }
+
     return db.query.slotInstances.findFirst({
-      where: and(
-        eq(slotInstances.teacherId, teacherId),
-        and(
-          lte(slotInstances.startAt, endAt),
-          gte(slotInstances.endAt, startAt)
-        )
-      ),
+      where: and(...filters),
     });
   },
 
@@ -199,6 +232,35 @@ export const schedulingRepository = {
       .where(inArray(slotInstances.id, ids));
   },
 
+  async findCompletedByTeacherInRange(teacherId: string, start: Date, end: Date) {
+    return db.query.slotInstances.findMany({
+      where: and(
+        eq(slotInstances.teacherId, teacherId),
+        eq(slotInstances.status, "completed"),
+        between(slotInstances.startAt, start, end)
+      ),
+      orderBy: [slotInstances.startAt],
+    });
+  },
+  async findByTeacherInRange(teacherId: string, start: Date, end: Date) {
+    return db.query.slotInstances.findMany({
+      where: and(
+        eq(slotInstances.teacherId, teacherId),
+        between(slotInstances.startAt, start, end)
+      ),
+      with: {
+        student: {
+          columns: {
+            name: true,
+            assignedPlanId: true,
+            isActive: true,
+          }
+        },
+        rule: true,
+      },
+      orderBy: [slotInstances.startAt],
+    });
+  },
   async createAuditLog(data: NewSchedulingAuditLog) {
     return db.insert(schedulingAuditLogs).values(data).returning();
   }

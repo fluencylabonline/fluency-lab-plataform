@@ -16,14 +16,16 @@ import {
 } from "@/components/ui/select";
 import { EmptyResults } from "@/components/ui/empty";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "@/i18n/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface UsersPageClientProps {
   initialData: User[];
   currentUser: User;
+  basePath: string;
 }
 
-export function UsersPageClient({ initialData, currentUser }: UsersPageClientProps) {
+export function UsersPageClient({ initialData, currentUser, basePath }: UsersPageClientProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
@@ -99,8 +101,9 @@ export function UsersPageClient({ initialData, currentUser }: UsersPageClientPro
         {filteredUsers.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredUsers.map((user) => (
-              <div
+              <Link
                 key={user.id}
+                href={`${basePath}/${user.id}`}
                 className={`card p-5 flex flex-col gap-4 transition-all hover:ring-1 hover:ring-primary/20 ${!user.isActive ? "opacity-70 grayscale-[0.5]" : ""
                   }`}
               >
@@ -138,7 +141,7 @@ export function UsersPageClient({ initialData, currentUser }: UsersPageClientPro
                     {user.id.substring(0, 8)}
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (

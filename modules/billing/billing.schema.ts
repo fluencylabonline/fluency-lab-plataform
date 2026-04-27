@@ -69,6 +69,19 @@ export const installmentsTable = pgTable("installments", {
     .$onUpdate(() => new Date()),
 });
 
+export const billingAuditLogs = pgTable("billing_audit_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  installmentId: uuid("installment_id").notNull(),
+  actorId: text("actor_id").notNull(),
+  actorName: text("actor_name").notNull(),
+  previousStatus: text("previous_status"),
+  newStatus: text("new_status").notNull(),
+  previousAmount: integer("previous_amount"),
+  newAmount: integer("new_amount"),
+  reason: text("reason"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Relations
 export const plansRelations = relations(plansTable, ({ many }) => ({
   subscriptions: many(subscriptionsTable),
@@ -121,6 +134,13 @@ export const createSubscriptionSchema = z.object({
   dueDay: z.number().refine((day) => [1, 5, 10, 15].includes(day), {
     message: "O vencimento deve ser 1, 5, 10 ou 15",
   }),
+});
+
+export const updateInstallmentSchema = z.object({
+  id: z.uuid(),
+  status: z.enum(["pending", "paid", "overdue", "cancelled"]).optional(),
+  amount: z.number().int().positive().optional(),
+  password: z.string().optional(), // For sensitive manual changes
 });
 
 export type Plan = typeof plansTable.$inferSelect;

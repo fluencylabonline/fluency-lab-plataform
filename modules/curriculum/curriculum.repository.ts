@@ -207,6 +207,22 @@ export const curriculumRepository = {
       }
     }) as unknown as Promise<LessonSummary[]>;
   },
+  async findLessons(params: { search?: string, limit?: number }): Promise<LessonSummary[]> {
+    const { search, limit = 50 } = params;
+    const filters = [isNull(lessons.deletedAt)];
+    if (search) {
+      filters.push(sql`${lessons.title} ILIKE ${`%${search}%`}`);
+    }
+    return db.query.lessons.findMany({
+      where: and(...filters),
+      limit: limit,
+      orderBy: [sql`${lessons.createdAt} DESC`],
+      with: {
+        language: true,
+        media: true
+      }
+    }) as unknown as Promise<LessonSummary[]>;
+  },
 
   async findLessonItems(lessonId: string) {
     return db.query.lessonLearningItems.findMany({

@@ -42,3 +42,31 @@ export async function checkPermission(permission: Permission) {
     throw new Error("Unauthorized: Missing required permission");
   }
 }
+
+/**
+ * Verifies the user's password using Firebase Auth REST API.
+ * Useful for "sudo" mode or sensitive actions.
+ */
+export async function verifyPassword(email: string, password: string): Promise<boolean> {
+  try {
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    const response = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          email,
+          password,
+          returnSecureToken: true,
+        }),
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    const data = await response.json();
+    return response.ok && !!data.idToken;
+  } catch (error) {
+    console.error("[verifyPassword] Error:", error);
+    return false;
+  }
+}
