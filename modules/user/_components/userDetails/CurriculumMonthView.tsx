@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import { format, startOfMonth, parseISO } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ClassCard } from "./ClassCard";
 
@@ -13,12 +12,12 @@ interface CurriculumMonthViewProps {
   onUpdateLesson: (slot: any) => void;
 }
 
-export function CurriculumMonthView({ 
-  slots, 
-  isAdmin, 
-  onUpdateStatus, 
-  onSwapTeacher, 
-  onUpdateLesson 
+export function CurriculumMonthView({
+  slots,
+  isAdmin,
+  onUpdateStatus,
+  onSwapTeacher,
+  onUpdateLesson
 }: CurriculumMonthViewProps) {
   // Group slots by month
   const groupedSlots = slots.reduce((acc: any, slot: any) => {
@@ -43,7 +42,7 @@ export function CurriculumMonthView({
     <div className="space-y-10">
       {sortedMonths.map((monthKey) => {
         const monthDate = parseISO(`${monthKey}-01`);
-        const monthSlots = groupedSlots[monthKey].sort((a: any, b: any) => 
+        const monthSlots = groupedSlots[monthKey].sort((a: any, b: any) =>
           new Date(a.startAt).getTime() - new Date(b.startAt).getTime()
         );
 
@@ -55,9 +54,9 @@ export function CurriculumMonthView({
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {monthSlots.map((slot: any) => (
-                <ClassCard 
-                  key={slot.id} 
-                  slot={slot} 
+                <ClassCard
+                  key={slot.id}
+                  slot={slot}
                   isAdmin={isAdmin}
                   onUpdateStatus={onUpdateStatus}
                   onSwapTeacher={onSwapTeacher}

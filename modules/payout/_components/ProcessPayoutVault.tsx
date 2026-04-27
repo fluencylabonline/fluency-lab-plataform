@@ -11,7 +11,6 @@ import { notify } from "@/components/ui/toaster";
 import { processTeacherPayoutAction, getTeacherUnpaidClassesAction, checkCurrentSudoRequirementAction } from "../payout.actions";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { cn } from "@/lib/utils";
 
 interface ProcessPayoutVaultProps {
   teacherId: string;
@@ -50,7 +49,7 @@ export function ProcessPayoutVault({
     if (isOpen) {
       fetchUnpaid();
       setPassword("");
-      
+
       // Verificar se o usuário precisa de senha
       checkCurrentSudoRequirementAction().then(res => {
         if (res?.data?.success) {
@@ -74,11 +73,11 @@ export function ProcessPayoutVault({
     }
 
     setIsProcessing(true);
-    const result = await processTeacherPayoutAction({ 
-      teacherId, 
-      month, 
+    const result = await processTeacherPayoutAction({
+      teacherId,
+      month,
       year,
-      password 
+      password
     });
     setIsProcessing(false);
 

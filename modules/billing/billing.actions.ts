@@ -92,7 +92,7 @@ export const getInstallmentStatusAction = protectedAction
     return { success: true, data: { status: installment?.status } };
   });
 
-import { verifyPassword, verifySudoMode } from "@/lib/auth-server";
+import { verifySudoMode } from "@/lib/auth-server";
 
 export const updateInstallmentAction = adminAction
   .inputSchema(updateInstallmentSchema)

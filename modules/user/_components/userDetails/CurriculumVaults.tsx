@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import {
-  User,
   BookOpen,
   Check,
   Search,
@@ -26,8 +25,7 @@ import {
   VaultBody,
   VaultFooter,
   VaultSecondaryButton,
-  VaultPrimaryButton,
-  VaultIcon,
+  VaultPrimaryButton
 } from "@/components/ui/vault";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -82,7 +80,6 @@ interface CurriculumVaultsProps {
 }
 
 export function CurriculumVaults({
-  studentId,
   isUpdating,
   swapSlot,
   setSwapSlot,
@@ -106,7 +103,6 @@ export function CurriculumVaults({
   studentRules,
   availableRules,
   onConfirmAllocate,
-  onConfirmDeallocate,
 }: CurriculumVaultsProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null);

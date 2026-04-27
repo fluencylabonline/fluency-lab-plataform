@@ -76,7 +76,7 @@ export function TeacherEarningsTab({
   return (
     <div className="flex flex-col gap-8">
       {/* Month Navigation */}
-      <div className="flex items-center justify-between bg-card border border-border/50 rounded-xl px-6 py-4">
+      <div className="card flex items-center justify-between px-6 py-4">
         <div className="flex flex-col">
           <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">
             {t("period")}
@@ -214,7 +214,7 @@ function EditRateVault({
       } else {
         notify.error(result?.data?.error || t("error"));
       }
-    } catch (error) {
+    } catch {
       notify.error(t("error"));
     } finally {
       setIsUpdating(false);

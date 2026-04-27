@@ -2,9 +2,6 @@ import { payoutRepository } from "./payout.repository";
 import { userService } from "@/modules/user/user.service";
 import { sendPix } from "@/lib/abacate-pay";
 import { resend } from "@/lib/resend";
-import { db } from "@/lib/db";
-import { slotInstances } from "@/modules/scheduling/scheduling.schema";
-import { inArray } from "drizzle-orm";
 import TeacherPayoutEmail from "../communication/templates/TeacherPayoutEmail";
 
 export const payoutService = {

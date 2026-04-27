@@ -10,7 +10,6 @@ import * as z from "zod";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { notify } from "@/components/ui/toaster";
-import { BackButton } from "@/components/ui/back-button";
 
 import type { User } from "../user.schema";
 import { updateUserAction } from "../user.actions";
@@ -87,7 +86,7 @@ export function UserDetailsClient({
       } else {
         notify.error(result?.data?.error || t("updateError"));
       }
-    } catch (error) {
+    } catch {
       notify.error(t("updateError"));
     } finally {
       setIsUpdating(false);
@@ -108,7 +107,7 @@ export function UserDetailsClient({
       } else {
         notify.error(result?.data?.error || t("updateError"));
       }
-    } catch (error) {
+    } catch {
       notify.error(t("updateError"));
     } finally {
       setIsUpdating(false);
@@ -132,7 +131,7 @@ export function UserDetailsClient({
       } else {
         notify.error(result?.data?.error || t("authError"));
       }
-    } catch (error) {
+    } catch {
       notify.error(t("updateError"));
     } finally {
       setIsUpdating(false);
@@ -148,7 +147,7 @@ export function UserDetailsClient({
       } else {
         notify.error(result?.data?.error || "Erro ao carregar contrato");
       }
-    } catch (error) {
+    } catch {
       notify.error("Erro ao processar solicitação");
     } finally {
       setLoadingContractId(null);
@@ -168,7 +167,7 @@ export function UserDetailsClient({
       } else {
         notify.error(result?.data?.error || "Erro ao baixar contrato");
       }
-    } catch (error) {
+    } catch {
       notify.error("Erro ao processar solicitação");
     }
   };
@@ -183,11 +182,11 @@ export function UserDetailsClient({
         showSubHeader={false}
         className="contents"
         user={currentUser}
+        backHref={basePath}
       />
       <Tabs defaultValue="personal" className="container">
         <div className="flex flex-col items-start md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex flex-row gap-2 items-center">
-            <BackButton href={basePath} />
             <div className="flex items-center">
               <Avatar className="h-12 w-12">
                 <AvatarImage src={userAvatar} />
@@ -200,23 +199,47 @@ export function UserDetailsClient({
             </div>
           </div>
 
-          <TabsList className="mt-0 flex-wrap h-full">
-            <TabsTrigger value="personal">{t("personalInfo")}</TabsTrigger>
+          <TabsList className="mt-0 py-4 flex w-full justify-start overflow-x-auto flex-nowrap scrollbar-hide h-full bg-transparent border-none">
+
+            <TabsTrigger
+              value="personal"
+              className="shrink-0 [&[data-state=active]]:!bg-transparent [&[data-state=active]]:!shadow-none [&[data-state=active]]:!text-primary [&[data-state=active]]:!border-none focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+            >
+              {t("personalInfo")}
+            </TabsTrigger>
 
             {(user.role === "student" || user.role === "teacher") && (
-              <TabsTrigger value="payment">
+              <TabsTrigger
+                value="payment"
+                className="shrink-0 [&[data-state=active]]:!bg-transparent [&[data-state=active]]:!shadow-none [&[data-state=active]]:!text-primary [&[data-state=active]]:!border-none focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+              >
                 {user.role === "student" ? t("payment") : t("earningsStatement")}
               </TabsTrigger>
             )}
 
-            <TabsTrigger value="contracts">{t("contracts")}</TabsTrigger>
+            <TabsTrigger
+              value="contracts"
+              className="shrink-0 [&[data-state=active]]:!bg-transparent [&[data-state=active]]:!shadow-none [&[data-state=active]]:!text-primary [&[data-state=active]]:!border-none focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+            >
+              {t("contracts")}
+            </TabsTrigger>
 
             {user.role === "teacher" && (
-              <TabsTrigger value="schedule">{t("schedule")}</TabsTrigger>
+              <TabsTrigger
+                value="schedule"
+                className="shrink-0 [&[data-state=active]]:!bg-transparent [&[data-state=active]]:!shadow-none [&[data-state=active]]:!text-primary [&[data-state=active]]:!border-none focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+              >
+                {t("schedule")}
+              </TabsTrigger>
             )}
 
             {user.role === "student" && (
-              <TabsTrigger value="curriculum">Currículo</TabsTrigger>
+              <TabsTrigger
+                value="curriculum"
+                className="shrink-0 [&[data-state=active]]:!bg-transparent [&[data-state=active]]:!shadow-none [&[data-state=active]]:!text-primary [&[data-state=active]]:!border-none focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+              >
+                Currículo
+              </TabsTrigger>
             )}
           </TabsList>
         </div>

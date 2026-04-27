@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import {
@@ -140,14 +140,14 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
   })), [schedule, t]);
 
   const renderEventCard = useCallback((event: CalendarEvent) => (
-    <div key={event.id} className="p-4 rounded-md border border-white/10 bg-white/5 space-y-3 hover:border-primary/50 transition-all duration-300 group">
+    <div key={event.id} className="p-4 rounded-md border border-white/10 bg-muted space-y-3 hover:border-primary/50 transition-all duration-300 group">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
             <UserIcon className="w-4 h-4" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-white group-hover:text-primary transition-colors">
+            <h4 className="text-sm font-bold text-text group-hover:text-primary transition-colors">
               {event.title}
             </h4>
             <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground">
@@ -165,7 +165,7 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
           )}>
             {event.type === "REPOSICAO" ? "Reposição" : "Regular"}
           </Badge>
-          <div className="text-[10px] font-black text-white/90 tracking-widest uppercase">
+          <div className="text-[10px] font-black text-text tracking-widest uppercase">
             {format(event.start, "HH:mm")}
           </div>
         </div>

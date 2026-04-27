@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
-import { Plus, Calendar as CalendarIcon, Clock, AlertTriangle, AlertCircle } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, AlertTriangle, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 
 import {
@@ -35,7 +35,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { notify } from "@/components/ui/toaster";
 
@@ -78,7 +78,6 @@ export function CreateSlotVault({
   const {
     register,
     handleSubmit,
-    control,
     setValue,
     watch,
     formState: { errors },
@@ -150,7 +149,7 @@ export function CreateSlotVault({
       } else {
         notify.error(result?.data?.error || t("error") || "Erro ao criar horário");
       }
-    } catch (error) {
+    } catch {
       notify.error(t("error") || "Erro ao criar horário");
     } finally {
       setIsSubmitting(false);
@@ -250,7 +249,7 @@ export function CreateSlotVault({
                 </div>
               </VaultField>
             </div>
-            
+
             {conflict && (
               <div className="p-2 rounded bg-rose-500/10 border border-rose-500/20 flex items-start gap-2 animate-in fade-in slide-in-from-top-1 mt-2">
                 <AlertTriangle className="w-3 h-3 text-rose-500 mt-0.5 shrink-0" />

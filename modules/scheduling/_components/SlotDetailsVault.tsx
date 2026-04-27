@@ -228,7 +228,7 @@ export function SlotDetailsVault({
         } else {
           notify.error(result?.data?.error || t("deleteError") || "Erro ao excluir horário.");
         }
-      } catch (error) {
+      } catch {
         notify.error(t("deleteError") || "Erro ao excluir horário.");
       } finally {
         setIsDeleting(false);
@@ -266,7 +266,7 @@ export function SlotDetailsVault({
         } else {
           notify.error(result?.data?.error || t("updateError") || "Erro ao atualizar horário.");
         }
-      } catch (error) {
+      } catch {
         notify.error(t("updateError") || "Erro ao atualizar horário.");
       } finally {
         setIsUpdating(false);
@@ -297,12 +297,12 @@ export function SlotDetailsVault({
           <VaultBody>
             {!isEditing ? (
               <div className="space-y-6">
-                <div className="flex items-center gap-4 p-4 rounded-md bg-white/5 border border-white/10">
+                <div className="flex items-center gap-4 p-4 rounded-md bg-muted-foreground/15 border border-white/10">
                   <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
                     <UserIcon className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">{event.title}</h3>
+                    <h3 className="text-lg font-bold">{event.title}</h3>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className={cn(
                         "text-[10px] font-black uppercase",
@@ -324,14 +324,14 @@ export function SlotDetailsVault({
                       <CalendarIcon className="w-3 h-3" />
                       <span className="text-[10px] font-black uppercase tracking-widest">Data</span>
                     </div>
-                    <p className="text-sm font-bold text-white">{format(event.start, "dd 'de' MMMM, yyyy")}</p>
+                    <p className="text-sm font-bold text-text">{format(event.start, "dd 'de' MMMM, yyyy")}</p>
                   </div>
                   <div className="p-4 rounded-md bg-white/[0.02] border border-white/5 space-y-1">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Clock className="w-3 h-3" />
                       <span className="text-[10px] font-black uppercase tracking-widest">Horário</span>
                     </div>
-                    <p className="text-sm font-bold text-white">
+                    <p className="text-sm font-bold text-text">
                       {format(event.start, "HH:mm")} - {format(event.end || event.start, "HH:mm")}
                     </p>
                   </div>
@@ -346,11 +346,11 @@ export function SlotDetailsVault({
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <span className="text-[10px] font-black uppercase text-muted-foreground block mb-1">Início</span>
-                        <p className="text-sm font-bold text-white">{format(event.ruleStartDate, "dd/MM/yyyy")}</p>
+                        <p className="text-sm font-bold text-text">{format(event.ruleStartDate, "dd/MM/yyyy")}</p>
                       </div>
                       <div>
                         <span className="text-[10px] font-black uppercase text-muted-foreground block mb-1">Término</span>
-                        <p className="text-sm font-bold text-white">
+                        <p className="text-sm font-bold text-text">
                           {event.ruleEndDate ? format(event.ruleEndDate, "dd/MM/yyyy") : "Indeterminado"}
                         </p>
                       </div>
@@ -365,7 +365,7 @@ export function SlotDetailsVault({
                     </div>
                     <div>
                       <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Conteúdo / Plano</h4>
-                      <p className="text-sm font-bold text-white">{event.location || "Nenhum conteúdo definido"}</p>
+                      <p className="text-sm font-bold text-text">{event.location || "Nenhum conteúdo definido"}</p>
                     </div>
                   </div>
 
@@ -376,7 +376,7 @@ export function SlotDetailsVault({
                       </div>
                       <div>
                         <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Notas</h4>
-                        <p className="text-sm text-white/80 leading-relaxed">
+                        <p className="text-sm text-text/80 leading-relaxed">
                           {event.notes}
                         </p>
                       </div>
@@ -453,7 +453,7 @@ export function SlotDetailsVault({
                         type="time"
                         value={editForm.startTime}
                         onChange={(e) => setEditForm(prev => ({ ...prev, startTime: e.target.value }))}
-                        className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-sm text-white focus:outline-none focus:border-primary transition-colors"
+                        className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-sm text-text focus:outline-none focus:border-primary transition-colors"
                       />
                     </div>
                     <div className="space-y-2">
@@ -462,7 +462,7 @@ export function SlotDetailsVault({
                         type="time"
                         value={editForm.endTime}
                         onChange={(e) => setEditForm(prev => ({ ...prev, endTime: e.target.value }))}
-                        className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-sm text-white focus:outline-none focus:border-primary transition-colors"
+                        className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-sm text-text focus:outline-none focus:border-primary transition-colors"
                       />
                     </div>
                   </div>
@@ -554,7 +554,7 @@ export function SlotDetailsVault({
                 disabled={isDeleting}
                 className="w-full p-4 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 text-left transition-all"
               >
-                <h4 className="text-sm font-bold text-white">Apenas esta aula</h4>
+                <h4 className="text-sm font-bold text-text">Apenas esta aula</h4>
                 <p className="text-xs text-muted-foreground mt-1">Remove apenas o horário selecionado do calendário.</p>
               </button>
 
@@ -588,7 +588,7 @@ export function SlotDetailsVault({
                 disabled={isUpdating}
                 className="w-full p-4 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 text-left transition-all"
               >
-                <h4 className="text-sm font-bold text-white">Apenas esta aula</h4>
+                <h4 className="text-sm font-bold text-text">Apenas esta aula</h4>
                 <p className="text-xs text-muted-foreground mt-1">A mudança de horário e conteúdo afetará somente este dia.</p>
               </button>
 

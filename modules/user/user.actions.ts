@@ -12,7 +12,7 @@ import { communicationService } from "@/modules/communication/communication.serv
 import { checkRateLimit } from "@/lib/rate-limit";
 import { locales } from "@/i18n/config";
 import { decrypt } from "@/lib/cryptography";
-import { verifyPassword, verifySudoMode } from "@/lib/auth-server";
+import { verifySudoMode } from "@/lib/auth-server";
 
 // --- Funções Auxiliares Privadas ---
 const generateInviteLink = async (email: string, locale: string = "pt") => {

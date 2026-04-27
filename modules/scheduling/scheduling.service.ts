@@ -9,7 +9,7 @@ import {
   schedulingAuditLogs
 } from "./scheduling.schema";
 import { contractInstancesTable } from "@/modules/contract/contract.schema";
-import { eq, and, gte, lt, or, asc, desc } from "drizzle-orm";
+import { eq, and, gte, lt, asc, desc } from "drizzle-orm";
 import { communicationService } from "@/modules/communication/communication.service";
 import { userService } from "@/modules/user/user.service";
 import {
@@ -79,7 +79,7 @@ export const schedulingService = {
     const now = new Date();
     const maxHorizon = addMonths(now, 12);
     const minHorizon = addMonths(now, 6);
-    
+
     let horizon = endOfMonth(contract.expiresAt);
     if (isAfter(horizon, maxHorizon)) horizon = maxHorizon;
     if (isBefore(horizon, minHorizon)) horizon = minHorizon;
@@ -299,7 +299,7 @@ export const schedulingService = {
 
   async notifySwap(oldTeacherId: string, newTeacherId: string, studentId: string | null, startAt: Date) {
     if (!studentId) return;
-    
+
     const [oldTeacher, newTeacher, student] = await Promise.all([
       userService.getUser(oldTeacherId),
       userService.getUser(newTeacherId),
@@ -651,13 +651,13 @@ export const schedulingService = {
               gte(slotInstances.startAt, slot.startAt)
             )
           );
-        
+
         // Update the recurrence rule to end it
         await tx.update(recurrenceRules)
           .set({ endDate: slot.startAt })
           .where(eq(recurrenceRules.id, slot.ruleId));
       }
-      
+
       return { success: true };
     });
   },
@@ -703,7 +703,7 @@ export const schedulingService = {
           // For future, we'd need a more complex check or a warning. 
           // For now, let's at least check the current slot's future time.
           const conflict = await schedulingRepository.findOverlappingSlot(slot.teacherId, checkStart, checkEnd, slotId);
-           if (conflict) {
+          if (conflict) {
             throw new Error(`Conflict detected in this slot: Teacher already has a slot at this time (${format(conflict.startAt, "HH:mm")} - ${format(conflict.endAt, "HH:mm")})`);
           }
         }
@@ -723,19 +723,19 @@ export const schedulingService = {
               gte(slotInstances.startAt, slot.startAt)
             )
           );
-        
+
         // Synchronize rule template if time or basic metadata changed
         const ruleUpdate: any = {};
         if (data.startAt) ruleUpdate.startTime = format(new Date(data.startAt), "HH:mm");
         if (data.endAt) ruleUpdate.endTime = format(new Date(data.endAt), "HH:mm");
-        
+
         if (Object.keys(ruleUpdate).length > 0) {
-           await tx.update(recurrenceRules)
-             .set(ruleUpdate)
-             .where(eq(recurrenceRules.id, slot.ruleId));
+          await tx.update(recurrenceRules)
+            .set(ruleUpdate)
+            .where(eq(recurrenceRules.id, slot.ruleId));
         }
       }
-      
+
       return { success: true };
     });
   },

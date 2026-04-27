@@ -20,7 +20,7 @@ import {
   isWithinInterval
 } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
-import { useTranslations, useLocale } from "next-intl";
+import { useLocale } from "next-intl";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, ChevronDown, ChevronUp, Clock, User } from "lucide-react";
 import { Shimmer } from "@shimmer-from-structure/react";
 import { cn } from "@/lib/utils";
@@ -56,7 +56,6 @@ const CalendarGrid = React.memo(({
   selectedDate,
   eventsByDay,
   onDateClick,
-  dateLocale,
   weekDays
 }: any) => {
   const monthStart = startOfMonth(currentDate);
@@ -67,9 +66,9 @@ const CalendarGrid = React.memo(({
 
   return (
     <div className="flex flex-col flex-1">
-      <div className="grid grid-cols-7 border-y border-white/5 bg-white/[0.02]">
+      <div className="grid grid-cols-7 border-y border-white/5 bg-muted-foreground/30">
         {weekDays.map((day: string) => (
-          <div key={day} className="py-2 lg:py-4 text-center text-[9px] lg:text-[10px] font-black text-muted-foreground/60 tracking-[0.1em] lg:tracking-[0.2em]">
+          <div key={day} className="py-2 lg:py-4 text-center text-[9px] lg:text-[10px] font-black text-muted-foreground tracking-[0.1em] lg:tracking-[0.2em]">
             {day}
           </div>
         ))}
@@ -88,9 +87,9 @@ const CalendarGrid = React.memo(({
               onClick={() => onDateClick(day)}
               className={cn(
                 "aspect-square lg:aspect-auto lg:min-h-[100px] p-1 lg:p-2 border-b border-r border-white/5 cursor-pointer transition-all duration-200 group relative",
-                !isCurrentMonth && "bg-black/60 opacity-20",
+                !isCurrentMonth && "bg-muted-foreground/30 opacity-20",
                 isSelected && "bg-primary/10",
-                "hover:bg-white/[0.05]"
+                "hover:bg-primary/15"
               )}
             >
               <div className="flex items-center justify-between mb-1">
@@ -110,7 +109,7 @@ const CalendarGrid = React.memo(({
                 )}
                 <div className="hidden lg:flex flex-col gap-1 overflow-hidden">
                   {dayEvents.slice(0, 2).map((event: any) => (
-                    <div key={event.id} className="text-[9px] font-bold px-1.5 py-0.5 rounded-sm bg-white/5 border border-white/10 text-white/70 truncate">
+                    <div key={event.id} className="text-[9px] font-bold px-1.5 py-0.5 rounded-sm bg-primary/10 border border-white/10 text-text/20 truncate">
                       {format(event.start, "HH:mm")} {event.title}
                     </div>
                   ))}
@@ -172,7 +171,7 @@ const WeekSection = React.memo(({
   const daysInWeek = React.useMemo(() => eachDayOfInterval({ start: weekStart, end: weekEnd }), [weekStart, weekEnd]);
 
   return (
-    <div className="flex flex-col border border-white/5 rounded-md bg-white/[0.02] overflow-hidden transition-all duration-300">
+    <div className="flex flex-col border border-white/5 rounded-md bg-muted/50 overflow-hidden transition-all duration-300">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center justify-between p-3 lg:p-4 hover:bg-white/[0.05] transition-colors group"
@@ -182,7 +181,7 @@ const WeekSection = React.memo(({
             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
               {locale === "pt" ? `Semana ${weekNumber}` : `Week ${weekNumber}`}
             </span>
-            <span className="text-[11px] font-bold text-white/80">
+            <span className="text-[11px] font-bold text-muted-foreground/80">
               {format(weekStart, "d MMM")} - {format(weekEnd, "d MMM")}
             </span>
           </div>
@@ -310,7 +309,7 @@ const MonthSection = React.memo(({
       ref={assignRef}
       className="space-y-4"
     >
-      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/80 sticky top-0 bg-black/40 backdrop-blur-md px-2 py-3 z-10 border-b border-white/5">
+      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/80 sticky top-0 bg-muted-foreground/15 backdrop-blur-md px-2 py-3 z-10 border-b border-white/5">
         {format(monthDate, "MMMM 'de' yyyy", { locale: dateLocale })}
       </h3>
 
@@ -545,10 +544,10 @@ export function CalendarView({
 
   // Corrigido: Removido `shadow-2xl` e altura baseada em dvh para evitar problemas com header
   return (
-    <div className={cn("flex flex-col lg:grid lg:grid-cols-[1fr_400px] gap-0 bg-black/40 backdrop-blur-xl border border-white/5 rounded-md overflow-hidden h-[85dvh] lg:h-[85dvh]", className)}>
-      <div className="flex flex-col border-r border-white/5 bg-black/20 sticky top-0 lg:relative z-20">
-        <div className="flex items-center justify-between p-4 lg:p-6 bg-black/40 lg:bg-transparent backdrop-blur-md lg:backdrop-blur-none">
-          <h2 className="text-lg lg:text-xl font-black capitalize tracking-tight text-white">
+    <div className={cn("flex flex-col lg:grid lg:grid-cols-[1fr_400px] gap-0 backdrop-blur-xl border border-white/5 rounded-md overflow-hidden h-[85dvh] lg:h-[85dvh]", className)}>
+      <div className="flex flex-col border-r border-foreground/10 bg-card/50 sticky top-0 lg:relative z-20">
+        <div className="flex items-center justify-between p-4 lg:p-6 bg-background/80 dark:bg-background/40 lg:bg-background dark:lg:bg-background/50 backdrop-blur-md lg:backdrop-blur-none">
+          <h2 className="text-md lg:text-xl font-black capitalize tracking-tight text-text">
             {format(currentDate, "MMMM 'de' yyyy", { locale: dateLocale })}
           </h2>
           <div className="flex items-center gap-2">
@@ -591,7 +590,7 @@ export function CalendarView({
 
       <div
         ref={listRef}
-        className="flex flex-col bg-background relative h-[450px] lg:h-full overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
+        className="flex flex-col bg-card relative h-[450px] lg:h-full overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
       >
         <div className="flex flex-col space-y-12">
           <Shimmer
@@ -609,10 +608,10 @@ export function CalendarView({
               dateLocale,
               locale,
               renderEventCard,
-              onEventClick: () => {},
-              setMonthRef: () => {},
+              onEventClick: () => { },
+              setMonthRef: () => { },
               selectedDate: startOfToday(),
-              setDayRef: () => {}
+              setDayRef: () => { }
             }}
           >
             {displayedMonths.map((monthKey) => (

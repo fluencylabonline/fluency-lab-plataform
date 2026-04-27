@@ -4,7 +4,7 @@ import { protectedAction, permissionAction } from "@/lib/safe-action";
 import { z } from "zod";
 import { payoutService } from "./payout.service";
 import { revalidatePath } from "next/cache";
-import { verifyPassword, checkUserHasPassword, verifySudoMode } from "@/lib/auth-server";
+import { checkUserHasPassword, verifySudoMode } from "@/lib/auth-server";
 
 export const checkCurrentSudoRequirementAction = protectedAction
   .schema(z.void())
@@ -12,7 +12,7 @@ export const checkCurrentSudoRequirementAction = protectedAction
     try {
       const hasPassword = await checkUserHasPassword(ctx.user.id);
       return { success: true, hasPassword };
-    } catch (error) {
+    } catch {
       return { success: false, hasPassword: true }; // Fallback para segurança
     }
   });
@@ -37,7 +37,7 @@ export const processTeacherPayoutAction = permissionAction("class.update.any")
         parsedInput.month,
         parsedInput.year
       );
-      
+
       revalidatePath("/");
       return { success: true, data: payout };
     } catch (error) {
@@ -59,7 +59,7 @@ export const getTeacherUnpaidClassesAction = protectedAction
         parsedInput.month,
         parsedInput.year
       );
-      
+
       return { success: true, data: classes };
     } catch (error) {
       return { success: false, error: (error as Error).message };

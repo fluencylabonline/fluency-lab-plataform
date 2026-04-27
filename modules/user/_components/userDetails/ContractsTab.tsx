@@ -44,7 +44,7 @@ export function ContractsTab({
         {contracts.map((contract) => (
           <div
             key={contract.id}
-            className="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-4 gap-4 hover:bg-muted/20 transition-colors"
+            className="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-4 gap-4 card"
           >
             <div className="flex items-start gap-3 min-w-0">
               <div className="p-2 rounded-sm bg-muted shrink-0">

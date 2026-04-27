@@ -2,19 +2,16 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  Calendar,
-  Plus,
   BookOpen,
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-  Filter,
   LayoutGrid,
   Clock,
   History,
   Coins
 } from "lucide-react";
-import { format, addMonths, subMonths, startOfMonth, endOfMonth } from "date-fns";
+import { format, addMonths, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { Button } from "@/components/ui/button";
@@ -232,8 +229,8 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
 
   const handleAssignPlan = async (planId: string, startClassId?: string) => {
     setIsUpdating(true);
-    const result = await assignPlanAction({ 
-      templateId: planId, 
+    const result = await assignPlanAction({
+      templateId: planId,
       studentId,
       startClassId
     });
@@ -259,14 +256,14 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
       {/* 0. Student Overall Progress Dashboard */}
       {gap && gap.totalClasses > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="md:col-span-2 bg-card border rounded-xl p-5 flex flex-col justify-center">
+          <div className="card md:col-span-2 p-5 flex flex-col justify-center">
             <div className="flex justify-between items-end mb-2">
               <span className="text-sm font-semibold">Progresso Geral do Curso</span>
               <span className="text-xs text-muted-foreground">{gap.completedClasses} / {gap.totalClasses} aulas</span>
             </div>
             <Progress value={(gap.completedClasses / gap.totalClasses) * 100} className="h-3" />
           </div>
-          <div className="bg-card border rounded-xl p-5 flex items-center gap-4">
+          <div className="card border rounded-xl p-5 flex items-center gap-4">
             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
               <BookOpen className="h-5 w-5" />
             </div>
@@ -280,7 +277,7 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
 
       {/* Header Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 justify-between">
           <Button variant="outline" size="icon" onClick={() => setCurrentDate(subMonths(currentDate, 1))}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -292,19 +289,19 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
           </Button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 overflow-x-auto flex-nowrap scrollbar-hide w-full md:w-auto">
           {isAdmin && (
             <>
-              <Button variant="outline" size="icon" onClick={() => setShowPlanHistory(true)}>
+              <Button variant="outline" size="icon" onClick={() => setShowPlanHistory(true)} className="shrink-0">
                 <History className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="icon" onClick={() => setShowManageCredits(true)}>
+              <Button variant="outline" size="icon" onClick={() => setShowManageCredits(true)} className="shrink-0">
                 <Coins className="h-4 w-4" />
               </Button>
-              <Button variant="outline" onClick={() => setShowManageSchedule(true)}>
+              <Button variant="outline" onClick={() => setShowManageSchedule(true)} className="shrink-0">
                 <Clock className="mr-2 h-4 w-4" /> Gerenciar Horários
               </Button>
-              <Button onClick={() => setShowAssignPlan(true)}>
+              <Button onClick={() => setShowAssignPlan(true)} className="shrink-0">
                 <BookOpen className="mr-2 h-4 w-4" /> Designar Plano
               </Button>
             </>
@@ -314,7 +311,7 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
 
       {/* Gap Analysis Info */}
       {gap && (gap.upcomingClassesCount > 0 || gap.planLessonsCount > 0) && (
-        <div className="bg-accent/30 rounded-xl p-4 flex items-center justify-between border border-accent">
+        <div className="card p-4 flex items-center justify-between border border-accent">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
               <LayoutGrid className="h-5 w-5" />

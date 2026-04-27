@@ -67,7 +67,7 @@ export function PersonalInfoTab({
       } else {
         notify.error(result?.data?.error === "authError" ? t("authError") : t("error"));
       }
-    } catch (error) {
+    } catch {
       notify.error(t("error"));
     } finally {
       setIsRevealing(false);

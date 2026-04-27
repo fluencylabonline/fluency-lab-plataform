@@ -56,7 +56,7 @@ export function ClassCard({
   const StatusIcon = config.icon;
 
   return (
-    <div className="item overflow-hidden border-none group transition-all p-4">
+    <div className="card overflow-hidden group transition-all p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="space-y-3 flex-1">
           <div className="flex items-center justify-between">
@@ -80,7 +80,7 @@ export function ClassCard({
           <div className="space-y-1.5 pt-1">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <User className="h-3.5 w-3.5" />
-              <span className="truncate">Prof. {slot.teacherName || slot.teacherId}</span>
+              <span className="truncate">Prof. {slot.teacherName}</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <BookOpen className="h-3.5 w-3.5" />
@@ -99,7 +99,7 @@ export function ClassCard({
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="center">
               <DropdownMenuLabel>Ações da Aula</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onUpdateStatus(slot.id, "completed")}>

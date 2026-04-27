@@ -155,7 +155,7 @@ function DropdownMenuContent({
                 <div
                     data-slot="dropdown-menu-content"
                     className={cn(
-                        "mt-2 flex flex-col px-4 pb-8 pt-2 max-h-[70vh] overflow-y-auto w-full",
+                        "mt-2 flex flex-col px-4 pb-8 pt-2 max-h-[80vh] overflow-y-auto w-full",
                         className
                     )}
                     {...(props as React.HTMLAttributes<HTMLDivElement>)}
