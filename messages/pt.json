@@ -72,6 +72,7 @@
     "studyingLanguages": "Idiomas de Estudo",
     "createUser": "Criar Usuário",
     "cancel": "Cancelar",
+    "invalid": "Inválido",
     "validation": {
       "errorTitle": "Erro de Validação",
       "errorDescription": "Verifique os campos obrigatórios.",
@@ -1195,5 +1196,149 @@
     "description": "Você se despediu, mas saiba que as portas estarão sempre abertas. Sua jornada de aprendizado pode continuar quando você estiver pronto.",
     "talkToUs": "Falar com a gente",
     "backToLogin": "Voltar para o login"
+  }
+  ,
+  "AdminFinances": {
+    "title": "Financeiro",
+    "subtitle": "Gestão fiscal, transações e projeções de faturamento.",
+    "months": {
+      "january": "Janeiro",
+      "february": "Fevereiro",
+      "march": "Março",
+      "april": "Abril",
+      "may": "Maio",
+      "june": "Junho",
+      "july": "Julho",
+      "august": "Agosto",
+      "september": "Setembro",
+      "october": "Outubro",
+      "november": "Novembro",
+      "december": "Dezembro"
+    },
+    "allMonths": "Todos os meses",
+    "status": {
+      "all": "Todos os status",
+      "paid": "Pagos/Recebidos",
+      "pending": "Pendentes",
+      "cancelled": "Cancelados"
+    },
+    "metrics": {
+      "revenue": "Receita Total",
+      "installments": "Parcelas",
+      "extraRevenue": "Receitas Avulsas",
+      "expenses": "Despesas Totais",
+      "teacherPayouts": "Pagto Professores",
+      "extraExpenses": "Despesas Avulsas",
+      "netProfit": "Lucro Líquido",
+      "irpfDue": "IRPF Estimado",
+      "monthlyTotal": "Total do Mês",
+      "irpfTooltip": "Cálculo baseado no lucro tributável (Receita - Despesas Dedutíveis - Isenção MEI)."
+    },
+    "transactions": {
+      "title": "Histórico de Transações",
+      "date": "Data",
+      "description": "Descrição",
+      "category": "Categoria",
+      "method": "Método",
+      "amount": "Valor",
+      "deductible": "Dedutível",
+      "emptyTitle": "Nenhuma transação",
+      "emptyDescription": "Não encontramos transações para o período selecionado.",
+      "status": {
+        "label": "Status",
+        "paid": "Pago",
+        "pending": "Pendente",
+        "cancelled": "Cancelado"
+      },
+      "methods": {
+        "pix": "Pix",
+        "credit_card": "Cartão de Crédito",
+        "bank_transfer": "Transferência",
+        "cash": "Dinheiro",
+        "other": "Outro"
+      }
+    },
+    "forecast": {
+      "title": "Projeções",
+      "pendingRevenue": "Receita Projetada",
+      "pendingExpenses": "Despesas Pendentes",
+      "basedOnInstallments": "Baseado em mensalidades pendentes",
+      "basedOnPendingTransactions": "Baseado em despesas pendentes cadastradas",
+      "forecastDisclaimer": "Os valores de projeção são baseados em cobranças e despesas pendentes no sistema e podem não refletir o valor final recebido ou pago.",
+      "viewDetails": "Ver Projeção Detalhada",
+      "detailsTitle": "Detalhes das Projeções",
+      "detailsSubtitle": "Lista de todas as mensalidades pendentes para {year}.",
+      "student": "Estudante",
+      "plan": "Plano",
+      "amount": "Valor",
+      "dueDate": "Vencimento",
+      "installment": "Parcela",
+      "description": "Descrição",
+      "category": "Categoria",
+      "emptyTitle": "Nenhuma projeção encontrada",
+      "emptyDescription": "Não existem mensalidades pendentes para o período selecionado.",
+      "emptyExpensesTitle": "Nenhuma despesa pendente",
+      "emptyExpensesDescription": "Não há despesas com status pendente para este período."
+    },
+    "newTransaction": {
+      "trigger": "Nova Transação",
+      "title": "Cadastrar Transação",
+      "type": "Tipo",
+      "income": "Receita",
+      "expense": "Despesa",
+      "status": "Status",
+      "paid": "Pago",
+      "pending": "Pendente",
+      "cancelled": "Cancelado",
+      "description": "Descrição",
+      "descriptionPlaceholder": "Ex: Compra de materiais, Venda avulsa...",
+      "amount": "Valor (R$)",
+      "date": "Data",
+      "category": "Categoria",
+      "categoryPlaceholder": "Ex: Marketing, Infra, Vendas...",
+      "method": "Método de Pagamento",
+      "methodPlaceholder": "Selecione o método",
+      "attachment": "Anexo",
+      "attachmentPlaceholder": "Clique para anexar arquivo",
+      "attachmentLoaded": "Anexo carregado",
+      "deductibleLabel": "Esta despesa é dedutível para fins fiscais?",
+      "cancel": "Cancelar",
+      "save": "Salvar Transação",
+      "saving": "Salvando...",
+      "deleting": "Excluindo...",
+      "confirmDelete": "Excluir",
+      "success": "Transação cadastrada com sucesso!",
+      "error": "Erro ao cadastrar transação."
+    },
+    "fiscalConfig": {
+      "trigger": "Config. Fiscal",
+      "title": "Configuração Fiscal",
+      "yearLabel": "Ano de Referência",
+      "meiExemptLabel": "Percentual de Isenção MEI",
+      "meiExemptHelp": "Padrão: 32% para serviços.",
+      "irpfTableTitle": "Tabela Progressiva IRPF",
+      "addRange": "Adicionar Faixa",
+      "cancel": "Cancelar",
+      "save": "Salvar Configuração",
+      "saving": "Salvando...",
+      "success": "Configuração fiscal atualizada!",
+      "error": "Erro ao atualizar configuração."
+    },
+    "helpLabel": "Como funciona?",
+    "help": {
+      "close": "Entendi!",
+      "intro": {
+        "title": "Bem-vindo às Finanças",
+        "description": "Entenda como funciona o fluxo financeiro da FluencyLab."
+      },
+      "status": {
+        "title": "Pendente vs. Pago",
+        "description": "A diferença crucial entre os status de transação."
+      },
+      "fiscal": {
+        "title": "Configuração Fiscal",
+        "description": "Como calculamos seus impostos (MEI/IRPF)."
+      }
+    }
   }
 }

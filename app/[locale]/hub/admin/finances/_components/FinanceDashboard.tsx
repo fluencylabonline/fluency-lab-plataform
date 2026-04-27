@@ -1,0 +1,161 @@
+"use client";
+
+import { useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { FiscalConfigVault } from "./FiscalConfigVault";
+import { ForecastCards } from "./ForecastCards";
+import { MetricsCards } from "./MetricsCards";
+import { NewTransactionVault } from "./NewTransactionVault";
+import { TransactionsTable } from "./TransactionsTable";
+import { Transaction, FiscalConfig } from "@/modules/finance/finance.schema";
+import { FinanceMetrics, FinanceForecast, MonthlyBreakdownItem } from "@/modules/finance/finance.types";
+
+interface FinanceDashboardProps {
+  initialMetrics: FinanceMetrics;
+  initialForecast: FinanceForecast;
+  initialTransactions: Transaction[];
+  initialMonthlyBreakdown: MonthlyBreakdownItem[];
+  initialFiscalConfig: FiscalConfig | null;
+  currentMonth: number | "all";
+  currentYear: number;
+  currentStatus: string;
+}
+
+export function FinanceDashboard({
+  initialMetrics,
+  initialForecast,
+  initialTransactions,
+  initialMonthlyBreakdown,
+  initialFiscalConfig,
+  currentMonth,
+  currentYear,
+  currentStatus,
+}: FinanceDashboardProps) {
+  const t = useTranslations("AdminFinances");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const monthLabels = useMemo(() => [
+    t("months.january"), t("months.february"), t("months.march"),
+    t("months.april"), t("months.may"), t("months.june"),
+    t("months.july"), t("months.august"), t("months.september"),
+    t("months.october"), t("months.november"), t("months.december"),
+  ], [t]);
+
+  const yearOptions = useMemo(() => {
+    const now = new Date().getFullYear();
+    return Array.from({ length: 5 }, (_, i) => now - i);
+  }, []);
+
+  const updateFilters = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.set(key, value);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Filters & Actions */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card p-4 rounded-xl border border-border shadow-xs">
+        <div className="flex flex-wrap items-center gap-2">
+          <Select
+            value={currentMonth.toString()}
+            onValueChange={(v) => updateFilters("month", v)}
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("allMonths")}</SelectItem>
+              {monthLabels.map((label, i) => (
+                <SelectItem key={i} value={i.toString()}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={currentYear.toString()}
+            onValueChange={(v) => updateFilters("year", v)}
+          >
+            <SelectTrigger className="w-[100px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {yearOptions.map((y) => (
+                <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={currentStatus}
+            onValueChange={(v) => updateFilters("status", v)}
+          >
+            <SelectTrigger className="w-[150px] sm:w-[250px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("status.all")}</SelectItem>
+              <SelectItem value="paid">{t("status.paid")}</SelectItem>
+              <SelectItem value="pending">{t("status.pending")}</SelectItem>
+              <SelectItem value="cancelled">{t("status.cancelled")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <FiscalConfigVault initialConfig={initialFiscalConfig} year={currentYear} />
+          <NewTransactionVault />
+        </div>
+      </div>
+
+      {/* Metrics Section */}
+      <MetricsCards
+        metrics={initialMetrics}
+        monthlyBreakdown={initialMonthlyBreakdown}
+        currentMonth={currentMonth}
+      />
+
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Transactions Section */}
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          <Card className="border-border shadow-xs">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg font-semibold">{t("transactions.title")}</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <TransactionsTable transactions={initialTransactions} />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Forecast Section */}
+        <div className="flex flex-col gap-6">
+          <Card className="border-border shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">{t("forecast.title")}</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <ForecastCards
+                forecast={initialForecast}
+                month={currentMonth}
+                year={currentYear}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}

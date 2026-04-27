@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { payoutsTable } from "./payout.schema";
 import { slotInstances } from "@/modules/scheduling/scheduling.schema";
-import { eq, and, isNull, between, inArray } from "drizzle-orm";
+import { eq, and, isNull, between, inArray, sum } from "drizzle-orm";
 
 export const payoutRepository = {
   async createPayout(data: typeof payoutsTable.$inferInsert) {
@@ -46,5 +46,17 @@ export const payoutRepository = {
     await db.update(slotInstances)
       .set({ payoutId })
       .where(inArray(slotInstances.id, classIds));
+  },
+
+  async sumPayouts(filters: { status: "completed" | "pending"; start: Date; end: Date }) {
+    const [result] = await db
+      .select({ total: sum(payoutsTable.amount) })
+      .from(payoutsTable)
+      .where(and(
+        eq(payoutsTable.status, filters.status),
+        between(payoutsTable.createdAt, filters.start, filters.end)
+      ));
+    
+    return Number(result?.total || 0);
   }
 };

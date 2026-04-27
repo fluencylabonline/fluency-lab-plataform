@@ -72,6 +72,8 @@
     "studyingLanguages": "Studying Languages",
     "createUser": "Create User",
     "cancel": "Cancel",
+    "valid": "Valid",
+    "invalid": "Invalid",
     "validation": {
       "errorTitle": "Validation Error",
       "errorDescription": "Please check the required fields.",
@@ -1165,5 +1167,149 @@
     "description": "You've said goodbye, but know that our doors will always be open. Your learning journey can continue whenever you're ready.",
     "talkToUs": "Talk to us",
     "backToLogin": "Back to login"
+  }
+  ,
+  "AdminFinances": {
+    "title": "Finances",
+    "subtitle": "Fiscal management, transactions and revenue projections.",
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    },
+    "allMonths": "All months",
+    "status": {
+      "all": "All status",
+      "paid": "Paid/Received",
+      "pending": "Pending",
+      "cancelled": "Cancelled"
+    },
+    "metrics": {
+      "revenue": "Total Revenue",
+      "installments": "Installments",
+      "extraRevenue": "Extra Revenue",
+      "expenses": "Total Expenses",
+      "teacherPayouts": "Teacher Payouts",
+      "extraExpenses": "Extra Expenses",
+      "netProfit": "Net Profit",
+      "irpfDue": "Estimated Income Tax",
+      "monthlyTotal": "Monthly Total",
+      "irpfTooltip": "Calculation based on taxable profit (Revenue - Deductible Expenses - MEI Exemption)."
+    },
+    "transactions": {
+      "title": "Transaction History",
+      "date": "Date",
+      "description": "Description",
+      "category": "Category",
+      "method": "Method",
+      "amount": "Amount",
+      "deductible": "Deductible",
+      "emptyTitle": "No transactions",
+      "emptyDescription": "We couldn't find any transactions for the selected period.",
+      "status": {
+        "label": "Status",
+        "paid": "Paid",
+        "pending": "Pending",
+        "cancelled": "Cancelled"
+      },
+      "methods": {
+        "pix": "Pix",
+        "credit_card": "Credit Card",
+        "bank_transfer": "Bank Transfer",
+        "cash": "Cash",
+        "other": "Other"
+      }
+    },
+    "forecast": {
+      "title": "Projections",
+      "pendingRevenue": "Projected Revenue",
+      "pendingExpenses": "Pending Expenses",
+      "basedOnInstallments": "Based on pending installments",
+      "basedOnPendingTransactions": "Based on registered pending expenses",
+      "forecastDisclaimer": "Projection values are based on pending charges and expenses in the system and may not reflect the final amount received or paid.",
+      "viewDetails": "View Detailed Projection",
+      "detailsTitle": "Projection Details",
+      "detailsSubtitle": "List of all pending installments and expenses for {year}.",
+      "student": "Student",
+      "plan": "Plan",
+      "amount": "Amount",
+      "dueDate": "Due Date",
+      "installment": "Installment",
+      "description": "Description",
+      "category": "Category",
+      "emptyTitle": "No projections found",
+      "emptyDescription": "There are no pending installments for the selected period.",
+      "emptyExpensesTitle": "No pending expenses",
+      "emptyExpensesDescription": "There are no expenses with pending status for this period."
+    },
+    "newTransaction": {
+      "trigger": "New Transaction",
+      "title": "Register Transaction",
+      "type": "Type",
+      "income": "Income",
+      "expense": "Expense",
+      "status": "Status",
+      "paid": "Paid",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "description": "Description",
+      "descriptionPlaceholder": "e.g., Purchase of materials, extra sale...",
+      "amount": "Amount (R$)",
+      "date": "Date",
+      "category": "Category",
+      "categoryPlaceholder": "e.g., Marketing, Infra, Sales...",
+      "method": "Payment Method",
+      "methodPlaceholder": "Select method",
+      "attachment": "Attachment",
+      "attachmentPlaceholder": "Click to attach file",
+      "attachmentLoaded": "Attachment loaded",
+      "deductibleLabel": "Is this expense deductible for tax purposes?",
+      "cancel": "Cancel",
+      "save": "Save Transaction",
+      "saving": "Saving...",
+      "deleting": "Deleting...",
+      "confirmDelete": "Delete",
+      "success": "Transaction registered successfully!",
+      "error": "Error registering transaction."
+    },
+    "fiscalConfig": {
+      "trigger": "Fiscal Config",
+      "title": "Fiscal Configuration",
+      "yearLabel": "Reference Year",
+      "meiExemptLabel": "MEI Exemption Percentage",
+      "meiExemptHelp": "Default: 32% for services.",
+      "irpfTableTitle": "Progressive Income Tax Table",
+      "addRange": "Add Range",
+      "cancel": "Cancel",
+      "save": "Save Configuration",
+      "saving": "Saving...",
+      "success": "Fiscal configuration updated!",
+      "error": "Error updating configuration."
+    },
+    "helpLabel": "How it works?",
+    "help": {
+      "close": "Got it!",
+      "intro": {
+        "title": "Welcome to Finances",
+        "description": "Understand how the FluencyLab financial flow works."
+      },
+      "status": {
+        "title": "Pending vs. Paid",
+        "description": "The crucial difference between transaction statuses."
+      },
+      "fiscal": {
+        "title": "Fiscal Configuration",
+        "description": "How we calculate your taxes (MEI/IRPF)."
+      }
+    }
   }
 }

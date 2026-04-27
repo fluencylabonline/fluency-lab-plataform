@@ -637,5 +637,17 @@ export const billingService = {
         reason: "Atualização manual de parcela pelo admin",
       });
     }
+  },
+
+  async getTotalRevenue(start: Date, end: Date) {
+    return billingRepository.sumInstallments({ status: "paid", start, end });
+  },
+
+  async getRevenueForecast(start: Date, end: Date) {
+    return billingRepository.sumInstallments({ status: "pending", start, end });
+  },
+
+  async getDetailedRevenueForecast(start: Date, end: Date) {
+    return billingRepository.findInstallmentsDetails({ status: "pending", start, end });
   }
 };

@@ -98,5 +98,9 @@ export const payoutService = {
     }
 
     return payout;
+  },
+
+  async getTotalPayouts(start: Date, end: Date) {
+    return payoutRepository.sumPayouts({ status: "completed", start, end });
   }
 };

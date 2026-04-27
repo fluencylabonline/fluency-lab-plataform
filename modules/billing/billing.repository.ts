@@ -7,7 +7,7 @@ import {
   Subscription, 
   Installment 
 } from "./billing.schema";
-import { eq, and, lte, isNull, between } from "drizzle-orm";
+import { eq, and, lte, isNull, between, sum } from "drizzle-orm";
 
 export const billingRepository = {
   // Audit
@@ -129,6 +129,40 @@ export const billingRepository = {
           with: { student: true }
         }
       }
+    });
+  },
+
+  async sumInstallments(filters: { status: "paid" | "pending"; start: Date; end: Date }) {
+    const dateField = filters.status === "paid" ? installmentsTable.paidAt : installmentsTable.dueDate;
+    
+    const [result] = await db
+      .select({ total: sum(installmentsTable.amount) })
+      .from(installmentsTable)
+      .where(and(
+        eq(installmentsTable.status, filters.status),
+        between(dateField, filters.start, filters.end)
+      ));
+    
+    return Number(result?.total || 0);
+  },
+
+  async findInstallmentsDetails(filters: { status: "paid" | "pending"; start: Date; end: Date }) {
+    const dateField = filters.status === "paid" ? installmentsTable.paidAt : installmentsTable.dueDate;
+    
+    return db.query.installmentsTable.findMany({
+      where: and(
+        eq(installmentsTable.status, filters.status),
+        between(dateField, filters.start, filters.end)
+      ),
+      with: {
+        subscription: {
+          with: {
+            student: true,
+            plan: true
+          }
+        }
+      },
+      orderBy: (table, { asc }) => [asc(table.dueDate)]
     });
   }
 };
