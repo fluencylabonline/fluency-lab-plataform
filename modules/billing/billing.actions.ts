@@ -92,7 +92,7 @@ export const getInstallmentStatusAction = protectedAction
     return { success: true, data: { status: installment?.status } };
   });
 
-import { verifyPassword } from "@/lib/auth-server";
+import { verifyPassword, verifySudoMode } from "@/lib/auth-server";
 
 export const updateInstallmentAction = adminAction
   .inputSchema(updateInstallmentSchema)
@@ -106,7 +106,7 @@ export const updateInstallmentAction = adminAction
           return { success: false, error: "A confirmação de senha é obrigatória para marcar como paga." };
         }
 
-        const isValid = await verifyPassword(ctx.user.email, password);
+        const isValid = await verifySudoMode(ctx.user.id, ctx.user.email!, password);
         if (!isValid) {
           return { success: false, error: "Senha incorreta. Ação não autorizada." };
         }

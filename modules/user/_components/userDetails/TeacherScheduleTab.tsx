@@ -77,8 +77,9 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
 
       const allNewData: SlotInstanceWithDetails[] = [];
       results.forEach(result => {
-        if (result?.data?.success) {
-          allNewData.push(...(result.data.data || []));
+        const response = result?.data;
+        if (response?.success) {
+          allNewData.push(...(response.data || []));
         }
       });
 
@@ -199,23 +200,23 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
 
   return (
     <>
-        <CalendarView
-          events={calendarEvents}
-          onMonthChange={handleMonthChange}
-          onEventClick={handleEventClick}
-          renderEventCard={renderEventCard}
-          isLoading={isFetching || isInitialLoading}
-          headerActions={
-            <Button
-              onClick={() => setIsCreateVaultOpen(true)}
-              className="rounded-md gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-8 lg:h-9 text-[10px] uppercase tracking-widest px-4"
-            >
-              <Plus className="w-3 h-3 lg:w-4 lg:h-4" />
-              <span className="hidden sm:inline">Novo Horário</span>
-              <span className="sm:hidden">Novo</span>
-            </Button>
-          }
-        />
+      <CalendarView
+        events={calendarEvents}
+        onMonthChange={handleMonthChange}
+        onEventClick={handleEventClick}
+        renderEventCard={renderEventCard}
+        isLoading={isFetching || isInitialLoading}
+        headerActions={
+          <Button
+            onClick={() => setIsCreateVaultOpen(true)}
+            className="rounded-md gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-8 lg:h-9 text-[10px] uppercase tracking-widest px-4"
+          >
+            <Plus className="w-3 h-3 lg:w-4 lg:h-4" />
+            <span className="hidden sm:inline">Novo Horário</span>
+            <span className="sm:hidden">Novo</span>
+          </Button>
+        }
+      />
 
       <CreateSlotVault
         teacherId={teacherId}

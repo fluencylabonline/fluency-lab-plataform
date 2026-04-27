@@ -28,6 +28,16 @@ export const emailStyles = {
     textAlign: "center" as const,
     marginBottom: "24px",
   } as CSSProperties,
+  h2: {
+    fontSize: "20px",
+    fontWeight: "bold",
+    color: "#1a1a1a",
+    marginBottom: "16px",
+  } as CSSProperties,
+  hr: {
+    borderColor: "#e6ebf1",
+    margin: "20px 0",
+  } as CSSProperties,
   heading: {
     fontSize: "20px",
     fontWeight: "bold",
@@ -82,5 +92,19 @@ export const emailStyles = {
     textAlign: "center" as const,
     display: "inline-block",
     padding: "12px 24px",
+  } as CSSProperties,
+  highlightSection: {
+    backgroundColor: "#f4f4f4",
+    borderRadius: "4px",
+    padding: "16px",
+    margin: "16px 0",
+    borderLeft: "4px solid #000",
+  } as CSSProperties,
+  highlightText: {
+    fontSize: "16px",
+    lineHeight: "24px",
+    color: "#1a1a1a",
+    margin: "0",
+    fontStyle: "italic",
   } as CSSProperties,
 };

@@ -60,3 +60,46 @@ export async function createPixCharge(payload: {
     expiresAt: string;
   };
 }
+
+/**
+ * Helper to send a PIX transfer to a third party (e.g., teacher) using AbacatePay.
+ * Docs: POST /pix/send
+ */
+export async function sendPix(payload: {
+  amount: number;
+  pixKey: string;
+  pixKeyType: string;
+  externalId: string;
+  description?: string;
+}) {
+  const res = await fetch("https://api.abacatepay.com/v2/pix/send", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${env.ABACATEPAY_API_KEY}`,
+    },
+    body: JSON.stringify({
+      amount: payload.amount,
+      externalId: payload.externalId,
+      description: payload.description,
+      pix: {
+        key: payload.pixKey,
+        type: payload.pixKeyType,
+      },
+    }),
+  });
+
+  const result = await res.json();
+
+  if (!result.success) {
+    console.error("[AbacatePay] Send PIX Error:", result.error);
+    throw new Error(result.error || "Failed to send PIX");
+  }
+
+  return result.data as {
+    id: string;
+    amount: number;
+    status: string;
+    externalId: string;
+  };
+}

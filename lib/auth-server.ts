@@ -70,3 +70,28 @@ export async function verifyPassword(email: string, password: string): Promise<b
     return false;
   }
 }
+
+/**
+ * Checks if a user has a password set (vs just Google Auth).
+ */
+export async function checkUserHasPassword(uid: string): Promise<boolean> {
+  try {
+    const firebaseUser = await adminAuth.getUser(uid);
+    return firebaseUser.providerData.some((p) => p.providerId === "password");
+  } catch (error) {
+    console.error("[checkUserHasPassword] Error:", error);
+    return false;
+  }
+}
+
+/**
+ * Unified sudo-mode check.
+ * If user has a password, it's mandatory.
+ * If user is Google-only, it's skipped.
+ */
+export async function verifySudoMode(uid: string, email: string, password?: string): Promise<boolean> {
+  const hasPassword = await checkUserHasPassword(uid);
+  if (!hasPassword) return true;
+  if (!password) return false;
+  return verifyPassword(email, password);
+}

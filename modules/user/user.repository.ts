@@ -83,4 +83,14 @@ export const userRepository = {
       orderBy: (table, { desc }) => [desc(table.createdAt)],
     });
   },
+
+  /**
+   * Find all users with a specific role.
+   */
+  async findAllByRole(role: User["role"]): Promise<User[]> {
+    return db.query.usersTable.findMany({
+      where: eq(usersTable.role, role),
+      orderBy: (table, { asc }) => [asc(table.name)],
+    });
+  },
 };

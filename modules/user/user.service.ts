@@ -160,4 +160,8 @@ export const userService = {
   async getAllUsers(): Promise<User[]> {
     return userRepository.findAll();
   },
-};
+
+  async getAllTeachers(): Promise<User[]> {
+    return userRepository.findAllByRole("teacher");
+  },
+};

@@ -105,8 +105,9 @@ export const schedulingRepository = {
   },
 
   // --- Recurrence Rules ---
-  async findRuleById(id: string) {
-    return db.query.recurrenceRules.findFirst({
+  async findRuleById(id: string, dbClient?: any) {
+    const client = dbClient || db;
+    return client.query.recurrenceRules.findFirst({
       where: eq(recurrenceRules.id, id),
     });
   },
@@ -115,8 +116,9 @@ export const schedulingRepository = {
     return db.query.recurrenceRules.findMany();
   },
 
-  async findSlotByRuleAndDate(ruleId: string, startAt: Date) {
-    return db.query.slotInstances.findFirst({
+  async findSlotByRuleAndDate(ruleId: string, startAt: Date, dbClient?: any) {
+    const client = dbClient || db;
+    return client.query.slotInstances.findFirst({
       where: and(
         eq(slotInstances.ruleId, ruleId),
         eq(slotInstances.startAt, startAt)
@@ -140,7 +142,7 @@ export const schedulingRepository = {
 
   async findCreditsByStudent(studentId: string, onlyActive: boolean = true) {
     const filters = [eq(studentCredits.studentId, studentId)];
-    
+
     if (onlyActive) {
       filters.push(isNull(studentCredits.usedAt));
       filters.push(gte(studentCredits.expiresAt, new Date()));
@@ -152,7 +154,8 @@ export const schedulingRepository = {
     });
   },
 
-  async findOverlappingSlot(teacherId: string, startAt: Date, endAt: Date, excludeId?: string) {
+  async findOverlappingSlot(teacherId: string, startAt: Date, endAt: Date, excludeId?: string, dbClient?: any) {
+    const client = dbClient || db;
     const filters = [
       eq(slotInstances.teacherId, teacherId),
       lte(slotInstances.startAt, endAt),
@@ -163,7 +166,7 @@ export const schedulingRepository = {
       filters.push(ne(slotInstances.id, excludeId));
     }
 
-    return db.query.slotInstances.findFirst({
+    return client.query.slotInstances.findFirst({
       where: and(...filters),
     });
   },
@@ -236,9 +239,16 @@ export const schedulingRepository = {
     return db.query.slotInstances.findMany({
       where: and(
         eq(slotInstances.teacherId, teacherId),
-        eq(slotInstances.status, "completed"),
+        inArray(slotInstances.status, ["completed", "no-show", 'canceled-student']),
         between(slotInstances.startAt, start, end)
       ),
+      with: {
+        student: {
+          columns: {
+            name: true,
+          }
+        }
+      },
       orderBy: [slotInstances.startAt],
     });
   },

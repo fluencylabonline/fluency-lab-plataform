@@ -12,7 +12,7 @@ import { communicationService } from "@/modules/communication/communication.serv
 import { checkRateLimit } from "@/lib/rate-limit";
 import { locales } from "@/i18n/config";
 import { decrypt } from "@/lib/cryptography";
-import { verifyPassword } from "@/lib/auth-server";
+import { verifyPassword, verifySudoMode } from "@/lib/auth-server";
 
 // --- Funções Auxiliares Privadas ---
 const generateInviteLink = async (email: string, locale: string = "pt") => {
@@ -188,6 +188,18 @@ export const searchUsersAction = protectedAction
     return userService.searchUsers(parsedInput.term);
   });
 
+export const getTeachersAction = protectedAction
+  .inputSchema(z.object({}))
+  .action(async () => {
+    try {
+      const data = await userService.getAllTeachers();
+      return { success: true, data };
+    } catch (error) {
+      console.error("[getTeachersAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
 export const updateUserAction = adminAction
   .inputSchema(updateUserSchema)
   .action(async ({ parsedInput }) => {
@@ -208,15 +220,15 @@ export const revealSensitiveDataAction = adminAction
     z.object({
       userId: z.string(),
       field: z.enum(["cellphone", "taxId", "businessTaxId", "pixKey"]),
-      password: z.string(),
+      password: z.string().optional(),
     })
   )
   .action(async ({ parsedInput, ctx }) => {
     try {
       const { userId, field, password } = parsedInput;
 
-      // Verify admin password
-      const isValid = await verifyPassword(ctx.user.email, password);
+      // Verify admin password (Sudo Mode)
+      const isValid = await verifySudoMode(ctx.user.id, ctx.user.email!, password);
       if (!isValid) return { success: false, error: "authError" };
 
       const user = await userService.getUserById(userId);

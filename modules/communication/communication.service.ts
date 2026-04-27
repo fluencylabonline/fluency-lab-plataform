@@ -21,6 +21,7 @@ import {
   ContractExpiringEmail,
   ContractRenewedEmail,
 } from "./templates/ContractStatusEmails";
+import { ScheduleAlertEmail } from "./templates/ScheduleAlertEmail";
 import type {
   SendWhatsAppTemplateOptions,
   WhatsAppResponse,
@@ -188,6 +189,18 @@ export class CommunicationService {
       });
     } catch (error) {
       console.error("[CommunicationService.sendClassOverdueTeacherEmail] Error:", error);
+    }
+  }
+
+  async sendScheduleAlertEmail(email: string, name: string, message: string) {
+    try {
+      await this.sendEmail({
+        to: email,
+        subject: "\uD83D\uDCE2 Alerta de Agenda - Fluency Lab",
+        template: React.createElement(ScheduleAlertEmail, { teacherName: name, message }),
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendScheduleAlertEmail] Error:", error);
     }
   }
 

@@ -20,6 +20,8 @@ import { StudentPaymentTab } from "./userDetails/StudentPaymentTab";
 import { TeacherEarningsTab } from "./userDetails/TeacherEarningsTab";
 import { ContractsTab } from "./userDetails/ContractsTab";
 import { TeacherScheduleTab } from "./userDetails/TeacherScheduleTab";
+import { StudentCurriculumTab } from "./userDetails/StudentCurriculumTab";
+import { Header } from "@/components/layout/header";
 
 const rateSchema = z.object({
   rate: z.number().min(0),
@@ -152,8 +154,14 @@ export function UserDetailsClient({
   const userAvatar = (user as any).avatarUrl || (user as any).image;
 
   return (
-    <div className="p-3 px-6">
-      <Tabs defaultValue="personal">
+    <div>
+      <Header
+        title="Detalhes do Usuário"
+        showSubHeader={false}
+        className="contents"
+        user={currentUser}
+      />
+      <Tabs defaultValue="personal" className="container">
         <div className="flex flex-col items-start md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex flex-row gap-2 items-center">
             <BackButton href={basePath} />
@@ -182,6 +190,10 @@ export function UserDetailsClient({
 
             {user.role === "teacher" && (
               <TabsTrigger value="schedule">{t("schedule")}</TabsTrigger>
+            )}
+
+            {user.role === "student" && (
+              <TabsTrigger value="curriculum">Currículo</TabsTrigger>
             )}
           </TabsList>
         </div>
@@ -215,6 +227,7 @@ export function UserDetailsClient({
               user={user}
               teacherClasses={teacherClasses}
               earningsSummary={earningsSummary}
+              isAdmin={isAdmin}
             />
           )}
         </TabsContent>
@@ -231,6 +244,12 @@ export function UserDetailsClient({
         {user.role === "teacher" && (
           <TabsContent value="schedule" className="mt-4">
             <TeacherScheduleTab teacherId={user.id} />
+          </TabsContent>
+        )}
+
+        {user.role === "student" && (
+          <TabsContent value="curriculum" className="mt-4">
+            <StudentCurriculumTab studentId={user.id} isAdmin={isAdmin} />
           </TabsContent>
         )}
       </Tabs>

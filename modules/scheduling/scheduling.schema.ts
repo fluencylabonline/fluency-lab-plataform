@@ -97,6 +97,12 @@ export const slotInstances = pgTable("slot_instances", {
   reminder24hSent: boolean("reminder_24h_sent").default(false).notNull(),
   reminder1hSent: boolean("reminder_1h_sent").default(false).notNull(),
 
+  // Earnings Snapshot
+  teacherHourlyRate: integer("teacher_hourly_rate"), 
+  
+  // Payout Tracking
+  payoutId: uuid("payout_id"),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

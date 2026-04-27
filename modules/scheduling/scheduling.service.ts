@@ -8,7 +8,10 @@ import {
   studentCredits,
   schedulingAuditLogs
 } from "./scheduling.schema";
-import { eq, and, gte } from "drizzle-orm";
+import { contractInstancesTable } from "@/modules/contract/contract.schema";
+import { eq, and, gte, lt, or, asc, desc } from "drizzle-orm";
+import { communicationService } from "@/modules/communication/communication.service";
+import { userService } from "@/modules/user/user.service";
 import {
   addWeeks,
   addMonths,
@@ -19,12 +22,11 @@ import {
   differenceInHours,
   subHours,
   addHours,
-  addMinutes
+  addMinutes,
+  endOfMonth
 } from "date-fns";
 import { notificationService } from "@/modules/notification/notification.service";
-
 import { userRepository } from "@/modules/user/user.repository";
-import { communicationService } from "@/modules/communication/communication.service";
 
 export const schedulingService = {
   // --- Rule Management ---
@@ -52,7 +54,7 @@ export const schedulingService = {
     ruleId: string,
     studentId: string
   ) {
-    // RBAC: Admin/Manager can allocate anyone.
+    // RBAC: Admin/Manager can allocate students.
     if (!hasPermission(user, "class.update.any")) {
       throw new Error("Unauthorized: Only Admin or Manager can allocate students to rules");
     }
@@ -60,14 +62,35 @@ export const schedulingService = {
     const rule = await schedulingRepository.findRuleById(ruleId);
     if (!rule) throw new Error("Recurrence Rule not found");
 
+    // 1. Get student's active contract to find expiresAt
+    const contract = await db.query.contractInstancesTable.findFirst({
+      where: and(
+        eq(contractInstancesTable.userId, studentId),
+        eq(contractInstancesTable.status, "signed")
+      ),
+      orderBy: [desc(contractInstancesTable.createdAt)]
+    });
+
+    if (!contract || !contract.expiresAt) {
+      throw new Error("Student has no signed contract with expiration date.");
+    }
+
+    // Business Rule: Clamped between 6 and 12 months from now
+    const now = new Date();
+    const maxHorizon = addMonths(now, 12);
+    const minHorizon = addMonths(now, 6);
+    
+    let horizon = endOfMonth(contract.expiresAt);
+    if (isAfter(horizon, maxHorizon)) horizon = maxHorizon;
+    if (isBefore(horizon, minHorizon)) horizon = minHorizon;
+
     return await db.transaction(async (tx) => {
-      // 1. Update the template
+      // 2. Update the rule template
       await tx.update(recurrenceRules)
         .set({ studentId })
         .where(eq(recurrenceRules.id, ruleId));
 
-      // 2. Update future available slots
-      const now = new Date();
+      // 3. Update existing available slots up to horizon
       await tx.update(slotInstances)
         .set({
           studentId,
@@ -78,9 +101,14 @@ export const schedulingService = {
           and(
             eq(slotInstances.ruleId, ruleId),
             eq(slotInstances.status, "available"),
-            gte(slotInstances.startAt, now)
+            gte(slotInstances.startAt, now),
+            lt(slotInstances.startAt, horizon)
           )
         );
+
+      // 4. Generate missing slots if teacher schedule doesn't reach horizon
+      // We pass studentId to ensure newly created slots are correctly attributed
+      await this.materializeSlotsUntilDate(ruleId, horizon, tx, studentId);
 
       // Notification
       const student = await userRepository.findById(studentId);
@@ -94,8 +122,224 @@ export const schedulingService = {
         });
       }
 
+      // Notify Teacher about new student and possible extra slots
+      await notificationService.sendNotification({
+        title: "Novo Aluno Alocado",
+        body: `O aluno ${student?.name || ""} foi alocado no seu horário de ${rule.startTime}. Aulas geradas até ${format(horizon, "dd/MM/yyyy")}.`,
+        targetType: "specific",
+        userIds: [rule.teacherId],
+        channels: { inApp: true, push: true },
+      });
+
       return { success: true };
     });
+  },
+
+  async deallocateStudentFromRule(
+    user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
+    ruleId: string
+  ) {
+    if (!hasPermission(user, "class.update.any")) {
+      throw new Error("Unauthorized: Only Admin or Manager can deallocate students");
+    }
+
+    const now = new Date();
+
+    return await db.transaction(async (tx) => {
+      // 1. Remove student from rule
+      await tx.update(recurrenceRules)
+        .set({ studentId: null })
+        .where(eq(recurrenceRules.id, ruleId));
+
+      // 2. Revert future slots to available
+      await tx.update(slotInstances)
+        .set({
+          studentId: null,
+          status: "available",
+          updatedAt: now
+        })
+        .where(
+          and(
+            eq(slotInstances.ruleId, ruleId),
+            eq(slotInstances.status, "scheduled"),
+            gte(slotInstances.startAt, now)
+          )
+        );
+
+      return { success: true };
+    });
+  },
+
+  async materializeSlotsUntilDate(ruleId: string, horizon: Date, tx?: any, overrideStudentId?: string) {
+    const dbClient = tx || db;
+    const rule = await schedulingRepository.findRuleById(ruleId, dbClient);
+    if (!rule) throw new Error("Rule not found");
+
+    const now = new Date();
+    let current = startOfDay(new Date(rule.startDate));
+    let generatedCount = 0;
+
+    if (isBefore(current, startOfDay(now)) && rule.frequency !== "NONE") {
+      while (isBefore(current, startOfDay(now))) {
+        if (rule.frequency === "WEEKLY") current = addWeeks(current, 1);
+        else if (rule.frequency === "BIWEEKLY") current = addWeeks(current, 2);
+        else if (rule.frequency === "MONTHLY") current = addMonths(current, 1);
+        else break;
+      }
+    }
+
+    while (!isAfter(current, horizon)) {
+      const [startHour, startMin] = rule.startTime.split(":").map(Number);
+      const [endHour, endMin] = rule.endTime.split(":").map(Number);
+
+      const startAt = new Date(current);
+      startAt.setHours(startHour, startMin, 0, 0);
+      const endAt = new Date(current);
+      endAt.setHours(endHour, endMin, 0, 0);
+
+      if (isAfter(startAt, now)) {
+        const exists = await schedulingRepository.findSlotByRuleAndDate(ruleId, startAt, dbClient);
+        const conflict = await schedulingRepository.findOverlappingSlot(rule.teacherId, startAt, endAt, undefined, dbClient);
+
+        if (!exists && !conflict) {
+          const studentId = overrideStudentId || rule.studentId;
+          await dbClient.insert(slotInstances).values({
+            ruleId: rule.id,
+            teacherId: rule.teacherId,
+            studentId,
+            type: rule.type,
+            status: studentId ? "scheduled" : "available",
+            startAt,
+            endAt,
+          });
+          generatedCount++;
+        }
+      }
+
+      if (rule.frequency === "WEEKLY") current = addWeeks(current, 1);
+      else if (rule.frequency === "BIWEEKLY") current = addWeeks(current, 2);
+      else if (rule.frequency === "MONTHLY") current = addMonths(current, 1);
+      else break;
+    }
+    return generatedCount;
+  },
+
+  async swapSlotTeacher(
+    user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
+    slotId: string,
+    newTeacherId: string
+  ) {
+    if (!hasPermission(user, "class.update.any")) {
+      throw new Error("Unauthorized: Only Admin or Manager can swap teachers.");
+    }
+
+    const slot = await schedulingRepository.findById(slotId);
+    if (!slot) throw new Error("Slot not found");
+    if (!slot.studentId) throw new Error("Slot must have a student to be swapped.");
+
+    // Check conflict for new teacher
+    const conflict = await schedulingRepository.findOverlappingSlot(newTeacherId, slot.startAt, slot.endAt);
+    if (conflict && conflict.status !== "available" && conflict.status !== "canceled-teacher" && conflict.status !== "canceled-admin") {
+      throw new Error(`Conflict: New teacher already has a class at ${format(slot.startAt, "HH:mm")}`);
+    }
+
+    const swapResult = await db.transaction(async (tx) => {
+      // 1. Mark old slot as canceled-admin
+      await tx.update(slotInstances)
+        .set({ status: "canceled-admin", updatedAt: new Date() })
+        .where(eq(slotInstances.id, slotId));
+
+      // 2. If new teacher has an 'available' slot here, use it. Otherwise create new.
+      if (conflict && conflict.status === "available") {
+        await tx.update(slotInstances)
+          .set({
+            studentId: slot.studentId,
+            status: "scheduled",
+            planId: slot.planId,
+            planName: slot.planName,
+            lessonId: slot.lessonId,
+            lessonTitle: slot.lessonTitle,
+            updatedAt: new Date()
+          })
+          .where(eq(slotInstances.id, conflict.id));
+      } else {
+        await tx.insert(slotInstances).values({
+          teacherId: newTeacherId,
+          studentId: slot.studentId,
+          status: "scheduled",
+          type: slot.type,
+          startAt: slot.startAt,
+          endAt: slot.endAt,
+          planId: slot.planId,
+          planName: slot.planName,
+          lessonId: slot.lessonId,
+          lessonTitle: slot.lessonTitle,
+        });
+      }
+
+      // Audit log for swap
+      await tx.insert(schedulingAuditLogs).values({
+        slotId,
+        actorId: user.id,
+        actorRole: user.role,
+        previousStatus: slot.status,
+        newStatus: "canceled-admin",
+        reason: `Teacher swapped from ${slot.teacherId} to ${newTeacherId}`,
+      });
+
+      return { success: true };
+    });
+
+    if (swapResult.success) {
+      schedulingService.notifySwap(slot.teacherId, newTeacherId, slot.studentId, slot.startAt).catch(console.error);
+    }
+
+    return swapResult;
+  },
+
+  async notifySwap(oldTeacherId: string, newTeacherId: string, studentId: string | null, startAt: Date) {
+    if (!studentId) return;
+    
+    const [oldTeacher, newTeacher, student] = await Promise.all([
+      userService.getUser(oldTeacherId),
+      userService.getUser(newTeacherId),
+      userService.getUser(studentId),
+    ]);
+
+    const dateStr = format(new Date(startAt), "dd/MM HH:mm");
+
+    if (oldTeacher && student) {
+      await communicationService.sendScheduleAlertEmail(
+        oldTeacher.email,
+        oldTeacher.name,
+        `A aula do dia ${dateStr} com o aluno ${student.name} foi removida da sua agenda por um administrador.`
+      );
+    }
+
+    if (newTeacher && student) {
+      await communicationService.sendScheduleAlertEmail(
+        newTeacher.email,
+        newTeacher.name,
+        `Uma nova aula foi atribuída a você no dia ${dateStr} com o aluno ${student.name}.`
+      );
+    }
+  },
+
+  async updateSlotLesson(
+    user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
+    slotId: string,
+    lessonId: string,
+    lessonTitle: string
+  ) {
+    if (!hasPermission(user, "class.update.any") && user.role !== "teacher") {
+      throw new Error("Unauthorized");
+    }
+
+    await db.update(slotInstances)
+      .set({ lessonId, lessonTitle, updatedAt: new Date() })
+      .where(eq(slotInstances.id, slotId));
+
+    return { success: true };
   },
 
   // --- Class Status Management ---
@@ -105,14 +349,31 @@ export const schedulingService = {
     status: typeof slotInstances.status.enumValues[number]
   ) {
     // RBAC: Admin/Manager can change to any status.
-    if (!hasPermission(user, "class.update.any")) {
-      throw new Error("Unauthorized: Only Admin or Manager can manually override class status");
-    }
-
+    const isAdmin = hasPermission(user, "class.update.any");
     const slot = await schedulingRepository.findById(classId);
     if (!slot) throw new Error("Slot instance not found");
 
-    await schedulingRepository.updateStatus(classId, status);
+    if (!isAdmin) {
+      // Teacher limits
+      if (user.role === "teacher" && slot.teacherId === user.id) {
+        const allowedTeacherStatus = ["completed", "canceled-teacher", "no-show"];
+        if (!allowedTeacherStatus.includes(status)) {
+          throw new Error("Unauthorized: Teachers can only set completed, canceled-teacher or no-show.");
+        }
+      } else {
+        throw new Error("Unauthorized to change status of this class.");
+      }
+    }
+
+    const updateData: any = { status };
+    if (status === "completed" || status === "no-show") {
+      const teacher = await userService.getUserById(slot.teacherId);
+      if (teacher) {
+        updateData.teacherHourlyRate = teacher.teacherHourlyRate;
+      }
+    }
+
+    await schedulingRepository.updateSlot(classId, updateData);
 
     // Audit Log
     await schedulingRepository.createAuditLog({
@@ -156,9 +417,17 @@ export const schedulingService = {
         }
       }
 
+      const updateData: any = { status: finalStatus, updatedAt: new Date() };
+      if (finalStatus === "completed" || finalStatus === "no-show") {
+        const teacher = await userService.getUserById(slot.teacherId);
+        if (teacher) {
+          updateData.teacherHourlyRate = teacher.teacherHourlyRate;
+        }
+      }
+
       // 2. Update slot status
       await tx.update(slotInstances)
-        .set({ status: finalStatus, updatedAt: new Date() })
+        .set(updateData)
         .where(eq(slotInstances.id, classId));
 
       // 2.1 Audit Log (part of transaction)
@@ -671,6 +940,16 @@ export const schedulingService = {
   },
   async getTeacherClassesInRange(teacherId: string, start: Date, end: Date) {
     return schedulingRepository.findByTeacherInRange(teacherId, start, end);
+  },
+  async getStudentClassesInRange(studentId: string, start: Date, end: Date) {
+    return db.query.slotInstances.findMany({
+      where: and(
+        eq(slotInstances.studentId, studentId),
+        gte(slotInstances.startAt, start),
+        lt(slotInstances.startAt, end)
+      ),
+      orderBy: [asc(slotInstances.startAt)],
+    });
   },
 };
 

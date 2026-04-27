@@ -27,8 +27,8 @@ export function StudentPlanStatus({ studentId }: StudentPlanStatusProps) {
 
         startTransition(async () => {
             const result = await getStudentPlanGapAction({ studentId });
-            if (result?.data) {
-                setGapData(result.data);
+            if (result?.data?.success && result.data.data) {
+                setGapData(result.data.data);
             }
         });
     }, [studentId]);
@@ -44,7 +44,7 @@ export function StudentPlanStatus({ studentId }: StudentPlanStatusProps) {
 
     if (!gapData) return null;
 
-    const hasGap = gapData.gap > 0;
+    const hasGap = gapData.hasGap;
 
     return (
         <div className={`p-4 rounded-2xl border transition-all ${hasGap
@@ -83,14 +83,14 @@ export function StudentPlanStatus({ studentId }: StudentPlanStatusProps) {
                             <Calendar className="w-4 h-4 text-primary" />
                             <div className="flex flex-col">
                                 <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">{t("empty_slots") || "Empty Slots"}</span>
-                                <span className="text-sm font-bold">{gapData.upcomingClasses}</span>
+                                <span className="text-sm font-bold">{gapData.upcomingClassesCount}</span>
                             </div>
                         </div>
                         <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-700">
                             <BookOpen className="w-4 h-4 text-primary" />
                             <div className="flex flex-col">
                                 <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">{t("plan_lessons") || "Plan Lessons"}</span>
-                                <span className="text-sm font-bold">{gapData.planLessons}</span>
+                                <span className="text-sm font-bold">{gapData.planLessonsCount}</span>
                             </div>
                         </div>
                     </div>

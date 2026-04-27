@@ -214,12 +214,20 @@ export const learningService = {
   /**
    * Assigns a plan to a student by cloning it and linking to upcoming classes.
    */
-  async assignPlanToStudent(templateId: string, studentId: string) {
-    // 1. Clone the template for the student
+  async assignPlanToStudent(templateId: string, studentId: string, startClassId?: string) {
+    // 1. Deactivate current active plan
+    await db.update(learningPlans)
+      .set({ status: "completed", updatedAt: new Date() })
+      .where(and(
+        eq(learningPlans.studentId, studentId),
+        eq(learningPlans.status, "active")
+      ));
+
+    // 2. Clone the template for the student
     const personalizedPlan = await learningRepository.clonePlanWithLessons(templateId, studentId);
 
-    // 2. Link lessons to upcoming classes
-    await this.linkPlanToUpcomingClasses(studentId, personalizedPlan.id);
+    // 3. Link lessons to upcoming classes
+    await this.linkPlanToUpcomingClasses(studentId, personalizedPlan.id, startClassId);
 
     return personalizedPlan;
   },
@@ -227,14 +235,14 @@ export const learningService = {
   /**
    * Links a plan's lessons to upcoming scheduled classes in order.
    */
-  async linkPlanToUpcomingClasses(studentId: string, planId: string) {
+  async linkPlanToUpcomingClasses(studentId: string, planId: string, startClassId?: string) {
     const plan = await learningRepository.findPlanWithLessons(planId);
     if (!plan || plan.lessons.length === 0) return;
 
     const now = new Date();
 
     // Fetch upcoming scheduled classes (NOT COMPLETED/CANCELED)
-    const classes = await db.query.slotInstances.findMany({
+    let classes = await db.query.slotInstances.findMany({
       where: and(
         eq(slotInstances.studentId, studentId),
         eq(slotInstances.status, "scheduled"),
@@ -242,6 +250,16 @@ export const learningService = {
       ),
       orderBy: [asc(slotInstances.startAt)]
     });
+
+    if (classes.length === 0) return;
+
+    // If a starting class is specified, slice the array
+    if (startClassId) {
+      const startIndex = classes.findIndex(c => c.id === startClassId);
+      if (startIndex !== -1) {
+        classes = classes.slice(startIndex);
+      }
+    }
 
     if (classes.length === 0) return;
 
@@ -304,13 +322,32 @@ export const learningService = {
     const lessonCount = activePlan?.lessons.length || 0;
     const gap = classesCount.length - lessonCount;
 
+    // 3. Overall stats for progress bar
+    const allStudentClasses = await db.query.slotInstances.findMany({
+      where: eq(slotInstances.studentId, studentId),
+    });
+
+    const completed = allStudentClasses.filter(s => s.status === "completed").length;
+    const withLesson = allStudentClasses.filter(s => !!s.lessonId).length;
+
     return {
-      upcomingClasses: classesCount.length,
-      planLessons: lessonCount,
+      upcomingClassesCount: classesCount.length,
+      planLessonsCount: lessonCount,
       gap: gap > 0 ? gap : 0,
       hasGap: gap > 0,
-      activePlanName: activePlan?.name
+      activePlanName: activePlan?.name,
+      activePlanId: activePlan?.id,
+      totalClasses: allStudentClasses.length,
+      completedClasses: completed,
+      classesWithLesson: withLesson
     };
+  },
+
+  /**
+   * Lists all plans assigned to a specific student.
+   */
+  async getStudentPlans(studentId: string) {
+    return learningRepository.findPlansByStudentId(studentId);
   },
 
   /**

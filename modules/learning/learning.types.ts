@@ -1,7 +1,11 @@
 export interface StudentCurriculumGap {
-    upcomingClasses: number;
-    planLessons: number;
+    upcomingClassesCount: number;
+    planLessonsCount: number;
     gap: number;
     hasGap: boolean;
     activePlanName?: string;
+    activePlanId?: string;
+    totalClasses: number;
+    completedClasses: number;
+    classesWithLesson: number;
 }

@@ -1,8 +1,8 @@
 import { db } from "@/lib/db";
-import { 
-  studentProfiles, studentItemProgress, learningPlans, planLessons 
+import {
+  studentProfiles, studentItemProgress, learningPlans, planLessons
 } from "./learning.schema";
-import { eq, and, asc, sql, isNull } from "drizzle-orm";
+import { eq, and, asc, sql, isNull, desc } from "drizzle-orm";
 
 export const learningRepository = {
   // Profiles
@@ -125,7 +125,7 @@ export const learningRepository = {
 
   async findSimilarLessons(vector: number[], languageId: string, limit: number = 10) {
     // pgvector similarity search: <=> is cosine distance
-    return db.execute<{id: string, distance: number}>(sql`
+    return db.execute<{ id: string, distance: number }>(sql`
       SELECT id, (embedding <=> ${JSON.stringify(vector)}::vector) as distance
       FROM curriculum_lessons 
       WHERE status = 'ready' 
@@ -144,7 +144,7 @@ export const learningRepository = {
       JOIN curriculum_lesson_learning_items lli ON lli.item_id = p.item_id
       WHERE lli.lesson_id = ${lessonId}
     `);
-    
+
     return result.rows[0] || { total: 0, failures: 0 };
   },
 
@@ -168,5 +168,16 @@ export const learningRepository = {
       .from(planLessons)
       .where(eq(planLessons.planId, planId));
     return result[0]?.max ?? -1;
+  },
+
+  async findPlansByStudentId(studentId: string) {
+    return db.query.learningPlans.findMany({
+      where: eq(learningPlans.studentId, studentId),
+      with: {
+        language: true,
+        lessons: true
+      },
+      orderBy: [desc(learningPlans.createdAt)]
+    });
   }
 };

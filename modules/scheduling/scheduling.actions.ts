@@ -2,6 +2,7 @@
 
 import { protectedAction, permissionAction } from "@/lib/safe-action";
 import { schedulingService } from "./scheduling.service";
+import { userService } from "@/modules/user/user.service";
 import {
   allocateStudentSchema,
   updateSlotStatusSchema,
@@ -12,6 +13,7 @@ import {
 } from "./scheduling.schema";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { startOfMonth, endOfMonth } from "date-fns";
 import { schedulingRepository } from "./scheduling.repository";
 
 export const createRecurrenceRuleAction = permissionAction("class.update.any")
@@ -214,6 +216,158 @@ export const updateSlotAction = protectedAction
       return { success: true };
     } catch (error) {
       console.error("[updateSlotAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const swapSlotTeacherAction = permissionAction("class.update.any")
+  .inputSchema(z.object({
+    slotId: z.string().uuid(),
+    newTeacherId: z.string(),
+  }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      await schedulingService.swapSlotTeacher(ctx.user, parsedInput.slotId, parsedInput.newTeacherId);
+      revalidatePath("/");
+      return { success: true };
+    } catch (error) {
+      console.error("[swapSlotTeacherAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const updateSlotLessonAction = protectedAction
+  .inputSchema(z.object({
+    slotId: z.string().uuid(),
+    lessonId: z.string().uuid(),
+    lessonTitle: z.string(),
+  }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      await schedulingService.updateSlotLesson(ctx.user, parsedInput.slotId, parsedInput.lessonId, parsedInput.lessonTitle);
+      revalidatePath("/");
+      return { success: true };
+    } catch (error) {
+      console.error("[updateSlotLessonAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const getStudentScheduleAction = protectedAction
+  .inputSchema(z.object({
+    studentId: z.string(),
+    month: z.number().min(0).max(11),
+    year: z.number(),
+  }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const baseDate = new Date(parsedInput.year, parsedInput.month, 1);
+      const start = startOfMonth(baseDate);
+      const end = endOfMonth(baseDate);
+      
+      console.log(`[getStudentScheduleAction] Fetching for ${parsedInput.studentId} range:`, {
+        start: start.toISOString(),
+        end: end.toISOString()
+      });
+
+      const schedule = await schedulingService.getStudentClassesInRange(parsedInput.studentId, start, end);
+      
+      // Filter only NORMAL classes for the curriculum view
+      const normalClasses = schedule.filter(s => s.type === "NORMAL");
+      
+      return { success: true, data: normalClasses };
+    } catch (error) {
+      console.error("[getStudentScheduleAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+export const getAvailableRulesAction = permissionAction("class.update.any")
+  .inputSchema(z.object({}))
+  .action(async () => {
+    try {
+      const rules = await schedulingRepository.findAllRules();
+      // Filter rules that don't have a student assigned AND are NORMAL type
+      const available = rules.filter((r) => !r.studentId && r.type === "NORMAL");
+      return { success: true, data: available };
+    } catch (error) {
+      console.error("[getAvailableRulesAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const getStudentRulesAction = protectedAction
+  .inputSchema(z.object({ studentId: z.string() }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const rules = await schedulingRepository.findAllRules();
+      const studentRules = rules.filter((r) => r.studentId === parsedInput.studentId && r.type === "NORMAL");
+      return { success: true, data: studentRules };
+    } catch (error) {
+      console.error("[getStudentRulesAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const deallocateStudentAction = permissionAction("class.update.any")
+  .inputSchema(z.object({ ruleId: z.string().uuid() }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      await schedulingService.deallocateStudentFromRule(ctx.user, parsedInput.ruleId);
+      revalidatePath("/");
+      return { success: true };
+    } catch (error) {
+      console.error("[deallocateStudentAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+export const getTeacherEarningsAction = permissionAction("class.update.any")
+  .inputSchema(z.object({
+    teacherId: z.string(),
+    month: z.number().min(0).max(11),
+    year: z.number(),
+  }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const start = new Date(parsedInput.year, parsedInput.month, 1);
+      const end = new Date(parsedInput.year, parsedInput.month + 1, 0, 23, 59, 59);
+
+      const teacherClasses = await schedulingService.getTeacherCompletedClasses(parsedInput.teacherId, start, end);
+
+      const user = await userService.getUserById(parsedInput.teacherId);
+      if (!user) throw new Error("Teacher not found");
+
+      const count = teacherClasses.length;
+      const total = teacherClasses.reduce((acc, cls) => {
+        return acc + (cls.teacherHourlyRate ?? user.teacherHourlyRate);
+      }, 0);
+
+      return {
+        success: true,
+        data: {
+          teacherClasses,
+          earningsSummary: { count, total }
+        }
+      };
+    } catch (error) {
+      console.error("[getTeacherEarningsAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const updateClassEarningsAction = permissionAction("class.update.any")
+  .inputSchema(z.object({
+    classId: z.string().uuid(),
+    teacherHourlyRate: z.number().int().min(0),
+  }))
+  .action(async ({ parsedInput }) => {
+    try {
+      await schedulingRepository.updateSlot(parsedInput.classId, {
+        teacherHourlyRate: parsedInput.teacherHourlyRate
+      });
+      revalidatePath("/");
+      return { success: true };
+    } catch (error) {
+      console.error("[updateClassEarningsAction] Error:", error);
       return { success: false, error: (error as Error).message };
     }
   });

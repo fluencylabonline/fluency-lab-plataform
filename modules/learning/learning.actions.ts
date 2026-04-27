@@ -40,9 +40,14 @@ const createPlanTemplateSchema = z.object({
 const assignPlanSchema = z.object({
   templateId: z.uuid(),
   studentId: z.string(),
+  startClassId: z.string().optional(),
 });
 
 const getStudentPlanGapSchema = z.object({
+  studentId: z.string(),
+});
+
+const getStudentPlansSchema = z.object({
   studentId: z.string(),
 });
 
@@ -146,7 +151,11 @@ export const createPlanTemplateAction = permissionAction("material.create")
 export const assignPlanAction = permissionAction("material.create")
   .schema(assignPlanSchema)
   .action(async ({ parsedInput }) => {
-    const plan = await learningService.assignPlanToStudent(parsedInput.templateId, parsedInput.studentId);
+    const plan = await learningService.assignPlanToStudent(
+      parsedInput.templateId, 
+      parsedInput.studentId,
+      parsedInput.startClassId
+    );
     revalidatePath("/hub/manager/learning");
     return { success: true, planId: plan.id };
   });
@@ -157,7 +166,13 @@ export const assignPlanAction = permissionAction("material.create")
 export const getStudentPlanGapAction = permissionAction("material.view")
   .schema(getStudentPlanGapSchema)
   .action(async ({ parsedInput }) => {
-    return await learningService.getStudentCurriculumGap(parsedInput.studentId);
+    try {
+      const data = await learningService.getStudentCurriculumGap(parsedInput.studentId);
+      return { success: true, data };
+    } catch (error) {
+      console.error("[getStudentPlanGapAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
   });
 
 /**
@@ -166,7 +181,13 @@ export const getStudentPlanGapAction = permissionAction("material.view")
 export const getTemplatesAction = permissionAction("material.view")
   .schema(z.object({}))
   .action(async () => {
-    return await learningService.getTemplatesForHub();
+    try {
+      const data = await learningService.getTemplatesForHub();
+      return { success: true, data };
+    } catch (error) {
+      console.error("[getTemplatesAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
   });
 
 /**
@@ -200,5 +221,20 @@ export const removeLessonFromPlanAction = permissionAction("material.create")
     await learningService.removeLessonFromPlan(parsedInput.planId, parsedInput.lessonId);
     revalidatePath(`/hub/manager/learning/${parsedInput.planId}`);
     return { success: true };
+  });
+
+/**
+ * Action to fetch all plans assigned to a specific student.
+ */
+export const getStudentPlansAction = permissionAction("material.view")
+  .schema(getStudentPlansSchema)
+  .action(async ({ parsedInput }) => {
+    try {
+      const data = await learningService.getStudentPlans(parsedInput.studentId);
+      return { success: true, data };
+    } catch (error) {
+      console.error("[getStudentPlansAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
   });
 
