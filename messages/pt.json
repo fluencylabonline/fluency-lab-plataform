@@ -164,6 +164,8 @@
     "version": "Versão",
     "signedAt": "Assinado em",
     "validUntil": "Válido até",
+    "valid": "Válido",
+    "expired": "Expirado",
     "indefinite": "Indeterminado",
     "view": "Visualizar",
     "download": "Baixar",

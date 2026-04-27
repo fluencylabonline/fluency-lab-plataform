@@ -71,6 +71,25 @@ export function ContractsTab({
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
+              {contract.status === "signed" && (
+                <div className="flex items-center gap-2 mr-2">
+                  {(!contract.expiresAt || new Date(contract.expiresAt) > new Date()) ? (
+                    <Badge variant="outline" className="text-[9px] h-4 font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                      {t("valid")}
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-[9px] h-4 font-black uppercase tracking-widest bg-destructive/10 text-destructive border-destructive/20">
+                      {t("expired")}
+                    </Badge>
+                  )}
+                  {contract.expiresAt && (
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest whitespace-nowrap">
+                      {t("validUntil")} {format(new Date(contract.expiresAt), "dd/MM/yyyy")}
+                    </span>
+                  )}
+                </div>
+              )}
+
               <Button
                 variant="outline"
                 size="sm"

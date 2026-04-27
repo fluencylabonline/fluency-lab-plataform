@@ -11,7 +11,8 @@ import {
   Filter,
   LayoutGrid,
   Clock,
-  History
+  History,
+  Coins
 } from "lucide-react";
 import { format, addMonths, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -39,6 +40,7 @@ import { getLessonsAction } from "@/modules/curriculum/curriculum.actions";
 
 import { CurriculumMonthView } from "./CurriculumMonthView";
 import { CurriculumVaults } from "./CurriculumVaults";
+import { ManageCreditsVault } from "./ManageCreditsVault";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Shimmer } from "@shimmer-from-structure/react";
@@ -71,6 +73,9 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
   // Plan History
   const [showPlanHistory, setShowPlanHistory] = useState(false);
   const [studentPlans, setStudentPlans] = useState<any[]>([]);
+
+  // Credits
+  const [showManageCredits, setShowManageCredits] = useState(false);
 
   const mockSlots = Array.from({ length: 6 }).map((_, i) => ({
     id: `mock-${i}`,
@@ -293,6 +298,9 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
               <Button variant="outline" size="icon" onClick={() => setShowPlanHistory(true)}>
                 <History className="h-4 w-4" />
               </Button>
+              <Button variant="outline" size="icon" onClick={() => setShowManageCredits(true)}>
+                <Coins className="h-4 w-4" />
+              </Button>
               <Button variant="outline" onClick={() => setShowManageSchedule(true)}>
                 <Clock className="mr-2 h-4 w-4" /> Gerenciar Horários
               </Button>
@@ -366,6 +374,13 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
         availableRules={availableRules}
         onConfirmAllocate={handleAllocate}
         onConfirmDeallocate={handleDeallocate}
+      />
+
+      <ManageCreditsVault
+        studentId={studentId}
+        open={showManageCredits}
+        onOpenChange={setShowManageCredits}
+        isAdmin={isAdmin}
       />
     </div>
   );

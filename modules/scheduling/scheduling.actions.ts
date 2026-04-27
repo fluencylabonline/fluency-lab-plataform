@@ -65,12 +65,24 @@ export const grantCreditAction = permissionAction("credits.grant")
     try {
       await schedulingService.grantCredit(ctx.user, {
         ...parsedInput,
-        expiresAt: new Date(parsedInput.expiresAt),
+        expiresAt: parsedInput.expiresAt, // already a Date from schema if using z.date()
       });
       revalidatePath("/");
       return { success: true };
     } catch (error) {
       console.error("[grantCreditAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const getStudentCreditsAction = protectedAction
+  .inputSchema(z.object({ studentId: z.string(), onlyActive: z.boolean().default(true) }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const credits = await schedulingRepository.findCreditsByStudent(parsedInput.studentId, parsedInput.onlyActive);
+      return { success: true, data: credits };
+    } catch (error) {
+      console.error("[getStudentCreditsAction] Error:", error);
       return { success: false, error: (error as Error).message };
     }
   });

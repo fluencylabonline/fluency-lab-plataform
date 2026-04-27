@@ -14,6 +14,7 @@ import { BackButton } from "@/components/ui/back-button";
 
 import type { User } from "../user.schema";
 import { updateUserAction } from "../user.actions";
+import { getContractDownloadUrlAction } from "../../contract/contract.actions";
 import { updateInstallmentAction } from "../../billing/billing.actions";
 import { PersonalInfoTab } from "./userDetails/PersonalInfoTab";
 import { StudentPaymentTab } from "./userDetails/StudentPaymentTab";
@@ -140,14 +141,36 @@ export function UserDetailsClient({
 
   const handleViewContract = async (id: string) => {
     setLoadingContractId(id);
-    setTimeout(() => {
+    try {
+      const result = await getContractDownloadUrlAction({ instanceId: id });
+      if (result?.data?.success && result.data.downloadUrl) {
+        window.open(result.data.downloadUrl, "_blank");
+      } else {
+        notify.error(result?.data?.error || "Erro ao carregar contrato");
+      }
+    } catch (error) {
+      notify.error("Erro ao processar solicitação");
+    } finally {
       setLoadingContractId(null);
-      notify.info("Visualização de contrato em desenvolvimento");
-    }, 1000);
+    }
   };
 
   const handleDownloadContract = async (id: string) => {
-    notify.info("Download de contrato em desenvolvimento");
+    try {
+      const result = await getContractDownloadUrlAction({ instanceId: id });
+      if (result?.data?.success && result.data.downloadUrl) {
+        const link = document.createElement("a");
+        link.href = result.data.downloadUrl;
+        link.setAttribute("download", `contrato_${id}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        notify.error(result?.data?.error || "Erro ao baixar contrato");
+      }
+    } catch (error) {
+      notify.error("Erro ao processar solicitação");
+    }
   };
 
   const userInitials = user.name ? user.name.charAt(0).toUpperCase() : "U";

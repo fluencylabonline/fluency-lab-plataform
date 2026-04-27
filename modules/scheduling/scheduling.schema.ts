@@ -189,7 +189,7 @@ export const grantCreditSchema = z.object({
   studentId: z.string(),
   type: z.enum(creditTypeEnum.enumValues),
   amount: z.number().int().positive().default(1),
-  expiresAt: z.date(),
+  expiresAt: z.coerce.date(),
   reason: z.string().max(255).optional(),
 });
 

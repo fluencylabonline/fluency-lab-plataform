@@ -3,6 +3,8 @@
 import { protectedAction } from "@/lib/safe-action";
 import { signContractSchema, type ContractInstance } from "./contract.schema";
 import { contractService } from "./contract.service";
+import { contractRepository } from "./contract.repository";
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -103,4 +105,27 @@ export const getPendingContractAction = protectedAction
       data: instance,
       downloadUrl
     } as { success: boolean; error?: string; data?: ContractInstance | null; downloadUrl?: string };
+  });
+
+export const getContractDownloadUrlAction = protectedAction
+  .schema(z.object({ instanceId: z.string() }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const instance = await contractRepository.findInstanceById(parsedInput.instanceId);
+      if (!instance) throw new Error("Contrato não encontrado.");
+
+      // Permission check: Own user or Admin/Manager
+      if (instance.userId !== ctx.user.id && ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+        throw new Error("Sem permissão para acessar este contrato.");
+      }
+
+      if (!instance.pdfUrl) throw new Error("PDF ainda não foi gerado para este contrato.");
+
+      const downloadUrl = await contractService.getSignedUrl(instance.pdfUrl);
+      return { success: true, downloadUrl };
+    } catch (error) {
+      const err = error as Error;
+      console.error("[getContractDownloadUrlAction] Error:", err.message);
+      return { success: false, error: err.message || "Falha ao gerar URL de download." };
+    }
   });
