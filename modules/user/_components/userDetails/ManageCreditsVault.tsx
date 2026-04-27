@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   History,
   Clock,
@@ -44,6 +44,7 @@ import {
   grantCreditAction
 } from "@/modules/scheduling/scheduling.actions";
 import { creditTypeEnum } from "@/modules/scheduling/scheduling.schema";
+import { StudentCredit } from "@/modules/scheduling/scheduling.types";
 import { Button } from "@/components/ui/button";
 
 const grantFormSchema = z.object({
@@ -68,8 +69,8 @@ export function ManageCreditsVault({
   onOpenChange,
   isAdmin,
 }: ManageCreditsVaultProps) {
-  const [credits, setCredits] = useState<any[]>([]);
-  const [history, setHistory] = useState<any[]>([]);
+  const [credits, setCredits] = useState<StudentCredit[]>([]);
+  const [history, setHistory] = useState<StudentCredit[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [view, setView] = useState<"list" | "grant" | "history">("list");
 
@@ -106,7 +107,7 @@ export function ManageCreditsVault({
     }
   });
 
-  const fetchCredits = async () => {
+  const fetchCredits = useCallback(async () => {
     setIsLoading(true);
     const [activeRes, historyRes] = await Promise.all([
       getStudentCreditsAction({ studentId, onlyActive: true }),
@@ -118,33 +119,36 @@ export function ManageCreditsVault({
     }
     if (historyRes?.data?.success) {
       const all = historyRes.data.data || [];
-      const historyOnly = all.filter((c: any) => c.usedAt || new Date(c.expiresAt) < new Date());
+      const historyOnly = all.filter((c: StudentCredit) => c.usedAt || (c.expiresAt && new Date(c.expiresAt) < new Date()));
       setHistory(historyOnly);
     }
     setIsLoading(false);
-  };
+  }, [studentId]);
 
   useEffect(() => {
-    if (open) {
-      fetchCredits();
-      setView("list");
-      reset();
-    }
-  }, [open, studentId, reset]);
+    const init = async () => {
+      if (open) {
+        await fetchCredits();
+        setView("list");
+        reset();
+      }
+    };
+    init();
+  }, [open, studentId, reset, fetchCredits]);
 
   const onGrantSubmit = (values: GrantFormValues) => {
     execute({
       studentId,
-      type: values.type as any,
-      amount: values.amount as any,
-      expiresAt: values.expiresAt as any,
+      type: values.type,
+      amount: Number(values.amount),
+      expiresAt: values.expiresAt,
       reason: values.reason,
     });
   };
 
-  const getStatusBadge = (credit: any) => {
+  const getStatusBadge = (credit: StudentCredit) => {
     if (credit.usedAt) return <Badge variant="secondary">Usado</Badge>;
-    if (new Date(credit.expiresAt) < new Date()) return <Badge variant="destructive">Expirado</Badge>;
+    if (credit.expiresAt && new Date(credit.expiresAt) < new Date()) return <Badge variant="destructive">Expirado</Badge>;
     return <Badge variant="default" className="bg-emerald-500">Ativo</Badge>;
   };
 
@@ -223,7 +227,7 @@ export function ManageCreditsVault({
                           </span>
                         </div>
                         {credit.reason && (
-                          <p className="text-xs text-muted-foreground italic mb-3">"{credit.reason}"</p>
+                          <p className="text-xs text-muted-foreground italic mb-3">&quot;{credit.reason}&quot;</p>
                         )}
                         <div className="flex items-center justify-between text-[10px]">
                           <span className="text-muted-foreground font-medium">Concedido em {format(new Date(credit.grantedAt), "dd/MM/yy")}</span>
@@ -246,7 +250,7 @@ export function ManageCreditsVault({
               <VaultForm onSubmit={handleSubmit(onGrantSubmit)} id="grant-credit-form">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <VaultField label="Tipo de Crédito" error={errors.type?.message} required>
-                    <Select onValueChange={(val) => setValue("type", val as any)} defaultValue={getValues("type")}>
+                    <Select onValueChange={(val) => setValue("type", val as GrantFormValues["type"])} defaultValue={getValues("type")}>
                       <SelectTrigger className="h-11 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl">
                         <SelectValue placeholder="Selecione o tipo" />
                       </SelectTrigger>

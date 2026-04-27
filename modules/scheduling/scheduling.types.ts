@@ -44,5 +44,15 @@ export type StudentCreditWithDetails = StudentCredit & {
 export type SlotInstanceWithDetails = SlotInstance & {
   rule?: RecurrenceRule | null;
   credit?: StudentCredit | null;
-  student?: { name: string | null; assignedPlanId: string | null; isActive: boolean } | null;
+  student?: { 
+    name: string | null; 
+    assignedPlanId: string | null; 
+    isActive: boolean;
+  } | null;
+  teacher?: {
+    name: string | null;
+  } | null;
+  // Compatibility fields often attached in services or expected by legacy UI
+  teacherName?: string | null;
 };
+

@@ -120,7 +120,7 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
   const calendarEvents: CalendarEvent[] = useMemo(() => schedule.map(slot => ({
     id: slot.id,
     title: slot.student?.name || t("noStudent"),
-    studentName: slot.student?.name,
+    studentName: slot.student?.name || undefined,
     start: new Date(slot.startAt),
     end: new Date(slot.endAt),
     status: slot.status,
@@ -128,15 +128,15 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
     isRecurring: !!slot.ruleId,
     ruleStartDate: slot.rule?.startDate ? new Date(slot.rule.startDate) : undefined,
     ruleEndDate: slot.rule?.endDate ? new Date(slot.rule.endDate) : null,
-    location: slot.lessonTitle || slot.planName,
-    lessonTitle: slot.lessonTitle,
-    lessonId: slot.lessonId,
-    planId: slot.planId,
-    planName: slot.planName,
-    studentId: slot.studentId,
-    assignedPlanId: slot.student?.assignedPlanId,
-    isActive: slot.student?.isActive,
-    rescheduledFrom: slot.rescheduledFrom
+    location: (slot.lessonTitle || slot.planName) || undefined,
+    lessonTitle: slot.lessonTitle || undefined,
+    lessonId: slot.lessonId || undefined,
+    planId: slot.planId || undefined,
+    planName: slot.planName || undefined,
+    studentId: slot.studentId || undefined,
+    assignedPlanId: slot.student?.assignedPlanId || undefined,
+    isActive: slot.student?.isActive ?? undefined,
+    rescheduledFrom: slot.rescheduledFrom || undefined
   })), [schedule, t]);
 
   const renderEventCard = useCallback((event: CalendarEvent) => (
@@ -178,7 +178,7 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
         </div>
       )}
     </div>
-  ), [t]);
+  ), []);
 
   const handleMonthChange = useCallback((date: Date) => {
     fetchSchedule(date.getMonth(), date.getFullYear());

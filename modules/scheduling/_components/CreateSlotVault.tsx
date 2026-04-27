@@ -173,7 +173,7 @@ export function CreateSlotVault({
               <VaultField label={t("slotType") || "Tipo"} error={errors.type?.message}>
                 <Select
                   value={watch("type")}
-                  onValueChange={(val: any) => setValue("type", val)}
+                  onValueChange={(val: CreateRecurrenceRuleValues["type"]) => setValue("type", val)}
                 >
                   <SelectTrigger className="w-full h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl">
                     <SelectValue />
@@ -188,7 +188,7 @@ export function CreateSlotVault({
               <VaultField label={t("frequencyLabel") || "Frequência"} error={errors.frequency?.message}>
                 <Select
                   value={watch("frequency")}
-                  onValueChange={(val: any) => setValue("frequency", val)}
+                  onValueChange={(val: CreateRecurrenceRuleValues["frequency"]) => setValue("frequency", val)}
                 >
                   <SelectTrigger className="w-full h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl">
                     <SelectValue />

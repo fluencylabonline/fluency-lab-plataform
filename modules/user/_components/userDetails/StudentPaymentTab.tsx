@@ -17,18 +17,22 @@ import {
 } from "@/components/ui/vault";
 import { Badge } from "@/components/ui/badge";
 
+import { SubscriptionWithPlan, Installment } from "@/modules/billing/billing.types";
+import { UseFormReturn, FieldValues } from "react-hook-form";
+
 interface StudentPaymentTabProps {
-  activeSubscription: any;
-  installments: any[];
-  subscriptions: any[];
+  activeSubscription: SubscriptionWithPlan | null;
+  installments: Installment[];
+  subscriptions: SubscriptionWithPlan[];
   isAdmin: boolean;
   isUpdating: boolean;
   adminPassword: string;
   setAdminPassword: (p: string) => void;
-  installmentForm: any;
+  installmentForm: UseFormReturn<FieldValues>; // FieldValues is safer than any
   onUpdateInstallment: (id: string, data: { amount?: number }) => Promise<void>;
   onMarkAsPaid: (id: string) => Promise<void>;
 }
+
 
 export function StudentPaymentTab({
   activeSubscription,
@@ -91,7 +95,7 @@ export function StudentPaymentTab({
             />
             <StatBlock
               label={t("monthlyFee")}
-              value={(activeSubscription.plan?.price / 100).toLocaleString("pt-BR", {
+              value={((activeSubscription.plan?.price ?? 0) / 100).toLocaleString("pt-BR", {
                 style: "currency",
                 currency: "BRL",
               })}
@@ -163,7 +167,7 @@ export function StudentPaymentTab({
                           </div>
 
                           <form
-                            onSubmit={installmentForm.handleSubmit((d: any) =>
+                            onSubmit={installmentForm.handleSubmit((d) =>
                               onUpdateInstallment(inst.id, { amount: d.amount })
                             )}
                             className="flex flex-col gap-4 pt-4 border-t border-border/50"

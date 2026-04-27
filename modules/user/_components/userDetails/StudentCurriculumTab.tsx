@@ -42,6 +42,11 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Shimmer } from "@shimmer-from-structure/react";
 
+import { SlotInstanceWithDetails, RecurrenceRule } from "@/modules/scheduling/scheduling.types";
+import { User } from "@/modules/user/user.schema";
+import { LearningPlan, LearningPlanWithLessons, StudentCurriculumGap } from "@/modules/learning/learning.types";
+import { LessonSummary } from "@/modules/curriculum/curriculum.types";
+
 interface StudentCurriculumTabProps {
   studentId: string;
   isAdmin: boolean;
@@ -49,30 +54,31 @@ interface StudentCurriculumTabProps {
 
 export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTabProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [slots, setSlots] = useState<any[]>([]);
+  const [slots, setSlots] = useState<SlotInstanceWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [gap, setGap] = useState<any>(null);
+  const [gap, setGap] = useState<StudentCurriculumGap | null>(null);
 
   // Data for Vaults
-  const [teachers, setTeachers] = useState<any[]>([]);
-  const [plans, setPlans] = useState<any[]>([]);
-  const [lessons, setLessons] = useState<any[]>([]);
+  const [teachers, setTeachers] = useState<User[]>([]);
+  const [plans, setPlans] = useState<LearningPlan[]>([]);
+  const [lessons, setLessons] = useState<LessonSummary[]>([]);
 
   // Selection States for Vaults
-  const [swapSlot, setSwapSlot] = useState<any>(null);
-  const [lessonSlot, setLessonSlot] = useState<any>(null);
+  const [swapSlot, setSwapSlot] = useState<SlotInstanceWithDetails | null>(null);
+  const [lessonSlot, setLessonSlot] = useState<SlotInstanceWithDetails | null>(null);
   const [showAssignPlan, setShowAssignPlan] = useState(false);
   const [showManageSchedule, setShowManageSchedule] = useState(false);
-  const [availableRules, setAvailableRules] = useState<any[]>([]);
-  const [studentRules, setStudentRules] = useState<any[]>([]);
+  const [availableRules, setAvailableRules] = useState<RecurrenceRule[]>([]);
+  const [studentRules, setStudentRules] = useState<RecurrenceRule[]>([]);
 
   // Plan History
   const [showPlanHistory, setShowPlanHistory] = useState(false);
-  const [studentPlans, setStudentPlans] = useState<any[]>([]);
+  const [studentPlans, setStudentPlans] = useState<LearningPlanWithLessons[]>([]);
 
   // Credits
   const [showManageCredits, setShowManageCredits] = useState(false);
+
 
   const mockSlots = Array.from({ length: 6 }).map((_, i) => ({
     id: `mock-${i}`,
@@ -82,8 +88,9 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
     teacherName: "Professor Loading...",
     planName: "Plan Name...",
     lessonTitle: "Lesson Title...",
-    type: "NORMAL"
-  }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  })) as any as SlotInstanceWithDetails[];
+
 
   const fetchSchedule = useCallback(async () => {
     setIsLoading(true);
@@ -97,7 +104,7 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
     if (response?.success) {
       setSlots(response.data || []);
     } else {
-      const errorMsg = (response as any)?.error || "Erro desconhecido";
+      const errorMsg = (response as { error?: string })?.error || "Erro desconhecido";
       notify.error("Erro ao carregar agenda: " + errorMsg);
     }
     setIsLoading(false);
@@ -106,7 +113,7 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
   const fetchGap = useCallback(async () => {
     const result = await getStudentPlanGapAction({ studentId });
     const response = result?.data;
-    if (response?.success) setGap(response.data);
+    if (response?.success) setGap(response.data ?? null);
   }, [studentId]);
 
   const fetchStaticData = useCallback(async () => {
@@ -148,24 +155,32 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
   }, [isAdmin, studentId]);
 
   useEffect(() => {
-    fetchSchedule();
-    fetchGap();
-    fetchRules();
-    fetchPlans();
+    const init = async () => {
+      await Promise.all([
+        fetchSchedule(),
+        fetchGap(),
+        fetchRules(),
+        fetchPlans()
+      ]);
+    };
+    init();
   }, [fetchSchedule, fetchGap, fetchRules, fetchPlans]);
 
   useEffect(() => {
-    fetchStaticData();
+    const init = async () => {
+      await fetchStaticData();
+    };
+    init();
   }, [fetchStaticData]);
 
-  const handleUpdateStatus = async (slotId: string, status: any) => {
+  const handleUpdateStatus = async (slotId: string, status: SlotInstanceWithDetails["status"]) => {
     setIsUpdating(true);
     const result = await updateClassStatusAction({ classId: slotId, status });
     if (result?.data?.success) {
       notify.success("Status atualizado!");
       fetchSchedule();
     } else {
-      const errorMsg = (result?.data as any)?.error || "Erro ao atualizar status";
+      const errorMsg = (result?.data as { error?: string })?.error || "Erro ao atualizar status";
       notify.error(errorMsg);
     }
     setIsUpdating(false);
@@ -179,7 +194,7 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
       setSwapSlot(null);
       fetchSchedule();
     } else {
-      const errorMsg = (result?.data as any)?.error || "Erro ao trocar professor";
+      const errorMsg = (result?.data as { error?: string })?.error || "Erro ao trocar professor";
       notify.error(errorMsg);
     }
     setIsUpdating(false);
@@ -193,7 +208,7 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
       setLessonSlot(null);
       fetchSchedule();
     } else {
-      const errorMsg = (result?.data as any)?.error || "Erro ao vincular lição";
+      const errorMsg = (result?.data as { error?: string })?.error || "Erro ao vincular lição";
       notify.error(errorMsg);
     }
     setIsUpdating(false);
@@ -207,7 +222,7 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
       fetchRules();
       fetchSchedule();
     } else {
-      const errorMsg = (result?.data as any)?.error || "Erro ao alocar aluno";
+      const errorMsg = (result?.data as { error?: string })?.error || "Erro ao alocar aluno";
       notify.error(errorMsg);
     }
     setIsUpdating(false);
@@ -221,7 +236,7 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
       fetchRules();
       fetchSchedule();
     } else {
-      const errorMsg = (result?.data as any)?.error || "Erro ao remover horário";
+      const errorMsg = (result?.data as { error?: string })?.error || "Erro ao remover horário";
       notify.error(errorMsg);
     }
     setIsUpdating(false);
@@ -241,7 +256,7 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
       fetchGap();
       fetchPlans();
     } else {
-      const errorMsg = (result?.data as any)?.error || "Erro ao designar plano";
+      const errorMsg = (result?.data as { error?: string })?.error || "Erro ao designar plano";
       notify.error(errorMsg);
     }
     setIsUpdating(false);

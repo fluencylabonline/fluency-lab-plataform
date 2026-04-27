@@ -40,44 +40,50 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
+import { User } from "@/modules/user/user.schema";
+import { LessonSummary } from "@/modules/curriculum/curriculum.types";
+import { LearningPlan, LearningPlanWithLessons } from "@/modules/learning/learning.types";
+import { RecurrenceRule, SlotInstanceWithDetails } from "@/modules/scheduling/scheduling.types";
+
 interface CurriculumVaultsProps {
   // Common
   studentId: string;
   isUpdating: boolean;
 
   // Swap Teacher
-  swapSlot: any;
-  setSwapSlot: (slot: any) => void;
-  teachers: any[];
+  swapSlot: SlotInstanceWithDetails | null;
+  setSwapSlot: (slot: SlotInstanceWithDetails | null) => void;
+  teachers: User[];
   onConfirmSwap: (slotId: string, teacherId: string) => void;
 
   // Update Lesson
-  lessonSlot: any;
-  setLessonSlot: (slot: any) => void;
-  lessons: any[];
+  lessonSlot: SlotInstanceWithDetails | null;
+  setLessonSlot: (slot: SlotInstanceWithDetails | null) => void;
+  lessons: LessonSummary[];
   onConfirmLesson: (slotId: string, lessonId: string, lessonTitle: string) => void;
 
   // Assign Plan
   showAssignPlan: boolean;
   setShowAssignPlan: (show: boolean) => void;
-  plans: any[];
+  plans: LearningPlan[];
   activePlanName?: string;
-  upcomingClasses: any[];
+  upcomingClasses: SlotInstanceWithDetails[];
   onConfirmAssignPlan: (planId: string, startClassId?: string) => void;
 
   // Plan History
   showPlanHistory: boolean;
   setShowPlanHistory: (show: boolean) => void;
-  studentPlans: any[];
+  studentPlans: LearningPlanWithLessons[];
 
   // Manage Recurring Schedule
   showManageSchedule: boolean;
   setShowManageSchedule: (show: boolean) => void;
-  studentRules: any[];
-  availableRules: any[];
+  studentRules: RecurrenceRule[];
+  availableRules: RecurrenceRule[];
   onConfirmAllocate: (ruleId: string) => void;
   onConfirmDeallocate: (ruleId: string) => void;
 }
+
 
 export function CurriculumVaults({
   isUpdating,
@@ -103,7 +109,9 @@ export function CurriculumVaults({
   studentRules,
   availableRules,
   onConfirmAllocate,
+  onConfirmDeallocate,
 }: CurriculumVaultsProps) {
+
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
   const [deallocatingId, setDeallocatingId] = useState<string | null>(null);
@@ -111,7 +119,6 @@ export function CurriculumVaults({
 
   // States for Plan Assignment Step Logic
   const [assignStep, setAssignStep] = useState<"selection" | "confirm-replace" | "select-start-class">("selection");
-  const [pendingPlanId, setPendingPlanId] = useState<string | null>(null);
   const [startClassId, setStartClassId] = useState<string | null>(null);
 
   React.useEffect(() => {
@@ -138,14 +145,14 @@ export function CurriculumVaults({
 
   // Reset selection when vaults are closed
   React.useEffect(() => {
-    const isAnyVaultOpen = !!swapSlot || !!lessonSlot || showAssignPlan || showManageSchedule || showPlanHistory;
+    const isAnyVaultOpen = !!swapSlot || !!lessonSlot || showAssignPlan || showManageSchedule || showPlanHistory || !!deallocatingId;
     if (!isAnyVaultOpen) {
       resetSelection();
       setAssignStep("selection");
-      setPendingPlanId(null);
       setStartClassId(null);
     }
-  }, [swapSlot, lessonSlot, showAssignPlan, showManageSchedule, showPlanHistory]);
+  }, [swapSlot, lessonSlot, showAssignPlan, showManageSchedule, showPlanHistory, deallocatingId]);
+
 
   return (
     <>
@@ -533,6 +540,32 @@ export function CurriculumVaults({
           </VaultFooter>
         </VaultContent>
       </Vault>
+
+      {/* 5. Deallocate Rule Confirmation Vault */}
+      <Vault open={!!deallocatingId} onOpenChange={(open) => !open && setDeallocatingId(null)}>
+        <VaultContent>
+          <VaultHeader>
+            <VaultTitle className="text-destructive font-bold">Remover Horário Recorrente?</VaultTitle>
+            <VaultDescription>
+              Isso interromperá a geração automática de novas aulas para este horário. Aulas já geradas permanecerão no calendário.
+            </VaultDescription>
+          </VaultHeader>
+          <VaultFooter className="gap-2">
+            <VaultSecondaryButton onClick={() => setDeallocatingId(null)}>Cancelar</VaultSecondaryButton>
+            <VaultPrimaryButton 
+              disabled={isUpdating}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              onClick={() => {
+                if (deallocatingId) onConfirmDeallocate(deallocatingId);
+                setDeallocatingId(null);
+              }}
+            >
+              Confirmar Remoção
+            </VaultPrimaryButton>
+          </VaultFooter>
+        </VaultContent>
+      </Vault>
+
 
       {/* 6. Plan History Vault */}
       <Vault open={showPlanHistory} onOpenChange={(open) => !open && setShowPlanHistory(false)}>

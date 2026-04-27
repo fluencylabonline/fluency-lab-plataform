@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/vault";
 import { notify } from "@/components/ui/toaster";
 import { Input } from "@/components/ui/input";
+import { UseFormReturn, FieldValues } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import type { User } from "../../user.schema";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ interface PersonalInfoTabProps {
   user: User;
   isAdmin: boolean;
   isUpdating: boolean;
-  rateForm: any;
+  rateForm: UseFormReturn<FieldValues>;
   onUpdateRate: (data: { rate: number }) => Promise<void>;
 }
 
@@ -95,7 +96,7 @@ export function PersonalInfoTab({
           <div className="min-w-0">
             <p className="font-black text-sm tracking-tight truncate">{user.name}</p>
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">
-              {tRoles(user.role as any)}
+              {tRoles(user.role as "admin" | "teacher" | "student" | "manager")}
             </p>
             <Badge variant={user.isActive ? "default" : "secondary"} className="mt-2 text-[9px] h-4 font-black">
               {user.isActive ? t("active") : t("inactive")}
@@ -228,7 +229,8 @@ export function PersonalInfoTab({
                         <VaultTitle>{t("editHourlyRate")}</VaultTitle>
                       </VaultHeader>
                       <form
-                        onSubmit={rateForm.handleSubmit(onUpdateRate)}
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        onSubmit={rateForm.handleSubmit(onUpdateRate as any)}
                         className="space-y-4 p-4"
                       >
                         <div className="space-y-2">

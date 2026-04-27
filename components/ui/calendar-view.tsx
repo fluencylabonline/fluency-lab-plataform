@@ -19,6 +19,7 @@ import {
   isSameWeek,
   isWithinInterval
 } from "date-fns";
+import type { Locale as DateLocale } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import { useLocale } from "next-intl";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, ChevronDown, ChevronUp, Clock, User } from "lucide-react";
@@ -37,8 +38,17 @@ export interface CalendarEvent {
   isRecurring?: boolean;
   ruleStartDate?: Date;
   ruleEndDate?: Date | null;
-  [key: string]: any;
+  status?: string;
+  location?: string;
+  studentId?: string;
+  studentName?: string;
+  assignedPlanId?: string;
+  lessonId?: string;
+  notes?: string;
+  isActive?: boolean;
+  [key: string]: unknown;
 }
+
 
 interface CalendarViewProps {
   events?: CalendarEvent[];
@@ -51,17 +61,27 @@ interface CalendarViewProps {
   isLoading?: boolean;
 }
 
+interface CalendarGridProps {
+  currentDate: Date;
+  selectedDate: Date;
+  eventsByDay: Record<string, CalendarEvent[]>;
+  onDateClick: (date: Date) => void;
+  weekDays: string[];
+  dateLocale: DateLocale;
+}
+
 const CalendarGrid = React.memo(({
   currentDate,
   selectedDate,
   eventsByDay,
   onDateClick,
-  weekDays
-}: any) => {
+  weekDays,
+  dateLocale
+}: CalendarGridProps) => {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(monthStart);
-  const startDate = startOfWeek(monthStart);
-  const endDate = endOfWeek(monthEnd);
+  const startDate = startOfWeek(monthStart, { locale: dateLocale });
+  const endDate = endOfWeek(monthEnd, { locale: dateLocale });
   const days = eachDayOfInterval({ start: startDate, end: endDate });
 
   return (
@@ -108,7 +128,7 @@ const CalendarGrid = React.memo(({
                   </div>
                 )}
                 <div className="hidden lg:flex flex-col gap-1 overflow-hidden">
-                  {dayEvents.slice(0, 2).map((event: any) => (
+                  {dayEvents.slice(0, 2).map((event: CalendarEvent) => (
                     <div key={event.id} className="text-[9px] font-bold px-1.5 py-0.5 rounded-sm bg-primary/10 border border-white/10 text-text/20 truncate">
                       {format(event.start, "HH:mm")} {event.title}
                     </div>
@@ -130,17 +150,29 @@ const CalendarGrid = React.memo(({
 
 CalendarGrid.displayName = "CalendarGrid";
 
+interface WeekSectionProps {
+  weekNumber: number;
+  events: CalendarEvent[];
+  dateLocale: DateLocale;
+  locale: string;
+  renderEventCard?: (event: CalendarEvent) => React.ReactNode;
+  onEventClick?: (event: CalendarEvent) => void;
+  isExpandedInitially: boolean;
+  selectedDate: Date | null;
+  setDayRef: (key: string, el: HTMLDivElement | null) => void;
+}
+
 const WeekSection = React.memo(({
   weekNumber,
   events,
   dateLocale,
-  locale, // Corrigido: Recebendo via prop
+  locale,
   renderEventCard,
   onEventClick,
   isExpandedInitially,
   selectedDate,
-  setDayRef // Corrigido: Função estável passada pelo pai
-}: any) => {
+  setDayRef
+}: WeekSectionProps) => {
   const [isExpanded, setIsExpanded] = React.useState(isExpandedInitially);
 
   // Corrigido: Sincroniza estado inicial caso mude via props (navegação externa)
@@ -272,17 +304,29 @@ const WeekSection = React.memo(({
 
 WeekSection.displayName = "WeekSection";
 
+interface MonthSectionProps {
+  monthKey: string;
+  monthEvents: CalendarEvent[];
+  dateLocale: DateLocale;
+  locale: string;
+  renderEventCard?: (event: CalendarEvent) => React.ReactNode;
+  onEventClick?: (event: CalendarEvent) => void;
+  setMonthRef: (key: string, el: HTMLDivElement | null) => void;
+  selectedDate: Date | null;
+  setDayRef: (key: string, el: HTMLDivElement | null) => void;
+}
+
 const MonthSection = React.memo(({
   monthKey,
   monthEvents,
   dateLocale,
-  locale, // Corrigido: Recebendo via prop
+  locale,
   renderEventCard,
   onEventClick,
-  setMonthRef, // Corrigido: Usando função estável para ref
+  setMonthRef,
   selectedDate,
   setDayRef
-}: any) => {
+}: MonthSectionProps) => {
   const monthDate = parseISO(`${monthKey}-01`);
 
   const eventsByWeek = React.useMemo(() => {

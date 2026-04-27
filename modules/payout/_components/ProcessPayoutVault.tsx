@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Vault, VaultContent, VaultHeader, VaultTitle, VaultTrigger } from "@/components/ui/vault";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ interface ProcessPayoutVaultProps {
   onSuccess: () => void;
 }
 
+import { SlotInstanceWithDetails } from "@/modules/scheduling/scheduling.types";
+
 export function ProcessPayoutVault({
   teacherId,
   month,
@@ -26,7 +28,8 @@ export function ProcessPayoutVault({
   onSuccess,
 }: ProcessPayoutVaultProps) {
   const t = useTranslations("UserManagement");
-  const [classes, setClasses] = useState<any[]>([]);
+  const [classes, setClasses] = useState<SlotInstanceWithDetails[]>([]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -36,28 +39,30 @@ export function ProcessPayoutVault({
   const today = new Date();
   const is15th = today.getDate() === 15;
 
-  const fetchUnpaid = async () => {
+  const fetchUnpaid = useCallback(async () => {
     setIsLoading(true);
     const result = await getTeacherUnpaidClassesAction({ teacherId, month, year });
     if (result?.data?.success) {
       setClasses(result.data.data || []);
     }
     setIsLoading(false);
-  };
+  }, [teacherId, month, year]);
 
   useEffect(() => {
-    if (isOpen) {
-      fetchUnpaid();
-      setPassword("");
+    const init = async () => {
+      if (isOpen) {
+        await fetchUnpaid();
+        setPassword("");
 
-      // Verificar se o usuário precisa de senha
-      checkCurrentSudoRequirementAction().then(res => {
+        // Verificar se o usuário precisa de senha
+        const res = await checkCurrentSudoRequirementAction();
         if (res?.data?.success) {
           setNeedsPassword(res.data.hasPassword);
         }
-      });
-    }
-  }, [isOpen]);
+      }
+    };
+    init();
+  }, [isOpen, fetchUnpaid]);
 
   const total = classes.reduce((sum, cls) => sum + (cls.teacherHourlyRate || 0), 0);
 
@@ -146,11 +151,12 @@ export function ProcessPayoutVault({
                       </p>
                     </div>
                     <p className="text-sm font-black">
-                      {(cls.teacherHourlyRate / 100).toLocaleString("pt-BR", {
+                      {((cls.teacherHourlyRate || 0) / 100).toLocaleString("pt-BR", {
                         style: "currency",
                         currency: "BRL",
                       })}
                     </p>
+
                   </div>
                 ))
               )}

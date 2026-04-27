@@ -27,6 +27,7 @@ import {
 } from "date-fns";
 import { notificationService } from "@/modules/notification/notification.service";
 import { userRepository } from "@/modules/user/user.repository";
+import { NewSlotInstance } from "./scheduling.types";
 
 export const schedulingService = {
   // --- Rule Management ---
@@ -170,6 +171,7 @@ export const schedulingService = {
     });
   },
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async materializeSlotsUntilDate(ruleId: string, horizon: Date, tx?: any, overrideStudentId?: string) {
     const dbClient = tx || db;
     const rule = await schedulingRepository.findRuleById(ruleId, dbClient);
@@ -365,7 +367,7 @@ export const schedulingService = {
       }
     }
 
-    const updateData: any = { status };
+    const updateData: Partial<NewSlotInstance> = { status };
     if (status === "completed" || status === "no-show") {
       const teacher = await userService.getUserById(slot.teacherId);
       if (teacher) {
@@ -417,7 +419,7 @@ export const schedulingService = {
         }
       }
 
-      const updateData: any = { status: finalStatus, updatedAt: new Date() };
+      const updateData: Partial<NewSlotInstance> = { status: finalStatus, updatedAt: new Date() };
       if (finalStatus === "completed" || finalStatus === "no-show") {
         const teacher = await userService.getUserById(slot.teacherId);
         if (teacher) {
@@ -725,7 +727,7 @@ export const schedulingService = {
           );
 
         // Synchronize rule template if time or basic metadata changed
-        const ruleUpdate: any = {};
+        const ruleUpdate: Partial<typeof recurrenceRules.$inferSelect> = {};
         if (data.startAt) ruleUpdate.startTime = format(new Date(data.startAt), "HH:mm");
         if (data.endAt) ruleUpdate.endTime = format(new Date(data.endAt), "HH:mm");
 

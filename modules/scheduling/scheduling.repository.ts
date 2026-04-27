@@ -105,7 +105,7 @@ export const schedulingRepository = {
   },
 
   // --- Recurrence Rules ---
-  async findRuleById(id: string, dbClient?: any) {
+  async findRuleById(id: string, dbClient?: typeof db) {
     const client = dbClient || db;
     return client.query.recurrenceRules.findFirst({
       where: eq(recurrenceRules.id, id),
@@ -116,7 +116,7 @@ export const schedulingRepository = {
     return db.query.recurrenceRules.findMany();
   },
 
-  async findSlotByRuleAndDate(ruleId: string, startAt: Date, dbClient?: any) {
+  async findSlotByRuleAndDate(ruleId: string, startAt: Date, dbClient?: typeof db) {
     const client = dbClient || db;
     return client.query.slotInstances.findFirst({
       where: and(
@@ -154,7 +154,7 @@ export const schedulingRepository = {
     });
   },
 
-  async findOverlappingSlot(teacherId: string, startAt: Date, endAt: Date, excludeId?: string, dbClient?: any) {
+  async findOverlappingSlot(teacherId: string, startAt: Date, endAt: Date, excludeId?: string, dbClient?: typeof db) {
     const client = dbClient || db;
     const filters = [
       eq(slotInstances.teacherId, teacherId),
@@ -246,6 +246,8 @@ export const schedulingRepository = {
         student: {
           columns: {
             name: true,
+            assignedPlanId: true,
+            isActive: true,
           }
         }
       },

@@ -32,6 +32,8 @@ export const payoutRepository = {
         student: {
           columns: {
             name: true,
+            assignedPlanId: true,
+            isActive: true,
           }
         }
       },

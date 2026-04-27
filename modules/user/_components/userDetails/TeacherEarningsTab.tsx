@@ -17,15 +17,18 @@ import { Input } from "@/components/ui/input";
 import { ProcessPayoutVault } from "@/modules/payout/_components/ProcessPayoutVault";
 import { Badge } from "@/components/ui/badge";
 
+import { SlotInstanceWithDetails } from "@/modules/scheduling/scheduling.types";
+
 interface TeacherEarningsTabProps {
   user: User;
-  teacherClasses: any[];
+  teacherClasses: SlotInstanceWithDetails[];
   earningsSummary: {
     count: number;
     total: number;
   };
   isAdmin?: boolean;
 }
+
 
 export function TeacherEarningsTab({
   user,
@@ -192,10 +195,11 @@ function EditRateVault({
   currentRate,
   onUpdated,
 }: {
-  cls: any;
+  cls: SlotInstanceWithDetails;
   currentRate: number;
   onUpdated: () => void;
 }) {
+
   const t = useTranslations("UserManagement");
   const [rate, setRate] = useState(currentRate / 100);
   const [isUpdating, setIsUpdating] = useState(false);

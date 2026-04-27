@@ -27,13 +27,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
+import { SlotInstanceWithDetails } from "@/modules/scheduling/scheduling.types";
+
 interface ClassCardProps {
-  slot: any;
+  slot: SlotInstanceWithDetails;
   isAdmin: boolean;
-  onUpdateStatus: (slotId: string, status: string) => void;
-  onSwapTeacher: (slot: any) => void;
-  onUpdateLesson: (slot: any) => void;
+  onUpdateStatus: (slotId: string, status: SlotInstanceWithDetails["status"]) => void;
+  onSwapTeacher: (slot: SlotInstanceWithDetails) => void;
+  onUpdateLesson: (slot: SlotInstanceWithDetails) => void;
 }
+
 
 export function ClassCard({
   slot,
@@ -42,7 +45,7 @@ export function ClassCard({
   onSwapTeacher,
   onUpdateLesson
 }: ClassCardProps) {
-  const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
+  const statusConfig: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
     scheduled: { label: "Agendada", color: "bg-blue-500/10 text-blue-500 border-blue-500/20", icon: Calendar },
     completed: { label: "Concluída", color: "bg-green-500/10 text-green-500 border-green-500/20", icon: CheckCircle2 },
     "canceled-student": { label: "Canc. Aluno", color: "bg-red-500/10 text-red-500 border-red-500/20", icon: XCircle },

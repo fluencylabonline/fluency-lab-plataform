@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { SectionLabel } from "./UserDetailsPrimitives";
 import { Badge } from "@/components/ui/badge";
 
+import { ContractWithTemplate } from "@/modules/contract/contract.types";
+
 interface ContractsTabProps {
-  contracts: any[];
+  contracts: ContractWithTemplate[];
   onViewContract: (id: string) => Promise<void>;
   onDownloadContract: (id: string) => Promise<void>;
   loadingContractId: string | null;

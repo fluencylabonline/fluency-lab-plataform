@@ -12,6 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { notify } from "@/components/ui/toaster";
 
 import type { User } from "../user.schema";
+import type { SubscriptionWithPlan, Installment } from "../../billing/billing.types";
+import type { SlotInstanceWithDetails } from "../../scheduling/scheduling.types";
+import type { ContractWithTemplate } from "../../contract/contract.types";
 import { updateUserAction } from "../user.actions";
 import { getContractDownloadUrlAction } from "../../contract/contract.actions";
 import { updateInstallmentAction } from "../../billing/billing.actions";
@@ -34,12 +37,12 @@ const installmentSchema = z.object({
 interface UserDetailsClientProps {
   user: User;
   currentUser: User;
-  activeSubscription?: any;
-  installments?: any[];
-  subscriptions?: any[];
-  teacherClasses?: any[];
+  activeSubscription?: SubscriptionWithPlan | null;
+  installments?: Installment[];
+  subscriptions?: SubscriptionWithPlan[];
+  teacherClasses?: SlotInstanceWithDetails[];
   earningsSummary?: { count: number; total: number };
-  contracts?: any[];
+  contracts?: ContractWithTemplate[];
   basePath: string;
   isAdmin: boolean;
 }
@@ -173,7 +176,7 @@ export function UserDetailsClient({
   };
 
   const userInitials = user.name ? user.name.charAt(0).toUpperCase() : "U";
-  const userAvatar = (user as any).avatarUrl || (user as any).image;
+  const userAvatar = user.photoUrl || undefined;
 
   return (
     <div>
@@ -249,7 +252,8 @@ export function UserDetailsClient({
             user={user}
             isAdmin={isAdmin}
             isUpdating={isUpdating}
-            rateForm={rateForm}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            rateForm={rateForm as any}
             onUpdateRate={handleUpdateRate}
           />
         </TabsContent>
@@ -257,14 +261,15 @@ export function UserDetailsClient({
         <TabsContent value="payment" className="mt-4">
           {user.role === "student" ? (
             <StudentPaymentTab
-              activeSubscription={activeSubscription}
+              activeSubscription={activeSubscription ?? null}
               installments={installments}
               subscriptions={subscriptions}
               isAdmin={isAdmin}
               isUpdating={isUpdating}
               adminPassword={adminPassword}
               setAdminPassword={setAdminPassword}
-              installmentForm={installmentForm}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              installmentForm={installmentForm as any}
               onUpdateInstallment={handleUpdateInstallment}
               onMarkAsPaid={handleMarkAsPaid}
             />
