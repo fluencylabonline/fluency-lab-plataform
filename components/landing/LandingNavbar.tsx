@@ -20,6 +20,8 @@ import {
   VaultTitle,
   VaultBody,
 } from "@/components/ui/vault";
+import { LanguageSwitcher } from "../ui/language-switcher";
+import { ThemeSwitcher } from "../ui/theme-switcher";
 
 interface LandingNavbarProps {
   user: User | null;
@@ -136,6 +138,7 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
                   src={Logo}
                   alt="Logo"
                   width={140}
+                  style={{ height: "auto" }}
                   className="object-contain"
                 />
               </div>
@@ -249,8 +252,14 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
       </motion.header>
 
       <header className="md:hidden w-full p-4 flex justify-between items-center z-40 relative">
-        <div className="w-36 relative">
-          <Image src={Logo} alt="Logo" height={40} className="object-contain" />
+        <div className="w-36">
+          <Image
+            src={Logo}
+            alt="Logo"
+            width={144}
+            style={{ height: "auto" }}
+            className="object-contain"
+          />
         </div>
 
         <button
@@ -267,8 +276,8 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
             </>
           ) : (
             <>
-              <span className="whitespace-nowrap text-text">{t("nav.login") || "Entrar"}</span>
-              <DoorOpenIcon className="w-4 h-4 text-text" />
+              <span className="whitespace-nowrap text-white dark:text-white">{t("nav.login") || "Entrar"}</span>
+              <DoorOpenIcon className="w-4 h-4 text-white dark:text-white" />
             </>
           )}
         </button>
@@ -285,6 +294,10 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
 
         <VaultContent className="md:hidden">
           <VaultHeader>
+            <div className="flex items-center justify-center gap-2">
+              <LanguageSwitcher />
+              <ThemeSwitcher />
+            </div>
             <VaultTitle>{t("nav.menu") || "Menu"}</VaultTitle>
           </VaultHeader>
           <VaultBody className="p-8 pb-10">

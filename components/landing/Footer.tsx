@@ -78,7 +78,7 @@ export default function Footer() {
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-12 gap-x-4 gap-y-10 lg:gap-8 items-start">
                         <div className="col-span-2 lg:col-span-4 space-y-4 text-center lg:text-left flex flex-col items-center lg:items-start">
                             <div className="flex items-center gap-1.5 font-bold tracking-tighter text-xl text-slate-900 dark:text-white select-none">
-                                <Image src={Logo} alt="Logo" width={200} height={200} priority />
+                                <Image src={Logo} alt="Logo" width={200} style={{ height: "auto" }} priority />
                             </div>
                             <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto lg:mx-0">
                                 {t("brand.description") || "Transformando o aprendizado..."}

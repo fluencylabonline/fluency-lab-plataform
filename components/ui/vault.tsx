@@ -128,7 +128,7 @@ const VaultContent = React.forwardRef<
                         ? "bottom-2 inset-x-2 w-auto rounded-2xl after:!hidden mt-24"
                         : "bottom-0 inset-x-0 w-full rounded-t-[20px] mt-24",
 
-                    "sm:bottom-6 sm:inset-x-0 sm:mx-auto sm:w-full sm:max-w-lg sm:rounded-2xl sm:after:!hidden sm:mt-0",
+                    "sm:bottom-6 sm:inset-x-0 sm:mx-auto sm:w-full sm:max-w-lg sm:rounded-2xl sm:after:!hidden sm:mt-0 max-h-[97vh]",
 
                     className,
                 )}
@@ -491,7 +491,7 @@ const VaultSecondaryButton = React.forwardRef<
             className={twMerge(
                 `flex items-center justify-center gap-2 flex-row min-w-fit px-6 py-3 lg:text-lg md:text-base text-sm font-semibold 
         text-gray-700 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200
-        bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700
+        bg-slate-300/50 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700
         rounded-xl transition-all duration-150
         border border-gray-200/50 dark:border-gray-600/50 
         hover:border-gray-300/70 dark:hover:border-gray-500/70

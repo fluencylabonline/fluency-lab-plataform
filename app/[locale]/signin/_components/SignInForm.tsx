@@ -205,6 +205,7 @@ export function SignInForm() {
             width={20}
             height={20}
             className="mr-2"
+            loading="eager"
           />
           {t("signInWithGoogle") || "Entrar com Google"}
         </Button>

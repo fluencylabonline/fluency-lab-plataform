@@ -123,8 +123,8 @@ export function CreatePasswordForm() {
   };
 
   return (
-    <div className="min-h-screen min-w-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="card w-full max-w-[500px] border-none rounded-3xl overflow-hidden">
+    <div className="min-h-screen min-w-screen flex items-center justify-center p-4">
+      <div className="bg-slate-300/50 dark:bg-gray-900 w-full max-w-[500px] border-none rounded-md overflow-hidden">
         <div className="text-center space-y-2 pt-10 px-8">
           <div className="flex items-center justify-center gap-2">
             <LanguageSwitcher />

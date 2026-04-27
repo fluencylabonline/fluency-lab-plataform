@@ -120,6 +120,7 @@ export function OnboardingFlow({ user }: OnboardingFlowProps) {
                         src={Logo}
                         alt="Logo"
                         width={180}
+                        style={{ height: "auto" }}
                         className="object-contain"
                     />
                 </div>

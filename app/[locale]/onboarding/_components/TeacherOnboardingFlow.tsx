@@ -81,7 +81,7 @@ export function TeacherOnboardingFlow({ user }: TeacherOnboardingFlowProps) {
 
             {/* Top Navigation */}
             <header className="relative z-20 w-full px-6 py-6 sm:py-8 md:px-12 flex items-center justify-between ">
-                <Image src={Logo} alt="Logo" width={180} className="object-contain" />
+                <Image src={Logo} alt="Logo" width={180} style={{ height: "auto" }} className="object-contain" />
                 <div className="hidden md:flex flex-col items-end gap-2">
                     <div className="w-48 h-1.5 bg-slate-200 dark:bg-slate-900 rounded-full overflow-hidden">
                         <motion.div className="h-full bg-primary" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.5 }} />
