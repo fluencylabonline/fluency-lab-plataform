@@ -34,7 +34,10 @@ export type Permission =
   | "material.create"
   | "material.update"
   | "material.delete"
-  | "material.view";
+  | "material.view"
+  | "course.manage"
+  | "course.view"
+  | "course.learn";
 
 export type Role = "admin" | "teacher" | "student" | "manager";
 export enum UserRoles {
@@ -60,6 +63,9 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "credits.grant",
     "credits.view.all",
     "material.view",
+    "course.manage",
+    "course.view",
+    "course.learn",
   ],
   manager: [
     "student.support",
@@ -74,6 +80,8 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "credits.manage",
     "credits.grant",
     "credits.view.all",
+    "course.manage",
+    "course.view",
   ],
   teacher: [
     "class.view.assigned",
@@ -96,6 +104,8 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "payment.view.self",
     "credits.view.self",
     "material.view",
+    "course.view",
+    "course.learn",
   ],
 };
 

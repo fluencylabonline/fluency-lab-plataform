@@ -1,0 +1,20 @@
+"use client";
+
+import useSWR from "swr";
+import { type StudentCourse } from "@/modules/course/course.types";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+export function useStudentCourses() {
+  const { data, error, isLoading, mutate } = useSWR<StudentCourse[]>(
+    "/api/student/courses/list",
+    fetcher
+  );
+
+  return {
+    courses: data,
+    isLoading,
+    isError: error,
+    mutate,
+  };
+}
