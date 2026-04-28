@@ -173,9 +173,9 @@ const managerItems: MenuItemType[] = [
         iconProps: { size: 20 },
     },
     {
-        href: "/manager/students",
-        label: "Estudantes",
-        labelKey: "students",
+        href: "/manager/users",
+        label: "Usuários",
+        labelKey: "users",
         Icon: PeopleIcon,
         iconProps: { size: 20 },
         permission: "student.support",

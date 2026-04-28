@@ -26,3 +26,28 @@ export const deleteWhatsAppTemplateAction = adminAction
     revalidatePath("/hub/admin/communication");
     return { success: true };
   });
+
+export const getWhatsAppConversationsAction = adminAction
+  .action(async () => {
+    return await communicationService.getConversations();
+  });
+
+export const getWhatsAppMessagesAction = adminAction
+  .schema(z.object({ conversationId: z.string() }))
+  .action(async ({ parsedInput }) => {
+    return await communicationService.getMessages(parsedInput.conversationId);
+  });
+
+export const sendWhatsAppTextMessageAction = adminAction
+  .schema(z.object({ to: z.string(), text: z.string() }))
+  .action(async ({ parsedInput }) => {
+    return await communicationService.sendWhatsAppTextMessage(parsedInput.to, parsedInput.text);
+  });
+
+export const markWhatsAppConversationAsReadAction = adminAction
+  .schema(z.object({ conversationId: z.string() }))
+  .action(async ({ parsedInput }) => {
+    await communicationService.markAsRead(parsedInput.conversationId);
+    return { success: true };
+  });
+

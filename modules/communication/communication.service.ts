@@ -1,5 +1,7 @@
 import { resend } from "@/lib/resend";
 import { env } from "@/env";
+import { communicationRepository } from "./communication.repository";
+
 import { render } from "@react-email/render";
 import React from "react";
 import type { ReactElement } from "react";
@@ -386,7 +388,7 @@ export class CommunicationService {
     // Formata o número (garantindo que tenha o código do país e sem caracteres especiais)
     const formattedPhone = to.replace(/\D/g, "");
 
-    return this.sendWhatsAppRequest({
+    const response = await this.sendWhatsAppRequest({
       messaging_product: "whatsapp",
       to: formattedPhone,
       type: "template",
@@ -396,6 +398,91 @@ export class CommunicationService {
         components: components
       }
     });
+
+    if (response?.messages?.[0]?.id) {
+      // Persistir no banco
+      let conversation = await communicationRepository.findConversationByWaId(formattedPhone);
+      if (!conversation) {
+        const user = await communicationRepository.findUserByPhone(formattedPhone);
+        conversation = await communicationRepository.createConversation({
+          waId: formattedPhone,
+          studentId: user?.id,
+          lastMessageContent: `[Template: ${templateName}]`,
+          lastMessageAt: new Date(),
+        });
+      } else {
+        await communicationRepository.updateConversation(conversation.id, {
+          lastMessageContent: `[Template: ${templateName}]`,
+          lastMessageAt: new Date(),
+        });
+      }
+
+      await communicationRepository.saveMessage({
+        id: response.messages[0].id,
+        conversationId: conversation.id,
+        content: `[Template: ${templateName}]`,
+        type: "template",
+        direction: "outbound",
+        status: "sent",
+      });
+    }
+
+    return response;
+  }
+
+  /**
+   * Envia uma mensagem de texto livre (janela de 24h).
+   */
+  async sendWhatsAppTextMessage(to: string, text: string): Promise<WhatsAppResponse | null> {
+    const formattedPhone = to.replace(/\D/g, "");
+
+    const response = await this.sendWhatsAppRequest({
+      messaging_product: "whatsapp",
+      to: formattedPhone,
+      type: "text",
+      text: { body: text }
+    });
+
+    if (response?.messages?.[0]?.id) {
+      let conversation = await communicationRepository.findConversationByWaId(formattedPhone);
+      if (!conversation) {
+        const user = await communicationRepository.findUserByPhone(formattedPhone);
+        conversation = await communicationRepository.createConversation({
+          waId: formattedPhone,
+          studentId: user?.id,
+          lastMessageContent: text,
+          lastMessageAt: new Date(),
+        });
+      } else {
+        await communicationRepository.updateConversation(conversation.id, {
+          lastMessageContent: text,
+          lastMessageAt: new Date(),
+        });
+      }
+
+      await communicationRepository.saveMessage({
+        id: response.messages[0].id,
+        conversationId: conversation.id,
+        content: text,
+        type: "text",
+        direction: "outbound",
+        status: "sent",
+      });
+    }
+
+    return response;
+  }
+
+  async getConversations() {
+    return communicationRepository.getConversations();
+  }
+
+  async getMessages(conversationId: string) {
+    return communicationRepository.getMessages(conversationId);
+  }
+
+  async markAsRead(conversationId: string) {
+    return communicationRepository.markAsRead(conversationId);
   }
 
   /**

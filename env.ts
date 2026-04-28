@@ -47,6 +47,7 @@ export const env = createEnv({
     WHATSAPP_ACCESS_TOKEN: z.string().min(1),
     WHATSAPP_PHONE_NUMBER_ID: z.string().min(1),
     WHATSAPP_BUSINESS_ACCOUNT_ID: z.string().optional(),
+    WHATSAPP_VERIFY_TOKEN: z.string().min(1).default("fluencylab_whatsapp_token"),
   },
   client: {
     // Firebase Client (public)
@@ -93,6 +94,7 @@ export const env = createEnv({
     WHATSAPP_ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN,
     WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID,
     WHATSAPP_BUSINESS_ACCOUNT_ID: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
+    WHATSAPP_VERIFY_TOKEN: process.env.WHATSAPP_VERIFY_TOKEN,
 
     // Client
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,

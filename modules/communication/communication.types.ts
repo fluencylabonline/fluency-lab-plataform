@@ -67,3 +67,26 @@ export interface WhatsAppTemplateListResponse {
     };
   };
 }
+
+export interface WhatsAppConversation {
+  id: string;
+  waId: string;
+  studentId: string | null;
+  lastMessageContent: string | null;
+  lastMessageAt: Date | string | null;
+  unreadCount: number;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+export interface WhatsAppMessage {
+  id: string;
+  conversationId: string;
+  content: string | null;
+  type: string;
+  direction: "inbound" | "outbound";
+  status: "sent" | "delivered" | "read" | "failed";
+  metadata: any;
+  createdAt: Date | string;
+}
+

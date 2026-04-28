@@ -13,6 +13,7 @@ import * as contractSchema from "@/modules/contract/contract.schema";
 import * as payoutSchema from "@/modules/payout/payout.schema";
 import * as financeSchema from "@/modules/finance/finance.schema";
 import * as courseSchema from "@/modules/course/course.schema";
+import * as communicationSchema from "@/modules/communication/communication.schema";
 
 // Required for Node.js environments when using WebSockets
 if (typeof window === "undefined") {
@@ -34,5 +35,7 @@ export const db = drizzle(pool, {
     ...payoutSchema,
     ...financeSchema,
     ...courseSchema,
+    ...communicationSchema,
   },
 });
+

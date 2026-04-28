@@ -145,6 +145,8 @@
     "expiration": "Expiração",
     "downloadPdf": "Baixar Documento (PDF)",
     "pdfUnavailable": "PDF indisponível para este contrato",
+    "noContracts": "Nenhum contrato emitido",
+    "noContractsDesc": "Não existem documentos contratuais vinculados a este perfil.",
     "earningsThisMonth": "Ganhos deste mês",
     "processPayout": "Processar Pagamento",
     "payoutReview": "Revisão de Pagamento",
