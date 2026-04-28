@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Plus, MoreVertical, Globe, Activity } from "lucide-react";
 import Image from "next/image";
+import FallbackPlaceholder from '@/public/backgrounds/placeholder-course.jpg'
 import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "@/components/layout/header";
 import { EmptyResults } from "@/components/ui/empty";
@@ -175,9 +176,11 @@ export function CoursePageClient({ initialData, currentUser }: CoursePageClientP
                   {/* Top Image */}
                   <div className="aspect-[16/10] w-full overflow-hidden relative">
                     <Image
-                      src={course.imageUrl || "/placeholder-course.jpg"}
+                      src={FallbackPlaceholder || course.imageUrl}
                       alt={course.title}
-                      fill
+                      loading="lazy"
+                      width={2000}
+                      height={1600}
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -257,9 +260,9 @@ export function CoursePageClient({ initialData, currentUser }: CoursePageClientP
         </AnimatePresence>
       </main>
 
-      <CreateCourseVault 
-        open={isOpen} 
-        onOpenChange={setIsOpen} 
+      <CreateCourseVault
+        open={isOpen}
+        onOpenChange={setIsOpen}
         onSuccess={(newCourse) => setCourses(prev => [newCourse, ...prev])}
       />
 

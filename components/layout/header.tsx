@@ -187,9 +187,10 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                         <div className="flex items-center justify-between w-full min-h-[40px] gap-4">
                             <div className="flex-1 truncate">
                                 {subtitle && (
-                                    <p className="text-sm md:text-xl text-text truncate">
-                                        {subtitle}
-                                    </p>
+                                    <div className="flex flex-row items-center gap-2">
+                                        <div className="min-w-[5px] h-[20px] bg-primary rounded-lg" />
+                                        <p className="text-sm md:text-lg text-text truncate ">{subtitle}</p>
+                                    </div>
                                 )}
                             </div>
 

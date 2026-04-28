@@ -177,15 +177,14 @@ export function Wizard({
                         <VaultSecondaryButton
                             onClick={handlePrev}
                             disabled={currentStep === 0}
-                            className="rounded-full px-4"
+                            className="rounded-full w-12 h-12 p-0"
                         >
                             <ChevronLeft className="w-5 h-5" />
                         </VaultSecondaryButton>
 
-                        <VaultPrimaryButton onClick={handleNext} className="rounded-full px-4">
+                        <VaultPrimaryButton onClick={handleNext} className="rounded-full w-12 h-12 p-0">
                             {currentStep === steps.length - 1 ? (
                                 <div className="flex items-center gap-2">
-                                    <span>{submitLabel}</span>
                                     <Check className="w-5 h-5" />
                                 </div>
                             ) : (
