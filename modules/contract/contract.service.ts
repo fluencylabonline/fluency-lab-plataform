@@ -259,6 +259,11 @@ export const contractService = {
     // 2. Deactivate user
     await userService.updateUser(instance.userId, { isActive: false });
 
+    // 2.1 Update subscription status if exists
+    if (instance.subscriptionId) {
+      await billingService.updateSubscription(instance.subscriptionId, { status: "cancelled" });
+    }
+
     // 3. Send notification
     if (instance?.user?.email) {
       await communicationService.sendContractCancelledEmail(

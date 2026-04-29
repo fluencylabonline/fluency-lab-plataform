@@ -6,7 +6,7 @@ import { notificationService } from "../notification/notification.service";
 import { addMonths, startOfDay, setDate, addDays, endOfDay, endOfMonth, getDate, getDaysInMonth } from "date-fns";
 import { env } from "@/env";
 import { db } from "@/lib/db";
-import { Installment, installmentsTable } from "./billing.schema";
+import { Installment, installmentsTable, Subscription } from "./billing.schema";
 import { eq, asc, and } from "drizzle-orm";
 import { decrypt } from "@/lib/cryptography";
 import { revalidatePath } from "next/cache";
@@ -168,6 +168,10 @@ export const billingService = {
     }
 
     return subscription;
+  },
+
+  async updateSubscription(id: string, data: Partial<Subscription>) {
+    return billingRepository.updateSubscription(id, data);
   },
 
   // Helper to generate the actual AbacatePay billing for an installment
@@ -348,10 +352,21 @@ export const billingService = {
       }
 
       await billingRepository.updateSubscription(sub.id, {
-        status: "cancelled",
+        status: "pending_fee",
         cancellationDate: new Date(),
         cancellationFeeInstallmentId: pix.id,
       });
+
+      // Send WhatsApp with PIX for cancellation fee
+      if (cellphone && pix.brCode) {
+        await communicationService.sendPaymentReminderWhatsApp({
+          cellphone: cellphone,
+          studentName: student?.name || "Aluno",
+          amount: feeAmount,
+          dueDate: new Date(pix.expiresAt),
+          pixPayload: pix.brCode,
+        });
+      }
 
       return {
         success: true,
@@ -398,8 +413,8 @@ export const billingService = {
   },
 
   async markInstallmentAsPaid(
-    installmentId: string, 
-    abacatePayBillingId?: string, 
+    installmentId: string,
+    abacatePayBillingId?: string,
     actor?: { id: string; name: string }
   ) {
     const installment = await billingRepository.findInstallmentById(installmentId);
@@ -429,10 +444,10 @@ export const billingService = {
     });
 
     const sub = await billingRepository.findSubscriptionById(installment.subscriptionId);
-    
+
     if (sub) {
       const student = await userService.getUser(sub.studentId);
-      
+
       if (student) {
         // 1. Email confirmation
         try {
@@ -477,14 +492,14 @@ export const billingService = {
       // For billing.paid, resource might be 'billing' or 'pixQrCode'
       // For transparent.completed, resource is 'transparent'
       const resource = (data.billing || data.transparent || data.pixQrCode) as (Record<string, unknown> & { id: string }) | undefined;
-      
+
       if (!resource) {
         console.warn("[AbacatePay Webhook] No resource found in event data:", JSON.stringify(data));
         return;
       }
 
       console.log(`[AbacatePay Webhook] Processing ${event.event}. Resource ID:`, resource.id);
-      
+
       interface BillingMetadata {
         installmentId?: string;
         installment?: { id: string };
@@ -495,7 +510,7 @@ export const billingService = {
       }
 
       let metadata = resource.metadata as string | BillingMetadata | undefined;
-      
+
       // Safety: Parse metadata if it comes as a string
       if (typeof metadata === "string") {
         try {
@@ -664,8 +679,8 @@ export const billingService = {
   },
 
   async updateInstallment(
-    id: string, 
-    data: Partial<Installment>, 
+    id: string,
+    data: Partial<Installment>,
     actor?: { id: string; name: string }
   ) {
     const previous = await billingRepository.findInstallmentById(id);
