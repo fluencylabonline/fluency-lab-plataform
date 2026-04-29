@@ -223,6 +223,37 @@
     "creatingSlot": "Criando horário...",
     "slotCreated": "Horário criado com sucesso!"
   },
+  "Dashboard": {
+    "title": "Visão Geral",
+    "subtitle": "Acompanhe o desempenho da FluencyLab em tempo real.",
+    "stats": {
+      "mrr": "Receita Mensal (MRR)",
+      "activeStudents": "Alunos Ativos",
+      "todayClasses": "Aulas Hoje",
+      "studentGrowth": "Novos Alunos"
+    },
+    "finance": {
+      "cashFlow": "Fluxo de Caixa",
+      "cashFlowDesc": "Comparativo mensal de receitas e despesas (R$)",
+      "income": "Receita",
+      "expense": "Despesa"
+    },
+    "academic": {
+      "classStatus": "Status de Aulas",
+      "classStatusDesc": "Resumo de presença e cancelamentos",
+      "popularCourses": "Cursos em Destaque",
+      "popularCoursesDesc": "Cursos com maior número de matrículas",
+      "enrollments": "matrículas",
+      "noRecentClasses": "Nenhuma aula realizada",
+      "noCourses": "Nenhum curso matriculado"
+    },
+    "retention": {
+      "onboarding": "Funil de Onboarding",
+      "onboardingDesc": "Estudantes por etapa do processo inicial",
+      "noOnboarding": "Sem dados de onboarding",
+      "students": "alunos"
+    }
+  },
   "UserRoles": {
     "admin": "Administrador",
     "teacher": "Professor",
