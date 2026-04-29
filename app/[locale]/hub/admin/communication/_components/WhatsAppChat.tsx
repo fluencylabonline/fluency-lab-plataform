@@ -13,9 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, User, MessageCircle, Clock, Check, CheckCheck } from "lucide-react";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { notify } from "@/components/ui/toaster";
-import { Shimmer } from "@shimmer-from-structure/react";
 
 export function WhatsAppChat() {
   const [selectedConv, setSelectedConv] = useState<WhatsAppConversation | null>(null);

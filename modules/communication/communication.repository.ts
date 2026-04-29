@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
 import { whatsappConversationsTable, whatsappMessagesTable } from "./communication.schema";
-import { eq, desc, and } from "drizzle-orm";
-import { usersTable } from "../user/user.schema";
+import { eq, desc } from "drizzle-orm";
 
 export const communicationRepository = {
   async findConversationByWaId(waId: string) {

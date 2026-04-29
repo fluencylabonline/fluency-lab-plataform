@@ -14,7 +14,8 @@ import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { getWhatsAppTemplatesAction, deleteWhatsAppTemplateAction } from "@/modules/communication/communication.actions";
 import { notify } from "@/components/ui/toaster";
-import { WhatsAppChat } from "@/app/[locale/]hub/admin/communication/_components/WhatsAppChat";
+import { WhatsAppChat } from "@/app/[locale]/hub/admin/communication/_components/WhatsAppChat";
+import { SendWhatsAppMessageVault } from "@/app/[locale]/hub/admin/communication/_components/SendWhatsAppMessageVault";
 
 
 interface CommunicationDashboardProps {
@@ -25,7 +26,9 @@ interface CommunicationDashboardProps {
 export function CommunicationDashboard({ initialTemplates, initialHistory }: CommunicationDashboardProps) {
   const [isNotifyOpen, setIsNotifyOpen] = useState(false);
   const [isWabaOpen, setIsWabaOpen] = useState(false);
+  const [isSendWaOpen, setIsSendWaOpen] = useState(false);
   const [templates, setTemplates] = useState<WhatsAppTemplate[]>(initialTemplates);
+
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefreshTemplates = async () => {
@@ -93,7 +96,17 @@ export function CommunicationDashboard({ initialTemplates, initialHistory }: Com
             >
               Novo Template
             </Button>
+            <Button
+              onClick={() => setIsSendWaOpen(true)}
+              variant="outline"
+              size="sm"
+              className="bg-green-500/10 text-green-600 hover:bg-green-500/20 hover:text-green-700 border-green-500/20"
+              leftIcon={<MessageSquare className="w-4 h-4" />}
+            >
+              Nova Conversa
+            </Button>
           </div>
+
         </div>
 
         <TabsContent value="history" className="space-y-4">
@@ -201,6 +214,8 @@ export function CommunicationDashboard({ initialTemplates, initialHistory }: Com
 
       <SendNotificationVault open={isNotifyOpen} onOpenChange={setIsNotifyOpen} />
       <CreateWhatsAppTemplateVault open={isWabaOpen} onOpenChange={setIsWabaOpen} />
+      <SendWhatsAppMessageVault open={isSendWaOpen} onOpenChange={setIsSendWaOpen} templates={templates} />
     </div>
+
   );
 }

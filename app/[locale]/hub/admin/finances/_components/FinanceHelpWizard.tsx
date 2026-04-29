@@ -178,7 +178,6 @@ export function FinanceHelpWizard({ open, onOpenChange }: FinanceHelpWizardProps
       open={open}
       onOpenChange={onOpenChange}
       steps={steps}
-      submitLabel={t("close") || "Começar a Gerenciar!"}
       onComplete={() => onOpenChange(false)}
     />
   );

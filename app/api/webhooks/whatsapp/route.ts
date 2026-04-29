@@ -32,12 +32,12 @@ export async function POST(req: NextRequest) {
     if (!value) return NextResponse.json({ success: true });
 
     // 1. Processar Status de Mensagens (Entregue, Lida, etc)
-    if (value.statuses) {
-      for (const status of value.statuses) {
+    /* if (value.statuses) {
+      for (const _status of value.statuses) {
         // TODO: Atualizar status no banco se necessário
         // communicationRepository.updateMessageStatus(status.id, status.status);
       }
-    }
+    } */
 
     // 2. Processar Novas Mensagens
     if (value.messages) {
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         const timestamp = new Date(parseInt(msg.timestamp) * 1000);
         
         let content = "";
-        let type = msg.type;
+        const type = msg.type;
 
         if (msg.type === "text") {
           content = msg.text.body;

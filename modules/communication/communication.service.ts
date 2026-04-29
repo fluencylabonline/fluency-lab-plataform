@@ -1,6 +1,8 @@
 import { resend } from "@/lib/resend";
 import { env } from "@/env";
 import { communicationRepository } from "./communication.repository";
+import { decrypt } from "@/lib/cryptography";
+
 
 import { render } from "@react-email/render";
 import React from "react";
@@ -386,7 +388,8 @@ export class CommunicationService {
     const { to, templateName, components, languageCode = "pt_BR" } = options;
 
     // Formata o número (garantindo que tenha o código do país e sem caracteres especiais)
-    const formattedPhone = to.replace(/\D/g, "");
+    const formattedPhone = this.getCleanPhone(to);
+
 
     const response = await this.sendWhatsAppRequest({
       messaging_product: "whatsapp",
@@ -434,7 +437,8 @@ export class CommunicationService {
    * Envia uma mensagem de texto livre (janela de 24h).
    */
   async sendWhatsAppTextMessage(to: string, text: string): Promise<WhatsAppResponse | null> {
-    const formattedPhone = to.replace(/\D/g, "");
+    const formattedPhone = this.getCleanPhone(to);
+
 
     const response = await this.sendWhatsAppRequest({
       messaging_product: "whatsapp",
@@ -612,6 +616,15 @@ export class CommunicationService {
       return link;
     }
   }
+
+  private getCleanPhone(to: string): string {
+    if (!to) return "";
+    // 1. Descriptografa se necessário (formato crypto:iv:data)
+    const decrypted = to.includes(":") ? decrypt(to) : to;
+    // 2. Remove tudo que não for número
+    return decrypted.replace(/\D/g, "");
+  }
 }
+
 
 export const communicationService = new CommunicationService();

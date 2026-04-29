@@ -51,3 +51,15 @@ export const markWhatsAppConversationAsReadAction = adminAction
     return { success: true };
   });
 
+export const sendWhatsAppTemplateAction = adminAction
+  .schema(z.object({
+    to: z.string(),
+    templateName: z.string(),
+    languageCode: z.string().optional(),
+    components: z.array(z.any()).optional(),
+  }))
+  .action(async ({ parsedInput }) => {
+    return await communicationService.sendWhatsAppTemplate(parsedInput);
+  });
+
+

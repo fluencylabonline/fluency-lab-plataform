@@ -9,6 +9,7 @@ import { db } from "@/lib/db";
 import { Installment, installmentsTable } from "./billing.schema";
 import { eq, asc, and } from "drizzle-orm";
 import { decrypt } from "@/lib/cryptography";
+import { revalidatePath } from "next/cache";
 
 export const billingService = {
   async getActiveSubscription(studentId: string) {
@@ -410,6 +411,11 @@ export const billingService = {
       abacatePayBillingId: abacatePayBillingId || installment.abacatePayBillingId,
     });
 
+    console.log("[AbacatePay Webhook] Installment successfully updated to PAID in DB:", installmentId);
+    revalidatePath("/onboarding");
+    revalidatePath("/student/billing");
+    revalidatePath("/admin/finances");
+
     // Create Audit Log
     await billingRepository.createAuditLog({
       installmentId,
@@ -423,24 +429,34 @@ export const billingService = {
     });
 
     const sub = await billingRepository.findSubscriptionById(installment.subscriptionId);
+    
     if (sub) {
       const student = await userService.getUser(sub.studentId);
+      
       if (student) {
         // 1. Email confirmation
-        await communicationService.sendPaymentConfirmedEmail(student.email, {
-          studentName: student.name,
-          amount: installment.amount,
-        });
+        try {
+          await communicationService.sendPaymentConfirmedEmail(student.email, {
+            studentName: student.name,
+            amount: installment.amount,
+          });
+        } catch (error) {
+          console.error("[BillingService] Failed to send confirmation email:", error);
+        }
 
         // 2. In-App and Push Notification
-        await notificationService.sendNotification({
-          title: "✅ Pagamento confirmado!",
-          body: `Seu pagamento de ${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(installment.amount / 100)} foi recebido com sucesso.`,
-          targetType: "specific",
-          userIds: [student.id],
-          channels: { inApp: true, push: true },
-          actionUrl: "/student/billing",
-        });
+        try {
+          await notificationService.sendNotification({
+            title: "✅ Pagamento confirmado!",
+            body: `Seu pagamento de ${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(installment.amount / 100)} foi recebido com sucesso.`,
+            targetType: "specific",
+            userIds: [student.id],
+            channels: { inApp: true, push: true },
+            actionUrl: "/student/billing",
+          });
+        } catch (error) {
+          console.error("[BillingService] Failed to send notification:", error);
+        }
       }
     }
 
@@ -448,33 +464,63 @@ export const billingService = {
   },
 
   // 6. Webhook logic
-  async processWebhook(payload: import("@abacatepay/types/v2").WebhookEvent) {
-    const event = payload; // Already verified by route
+  async processWebhook(payload: Record<string, unknown>) {
+    interface WebhookEvent {
+      event: string;
+      data: Record<string, Record<string, unknown>>;
+    }
 
-    if (event.event === "billing.paid") {
+    const event = payload as unknown as WebhookEvent;
+
+    if (event.event === "billing.paid" || event.event === "transparent.completed") {
       const data = event.data;
-      const resource = "billing" in data ? data.billing : data.pixQrCode;
-      const metadata = (resource as {
-        metadata?: {
-          installmentId?: string;
-          installment?: { id?: string };
-          subscriptionId?: string;
-          subscription?: { id?: string };
-          type?: string;
-          info?: { type?: string };
-        }
-      }).metadata;
+      // For billing.paid, resource might be 'billing' or 'pixQrCode'
+      // For transparent.completed, resource is 'transparent'
+      const resource = (data.billing || data.transparent || data.pixQrCode) as (Record<string, unknown> & { id: string }) | undefined;
+      
+      if (!resource) {
+        console.warn("[AbacatePay Webhook] No resource found in event data:", JSON.stringify(data));
+        return;
+      }
 
-      const installmentId = metadata?.installmentId || metadata?.installment?.id;
-      const subscriptionId = metadata?.subscriptionId || metadata?.subscription?.id;
-      const type = metadata?.type || metadata?.info?.type;
+      console.log(`[AbacatePay Webhook] Processing ${event.event}. Resource ID:`, resource.id);
+      
+      interface BillingMetadata {
+        installmentId?: string;
+        installment?: { id: string };
+        subscriptionId?: string;
+        subscription?: { id: string };
+        type?: string;
+        info?: { type: string };
+      }
+
+      let metadata = resource.metadata as string | BillingMetadata | undefined;
+      
+      // Safety: Parse metadata if it comes as a string
+      if (typeof metadata === "string") {
+        try {
+          metadata = JSON.parse(metadata) as BillingMetadata;
+        } catch {
+          console.error("[AbacatePay Webhook] Failed to parse metadata string:", metadata);
+        }
+      }
+
+      const meta = metadata as BillingMetadata | undefined;
+      console.log("[AbacatePay Webhook] Metadata processed:", JSON.stringify(meta, null, 2));
+
+      const installmentId = meta?.installmentId || meta?.installment?.id;
+      const subscriptionId = meta?.subscriptionId || meta?.subscription?.id;
+      const type = meta?.type || meta?.info?.type;
 
       if (installmentId) {
+        console.log("[AbacatePay Webhook] Attempting to mark installment as paid:", installmentId);
         await this.markInstallmentAsPaid(installmentId, resource.id);
+      } else {
+        console.warn("[AbacatePay Webhook] No installmentId found in metadata");
       }
 
       // Handle Cancellation Fee
-      const subId = subscriptionId || metadata?.subscriptionId;
+      const subId = subscriptionId;
       if (type === "cancellation_fee" && subId) {
         const { contractService } = await import("../contract/contract.service");
         const { contractRepository } = await import("../contract/contract.repository");

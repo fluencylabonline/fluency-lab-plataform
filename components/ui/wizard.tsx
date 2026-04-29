@@ -30,7 +30,6 @@ interface WizardProps {
     onOpenChange: (open: boolean) => void;
     steps: WizardStep[];
     onComplete?: () => void;
-    submitLabel?: string;
 }
 
 const contentVariants: Variants = {
@@ -59,7 +58,6 @@ export function Wizard({
     onOpenChange,
     steps,
     onComplete,
-    submitLabel = "Concluir",
 }: WizardProps) {
     const [currentStep, setCurrentStep] = useState(0);
     const [direction, setDirection] = useState(0);

@@ -86,7 +86,7 @@ export interface WhatsAppMessage {
   type: string;
   direction: "inbound" | "outbound";
   status: "sent" | "delivered" | "read" | "failed";
-  metadata: any;
+  metadata: unknown;
   createdAt: Date | string;
 }
 
