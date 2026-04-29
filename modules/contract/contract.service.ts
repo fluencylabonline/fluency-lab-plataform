@@ -9,6 +9,7 @@ import { env } from "@/env";
 import { billingService } from "../billing/billing.service";
 import { addMonths } from "date-fns";
 import { ContractSignatureMetadata } from "./contract.schema";
+import { schedulingService } from "../scheduling/scheduling.service";
 
 interface GuardianData {
   name: string;
@@ -245,11 +246,20 @@ export const contractService = {
    * Finaliza o cancelamento no banco de dados e envia notificação.
    */
   async finalizeCancellation(instanceId: string) {
+    const instance = await contractRepository.findInstanceById(instanceId);
+    if (!instance) throw new Error("Contrato não encontrado.");
+
     await contractRepository.updateInstance(instanceId, {
       status: "cancelled",
     });
 
-    const instance = await contractRepository.findInstanceById(instanceId);
+    // 1. Cancel future classes
+    await schedulingService.cancelFutureClassesForStudent(instance.userId);
+
+    // 2. Deactivate user
+    await userService.updateUser(instance.userId, { isActive: false });
+
+    // 3. Send notification
     if (instance?.user?.email) {
       await communicationService.sendContractCancelledEmail(
         instance.user.email, 

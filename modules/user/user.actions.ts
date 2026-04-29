@@ -246,3 +246,47 @@ export const revealSensitiveDataAction = adminAction
       return { success: false, error: "error" };
     }
   });
+
+export const requestStudentDeactivationAction = adminAction
+  .inputSchema(
+    z.object({
+      userId: z.string(),
+      password: z.string(),
+    })
+  )
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const { userId, password } = parsedInput;
+
+      // 1. Sudo Mode Verification
+      const isValid = await verifySudoMode(ctx.user.id, ctx.user.email!, password);
+      if (!isValid) return { success: false, error: "authError" };
+
+      // 2. Resolve Services and Repositories (Dynamic imports)
+      const { contractService } = await import("../contract/contract.service");
+      const { contractRepository } = await import("../contract/contract.repository");
+
+      // 3. Find active (signed) contract for the student
+      const contracts = await contractRepository.findUserInstances(userId);
+      const activeContract = contracts.find((c) => c.status === "signed");
+
+      if (!activeContract) {
+        const { schedulingService } = await import("../scheduling/scheduling.service");
+        await schedulingService.cancelFutureClassesForStudent(userId);
+        await userService.updateUser(userId, { isActive: false });
+        revalidatePath("/hub/admin/users");
+        revalidatePath("/hub/manager/users");
+        return { success: true, feeRequired: false };
+      }
+
+      const result = await contractService.requestCancellation(activeContract.id);
+
+      revalidatePath("/hub/admin/users");
+      revalidatePath("/hub/manager/users");
+
+      return result;
+    } catch (error) {
+      console.error("[requestStudentDeactivationAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });

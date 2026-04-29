@@ -35,7 +35,7 @@ export default async function UserDetailsPage({ params }: UserDetailsPageProps) 
       : Promise.resolve([])
   ]);
 
-  const activeSub = subscriptions.find(s => s.status === "active");
+  const activeSub = subscriptions.find(s => s.status === "active" || s.status === "pending_fee");
   const installments = activeSub
     ? await billingService.getInstallmentsBySubscriptionId(activeSub.id)
     : [];

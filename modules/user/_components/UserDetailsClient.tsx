@@ -24,6 +24,7 @@ import { TeacherEarningsTab } from "./userDetails/TeacherEarningsTab";
 import { ContractsTab } from "./userDetails/ContractsTab";
 import { TeacherScheduleTab } from "./userDetails/TeacherScheduleTab";
 import { StudentCurriculumTab } from "./userDetails/StudentCurriculumTab";
+import { ActionsTab } from "./userDetails/ActionsTab";
 import { Header } from "@/components/layout/header";
 
 const rateSchema = z.object({
@@ -244,6 +245,15 @@ export function UserDetailsClient({
                 Currículo
               </TabsTrigger>
             )}
+
+            {user.role === "student" && isAdmin && (
+              <TabsTrigger
+                value="actions"
+                className="shrink-0 [&[data-state=active]]:!bg-transparent [&[data-state=active]]:!shadow-none [&[data-state=active]]:!text-primary [&[data-state=active]]:!border-none focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+              >
+                {t("actions")}
+              </TabsTrigger>
+            )}
           </TabsList>
         </div>
 
@@ -301,6 +311,18 @@ export function UserDetailsClient({
         {user.role === "student" && (
           <TabsContent value="curriculum" className="mt-4">
             <StudentCurriculumTab studentId={user.id} isAdmin={isAdmin} />
+          </TabsContent>
+        )}
+
+        {user.role === "student" && isAdmin && (
+          <TabsContent value="actions" className="mt-4">
+            <ActionsTab
+              userId={user.id}
+              userName={user.name || ""}
+              isActive={user.isActive ?? true}
+              activeSubscription={activeSubscription}
+              installments={installments}
+            />
           </TabsContent>
         )}
       </Tabs>

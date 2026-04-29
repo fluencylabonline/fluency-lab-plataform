@@ -953,5 +953,68 @@ export const schedulingService = {
       orderBy: [asc(slotInstances.startAt)],
     });
   },
+
+  async cancelFutureClassesForStudent(studentId: string) {
+    const now = new Date();
+    
+    // 1. Get all future scheduled classes for this student
+    const futureClasses = await db.query.slotInstances.findMany({
+      where: and(
+        eq(slotInstances.studentId, studentId),
+        eq(slotInstances.status, "scheduled"),
+        gte(slotInstances.startAt, now)
+      ),
+      orderBy: [slotInstances.startAt]
+    });
+
+    if (futureClasses.length === 0) return { success: true, count: 0 };
+
+    const student = await userService.getUser(studentId);
+    const teacherIds = Array.from(new Set(futureClasses.map(c => c.teacherId)));
+
+    return await db.transaction(async (tx) => {
+      // 2. Mark future classes as canceled-admin
+      await tx.update(slotInstances)
+        .set({ status: "canceled-admin", updatedAt: now })
+        .where(
+          and(
+            eq(slotInstances.studentId, studentId),
+            eq(slotInstances.status, "scheduled"),
+            gte(slotInstances.startAt, now)
+          )
+        );
+
+      // 3. Create new AVAILABLE slots for each canceled class
+      for (const cls of futureClasses) {
+        await tx.insert(slotInstances).values({
+          teacherId: cls.teacherId,
+          ruleId: cls.ruleId,
+          type: cls.type,
+          status: "available",
+          startAt: cls.startAt,
+          endAt: cls.endAt,
+          updatedAt: now
+        });
+      }
+
+      // 4. Notify each teacher about the cancellation and new availability
+      for (const teacherId of teacherIds) {
+        const teacher = await userService.getUser(teacherId);
+        if (teacher && student) {
+          const teacherClasses = futureClasses.filter(c => c.teacherId === teacherId);
+          const firstClass = teacherClasses[0].startAt;
+          const lastClass = teacherClasses[teacherClasses.length - 1].startAt;
+          
+          await communicationService.sendScheduleAlertEmail(
+            teacher.email,
+            teacher.name,
+            `O aluno ${student.name} encerrou o contrato e não fará mais aulas. ${teacherClasses.length} aulas foram canceladas no período de ${format(firstClass, "dd/MM")} a ${format(lastClass, "dd/MM")}. Novos horários vagos foram abertos em sua agenda automaticamente.`
+          );
+        }
+      }
+
+      return { success: true, count: futureClasses.length };
+    });
+  }
 };
 
