@@ -2,8 +2,10 @@
 
 import { protectedAction, permissionAction } from "@/lib/safe-action";
 import { learningService } from "./learning.service";
+import { learningRepository } from "./learning.repository";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { studentProfileSurveySchema } from "./learning.schema.zod";
 
 
 // ================= SCHEMAS =================
@@ -66,6 +68,21 @@ const removeLessonFromPlanSchema = z.object({
   lessonId: z.uuid(),
 });
 
+const saveProfileSurveySchema = z.object({
+  id: z.uuid().optional(),
+  studentId: z.string().optional(),
+  responses: z.any(),
+});
+
+const finalizeProfileSchema = z.object({
+  profileId: z.uuid(),
+});
+
+const associateProfileSchema = z.object({
+  profileId: z.uuid(),
+  studentId: z.string(),
+});
+
 
 // ================= ACTIONS =================
 
@@ -93,8 +110,16 @@ export const recordPracticeResultAction = protectedAction
  */
 export const generatePlanAction = protectedAction
   .schema(generatePlanSchema)
-  .action(async ({ parsedInput, ctx }) => {
-    const plan = await learningService.generatePersonalizedPlan(ctx.user.id, parsedInput.languageId);
+  .action(async ({ ctx }) => {
+    // Find the active profile for this student
+    const profile = await learningRepository.findProfileByStudentId(ctx.user.id);
+    if (!profile) throw new Error("Student profile not found. Please complete assessment.");
+
+    const plan = await learningService.generatePersonalizedPlan(
+      ctx.user.id, 
+      profile.id,
+      { allowSuggestions: false }
+    );
 
     revalidatePath("/student/learning/plans");
 
@@ -236,5 +261,87 @@ export const getStudentPlansAction = permissionAction("material.view")
       console.error("[getStudentPlansAction] Error:", error);
       return { success: false, error: (error as Error).message };
     }
+  });
+
+/**
+ * Action to save a draft of the student profile survey.
+ */
+export const saveProfileSurveyAction = protectedAction
+  .schema(saveProfileSurveySchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const result = await learningService.saveProfileSurvey(parsedInput, ctx.user.id);
+    return { success: true, profile: result };
+  });
+
+/**
+ * Action to finalize the student profile, triggering AI analysis and embedding.
+ */
+export const finalizeProfileAction = protectedAction
+  .schema(finalizeProfileSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    // 1. Fetch current profile to validate responses against full schema
+    const profile = await learningService.findProfileById(parsedInput.profileId);
+    if (!profile) return { success: false, error: "Perfil não encontrado" };
+
+    const validation = studentProfileSurveySchema.safeParse(profile.responses);
+    if (!validation.success) {
+      return { success: false, error: "Questionário incompleto ou inválido" };
+    }
+
+    const result = await learningService.finalizeProfile(parsedInput.profileId, ctx.user.id);
+    revalidatePath("/hub/manager/students");
+    return { success: true, profile: result };
+  });
+
+/**
+ * Action for managers to associate an orphan profile to a student.
+ */
+export const associateProfileToStudentAction = permissionAction("student.support")
+  .schema(associateProfileSchema)
+  .action(async ({ parsedInput }) => {
+    await learningService.associateStudentProfile(parsedInput.profileId, parsedInput.studentId);
+    revalidatePath("/hub/manager/students");
+    return { success: true };
+  });
+
+export const generatePersonalizedPlanAction = protectedAction
+  .schema(z.object({
+    profileId: z.string(),
+    studentId: z.string(),
+    allowSuggestions: z.boolean().default(false),
+  }))
+  .action(async ({ parsedInput, ctx }) => {
+    if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+      throw new Error("Unauthorized");
+    }
+
+    const plan = await learningService.generatePersonalizedPlan(
+      parsedInput.studentId,
+      parsedInput.profileId,
+      { allowSuggestions: parsedInput.allowSuggestions },
+      ctx.user.id
+    );
+
+    revalidatePath(`/hub/manager/students/onboarding/${parsedInput.profileId}/view`);
+    return { success: true, planId: plan.id };
+  });
+
+const archiveProfileSchema = z.object({
+  profileId: z.string().uuid(),
+});
+
+export const archiveProfileAction = permissionAction("student.support")
+  .schema(archiveProfileSchema)
+  .action(async ({ parsedInput }) => {
+    const profile = await learningService.findProfileById(parsedInput.profileId);
+    if (!profile) return { success: false, error: "Perfil não encontrado" };
+
+    if (profile.studentId) {
+      return { success: false, error: "Apenas perfis sem alunos vinculados podem ser desativados" };
+    }
+
+    await learningService.archiveProfile(parsedInput.profileId);
+    revalidatePath("/hub/manager/students/onboarding");
+    return { success: true };
   });
 

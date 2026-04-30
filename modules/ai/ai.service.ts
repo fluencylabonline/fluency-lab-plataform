@@ -52,6 +52,119 @@ export const aiService = {
   },
 
   /**
+   * Generates a qualitative pedagogical summary based on the student survey responses.
+   * This summary is used to generate the embedding for RAG.
+   */
+  async generateStudentProfileSummary(responses: Record<string, unknown>, userId?: string): Promise<string> {
+    if (userId) {
+      const limit = await checkRateLimit("gemini_summary", userId, 50);
+      if (!limit.success) throw new Error("Rate limit exceeded for AI summary");
+    }
+
+    const model = genAI.getGenerativeModel({
+      model: "models/gemini-2.0-flash",
+    });
+
+    const prompt = `Atue como um Especialista em Pedagogia e Design Instrucional.
+    Analise as respostas do questionário de onboarding de um aluno e gere um resumo qualitativo detalhado (Pedagogical Profile) em PORTUGUÊS.
+    
+    Este resumo deve capturar:
+    1. Perfil Profissional e Interesses: Como o aluno usa o idioma e o que o motiva.
+    2. Nível e Histórico: Onde ele está agora e qual sua bagagem.
+    3. Objetivos e Prazos: O que ele quer alcançar e em quanto tempo.
+    4. Estilo de Aprendizagem e Preferências: Como ele prefere aprender e que tipo de correções espera.
+    5. Desafios e Bloqueios: O que o impede de avançar (ex: ansiedade ao falar).
+    
+    O resumo deve ser escrito de forma narrativa e técnica, focado em ajudar a IA a selecionar as melhores lições para ele.
+    
+    RESPOSTAS DO ALUNO:
+    ${JSON.stringify(responses, null, 2)}
+    
+    Resumo Qualitativo:`;
+
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  },
+
+  /**
+   * Generates a structural sequence for a learning plan.
+   * Decides between existing lessons and suggestions for new content.
+   */
+  async generatePersonalizedPlanStructure(
+    params: {
+      profileSummary: string;
+      currentLevel: string;
+      availableLessons: Array<{ id: string; title: string; difficulty: string }>;
+      allowSuggestions: boolean;
+    },
+    userId?: string
+  ) {
+    if (userId) {
+      const limit = await checkRateLimit("gemini_plan_gen", userId, 50);
+      if (!limit.success) throw new Error("Rate limit exceeded for AI plan generation");
+    }
+
+    const model = genAI.getGenerativeModel({
+      model: "models/gemini-2.0-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            planName: { type: SchemaType.STRING },
+            slots: {
+              type: SchemaType.ARRAY,
+              items: {
+                type: SchemaType.OBJECT,
+                properties: {
+                  type: { type: SchemaType.STRING, format: "enum", enum: ["existing", "suggestion"] },
+                  lessonId: { type: SchemaType.STRING }, // Used if type is 'existing'
+                  suggestion: {
+                    type: SchemaType.OBJECT,
+                    properties: {
+                      title: { type: SchemaType.STRING },
+                      description: { type: SchemaType.STRING },
+                      objective: { type: SchemaType.STRING }
+                    },
+                    required: ["title", "description", "objective"]
+                  }
+                },
+                required: ["type"]
+              }
+            }
+          },
+          required: ["planName", "slots"]
+        }
+      }
+    });
+
+    const prompt = `Atue como um Diretor Pedagógico de uma escola de idiomas de elite.
+    Seu objetivo é criar um Plano de Estudos de 24 AULAS personalizado para este aluno.
+    
+    PERFIL DO ALUNO:
+    "${params.profileSummary}"
+    NÍVEL ATUAL: ${params.currentLevel}
+    
+    AULAS DISPONÍVEIS NO BANCO:
+    ${JSON.stringify(params.availableLessons, null, 2)}
+    
+    INSTRUÇÕES:
+    1. Crie uma sequência lógica de EXATAMENTE 24 aulas que leve o aluno do nível atual para o próximo objetivo.
+    2. Se uma aula disponível no banco for uma excelente combinação para o perfil e nível, use-a (type: "existing").
+    3. Se NÃO houver uma aula ideal no banco para um determinado passo necessário na jornada:
+       - Se allowSuggestions for TRUE: Crie uma SUGESTÃO de aula (type: "suggestion") com tema, descrição e objetivo.
+       - Se allowSuggestions for FALSE: Tente adaptar a aula disponível mais próxima.
+    4. O plano deve ser equilibrado entre interesses profissionais e gramática necessária para o nível.
+    
+    Permitir Sugestões: ${params.allowSuggestions ? "SIM" : "NÃO"}
+    
+    Retorne o JSON conforme o esquema definido com exatamente 24 slots.`;
+
+    const result = await model.generateContent(prompt);
+    return JSON.parse(result.response.text());
+  },
+
+  /**
    * Step 3: Parser Semântico. 
    * Extrair vocabulário e estruturas sugeridas de um texto.
    */

@@ -1,7 +1,7 @@
 import {
-  pgTable, uuid, varchar, text, timestamp, integer, doublePrecision, pgEnum, jsonb, vector, boolean
+  pgTable, uuid, varchar, text, timestamp, integer, doublePrecision, pgEnum, jsonb, vector, boolean, uniqueIndex
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { usersTable } from "@/modules/user/user.schema";
 import { languages, learningItems, lessons } from "@/modules/curriculum/curriculum.schema";
 
@@ -22,19 +22,46 @@ export const planStatusEnum = pgEnum("plan_status", [
   "paused"
 ]);
 
+export const profileStatusEnum = pgEnum("profile_status", [
+  "draft",
+  "active",
+  "archived"
+]);
+
 // ================= TABLES =================
 
 // 1. Student Profiles (Adaptive Learning specific data)
 export const studentProfiles = pgTable("learning_student_profiles", {
-  studentId: varchar("student_id", { length: 255 }).primaryKey().references(() => usersTable.id, { onDelete: "cascade" }),
+  id: uuid("id").primaryKey().defaultRandom(),
+  studentId: varchar("student_id", { length: 255 }).references(() => usersTable.id, { onDelete: "cascade" }),
 
+  // Survey Data (The 10 steps)
+  responses: jsonb("responses").notNull().default({}),
+  
   // Vector profile for RAG matching
   profileVector: vector("profile_vector", { dimensions: 3072 }),
 
   // IA qualitative notes
   qualitativeNotes: text("qualitative_notes"),
 
+  status: profileStatusEnum("status").default("draft").notNull(),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [{
+  uniqueStudentId: uniqueIndex("idx_student_profiles_student_id").on(t.studentId).where(sql`student_id IS NOT NULL`)
+}]);
+
+// 1.1 Student Profile History (Audit Trail)
+export const studentProfileHistory = pgTable("learning_student_profile_history", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  profileId: uuid("profile_id").references(() => studentProfiles.id, { onDelete: "cascade" }).notNull(),
+  studentId: varchar("student_id", { length: 255 }),
+  responses: jsonb("responses").notNull(),
+  qualitativeNotes: text("qualitative_notes"),
+  status: varchar("status", { length: 50 }),
+  changedBy: varchar("changed_by", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // 2. Student Item Progress (SRS Motor SM-2)
@@ -91,10 +118,18 @@ export const planLessons = pgTable("learning_plan_lessons", {
 
 // ================= RELATIONS =================
 
-export const studentProfilesRelations = relations(studentProfiles, ({ one }) => ({
-  user: one(usersTable, {
+export const studentProfilesRelations = relations(studentProfiles, ({ one, many }) => ({
+  student: one(usersTable, {
     fields: [studentProfiles.studentId],
     references: [usersTable.id],
+  }),
+  history: many(studentProfileHistory),
+}));
+
+export const studentProfileHistoryRelations = relations(studentProfileHistory, ({ one }) => ({
+  profile: one(studentProfiles, {
+    fields: [studentProfileHistory.profileId],
+    references: [studentProfiles.id],
   }),
 }));
 

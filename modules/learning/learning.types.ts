@@ -10,6 +10,7 @@ export interface StudentCurriculumGap {
     totalClasses: number;
     completedClasses: number;
     classesWithLesson: number;
+    profileId?: string;
 }
 
 export type LearningPlan = typeof learningPlans.$inferSelect;

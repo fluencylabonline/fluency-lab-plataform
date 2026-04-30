@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import {
-  studentProfiles, studentItemProgress, learningPlans, planLessons
+  studentProfiles, studentItemProgress, learningPlans, planLessons, studentProfileHistory
 } from "./learning.schema";
 import { eq, and, asc, sql, isNull, desc } from "drizzle-orm";
 
@@ -12,13 +12,63 @@ export const learningRepository = {
     });
   },
 
-  async upsertProfile(data: typeof studentProfiles.$inferInsert) {
-    return db.insert(studentProfiles)
-      .values(data)
-      .onConflictDoUpdate({
-        target: studentProfiles.studentId,
-        set: { ...data, updatedAt: new Date() },
-      })
+  async findProfileById(id: string) {
+    return db.query.studentProfiles.findFirst({
+      where: eq(studentProfiles.id, id),
+    });
+  },
+
+  async findAllProfiles() {
+    return db.query.studentProfiles.findMany({
+      with: {
+        student: true,
+      },
+      orderBy: [desc(studentProfiles.updatedAt)],
+    });
+  },
+
+  async upsertProfile(data: typeof studentProfiles.$inferInsert, changedBy?: string) {
+    return db.transaction(async (tx) => {
+      const existing = data.id ? await tx.query.studentProfiles.findFirst({
+        where: eq(studentProfiles.id, data.id),
+      }) : null;
+
+      let profile;
+      if (existing) {
+        [profile] = await tx.update(studentProfiles)
+          .set({ ...data, updatedAt: new Date() })
+          .where(eq(studentProfiles.id, existing.id))
+          .returning();
+      } else {
+        [profile] = await tx.insert(studentProfiles)
+          .values(data)
+          .returning();
+      }
+
+      // Add to history
+      await tx.insert(studentProfileHistory).values({
+        profileId: profile.id,
+        studentId: profile.studentId,
+        responses: profile.responses,
+        qualitativeNotes: profile.qualitativeNotes,
+        changedBy,
+      });
+
+      return profile;
+    });
+  },
+
+  async associateProfileToStudent(profileId: string, studentId: string) {
+    return db.update(studentProfiles)
+      .set({ studentId, updatedAt: new Date() })
+      .where(eq(studentProfiles.id, profileId))
+      .returning();
+  },
+
+  async archiveProfile(id: string) {
+    return db.update(studentProfiles)
+      .set({ status: "archived", updatedAt: new Date() })
+      .where(eq(studentProfiles.id, id))
       .returning();
   },
 
@@ -125,8 +175,8 @@ export const learningRepository = {
 
   async findSimilarLessons(vector: number[], languageId: string, limit: number = 10) {
     // pgvector similarity search: <=> is cosine distance
-    return db.execute<{ id: string, distance: number }>(sql`
-      SELECT id, (embedding <=> ${JSON.stringify(vector)}::vector) as distance
+    return db.execute<{ id: string, title: string, difficulty: string, distance: number }>(sql`
+      SELECT id, title, difficulty, (embedding <=> ${JSON.stringify(vector)}::vector) as distance
       FROM curriculum_lessons 
       WHERE status = 'ready' 
       AND language_id = ${languageId}

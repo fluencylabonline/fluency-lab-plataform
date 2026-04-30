@@ -9,8 +9,10 @@ import {
   LayoutGrid,
   Clock,
   History,
-  Coins
+  Coins,
+  Sparkles
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { format, addMonths, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -55,6 +57,7 @@ interface StudentCurriculumTabProps {
 export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTabProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [slots, setSlots] = useState<SlotInstanceWithDetails[]>([]);
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [gap, setGap] = useState<StudentCurriculumGap | null>(null);
@@ -318,6 +321,18 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
               </Button>
               <Button onClick={() => setShowAssignPlan(true)} className="shrink-0">
                 <BookOpen className="mr-2 h-4 w-4" /> Designar Plano
+              </Button>
+              <Button 
+                variant="outline"
+                className="shrink-0 border-primary/20 hover:border-primary/50 text-primary"
+                onClick={() => {
+                  const path = gap?.profileId 
+                    ? `/hub/manager/students/onboarding/${gap.profileId}`
+                    : `/hub/manager/students/onboarding/new?studentId=${studentId}`;
+                  router.push(path);
+                }}
+              >
+                <Sparkles className="mr-2 h-4 w-4 fill-primary/10" /> Perfil Adaptativo
               </Button>
             </>
           )}

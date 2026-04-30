@@ -30,6 +30,7 @@ interface WizardProps {
     onOpenChange: (open: boolean) => void;
     steps: WizardStep[];
     onComplete?: () => void;
+    onStepChange?: (stepIndex: number) => void;
 }
 
 const contentVariants: Variants = {
@@ -58,6 +59,7 @@ export function Wizard({
     onOpenChange,
     steps,
     onComplete,
+    onStepChange,
 }: WizardProps) {
     const [currentStep, setCurrentStep] = useState(0);
     const [direction, setDirection] = useState(0);
@@ -75,7 +77,9 @@ export function Wizard({
     const handleNext = () => {
         if (currentStep < steps.length - 1) {
             setDirection(1);
-            setCurrentStep((prev) => prev + 1);
+            const nextStep = currentStep + 1;
+            setCurrentStep(nextStep);
+            onStepChange?.(nextStep);
         } else {
             onComplete?.();
             onOpenChange(false);
@@ -85,7 +89,9 @@ export function Wizard({
     const handlePrev = () => {
         if (currentStep > 0) {
             setDirection(-1);
-            setCurrentStep((prev) => prev - 1);
+            const prevStep = currentStep - 1;
+            setCurrentStep(prevStep);
+            onStepChange?.(prevStep);
         }
     };
 

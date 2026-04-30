@@ -2,10 +2,67 @@ import { learningRepository } from "./learning.repository";
 import { curriculumRepository } from "@/modules/curriculum/curriculum.repository";
 import { addDays } from "date-fns";
 import { db } from "@/lib/db";
+import { 
+  studentProfiles, 
+  learningPlans, 
+  planLessons,
+} from "./learning.schema";
+import { lessons, languages } from "@/modules/curriculum/curriculum.schema";
+import { usersTable } from "@/modules/user/user.schema";
 import { slotInstances } from "@/modules/scheduling/scheduling.schema";
-import { eq, and, gte, asc } from "drizzle-orm";
+import { eq, and, asc, gte } from "drizzle-orm";
+import { aiService } from "@/modules/ai/ai.service";
 
 export const learningService = {
+  // Profiles
+  async saveProfileSurvey(data: { id?: string, studentId?: string, responses: Record<string, unknown> }, userId?: string) {
+    return learningRepository.upsertProfile({
+      id: data.id,
+      studentId: data.studentId,
+      responses: data.responses,
+      status: "draft",
+    }, userId);
+  },
+
+  async finalizeProfile(profileId: string, userId?: string) {
+    const profile = await learningRepository.findProfileById(profileId);
+    if (!profile) throw new Error("Profile not found");
+
+    // 1. Generate Pedagogical Summary using Gemini 2.0 Flash
+    const summary = await aiService.generateStudentProfileSummary(profile.responses as Record<string, unknown>, userId);
+
+    // 2. Generate Embedding Vector
+    const vector = await aiService.getEmbeddings(summary, userId);
+
+    // 3. Update Profile
+    return learningRepository.upsertProfile({
+      id: profileId,
+      qualitativeNotes: summary,
+      profileVector: vector,
+      status: "active",
+    }, userId);
+  },
+
+  async findProfileById(id: string) {
+    return learningRepository.findProfileById(id);
+  },
+
+  async getAllProfiles() {
+    return learningRepository.findAllProfiles();
+  },
+
+  async findProfileByStudentId(studentId: string) {
+    return learningRepository.findProfileByStudentId(studentId);
+  },
+
+  async associateStudentProfile(profileId: string, studentId: string) {
+    return learningRepository.associateProfileToStudent(profileId, studentId);
+  },
+
+  async archiveProfile(profileId: string) {
+    return learningRepository.archiveProfile(profileId);
+  },
+
   /**'
    * Updates student progress for a specific item using the SM-2 algorithm.
    * @param q Quality of response (0-5). 0-2 = Fail, 3-5 = Pass.
@@ -96,36 +153,92 @@ export const learningService = {
   },
 
   /**
-   * Generates a learning plan based on student level and RAG using pgvector.
+   * Generates a learning plan based on student level, profile vector, and AI orchestration.
+   * Supports AI suggestions for missing content if allowSuggestions is true.
    */
-  async generatePersonalizedPlan(studentId: string, languageId: string) {
-    // 1. Get student profile and vector
-    const profile = await learningRepository.findProfileByStudentId(studentId);
-    if (!profile || !profile.profileVector) {
-      throw new Error("Student profile vector not found. Please complete assessment.");
+  async generatePersonalizedPlan(studentId: string, profileId: string, options: { allowSuggestions: boolean }, userId?: string) {
+    // 1. Get student and profile
+    const student = await db.query.usersTable.findFirst({
+      where: eq(usersTable.id, studentId),
+    });
+    if (!student) throw new Error("Student not found");
+
+    const profile = await learningRepository.findProfileById(profileId);
+    if (!profile || !profile.profileVector || !profile.qualitativeNotes) {
+      throw new Error("Student profile or AI summary not found. Please complete assessment.");
     }
 
-    // 2. Query for similar lessons using pgvector
+    // 2. Determine target language (default to English if not specified)
+    // We'll use the first language from the student's languages array or a default
+    let languageId = student.languages?.[0];
+    if (!languageId) {
+      const enLang = await db.query.languages.findFirst({
+        where: eq(languages.code, "en")
+      });
+      if (enLang) languageId = enLang.id;
+    }
+    if (!languageId) throw new Error("Target language not found for plan generation");
+
+    // 3. Find top 40 similar lessons to give as candidates to the AI
     const similarRows = await learningRepository.findSimilarLessons(
       profile.profileVector as number[],
       languageId,
-      10
+      40
     );
 
-    // 3. Create Plan
-    const plan = await learningRepository.createPlan({
-      studentId,
-      name: "",
-      languageId: ""
+    const availableLessons = similarRows.rows.map(r => ({
+      id: r.id as string,
+      title: r.title as string,
+      difficulty: r.difficulty as string
+    }));
+
+    // 4. Call AI to generate the plan structure
+    const planStructure = await aiService.generatePersonalizedPlanStructure({
+      profileSummary: profile.qualitativeNotes,
+      currentLevel: `Elo Score: ${student.currentEloScore} (CEFR approx target mapping)`,
+      availableLessons,
+      allowSuggestions: options.allowSuggestions
+    }, userId);
+
+    // 5. Create the Plan in DB
+    return db.transaction(async (tx) => {
+      const [plan] = await tx.insert(learningPlans).values({
+        studentId,
+        languageId,
+        name: planStructure.planName || `Plano Personalizado - ${student.name}`,
+        status: "draft",
+      }).returning();
+
+      // 6. Process slots (max 12 as per AI prompt)
+      for (let i = 0; i < planStructure.slots.length; i++) {
+        const slot = planStructure.slots[i];
+        let lessonId = slot.lessonId;
+
+        // If it's a suggestion, create a placeholder lesson
+        if (slot.type === "suggestion" && slot.suggestion) {
+          const [suggestedLesson] = await tx.insert(lessons).values({
+            languageId,
+            title: `[SUGESTÃO] ${slot.suggestion.title}`,
+            difficulty: "A1", // Default, AI should specify in future
+            status: "draft",
+            contentText: `Objetivo: ${slot.suggestion.objective}\n\nDescrição: ${slot.suggestion.description}`,
+            creationStep: 1, // Start at step 1 for manager to complete
+          }).returning();
+          lessonId = suggestedLesson.id;
+        }
+
+        // Link to plan if we have a lessonId
+        if (lessonId) {
+          await tx.insert(planLessons).values({
+            planId: plan.id,
+            lessonId,
+            order: i,
+          });
+        }
+      }
+
+      return plan;
     });
-
-    // 4. Link lessons in order
-    for (let i = 0; i < similarRows.rows.length; i++) {
-      const lessonId = similarRows.rows[i].id as string;
-      await learningRepository.addLessonToPlan(plan.id, lessonId, i);
-    }
-
-    return plan;
   },
 
   /**
@@ -330,6 +443,11 @@ export const learningService = {
     const completed = allStudentClasses.filter(s => s.status === "completed").length;
     const withLesson = allStudentClasses.filter(s => !!s.lessonId).length;
 
+    // 4. Check for pedagogical profile
+    const profile = await db.query.studentProfiles.findFirst({
+      where: eq(studentProfiles.studentId, studentId),
+    });
+
     return {
       upcomingClassesCount: classesCount.length,
       planLessonsCount: lessonCount,
@@ -339,7 +457,8 @@ export const learningService = {
       activePlanId: activePlan?.id,
       totalClasses: allStudentClasses.length,
       completedClasses: completed,
-      classesWithLesson: withLesson
+      classesWithLesson: withLesson,
+      profileId: profile?.id
     };
   },
 
@@ -380,5 +499,4 @@ export const learningService = {
   }
 };
 
-import { learningPlans } from "./learning.schema";
 

@@ -2,10 +2,11 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, Mail, Shield, Circle } from "lucide-react";
+import { Plus, Mail, Shield, Circle, Sparkles } from "lucide-react";
 import { CreateUserVault } from "./CreateUserVault";
 import { Header } from "@/components/layout/header";
 import { hasPermission, Role } from "@/lib/rbac";
+import { cn } from "@/lib/utils";
 import type { User } from "@/modules/user/user.schema";
 import {
   Select,
@@ -18,6 +19,7 @@ import { EmptyResults } from "@/components/ui/empty";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "@/i18n/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { buttonVariants } from "@/components/ui/button";
 
 interface UsersPageClientProps {
   initialData: User[];
@@ -96,6 +98,15 @@ export function UsersPageClient({ initialData, currentUser, basePath }: UsersPag
               </SelectContent>
             </Select>
           </div>
+
+          <div className="flex-1" />
+
+          <Link
+            href="/hub/manager/students/onboarding"
+            className={cn(buttonVariants({ variant: "outline" }), "shrink-0 border-primary/20 text-primary hover:bg-primary/5")}
+          >
+            <Sparkles className="mr-2 h-4 w-4 fill-primary/10" /> Perfil Adaptativo
+          </Link>
         </div>
 
         {filteredUsers.length > 0 ? (
