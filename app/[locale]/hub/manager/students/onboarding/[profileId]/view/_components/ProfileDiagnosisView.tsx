@@ -19,9 +19,26 @@ import {
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Switch } from "@/components/ui/switch";
-import { generatePersonalizedPlanAction } from "@/modules/learning/learning.actions";
+import { generatePersonalizedPlanAction, associateProfileToStudentAction } from "@/modules/learning/learning.actions";
+import { searchStudentsAction } from "@/modules/user/user.actions";
 import { useTransition, useState } from "react";
 import { notify } from "@/components/ui/toaster";
+import { cn } from "@/lib/utils";
+import {
+  Vault,
+  VaultContent,
+  VaultHeader,
+  VaultTitle,
+  VaultDescription,
+  VaultIcon,
+  VaultBody,
+  VaultFooter,
+  VaultPrimaryButton,
+  VaultSecondaryButton,
+} from "@/components/ui/vault";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { Search, Check, Link as LinkIcon } from "lucide-react";
 
 interface ProfileDiagnosisViewProps {
   profile: {
@@ -45,7 +62,53 @@ export function ProfileDiagnosisView({ profile }: ProfileDiagnosisViewProps) {
   const [isPending, startTransition] = useTransition();
   const [allowSuggestions, setAllowSuggestions] = useState(true);
 
+  // Linking State
+  const [isLinkingVaultOpen, setIsLinkingVaultOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<{ id: string; name: string; email: string }[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+
   const qualitativeNotes = profile.qualitativeNotes || "";
+
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const results = await searchStudentsAction({ term: query });
+      if (results?.data) {
+        setSearchResults(results.data);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleLinkStudent = () => {
+    if (!selectedStudentId) return;
+
+    startTransition(async () => {
+      const result = await associateProfileToStudentAction({
+        profileId: profile.id,
+        studentId: selectedStudentId,
+      });
+
+      if (result?.data?.success) {
+        notify.success("Aluno vinculado com sucesso!");
+        setIsLinkingVaultOpen(false);
+        window.location.reload();
+      } else {
+        notify.error("Erro ao vincular aluno");
+      }
+    });
+  };
 
   const handleGeneratePlan = () => {
     startTransition(async () => {
@@ -171,9 +234,19 @@ export function ProfileDiagnosisView({ profile }: ProfileDiagnosisViewProps) {
                   </Button>
 
                   {!profile.studentId ? (
-                    <div className="flex items-center gap-2 px-3 py-2 text-destructive text-xs font-medium">
-                      <AlertTriangle className="size-4 shrink-0" />
-                      Vincule um aluno para prosseguir.
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2 px-3 py-2 text-destructive text-xs font-medium bg-destructive/5 rounded-md border border-destructive/10">
+                        <AlertTriangle className="size-4 shrink-0" />
+                        Vincule um aluno para prosseguir.
+                      </div>
+                      <Button 
+                        variant="secondary" 
+                        size="sm" 
+                        className="rounded-md gap-2"
+                        onClick={() => setIsLinkingVaultOpen(true)}
+                      >
+                        <LinkIcon className="size-4" /> Vincular Aluno Agora
+                      </Button>
                     </div>
                   ) : !profile.student?.lastPlacementTestDate ? (
                     <div className="flex items-center gap-2 px-3 py-2 text-amber-600 dark:text-amber-400 text-xs font-medium">
@@ -206,7 +279,17 @@ export function ProfileDiagnosisView({ profile }: ProfileDiagnosisViewProps) {
                 </div>
                 <div>
                   <h3 className="font-bold text-base leading-tight">{profile.student?.name || "Não vinculado"}</h3>
-                  <p className="text-xs text-muted-foreground truncate max-w-[150px]">{profile.student?.email || "Sem e-mail"}</p>
+                  {profile.student?.email ? (
+                    <p className="text-xs text-muted-foreground truncate max-w-[150px]">{profile.student.email}</p>
+                  ) : (
+                    <Button 
+                      variant="link" 
+                      className="h-auto p-0 text-[10px] text-primary font-bold uppercase tracking-wider"
+                      onClick={() => setIsLinkingVaultOpen(true)}
+                    >
+                      Buscar Aluno
+                    </Button>
+                  )}
                 </div>
               </div>
 
@@ -273,6 +356,81 @@ export function ProfileDiagnosisView({ profile }: ProfileDiagnosisViewProps) {
           </aside>
         </div>
       </main>
+
+      {/* Linking Vault */}
+      <Vault open={isLinkingVaultOpen} onOpenChange={setIsLinkingVaultOpen}>
+        <VaultContent>
+          <VaultHeader>
+            <VaultIcon type="user" />
+            <VaultTitle>Vincular Aluno</VaultTitle>
+            <VaultDescription>
+              Busque por nome ou e-mail para associar este diagnóstico a um aluno ativo.
+            </VaultDescription>
+          </VaultHeader>
+          <VaultBody className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <Input
+                placeholder="Nome ou e-mail do aluno..."
+                className="pl-10 rounded-md"
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                autoFocus
+              />
+            </div>
+
+            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+              {isSearching ? (
+                <div className="flex items-center justify-center py-10">
+                  <Spinner className="size-6 text-primary" />
+                </div>
+              ) : searchResults.length > 0 ? (
+                searchResults.map((student) => (
+                  <button
+                    key={student.id}
+                    onClick={() => setSelectedStudentId(student.id)}
+                    className={cn(
+                      "w-full flex items-center justify-between p-3 rounded-md border text-left transition-all",
+                      selectedStudentId === student.id
+                        ? "border-primary bg-primary/5 ring-1 ring-primary"
+                        : "border-border/60 hover:border-primary/40 hover:bg-muted/5"
+                    )}
+                  >
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-bold">{student.name}</p>
+                      <p className="text-xs text-muted-foreground">{student.email}</p>
+                    </div>
+                    {selectedStudentId === student.id && (
+                      <Check className="size-4 text-primary" />
+                    )}
+                  </button>
+                ))
+              ) : searchQuery.length >= 2 ? (
+                <div className="text-center py-10 text-muted-foreground">
+                  <p className="text-sm font-medium">Nenhum aluno encontrado.</p>
+                  <p className="text-xs">Tente um termo diferente.</p>
+                </div>
+              ) : (
+                <div className="text-center py-10 text-muted-foreground opacity-50">
+                  <Search className="size-8 mx-auto mb-2 stroke-[1.5]" />
+                  <p className="text-xs">Digite pelo menos 2 caracteres para buscar.</p>
+                </div>
+              )}
+            </div>
+          </VaultBody>
+          <VaultFooter>
+            <VaultSecondaryButton onClick={() => setIsLinkingVaultOpen(false)}>
+              Cancelar
+            </VaultSecondaryButton>
+            <VaultPrimaryButton 
+              onClick={handleLinkStudent} 
+              disabled={!selectedStudentId || isPending}
+            >
+              {isPending ? "Vinculando..." : "Confirmar Vínculo"}
+            </VaultPrimaryButton>
+          </VaultFooter>
+        </VaultContent>
+      </Vault>
     </div>
   );
 }
