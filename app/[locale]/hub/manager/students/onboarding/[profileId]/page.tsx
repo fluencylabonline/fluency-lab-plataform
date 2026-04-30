@@ -1,7 +1,7 @@
 import { learningService } from "@/modules/learning/learning.service";
 import { StudentProfileSurvey } from "@/app/[locale]/hub/manager/students/_components/StudentProfileSurvey";
 import { notFound } from "next/navigation";
-import { type StudentProfileSurveyInput } from "@/modules/learning/learning.schema.zod";
+import { type StudentProfileSurveyInput } from "@/modules/learning/learning.schema";
 
 interface OnboardingPageProps {
   params: Promise<{

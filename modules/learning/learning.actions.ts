@@ -5,7 +5,7 @@ import { learningService } from "./learning.service";
 import { learningRepository } from "./learning.repository";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { studentProfileSurveySchema } from "./learning.schema.zod";
+import { studentProfileSurveySchema } from "./learning.schema";
 
 
 // ================= SCHEMAS =================

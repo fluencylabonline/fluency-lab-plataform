@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   studentProfileSurveySchema,
   type StudentProfileSurveyInput
-} from "@/modules/learning/learning.schema.zod";
+} from "@/modules/learning/learning.schema";
 import { notify } from "@/components/ui/toaster";
 import { saveProfileSurveyAction, finalizeProfileAction } from "@/modules/learning/learning.actions";
 import {
