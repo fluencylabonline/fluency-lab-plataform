@@ -183,4 +183,8 @@ export const userService = {
   async updateNotificationPrefs(userId: string, prefs: NotificationPrefs): Promise<User | undefined> {
     return userRepository.updateNotificationPrefs(userId, prefs);
   },
+
+  async countActiveStudents(): Promise<number> {
+    return userRepository.countActiveStudents();
+  },
 };

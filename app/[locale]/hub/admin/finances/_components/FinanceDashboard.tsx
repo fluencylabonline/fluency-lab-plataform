@@ -17,7 +17,8 @@ import { MetricsCards } from "./MetricsCards";
 import { NewTransactionVault } from "./NewTransactionVault";
 import { TransactionsTable } from "./TransactionsTable";
 import { Transaction, FiscalConfig } from "@/modules/finance/finance.schema";
-import { FinanceMetrics, FinanceForecast, MonthlyBreakdownItem } from "@/modules/finance/finance.types";
+import { FinanceMetrics, FinanceForecast, MonthlyBreakdownItem, MEICapacity } from "@/modules/finance/finance.types";
+import { MEICapacityCard } from "./MEICapacityCard";
 
 interface FinanceDashboardProps {
   initialMetrics: FinanceMetrics;
@@ -25,6 +26,7 @@ interface FinanceDashboardProps {
   initialTransactions: Transaction[];
   initialMonthlyBreakdown: MonthlyBreakdownItem[];
   initialFiscalConfig: FiscalConfig | null;
+  initialMEICapacity: MEICapacity;
   currentMonth: number | "all";
   currentYear: number;
   currentStatus: string;
@@ -36,6 +38,7 @@ export function FinanceDashboard({
   initialTransactions,
   initialMonthlyBreakdown,
   initialFiscalConfig,
+  initialMEICapacity,
   currentMonth,
   currentYear,
   currentStatus,
@@ -154,6 +157,8 @@ export function FinanceDashboard({
               />
             </CardContent>
           </Card>
+
+          <MEICapacityCard capacity={initialMEICapacity} />
         </div>
       </div>
     </div>

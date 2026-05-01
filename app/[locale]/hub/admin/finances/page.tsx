@@ -15,7 +15,6 @@ import { startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 
 export default async function AdminFinancesPage({ searchParams }: FinancesPageProps) {
 
-  //TODO: CALCULAR QUANTOAS ALUNOS EU TENHO E QUANTOS EU POSSO TER DENTRO DO LIMITE DO MEI PARA NAO VIRAR SIMPLES NACIONAL
   const t = await getTranslations("AdminFinances");
   const resolvedParams = await searchParams;
 
@@ -37,7 +36,7 @@ export default async function AdminFinancesPage({ searchParams }: FinancesPagePr
   }
 
   // Fetch initial data
-  const [metrics, forecast, transactions, monthlyBreakdown, fiscalConfig] = await Promise.all([
+  const [metrics, forecast, transactions, monthlyBreakdown, fiscalConfig, meiCapacity] = await Promise.all([
     financeService.getFiscalMetrics(year),
     financeService.getForecast(year, monthStr === "all" ? undefined : (monthStr ? parseInt(monthStr) : now.getMonth())),
     financeService.getTransactions({
@@ -46,7 +45,8 @@ export default async function AdminFinancesPage({ searchParams }: FinancesPagePr
       status: status === "all" ? undefined : status
     }),
     financeService.getMonthlyBreakdown(year),
-    financeService.getFiscalConfig(year)
+    financeService.getFiscalConfig(year),
+    financeService.getMEICapacity(year)
   ]);
 
   return (
@@ -63,6 +63,7 @@ export default async function AdminFinancesPage({ searchParams }: FinancesPagePr
           initialTransactions={transactions}
           initialMonthlyBreakdown={monthlyBreakdown}
           initialFiscalConfig={fiscalConfig ?? null}
+          initialMEICapacity={meiCapacity}
           currentMonth={monthStr === "all" ? "all" : (monthStr ? parseInt(monthStr) : now.getMonth())}
           currentYear={year}
           currentStatus={status}

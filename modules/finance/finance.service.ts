@@ -1,7 +1,8 @@
 import { financeRepository } from "./finance.repository";
 import { billingService } from "../billing/billing.service";
 import { payoutService } from "../payout/payout.service";
-import { startOfYear, endOfYear, startOfMonth, endOfMonth } from "date-fns";
+import { userService } from "../user/user.service";
+import { startOfYear, endOfYear, startOfMonth, endOfMonth, addDays } from "date-fns";
 import { CreateTransactionValues, UpsertFiscalConfigValues } from "./finance.schema";
 
 export const financeService = {
@@ -193,5 +194,60 @@ export const financeService = {
 
   async getCategories() {
     return financeRepository.getUniqueCategories();
+  },
+
+  async getMEICapacity(year: number) {
+    const now = new Date();
+    const isCurrentYear = now.getFullYear() === year;
+    const monthsRemaining = isCurrentYear ? (12 - now.getMonth()) : 1;
+
+    // 1. Get metrics, forecast and active plans
+    const [metrics, forecast, studentCount, activePlans] = await Promise.all([
+      this.getFiscalMetrics(year),
+      this.getForecast(year),
+      userService.countActiveStudents(),
+      billingService.listActivePlans()
+    ]);
+
+    const currentRevenue = metrics.revenue.total;
+    const pendingRevenue = forecast.installments;
+    
+    const MEI_LIMIT = 8100000; // R$ 81.000,00
+    const committedRevenue = currentRevenue + pendingRevenue;
+    const remainingBudget = Math.max(0, MEI_LIMIT - committedRevenue);
+
+    // 2. Calculate Ticket Baseline
+    // We use the average of active plans as the baseline because new students will likely 
+    // subscribe to one of these. This avoids noise from small test transactions.
+    const plansAverage = activePlans.length > 0 
+      ? Math.round(activePlans.reduce((acc, p) => acc + (p.price || 0), 0) / activePlans.length)
+      : 16500; // Fallback to R$ 165,00
+
+    // For historical comparison, we still calculate the real average of last month
+    const lastMonthStart = startOfMonth(addDays(now, -30));
+    const lastMonthEnd = endOfMonth(addDays(now, -30));
+    const lastMonthRevenue = await billingService.getTotalRevenue(lastMonthStart, lastMonthEnd);
+    const historicalAverage = studentCount > 0 && lastMonthRevenue > 0 
+      ? Math.round(lastMonthRevenue / studentCount) 
+      : 0;
+
+    // Use the HIGHER of plan average or historical average for capacity safety
+    const capacityTicket = Math.max(plansAverage, historicalAverage);
+
+    // 3. Calculate Available Slots
+    const costPerNewStudent = capacityTicket * monthsRemaining;
+    const availableSlots = costPerNewStudent > 0 ? Math.floor(remainingBudget / costPerNewStudent) : 0;
+    
+    const maxStudents = studentCount + availableSlots;
+
+    return {
+      currentStudents: studentCount,
+      maxStudents,
+      availableSlots,
+      revenueLimit: MEI_LIMIT,
+      currentRevenue,
+      remainingRevenue: remainingBudget,
+      averageTicket: historicalAverage || plansAverage // Show historical if available, else plans
+    };
   }
 };

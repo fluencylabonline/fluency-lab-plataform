@@ -143,5 +143,16 @@ export const userRepository = {
         )
       )
     });
+  },
+
+  async countActiveStudents(): Promise<number> {
+    const result = await db.query.usersTable.findMany({
+      where: (table, { eq, and }) => and(
+        eq(table.role, "student"),
+        eq(table.isActive, true)
+      ),
+      columns: { id: true }
+    });
+    return result.length;
   }
 };

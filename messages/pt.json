@@ -1388,6 +1388,16 @@
         "title": "Configuração Fiscal",
         "description": "Como calculamos seus impostos (MEI/IRPF)."
       }
+    },
+    "capacity": {
+      "title": "Limite MEI",
+      "revenueLimit": "Limite Anual",
+      "nearLimitWarning": "Você está próximo do limite do MEI!",
+      "currentStudents": "Alunos Ativos",
+      "availableSlots": "Vagas Restantes",
+      "averageTicket": "Ticket Médio (Mensal)",
+      "maxEstimatedStudents": "Capacidade Total Estimada",
+      "committedRevenue": "Comprometido (Pago + Previsto)"
     }
   },
   "Courses": {

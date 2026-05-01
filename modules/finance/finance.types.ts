@@ -46,3 +46,13 @@ export interface DetailedForecast {
   installments: InstallmentWithDetails[];
   pendingExpenses: Transaction[];
 }
+
+export interface MEICapacity {
+  currentStudents: number;
+  maxStudents: number;
+  availableSlots: number;
+  revenueLimit: number;
+  currentRevenue: number;
+  remainingRevenue: number;
+  averageTicket: number;
+}
