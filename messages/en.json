@@ -1326,6 +1326,16 @@
         "title": "Fiscal Configuration",
         "description": "How we calculate your taxes (MEI/IRPF)."
       }
+    },
+    "capacity": {
+      "title": "MEI Limit",
+      "revenueLimit": "Annual Limit",
+      "nearLimitWarning": "You are near the MEI limit!",
+      "currentStudents": "Active Students",
+      "availableSlots": "Available Slots",
+      "averageTicket": "Average Ticket (Monthly)",
+      "maxEstimatedStudents": "Total Estimated Capacity",
+      "committedRevenue": "Committed (Paid + Forecasted)"
     }
   },
   "Courses": {
@@ -1392,6 +1402,54 @@
       "classesDesc": "Scheduled class reminders and confirmations.",
       "marketing": "News & Promotions",
       "marketingDesc": "Stay up to date with new features and special offers."
+    }
+  },
+  "Dashboard": {
+    "title": "Overview",
+    "subtitle": "Monitor FluencyLab's performance in real-time.",
+    "stats": {
+      "mrr": "Monthly Revenue (MRR)",
+      "activeStudents": "Active Students",
+      "todayClasses": "Today's Classes",
+      "studentGrowth": "New Students",
+      "vsLastMonth": "vs. last month"
+    },
+    "finance": {
+      "cashFlow": "Cash Flow",
+      "cashFlowDesc": "Revenue and expenses from the last 6 months",
+      "income": "Income",
+      "expense": "Expense",
+      "totalIncome": "Total Revenue",
+      "totalExpense": "Total Expense",
+      "netProfit": "Net Profit",
+      "margin": "{value}% margin",
+      "pendingIncome": "To Receive",
+      "vsLastMonth": "prev. month"
+    },
+    "sections": {
+      "overview": "Overview",
+      "finance": "Finance",
+      "academic": "Academic"
+    },
+    "academic": {
+      "attendanceTitle": "Class Status",
+      "attendanceDesc": "Summary of attendance and cancellations",
+      "completed": "Completed",
+      "noShow": "No-show",
+      "canceledStudent": "Stud. Canceled",
+      "canceledTeacher": "Teach. Canceled",
+      "classes": "classes",
+      "emptyClasses": "No class data",
+      "coursesTitle": "Featured Courses",
+      "coursesDesc": "Courses with the highest number of enrollments",
+      "emptyCourses": "No students enrolled"
+    },
+    "onboarding": {
+      "title": "Onboarding Funnel",
+      "subtitle": "Students by initial process stage",
+      "students": "st.",
+      "dropped": "{count} left",
+      "empty": "No onboarding data"
     }
   }
 }

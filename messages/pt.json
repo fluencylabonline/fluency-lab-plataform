@@ -239,37 +239,6 @@
     "pixCopySuccess": "Código PIX copiado!",
     "adminPasswordRequired": "A senha administrativa é obrigatória."
   },
-  "Dashboard": {
-    "title": "Visão Geral",
-    "subtitle": "Acompanhe o desempenho da FluencyLab em tempo real.",
-    "stats": {
-      "mrr": "Receita Mensal (MRR)",
-      "activeStudents": "Alunos Ativos",
-      "todayClasses": "Aulas Hoje",
-      "studentGrowth": "Novos Alunos"
-    },
-    "finance": {
-      "cashFlow": "Fluxo de Caixa",
-      "cashFlowDesc": "Comparativo mensal de receitas e despesas (R$)",
-      "income": "Receita",
-      "expense": "Despesa"
-    },
-    "academic": {
-      "classStatus": "Status de Aulas",
-      "classStatusDesc": "Resumo de presença e cancelamentos",
-      "popularCourses": "Cursos em Destaque",
-      "popularCoursesDesc": "Cursos com maior número de matrículas",
-      "enrollments": "matrículas",
-      "noRecentClasses": "Nenhuma aula realizada",
-      "noCourses": "Nenhum curso matriculado"
-    },
-    "retention": {
-      "onboarding": "Funil de Onboarding",
-      "onboardingDesc": "Estudantes por etapa do processo inicial",
-      "noOnboarding": "Sem dados de onboarding",
-      "students": "alunos"
-    }
-  },
   "UserRoles": {
     "admin": "Administrador",
     "teacher": "Professor",
@@ -1464,6 +1433,54 @@
       "classesDesc": "Lembretes de aulas marcadas e confirmações.",
       "marketing": "Novidades e Promoções",
       "marketingDesc": "Fique por dentro de novos recursos e ofertas especiais."
+    }
+  },
+  "Dashboard": {
+    "title": "Visão Geral",
+    "subtitle": "Acompanhe o desempenho da FluencyLab em tempo real.",
+    "stats": {
+      "mrr": "Receita Mensal (MRR)",
+      "activeStudents": "Alunos Ativos",
+      "todayClasses": "Aulas Hoje",
+      "studentGrowth": "Novos Alunos",
+      "vsLastMonth": "vs. mês passado"
+    },
+    "finance": {
+      "cashFlow": "Fluxo de Caixa",
+      "cashFlowDesc": "Receitas e despesas dos últimos 6 meses",
+      "income": "Receita",
+      "expense": "Despesa",
+      "totalIncome": "Receita Total",
+      "totalExpense": "Despesa Total",
+      "netProfit": "Lucro Líquido",
+      "margin": "{value}% margem",
+      "pendingIncome": "A Receber",
+      "vsLastMonth": "mês ant."
+    },
+    "sections": {
+      "overview": "Visão Geral",
+      "finance": "Financeiro",
+      "academic": "Acadêmico"
+    },
+    "academic": {
+      "attendanceTitle": "Status de Aulas",
+      "attendanceDesc": "Resumo de presença e cancelamentos",
+      "completed": "Concluídas",
+      "noShow": "No-show",
+      "canceledStudent": "Canc. Aluno",
+      "canceledTeacher": "Canc. Prof",
+      "classes": "aulas",
+      "emptyClasses": "Sem dados de aulas",
+      "coursesTitle": "Cursos em Destaque",
+      "coursesDesc": "Cursos com maior número de matrículas",
+      "emptyCourses": "Nenhum curso matriculado"
+    },
+    "onboarding": {
+      "title": "Funil de Onboarding",
+      "subtitle": "Estudantes por etapa do processo inicial",
+      "students": "al.",
+      "dropped": "{count} saíram",
+      "empty": "Sem dados de onboarding"
     }
   }
 }

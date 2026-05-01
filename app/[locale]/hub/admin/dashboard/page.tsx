@@ -19,42 +19,57 @@ export default async function AdminDashboardPage() {
   const t = await getTranslations("Dashboard");
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col min-h-screen">
       <Header
         title={t("title")}
         subtitle={t("subtitle")}
         user={user}
       />
 
-      <main className="container pb-10 flex flex-col gap-8">
-        {/* Top KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard data={{ ...data.stats.mrr, title: t("stats.mrr") }} />
-          <StatCard data={{ ...data.stats.activeStudents, title: t("stats.activeStudents") }} />
-          <StatCard data={{ ...data.stats.todayClasses, title: t("stats.todayClasses") }} />
-          <StatCard data={{ ...data.stats.studentGrowth, title: t("stats.studentGrowth") }} />
-        </div>
+      <main className="container max-w-7xl pb-12 pt-2 flex flex-col gap-8">
+        {/* Section: KPIs */}
+        <section className="flex flex-col gap-3">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60 px-0.5">
+            {t("sections.overview")}
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <StatCard data={{ ...data.stats.mrr, title: t("stats.mrr") }} />
+            <StatCard data={{ ...data.stats.activeStudents, title: t("stats.activeStudents") }} />
+            <StatCard data={{ ...data.stats.todayClasses, title: t("stats.todayClasses") }} />
+            <StatCard data={{ ...data.stats.studentGrowth, title: t("stats.studentGrowth") }} />
+          </div>
+        </section>
 
-        {/* Financial Overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
-          <FinanceCharts 
-            data={data.finance.monthlyCashFlow} 
-            pendingIncome={data.finance.pendingIncome} 
-          />
-        </div>
-
-        {/* Academic & Onboarding */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-2">
-            <AcademicStats 
-              attendance={data.academic.attendance} 
-              popularCourses={data.academic.popularCourses} 
+        {/* Section: Finance */}
+        <section className="flex flex-col gap-3">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60 px-0.5">
+            {t("sections.finance")}
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
+            <FinanceCharts
+              data={data.finance.monthlyCashFlow}
+              pendingIncome={data.finance.pendingIncome}
             />
           </div>
-          <div className="xl:col-span-1">
-            <OnboardingFunnel data={data.academic.onboardingFunnel} />
+        </section>
+
+        {/* Section: Academic & Onboarding */}
+        <section className="flex flex-col gap-3">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60 px-0.5">
+            {t("sections.academic")}
+          </h2>
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+            <div className="xl:col-span-2">
+              <AcademicStats
+                attendance={data.academic.attendance}
+                popularCourses={data.academic.popularCourses}
+              />
+            </div>
+            <div className="xl:col-span-1">
+              <OnboardingFunnel data={data.academic.onboardingFunnel} />
+            </div>
           </div>
-        </div>
+        </section>
       </main>
     </div>
   );

@@ -4,12 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCardData } from "@/modules/dashboard/dashboard.types";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface StatCardProps {
   data: StatCardData;
 }
 
 export function StatCard({ data }: StatCardProps) {
+  const t = useTranslations("Dashboard.stats");
+  
   const formattedValue = new Intl.NumberFormat("pt-BR", {
     style: data.format === "currency" ? "currency" : "decimal",
     currency: "BRL",
@@ -18,25 +21,69 @@ export function StatCard({ data }: StatCardProps) {
 
   const hasChange = typeof data.change === "number";
 
+  const trendConfig = {
+    up: {
+      icon: TrendingUp,
+      color: "text-emerald-500",
+      bg: "bg-emerald-50 dark:bg-emerald-950/40",
+      border: "border-emerald-100 dark:border-emerald-900/60",
+      label: "text-emerald-600 dark:text-emerald-400",
+    },
+    down: {
+      icon: TrendingDown,
+      color: "text-rose-500",
+      bg: "bg-rose-50 dark:bg-rose-950/40",
+      border: "border-rose-100 dark:border-rose-900/60",
+      label: "text-rose-600 dark:text-rose-400",
+    },
+    neutral: {
+      icon: Minus,
+      color: "text-muted-foreground",
+      bg: "bg-muted/40",
+      border: "border-border/60",
+      label: "text-muted-foreground",
+    },
+  };
+
+  const trend = data.trend ?? "neutral";
+  const config = trendConfig[trend];
+  const Icon = config.icon;
+
   return (
-    <Card className="card border-none shadow-none">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+    <Card className="relative overflow-hidden border bg-card shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+      {/* Subtle top accent bar */}
+      <div
+        className={cn(
+          "absolute top-0 left-0 right-0 h-0.5",
+          trend === "up" && "bg-emerald-400",
+          trend === "down" && "bg-rose-400",
+          trend === "neutral" && "bg-border"
+        )}
+      />
+
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3 pt-5 px-5">
+        <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
           {data.title}
         </CardTitle>
-        {data.trend === "up" && <TrendingUp className="h-4 w-4 text-emerald-500" />}
-        {data.trend === "down" && <TrendingDown className="h-4 w-4 text-rose-500" />}
-        {data.trend === "neutral" && <Minus className="h-4 w-4 text-muted-foreground" />}
+        <div className={cn("flex items-center justify-center w-7 h-7 rounded-lg", config.bg, config.border, "border")}>
+          <Icon className={cn("h-3.5 w-3.5", config.color)} />
+        </div>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{formattedValue}</div>
+
+      <CardContent className="px-5 pb-5">
+        <div className="text-2xl font-bold tracking-tight tabular-nums">
+          {formattedValue}
+        </div>
+
         {hasChange && (
-          <p className={cn(
-            "text-xs mt-1 font-medium",
-            data.trend === "up" ? "text-emerald-500" : data.trend === "down" ? "text-rose-500" : "text-muted-foreground"
-          )}>
-            {data.change! > 0 ? "+" : ""}{data.change?.toFixed(1)}% em relação ao mês passado
-          </p>
+          <div className="flex items-center gap-1.5 mt-2">
+            <span className={cn("text-xs font-semibold tabular-nums", config.label)}>
+              {data.change! > 0 ? "+" : ""}{data.change?.toFixed(1)}%
+            </span>
+            <span className="text-xs text-muted-foreground/60">
+              {t("vsLastMonth")}
+            </span>
+          </div>
         )}
       </CardContent>
     </Card>
