@@ -1,4 +1,5 @@
 import { get, set, del } from "idb-keyval";
+import { syncPracticeBatchAction } from "./learning.actions";
 
 export interface OfflinePractice {
   id: string;
@@ -81,10 +82,19 @@ export async function flushPracticeQueue() {
   if (queue.length === 0) return;
 
   try {
-    // TODO: call syncPracticeBatchAction({ results: queue }) when implemented
-    console.log(`[offline] Would flush ${queue.length} practice results`);
-    // await syncPracticeBatchAction({ results: queue });
-    // await offlineStorage.clearQueue();
+    const results = queue.map((q) => ({
+      itemId: q.itemId,
+      lessonId: q.lessonId,
+      quality: q.quality,
+      practicedAt: new Date(q.practicedAt),
+    }));
+
+    const response = await syncPracticeBatchAction({ items: results });
+
+    if (response?.data?.count) {
+      console.log(`[offline] Successfully flushed ${response.data.count} practice results`);
+      await offlineStorage.clearQueue();
+    }
   } catch (error) {
     console.warn("[offline] Failed to flush queue:", error);
   }
