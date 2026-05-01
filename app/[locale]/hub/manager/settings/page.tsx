@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { SettingsPageContent } from "@/modules/user/_components/SettingsPageContent";
 import type { NotificationPrefs } from "@/modules/user/user.schema";
 
-export default async function SettingsPage() {
+export default async function ManagerSettingsPage() {
   const sessionUser = await getCurrentUser();
   if (!sessionUser) redirect("/login");
 
