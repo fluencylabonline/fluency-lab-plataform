@@ -1440,5 +1440,30 @@
     "statusDraft": "Rascunho",
     "filterLanguage": "Idioma",
     "filterStatus": "Status"
+  },
+  "Settings": {
+    "title": "Configurações",
+    "subtitle": "Gerencie sua conta e preferências",
+    "profilePlaceholderTitle": "Perfil Público",
+    "profilePlaceholderDesc": "Em breve você poderá editar sua bio, links e foto de perfil aqui.",
+    "security": "Segurança",
+    "securityPlaceholderTitle": "Segurança & Privacidade",
+    "securityPlaceholderDesc": "Troca de senha, autenticação de dois fatores e sessões ativas.",
+    "appearanceDesc": "Personalize o visual da plataforma conforme sua preferência.",
+    "themeColor": "Cor do Tema",
+    "themeColorDesc": "Escolha a cor de destaque principal.",
+    "mode": "Modo",
+    "modeDesc": "Escolha entre o modo claro, escuro ou seguir o sistema.",
+    "notificationsDesc": "Escolha quais lembretes e alertas você deseja receber.",
+    "notifications": {
+      "streak": "Lembretes de Streak",
+      "streakDesc": "Avisar quando sua ofensiva estiver em risco (após as 20h).",
+      "roadmap": "Alertas de Roadmap",
+      "roadmapDesc": "Avisar quando houver novas lições disponíveis ou atrasadas.",
+      "classes": "Aulas e Agendamentos",
+      "classesDesc": "Lembretes de aulas marcadas e confirmações.",
+      "marketing": "Novidades e Promoções",
+      "marketingDesc": "Fique por dentro de novos recursos e ofertas especiais."
+    }
   }
 }

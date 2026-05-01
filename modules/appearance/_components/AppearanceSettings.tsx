@@ -7,15 +7,18 @@ import { useTheme } from "next-themes";
 import { useAppearanceStore } from "@/modules/appearance/appearance.store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export function AppearanceSettings() {
+    const t = useTranslations("Settings");
+    const tc = useTranslations("Common");
     const { setTheme, theme } = useTheme();
     const { mode, setMode } = useAppearanceStore();
 
     const modes = [
-        { value: "light", label: "Claro", icon: Sun },
-        { value: "dark", label: "Escuro", icon: Moon },
-        { value: "system", label: "Sistema", icon: Monitor },
+        { value: "light", label: tc("light"), icon: Sun },
+        { value: "dark", label: tc("dark"), icon: Moon },
+        { value: "system", label: tc("system"), icon: Monitor },
     ] as const;
 
     return (
@@ -23,18 +26,18 @@ export function AppearanceSettings() {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Palette className="w-5 h-5 text-primary" />
-                    Aparência
+                    {tc("appearance")}
                 </CardTitle>
                 <CardDescription>
-                    Personalize o visual da plataforma conforme sua preferência.
+                    {t("appearanceDesc")}
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
                 <div className="space-y-4">
                     <div className="flex flex-col space-y-1">
-                        <span className="font-bold">Cor do Tema</span>
+                        <span className="font-bold">{t("themeColor")}</span>
                         <span className="text-sm text-muted-foreground">
-                            Escolha a cor de destaque principal.
+                            {t("themeColorDesc")}
                         </span>
                     </div>
                     <ColorSwitcher />
@@ -42,9 +45,9 @@ export function AppearanceSettings() {
 
                 <div className="space-y-4">
                     <div className="flex flex-col space-y-1">
-                        <span className="font-bold">Modo</span>
+                        <span className="font-bold">{t("mode")}</span>
                         <span className="text-sm text-muted-foreground">
-                            Escolha entre o modo claro, escuro ou seguir o sistema.
+                            {t("modeDesc")}
                         </span>
                     </div>
                     <div className="grid grid-cols-3 gap-2">

@@ -1368,5 +1368,30 @@
     "statusDraft": "Draft",
     "filterLanguage": "Language",
     "filterStatus": "Status"
+  },
+  "Settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account and preferences",
+    "profilePlaceholderTitle": "Public Profile",
+    "profilePlaceholderDesc": "Soon you'll be able to edit your bio, links, and profile picture here.",
+    "security": "Security",
+    "securityPlaceholderTitle": "Security & Privacy",
+    "securityPlaceholderDesc": "Password changes, two-factor authentication, and active sessions.",
+    "appearanceDesc": "Customize the platform look to your preference.",
+    "themeColor": "Theme Color",
+    "themeColorDesc": "Choose the main accent color.",
+    "mode": "Mode",
+    "modeDesc": "Choose between light, dark, or follow the system.",
+    "notificationsDesc": "Choose which reminders and alerts you want to receive.",
+    "notifications": {
+      "streak": "Streak Reminders",
+      "streakDesc": "Notify when your streak is at risk (after 8 PM).",
+      "roadmap": "Roadmap Alerts",
+      "roadmapDesc": "Notify when there are new or overdue lessons.",
+      "classes": "Classes & Appointments",
+      "classesDesc": "Scheduled class reminders and confirmations.",
+      "marketing": "News & Promotions",
+      "marketingDesc": "Stay up to date with new features and special offers."
+    }
   }
 }

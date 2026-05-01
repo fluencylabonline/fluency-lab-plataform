@@ -8,12 +8,15 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bell, Zap, Map as MapIcon, Calendar, Megaphone } from "lucide-react";
 import type { NotificationPrefs } from "@/modules/user/user.schema";
+import { useTranslations } from "next-intl";
 
 interface NotificationSettingsProps {
   initialPrefs: NotificationPrefs;
 }
 
 export function NotificationSettings({ initialPrefs }: NotificationSettingsProps) {
+  const t = useTranslations("Settings");
+  const tc = useTranslations("Common");
   const [isPending, startTransition] = useTransition();
 
   const handleToggle = (key: keyof typeof initialPrefs, value: boolean) => {
@@ -22,9 +25,9 @@ export function NotificationSettings({ initialPrefs }: NotificationSettingsProps
       const result = await updateNotificationPrefsAction(newPrefs);
       
       if (result?.data?.success) {
-        notify.success("Configurações atualizadas!");
+        notify.success(tc("success"));
       } else {
-        notify.error("Erro ao atualizar configurações.");
+        notify.error(tc("error"));
       }
     });
   };
@@ -34,10 +37,10 @@ export function NotificationSettings({ initialPrefs }: NotificationSettingsProps
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bell className="w-5 h-5 text-primary" />
-          Notificações
+          {tc("notifications")}
         </CardTitle>
         <CardDescription>
-          Escolha quais lembretes e alertas você deseja receber.
+          {t("notificationsDesc")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -45,10 +48,10 @@ export function NotificationSettings({ initialPrefs }: NotificationSettingsProps
           <div className="flex flex-col space-y-1">
             <Label className="flex items-center gap-2 font-bold">
               <Zap className="w-4 h-4 text-orange-500" />
-              Lembretes de Streak
+              {t("notifications.streak")}
             </Label>
             <span className="text-sm text-muted-foreground">
-              Avisar quando sua ofensiva estiver em risco (após as 20h).
+              {t("notifications.streakDesc")}
             </span>
           </div>
           <Switch
@@ -62,10 +65,10 @@ export function NotificationSettings({ initialPrefs }: NotificationSettingsProps
           <div className="flex flex-col space-y-1">
             <Label className="flex items-center gap-2 font-bold">
               <MapIcon className="w-4 h-4 text-green-500" />
-              Alertas de Roadmap
+              {t("notifications.roadmap")}
             </Label>
             <span className="text-sm text-muted-foreground">
-              Avisar quando houver novas lições disponíveis ou atrasadas.
+              {t("notifications.roadmapDesc")}
             </span>
           </div>
           <Switch
@@ -79,10 +82,10 @@ export function NotificationSettings({ initialPrefs }: NotificationSettingsProps
           <div className="flex flex-col space-y-1">
             <Label className="flex items-center gap-2 font-bold">
               <Calendar className="w-4 h-4 text-blue-500" />
-              Aulas e Agendamentos
+              {t("notifications.classes")}
             </Label>
             <span className="text-sm text-muted-foreground">
-              Lembretes de aulas marcadas e confirmações.
+              {t("notifications.classesDesc")}
             </span>
           </div>
           <Switch
@@ -96,10 +99,10 @@ export function NotificationSettings({ initialPrefs }: NotificationSettingsProps
           <div className="flex flex-col space-y-1">
             <Label className="flex items-center gap-2 font-bold">
               <Megaphone className="w-4 h-4 text-purple-500" />
-              Novidades e Promoções
+              {t("notifications.marketing")}
             </Label>
             <span className="text-sm text-muted-foreground">
-              Fique por dentro de novos recursos e ofertas especiais.
+              {t("notifications.marketingDesc")}
             </span>
           </div>
           <Switch
