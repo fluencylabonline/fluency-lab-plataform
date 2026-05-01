@@ -6,7 +6,7 @@ import { userService } from "./user.service";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { adminAuth } from "@/lib/firebase-admin";
-import { NewUser, createUserSchema, requestNewInviteSchema, updateUserSchema } from "./user.schema";
+import { NewUser, createUserSchema, requestNewInviteSchema, updateUserSchema, notificationPrefsSchema } from "./user.schema";
 import { env } from "@/env";
 import { communicationService } from "@/modules/communication/communication.service";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -129,6 +129,13 @@ export const createUserAction = permissionAction("user.create")
     }
   });
 
+export const updateNotificationPrefsAction = protectedAction
+  .schema(notificationPrefsSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    await userService.updateNotificationPrefs(ctx.user.id, parsedInput);
+    return { success: true };
+  });
+
 export const resendInviteAction = permissionAction("user.create")
   .inputSchema(
     z.object({
@@ -198,6 +205,14 @@ export const getTeachersAction = protectedAction
       console.error("[getTeachersAction] Error:", error);
       return { success: false, error: (error as Error).message };
     }
+  });
+
+export const toggleNotificationAction = protectedAction
+  .inputSchema(z.object({ type: z.enum(["push", "app"]), enabled: z.boolean() }))
+  .action(async ({ parsedInput, ctx }) => {
+    await userService.toggleNotification(ctx.user.id, parsedInput.type, parsedInput.enabled);
+    revalidatePath("/hub/student/settings");
+    return { success: true };
   });
 
 export const updateUserAction = adminAction

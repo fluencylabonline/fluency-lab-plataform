@@ -1,6 +1,6 @@
 import { userRepository } from "./user.repository";
 import { adminAuth } from "@/lib/firebase-admin";
-import type { User, NewUser } from "./user.schema";
+import type { User, NewUser, NotificationPrefs } from "./user.schema";
 import { env } from "@/env";
 import { communicationService } from "@/modules/communication/communication.service";
 import { abacate } from "@/lib/abacate-pay";
@@ -164,4 +164,23 @@ export const userService = {
   async getAllTeachers(): Promise<User[]> {
     return userRepository.findAllByRole("teacher");
   },
-};
+
+  async toggleNotification(userId: string, type: "push" | "app", enabled: boolean): Promise<User | undefined> {
+    return userRepository.updateNotificationSettings(userId, {
+      [type === "push" ? "pushNotificationsEnabled" : "appNotificationsEnabled"]: enabled,
+    });
+  },
+
+  async updateGamification(userId: string, data: { xp?: number, streak?: number, lastPracticeDate?: Date }): Promise<User | undefined> {
+    const updateData: { currentXP?: number, streakCount?: number, lastPracticeDate?: Date } = {};
+    if (data.xp !== undefined) updateData.currentXP = data.xp;
+    if (data.streak !== undefined) updateData.streakCount = data.streak;
+    if (data.lastPracticeDate !== undefined) updateData.lastPracticeDate = data.lastPracticeDate;
+    
+    return userRepository.updateGamification(userId, updateData);
+  },
+
+  async updateNotificationPrefs(userId: string, prefs: NotificationPrefs): Promise<User | undefined> {
+    return userRepository.updateNotificationPrefs(userId, prefs);
+  },
+};

@@ -1,0 +1,36 @@
+name: Learning & Practice Reminders Cron
+
+on:
+  schedule:
+    # Run every 4 hours
+    - cron: '0 */4 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  reminders:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Trigger Learning Reminders API
+        env:
+          APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ]; then
+            echo "Error: NEXT_PUBLIC_APP_URL variable is not set."
+            exit 1
+          fi
+          if [ -z "$CRON_SECRET" ]; then
+            echo "Error: CRON_SECRET secret is not set."
+            exit 1
+          fi
+          
+          # Remove trailing slash from APP_URL if exists
+          CLEAN_URL=$(echo $APP_URL | sed 's:/*$::')
+          
+          curl -f -X POST "$CLEAN_URL/api/cron/learning" \
+          -H "Authorization: Bearer $CRON_SECRET" \
+          -H "Content-Type: application/json"

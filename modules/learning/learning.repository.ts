@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import {
-  studentProfiles, studentItemProgress, learningPlans, planLessons, studentProfileHistory
+  studentProfiles, studentItemProgress, learningPlans, planLessons, studentProfileHistory,
+  learningPracticeSessions, learningXpTransactions
 } from "./learning.schema";
 import { eq, and, asc, sql, isNull, desc } from "drizzle-orm";
 
@@ -107,6 +108,41 @@ export const learningRepository = {
           }
         }
       }
+    });
+  },
+
+  async findActivePlanWithLessons(studentId: string) {
+    return db.query.learningPlans.findFirst({
+      where: and(
+        eq(learningPlans.studentId, studentId),
+        eq(learningPlans.status, "active")
+      ),
+      with: {
+        lessons: {
+          orderBy: [asc(planLessons.order)],
+          with: {
+            lesson: true
+          }
+        }
+      }
+    });
+  },
+
+  async findArchivedPlansByStudentId(studentId: string) {
+    return db.query.learningPlans.findMany({
+      where: and(
+        eq(learningPlans.studentId, studentId),
+        sql`${learningPlans.status} IN ('completed', 'paused')`
+      ),
+      with: {
+        lessons: {
+          orderBy: [asc(planLessons.order)],
+          with: {
+            lesson: true
+          }
+        }
+      },
+      orderBy: [desc(learningPlans.updatedAt)]
     });
   },
 
@@ -229,5 +265,48 @@ export const learningRepository = {
       },
       orderBy: [desc(learningPlans.createdAt)]
     });
+  },
+
+  async updateLessonProgress(planId: string, lessonId: string, completedPracticeDays: number) {
+    const isCompleted = completedPracticeDays >= 6;
+    return db.update(planLessons)
+      .set({
+        completedPracticeDays,
+        isCompleted,
+        completedAt: isCompleted ? new Date() : null
+      })
+      .where(and(eq(planLessons.planId, planId), eq(planLessons.lessonId, lessonId)));
+  },
+
+  // Sessions
+  async findSessionState(planId: string) {
+    return db.query.learningPracticeSessions.findFirst({
+      where: eq(learningPracticeSessions.planId, planId),
+    });
+  },
+
+  async upsertSessionState(data: typeof learningPracticeSessions.$inferInsert) {
+    const existing = await this.findSessionState(data.planId);
+
+    if (existing) {
+      const [result] = await db.update(learningPracticeSessions)
+        .set({ state: data.state, updatedAt: new Date() })
+        .where(eq(learningPracticeSessions.id, existing.id))
+        .returning();
+      return result;
+    } else {
+      const [result] = await db.insert(learningPracticeSessions).values(data).returning();
+      return result;
+    }
+  },
+
+  async deleteSessionState(planId: string) {
+    return db.delete(learningPracticeSessions).where(eq(learningPracticeSessions.planId, planId));
+  },
+
+  // XP
+  async createXpTransaction(data: typeof learningXpTransactions.$inferInsert) {
+    const [result] = await db.insert(learningXpTransactions).values(data).returning();
+    return result;
   }
 };

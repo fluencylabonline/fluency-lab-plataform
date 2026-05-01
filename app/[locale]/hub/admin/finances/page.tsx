@@ -14,9 +14,11 @@ interface FinancesPageProps {
 import { startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 
 export default async function AdminFinancesPage({ searchParams }: FinancesPageProps) {
+
+  //TODO: CALCULAR QUANTOAS ALUNOS EU TENHO E QUANTOS EU POSSO TER DENTRO DO LIMITE DO MEI PARA NAO VIRAR SIMPLES NACIONAL
   const t = await getTranslations("AdminFinances");
   const resolvedParams = await searchParams;
-  
+
   const now = new Date();
   const monthStr = resolvedParams.month;
   const year = resolvedParams.year ? parseInt(resolvedParams.year) : now.getFullYear();
@@ -49,8 +51,8 @@ export default async function AdminFinancesPage({ searchParams }: FinancesPagePr
 
   return (
     <div className="flex flex-col gap-4">
-      <FinanceHeader 
-        title={t("title")} 
+      <FinanceHeader
+        title={t("title")}
         subtitle={t("subtitle")}
       />
 

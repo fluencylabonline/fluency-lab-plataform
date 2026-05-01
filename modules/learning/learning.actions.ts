@@ -345,3 +345,134 @@ export const archiveProfileAction = permissionAction("student.support")
     return { success: true };
   });
 
+
+// ===================== PRACTICE SESSION ACTIONS =====================
+
+const getDailyPracticeSchema = z.object({
+  planId: z.string(),
+  dayOverride: z.number().int().min(1).max(6).optional(),
+});
+
+const sessionProgressSchema = z.object({
+  planId: z.string(),
+  state: z.object({
+    planId: z.string(),
+    currentDay: z.number(),
+    mode: z.string(),
+    currentIndex: z.number(),
+    results: z.array(z.object({
+      itemId: z.string(),
+      lessonId: z.string(),
+      grade: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
+      type: z.enum(["item", "structure"]),
+      timestamp: z.coerce.date(),
+    })),
+    items: z.array(z.unknown()),
+    lastUpdated: z.coerce.date(),
+  }),
+});
+
+const processResultsSchema = z.object({
+  planId: z.string(),
+  results: z.array(z.object({
+    itemId: z.string(),
+    lessonId: z.string(),
+    grade: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
+    type: z.enum(["item", "structure"]),
+    timestamp: z.coerce.date(),
+  })),
+  isReplay: z.boolean().default(false),
+  streak: z.number().int().min(0).default(0),
+});
+
+const purchaseReplaySchema = z.object({
+  planId: z.string(),
+  targetDay: z.number().int().min(1).max(6),
+  currentDay: z.number().int().min(1).max(6),
+});
+
+/**
+ * Fetches the daily practice session for a student's plan.
+ * Returns PracticeItems ready to be rendered by the PracticeSession component.
+ */
+export const getDailyPracticeAction = protectedAction
+  .schema(getDailyPracticeSchema)
+  .action(async ({ parsedInput }) => {
+    const session = await learningService.getPracticeCycle(
+      parsedInput.planId,
+      parsedInput.dayOverride
+    );
+    return session;
+  });
+
+/**
+ * Retrieves the saved session state for resuming an interrupted practice session.
+ */
+export const getSessionProgressAction = protectedAction
+  .schema(z.object({ planId: z.string() }))
+  .action(async ({ parsedInput }) => {
+    return learningService.getSessionState(parsedInput.planId);
+  });
+
+/**
+ * Saves the current session state so the student can resume later.
+ */
+export const saveSessionProgressAction = protectedAction
+  .schema(sessionProgressSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return learningService.saveSessionState(ctx.user.id, parsedInput.planId, parsedInput.state as any);
+  });
+
+/**
+ * Clears the session state after a session is successfully completed.
+ */
+export const clearSessionProgressAction = protectedAction
+  .schema(z.object({ planId: z.string() }))
+  .action(async ({ parsedInput }) => {
+    return learningService.clearSessionState(parsedInput.planId);
+  });
+
+/**
+ * Processes and records the results of a completed practice session.
+ * Calculates XP, updates SRS for each item, and returns the summary.
+ */
+export const processSessionResultsAction = protectedAction
+  .schema(processResultsSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const result = await learningService.processSessionResults(
+      ctx.user.id,
+      parsedInput.planId,
+      parsedInput.results,
+      parsedInput.isReplay,
+      parsedInput.streak
+    );
+    revalidatePath("/hub/student/practice");
+    return result;
+  });
+
+/**
+ * Allows a student to purchase a replay of a completed practice day using XP.
+ */
+export const purchaseReplaySessionAction = protectedAction
+  .schema(purchaseReplaySchema)
+  .action(async ({ parsedInput, ctx }) => {
+    return learningService.purchaseReplaySession(
+      ctx.user.id,
+      parsedInput.planId,
+      parsedInput.targetDay,
+      parsedInput.currentDay
+    );
+  });
+
+export const getRoadmapAction = protectedAction
+  .schema(z.object({}))
+  .action(async ({ ctx }) => {
+    return learningService.getStudentRoadmap(ctx.user.id);
+  });
+
+export const getArchivedPlansAction = protectedAction
+  .schema(z.object({}))
+  .action(async ({ ctx }) => {
+    return learningService.getArchivedPlans(ctx.user.id);
+  });

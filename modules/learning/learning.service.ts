@@ -6,12 +6,16 @@ import {
   studentProfiles, 
   learningPlans, 
   planLessons,
+  learningXpTransactions,
 } from "./learning.schema";
 import { lessons, languages } from "@/modules/curriculum/curriculum.schema";
-import { usersTable } from "@/modules/user/user.schema";
+import { usersTable, type NotificationPrefs } from "@/modules/user/user.schema";
 import { slotInstances } from "@/modules/scheduling/scheduling.schema";
 import { eq, and, asc, gte } from "drizzle-orm";
 import { aiService } from "@/modules/ai/ai.service";
+import { notificationService } from "@/modules/notification/notification.service";
+import { userRepository } from "@/modules/user/user.repository";
+import { isSameDay } from "date-fns";
 
 export const learningService = {
   // Profiles
@@ -496,7 +500,406 @@ export const learningService = {
    */
   async reorderLessons(planId: string, lessonIds: string[]) {
     return learningRepository.reorderPlanLessons(planId, lessonIds);
+  },
+
+  async getStudentRoadmap(studentId: string) {
+    const activePlan = await learningRepository.findActivePlanWithLessons(studentId);
+    if (!activePlan) return null;
+
+    const lessonsWithStatus = activePlan.lessons.map((pl, index) => {
+      let status: "completed" | "current" | "future" = "future";
+      
+      if (pl.isCompleted) {
+        status = "completed";
+      } else if (index === 0 || activePlan.lessons[index - 1].isCompleted) {
+        status = "current";
+      }
+
+      return {
+        ...pl,
+        status,
+      };
+    });
+
+    return {
+      ...activePlan,
+      lessons: lessonsWithStatus,
+    };
+  },
+
+  async getArchivedPlans(studentId: string) {
+    return learningRepository.findArchivedPlansByStudentId(studentId);
+  },
+
+  // ===================== PRACTICE SESSION METHODS =====================
+
+  /**
+   * Returns the daily practice session for a given plan and day.
+   * Extracts real content from the active lesson's LearningItems & quizData.
+   *
+   * Logic:
+   *   1. Find the active lesson in the plan
+   *   2. Fetch its CORE LearningItems + quizData
+   *   3. Map to PracticeItems based on the day:
+   *      - Day 1: vocab items → flashcard_visual (with image_url + useTTS)
+   *      - Day 2: vocab example sentences → gap_fill_listening (TTS reads full sentence)
+   *      - Day 3: structure items w/ word_order → sentence_unscramble
+   *      - Day 4: vocab items → flashcard_recall (no imageUrl)
+   *      - Day 5: quizData sections 1-4 → quiz_comprehensive
+   *      - Day 6: quizData section 5 (comprehension) → listening_choice
+   */
+  async getPracticeCycle(planId: string, dayOverride?: number): Promise<import("./learning.types").DailyPracticeSession> {
+    const plan = await learningRepository.findPlanWithLessons(planId);
+    if (!plan) throw new Error("Plan not found");
+
+    // Find current lesson: first not completed, or last completed if all done
+    const activeLessonRecord = plan.lessons.find(l => !l.isCompleted) || plan.lessons[plan.lessons.length - 1];
+    if (!activeLessonRecord) throw new Error("No lessons in plan");
+
+    const day = dayOverride ?? activeLessonRecord.completedPracticeDays + 1;
+    
+    // Safety check: day should be 1-6
+    const clampedDay = Math.max(1, Math.min(6, day));
+
+    // Fetch lesson details (items, quiz, media)
+    const lesson = await curriculumRepository.findLessonById(activeLessonRecord.lessonId);
+    if (!lesson) throw new Error("Lesson details not found");
+
+    const coreItems = lesson.items.filter(i => i.priority === "CORE");
+    const practiceItems: import("./learning.types").PracticeItem[] = [];
+
+    const modeMap: Record<number, import("./learning.types").PracticeMode> = {
+      1: "flashcard_visual",
+      2: "gap_fill_listening",
+      3: "sentence_unscramble",
+      4: "flashcard_recall",
+      5: "quiz_comprehensive",
+      6: "listening_choice"
+    };
+
+    const mode = modeMap[clampedDay];
+
+    switch (clampedDay) {
+      case 1: // Visual Flashcard (Vocab + Structure)
+      case 4: // Recall Flashcard (Vocab + Structure)
+        coreItems.forEach(({ item }) => {
+          const meta = item.metadata as { translation?: string; meanings?: Array<{ translation: string }>; image_url?: string | null };
+          practiceItems.push({
+            id: item.id,
+            lessonId: activeLessonRecord.lessonId,
+            type: item.type === "STRUCTURE" ? "structure" : "item",
+            renderMode: mode,
+            mainText: item.lemma,
+            flashcard: {
+              front: item.lemma,
+              back: meta.translation || meta.meanings?.[0]?.translation || "...",
+              imageUrl: clampedDay === 1 ? meta.image_url : null,
+              useTTS: true
+            }
+          });
+        });
+        break;
+
+      case 2: // Gap Fill (Vocab)
+        coreItems.filter(i => i.item.type === "VOCABULARY").forEach(({ item }) => {
+          const meta = item.metadata as { examples?: Array<{ text: string }> };
+          const example = meta.examples?.[0];
+          if (!example) return;
+
+          // Simple gap replacement: replace lemma in example text with ____
+          const regex = new RegExp(item.lemma, "gi");
+          const gapText = example.text.replace(regex, "____");
+
+          practiceItems.push({
+            id: item.id,
+            lessonId: activeLessonRecord.lessonId,
+            type: "item",
+            renderMode: "gap_fill_listening",
+            mainText: gapText,
+            gapFill: {
+              sentenceWithGap: gapText,
+              correctAnswer: item.lemma,
+              fullSentenceForTTS: example.text,
+              useTTS: true
+            }
+          });
+        });
+        break;
+
+      case 3: // Unscramble (Structure)
+        coreItems.filter(i => i.item.type === "STRUCTURE").forEach(({ item }) => {
+          const meta = item.metadata as { examples?: Array<{ text: string; word_order: Array<{ word: string }> }> };
+          const example = meta.examples?.[0];
+          if (!example || !example.word_order) return;
+
+          practiceItems.push({
+            id: item.id,
+            lessonId: activeLessonRecord.lessonId,
+            type: "structure",
+            renderMode: "sentence_unscramble",
+            mainText: example.text,
+            unscramble: {
+              scrambledWords: [...example.word_order].sort(() => Math.random() - 0.5).map((w) => w.word),
+              correctOrder: example.word_order.map((w) => w.word)
+            }
+          });
+        });
+        break;
+
+      case 5: // Quiz Comprehensive (Sections 1-4)
+      case 6: // Listening Choice (Section 5)
+        if (lesson.quizData?.quiz_sections) {
+          const sections = clampedDay === 5 
+            ? lesson.quizData.quiz_sections.filter(s => s.type !== "comprehension")
+            : lesson.quizData.quiz_sections.filter(s => s.type === "comprehension");
+
+          sections.forEach(section => {
+            section.questions.forEach((q, idx) => {
+              practiceItems.push({
+                id: `quiz-${section.type}-${idx}`,
+                lessonId: activeLessonRecord.lessonId,
+                type: "item",
+                renderMode: mode,
+                mainText: q.text,
+                quiz: {
+                  question: q.text,
+                  options: q.options,
+                  correctIndex: q.correctIndex,
+                  explanation: q.explanation,
+                  sectionType: section.type
+                }
+              });
+            });
+          });
+        }
+        break;
+    }
+
+    return {
+      dayIndex: clampedDay,
+      mode,
+      items: practiceItems
+    };
+  },
+
+  /**
+   * Saves the ongoing session state to the database.
+   * Used for resuming an interrupted session.
+   */
+  async saveSessionState(studentId: string, planId: string, state: import("./learning.types").SessionState) {
+    await learningRepository.upsertSessionState({
+      studentId,
+      planId,
+      state,
+    });
+    return { success: true };
+  },
+
+  /**
+   * Retrieves a previously saved session state.
+   */
+  async getSessionState(planId: string): Promise<import("./learning.types").SessionState | null> {
+    const session = await learningRepository.findSessionState(planId);
+    return (session?.state as unknown as import("./learning.types").SessionState) || null;
+  },
+
+  /**
+   * Clears the session state after a session is completed.
+   */
+  async clearSessionState(planId: string) {
+    await learningRepository.deleteSessionState(planId);
+    return { success: true };
+  },
+
+  /**
+   * Processes the results of a completed practice session.
+   * Calculates XP, calls recordPracticeResult for each item, and returns the summary.
+   */
+  async processSessionResults(
+    studentId: string,
+    planId: string,
+    results: import("./learning.types").PracticeResult[],
+    isReplay: boolean,
+    streak: number
+  ) {
+    let xpGained = 0;
+    const correctCount = results.filter((r) => r.grade >= 3).length;
+
+    if (!isReplay) {
+      // 1. Calculate XP: (correct_items * 10) + (streak * 2)
+      xpGained = correctCount * 10 + streak * 2;
+
+      await db.transaction(async (tx) => {
+        // 2. Update SRS Progress for each item
+        for (const result of results) {
+          await this.recordPracticeResult(
+            studentId,
+            result.itemId,
+            result.grade,
+            result.lessonId,
+            result.timestamp
+          );
+        }
+
+        // 3. Update Lesson Completion Progress
+        const plan = await this.getPlanById(planId);
+        if (plan) {
+          const activeLesson = plan.lessons.find(l => !l.isCompleted) || plan.lessons[plan.lessons.length - 1];
+          if (activeLesson) {
+            const newDay = Math.min(6, activeLesson.completedPracticeDays + 1);
+            await learningRepository.updateLessonProgress(planId, activeLesson.lessonId, newDay);
+          }
+        }
+
+        // 4. Update User XP & Streak
+        const user = await db.query.usersTable.findFirst({ where: eq(usersTable.id, studentId) });
+        if (user) {
+          const now = new Date();
+          const lastPractice = user.lastPracticeDate ? new Date(user.lastPracticeDate) : null;
+          let newStreak = user.streakCount || 0;
+
+          // Streak logic
+          if (lastPractice) {
+            const { differenceInCalendarDays } = await import("date-fns");
+            const diffDays = differenceInCalendarDays(now, lastPractice);
+
+            if (diffDays === 1) {
+              newStreak += 1;
+            } else if (diffDays > 1) {
+              newStreak = 1;
+            }
+          } else {
+            newStreak = 1;
+          }
+
+          await tx.update(usersTable)
+            .set({ 
+              currentXP: (user.currentXP || 0) + xpGained,
+              streakCount: newStreak,
+              lastPracticeDate: now,
+              updatedAt: now
+            })
+            .where(eq(usersTable.id, studentId));
+
+          // 5. Record XP Transaction
+          if (xpGained > 0) {
+            await tx.insert(learningXpTransactions).values({
+              studentId,
+              amount: xpGained,
+              type: "practice_completion",
+              description: `Prática concluída (Acertos: ${correctCount})`,
+              metadata: { planId, streakBonus: streak * 2 }
+            });
+          }
+        }
+      });
+    }
+
+    return { xpGained, totalItems: results.length, correctCount };
+  },
+
+  /**
+   * Allows a student to replay a completed practice day by spending XP.
+   * Cost formula: 50 + (daysDiff * 10)
+   */
+  async purchaseReplaySession(
+    studentId: string,
+    planId: string,
+    targetDay: number,
+    currentDay: number
+  ) {
+    const daysDiff = Math.max(0, currentDay - targetDay);
+    const cost = 50 + daysDiff * 10;
+
+    const user = await db.query.usersTable.findFirst({ where: eq(usersTable.id, studentId) });
+    if (!user || (user.currentXP || 0) < cost) {
+      throw new Error("XP_INSUFFICIENT");
+    }
+
+    await db.transaction(async (tx) => {
+      await tx.update(usersTable)
+        .set({ currentXP: (user.currentXP || 0) - cost, updatedAt: new Date() })
+        .where(eq(usersTable.id, studentId));
+
+      // Record transaction
+      await tx.insert(learningXpTransactions).values({
+        studentId,
+        amount: -cost,
+        type: "replay_purchase",
+        description: `Replay de Prática - Dia ${targetDay}`,
+        metadata: { planId, targetDay, currentDay }
+      });
+    });
+
+    return { success: true, cost };
+  },
+
+  /**
+   * CRON TASK: Scans students and sends appropriate reminders (Daily, Streak, Roadmap).
+   */
+  async sendPracticeReminders() {
+    const students = await userRepository.findStudentsForReminders();
+    const now = new Date();
+    const isLateDay = now.getHours() >= 20; // After 8 PM
+
+    let processedCount = 0;
+
+    for (const student of students) {
+      // 0. Resolve Notification Prefs
+      const prefs = (student.notificationPrefs as NotificationPrefs) || { streak: true, roadmap: true, classes: true };
+
+      // 1. Check if practiced today
+      const alreadyPracticed = student.lastPracticeDate && 
+        isSameDay(student.lastPracticeDate, now);
+
+      if (alreadyPracticed) continue;
+
+      // 2. Determine Trigger
+      let title = "Hora de praticar! 🚀";
+      let body = "Garanta sua evolução diária com 5-10 minutos de prática.";
+      let triggerType = "daily";
+      
+      // Streak Trigger (High Urgency)
+      if (student.streakCount > 0 && isLateDay) {
+        if (!prefs.streak) continue; // User disabled streak reminders
+        title = "Sua ofensiva está em risco! 🔥";
+        body = `Não deixe sua sequência de ${student.streakCount} dias acabar. Pratique agora!`;
+        triggerType = "streak";
+      } 
+      // Roadmap Trigger (Content accumulation)
+      else {
+        if (!prefs.roadmap) continue; // User disabled roadmap reminders
+        const roadmap = await this.getStudentRoadmap(student.id);
+        const hasPendingLessons = roadmap?.lessons.some(l => 
+          l.scheduledDate && l.scheduledDate <= now && (l.completedPracticeDays || 0) < 1
+        );
+
+        if (hasPendingLessons) {
+          title = "Conteúdo novo esperando! 📚";
+          body = "Você tem lições pendentes no seu roteiro. Vamos colocar o inglês em dia?";
+          triggerType = "roadmap";
+        }
+      }
+
+      // 3. Send via Notification Service with Click Tracker
+      const baseUrl = "/hub/student/practice";
+      const trackerUrl = `/api/notifications/click?url=${encodeURIComponent(baseUrl)}&type=${triggerType}&id=${now.getTime()}`;
+
+      await notificationService.sendNotification({
+        title,
+        body,
+        actionUrl: trackerUrl,
+        targetType: "specific",
+        userIds: [student.id],
+        channels: {
+          push: student.pushNotificationsEnabled,
+          inApp: student.appNotificationsEnabled
+        }
+      });
+
+      processedCount++;
+    }
+
+    return processedCount;
   }
 };
-
-

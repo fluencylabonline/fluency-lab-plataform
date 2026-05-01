@@ -30,6 +30,13 @@ export const profileStatusEnum = pgEnum("profile_status", [
   "archived"
 ]);
 
+export const xpTransactionTypeEnum = pgEnum("xp_transaction_type", [
+  "practice_completion",
+  "streak_bonus",
+  "replay_purchase",
+  "adjustment"
+]);
+
 // ================= TABLES =================
 
 // 1. Student Profiles (Adaptive Learning specific data)
@@ -110,11 +117,50 @@ export const planLessons = pgTable("learning_plan_lessons", {
   planId: uuid("plan_id").references(() => learningPlans.id, { onDelete: "cascade" }).notNull(),
   lessonId: uuid("lesson_id").references(() => lessons.id, { onDelete: "cascade" }).notNull(),
   order: integer("order").notNull(),
+  scheduledDate: timestamp("scheduled_date"),
+  completedPracticeDays: integer("completed_practice_days").default(0).notNull(),
   isCompleted: boolean("is_completed").default(false).notNull(),
   completedAt: timestamp("completed_at"),
 }, (t) => [{
   pk: [t.planId, t.lessonId]
 }]);
+
+// 5. Practice Sessions (Persistence for resuming)
+export const learningPracticeSessions = pgTable("learning_practice_sessions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  studentId: varchar("student_id", { length: 255 }).references(() => usersTable.id, { onDelete: "cascade" }).notNull(),
+  planId: uuid("plan_id").references(() => learningPlans.id, { onDelete: "cascade" }).notNull(),
+  
+  state: jsonb("state").notNull(), // Practice session state (items, results, current index)
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// 6. XP Transactions (Ledger)
+export const learningXpTransactions = pgTable("learning_xp_transactions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  studentId: varchar("student_id", { length: 255 }).references(() => usersTable.id, { onDelete: "cascade" }).notNull(),
+  
+  amount: integer("amount").notNull(), // Positive or negative
+  type: xpTransactionTypeEnum("type").notNull(),
+  description: text("description"),
+  
+  metadata: jsonb("metadata").default({}), // Link to planId, lessonId, dayIndex
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// 7. Engagement Logs (Analytics)
+export const learningEngagementLogs = pgTable("learning_engagement_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  studentId: varchar("student_id", { length: 255 }).references(() => usersTable.id, { onDelete: "cascade" }).notNull(),
+  
+  eventType: varchar("event_type", { length: 50 }).notNull(), // e.g. 'notification_click'
+  metadata: jsonb("metadata").default({}), // notificationId, targetUrl, etc.
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
 
 // boolean import removed from here and moved to top
 
@@ -166,6 +212,31 @@ export const planLessonsRelations = relations(planLessons, ({ one }) => ({
   lesson: one(lessons, {
     fields: [planLessons.lessonId],
     references: [lessons.id],
+  }),
+}));
+
+export const learningPracticeSessionsRelations = relations(learningPracticeSessions, ({ one }) => ({
+  student: one(usersTable, {
+    fields: [learningPracticeSessions.studentId],
+    references: [usersTable.id],
+  }),
+  plan: one(learningPlans, {
+    fields: [learningPracticeSessions.planId],
+    references: [learningPlans.id],
+  }),
+}));
+
+export const learningXpTransactionsRelations = relations(learningXpTransactions, ({ one }) => ({
+  student: one(usersTable, {
+    fields: [learningXpTransactions.studentId],
+    references: [usersTable.id],
+  }),
+}));
+
+export const learningEngagementLogsRelations = relations(learningEngagementLogs, ({ one }) => ({
+  student: one(usersTable, {
+    fields: [learningEngagementLogs.studentId],
+    references: [usersTable.id],
   }),
 }));
 

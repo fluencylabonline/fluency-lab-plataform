@@ -48,3 +48,44 @@ export const offlineStorage = {
     await set(QUEUE_KEY, filtered);
   }
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Convenience helpers for the PracticeSession component
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Queues a single practice result for offline storage.
+ * Matches the shape of PracticeResult from learning.types.
+ */
+export async function queuePracticeResult(result: {
+  itemId: string;
+  lessonId: string;
+  grade: number;
+  type: string;
+  timestamp: Date;
+}) {
+  return offlineStorage.addToQueue({
+    itemId: result.itemId,
+    lessonId: result.lessonId,
+    quality: result.grade,
+    practicedAt: result.timestamp.toISOString(),
+  });
+}
+
+/**
+ * Attempts to flush all queued practice results to the server.
+ * Import syncPracticeBatchAction from learning.actions when ready.
+ */
+export async function flushPracticeQueue() {
+  const queue = await offlineStorage.getQueue();
+  if (queue.length === 0) return;
+
+  try {
+    // TODO: call syncPracticeBatchAction({ results: queue }) when implemented
+    console.log(`[offline] Would flush ${queue.length} practice results`);
+    // await syncPracticeBatchAction({ results: queue });
+    // await offlineStorage.clearQueue();
+  } catch (error) {
+    console.warn("[offline] Failed to flush queue:", error);
+  }
+}

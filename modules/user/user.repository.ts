@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { usersTable, type User, type NewUser } from "./user.schema";
+import { usersTable, type User, type NewUser, type NotificationPrefs } from "./user.schema";
 import { eq } from "drizzle-orm";
 
 export const userRepository = {
@@ -93,4 +93,55 @@ export const userRepository = {
       orderBy: (table, { asc }) => [asc(table.name)],
     });
   },
+  /**
+   * Find student with gamification data.
+   */
+  async findStudentWithGamification(id: string): Promise<User | undefined> {
+    return db.query.usersTable.findFirst({
+      where: eq(usersTable.id, id),
+    });
+  },
+
+  /**
+   * Update XP, Streak and Notifications.
+   */
+  async updateGamification(id: string, data: { currentXP?: number, streakCount?: number, lastPracticeDate?: Date }) {
+    const [updated] = await db
+      .update(usersTable)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(usersTable.id, id))
+      .returning();
+    return updated;
+  },
+
+  async updateNotificationSettings(id: string, data: { pushNotificationsEnabled?: boolean, appNotificationsEnabled?: boolean }) {
+    const [updated] = await db
+      .update(usersTable)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(usersTable.id, id))
+      .returning();
+    return updated;
+  },
+
+  async updateNotificationPrefs(id: string, prefs: NotificationPrefs) {
+    const [updated] = await db
+      .update(usersTable)
+      .set({ notificationPrefs: prefs, updatedAt: new Date() })
+      .where(eq(usersTable.id, id))
+      .returning();
+    return updated;
+  },
+
+  async findStudentsForReminders(): Promise<User[]> {
+    return db.query.usersTable.findMany({
+      where: (table, { eq, or, and }) => and(
+        eq(table.role, "student"),
+        eq(table.isActive, true),
+        or(
+          eq(table.pushNotificationsEnabled, true),
+          eq(table.appNotificationsEnabled, true)
+        )
+      )
+    });
+  }
 };

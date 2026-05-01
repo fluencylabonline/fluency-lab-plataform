@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, pgEnum, integer, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, pgEnum, integer, uuid, jsonb } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
 import { locales } from "@/i18n/config";
@@ -62,6 +62,21 @@ export const usersTable = pgTable("users", {
   lastPlacementTestDate: timestamp("last_placement_test_date"),
   currentEloScore: integer("current_elo_score").notNull().default(600),
 
+  // Gamification
+  currentXP: integer("current_xp").notNull().default(0),
+  streakCount: integer("streak_count").notNull().default(0),
+  lastPracticeDate: timestamp("last_practice_date"),
+
+  // Notifications
+  pushNotificationsEnabled: boolean("push_notifications_enabled").notNull().default(true),
+  appNotificationsEnabled: boolean("app_notifications_enabled").notNull().default(true),
+  notificationPrefs: jsonb("notification_prefs").notNull().default({
+    streak: true,
+    roadmap: true,
+    classes: true,
+    marketing: false,
+  }),
+
   // Payment
   teacherHourlyRate: integer("teacher_hourly_rate").notNull().default(4200),
 });
@@ -101,6 +116,13 @@ export const twoFactorSchema = z.object({
 export const requestNewInviteSchema = z.object({
   email: z.email("Validation.emailInvalid"),
   locale: z.enum(locales).optional().default("pt"),
+});
+
+export const notificationPrefsSchema = z.object({
+  streak: z.boolean().default(true),
+  roadmap: z.boolean().default(true),
+  classes: z.boolean().default(true),
+  marketing: z.boolean().default(false),
 });
 
 // Form Schemas
@@ -210,6 +232,8 @@ export type TeacherOnboardingWelcomeValues = z.input<typeof teacherOnboardingWel
 export type TeacherOnboardingDocumentsValues = z.input<typeof teacherOnboardingDocumentsSchema>;
 export type TeacherOnboardingPaymentValues = z.input<typeof teacherOnboardingPaymentSchema>;
 export type TeacherOnboardingAvailabilityValues = z.input<typeof teacherOnboardingAvailabilitySchema>;
+
+export type NotificationPrefs = z.infer<typeof notificationPrefsSchema>;
 
 // Rate Limiting Table 
 // TODO: TEMPORARY
