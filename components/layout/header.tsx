@@ -13,6 +13,7 @@ import { UserMenu } from "./user-menu";
 import { ThemeSwitcher } from "../ui/theme-switcher";
 import { NotificationBell } from "@/modules/notification/_components/NotificationBell";
 import { SearchBar } from "../ui/search-bar";
+import { useUserStore } from "@/modules/user/user.store";
 
 export interface HeaderAction {
     label: string;
@@ -48,9 +49,13 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
     className,
     ...props
 }, ref) => {
+    const { user: storeUser, hasHydrated } = useUserStore();
     const isMobile = useIsMobile();
     const [isSearchOpen, setIsSearchOpen] = React.useState(false);
     const [searchValue, setSearchValue] = React.useState("");
+
+    // Use prop user if provided, otherwise fallback to store user after hydration
+    const displayUser = user || (hasHydrated ? (storeUser as any) : null);
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
@@ -154,13 +159,13 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                                 </Button>
                                             )}
                                             {backHref ? renderAction(true) : null}
-                                            {user && <UserMenu user={user} />}
+                                            {displayUser && <UserMenu user={displayUser} />}
                                         </>
                                     ) : (
                                         <>
                                             <ThemeSwitcher />
                                             <NotificationBell />
-                                            {user && <UserMenu user={user} />}
+                                            {displayUser && <UserMenu user={displayUser} />}
                                         </>
                                     )}
                                 </div>

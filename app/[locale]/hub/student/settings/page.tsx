@@ -21,15 +21,16 @@ export default async function SettingsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-4 md:p-8 max-w-4xl mx-auto">
-      <Header 
-        title="Configurações" 
+    <div>
+      <Header
+        title="Configurações"
         subtitle="Gerencie sua conta e preferências"
+        className="contents"
       />
-      
-      <div className="space-y-8">
+
+      <div className="container flex flex-col gap-2">
         <NotificationSettings initialPrefs={prefs} />
-        
+
         {/* Placeholder for other settings */}
         <div className="p-8 border-2 border-dashed border-secondary rounded-3xl flex flex-col items-center justify-center text-center opacity-50">
           <p className="font-bold">Mais configurações em breve</p>
