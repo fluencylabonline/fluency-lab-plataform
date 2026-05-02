@@ -29,6 +29,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Field } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTranslations } from "next-intl";
 
 const activityFormSchema = z.object({
   title: z.string().min(1, "O título é obrigatório"),
@@ -45,6 +46,8 @@ interface RecessActivityEditorClientProps {
 }
 
 export function RecessActivityEditorClient({ initialActivity, languages }: RecessActivityEditorClientProps) {
+  const t = useTranslations("Recess");
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("content");
 
@@ -77,11 +80,11 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
     });
 
     if (response?.data?.success) {
-      notify.success(initialActivity ? "Atividade atualizada!" : "Atividade criada!");
+      notify.success(initialActivity ? (t('activityUpdated') || "Atividade atualizada!") : (t('activityCreated') || "Atividade criada!"));
       router.push("/hub/teacher/recess");
       router.refresh();
     } else {
-      notify.error(response?.data?.error || response?.serverError || "Erro ao salvar atividade");
+      notify.error(response?.data?.error || response?.serverError || (tCommon('error') || "Erro ao salvar atividade"));
     }
   };
 
@@ -98,8 +101,8 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
   return (
     <div className="flex flex-col min-h-screen">
       <Header
-        title={initialActivity ? "Editar Atividade" : "Nova Atividade de Recesso"}
-        subtitle="As atividades de recesso são lições de fallback para seus alunos"
+        title={initialActivity ? (t('editActivity') || "Editar Atividade") : (t('newRecessActivity') || "Nova Atividade de Recesso")}
+        subtitle={t('recessActivitySubtitle') || "As atividades de recesso são lições de fallback para seus alunos"}
       >
         <Button 
           variant="outline" 
@@ -108,7 +111,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
           onClick={() => router.back()}
         >
           <ArrowLeft className="w-4 h-4" />
-          Voltar
+          {tCommon('back') || "Voltar"}
         </Button>
       </Header>
 
@@ -119,18 +122,18 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
           <div className="lg:col-span-4 space-y-6">
             <Card className="p-6 space-y-6">
               <form onSubmit={handleSubmit(handleSave)} className="space-y-4">
-                <Field label="Título" required error={errors.title?.message}>
-                  <Input {...form.register("title")} placeholder="Ex: Prática de Conversação" />
+                <Field label={t('title') || "Título"} required error={errors.title?.message}>
+                  <Input {...form.register("title")} placeholder={t('titlePlaceholder') || "Ex: Prática de Conversação"} />
                 </Field>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <Field label="Idioma" required error={errors.languageId?.message}>
+                  <Field label={tCommon('language') || "Idioma"} required error={errors.languageId?.message}>
                     <Select 
                       onValueChange={(val) => form.setValue("languageId", val, { shouldDirty: true })}
                       defaultValue={form.getValues("languageId")}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
+                        <SelectValue placeholder={tCommon('select') || "Selecione"} />
                       </SelectTrigger>
                       <SelectContent>
                         {languages.map(lang => (
@@ -140,13 +143,13 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                     </Select>
                   </Field>
 
-                  <Field label="Nível" required error={errors.difficulty?.message}>
+                  <Field label={tCommon('level') || "Nível"} required error={errors.difficulty?.message}>
                     <Select 
                       onValueChange={(val: ActivityFormValues["difficulty"]) => form.setValue("difficulty", val, { shouldDirty: true })}
                       defaultValue={form.getValues("difficulty")}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
+                        <SelectValue placeholder={tCommon('select') || "Selecione"} />
                       </SelectTrigger>
                       <SelectContent>
                         {["A1", "A2", "B1", "B2", "C1", "C2"].map(lvl => (
@@ -163,7 +166,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  {initialActivity ? "Salvar Alterações" : "Criar Atividade"}
+                  {initialActivity ? (tCommon('saveChanges') || "Salvar Alterações") : (t('createActivity') || "Criar Atividade")}
                 </Button>
               </form>
 
@@ -174,7 +177,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                   onClick={() => setActiveTab("content")}
                 >
                   <FileText className="w-4 h-4" />
-                  Conteúdo da Atividade
+                  {t('activityContent') || "Conteúdo da Atividade"}
                 </Button>
                 <Button
                   variant={activeTab === "quiz" ? "default" : "ghost"}
@@ -182,7 +185,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                   onClick={() => setActiveTab("quiz")}
                 >
                   <HelpCircle className="w-4 h-4" />
-                  Avaliação (Quiz)
+                  {t('quizEvaluation') || "Avaliação (Quiz)"}
                   {quizQuestions.length > 0 && <Badge className="ml-auto">{quizQuestions.length}</Badge>}
                 </Button>
               </div>
@@ -203,7 +206,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                   <Card className="p-6">
                     <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
                       <FileText className="w-5 h-5 text-primary" />
-                      Texto da Atividade
+                      {t('activityText') || "Texto da Atividade"}
                     </h3>
                     <RichTextEditor 
                       content={form.getValues("contentJson")} 
@@ -222,17 +225,17 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                   <Card className="p-6">
                     <div className="flex items-center justify-between mb-8">
                       <div>
-                        <h3 className="text-xl font-bold">Avaliação</h3>
-                        <p className="text-sm text-muted-foreground">Adicione questões para verificar o aprendizado.</p>
+                        <h3 className="text-xl font-bold">{t('evaluation') || "Avaliação"}</h3>
+                        <p className="text-sm text-muted-foreground">{t('addQuestionsSubtitle') || "Adicione questões para verificar o aprendizado."}</p>
                       </div>
                       <Button variant="outline" className="rounded-xl" onClick={addQuestion}>
                         <Plus className="h-4 w-4 mr-2" />
-                        Nova Questão
+                        {t('newQuestion') || "Nova Questão"}
                       </Button>
                     </div>
 
                     <div className="max-w-xs mb-8">
-                      <Field label="Nota de Corte (%)">
+                      <Field label={t('passingScore') || "Nota de Corte (%)"}>
                         <Input
                           type="number"
                           value={passingScore}
@@ -255,9 +258,9 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                           </Button>
 
                           <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Pergunta {idx + 1}</label>
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{(t('question') || "Pergunta")} {idx + 1}</label>
                             <Input
-                              placeholder="Digite a pergunta..."
+                              placeholder={t('typeQuestionPlaceholder') || "Digite a pergunta..."}
                               value={q.text}
                               onChange={(e) => {
                                 setQuizQuestions(quizQuestions.map(item => item.id === q.id ? { ...item, text: e.target.value } : item));
@@ -281,7 +284,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                                   {q.correctAnswer === opt && opt !== "" ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
                                 </button>
                                 <Input
-                                  placeholder={`Opção ${optIdx + 1}`}
+                                  placeholder={`${t('option') || "Opção"} ${optIdx + 1}`}
                                   value={opt}
                                   onChange={(e) => {
                                     const newOptions = [...q.options];
@@ -298,7 +301,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                       {quizQuestions.length === 0 && (
                         <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed rounded-3xl opacity-60">
                           <HelpCircle className="h-8 w-8 mb-2" />
-                          <p className="text-sm font-medium">Nenhuma questão adicionada</p>
+                          <p className="text-sm font-medium">{t('noQuestionsAdded') || "Nenhuma questão adicionada"}</p>
                         </div>
                       )}
                     </div>

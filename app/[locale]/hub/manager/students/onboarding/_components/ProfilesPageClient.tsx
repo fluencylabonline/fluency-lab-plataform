@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/header";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import {
   Sparkles,
   User,
@@ -57,6 +58,7 @@ interface ProfilesPageClientProps {
 }
 
 export function ProfilesPageClient({ initialData }: ProfilesPageClientProps) {
+  const t = useTranslations("Survey");
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -180,7 +182,7 @@ export function ProfilesPageClient({ initialData }: ProfilesPageClientProps) {
               <div className="size-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
                 <Search className="h-8 w-8 text-muted-foreground/30" />
               </div>
-              <h3 className="text-xl font-bold mb-1">Nenhum perfil encontrado</h3>
+              <h3 className="text-xl font-bold mb-1">{t('noProfilesFound') || "Nenhum perfil encontrado"}</h3>
               <p className="text-muted-foreground text-center max-w-xs mb-6">
                 {search ? `Não encontramos perfis para "${search}"` : "Comece criando o primeiro perfil pedagógico de aluno."}
               </p>

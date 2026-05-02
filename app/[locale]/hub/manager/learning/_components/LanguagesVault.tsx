@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Languages, Plus, Trash2, Loader2, Globe, Link2 } from "lucide-react";
 import useSWR from "swr";
+import { useTranslations } from "next-intl";
 
 import {
     Vault,
@@ -45,6 +46,7 @@ interface LanguagesVaultProps {
 }
 
 export function LanguagesVault({ initialData }: LanguagesVaultProps) {
+    const t = useTranslations("Media");
     const [isOpen, setIsOpen] = React.useState(false);
     const [languageToDelete, setLanguageToDelete] = React.useState<string | null>(null);
 
@@ -209,7 +211,7 @@ export function LanguagesVault({ initialData }: LanguagesVaultProps) {
                                                             </TooltipTrigger>
                                                             {isLinkedToLesson && (
                                                                 <TooltipContent>
-                                                                    <p className="text-xs">Não é possível excluir um idioma em uso</p>
+                                                                    <p className="text-xs">{t('cannotDeleteInUse') || "Não é possível excluir um idioma em uso"}</p>
                                                                 </TooltipContent>
                                                             )}
                                                         </Tooltip>

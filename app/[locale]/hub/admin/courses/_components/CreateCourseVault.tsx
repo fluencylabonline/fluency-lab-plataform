@@ -170,14 +170,14 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCours
                 >
                   {selectedLanguage
                     ? languages.find((lang) => lang.value === selectedLanguage)?.label
-                    : "Selecionar idioma..."}
+                    : (t('selectLanguage') || "Selecionar idioma...")}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </button>
 
                 <CommandDialog open={langOpen} onOpenChange={setLangOpen}>
-                  <CommandInput placeholder="Buscar idioma..." />
+                  <CommandInput placeholder={t('searchLanguage') || "Buscar idioma..."} />
                   <CommandList>
-                    <CommandEmpty>Nenhum idioma encontrado.</CommandEmpty>
+                    <CommandEmpty>{t('noLanguageFound') || "Nenhum idioma encontrado."}</CommandEmpty>
                     <CommandGroup>
                       {languages.map((lang) => (
                         <CommandItem
@@ -203,7 +203,7 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCours
               </VaultField>
 
               <VaultField
-                label="Duração Total"
+                label={t('totalDuration') || "Duração Total"}
                 required
                 error={errors.duration?.message}
               >
@@ -227,7 +227,7 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCours
             </VaultField>
 
             <VaultField
-              label="Capa do Curso"
+              label={t('courseCover') || "Capa do Curso"}
               required
               error={errors.imageUrl?.message}
             >
@@ -244,7 +244,7 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCours
                 </div>
 
                 <div className="flex-1 space-y-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Upload de Imagem (JPEG, PNG • Máx 5MB)</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t('imageUploadInfo') || "Upload de Imagem (JPEG, PNG • Máx 5MB)"}</p>
                   <div className="relative">
                     <input
                       type="file"
@@ -266,7 +266,7 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCours
                       ) : (
                         <>
                           <Upload className="h-4 w-4 mr-2" />
-                          {imageUrl ? "Alterar Imagem" : "Selecionar Arquivo"}
+                          {imageUrl ? (t('changeImage') || "Alterar Imagem") : (t('selectFile') || "Selecionar Arquivo")}
                         </>
                       )}
                     </Button>
@@ -287,7 +287,7 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCours
               type="submit"
               disabled={isSubmitting || isUploading}
             >
-              {isSubmitting ? "Criando..." : t("createCourse")}
+              {isSubmitting ? (tCommon('creating') || "Criando...") : t("createCourse")}
               <Plus className="w-5 h-5 ml-1" />
             </VaultPrimaryButton>
           </VaultFooter>

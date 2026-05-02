@@ -4,6 +4,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { CheckCircle2, History } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useTranslations } from "next-intl";
 
 interface ArchivedPlan {
   id: string;
@@ -23,13 +24,14 @@ interface HistoryAccordionProps {
 }
 
 export function HistoryAccordion({ plans }: HistoryAccordionProps) {
+  const t = useTranslations("Practice");
   if (plans.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <History className="w-12 h-12 text-muted-foreground/30 mb-4" />
-        <h3 className="text-lg font-bold text-muted-foreground">Nenhum histórico ainda</h3>
+        <h3 className="text-lg font-bold text-muted-foreground">{t('noHistoryYet') || "Nenhum histórico ainda"}</h3>
         <p className="text-sm text-muted-foreground/60 max-w-[200px]">
-          Seus planos concluídos aparecerão aqui.
+          {t('completedPlansWillAppearHere') || "Seus planos concluídos aparecerão aqui."}
         </p>
       </div>
     );
@@ -47,7 +49,7 @@ export function HistoryAccordion({ plans }: HistoryAccordionProps) {
             <div className="flex flex-col items-start text-left">
               <span className="text-sm font-bold">{plan.name}</span>
               <span className="text-xs text-muted-foreground">
-                Concluído em {format(new Date(plan.updatedAt), "MMMM 'de' yyyy", { locale: ptBR })}
+                {t('completedOn', { date: format(new Date(plan.updatedAt), "MMMM 'de' yyyy", { locale: ptBR }) }) || `Concluído em ${format(new Date(plan.updatedAt), "MMMM 'de' yyyy", { locale: ptBR })}`}
               </span>
             </div>
           </AccordionTrigger>
@@ -62,7 +64,7 @@ export function HistoryAccordion({ plans }: HistoryAccordionProps) {
                     <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
                       <CheckCircle2 className="w-4 h-4 text-primary" />
                     </div>
-                    <span className="text-sm font-medium">{lesson.lesson?.title || "Lição"}</span>
+                    <span className="text-sm font-medium">{lesson.lesson?.title || (t('lesson') || "Lição")}</span>
                   </div>
                   {lesson.completedAt && (
                     <span className="text-[10px] text-muted-foreground">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Play, Pause, CheckCircle, ArrowRight, Volume2 } from "lucide-react";
@@ -28,6 +29,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 export function ListeningChoiceExercise({ audioUrl, transcriptSegments, learningItems, onComplete }: ListeningChoiceExerciseProps) {
+  const t = useTranslations("Practice");
   const [phase, setPhase] = useState<"full_listen" | "interactive">("full_listen");
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasListened, setHasListened] = useState(true); // start as true to skip full listen in mock
@@ -145,8 +147,8 @@ export function ListeningChoiceExercise({ audioUrl, transcriptSegments, learning
           <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
             <Volume2 size={38} className="text-primary" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground">Ouça o áudio completo</h2>
-          <p className="text-muted-foreground text-sm">Preste atenção no contexto geral antes dos exercícios.</p>
+          <h2 className="text-2xl font-bold text-foreground">{t('listenFullAudio') || "Ouça o áudio completo"}</h2>
+          <p className="text-muted-foreground text-sm">{t('payAttentionContext') || "Preste atenção no contexto geral antes dos exercícios."}</p>
         </div>
 
         <div className="w-full max-w-sm bg-muted/30 p-6 rounded-2xl border border-border flex flex-col items-center gap-4">
@@ -158,12 +160,12 @@ export function ListeningChoiceExercise({ audioUrl, transcriptSegments, learning
           >
             {isPlaying ? <Pause size={26} fill="currentColor" /> : <Play size={26} fill="currentColor" className="ml-1" />}
           </Button>
-          <p className="text-sm text-muted-foreground">{isPlaying ? "Reproduzindo..." : "Toque para ouvir"}</p>
+          <p className="text-sm text-muted-foreground">{isPlaying ? (t('playing') || "Reproduzindo...") : (t('tapToListen') || "Toque para ouvir")}</p>
         </div>
 
         {hasListened && (
           <Button onClick={startInteractive} size="lg" className="w-full max-w-xs">
-            Iniciar exercício <ArrowRight className="ml-2 w-4 h-4" />
+            {t('startExercise') || "Iniciar exercício"} <ArrowRight className="ml-2 w-4 h-4" />
           </Button>
         )}
       </div>
@@ -179,7 +181,7 @@ export function ListeningChoiceExercise({ audioUrl, transcriptSegments, learning
 
       <div className="space-y-1">
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Trecho {segmentIdx + 1} de {transcriptSegments.length}</span>
+          <span>{t('segmentOf', { current: segmentIdx + 1, total: transcriptSegments.length }) || `Trecho ${segmentIdx + 1} de ${transcriptSegments.length}`}</span>
           <span>{Math.round(progress)}%</span>
         </div>
         <Progress value={progress} className="h-2" />
@@ -194,7 +196,7 @@ export function ListeningChoiceExercise({ audioUrl, transcriptSegments, learning
             onClick={togglePlay}
           >
             {isPlaying ? <Pause size={14} className="mr-2" /> : <Play size={14} className="mr-2" />}
-            {isPlaying ? "Reproduzindo..." : "Ouvir trecho novamente"}
+            {isPlaying ? (t('playing') || "Reproduzindo...") : (t('listenSegmentAgain') || "Ouvir trecho novamente")}
           </Button>
         </div>
       )}
@@ -216,7 +218,7 @@ export function ListeningChoiceExercise({ audioUrl, transcriptSegments, learning
             {gapState.parts[1]}
           </p>
         ) : (
-          <p className="text-muted-foreground text-sm italic">Carregando trecho...</p>
+          <p className="text-muted-foreground text-sm italic">{t('loadingSegment') || "Carregando trecho..."}</p>
         )}
       </div>
 
@@ -241,15 +243,15 @@ export function ListeningChoiceExercise({ audioUrl, transcriptSegments, learning
             ))}
           </div>
         ) : (
-          <p className="text-center text-muted-foreground text-xs italic py-2">Nenhum termo-chave neste trecho.</p>
+          <p className="text-center text-muted-foreground text-xs italic py-2">{t('noKeyTerms') || "Nenhum termo-chave neste trecho."}</p>
         )}
 
         {(!gapState?.hasGap || gapState?.selectedOption) && (
           <Button className="w-full" onClick={nextSegment}>
             {segmentIdx < transcriptSegments.length - 1 ? (
-              <><span>Próximo trecho</span> <ArrowRight className="ml-2" /></>
+              <><span>{t('nextSegment') || "Próximo trecho"}</span> <ArrowRight className="ml-2" /></>
             ) : (
-              <><span>Finalizar prática</span> <CheckCircle className="ml-2" /></>
+              <><span>{t('finishPractice') || "Finalizar prática"}</span> <CheckCircle className="ml-2" /></>
             )}
           </Button>
         )}

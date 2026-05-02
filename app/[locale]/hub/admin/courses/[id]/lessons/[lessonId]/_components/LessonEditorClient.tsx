@@ -39,7 +39,7 @@ import { z } from "zod";
 import { Field } from "@/components/ui/field";
 
 const lessonFormSchema = z.object({
-  title: z.string().min(1, "O título é obrigatório"),
+  title: z.string().min(1, "titleRequired"),
   duration: z.string().nullable().optional(),
   contentBlocks: z.array(z.any()),
   quizId: z.string().uuid().nullable().optional(),
@@ -54,6 +54,7 @@ interface LessonEditorClientProps {
 }
 
 export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }: LessonEditorClientProps) {
+  const t = useTranslations("Courses");
   const tCommon = useTranslations("Common");
   const router = useRouter();
 
@@ -108,7 +109,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
         if (quizResult?.data?.success && quizResult.data.data) {
           finalQuizId = quizResult.data.data.id;
         } else {
-          throw new Error(quizResult?.data?.error || "Erro ao salvar quiz");
+          throw new Error(quizResult?.data?.error || t('quizSaveError') || "Erro ao salvar quiz");
         }
       }
 
@@ -131,14 +132,14 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
     })();
 
     notify.promise(promise, {
-      loading: "Salvando aula...",
+      loading: t('savingLesson') || "Salvando aula...",
       success: () => {
         form.reset(values);
         setIsCreatingQuiz(false);
         router.refresh();
-        return "Aula atualizada com sucesso!";
+        return t('lessonUpdatedSuccess') || "Aula atualizada com sucesso!";
       },
-      error: (err: unknown) => (err as Error)?.message || "Ocorreu um erro"
+      error: (err: unknown) => (err as Error)?.message || tCommon('error') || "Ocorreu um erro"
     });
   };
 
@@ -206,18 +207,18 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                   <Settings2 className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold">Configurações</h3>
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Aula e Navegação</p>
+                  <h3 className="font-bold">{t('settings') || "Configurações"}</h3>
+                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{t('lessonAndNavigation') || "Aula e Navegação"}</p>
                 </div>
               </div>
 
               <form onSubmit={handleSubmit(handleSave)} className="space-y-4">
-                <Field label="Título da Aula" required error={errors.title?.message}>
-                  <Input {...form.register("title")} placeholder="Ex: Introdução ao Verbo To Be" />
+                <Field label={t('lessonTitle') || "Título da Aula"} required error={errors.title?.message === "titleRequired" ? (t('titleRequired') || "O título é obrigatório") : errors.title?.message}>
+                  <Input {...form.register("title")} placeholder={t('lessonTitlePlaceholder') || "Ex: Introdução ao Verbo To Be"} />
                 </Field>
 
-                <Field label="Duração (minutos)" error={errors.duration?.message}>
-                  <Input {...form.register("duration")} placeholder="Ex: 15" />
+                <Field label={t('durationMinutes') || "Duração (minutos)"} error={errors.duration?.message}>
+                  <Input {...form.register("duration")} placeholder={t('durationPlaceholder') || "Ex: 15"} />
                 </Field>
 
                 <div className="pt-2">
@@ -226,7 +227,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                     className="w-full h-12 rounded-xl gap-2 font-bold"
                     disabled={(!isDirty && !isCreatingQuiz) || isSubmitting}
                   >
-                    {isSubmitting ? (<Loader2 className="h-4 w-4 animate-spin" />) : (<div className="flex items-center gap-2"><Save className="h-4 w-4" /> Salvar Alterações</div>)}
+                    {isSubmitting ? (<Loader2 className="h-4 w-4 animate-spin" />) : (<div className="flex items-center gap-2"><Save className="h-4 w-4" /> {t('saveChanges') || "Salvar Alterações"}</div>)}
                   </Button>
                 </div>
               </form>
@@ -248,8 +249,8 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                     <FileText className="h-5 w-5" />
                   </div>
                   <div className="flex flex-col items-start">
-                    <span className="font-bold text-sm leading-tight">Conteúdo</span>
-                    <span className={cn("text-[10px] uppercase tracking-widest font-black", activeTab === "content" ? "text-white/60" : "text-muted-foreground")}>Aula</span>
+                    <span className="font-bold text-sm leading-tight">{t('content') || "Conteúdo"}</span>
+                    <span className={cn("text-[10px] uppercase tracking-widest font-black", activeTab === "content" ? "text-white/60" : "text-muted-foreground")}>{t('lesson') || "Aula"}</span>
                   </div>
                 </button>
 
@@ -269,8 +270,8 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                     <HelpCircle className="h-5 w-5" />
                   </div>
                   <div className="flex flex-col items-start">
-                    <span className="font-bold text-sm leading-tight">Avaliação</span>
-                    <span className={cn("text-[10px] uppercase tracking-widest font-black", activeTab === "quiz" ? "text-white/60" : "text-muted-foreground")}>Quiz</span>
+                    <span className="font-bold text-sm leading-tight">{t('assessment') || "Avaliação"}</span>
+                    <span className={cn("text-[10px] uppercase tracking-widest font-black", activeTab === "quiz" ? "text-white/60" : "text-muted-foreground")}>{t('quiz') || "Quiz"}</span>
                   </div>
                 </button>
 
@@ -290,8 +291,8 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                     <Eye className="h-5 w-5" />
                   </div>
                   <div className="flex flex-col items-start">
-                    <span className="font-bold text-sm leading-tight">Visualizar</span>
-                    <span className={cn("text-[10px] uppercase tracking-widest font-black", activeTab === "preview" ? "text-white/60" : "text-muted-foreground")}>Demo</span>
+                    <span className="font-bold text-sm leading-tight">{t('preview') || "Visualizar"}</span>
+                    <span className={cn("text-[10px] uppercase tracking-widest font-black", activeTab === "preview" ? "text-white/60" : "text-muted-foreground")}>{t('demo') || "Demo"}</span>
                   </div>
                 </button>
               </div>
@@ -304,8 +305,8 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                   {blocks.length}
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm">Blocos de Conteúdo</h4>
-                  <p className="text-xs text-muted-foreground">{blocks.filter(b => b.type === "video").length} Vídeos e {blocks.filter(b => b.type === "text").length} Textos</p>
+                  <h4 className="font-bold text-sm">{t('contentBlocks') || "Blocos de Conteúdo"}</h4>
+                  <p className="text-xs text-muted-foreground">{t('videosAndTexts', { videos: blocks.filter(b => b.type === "video").length, texts: blocks.filter(b => b.type === "text").length }) || `${blocks.filter(b => b.type === "video").length} Vídeos e ${blocks.filter(b => b.type === "text").length} Textos`}</p>
                 </div>
               </div>
             </Card>
@@ -335,8 +336,8 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                             {block.type === "video" ? <Video className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
                           </div>
                           <div>
-                            <h4 className="font-bold text-sm">Bloco {index + 1}</h4>
-                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{block.type === "video" ? "Vídeo Aula" : "Conteúdo de Texto"}</p>
+                            <h4 className="font-bold text-sm">{t('blockNumber', { number: index + 1 }) || `Bloco ${index + 1}`}</h4>
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{block.type === "video" ? (t('videoLesson') || "Vídeo Aula") : (t('textContent') || "Conteúdo de Texto")}</p>
                           </div>
                         </div>
                         <Button variant="ghost" size="icon" className="rounded-full text-destructive hover:bg-destructive/10" onClick={() => removeBlock(index)}>
@@ -352,7 +353,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                             </div>
                             <Input
                               className="pl-12 h-14 rounded-2xl bg-slate-50 dark:bg-slate-900/50 text-base"
-                              placeholder="Link do YouTube ou Google Drive..."
+                              placeholder={t('videoLinkPlaceholder') || "Link do YouTube ou Google Drive..."}
                               value={block.url}
                               onChange={(e) => updateVideoBlock(index, e.target.value)}
                             />
@@ -376,7 +377,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                       onClick={() => addBlock("video")}
                     >
                       <Video className="h-6 w-6 text-primary mr-2" />
-                      <span className="text-xs font-bold uppercase tracking-widest">Adicionar Vídeo</span>
+                      <span className="text-xs font-bold uppercase tracking-widest">{t('addVideo') || "Adicionar Vídeo"}</span>
                     </Button>
                     <Button
                       variant="outline"
@@ -384,7 +385,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                       onClick={() => addBlock("text")}
                     >
                       <FileText className="h-6 w-6 text-primary mr-2" />
-                      <span className="text-xs font-bold uppercase tracking-widest">Adicionar Texto</span>
+                      <span className="text-xs font-bold uppercase tracking-widest">{t('addText') || "Adicionar Texto"}</span>
                     </Button>
                   </div>
                 </motion.div>
@@ -401,19 +402,19 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                   <Card className="p-8 border-slate-200 dark:border-slate-800 shadow-sm">
                     <div className="flex items-center justify-between mb-8">
                       <div>
-                        <h3 className="text-xl font-bold">Avaliação da Aula</h3>
-                        <p className="text-sm text-muted-foreground">Configure as questões que o aluno deve responder ao final da aula.</p>
+                        <h3 className="text-xl font-bold">{t('lessonAssessment') || "Avaliação da Aula"}</h3>
+                        <p className="text-sm text-muted-foreground">{t('configureQuestionsDesc') || "Configure as questões que o aluno deve responder ao final da aula."}</p>
                       </div>
                       {quizQuestions.length > 0 && (
                         <Button variant="outline" className="rounded-xl" onClick={addQuestion}>
                           <Plus className="h-4 w-4 mr-2" />
-                          Nova Questão
+                          {t('newQuestion') || "Nova Questão"}
                         </Button>
                       )}
                     </div>
 
                     <div className="max-w-xs mb-8">
-                      <Field label="Nota de Corte (%)">
+                      <Field label={t('passingScore') || "Nota de Corte (%)"}>
                         <Input
                           type="number"
                           value={passingScore}
@@ -442,9 +443,9 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                           </Button>
 
                           <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Enunciado {idx + 1}</label>
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">{t('questionStatement', { number: idx + 1 }) || `Enunciado ${idx + 1}`}</label>
                             <Input
-                              placeholder="Digite a pergunta aqui..."
+                              placeholder={t('typeQuestionPlaceholder') || "Digite a pergunta aqui..."}
                               value={q.text}
                               onChange={(e) => {
                                 setQuizQuestions(quizQuestions.map(item => item.id === q.id ? { ...item, text: e.target.value } : item));
@@ -471,7 +472,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                                   {q.correctAnswer === opt && opt !== "" ? <CheckCircle2 className="h-5 w-5" /> : <Circle className="h-5 w-5" />}
                                 </button>
                                 <Input
-                                  placeholder={`Opção ${optIdx + 1}`}
+                                  placeholder={t('optionNumber', { number: optIdx + 1 }) || `Opção ${optIdx + 1}`}
                                   value={opt}
                                   onChange={(e) => {
                                     const newOptions = [...q.options];
@@ -492,11 +493,11 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                           <div className="h-16 w-16 rounded-full bg-primary/5 flex items-center justify-center mb-4">
                             <HelpCircle className="h-8 w-8 text-primary opacity-50" />
                           </div>
-                          <h4 className="font-bold">Nenhum Quiz Criado</h4>
-                          <p className="text-sm text-muted-foreground mb-6">Esta aula ainda não possui uma avaliação.</p>
+                          <h4 className="font-bold">{t('noQuizCreated') || "Nenhum Quiz Criado"}</h4>
+                          <p className="text-sm text-muted-foreground mb-6">{t('noAssessmentForLesson') || "Esta aula ainda não possui uma avaliação."}</p>
                           <Button onClick={addQuestion} className="rounded-2xl h-12 px-8">
                             <Plus className="h-5 w-5 mr-2" />
-                            Criar Primeira Questão
+                            {t('createFirstQuestion') || "Criar Primeira Questão"}
                           </Button>
                         </div>
                       )}
@@ -527,12 +528,12 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                             </div>
                             <div>
                               <h2 className="text-3xl font-bold mb-2">
-                                {quizResult.passed ? "Excelente Trabalho!" : "Quase lá!"}
+                                {quizResult.passed ? (t('excellentWork') || "Excelente Trabalho!") : (t('almostThere') || "Quase lá!")}
                               </h2>
                               <p className="text-muted-foreground max-w-sm mx-auto">
                                 {quizResult.passed
-                                  ? `Você completou a avaliação com sucesso atingindo ${quizResult.score}% de acerto.`
-                                  : `Você atingiu ${quizResult.score}%, mas precisa de pelo menos ${passingScore}% para passar.`}
+                                  ? (t('assessmentPassedMsg', { score: quizResult.score }) || `Você completou a avaliação com sucesso atingindo ${quizResult.score}% de acerto.`)
+                                  : (t('assessmentFailedMsg', { score: quizResult.score, passingScore }) || `Você atingiu ${quizResult.score}%, mas precisa de pelo menos ${passingScore}% para passar.`)}
                               </p>
                             </div>
                             <div className="flex gap-4 pt-4">
@@ -541,7 +542,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                                 setCurrentQuestionIndex(0);
                                 setUserAnswers({});
                               }}>
-                                Tentar Novamente
+                                {t('tryAgain') || "Tentar Novamente"}
                               </Button>
                               <Button className="rounded-2xl h-12 px-8" onClick={() => {
                                 setIsPreviewingQuiz(false);
@@ -549,7 +550,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                                 setCurrentQuestionIndex(0);
                                 setUserAnswers({});
                               }}>
-                                Voltar para Aula
+                                {t('backToLesson') || "Voltar para Aula"}
                               </Button>
                             </div>
                           </div>
@@ -557,8 +558,8 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                           <>
                             <div className="flex items-center justify-between pb-6 border-b">
                               <div>
-                                <Badge variant="outline" className="mb-2 uppercase tracking-widest text-[10px]">AULA: {title}</Badge>
-                                <h2 className="text-2xl font-bold">Avaliação de Conhecimento</h2>
+                                <Badge variant="outline" className="mb-2 uppercase tracking-widest text-[10px]">{t('lessonTitleBadge', { title }) || `AULA: ${title}`}</Badge>
+                                <h2 className="text-2xl font-bold">{t('knowledgeAssessment') || "Avaliação de Conhecimento"}</h2>
                               </div>
                               <Button variant="ghost" className="rounded-xl h-10 w-10 p-0" onClick={() => setIsPreviewingQuiz(false)}>
                                 <X className="h-5 w-5" />
@@ -568,7 +569,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                             <div className="space-y-8 py-4">
                               <div className="flex items-center justify-between">
                                 <span className="text-sm font-medium text-muted-foreground">
-                                  Questão {currentQuestionIndex + 1} de {quizQuestions.length}
+                                  {t('questionOf', { current: currentQuestionIndex + 1, total: quizQuestions.length }) || `Questão ${currentQuestionIndex + 1} de ${quizQuestions.length}`}
                                 </span>
                                 <div className="flex gap-1">
                                   {quizQuestions.map((_, i) => (
@@ -617,7 +618,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                                   disabled={currentQuestionIndex === 0}
                                   onClick={() => setCurrentQuestionIndex(currentQuestionIndex - 1)}
                                 >
-                                  Anterior
+                                  {t('previous') || "Anterior"}
                                 </Button>
 
                                 {currentQuestionIndex === quizQuestions.length - 1 ? (
@@ -633,7 +634,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                                       setQuizResult({ score, passed: score >= passingScore });
                                     }}
                                   >
-                                    Finalizar e Ver Resultado
+                                    {t('finishAndSeeResult') || "Finalizar e Ver Resultado"}
                                   </Button>
                                 ) : (
                                   <Button
@@ -641,7 +642,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                                     disabled={!userAnswers[quizQuestions[currentQuestionIndex].id]}
                                     onClick={() => setCurrentQuestionIndex(currentQuestionIndex + 1)}
                                   >
-                                    Próxima Questão
+                                    {t('nextQuestion') || "Próxima Questão"}
                                   </Button>
                                 )}
                               </div>
@@ -655,7 +656,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                           <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">{title}</h1>
                           <div className="flex items-center gap-4 text-muted-foreground">
                             <Badge variant="secondary" className="rounded-lg">{duration || "0"} min</Badge>
-                            <span className="text-xs uppercase font-bold tracking-widest">{blocks.length} Blocos de conteúdo</span>
+                            <span className="text-xs uppercase font-bold tracking-widest">{t('contentBlocksCount', { count: blocks.length }) || `${blocks.length} Blocos de conteúdo`}</span>
                           </div>
                         </div>
 
@@ -676,15 +677,15 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
 
                           {quizQuestions.length > 0 && (
                             <div className="pt-12 border-t border-slate-100 dark:border-slate-800">
-                              <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">AVALIAÇÃO FINAL DISPONÍVEL</Badge>
-                              <h3 className="text-2xl font-bold mb-6">Teste seus conhecimentos</h3>
+                              <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">{t('finalAssessmentAvailable') || "AVALIAÇÃO FINAL DISPONÍVEL"}</Badge>
+                              <h3 className="text-2xl font-bold mb-6">{t('testYourKnowledge') || "Teste seus conhecimentos"}</h3>
                               <Card className="p-10 border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col items-center text-center shadow-inner">
                                 <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-6">
                                   <HelpCircle className="h-10 w-10" />
                                 </div>
-                                <p className="text-muted-foreground mb-8 max-w-md">Ao completar todos os blocos de conteúdo acima, você estará pronto para o quiz de <strong>{quizQuestions.length} questões</strong>.</p>
+                                <p className="text-muted-foreground mb-8 max-w-md">{t('readyForQuizDesc', { count: quizQuestions.length }) || `Ao completar todos os blocos de conteúdo acima, você estará pronto para o quiz de ${quizQuestions.length} questões.`}</p>
                                 <Button className="rounded-3xl h-14 px-12 font-black text-lg shadow-xl shadow-primary/20 transition-transform hover:scale-105 active:scale-95" onClick={() => setIsPreviewingQuiz(true)}>
-                                  Iniciar Visualização do Quiz
+                                  {t('startQuizPreview') || "Iniciar Visualização do Quiz"}
                                 </Button>
                               </Card>
                             </div>

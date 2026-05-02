@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout/header";
 import { Progress } from "@/components/ui/progress";
 import { VideoPlayer } from "@/components/ui/video-player";
@@ -38,6 +39,7 @@ interface StudentPlayerClientProps {
 }
 
 export function StudentPlayerClient({ courseData, enrollment, currentUser }: StudentPlayerClientProps) {
+  const t = useTranslations("Courses");
   const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -83,7 +85,7 @@ export function StudentPlayerClient({ courseData, enrollment, currentUser }: Stu
     });
 
     if (!result?.data?.success) {
-      notify.error(result?.data?.error || "Erro ao atualizar progresso");
+      notify.error(result?.data?.error || t('progressUpdateError') || "Erro ao atualizar progresso");
       setLessonProgress(prev => ({ ...prev, [lessonId]: currentStatus ? 100 : 0 }));
     }
   };
@@ -113,7 +115,7 @@ export function StudentPlayerClient({ courseData, enrollment, currentUser }: Stu
         user={currentUser}
         backHref="/hub/student/courses"
         action={isMobile ? {
-          label: "Menu",
+          label: t('menu') || "Menu",
           icon: isSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />,
           onClick: () => setIsSidebarOpen(!isSidebarOpen)
         } : undefined}
@@ -142,7 +144,7 @@ export function StudentPlayerClient({ courseData, enrollment, currentUser }: Stu
           <div className="flex flex-col h-full overflow-y-auto">
             <div className="p-4 border-b border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-black/50">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Progresso</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('progress') || "Progresso"}</span>
                 <span className="text-xs font-bold text-primary">{completedCount}/{allLessons.length}</span>
               </div>
               <Progress value={progressPercentage} className="h-2 rounded-full" />
@@ -230,12 +232,12 @@ export function StudentPlayerClient({ courseData, enrollment, currentUser }: Stu
                         {lessonProgress[currentLesson.id] === 100 ? (
                           <>
                             <CheckCircle2 className="h-4 w-4" />
-                            Concluída
+                            {t('completed') || "Concluída"}
                           </>
                         ) : (
                           <>
                             <Circle className="h-4 w-4" />
-                            Marcar como concluída
+                            {t('markAsCompleted') || "Marcar como concluída"}
                           </>
                         )}
                       </button>
@@ -291,7 +293,7 @@ export function StudentPlayerClient({ courseData, enrollment, currentUser }: Stu
                 {currentLesson.contentBlocks.length === 0 && !currentLesson.quiz && (
                   <div className="p-12 text-center border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-3xl">
                     <FileText className="h-12 w-12 text-gray-200 mx-auto mb-4" />
-                    <p className="text-muted-foreground">Esta aula ainda não tem conteúdo disponível.</p>
+                    <p className="text-muted-foreground">{t('noContentAvailable') || "Esta aula ainda não tem conteúdo disponível."}</p>
                   </div>
                 )}
 
@@ -301,9 +303,9 @@ export function StudentPlayerClient({ courseData, enrollment, currentUser }: Stu
                 <div className="h-16 w-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
                   <PlayCircle className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <h2 className="text-xl font-bold mb-2">Selecione uma aula</h2>
+                <h2 className="text-xl font-bold mb-2">{t('selectLessonTitle') || "Selecione uma aula"}</h2>
                 <p className="text-muted-foreground max-w-xs mx-auto">
-                  Escolha uma aula no menu lateral para começar a aprender.
+                  {t('selectLessonDesc') || "Escolha uma aula no menu lateral para começar a aprender."}
                 </p>
               </div>
             )}

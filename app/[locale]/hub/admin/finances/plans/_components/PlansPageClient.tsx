@@ -87,10 +87,10 @@ export function PlansPageClient({ initialPlans, user }: PlansPageClientProps) {
               <div className="p-4 bg-muted rounded-full mb-4">
                 <Plus className="w-8 h-8 text-muted-foreground/50" />
               </div>
-              <h3 className="font-bold text-foreground">Nenhum plano cadastrado</h3>
-              <p className="text-sm max-w-xs text-center mt-1">Comece criando um plano para associar aos seus alunos.</p>
+              <h3 className="font-bold text-foreground">{t("noPlansRegistered") || "Nenhum plano cadastrado"}</h3>
+              <p className="text-sm max-w-xs text-center mt-1">{t("noPlansDesc") || "Comece criando um plano para associar aos seus alunos."}</p>
               <Button variant="default" className="mt-6 rounded-xl font-bold" onClick={handleCreate}>
-                Criar Primeiro Plano
+                {t("createFirstPlan") || "Criar Primeiro Plano"}
               </Button>
             </div>
           ) : (
@@ -108,7 +108,7 @@ export function PlansPageClient({ initialPlans, user }: PlansPageClientProps) {
                         </h3>
                         {!plan.isActive && (
                           <Badge variant="outline" className="text-[9px] uppercase font-bold py-0 h-4 border-muted-foreground/30 text-muted-foreground">
-                            Inativo
+                            {t("inactive") || "Inativo"}
                           </Badge>
                         )}
                       </div>
@@ -149,8 +149,8 @@ export function PlansPageClient({ initialPlans, user }: PlansPageClientProps) {
                         <Clock className="w-3.5 h-3.5 text-primary" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[9px] uppercase font-bold text-muted-foreground leading-none">Frequência</span>
-                        <span className="text-xs font-black text-foreground">{plan.classesPerWeek}x / sem</span>
+                        <span className="text-[9px] uppercase font-bold text-muted-foreground leading-none">{t("frequency") || "Frequência"}</span>
+                        <span className="text-xs font-black text-foreground">{t("classesPerWeek", { count: plan.classesPerWeek || 0 }) || `${plan.classesPerWeek}x / sem`}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2.5 p-2 bg-muted/30 rounded-xl border border-border/50">
@@ -158,8 +158,8 @@ export function PlansPageClient({ initialPlans, user }: PlansPageClientProps) {
                         <Calendar className="w-3.5 h-3.5 text-primary" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[9px] uppercase font-bold text-muted-foreground leading-none">Contrato</span>
-                        <span className="text-xs font-black text-foreground">{plan.durationMonths} meses</span>
+                        <span className="text-[9px] uppercase font-bold text-muted-foreground leading-none">{t("contract") || "Contrato"}</span>
+                        <span className="text-xs font-black text-foreground">{t("monthsCount", { count: plan.durationMonths || 0 }) || `${plan.durationMonths} meses`}</span>
                       </div>
                     </div>
                   </div>
@@ -175,7 +175,7 @@ export function PlansPageClient({ initialPlans, user }: PlansPageClientProps) {
 
                 <div className="mt-6 pt-4 border-t border-border/50 flex items-center justify-between">
                   <div className="flex flex-col">
-                    <span className="text-[10px] uppercase font-black text-muted-foreground/60">Investimento Mensal</span>
+                    <span className="text-[10px] uppercase font-black text-muted-foreground/60">{t("monthlyInvestment") || "Investimento Mensal"}</span>
                     <span className="text-2xl font-black tracking-tighter text-primary">
                       {formatCurrency(plan.price)}
                     </span>

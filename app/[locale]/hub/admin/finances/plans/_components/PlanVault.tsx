@@ -96,7 +96,7 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess }: PlanVaultProp
       onOpenChange(false);
       reset();
     } else {
-      const errorMessage = result?.data?.error || result?.serverError || "Ocorreu um erro";
+      const errorMessage = result?.data?.error || result?.serverError || (t("defaultError") || "Ocorreu um erro");
       notify.error(errorMessage);
     }
   };
@@ -125,7 +125,7 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess }: PlanVaultProp
             >
               <VaultInput
                 {...register("name")}
-                placeholder="Ex: Plano Mensal Inglês"
+                placeholder={t("namePlaceholder") || "Ex: Plano Mensal Inglês"}
               />
             </VaultField>
 
@@ -137,7 +137,7 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess }: PlanVaultProp
               >
                 <VaultInput
                   {...register("language")}
-                  placeholder="Ex: Inglês"
+                  placeholder={t("languagePlaceholder") || "Ex: Inglês"}
                 />
               </VaultField>
               <VaultField
@@ -170,7 +170,7 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess }: PlanVaultProp
               >
                 <VaultInput
                   type="number"
-                  placeholder="Ex: 33000"
+                  placeholder={t("pricePlaceholder") || "Ex: 33000"}
                   {...register("price", { valueAsNumber: true })}
                 />
               </VaultField>

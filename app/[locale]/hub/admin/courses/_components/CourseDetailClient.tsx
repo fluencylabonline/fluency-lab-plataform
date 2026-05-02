@@ -101,6 +101,7 @@ function SortableLesson({ lesson, onDelete, onEdit }: {
   onDelete: (id: string) => void;
   onEdit: (lesson: Lesson) => void;
 }) {
+  const t = useTranslations("Courses");
   const {
     attributes,
     listeners,
@@ -143,7 +144,7 @@ function SortableLesson({ lesson, onDelete, onEdit }: {
             {lesson.title}
           </span>
           <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mt-1 flex items-center gap-2">
-            <Clock className="h-3 w-3" /> {lesson.duration || "0"} min {lesson.quizId && "• QUIZ DISPONÍVEL"}
+            <Clock className="h-3 w-3" /> {lesson.duration || "0"} min {lesson.quizId && `• ${t('quizAvailable') || "QUIZ DISPONÍVEL"}`}
           </span>
         </div>
       </div>
@@ -155,7 +156,7 @@ function SortableLesson({ lesson, onDelete, onEdit }: {
           className="h-9 rounded-md hover:bg-white dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
           onClick={() => onEdit(lesson)}
         >
-          Editar Conteúdo
+          {t('editContent') || "Editar Conteúdo"}
         </Button>
         <Button
           variant="ghost"
@@ -189,6 +190,7 @@ function SortableSection({
   onDeleteLesson: (id: string) => void;
   onLessonDragEnd: (event: DragEndEvent) => void;
 }) {
+  const t = useTranslations("Courses");
   const {
     attributes,
     listeners,
@@ -220,7 +222,7 @@ function SortableSection({
             <GripVertical className="h-5 w-5" />
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Seção {index + 1}</span>
+            <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">{t('sectionIndex', { index: index + 1 }) || `Seção ${index + 1}`}</span>
             <span className="font-bold text-xl leading-tight">
               {section.title}
             </span>
@@ -234,7 +236,7 @@ function SortableSection({
             onClick={onAddLesson}
           >
             <Plus className="h-4 w-4" />
-            Nova Aula
+            {t('newLesson') || "Nova Aula"}
           </Button>
           <Button
             variant="ghost"
@@ -275,9 +277,9 @@ function SortableSection({
             <div className="inline-flex h-12 w-12 rounded-md bg-slate-50 dark:bg-slate-800 items-center justify-center text-muted-foreground mb-3">
               <BookOpen className="h-6 w-6" />
             </div>
-            <p className="text-sm text-muted-foreground font-medium">Nenhuma aula nesta seção.</p>
+            <p className="text-sm text-muted-foreground font-medium">{t('noLessonInSection') || "Nenhuma aula nesta seção."}</p>
             <Button variant="link" size="sm" onClick={onAddLesson} className="mt-1 text-primary">
-              Adicionar primeira aula
+              {t('addFirstLesson') || "Adicionar primeira aula"}
             </Button>
           </div>
         )}
@@ -301,8 +303,7 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
     setHasMounted(true);
   }, []);
 
-
-
+  const t = useTranslations("Courses");
   const tCommon = useTranslations("Common");
 
   const form = useForm<z.input<typeof insertCourseSchema>>({
@@ -341,16 +342,16 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
     const promise = updateCourseAction({ id: course.id, data });
 
     notify.promise(promise, {
-      loading: "Salvando alterações...",
+      loading: t('savingChanges') || "Salvando alterações...",
       success: (result) => {
         if (result?.data?.success) {
           setCourse(result.data.data as Course);
           form.reset(data);
-          return "Curso atualizado com sucesso!";
+          return t('courseUpdatedSuccess') || "Curso atualizado com sucesso!";
         }
-        throw new Error(result?.data?.error || "Erro ao atualizar curso");
+        throw new Error(result?.data?.error || t('updateCourseError') || "Erro ao atualizar curso");
       },
-      error: (err: unknown) => (err as Error)?.message || "Ocorreu um erro"
+      error: (err: unknown) => (err as Error)?.message || tCommon('errorOccurred') || "Ocorreu um erro"
     });
   };
 
@@ -366,14 +367,14 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
     });
 
     notify.promise(promise, {
-      loading: newStatus ? "Publicando curso..." : "Movendo para rascunho...",
+      loading: newStatus ? (t('publishingCourse') || "Publicando curso...") : (t('movingToDraft') || "Movendo para rascunho..."),
       success: (result) => {
         if (result?.data?.success) {
           setCourse(result.data.data as Course);
-          return newStatus ? "Curso publicado!" : "Curso movido para rascunho";
+          return newStatus ? (t('coursePublished') || "Curso publicado!") : (t('courseMovedToDraft') || "Curso movido para rascunho");
         }
         setCourse(prevCourse);
-        throw new Error(result?.data?.error || "Erro ao alterar status");
+        throw new Error(result?.data?.error || t('statusUpdateError') || "Erro ao alterar status");
       },
       error: (err: unknown) => {
         setCourse(prevCourse);
@@ -409,9 +410,9 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
         const result = await deleteSectionAction({ courseId: course.id, sectionId: deleteConfig.id });
         if (!result?.data?.success) {
           setSections(prevSections);
-          notify.error(result?.data?.error || "Erro ao excluir seção");
+          notify.error(result?.data?.error || t('deleteSectionError') || "Erro ao excluir seção");
         } else {
-          notify.success("Seção excluída");
+          notify.success(t('sectionDeleted') || "Seção excluída");
         }
       } else {
         const prevSections = [...sections];
@@ -423,14 +424,14 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
         const result = await deleteLessonAction({ courseId: course.id, lessonId: deleteConfig.id });
         if (!result?.data?.success) {
           setSections(prevSections);
-          notify.error(result?.data?.error || "Erro ao excluir aula");
+          notify.error(result?.data?.error || t('deleteLessonError') || "Erro ao excluir aula");
         } else {
-          notify.success("Aula excluída");
+          notify.success(t('lessonDeleted') || "Aula excluída");
         }
       }
       setDeleteConfig(null);
     } catch {
-      notify.error("Erro ao deletar seção");
+      notify.error(tCommon('errorOccurred') || "Ocorreu um erro");
     } finally {
       setIsDeleting(false);
     }
@@ -463,8 +464,8 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) return notify.error("Selecione uma imagem");
-    if (file.size > 5 * 1024 * 1024) return notify.error("Máximo 5MB");
+    if (!file.type.startsWith("image/")) return notify.error(t('selectImage') || "Selecione uma imagem");
+    if (file.size > 5 * 1024 * 1024) return notify.error(t('max5MB') || "Máximo 5MB");
 
     try {
       setUploading(true);
@@ -472,9 +473,9 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       setValue("imageUrl", url, { shouldDirty: true });
-      notify.success("Imagem carregada!");
+      notify.success(t('imageUploaded') || "Imagem carregada!");
     } catch {
-      notify.error("Erro ao deletar aula");
+      notify.error(t('imageUploadError') || "Erro ao fazer upload da imagem");
     } finally {
       setUploading(false);
     }
@@ -514,7 +515,7 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
               )}
               <label className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-md text-white">
                 {uploading ? <Loader2 className="h-8 w-8 animate-spin" /> : <Upload className="h-8 w-8 mb-2" />}
-                <span className="font-bold text-sm">Alterar Capa</span>
+                <span className="font-bold text-sm">{t('changeCover') || "Alterar Capa"}</span>
                 <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
               </label>
             </div>
@@ -522,26 +523,26 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
             {/* Course Form */}
             <div className="card p-8 ">
               <form onSubmit={handleSubmit(handleUpdateCourse)} className="space-y-6">
-                <Field label="Título do Curso" required error={form.formState.errors.title?.message}>
-                  <Input {...form.register("title")} placeholder="Ex: Inglês para Viagem" />
+                <Field label={t('courseTitle') || "Título do Curso"} required error={form.formState.errors.title?.message}>
+                  <Input {...form.register("title")} placeholder={t('courseTitlePlaceholder') || "Ex: Inglês para Viagem"} />
                 </Field>
 
-                <Field label="Descrição" required error={form.formState.errors.description?.message}>
+                <Field label={t('description') || "Descrição"} required error={form.formState.errors.description?.message}>
                   <Textarea
                     {...form.register("description")}
-                    placeholder="Descreva o que os alunos aprenderão..."
+                    placeholder={t('descriptionPlaceholder') || "Descreva o que os alunos aprenderão..."}
                   />
                 </Field>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <Field label="Idioma" error={form.formState.errors.language?.message}>
+                  <Field label={t('language') || "Idioma"} error={form.formState.errors.language?.message}>
                     <Controller
                       name="language"
                       control={form.control}
                       render={({ field }) => (
                         <Select onValueChange={field.onChange} value={field.value}>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione um idioma" />
+                            <SelectValue placeholder={t('selectLanguage') || "Selecione um idioma"} />
                           </SelectTrigger>
                           <SelectContent>
                             {languages.map(lang => (
@@ -554,8 +555,8 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
                       )}
                     />
                   </Field>
-                  <Field label="Duração" error={form.formState.errors.duration?.message}>
-                    <Input {...form.register("duration")} placeholder="Ex: 20h" />
+                  <Field label={t('duration') || "Duração"} error={form.formState.errors.duration?.message}>
+                    <Input {...form.register("duration")} placeholder={t('durationPlaceholder') || "Ex: 20h"} />
                   </Field>
                 </div>
 
@@ -565,7 +566,7 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
                     className="flex-1 h-12 rounded-md gap-2 font-bold"
                     disabled={!isDirty || isSubmitting}
                   >
-                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : (<div className="flex items-center gap-2"><Save className="h-4 w-4" /> Salvar Alterações</div>)}
+                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : (<div className="flex items-center gap-2"><Save className="h-4 w-4" /> {t('saveChanges') || "Salvar Alterações"}</div>)}
                   </Button>
                   <Button
                     type="button"
@@ -589,21 +590,21 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
                   <Users className="h-5 w-5" />
                 </div>
                 <div className="text-xl font-bold">{stats.students}</div>
-                <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Alunos</div>
+                <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">{t('students') || "Alunos"}</div>
               </div>
               <div className="text-center border-x border-primary/10">
                 <div className="h-10 w-10 rounded-md bg-white dark:bg-slate-800  flex items-center justify-center mx-auto mb-2 text-primary">
                   <Layers className="h-5 w-5" />
                 </div>
                 <div className="text-xl font-bold">{stats.sections}</div>
-                <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Módulos</div>
+                <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">{t('modules') || "Módulos"}</div>
               </div>
               <div className="text-center">
                 <div className="h-10 w-10 rounded-md bg-white dark:bg-slate-800  flex items-center justify-center mx-auto mb-2 text-primary">
                   <BookOpen className="h-5 w-5" />
                 </div>
                 <div className="text-xl font-bold">{stats.lessons}</div>
-                <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Aulas</div>
+                <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">{t('lessons') || "Aulas"}</div>
               </div>
             </div>
           </motion.div>
@@ -616,12 +617,12 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
           >
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-black tracking-tight">Conteúdo do Curso</h2>
-                <p className="text-sm text-muted-foreground">Gerencie a estrutura e ordem das aulas.</p>
+                <h2 className="text-2xl font-black tracking-tight">{t('courseContent') || "Conteúdo do Curso"}</h2>
+                <p className="text-sm text-muted-foreground">{t('manageCourseContentDesc') || "Gerencie a estrutura e ordem das aulas."}</p>
               </div>
               <Button size="lg" className="rounded-md h-12 px-6 gap-2 font-bold" onClick={() => setIsAddSectionOpen(true)}>
                 <Plus className="h-5 w-5" />
-                Nova Seção
+                {t('newSection') || "Nova Seção"}
               </Button>
             </div>
 
@@ -667,11 +668,11 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
                   <div className="h-16 w-16 bg-white dark:bg-slate-800 rounded-md  flex items-center justify-center mx-auto mb-4 text-slate-300">
                     <Layers className="h-8 w-8" />
                   </div>
-                  <h3 className="text-lg font-bold">Nenhum conteúdo ainda</h3>
-                  <p className="text-muted-foreground mb-6">Comece criando o primeiro módulo do seu curso.</p>
+                  <h3 className="text-lg font-bold">{t('noContentYet') || "Nenhum conteúdo ainda"}</h3>
+                  <p className="text-muted-foreground mb-6">{t('startCreatingModule') || "Comece criando o primeiro módulo do seu curso."}</p>
                   <Button onClick={() => setIsAddSectionOpen(true)} size="lg" className="rounded-md">
                     <Plus className="h-5 w-5 mr-2" />
-                    Criar Primeira Seção
+                    {t('createFirstSection') || "Criar Primeira Seção"}
                   </Button>
                 </div>
               )}
@@ -712,10 +713,10 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
         <VaultContent>
           <VaultHeader>
             <VaultIcon type="delete" />
-            <VaultTitle>Excluir {deleteConfig?.type === "section" ? "Seção" : "Aula"}</VaultTitle>
+            <VaultTitle>{tCommon('delete')} {deleteConfig?.type === "section" ? (t('deleteSection') || "Seção") : (t('deleteLesson') || "Aula")}</VaultTitle>
             <VaultDescription>
-              Tem certeza que deseja excluir &quot;<strong>{deleteConfig?.title}</strong>&quot;?
-              {deleteConfig?.type === "section" && " Todas as aulas desta seção também serão removidas."} Esta ação não pode ser desfeita.
+              {t('confirmDeleteDesc') || "Tem certeza que deseja excluir"} &quot;<strong>{deleteConfig?.title}</strong>&quot;?
+              {deleteConfig?.type === "section" && (t('allLessonsWillBeRemoved') || " Todas as aulas desta seção também serão removidas. Esta ação não pode ser desfeita.")}
             </VaultDescription>
           </VaultHeader>
           <VaultFooter>

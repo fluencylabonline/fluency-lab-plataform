@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import useSWR from "swr";
 import { RecessRequest } from "@/modules/scheduling/scheduling.types";
 import { Shimmer } from "@shimmer-from-structure/react";
+import { useTranslations } from "next-intl";
 
 interface CheckRecessVaultProps {
   teacherId: string;
@@ -44,6 +45,7 @@ const MOCK_RECESSES: RecessRequest[] = [
 ];
 
 function RecessList({ recesses }: { recesses: RecessRequest[] }) {
+  const t = useTranslations("Recess");
   if (recesses.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-3 text-center" data-shimmer-ignore>
@@ -51,9 +53,9 @@ function RecessList({ recesses }: { recesses: RecessRequest[] }) {
           <Info className="w-6 h-6 text-muted-foreground" />
         </div>
         <div className="space-y-1">
-          <p className="font-bold">Nenhum recesso encontrado</p>
+          <p className="font-bold">{t('noRecessFound') || "Nenhum recesso encontrado"}</p>
           <p className="text-xs text-muted-foreground px-8">
-            Você ainda não agendou nenhum período de recesso.
+            {t('noRecessFoundDesc') || "Você ainda não agendou nenhum período de recesso."}
           </p>
         </div>
       </div>
@@ -68,10 +70,10 @@ function RecessList({ recesses }: { recesses: RecessRequest[] }) {
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <Badge variant={recess.isValidated ? "default" : "secondary"} className="text-[9px] uppercase h-5">
-                  {recess.isValidated ? "Aprovado" : "Em Revisão"}
+                  {recess.isValidated ? (t('approved') || "Aprovado") : (t('underReview') || "Em Revisão")}
                 </Badge>
                 <span className="text-[10px] text-muted-foreground">
-                  Solicitado em {format(new Date(recess.createdAt), "dd/MM/yyyy")}
+                  {t('requestedOn', { date: format(new Date(recess.createdAt), "dd/MM/yyyy") }) || `Solicitado em ${format(new Date(recess.createdAt), "dd/MM/yyyy")}`}
                 </span>
               </div>
             </div>
@@ -79,12 +81,12 @@ function RecessList({ recesses }: { recesses: RecessRequest[] }) {
 
           <div className="flex items-center justify-between gap-4 p-3 bg-background rounded-xl border border-border/30">
             <div className="flex flex-col">
-              <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">Início</span>
+              <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">{t('start') || "Início"}</span>
               <span className="text-sm font-bold">{format(new Date(recess.startDate), "dd 'de' MMM", { locale: ptBR })}</span>
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
             <div className="flex flex-col text-right">
-              <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">Fim</span>
+              <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">{t('end') || "Fim"}</span>
               <span className="text-sm font-bold">{format(new Date(recess.endDate), "dd 'de' MMM", { locale: ptBR })}</span>
             </div>
           </div>
@@ -92,13 +94,13 @@ function RecessList({ recesses }: { recesses: RecessRequest[] }) {
           {!recess.isValidated && (
             <div className="flex items-center gap-2 text-amber-600 bg-amber-500/5 p-2 rounded-lg border border-amber-500/10" data-shimmer-ignore>
               <Clock className="w-3 h-3" />
-              <span className="text-[10px] font-medium">Aguardando aprovação manual dos managers</span>
+              <span className="text-[10px] font-medium">{t('waitingManualApproval') || "Aguardando aprovação manual dos managers"}</span>
             </div>
           )}
           {recess.isValidated && (
             <div className="flex items-center gap-2 text-emerald-600 bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10" data-shimmer-ignore>
               <CheckCircle2 className="w-3 h-3" />
-              <span className="text-[10px] font-medium">Validado automaticamente conforme o SLA</span>
+              <span className="text-[10px] font-medium">{t('autoValidatedSLA') || "Validado automaticamente conforme o SLA"}</span>
             </div>
           )}
         </div>
@@ -108,6 +110,8 @@ function RecessList({ recesses }: { recesses: RecessRequest[] }) {
 }
 
 export function CheckRecessVault({ teacherId }: CheckRecessVaultProps) {
+  const t = useTranslations("Recess");
+  const tCommon = useTranslations("Common");
   const [isOpen, setIsOpen] = useState(false);
 
   const { data: recesses, isLoading } = useSWR(
@@ -120,16 +124,16 @@ export function CheckRecessVault({ teacherId }: CheckRecessVaultProps) {
       <VaultTrigger asChild>
         <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5">
           <Calendar className="w-4 h-4 text-primary" />
-          Conferir Recessos
+          {t('checkRecesses') || "Conferir Recessos"}
         </Button>
       </VaultTrigger>
 
       <VaultContent className="sm:max-w-lg">
         <VaultHeader>
           <VaultIcon type="calendar" />
-          <VaultTitle>Seus Recessos</VaultTitle>
+          <VaultTitle>{t('yourRecesses') || "Seus Recessos"}</VaultTitle>
           <VaultDescription>
-            Histórico de recessos agendados e status de aprovação.
+            {t('recessHistoryDesc') || "Histórico de recessos agendados e status de aprovação."}
           </VaultDescription>
         </VaultHeader>
 
@@ -140,7 +144,7 @@ export function CheckRecessVault({ teacherId }: CheckRecessVaultProps) {
         </VaultBody>
 
         <VaultFooter>
-          <VaultSecondaryButton onClick={() => setIsOpen(false)}>Fechar</VaultSecondaryButton>
+          <VaultSecondaryButton onClick={() => setIsOpen(false)}>{tCommon('close') || "Fechar"}</VaultSecondaryButton>
         </VaultFooter>
       </VaultContent>
     </Vault>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { submitQuizAction } from "@/modules/course/course.actions";
 import { notify } from "@/components/ui/toaster";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ interface QuizPlayerProps {
 }
 
 export function QuizPlayer({ quizId, questions, initialResult, onComplete }: QuizPlayerProps) {
+  const t = useTranslations("Courses");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>(initialResult?.answers || {});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,7 +43,7 @@ export function QuizPlayer({ quizId, questions, initialResult, onComplete }: Qui
       setIsPracticing(false);
       onComplete(res.data.data.score, res.data.data.passed);
     } else {
-      notify.error(res?.data?.error || "Erro ao enviar quiz");
+      notify.error(res?.data?.error || t('submitQuizError') || "Erro ao enviar quiz");
     }
   };
 
@@ -56,7 +58,7 @@ export function QuizPlayer({ quizId, questions, initialResult, onComplete }: Qui
     return (
       <Card className="max-w-2xl mx-auto border-none shadow-none bg-transparent">
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <p className="text-muted-foreground">Este quiz não possui perguntas.</p>
+          <p className="text-muted-foreground">{t('quizHasNoQuestions') || "Este quiz não possui perguntas."}</p>
         </CardContent>
       </Card>
     );
@@ -67,9 +69,9 @@ export function QuizPlayer({ quizId, questions, initialResult, onComplete }: Qui
       <Card className="max-w-2xl mx-auto border-none shadow-none bg-transparent">
         <CardContent className="flex flex-col items-center justify-center py-12 space-y-6">
           <div className="text-center space-y-1 mb-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-primary/60">Resultado</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-primary/60">{t('result') || "Resultado"}</span>
             {initialResult === result && (
-              <p className="text-sm text-muted-foreground">Sua última tentativa salva</p>
+              <p className="text-sm text-muted-foreground">{t('lastAttemptSaved') || "Sua última tentativa salva"}</p>
             )}
           </div>
 
@@ -85,20 +87,20 @@ export function QuizPlayer({ quizId, questions, initialResult, onComplete }: Qui
           </div>
 
           <div className="text-center space-y-2">
-            <h2 className="text-xl font-bold">{result.passed ? "Parabéns! Você passou." : "Quase lá! Tente novamente."}</h2>
+            <h2 className="text-xl font-bold">{result.passed ? (t('congratulationsPassed') || "Parabéns! Você passou.") : (t('almostThereTryAgain') || "Quase lá! Tente novamente.")}</h2>
             {result.correctCount > 0 && (
-              <p className="text-muted-foreground">Você acertou {result.correctCount} de {result.totalCount} questões.</p>
+              <p className="text-muted-foreground">{t('correctQuestionsCount', { correct: result.correctCount, total: result.totalCount }) || `Você acertou ${result.correctCount} de ${result.totalCount} questões.`}</p>
             )}
           </div>
 
           <div className="flex gap-4">
             <Button variant="outline" onClick={resetQuiz}>
               <RotateCcw className="h-4 w-4 mr-2" />
-              Praticar Novamente
+              {t('practiceAgain') || "Praticar Novamente"}
             </Button>
             {result.passed && (
               <Button>
-                Próxima Aula
+                {t('nextLesson') || "Próxima Aula"}
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             )}
@@ -112,7 +114,7 @@ export function QuizPlayer({ quizId, questions, initialResult, onComplete }: Qui
     <Card className="max-w-2xl mx-auto border-none shadow-none bg-transparent">
       <CardHeader className="px-0">
         <div className="flex justify-between items-center mb-4">
-          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Questão {currentQuestionIndex + 1} de {questions.length}</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('questionOf', { current: currentQuestionIndex + 1, total: questions.length }) || `Questão ${currentQuestionIndex + 1} de ${questions.length}`}</span>
           <div className="flex-1 mx-4 h-2 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full bg-primary transition-all duration-300"
@@ -158,7 +160,7 @@ export function QuizPlayer({ quizId, questions, initialResult, onComplete }: Qui
           disabled={currentQuestionIndex === 0}
         >
           <ChevronLeft className="h-4 w-4 mr-2" />
-          Anterior
+          {t('previous') || "Anterior"}
         </Button>
 
         {isLastQuestion ? (
@@ -166,14 +168,14 @@ export function QuizPlayer({ quizId, questions, initialResult, onComplete }: Qui
             onClick={handleSubmit}
             disabled={!answers[currentQuestion.id] || isSubmitting}
           >
-            {isSubmitting ? "Enviando..." : "Finalizar Quiz"}
+            {isSubmitting ? (t('submitting') || "Enviando...") : (t('finishQuiz') || "Finalizar Quiz")}
           </Button>
         ) : (
           <Button
             onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
             disabled={!answers[currentQuestion.id]}
           >
-            Próxima
+            {t('next') || "Próxima"}
             <ChevronRight className="h-4 w-4 ml-2" />
           </Button>
         )}

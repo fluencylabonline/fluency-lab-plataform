@@ -15,6 +15,7 @@ import {
   CheckCircle2, ChevronLeft, ChevronRight, Trash2
 } from "lucide-react";
 import { useRouter, usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ export function StudentProfileSurvey({
   const [isDiscarding, setIsDiscarding] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations("Survey");
 
   const methods = useForm<StudentProfileSurveyInput>({
     resolver: zodResolver(studentProfileSurveySchema),
@@ -228,7 +230,7 @@ export function StudentProfileSurvey({
       content: (
         <div className="space-y-6">
           <div className="grid gap-2">
-            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Nível autodeclarado</Label>
+            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('selfDeclaredLevel') || "Nível autodeclarado"}</Label>
             <Controller
               name="step2.selfAssessedLevel"
               control={methods.control}
@@ -327,7 +329,7 @@ export function StudentProfileSurvey({
       content: (
         <div className="space-y-6">
           <div className="grid gap-2">
-            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Aulas por semana</Label>
+            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('classesPerWeek') || "Aulas por semana"}</Label>
             <Input
               type="number"
               {...methods.register("step4.weeklyFrequency", { valueAsNumber: true })}
@@ -383,11 +385,11 @@ export function StudentProfileSurvey({
       content: (
         <div className="space-y-5">
           <div className="grid gap-2">
-            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Área profissional</Label>
+            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('professionalArea') || "Área profissional"}</Label>
             <Input {...methods.register("step5.professionalArea")} placeholder="Ex: Tecnologia..." className="h-11 border-border/60 focus-visible:ring-1 focus-visible:ring-primary/40 bg-background/60" />
           </div>
           <div className="grid gap-3">
-            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Uso do idioma no trabalho</Label>
+            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('usageAtWork') || "Uso do idioma no trabalho"}</Label>
             <Controller
               name="step5.usageType"
               control={methods.control}
@@ -426,7 +428,7 @@ export function StudentProfileSurvey({
       dot: "bg-pink-500",
       content: (
         <div className="space-y-3">
-          <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Temas favoritos de conversa</Label>
+          <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('favoriteTopics') || "Temas favoritos de conversa"}</Label>
           <Textarea
             {...methods.register("step6.conversationTopics" as keyof StudentProfileSurveyInput)}
             placeholder="Ex: Cinema, Esportes, Política, Tecnologia..."
@@ -500,7 +502,7 @@ export function StudentProfileSurvey({
       content: (
         <div className="space-y-6">
           <div className="space-y-3">
-            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Principais dificuldades</Label>
+            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('mainDifficulties') || "Principais dificuldades"}</Label>
             <div className="flex flex-wrap gap-2">
               {["Pronúncia", "Gramática", "Vocabulário", "Escuta", "Falar em público"].map(d => (
                 <Controller
@@ -533,7 +535,7 @@ export function StudentProfileSurvey({
             </div>
           </div>
           <div className="space-y-4">
-            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Ansiedade ao falar</Label>
+            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('speakingAnxiety') || "Ansiedade ao falar"}</Label>
             <Controller
               name="step8.speakingAnxiety"
               control={methods.control}
@@ -574,7 +576,7 @@ export function StudentProfileSurvey({
       dot: "bg-zinc-500",
       content: (
         <div className="space-y-4">
-          <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Ritmo de aula preferido</Label>
+          <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('preferredPace') || "Ritmo de aula preferido"}</Label>
           <Controller
             name="step9.learningPace"
             control={methods.control}
@@ -634,7 +636,7 @@ export function StudentProfileSurvey({
             </div>
           </div>
           <div className="grid gap-2">
-            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Observações finais</Label>
+            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('finalNotes') || "Observações finais"}</Label>
             <Textarea
               {...methods.register("step10.generalObservations")}
               placeholder="Ex: Aluno tem pressa para uma entrevista mês que vem..."
