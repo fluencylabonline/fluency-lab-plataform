@@ -3,7 +3,8 @@ import {
   recurrenceRules,
   studentCredits,
   slotInstances,
-  schedulingAuditLogs
+  schedulingAuditLogs,
+  recessRequestsTable
 } from "./scheduling.schema";
 import { eq, and, lte, gte, isNull, inArray, between, ne } from "drizzle-orm";
 import {
@@ -137,6 +138,14 @@ export const schedulingRepository = {
   async findCreditById(id: string) {
     return db.query.studentCredits.findFirst({
       where: eq(studentCredits.id, id),
+    });
+  },
+
+  // --- Recess ---
+  async findRecessesByTeacher(teacherId: string) {
+    return db.query.recessRequestsTable.findMany({
+      where: eq(recessRequestsTable.teacherId, teacherId),
+      orderBy: [recessRequestsTable.startDate],
     });
   },
 

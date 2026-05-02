@@ -10,7 +10,8 @@ import {
   allocateStudentSchema,
   updateSlotStatusSchema,
   grantCreditSchema,
-  schedulingAuditLogs
+  schedulingAuditLogs,
+  recessRequestsTable
 } from "./scheduling.schema";
 import { z } from "zod";
 
@@ -25,6 +26,9 @@ export type NewSlotInstance = typeof slotInstances.$inferInsert;
 
 export type SchedulingAuditLog = typeof schedulingAuditLogs.$inferSelect;
 export type NewSchedulingAuditLog = typeof schedulingAuditLogs.$inferInsert;
+
+export type RecessRequest = typeof recessRequestsTable.$inferSelect;
+export type NewRecessRequest = typeof recessRequestsTable.$inferInsert;
 
 
 export type UserProfile = typeof usersTable.$inferSelect;

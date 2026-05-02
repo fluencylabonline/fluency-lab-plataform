@@ -85,7 +85,7 @@ const teacherItems: MenuItemType[] = [
         iconProps: { size: 20 },
     },
     {
-        href: "/teacher/my-students",
+        href: "/teacher/students",
         label: "Alunos",
         labelKey: "students",
         Icon: PeopleIcon,

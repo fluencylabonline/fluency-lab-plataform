@@ -6,8 +6,10 @@ import {
   slotInstances,
   recurrenceRules,
   studentCredits,
-  schedulingAuditLogs
+  schedulingAuditLogs,
+  recessRequestsTable
 } from "./scheduling.schema";
+import type { User } from "@/modules/user/user.schema";
 import { contractInstancesTable } from "@/modules/contract/contract.schema";
 import { eq, and, gte, lt, asc, desc } from "drizzle-orm";
 import { communicationService } from "@/modules/communication/communication.service";
@@ -23,7 +25,8 @@ import {
   subHours,
   addHours,
   addMinutes,
-  endOfMonth
+  endOfMonth,
+  differenceInCalendarDays
 } from "date-fns";
 import { notificationService } from "@/modules/notification/notification.service";
 import { userRepository } from "@/modules/user/user.repository";
@@ -204,13 +207,12 @@ export const schedulingService = {
         const conflict = await schedulingRepository.findOverlappingSlot(rule.teacherId, startAt, endAt, undefined, dbClient);
 
         if (!exists && !conflict) {
-          const studentId = overrideStudentId || rule.studentId;
-          await dbClient.insert(slotInstances).values({
+          await schedulingRepository.createSlotInstance({
             ruleId: rule.id,
             teacherId: rule.teacherId,
-            studentId,
+            studentId: overrideStudentId || rule.studentId,
             type: rule.type,
-            status: studentId ? "scheduled" : "available",
+            status: (overrideStudentId || rule.studentId) ? "scheduled" : "available",
             startAt,
             endAt,
           });
@@ -225,6 +227,7 @@ export const schedulingService = {
     }
     return generatedCount;
   },
+
 
   async swapSlotTeacher(
     user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
@@ -1015,6 +1018,157 @@ export const schedulingService = {
 
       return { success: true, count: futureClasses.length };
     });
-  }
+  },
+
+  async getRecessImpact(teacherId: string, startDate: Date, endDate: Date) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const classes = await schedulingRepository.findByTeacherInRange(teacherId, start, end);
+    const scheduledClasses = classes.filter(cls => cls.status === "scheduled" && cls.studentId);
+    
+    const studentsAffected = new Map<string, { id: string; name: string; language: string; classesCount: number }>();
+    const affectedClasses = scheduledClasses.map(cls => ({
+      id: cls.id,
+      studentId: cls.studentId!,
+      studentName: cls.student?.name || "Aluno",
+      startAt: cls.startAt,
+      endAt: cls.endAt,
+      language: "English" // Placeholder
+    }));
+
+    scheduledClasses.forEach(cls => {
+      if (cls.studentId && cls.student) {
+        const existing = studentsAffected.get(cls.studentId);
+        if (existing) {
+          existing.classesCount++;
+        } else {
+          studentsAffected.set(cls.studentId, {
+            id: cls.studentId,
+            name: cls.student.name || "Aluno",
+            language: "English", // Placeholder
+            classesCount: 1
+          });
+        }
+      }
+    });
+
+    return {
+      totalClasses: scheduledClasses.length,
+      totalStudents: studentsAffected.size,
+      studentsAffected: Array.from(studentsAffected.values()),
+      affectedClasses
+    };
+  },
+
+  async validateRecessSLA(teacherId: string, startDate: Date, endDate: Date) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const now = new Date();
+    
+    // 1. Check for Overlaps
+    const existingRecesses = await schedulingRepository.findRecessesByTeacher(teacherId);
+    const hasOverlap = existingRecesses.some(r => {
+      return (start <= r.endDate && end >= r.startDate);
+    });
+
+    if (hasOverlap) {
+      return {
+        success: false,
+        error: "Você já possui um recesso agendado que sobrepõe este período."
+      };
+    }
+
+    const daysAdvance = differenceInCalendarDays(start, now);
+    const duration = differenceInCalendarDays(end, start);
+    
+    return {
+      success: true,
+      data: {
+        isAutomatic: daysAdvance >= 20 && duration <= 15,
+        daysAdvance,
+        duration,
+        requiresReview: daysAdvance < 20
+      }
+    };
+  },
+
+  async getTeacherRecesses(teacherId: string) {
+    return await schedulingRepository.findRecessesByTeacher(teacherId);
+  },
+
+  async registerRecess(
+    user: User, 
+    data: { startDate: Date; endDate: Date; fallbackConfig: Record<string, { lessonId: string; message?: string }> }
+  ) {
+    const { startDate, endDate, fallbackConfig } = data;
+    
+    // Re-validate overlap at registration
+    const existingRecesses = await schedulingRepository.findRecessesByTeacher(user.id);
+    const hasOverlap = existingRecesses.some(r => {
+      return (startDate <= r.endDate && endDate >= r.startDate);
+    });
+
+    if (hasOverlap) throw new Error("Período de recesso sobreposto detectado.");
+
+    const now = new Date();
+    const daysAdvance = differenceInCalendarDays(startDate, now);
+    const isAutomatic = daysAdvance >= 20;
+
+    return await db.transaction(async (tx) => {
+      // 1. Create Recess Request
+      const [request] = await tx.insert(recessRequestsTable).values({
+        teacherId: user.id,
+        startDate,
+        endDate,
+        isValidated: isAutomatic,
+        fallbackConfig,
+      }).returning();
+
+      // 2. Get affected classes
+      const affectedClasses = await schedulingRepository.findByTeacherInRange(user.id, startDate, endDate);
+
+      for (const cls of affectedClasses) {
+        if (!cls.studentId) continue;
+        
+        const config = fallbackConfig[cls.id];
+        
+        // 3. Clone current class as fallback
+        await tx.insert(slotInstances).values({
+          teacherId: cls.teacherId,
+          studentId: cls.studentId,
+          ruleId: cls.ruleId,
+          startAt: cls.startAt,
+          endAt: cls.endAt,
+          status: "scheduled",
+          type: "RECESS_FALLBACK",
+          lessonId: config?.lessonId,
+          notes: `Atividade de recesso: ${config?.message || ""}`,
+        });
+
+        // 4. Mark original class as 'teacher-recess'
+        await tx.update(slotInstances)
+          .set({ 
+            status: "teacher-recess",
+            updatedAt: new Date()
+          })
+          .where(eq(slotInstances.id, cls.id));
+      }
+
+      // 5. Notify Managers
+      await notificationService.sendNotification({
+        title: isAutomatic ? "Novo Recesso Agendado" : "Nova Solicitação de Recesso (Revisão)",
+        body: `O professor ${user.name} agendou recesso de ${format(startDate, "dd/MM")} a ${format(endDate, "dd/MM")}.`,
+        targetType: "role",
+        targetRole: "manager",
+        channels: { inApp: true },
+      });
+
+      return request;
+    });
+  },
+
+  async getTeacherClasses(teacherId: string, startDate: Date, endDate: Date) {
+    return await schedulingRepository.findByTeacherInRange(teacherId, startDate, endDate);
+  },
 };
 

@@ -55,7 +55,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
     const [searchValue, setSearchValue] = React.useState("");
 
     // Use prop user if provided, otherwise fallback to store user after hydration
-    const displayUser = user || (hasHydrated ? (storeUser as any) : null);
+    const displayUser = user || (hasHydrated ? (storeUser as HeaderProps["user"]) : null);
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;

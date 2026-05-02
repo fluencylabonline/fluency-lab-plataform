@@ -1,5 +1,5 @@
 import {
-  pgTable, uuid, varchar, timestamp, boolean, pgEnum, integer, jsonb
+  pgTable, uuid, varchar, timestamp, boolean, pgEnum, integer, jsonb, text
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
@@ -7,7 +7,7 @@ import { z } from "zod";
 import { usersTable } from "@/modules/user/user.schema";
 
 // ================= ENUMS =================
-export const slotTypeEnum = pgEnum("slot_type", ["NORMAL", "REPOSICAO"]);
+export const slotTypeEnum = pgEnum("slot_type", ["NORMAL", "REPOSICAO", "RECESS_FALLBACK"]);
 
 export const recurrenceFreqEnum = pgEnum("recurrence_freq", ["NONE", "WEEKLY", "BIWEEKLY", "MONTHLY"]);
 
@@ -21,7 +21,7 @@ export const slotStatusEnum = pgEnum("slot_status", [
   "canceled-credit",         // Aula de reposição cancelada (perde o crédito)
   "no-show",
   "rescheduled",
-  "teacher-vacation",
+  "teacher-recess",
   "overdue",
   "available"                // Necessário para slots abertos
 ]);
@@ -103,6 +103,8 @@ export const slotInstances = pgTable("slot_instances", {
   // Payout Tracking
   payoutId: uuid("payout_id"),
 
+  notes: text("notes"),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -117,6 +119,24 @@ export const schedulingAuditLogs = pgTable("scheduling_audit_logs", {
   newStatus: slotStatusEnum("new_status").notNull(),
   reason: varchar("reason", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// 5. Solicitações de Recesso (SLA-Based)
+export const recessRequestsTable = pgTable("scheduling_recess_requests", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  teacherId: varchar("teacher_id", { length: 128 }).notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  
+  // Status de validação automática
+  isValidated: boolean("is_validated").default(true).notNull(),
+  
+  // Configuração de fallback por aula
+  // { [classId]: { lessonId: string, message: string } }
+  fallbackConfig: jsonb("fallback_config").$type<Record<string, { lessonId: string; message?: string }>>(),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 
@@ -156,6 +176,9 @@ export const insertStudentCreditSchema = createInsertSchema(studentCredits);
 
 export const selectSlotInstanceSchema = createSelectSchema(slotInstances);
 export const insertSlotInstanceSchema = createInsertSchema(slotInstances);
+
+export const selectRecessRequestSchema = createSelectSchema(recessRequestsTable);
+export const insertRecessRequestSchema = createInsertSchema(recessRequestsTable);
 
 // ================= DTOs =================
 export const rescheduleWithCreditSchema = z.object({

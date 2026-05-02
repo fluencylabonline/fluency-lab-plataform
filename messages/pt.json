@@ -222,6 +222,8 @@
     "createSlot": "Criar Horário",
     "creatingSlot": "Criando horário...",
     "slotCreated": "Horário criado com sucesso!",
+    "slotDeleted": "Horário excluído com sucesso!",
+    "slotUpdated": "Horário atualizado com sucesso!",
     "actions": "Ações",
     "accountActions": "Ações de Conta",
     "deactivateStudent": "Desativar Aluno",

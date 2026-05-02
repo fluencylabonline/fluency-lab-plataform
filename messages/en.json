@@ -202,6 +202,8 @@
     "createSlot": "Create Slot",
     "creatingSlot": "Creating slot...",
     "slotCreated": "Slot created successfully!",
+    "slotDeleted": "Slot deleted successfully!",
+    "slotUpdated": "Slot updated successfully!",
     "actions": "Actions",
     "accountActions": "Account Actions",
     "deactivateStudent": "Deactivate Student",

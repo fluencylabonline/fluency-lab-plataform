@@ -22,6 +22,7 @@ import {
 import type { Locale as DateLocale } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import { useLocale } from "next-intl";
+import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, ChevronDown, ChevronUp, Clock, User } from "lucide-react";
 import { Shimmer } from "@shimmer-from-structure/react";
 import { cn } from "@/lib/utils";
@@ -103,7 +104,7 @@ const CalendarGrid = React.memo(({
 
           return (
             <div
-              key={day.toString()}
+              key={dateKey}
               onClick={() => onDateClick(day)}
               className={cn(
                 "aspect-square lg:aspect-auto lg:min-h-[100px] p-1 lg:p-2 border-b border-r border-white/5 cursor-pointer transition-all duration-200 group relative",
@@ -241,7 +242,7 @@ const WeekSection = React.memo(({
             }
 
             return (
-              <div
+              <motion.div
                 key={dateKey}
                 ref={(el) => setDayRef(dateKey, el)}
                 className={cn(
@@ -265,7 +266,7 @@ const WeekSection = React.memo(({
                 )}
 
                 {dayEvents.map((event) => (
-                  <div key={event.id} onClick={() => onEventClick?.(event)} className="cursor-pointer">
+                  <motion.div key={event.id} onClick={() => onEventClick?.(event)} className="cursor-pointer">
                     {renderEventCard ? renderEventCard(event) : (
                       <div className="p-4 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 transition-all space-y-3 group">
                         <div className="flex items-start justify-between">
@@ -291,9 +292,9 @@ const WeekSection = React.memo(({
                         </div>
                       </div>
                     )}
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             );
           })}
         </div>
@@ -400,7 +401,7 @@ export function CalendarView({
   renderEventCard,
   className,
   headerActions,
-  isLoading
+  isLoading = false
 }: CalendarViewProps) {
   const locale = useLocale();
   const dateLocale = locale === "pt" ? ptBR : enUS;

@@ -32,11 +32,21 @@ const fmtCompact = (v: number) =>
     maximumFractionDigits: 1,
   }).format(v);
 
-function CustomTooltip({ active, payload, label }: any) {
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    dataKey: string | number;
+    value: number;
+    payload: Record<string, unknown>;
+  }>;
+  label?: string;
+}
+
+function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
 
-  const income = payload.find((p: any) => p.dataKey === "income")?.value ?? 0;
-  const expense = payload.find((p: any) => p.dataKey === "expense")?.value ?? 0;
+  const income = payload.find((p) => p.dataKey === "income")?.value ?? 0;
+  const expense = payload.find((p) => p.dataKey === "expense")?.value ?? 0;
   const net = income - expense;
 
   return (
@@ -214,7 +224,7 @@ export function FinanceCharts({ data, pendingIncome }: FinanceChartsProps) {
                 />
                 <Tooltip
                   content={<CustomTooltip />}
-                  cursor={{ fill: "hsl(var(--muted) / 0.06)", radius: 6 } as any}
+                  cursor={{ fill: "hsl(var(--muted) / 0.06)", radius: 6 }}
                 />
                 <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} />
                 <Bar

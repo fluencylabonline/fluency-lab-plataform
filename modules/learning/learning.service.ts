@@ -664,7 +664,7 @@ export const learningService = {
                 quiz: {
                   question: q.text,
                   options: q.options,
-                  correctIndex: q.correctIndex,
+                  correctIndex: q.correctIndex ?? 0,
                   explanation: q.explanation,
                   sectionType: section.type
                 }

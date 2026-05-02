@@ -11,7 +11,18 @@ interface AcademicStatsProps {
   popularCourses: PopularCourse[];
 }
 
-function CustomTooltip({ active, payload }: any) {
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    name: string;
+    value: number;
+    payload: {
+      color: string;
+    };
+  }>;
+}
+
+function CustomTooltip({ active, payload }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   const d = payload[0];
   return (
@@ -86,7 +97,7 @@ export function AcademicStats({ attendance, popularCourses }: AcademicStatsProps
 
               {/* Legend */}
               <div className="flex flex-col gap-2.5 min-w-0 w-full">
-                {attendanceData.map((entry, idx) => {
+                {attendanceData.map((entry) => {
                   const cfg = ATTENDANCE_COLORS.find((c) => c.label === entry.name)!;
                   const pct = total > 0 ? Math.round((entry.value / total) * 100) : 0;
                   return (

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { getLocale, getMessages } from "next-intl/server";
+import { getMessages } from "next-intl/server";
 import { cookies } from "next/headers";
 import { Providers } from "@/components/layout/providers";
 import { Quicksand } from "next/font/google";
@@ -36,10 +36,12 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({
   children,
-}: Readonly<{
+  params,
+}: {
   children: React.ReactNode;
-}>) {
-  const locale = await getLocale();
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const messages = await getMessages();
   const cookieStore = await cookies();
 
@@ -59,7 +61,9 @@ export default async function RootLayout({
           messages={messages}
           themeMode={themeMode}
         >
-          {children}
+          <div id="vault-root" className="h-full">
+            {children}
+          </div>
         </Providers>
       </body>
     </html>

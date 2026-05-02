@@ -3,7 +3,7 @@ import {
   languages, media, learningItems, lessons, lessonLearningItems
 } from "./curriculum.schema";
 import { LessonWithDetails, LessonSummary } from "./curriculum.types";
-import { eq, and, isNull, sql } from "drizzle-orm";
+import { eq, and, isNull, sql, desc } from "drizzle-orm";
 
 export const curriculumRepository = {
   // Languages
@@ -231,5 +231,19 @@ export const curriculumRepository = {
         item: true
       }
     });
-  }
+  },
+  async findRecessActivities(teacherId?: string): Promise<LessonSummary[]> {
+    return await db.query.lessons.findMany({
+      where: and(
+        eq(lessons.isRecessActivity, true),
+        eq(lessons.status, "ready"),
+        teacherId ? eq(lessons.teacherId, teacherId) : isNull(lessons.teacherId)
+      ),
+      with: {
+        language: true,
+        media: true
+      },
+      orderBy: [desc(lessons.createdAt)]
+    }) as unknown as Promise<LessonSummary[]>;
+  },
 };

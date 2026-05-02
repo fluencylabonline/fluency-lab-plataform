@@ -62,7 +62,7 @@ Podes controlar o comportamento do Shimmer diretamente no JSX usando atributos `
 
 ```tsx
 import { Suspense } from 'react';
-import { Shimmer } from 'shimmer-from-structure/react';
+import { Shimmer } from '@shimmer-from-structure/react';
 import { UserProfile } from './UserProfile';
 
 // 1. Defina as props mockadas

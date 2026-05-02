@@ -2,7 +2,7 @@ import { curriculumRepository } from "./curriculum.repository";
 import { aiService } from "@/modules/ai/ai.service";
 import { mediaService } from "@/modules/media/media.service";
 import crypto from "crypto";
-import { CEFRLevel, LearningItemMetadata, PracticeItem, VocabMetadata, StructureMetadata, AnalysisResult, QuizData } from "./curriculum.types";
+import { CEFRLevel, LearningItemMetadata, PracticeItem, VocabMetadata, StructureMetadata, AnalysisResult, QuizData, QuizQuestion } from "./curriculum.types";
 import { lessons, media } from "./curriculum.schema";
 
 export const curriculumService = {
@@ -568,6 +568,34 @@ export const curriculumService = {
       type: params.type,
       search: params.search,
       limit: params.limit || 50
+    });
+  },
+
+  async getRecessActivities(teacherId?: string) {
+    return await curriculumRepository.findRecessActivities(teacherId);
+  },
+
+  async upsertRecessActivity(data: {
+    id?: string,
+    title: string,
+    languageId: string,
+    difficulty: CEFRLevel,
+    contentJson?: Record<string, unknown> | null,
+    quizData?: { questions: QuizQuestion[]; passingScore: number } | null,
+    teacherId: string
+  }) {
+    if (data.id) {
+      return await curriculumRepository.updateLesson(data.id, {
+        ...data,
+        isRecessActivity: true,
+        status: "ready"
+      });
+    }
+    return await curriculumRepository.createLesson({
+      ...data,
+      isRecessActivity: true,
+      status: "ready",
+      creationStep: 12
     });
   },
 };

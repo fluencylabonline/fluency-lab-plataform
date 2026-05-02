@@ -81,6 +81,15 @@ const getSignedMediaUploadUrlSchema = z.object({
   contentType: z.string(),
 });
 
+const upsertRecessActivitySchema = z.object({
+  id: z.string().uuid().optional(),
+  title: z.string().min(1),
+  languageId: z.string().uuid(),
+  difficulty: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]),
+  contentJson: z.any().optional(),
+  quizData: z.any().optional(),
+});
+
 
 /**
  * Action to update media record (Step 3).
@@ -358,6 +367,36 @@ export const getLessonsAction = protectedAction
       return { success: true, data: lessons };
     } catch (error) {
       console.error("[getLessonsAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const getRecessActivitiesAction = protectedAction
+  .inputSchema(z.object({
+    teacherId: z.string().optional(),
+  }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const activities = await curriculumService.getRecessActivities(parsedInput.teacherId);
+      return { success: true, data: activities };
+    } catch (error) {
+      console.error("[getRecessActivitiesAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const upsertRecessActivityAction = protectedAction
+  .inputSchema(upsertRecessActivitySchema)
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const result = await curriculumService.upsertRecessActivity({
+        ...parsedInput,
+        teacherId: ctx.user.id,
+      });
+      revalidatePath("/hub/teacher/recess");
+      return { success: true, data: result };
+    } catch (error) {
+      console.error("[upsertRecessActivityAction] Error:", error);
       return { success: false, error: (error as Error).message };
     }
   });

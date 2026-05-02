@@ -12,7 +12,7 @@ import { useTranslations } from "next-intl";
 export function AppearanceSettings() {
     const t = useTranslations("Settings");
     const tc = useTranslations("Common");
-    const { setTheme, theme } = useTheme();
+    const { setTheme } = useTheme();
     const { mode, setMode } = useAppearanceStore();
 
     const modes = [

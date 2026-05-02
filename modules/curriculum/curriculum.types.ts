@@ -79,19 +79,24 @@ export interface AudioTimestamp {
 }
 
 export interface QuizQuestion {
+  id?: string;
   text: string;
+  type?: "multiple-choice" | "true-false";
   options: string[];
-  correctIndex: number;
-  explanation: string;
+  correctIndex?: number;
+  correctAnswer?: string;
+  explanation?: string;
   audioRange?: AudioTimestamp;
   relatedLearningItemId?: string;
 }
 
 export interface QuizData {
-  quiz_sections: Array<{
+  quiz_sections?: Array<{
     type: QuizSectionType;
     questions: QuizQuestion[];
   }>;
+  questions?: QuizQuestion[];
+  passingScore?: number;
 }
 
 export interface QuizItem {
@@ -285,11 +290,13 @@ export interface Lesson {
   contentHash: string | null;
   version: number;
   deletedAt: Date | null | undefined;
+  isRecessActivity: boolean | null;
+  teacherId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface LessonSummary extends Pick<Lesson, "id" | "title" | "difficulty" | "status" | "creationStep" | "version" | "createdAt" | "languageId"> {
+export interface LessonSummary extends Pick<Lesson, "id" | "title" | "difficulty" | "status" | "creationStep" | "version" | "createdAt" | "languageId" | "isRecessActivity" | "teacherId"> {
   language: Language | null;
   media: Media | null;
 }

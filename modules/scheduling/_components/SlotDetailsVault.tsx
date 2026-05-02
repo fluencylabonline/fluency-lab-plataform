@@ -471,7 +471,10 @@ export function SlotDetailsVault({
                     <div className="p-2 rounded bg-rose-500/10 border border-rose-500/20 flex items-start gap-2 animate-in fade-in slide-in-from-top-1">
                       <AlertTriangle className="w-3 h-3 text-rose-500 mt-0.5 shrink-0" />
                       <p className="text-[10px] text-rose-500 leading-tight font-medium">
-                        {t("conflictWarning") || `Conflito detectado: O professor já possui uma aula das ${format(conflict.startAt, "HH:mm")} às ${format(conflict.endAt, "HH:mm")}.`}
+                        {t("conflictWarning", { 
+                          start: format(conflict.startAt, "HH:mm"), 
+                          end: format(conflict.endAt, "HH:mm") 
+                        }) || `Conflito detectado: O professor já possui uma aula das ${format(conflict.startAt, "HH:mm")} às ${format(conflict.endAt, "HH:mm")}.`}
                       </p>
                     </div>
                   )}

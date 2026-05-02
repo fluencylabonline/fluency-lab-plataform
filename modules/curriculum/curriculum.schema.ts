@@ -1,15 +1,16 @@
 import {
-  pgTable, uuid, varchar, text, timestamp, integer, pgEnum, jsonb, vector
+  pgTable, uuid, varchar, text, timestamp, integer, pgEnum, jsonb, vector,
+  boolean
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { usersTable } from "@/modules/user/user.schema";
-import type { 
-  Segment, 
-  MediaConfig, 
-  LearningItemMetadata, 
-  AnalysisResult, 
-  QualityResult, 
-  QuizData 
+import type {
+  Segment,
+  MediaConfig,
+  LearningItemMetadata,
+  AnalysisResult,
+  QualityResult,
+  QuizData
 } from "./curriculum.types";
 import type { JSONContent } from "@tiptap/core";
 
@@ -103,6 +104,10 @@ export const lessons = pgTable("curriculum_lessons", {
   contentHash: varchar("content_hash", { length: 64 }),
   version: integer("version").default(1).notNull(),
   deletedAt: timestamp("deleted_at"),
+
+  // Recess specific
+  isRecessActivity: boolean("is_recess_activity").default(false).notNull(),
+  teacherId: varchar("teacher_id", { length: 128 }), // Optional: private activity
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

@@ -13,6 +13,7 @@ import {
 } from "./scheduling.schema";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { startOfDay, endOfDay } from "date-fns";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { schedulingRepository } from "./scheduling.repository";
 
@@ -380,6 +381,85 @@ export const updateClassEarningsAction = permissionAction("class.update.any")
       return { success: true };
     } catch (error) {
       console.error("[updateClassEarningsAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const getRecessImpactAction = protectedAction
+  .inputSchema(z.object({
+    startDate: z.date(),
+    endDate: z.date(),
+    teacherId: z.string().optional(),
+  }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const targetTeacherId = parsedInput.teacherId || ctx.user.id;
+      const start = startOfDay(parsedInput.startDate);
+      const end = endOfDay(parsedInput.endDate);
+      const impact = await schedulingService.getRecessImpact(targetTeacherId, start, end);
+      return { success: true, data: impact };
+    } catch (error) {
+      console.error("[getRecessImpactAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const validateRecessSLAAction = protectedAction
+  .inputSchema(z.object({
+    startDate: z.date(),
+    endDate: z.date(),
+    teacherId: z.string().optional(),
+  }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const targetTeacherId = parsedInput.teacherId || ctx.user.id;
+      const start = startOfDay(parsedInput.startDate);
+      const end = endOfDay(parsedInput.endDate);
+      const result = await schedulingService.validateRecessSLA(targetTeacherId, start, end);
+      return result; // result already has { success, data/error }
+    } catch (error) {
+      console.error("[validateRecessSLAAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const getTeacherRecessesAction = protectedAction
+  .inputSchema(z.object({
+    teacherId: z.string().optional(),
+  }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const targetTeacherId = parsedInput.teacherId || ctx.user.id;
+      const recesses = await schedulingService.getTeacherRecesses(targetTeacherId);
+      return { success: true, data: recesses };
+    } catch (error) {
+      console.error("[getTeacherRecessesAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const confirmRecessAction = protectedAction
+  .inputSchema(z.object({
+    startDate: z.date(),
+    endDate: z.date(),
+    fallbackConfig: z.record(z.string(), z.object({
+      lessonId: z.string(),
+      message: z.string().optional(),
+    })),
+  }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const start = startOfDay(parsedInput.startDate);
+      const end = endOfDay(parsedInput.endDate);
+      await schedulingService.registerRecess(ctx.user, {
+        ...parsedInput,
+        startDate: start,
+        endDate: end
+      });
+      revalidatePath("/");
+      return { success: true };
+    } catch (error) {
+      console.error("[confirmRecessAction] Error:", error);
       return { success: false, error: (error as Error).message };
     }
   });

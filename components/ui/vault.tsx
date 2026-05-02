@@ -96,7 +96,7 @@ const VaultContent = React.forwardRef<
     const { isStandalone } = useDevice();
 
     return (
-        <Drawer.Portal>
+        <Drawer.Portal container={typeof document !== 'undefined' ? document.getElementById('vault-root') : null}>
             <Drawer.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
             <Drawer.Content
                 ref={ref}
