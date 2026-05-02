@@ -5,7 +5,7 @@ import { Question } from "@/modules/placement/placement.schema";
 import { TestView } from "./TestView";
 import { ResultView } from "./ResultView";
 import { submitPlacementAnswerAction, getTestResultAction } from "@/modules/placement/placement.actions";
-import { usePlacementSound } from "@/hooks/ui/usePlacementSound";
+import { usePlacementSound } from "@/hooks/ui/use-placement-sound";
 import { notify } from "@/components/ui/toaster";
 import { Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";

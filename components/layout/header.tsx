@@ -13,7 +13,7 @@ import { UserMenu } from "./user-menu";
 import { ThemeSwitcher } from "../ui/theme-switcher";
 import { NotificationBell } from "@/modules/notification/_components/NotificationBell";
 import { SearchBar } from "../ui/search-bar";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useDebounce } from "@/hooks/common/use-debounce";
 import { useUserStore } from "@/modules/user/user.store";
 
 export interface HeaderAction {

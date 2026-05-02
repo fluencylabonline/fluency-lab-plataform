@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/command";
 import { notify } from "@/components/ui/toaster";
 import { User } from "@/modules/user/user.schema";
-import { useSearch } from "@/hooks/use-search";
+import { useSearch } from "@/hooks/data/use-search";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { EmptyResults } from "@/components/ui/empty";

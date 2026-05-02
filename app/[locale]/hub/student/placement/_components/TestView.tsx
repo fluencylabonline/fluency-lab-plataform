@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AudioPlayer } from "./AudioPlayer";
 import { useTranslations } from "next-intl";
-import { usePlacementSound } from "@/hooks/ui/usePlacementSound";
+import { usePlacementSound } from "@/hooks/ui/use-placement-sound";
 import { Question } from "@/modules/placement/placement.schema";
 import { UnscrambleView } from "./UnscrambleView";
 

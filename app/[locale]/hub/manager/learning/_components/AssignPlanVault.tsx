@@ -6,7 +6,7 @@ import { z } from "zod";
 import { useTranslations } from "next-intl";
 import { assignPlanAction } from "@/modules/learning/learning.actions";
 import { searchStudentsAction } from "@/modules/user/user.actions";
-import { useSearch } from "@/hooks/use-search";
+import { useSearch } from "@/hooks/data/use-search";
 import { useState, useTransition } from "react";
 import { User } from "@/modules/user/user.schema";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";

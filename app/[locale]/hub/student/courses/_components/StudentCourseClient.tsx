@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useStudentCourses } from "@/hooks/useStudentCourses";
+import { useStudentCourses } from "@/hooks/data/use-student-courses";
 import { Header } from "@/components/layout/header";
 import { EmptyResults } from "@/components/ui/empty";
 import { Badge } from "@/components/ui/badge";

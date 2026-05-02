@@ -1,7 +1,7 @@
 "use client";
 
 import useSWR from "swr";
-import { useDebounce } from "./use-debounce";
+import { useDebounce } from "../common/use-debounce";
 
 interface UseSearchOptions {
   minLength?: number;
