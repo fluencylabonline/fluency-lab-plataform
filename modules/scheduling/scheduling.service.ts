@@ -9,9 +9,9 @@ import {
   schedulingAuditLogs,
   recessRequestsTable
 } from "./scheduling.schema";
-import type { User } from "@/modules/user/user.schema";
+import { usersTable, type User } from "@/modules/user/user.schema";
 import { contractInstancesTable } from "@/modules/contract/contract.schema";
-import { eq, and, gte, lt, asc, desc } from "drizzle-orm";
+import { eq, and, gte, lt, asc, desc, inArray } from "drizzle-orm";
 import { communicationService } from "@/modules/communication/communication.service";
 import { userService } from "@/modules/user/user.service";
 import {
@@ -1169,6 +1169,32 @@ export const schedulingService = {
 
   async getTeacherClasses(teacherId: string, startDate: Date, endDate: Date) {
     return await schedulingRepository.findByTeacherInRange(teacherId, startDate, endDate);
+  },
+
+  async getTeacherStudents(teacherId: string) {
+    const studentIds = await schedulingRepository.findUniqueStudentsByTeacher(teacherId);
+    if (studentIds.length === 0) return [];
+
+    const students = await db.query.usersTable.findMany({
+      where: inArray(usersTable.id, studentIds),
+    });
+
+    const enrichedStudents = await Promise.all(students.map(async (student) => {
+      const nextClass = await schedulingRepository.findNextClassForStudent(student.id, teacherId);
+      
+      return {
+        id: student.id,
+        name: student.name,
+        email: student.email,
+        photoUrl: student.photoUrl,
+        nextClass: nextClass ? {
+          startAt: nextClass.startAt,
+          type: nextClass.type
+        } : null
+      };
+    }));
+
+    return enrichedStudents;
   },
 };
 

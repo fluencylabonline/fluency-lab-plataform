@@ -1675,6 +1675,28 @@
     "mainDifficulties": "Principais dificuldades",
     "speakingAnxiety": "Ansiedade ao falar",
     "preferredPace": "Ritmo de aula preferido",
-    "finalNotes": "Observações finais"
+    "finalNotes": "Final notes"
+  },
+  "MyStudentsPage": {
+    "title": "My Students",
+    "subheading": "Manage your students and track upcoming classes.",
+    "searchPlaceholder": "Search student...",
+    "genericError": "An error occurred while loading your students.",
+    "noResults": "No students found for your search."
+  },
+  "StudentCard": {
+    "invalidDate": "Invalid date",
+    "classToday": "Class today at",
+    "classTomorrow": "Class tomorrow",
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "dayAt": "on",
+    "at": "at",
+    "noScheduledClasse": "No scheduled classes"
   }
 }

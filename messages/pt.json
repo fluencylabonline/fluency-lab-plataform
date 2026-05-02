@@ -1676,5 +1676,27 @@
     "speakingAnxiety": "Ansiedade ao falar",
     "preferredPace": "Ritmo de aula preferido",
     "finalNotes": "Observações finais"
+  },
+  "MyStudentsPage": {
+    "title": "Meus Alunos",
+    "subheading": "Gerencie seus alunos e acompanhe as próximas aulas.",
+    "searchPlaceholder": "Buscar aluno...",
+    "genericError": "Ocorreu um erro ao carregar seus alunos.",
+    "noResults": "Nenhum aluno encontrado para sua busca."
+  },
+  "StudentCard": {
+    "invalidDate": "Data inválida",
+    "classToday": "Aula hoje às",
+    "classTomorrow": "Aula amanhã",
+    "sunday": "Domingo",
+    "monday": "Segunda-feira",
+    "tuesday": "Terça-feira",
+    "wednesday": "Quarta-feira",
+    "thursday": "Quinta-feira",
+    "friday": "Sexta-feira",
+    "saturday": "Sábado",
+    "dayAt": "dia",
+    "at": "às",
+    "noScheduledClasse": "Nenhuma aula agendada"
   }
 }

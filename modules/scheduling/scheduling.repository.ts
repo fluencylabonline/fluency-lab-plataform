@@ -6,7 +6,7 @@ import {
   schedulingAuditLogs,
   recessRequestsTable
 } from "./scheduling.schema";
-import { eq, and, lte, gte, isNull, inArray, between, ne } from "drizzle-orm";
+import { eq, and, lte, gte, isNull, inArray, between, ne, isNotNull, asc } from "drizzle-orm";
 import {
   NewRecurrenceRule,
   NewStudentCredit,
@@ -284,6 +284,31 @@ export const schedulingRepository = {
   },
   async createAuditLog(data: NewSchedulingAuditLog) {
     return db.insert(schedulingAuditLogs).values(data).returning();
+  },
+
+  async findUniqueStudentsByTeacher(teacherId: string) {
+    const results = await db.selectDistinct({ studentId: slotInstances.studentId })
+      .from(slotInstances)
+      .where(
+        and(
+          eq(slotInstances.teacherId, teacherId),
+          isNotNull(slotInstances.studentId)
+        )
+      );
+    
+    return results.map(r => r.studentId as string);
+  },
+
+  async findNextClassForStudent(studentId: string, teacherId: string) {
+    return db.query.slotInstances.findFirst({
+      where: and(
+        eq(slotInstances.studentId, studentId),
+        eq(slotInstances.teacherId, teacherId),
+        gte(slotInstances.startAt, new Date()),
+        eq(slotInstances.status, "scheduled")
+      ),
+      orderBy: [asc(slotInstances.startAt)]
+    });
   }
 };
 
