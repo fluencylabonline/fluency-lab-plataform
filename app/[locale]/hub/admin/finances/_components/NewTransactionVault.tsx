@@ -38,20 +38,28 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { createTransactionSchema, type CreateTransactionValues } from "@/modules/finance/finance.schema";
 import { createTransactionAction, getCategoriesAction } from "@/modules/finance/finance.actions";
 import { notify } from "@/components/ui/toaster";
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { storage } from "@/lib/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Button } from "@/components/ui/button";
+import useSWR from "swr";
 
 export function NewTransactionVault() {
   const t = useTranslations("AdminFinances.newTransaction");
   const [open, setOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const [categories, setCategories] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: categoriesResult } = useSWR(
+    open ? "finance-categories" : null,
+    () => getCategoriesAction(),
+    { revalidateOnFocus: false }
+  );
+
+  const categories = categoriesResult?.data?.success ? categoriesResult.data.data || [] : [];
 
   const { execute, status } = useAction(createTransactionAction, {
     onSuccess: (result) => {
@@ -83,17 +91,6 @@ export function NewTransactionVault() {
       attachmentUrl: "",
     }
   });
-
-  // Fetch categories on open
-  useEffect(() => {
-    if (open) {
-      getCategoriesAction().then((res) => {
-        if (res?.data?.success) {
-          setCategories(res.data.data || []);
-        }
-      });
-    }
-  }, [open]);
 
   const onSubmit = (values: CreateTransactionValues) => {
     execute(values);

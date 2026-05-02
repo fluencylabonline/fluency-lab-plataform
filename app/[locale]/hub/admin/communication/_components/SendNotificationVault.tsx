@@ -32,12 +32,13 @@ import {
   CommandItem
 } from "@/components/ui/command";
 import { notify } from "@/components/ui/toaster";
-import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { User } from "@/modules/user/user.schema";
+import { useSearch } from "@/hooks/use-search";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { EmptyResults } from "@/components/ui/empty";
 import { X, Search, User as UserIcon, Check } from "lucide-react";
-import { User } from "@/modules/user/user.schema";
+import { cn } from "@/lib/utils";
 
 interface SendNotificationVaultProps {
   open: boolean;
@@ -46,10 +47,13 @@ interface SendNotificationVaultProps {
 
 export function SendNotificationVault({ open, onOpenChange }: SendNotificationVaultProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<User[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const {
+    results: searchResults,
+    isSearching
+  } = useSearch<User>(searchTerm, searchUsersAction, { domain: "users" });
 
   const { register, handleSubmit, watch, setValue, formState: { errors }, reset } = useForm<SendNotificationValues>({
     resolver: zodResolver(sendNotificationSchema),
@@ -63,30 +67,6 @@ export function SendNotificationVault({ open, onOpenChange }: SendNotificationVa
   });
 
   const targetType = watch("targetType");
-
-  // Busca usuários via Server Action com debounce manual via useEffect
-  useEffect(() => {
-    if (searchTerm.length < 2) {
-      setSearchResults([]);
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      setIsSearching(true);
-      try {
-        const result = await searchUsersAction({ term: searchTerm });
-        if (result?.data) {
-          setSearchResults(result.data);
-        }
-      } catch (error) {
-        console.error("Search error:", error);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 400);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
 
   const toggleUser = (user: User) => {
     const isSelected = selectedUsers.find(u => u.id === user.id);

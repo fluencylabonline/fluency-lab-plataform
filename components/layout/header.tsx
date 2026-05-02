@@ -13,6 +13,7 @@ import { UserMenu } from "./user-menu";
 import { ThemeSwitcher } from "../ui/theme-switcher";
 import { NotificationBell } from "@/modules/notification/_components/NotificationBell";
 import { SearchBar } from "../ui/search-bar";
+import { useDebounce } from "@/hooks/use-debounce";
 import { useUserStore } from "@/modules/user/user.store";
 
 export interface HeaderAction {
@@ -53,6 +54,15 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
     const isMobile = useIsMobile();
     const [isSearchOpen, setIsSearchOpen] = React.useState(false);
     const [searchValue, setSearchValue] = React.useState("");
+    const debouncedSearch = useDebounce(searchValue, 400);
+
+    // Sync debounced value with parent
+    React.useEffect(() => {
+        // Only call if the search is actually open or if it was cleared
+        if (isSearchOpen || searchValue === "") {
+            onSearchChange?.(debouncedSearch);
+        }
+    }, [debouncedSearch, onSearchChange, isSearchOpen, searchValue]);
 
     // Use prop user if provided, otherwise fallback to store user after hydration
     const displayUser = user || (hasHydrated ? (storeUser as HeaderProps["user"]) : null);
@@ -60,13 +70,13 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setSearchValue(val);
-        onSearchChange?.(val);
+        // Removed direct onSearchChange call to use debounce effect instead
     };
 
     const closeSearch = () => {
         setIsSearchOpen(false);
         setSearchValue("");
-        onSearchChange?.("");
+        // No need to call onSearchChange here, the effect will handle it via debouncedSearch
     };
 
     const renderAction = (isMobileSlot: boolean) => {

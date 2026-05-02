@@ -20,7 +20,7 @@ export function SuspendedContent() {
         <div className="max-w-md w-full text-center space-y-8 relative z-10">
             <div className="relative inline-flex">
                 <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
-                <div className="relative bg-slate-100 dark:bg-slate-900 p-6 rounded-full border border-white/10 shadow-xl">
+                <div className="relative bg-slate-100 dark:bg-slate-900 p-6 rounded-full border border-white/10">
                     <LogOut className="w-12 h-12 text-primary" />
                 </div>
             </div>
@@ -36,7 +36,7 @@ export function SuspendedContent() {
 
             <div className="pt-4 flex flex-col gap-3">
                 <Button
-                    className="h-12 text-base font-medium rounded-xl shadow-lg shadow-primary/20"
+                    className="h-12 text-base font-medium rounded-xl"
                 >
                     <a
                         href="https://wa.me/5500000000000" // TODO: Colocar link real do suporte

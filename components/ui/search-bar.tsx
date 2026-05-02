@@ -43,6 +43,7 @@ const SearchBar = React.forwardRef<HTMLInputElement, SearchBarProps>(
             className,
             containerClassName,
             hasError,
+            rightIcon,
             ...rest
         },
         ref,
@@ -60,10 +61,19 @@ const SearchBar = React.forwardRef<HTMLInputElement, SearchBarProps>(
                 <Input
                     type="search"
                     ref={ref}
-                    className={twMerge("pl-10 dark:bg-slate-900!", className)}
+                    className={twMerge(
+                        "pl-10 dark:bg-slate-900!",
+                        rightIcon && "pr-10",
+                        className
+                    )}
                     hasError={hasError}
                     {...rest}
                 />
+                {rightIcon && (
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">
+                        {rightIcon}
+                    </div>
+                )}
             </div>
         );
     },

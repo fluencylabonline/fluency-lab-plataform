@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import useSWR from "swr";
 import { getStudentPlanGapAction } from "@/modules/learning/learning.actions";
-import { StudentCurriculumGap } from "@/modules/learning/learning.types";
 import { useTranslations } from "next-intl";
 import {
     CheckCircle2,
@@ -19,21 +18,15 @@ interface StudentPlanStatusProps {
 
 export function StudentPlanStatus({ studentId }: StudentPlanStatusProps) {
     const t = useTranslations("Learning");
-    const [gapData, setGapData] = useState<StudentCurriculumGap | null>(null);
-    const [isPending, startTransition] = useTransition();
 
-    useEffect(() => {
-        if (!studentId) return;
+    const { data: result, isLoading } = useSWR(
+        studentId ? ["student-plan-gap", studentId] : null,
+        () => getStudentPlanGapAction({ studentId })
+    );
 
-        startTransition(async () => {
-            const result = await getStudentPlanGapAction({ studentId });
-            if (result?.data?.success && result.data.data) {
-                setGapData(result.data.data);
-            }
-        });
-    }, [studentId]);
+    const gapData = result?.data?.success ? result.data.data : null;
 
-    if (isPending) {
+    if (isLoading) {
         return (
             <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
                 <Loader2 className="w-4 h-4 animate-spin" />

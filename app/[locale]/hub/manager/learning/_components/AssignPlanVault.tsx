@@ -6,6 +6,11 @@ import { z } from "zod";
 import { useTranslations } from "next-intl";
 import { assignPlanAction } from "@/modules/learning/learning.actions";
 import { searchStudentsAction } from "@/modules/user/user.actions";
+import { useSearch } from "@/hooks/use-search";
+import { useState, useTransition } from "react";
+import { User } from "@/modules/user/user.schema";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { SearchBar } from "@/components/ui/search-bar";
 import {
     Vault,
     VaultContent,
@@ -15,17 +20,13 @@ import {
     VaultBody,
     VaultForm,
     VaultField,
-    VaultInput,
     VaultPrimaryButton,
     VaultSecondaryButton,
     VaultFooter,
     VaultIcon
 } from "@/components/ui/vault";
 import { notify } from "@/components/ui/toaster";
-import { useState, useTransition, useEffect, useCallback } from "react";
-import { Search, Check, Info } from "lucide-react";
-import type { User } from "@/modules/user/user.schema";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Check, Info, Loader2, Search } from "lucide-react";
 
 const assignPlanSchema = z.object({
     studentId: z.string().min(1, { message: "Validation.required" }),
@@ -42,10 +43,13 @@ interface AssignPlanVaultProps {
 export function AssignPlanVault({ templateId, open, onOpenChange }: AssignPlanVaultProps) {
     const t = useTranslations("Learning");
     const [isPending, startTransition] = useTransition();
-    const [searchTerm, setSearchTerm] = useState("");
-    const [students, setStudents] = useState<User[]>([]);
     const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
-    const [isSearching, setIsSearching] = useState(false);
+
+    const [searchTerm, setSearchTerm] = useState("");
+    const {
+        results: students,
+        isSearching,
+    } = useSearch<User>(searchTerm, searchStudentsAction, { domain: "students" });
 
     const form = useForm<AssignPlanValues>({
         resolver: zodResolver(assignPlanSchema),
@@ -53,39 +57,6 @@ export function AssignPlanVault({ templateId, open, onOpenChange }: AssignPlanVa
             studentId: "",
         },
     });
-
-    // Student Search Logic
-    const handleSearch = useCallback(async (term: string) => {
-        if (!term || term.length < 2) {
-            setStudents([]);
-            return;
-        }
-
-        setIsSearching(true);
-        try {
-            const result = await searchStudentsAction({ term });
-            if (result?.serverError) {
-                notify.error(result.serverError);
-                return;
-            }
-            if (result?.data) {
-                setStudents(result.data as User[]);
-            } else {
-                setStudents([]);
-            }
-        } catch (error) {
-            console.error("Search error:", error);
-        } finally {
-            setIsSearching(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (searchTerm) handleSearch(searchTerm);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchTerm, handleSearch]);
 
     const onSubmit = (values: AssignPlanValues) => {
         startTransition(async () => {
@@ -125,31 +96,19 @@ export function AssignPlanVault({ templateId, open, onOpenChange }: AssignPlanVa
                             >
                                 <div className="space-y-4">
                                     <div className="relative group">
-                                        <VaultInput
+                                        <SearchBar
                                             placeholder={t("student_placeholder")}
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                             onKeyDown={(e) => {
                                                 if (e.key === "Enter") {
                                                     e.preventDefault();
-                                                    handleSearch(searchTerm);
                                                 }
                                             }}
-                                            className="pr-12 h-12"
+                                            className="h-12"
                                             autoFocus
+                                            rightIcon={isSearching && <Loader2 className="animate-spin size-4" />}
                                         />
-                                        <button
-                                            type="button"
-                                            onClick={() => handleSearch(searchTerm)}
-                                            disabled={isSearching || searchTerm.length < 2}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 disabled:opacity-30 transition-all"
-                                        >
-                                            {isSearching ? (
-                                                <div className="size-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                                            ) : (
-                                                <Search className="size-5" />
-                                            )}
-                                        </button>
                                     </div>
 
                                     {/* Results List */}
@@ -162,7 +121,6 @@ export function AssignPlanVault({ templateId, open, onOpenChange }: AssignPlanVa
                                                     onClick={() => {
                                                         setSelectedStudent(student);
                                                         form.setValue("studentId", student.id);
-                                                        setStudents([]);
                                                         setSearchTerm("");
                                                     }}
                                                     className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors text-left group/item"
