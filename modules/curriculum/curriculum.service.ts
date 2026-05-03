@@ -504,6 +504,10 @@ export const curriculumService = {
     return curriculumRepository.findAllLessons();
   },
 
+  async getLessonsPaginated(params: { search?: string, limit?: number, offset?: number }) {
+    return curriculumRepository.findLessons(params);
+  },
+
   async updateMedia(id: string, data: Partial<typeof media.$inferInsert>) {
     return await curriculumRepository.updateMedia(id, data);
   },

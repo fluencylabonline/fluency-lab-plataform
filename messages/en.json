@@ -1,6 +1,6 @@
 {
   "Navigation": {
-    "myProfile": "My Profile",
+    "myProfile": "Profile",
     "dashboard": "Dashboard",
     "users": "Users",
     "finances": "Finances",
@@ -9,8 +9,8 @@
     "tasks": "Tasks",
     "settings": "Settings",
     "students": "Students",
-    "mySchedule": "My Schedule",
-    "workbooks": "Study Materials",
+    "mySchedule": "Schedule",
+    "lessons": "Lessons",
     "chat": "Chats",
     "notebook": "Notebook",
     "calendar": "Calendar",

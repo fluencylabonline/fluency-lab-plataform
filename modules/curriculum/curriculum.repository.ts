@@ -207,8 +207,8 @@ export const curriculumRepository = {
       }
     }) as unknown as Promise<LessonSummary[]>;
   },
-  async findLessons(params: { search?: string, limit?: number }): Promise<LessonSummary[]> {
-    const { search, limit = 50 } = params;
+  async findLessons(params: { search?: string, limit?: number, offset?: number }): Promise<LessonSummary[]> {
+    const { search, limit = 50, offset = 0 } = params;
     const filters = [isNull(lessons.deletedAt)];
     if (search) {
       filters.push(sql`${lessons.title} ILIKE ${`%${search}%`}`);
@@ -216,6 +216,7 @@ export const curriculumRepository = {
     return db.query.lessons.findMany({
       where: and(...filters),
       limit: limit,
+      offset: offset,
       orderBy: [sql`${lessons.createdAt} DESC`],
       with: {
         language: true,

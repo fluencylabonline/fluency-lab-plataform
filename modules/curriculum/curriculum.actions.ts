@@ -360,15 +360,18 @@ export const getLessonsAction = protectedAction
   .inputSchema(z.object({
     search: z.string().optional(),
     limit: z.number().optional().default(50),
+    offset: z.number().optional().default(0),
+    languageId: z.string().optional(),
+    difficulty: z.string().optional(),
   }))
   .action(async ({ parsedInput }) => {
-    try {
-      const lessons = await curriculumRepository.findLessons(parsedInput);
-      return { success: true, data: lessons };
-    } catch (error) {
-      console.error("[getLessonsAction] Error:", error);
-      return { success: false, error: (error as Error).message };
-    }
+    return await curriculumRepository.findLessons(parsedInput);
+  });
+
+export const getLessonByIdAction = protectedAction
+  .inputSchema(z.object({ id: z.string().uuid() }))
+  .action(async ({ parsedInput }) => {
+    return await curriculumRepository.findLessonById(parsedInput.id);
   });
 
 export const getRecessActivitiesAction = protectedAction

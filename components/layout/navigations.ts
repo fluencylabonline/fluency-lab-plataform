@@ -101,9 +101,9 @@ const teacherItems: MenuItemType[] = [
         permission: "class.view.assigned",
     },
     {
-        href: "/teacher/workbooks",
-        label: "Material",
-        labelKey: "workbooks",
+        href: "/teacher/lessons",
+        label: "Lições",
+        labelKey: "lessons",
         Icon: LayoutDashboardIcon,
         iconProps: { size: 20 },
         permission: "material.view",

@@ -296,7 +296,7 @@ export interface Lesson {
   updatedAt: Date;
 }
 
-export interface LessonSummary extends Pick<Lesson, "id" | "title" | "difficulty" | "status" | "creationStep" | "version" | "createdAt" | "languageId" | "isRecessActivity" | "teacherId"> {
+export interface LessonSummary extends Pick<Lesson, "id" | "title" | "difficulty" | "status" | "creationStep" | "version" | "createdAt" | "languageId" | "isRecessActivity" | "teacherId" | "contentText"> {
   language: Language | null;
   media: Media | null;
 }

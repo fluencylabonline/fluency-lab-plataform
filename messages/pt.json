@@ -1,6 +1,6 @@
 {
   "Navigation": {
-    "myProfile": "Meu Perfil",
+    "myProfile": "Perfil",
     "dashboard": "Dashboard",
     "users": "Usuários",
     "finances": "Financeiro",
@@ -9,8 +9,8 @@
     "tasks": "Tarefas",
     "settings": "Configurações",
     "students": "Alunos",
-    "mySchedule": "Minha Agenda",
-    "workbooks": "Material",
+    "mySchedule": "Agenda",
+    "lessons": "Lições",
     "chat": "Conversas",
     "notebook": "Caderno",
     "calendar": "Calendário",

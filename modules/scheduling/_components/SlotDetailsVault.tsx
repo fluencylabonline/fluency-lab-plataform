@@ -123,8 +123,8 @@ export function SlotDetailsVault({
         const result = await getLessonsAction({
           search: lessonsSearch
         });
-        if (result?.data?.success) {
-          setLessonsResults(result.data.data as unknown as LessonSummary[]);
+        if (result?.data) {
+          setLessonsResults(result.data);
         }
       } catch (err) {
         console.error("Error searching lessons:", err);

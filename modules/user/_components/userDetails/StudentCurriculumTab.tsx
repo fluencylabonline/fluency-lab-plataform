@@ -134,7 +134,7 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
 
     if (tData?.success) setTeachers(tData.data || []);
     if (pData?.success) setPlans(pData.data || []);
-    if (lData?.success) setLessons(lData.data || []);
+    if (lData) setLessons(lData);
   }, [isAdmin]);
 
   const fetchPlans = useCallback(async () => {

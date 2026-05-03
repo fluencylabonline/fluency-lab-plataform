@@ -185,7 +185,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
             )}
 
             {showSubHeader && (
-                <div className="sub-header-layout flex px-4 py-4 md:px-6 w-full">
+                <div className="sub-header-layout flex px-4 pt-4 md:px-6 w-full">
                     {isMobile ? (
                         <div className="flex flex-col w-full">
                             <h1 className="text-xl font-bold tracking-tight text-foreground">
