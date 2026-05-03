@@ -1780,5 +1780,29 @@
     "october": "October",
     "november": "November",
     "december": "December"
+  },
+  "Lessons": {
+    "title": "Lessons Library",
+    "subtitle": "Explore and use pre-configured lessons for your classes",
+    "filtersLabel": "Filters:",
+    "emptyTitle": "No lessons found",
+    "emptyDescription": "Try adjusting your filters or search to find what you are looking for.",
+    "loadingMore": "Loading more lessons...",
+    "noDescription": "No description available.",
+    "contentLabel": "Content",
+    "viewDetails": "View Details"
+  },
+  "LessonDetail": {
+    "audioTitle": "Lesson Audio",
+    "audioPlayerTitle": "Original Audio",
+    "contentTitle": "Lesson Content",
+    "noContent": "No text content available.",
+    "learningItemsTitle": "Learning Items",
+    "vocabularyTitle": "Vocabulary",
+    "noVocabulary": "No vocabulary listed.",
+    "structuresTitle": "Structures",
+    "noStructures": "No structures listed.",
+    "tabContent": "Content"
   }
+
 }

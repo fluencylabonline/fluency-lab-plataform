@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Shimmer } from "@shimmer-from-structure/react";
 import { Header } from "@/components/layout/header";
+import { useTranslations } from "next-intl";
 
 const PAGE_SIZE = 20;
 
@@ -19,6 +20,7 @@ interface LessonListProps {
 }
 
 export function LessonList({ initialData, languages }: LessonListProps) {
+  const t = useTranslations("Lessons");
   const [search, setSearch] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
@@ -79,8 +81,8 @@ export function LessonList({ initialData, languages }: LessonListProps) {
   return (
     <div>
       <Header
-        title="Biblioteca de Lições"
-        subtitle="Explore e utilize lições pré-configuradas para suas aulas"
+        title={t("title") || "Biblioteca de Lições"}
+        subtitle={t("subtitle") || "Explore e utilize lições pré-configuradas para suas aulas"}
         className="contents"
         onSearchChange={(val) => setSearch(val)}
       />
@@ -88,7 +90,9 @@ export function LessonList({ initialData, languages }: LessonListProps) {
       <main className="container">
         {/* Filters */}
         <div className="flex flex-wrap gap-2 items-center py-2 pb-6">
-          <span className="text-xs font-bold uppercase text-muted-foreground mr-2">Filtros:</span>
+          <span className="text-xs font-bold uppercase text-muted-foreground mr-2">
+            {t("filtersLabel") || "Filtros:"}
+          </span>
 
           {/* Difficulty Filters */}
           {difficulties.map(diff => (
@@ -133,8 +137,8 @@ export function LessonList({ initialData, languages }: LessonListProps) {
           {filteredLessons.length === 0 && !isValidating ? (
             <div className="py-20">
               <EmptyResults
-                title="Nenhuma lição encontrada"
-                description="Tente ajustar seus filtros ou busca para encontrar o que procura."
+                title={t("emptyTitle") || "Nenhuma lição encontrada"}
+                description={t("emptyDescription") || "Tente ajustar seus filtros ou busca para encontrar o que procura."}
               />
             </div>
           ) : (
@@ -150,11 +154,11 @@ export function LessonList({ initialData, languages }: LessonListProps) {
         </Shimmer>
 
         {/* Infinite Scroll Trigger */}
-        <div ref={lastElementRef} className="h-10 flex items-center justify-center pb-10">
+        <div ref={lastElementRef} className="h-10 flex items-center justify-center pb-10 mt-10">
           {isLoadingMore && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <LoadingSpinner className="w-4 h-4" />
-              Carregando mais lições...
+              {t("loadingMore") || "Carregando mais lições..."}
             </div>
           )}
         </div>

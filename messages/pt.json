@@ -1780,5 +1780,29 @@
     "october": "Outubro",
     "november": "Novembro",
     "december": "Dezembro"
+  },
+  "Lessons": {
+    "title": "Biblioteca de Lições",
+    "subtitle": "Explore e utilize lições pré-configuradas para suas aulas",
+    "filtersLabel": "Filtros:",
+    "emptyTitle": "Nenhuma lição encontrada",
+    "emptyDescription": "Tente ajustar seus filtros ou busca para encontrar o que procura.",
+    "loadingMore": "Carregando mais lições...",
+    "noDescription": "Nenhuma descrição disponível.",
+    "contentLabel": "Conteúdo",
+    "viewDetails": "Ver Detalhes"
+  },
+  "LessonDetail": {
+    "audioTitle": "Áudio da Aula",
+    "audioPlayerTitle": "Áudio Original",
+    "contentTitle": "Conteúdo da Lição",
+    "noContent": "Nenhum conteúdo de texto disponível.",
+    "learningItemsTitle": "Itens de Aprendizado",
+    "vocabularyTitle": "Vocabulário",
+    "noVocabulary": "Nenhum vocabulário listado.",
+    "structuresTitle": "Estruturas",
+    "noStructures": "Nenhuma estrutura listada.",
+    "tabContent": "Conteúdo"
   }
+
 }

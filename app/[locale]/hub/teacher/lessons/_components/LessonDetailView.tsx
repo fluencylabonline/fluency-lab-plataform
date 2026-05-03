@@ -7,12 +7,14 @@ import { AudioPlayer } from "@/components/ui/audio-player";
 import { Header } from "@/components/layout/header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface LessonDetailViewProps {
   lesson: LessonWithDetails;
 }
 
 export function LessonDetailView({ lesson }: LessonDetailViewProps) {
+  const t = useTranslations("LessonDetail");
   const params = useParams();
   const locale = params.locale as string;
 
@@ -26,11 +28,11 @@ export function LessonDetailView({ lesson }: LessonDetailViewProps) {
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
             <AudioLines className="w-3.5 h-3.5" />
-            Áudio da Aula
+            {t("audioTitle") || "Áudio da Aula"}
           </div>
           <AudioPlayer
             url={lesson.media.url}
-            title="Áudio Original"
+            title={t("audioPlayerTitle") || "Áudio Original"}
             className="card"
           />
         </div>
@@ -40,7 +42,7 @@ export function LessonDetailView({ lesson }: LessonDetailViewProps) {
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
           <MessageSquare className="w-3.5 h-3.5" />
-          Conteúdo da Lição
+          {t("contentTitle") || "Conteúdo da Lição"}
         </div>
         <div className="card overflow-hidden">
           <div className="p-6 md:p-8 h-[50vh] md:h-[calc(100vh-325px)] overflow-y-auto custom-scrollbar">
@@ -48,7 +50,7 @@ export function LessonDetailView({ lesson }: LessonDetailViewProps) {
               {lesson.contentText ? (
                 <p className="whitespace-pre-wrap leading-relaxed text-text/90">{lesson.contentText}</p>
               ) : (
-                <p className="italic text-muted-foreground">Nenhum conteúdo de texto disponível.</p>
+                <p className="italic text-muted-foreground">{t("noContent") || "Nenhum conteúdo de texto disponível."}</p>
               )}
             </div>
           </div>
@@ -61,12 +63,14 @@ export function LessonDetailView({ lesson }: LessonDetailViewProps) {
     <div className="space-y-6 md:h-[calc(100vh-160px)] md:overflow-y-auto md:pr-2 p-4">
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
         <ListChecks className="w-3.5 h-3.5" />
-        Itens de Aprendizado
+        {t("learningItemsTitle") || "Itens de Aprendizado"}
       </div>
 
       {/* Vocabulary */}
       <div className="space-y-3">
-        <h4 className="text-[10px] font-bold uppercase text-primary/70 px-1 tracking-widest">Vocabulário</h4>
+        <h4 className="text-[10px] font-bold uppercase text-primary/70 px-1 tracking-widest">
+          {t("vocabularyTitle") || "Vocabulário"}
+        </h4>
         <div className="grid gap-2">
           {vocabulary.map((li, idx) => (
             <div key={idx} className="card flex items-center justify-between p-3">
@@ -75,14 +79,16 @@ export function LessonDetailView({ lesson }: LessonDetailViewProps) {
             </div>
           ))}
           {vocabulary.length === 0 && (
-            <p className="text-xs text-muted-foreground italic px-1">Nenhum vocabulário listado.</p>
+            <p className="text-xs text-muted-foreground italic px-1">{t("noVocabulary") || "Nenhum vocabulário listado."}</p>
           )}
         </div>
       </div>
 
       {/* Structures */}
       <div className="space-y-3">
-        <h4 className="text-[10px] font-bold uppercase text-primary/70 px-1 tracking-widest">Estruturas</h4>
+        <h4 className="text-[10px] font-bold uppercase text-primary/70 px-1 tracking-widest">
+          {t("structuresTitle") || "Estruturas"}
+        </h4>
         <div className="grid gap-2">
           {structures.map((li, idx) => (
             <div key={idx} className="card flex flex-col gap-1 p-3">
@@ -91,7 +97,7 @@ export function LessonDetailView({ lesson }: LessonDetailViewProps) {
             </div>
           ))}
           {structures.length === 0 && (
-            <p className="text-xs text-muted-foreground italic px-1">Nenhuma estrutura listada.</p>
+            <p className="text-xs text-muted-foreground italic px-1">{t("noStructures") || "Nenhuma estrutura listada."}</p>
           )}
         </div>
       </div>
@@ -128,10 +134,10 @@ export function LessonDetailView({ lesson }: LessonDetailViewProps) {
           <Tabs defaultValue="content" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6 h-12 p-1 bg-muted/50 rounded-2xl">
               <TabsTrigger value="content" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                Conteúdo
+                {t("tabContent") || "Conteúdo"}
               </TabsTrigger>
               <TabsTrigger value="items" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                Vocabulário
+                {t("vocabularyTitle") || "Vocabulário"}
               </TabsTrigger>
             </TabsList>
             <TabsContent value="content" className="mt-0 focus-visible:outline-none">

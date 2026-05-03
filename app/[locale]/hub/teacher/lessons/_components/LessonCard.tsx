@@ -6,12 +6,15 @@ import { buttonVariants } from "@/components/ui/button-variants";
 import { BookOpen, Tag, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface LessonCardProps {
   lesson: LessonSummary;
 }
 
 export function LessonCard({ lesson }: LessonCardProps) {
+  const t = useTranslations("Lessons");
+  const commonT = useTranslations("Common");
   const params = useParams();
   const locale = params.locale as string;
 
@@ -19,7 +22,7 @@ export function LessonCard({ lesson }: LessonCardProps) {
     <div className="card flex flex-col h-full group p-4">
       <div className="flex items-center justify-between mb-3">
         <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-medium uppercase tracking-wider">
-          {lesson.language?.name || "Idioma"}
+          {lesson.language?.name || commonT("language") || "Idioma"}
         </Badge>
         <div className="flex items-center gap-1 text-muted-foreground">
           <Tag className="w-3 h-3" />
@@ -32,13 +35,13 @@ export function LessonCard({ lesson }: LessonCardProps) {
       </h3>
 
       <p className="text-sm text-muted-foreground line-clamp-3 italic mb-4 flex-1">
-        {lesson.contentText || "Nenhuma descrição disponível."}
+        {lesson.contentText || t("noDescription") || "Nenhuma descrição disponível."}
       </p>
 
       <div className="pt-4 border-t border-border/50 flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <BookOpen className="w-3.5 h-3.5" />
-          <span className="text-xs font-medium">Conteúdo</span>
+          <span className="text-xs font-medium">{t("contentLabel") || "Conteúdo"}</span>
         </div>
 
         <Link
@@ -49,7 +52,7 @@ export function LessonCard({ lesson }: LessonCardProps) {
             className: "h-8 gap-2 text-xs font-bold hover:bg-primary/10 hover:text-primary"
           })}
         >
-          Ver Detalhes
+          {t("viewDetails") || "Ver Detalhes"}
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
