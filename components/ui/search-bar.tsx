@@ -62,7 +62,7 @@ const SearchBar = React.forwardRef<HTMLInputElement, SearchBarProps>(
                     type="search"
                     ref={ref}
                     className={twMerge(
-                        "pl-10 dark:bg-slate-900!",
+                        "pl-10 border-none!",
                         rightIcon && "pr-10",
                         className
                     )}

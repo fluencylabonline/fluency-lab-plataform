@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { SearchBar } from "@/components/ui/search-bar";
+import { Header } from "@/components/layout/header";
 import { EmptyResults } from "@/components/ui/empty";
 import { StudentCard, type StudentWithNextClass } from "./StudentCard";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,9 +10,17 @@ import { containerVariants, itemVariants } from "@/lib/animations";
 
 interface StudentsListProps {
   initialData: StudentWithNextClass[];
+  user: {
+    name: string | null;
+    email: string | null;
+    photoUrl?: string | null;
+    role?: string;
+  };
+  title: string;
+  subtitle: string;
 }
 
-export function StudentsList({ initialData }: StudentsListProps) {
+export function StudentsList({ initialData, user, title, subtitle }: StudentsListProps) {
   const t = useTranslations("MyStudentsPage");
   const [search, setSearch] = useState("");
 
@@ -27,46 +35,47 @@ export function StudentsList({ initialData }: StudentsListProps) {
   }, [initialData, search]);
 
   return (
-    <div className="space-y-6">
-      <div className="max-w-md">
-        <SearchBar
-          placeholder={t("searchPlaceholder")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="bg-card/50 border-none"
-        />
-      </div>
+    <div>
+      <Header
+        title={title}
+        subtitle={subtitle}
+        user={user}
+        onSearchChange={setSearch}
+        className="contents"
+      />
 
-      <AnimatePresence mode="popLayout">
-        {filteredStudents.length > 0 ? (
-          <motion.div
-            key="list"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-          >
-            {filteredStudents.map((student) => (
-              <motion.div key={student.id} variants={itemVariants} layout>
-                <StudentCard student={student} />
-              </motion.div>
-            ))}
-          </motion.div>
-        ) : (
-          <motion.div
-            key="empty"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-          >
-            <EmptyResults 
-              searchQuery={search} 
-              title={search ? t("noResults") : undefined}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <main className="container">
+        <AnimatePresence mode="popLayout">
+          {filteredStudents.length > 0 ? (
+            <motion.div
+              key="list"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            >
+              {filteredStudents.map((student) => (
+                <motion.div key={student.id} variants={itemVariants} layout>
+                  <StudentCard student={student} />
+                </motion.div>
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
+              <EmptyResults
+                searchQuery={search}
+                title={search ? t("noResults") : undefined}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
     </div>
   );
 }

@@ -73,11 +73,11 @@ export function PlansPageClient({ initialPlans, user }: PlansPageClientProps) {
         title={t("plansTitle") || "Gestão de Planos"}
         subtitle={t("plansSubtitle") || "Configure os pacotes de aulas e mensalidades"}
         user={user}
-        action={{
+        actions={[{
           label: t("newPlan") || "Novo Plano",
           icon: <Plus className="w-4 h-4" />,
           onClick: handleCreate
-        }}
+        }]}
       />
 
       <div className="container">

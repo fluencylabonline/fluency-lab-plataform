@@ -447,8 +447,8 @@ export const schedulingService = {
       });
 
 
-      // 3. If canceled-teacher-makeup AND met the notice period (if applicable)
-      if (reason === "canceled-teacher-makeup" && slot.studentId) {
+      // 3. If canceled-teacher AND met the notice period (if applicable)
+      if (reason === "canceled-teacher" && slot.studentId) {
         // Default expiration: 30 days
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 30);
@@ -1195,6 +1195,48 @@ export const schedulingService = {
     }));
 
     return enrichedStudents;
+  },
+
+  async getStudentClassesByTeacher(
+    user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
+    studentId: string,
+    startDate: Date,
+    endDate: Date
+  ) {
+    // RBAC: Admin/Manager can see any student's classes. Teacher can only see if they teach the student.
+    const isAdmin = hasPermission(user, "class.update.any");
+    const isTeacher = user.role === "teacher";
+
+    if (!isAdmin && !isTeacher) {
+      throw new Error("Unauthorized to access student classes");
+    }
+
+    // The repository method filters by both studentId and teacherId (passed as user.id here)
+    // If it's an admin, they might want to see classes with a specific teacher? 
+    // The prompt implies the teacher is looking at THEIR classes with the student.
+    return await schedulingRepository.findByStudentAndTeacherInRange(studentId, user.id, startDate, endDate);
+  },
+
+  async updateClassNotes(
+    user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
+    classId: string,
+    notes: string
+  ) {
+    const slot = await schedulingRepository.findById(classId);
+    if (!slot) throw new Error("Slot not found");
+
+    const isAdmin = hasPermission(user, "class.update.any");
+    const isTeacher = user.role === "teacher" && slot.teacherId === user.id;
+
+    if (!isAdmin && !isTeacher) {
+      throw new Error("Unauthorized to update notes for this class");
+    }
+
+    await db.update(slotInstances)
+      .set({ notes, updatedAt: new Date() })
+      .where(eq(slotInstances.id, classId));
+
+    return { success: true };
   },
 };
 

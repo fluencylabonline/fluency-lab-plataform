@@ -107,7 +107,7 @@
   }
 
   .card {
-    @apply duration-150 ease-in-out transition-all rounded-md border border-slate-200/50 dark:border-slate-700/50 bg-slate-300/15 dark:bg-slate-950/40 hover:border-slate-500/30 dark:hover:border-slate-900 hover:bg-slate-100/80 dark:hover:bg-gray-950/50;
+    @apply duration-150 ease-in-out transition-all rounded-md border border-slate-200/50 dark:border-slate-700/50 bg-slate-300/15 dark:bg-slate-950/40 hover:border-slate-500/30 dark:hover:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-gray-950/50;
   }
 
   .step-content {
@@ -115,11 +115,11 @@
   }
 
   .item {
-    @apply duration-150 ease-in-out transition-all rounded-md border border-slate-200/50 dark:border-slate-700/50 bg-white/15 dark:bg-slate-950/40 hover:border-slate-500/30 dark:hover:border-slate-600 hover:bg-white/5 dark:hover:bg-gray-950/50;
+    @apply duration-150 ease-in-out transition-all rounded-md border border-slate-200/50 dark:border-slate-700/50 bg-white/15 dark:bg-slate-800/40 hover:border-slate-500/30 dark:hover:border-slate-600 hover:bg-white/5 dark:hover:bg-gray-800/60;
   }
 
   .input {
-    @apply duration-150 ease-in-out transition-all rounded-md border border-slate-200/50 dark:border-slate-700/50 bg-white/20 dark:bg-slate-900/35 hover:border-slate-500/30 dark:hover:border-slate-600 placeholder:text-gray-500 dark:placeholder:text-gray-400 font-normal data-[placeholder]:text-gray-500 dark:data-[placeholder]:text-gray-400 hover:bg-white/5 dark:hover:bg-gray-800 focus:bg-white/25 dark:focus:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/20 dark:focus-visible:ring-blue-400/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-gray-900;
+    @apply duration-150 ease-in-out transition-all rounded-md border border-slate-200/50 dark:border-slate-700/50 bg-slate-300/30 dark:bg-gray-900 hover:border-slate-500/30 dark:hover:border-slate-600 placeholder:text-gray-500 dark:placeholder:text-gray-400 font-normal data-[placeholder]:text-gray-500 dark:data-[placeholder]:text-gray-400 hover:bg-white/5 dark:hover:bg-gray-800 focus:bg-white/25 dark:focus:bg-gray-800 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-blue-500/20 dark:focus-visible:ring-blue-400/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-gray-900;
   }
 
   .title {

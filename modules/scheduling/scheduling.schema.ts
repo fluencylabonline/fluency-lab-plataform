@@ -16,7 +16,6 @@ export const slotStatusEnum = pgEnum("slot_status", [
   "completed",
   "canceled-student",
   "canceled-teacher",
-  "canceled-teacher-makeup", // Gera crédito
   "canceled-admin",
   "canceled-credit",         // Aula de reposição cancelada (perde o crédito)
   "no-show",
@@ -192,7 +191,6 @@ export const cancelClassSchema = z.object({
   reason: z.enum([
     "canceled-student",
     "canceled-teacher",
-    "canceled-teacher-makeup",
     "canceled-admin",
     "canceled-credit"
   ]),

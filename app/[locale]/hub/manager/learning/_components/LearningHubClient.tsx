@@ -26,11 +26,11 @@ export function LearningHubClient({ user, languages }: LearningHubClientProps) {
                 title={t("learning_hub") || "Learning Hub"}
                 subtitle={t("learning_hub_desc") || "Manage path templates and curriculum materials."}
                 user={user}
-                action={{
+                actions={[{
                     label: t("create_plan") || "Create Plan",
                     icon: <Plus className="w-5 h-5" />,
                     onClick: () => setIsVaultOpen(true)
-                }}
+                }]}
                 className="contents"
             />
             <CreatePlanVault 

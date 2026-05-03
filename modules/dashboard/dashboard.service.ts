@@ -56,8 +56,8 @@ export const dashboardService = {
       if (row.status === "completed") attendance.completed = row.count;
       if (row.status === "no-show") attendance.noShow = row.count;
       if (row.status === "canceled-student") attendance.canceledStudent = row.count;
-      if (row.status === "canceled-teacher" || row.status === "canceled-teacher-makeup") {
-        attendance.canceledTeacher += row.count;
+      if (row.status === "canceled-teacher") {
+        attendance.canceledTeacher = row.count;
       }
     });
 

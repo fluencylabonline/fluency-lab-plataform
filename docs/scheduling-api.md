@@ -6,7 +6,7 @@ This document describes the backend primitives, services, and actions for the Sc
 
 ### Slot Instances (`slot_instances`)
 The actual class event.
-- **Status**: `available`, `scheduled`, `completed`, `canceled-student`, `canceled-teacher`, `canceled-teacher-makeup`, `no-show`, `overdue`.
+- **Status**: `available`, `scheduled`, `completed`, `canceled-student`, `canceled-teacher`, `no-show`, `overdue`.
 - **`isReschedulable`**: Boolean. If `false`, this class cannot be rescheduled if canceled (typically applies to makeup classes).
 - **`rescheduledFrom`**: JSONB field tracking the original class ID and time if this is a makeup class.
 
@@ -29,7 +29,7 @@ Available in `@/modules/scheduling/scheduling.actions.ts`.
 ### `cancelClassAction({ classId, reason })`
 - **Who can use**: Student (own class), Teacher (assigned class), Admin/Manager (any).
 - **Notice Period (4h)**: For **students**, if the cancellation occurs with less than 4 hours of notice, the status is forced to `no-show` (no makeup credit granted).
-- **Credit Logic**: If a teacher cancels with `canceled-teacher-makeup`, 1 credit is auto-granted to the student.
+- **Credit Logic**: If a teacher cancels (status `canceled-teacher`), 1 credit is auto-granted to the student.
 
 ### `rescheduleWithCreditAction({ originalClassId, newSlotId, creditId })`
 - **Who can use**: Student.

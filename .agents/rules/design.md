@@ -34,3 +34,14 @@ trigger: always_on
 
 ## 4. Empty States e Tratamento de Erros
 - Nenhuma tela deve ficar em branco se não houver dados, principalmente em buscas ou páginas que deviam mostrar dados. Sempre exiba um componente `<EmptyState />` com ícone, mensagem amigável e um CTA (Call to Action).
+
+## 5. Estrutura de Página e Cards
+- **Estrutura de Rota (page.tsx):** 
+  - O elemento raiz deve ser uma `div` sem classes.
+  - O conteúdo principal deve ser encapsulado em uma tag `<main>` com a classe `container`.
+  - Use o componente `<Header />` (se necessário) antes do `<main>`.
+- **Estilo de Containers (Sem Shadcn Card):**
+  - **NUNCA** use os componentes `Card`, `CardHeader`, `CardTitle` ou `CardContent` do Shadcn.
+  - Para containers de seção, use `<div className="card ...">`.
+  - Para itens de lista ou cartões repetíveis, use `<div className="item ...">`.
+  - Estes estilos (definidos em `globals.css`) garantem a consistência visual, ausência de sombras e o comportamento correto de hover/dark mode do projeto.

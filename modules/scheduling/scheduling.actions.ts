@@ -47,7 +47,7 @@ export const allocateStudentAction = permissionAction("class.update.any")
     }
   });
 
-export const updateClassStatusAction = permissionAction("class.update.any")
+export const updateClassStatusAction = protectedAction
   .inputSchema(updateSlotStatusSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -460,6 +460,42 @@ export const confirmRecessAction = protectedAction
       return { success: true };
     } catch (error) {
       console.error("[confirmRecessAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const getStudentClassesByTeacherAction = protectedAction
+  .inputSchema(z.object({
+    studentId: z.string(),
+    month: z.number().min(0).max(11),
+    year: z.number(),
+  }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const baseDate = new Date(parsedInput.year, parsedInput.month, 1);
+      const start = startOfMonth(baseDate);
+      const end = endOfMonth(baseDate);
+      
+      const data = await schedulingService.getStudentClassesByTeacher(ctx.user, parsedInput.studentId, start, end);
+      return { success: true, data };
+    } catch (error) {
+      console.error("[getStudentClassesByTeacherAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const updateClassNotesAction = protectedAction
+  .inputSchema(z.object({
+    classId: z.string().uuid(),
+    notes: z.string(),
+  }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      await schedulingService.updateClassNotes(ctx.user, parsedInput.classId, parsedInput.notes);
+      revalidatePath("/");
+      return { success: true };
+    } catch (error) {
+      console.error("[updateClassNotesAction] Error:", error);
       return { success: false, error: (error as Error).message };
     }
   });

@@ -38,11 +38,11 @@ export function PlacementClient({ user, languages, initialStats }: PlacementClie
                 title={t("manager_title") || "Placement Management"}
                 subtitle={t("manager_desc") || "Manage adaptive diagnostic questions and audio-based challenges."}
                 user={user}
-                action={{
+                actions={[{
                     label: t("generate_questions") || "Generate Questions",
                     icon: <Plus className="w-5 h-5" />,
                     onClick: () => setIsWizardOpen(true)
-                }}
+                }]}
                 className="contents"
             />
 

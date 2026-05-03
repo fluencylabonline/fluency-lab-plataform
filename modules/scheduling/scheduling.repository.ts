@@ -309,6 +309,20 @@ export const schedulingRepository = {
       ),
       orderBy: [asc(slotInstances.startAt)]
     });
+  },
+
+  async findByStudentAndTeacherInRange(studentId: string, teacherId: string, start: Date, end: Date) {
+    return db.query.slotInstances.findMany({
+      where: and(
+        eq(slotInstances.studentId, studentId),
+        eq(slotInstances.teacherId, teacherId),
+        between(slotInstances.startAt, start, end)
+      ),
+      with: {
+        rule: true,
+      },
+      orderBy: [asc(slotInstances.startAt)],
+    });
   }
 };
 

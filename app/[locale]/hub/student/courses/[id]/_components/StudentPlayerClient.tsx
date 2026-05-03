@@ -114,11 +114,11 @@ export function StudentPlayerClient({ courseData, enrollment, currentUser }: Stu
         showSubHeader={false}
         user={currentUser}
         backHref="/hub/student/courses"
-        action={isMobile ? {
+        actions={isMobile ? [{
           label: t('menu') || "Menu",
           icon: isSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />,
           onClick: () => setIsSidebarOpen(!isSidebarOpen)
-        } : undefined}
+        }] : undefined}
         className="contents"
       />
 

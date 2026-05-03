@@ -113,11 +113,11 @@ export function CoursePageClient({ initialData, currentUser }: CoursePageClientP
         subtitle={t("subtitle")}
         user={currentUser}
         onSearchChange={setSearch}
-        action={{
+        actions={[{
           label: t("createCourse"),
           icon: <Plus className="w-4 h-4" />,
           onClick: () => setIsOpen(true)
-        }}
+        }]}
       />
 
       <main className="container">

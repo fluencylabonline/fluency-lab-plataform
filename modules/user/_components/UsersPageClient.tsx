@@ -62,11 +62,11 @@ export function UsersPageClient({ initialData, currentUser, basePath }: UsersPag
         subtitle={t("createUserDescription")}
         user={currentUser}
         onSearchChange={setSearch}
-        action={hasPermission(currentUser, "user.create") ? {
+        actions={hasPermission(currentUser, "user.create") ? [{
           label: t("createUser"),
           icon: <Plus className="w-4 h-4" />,
           onClick: () => setIsOpen(true)
-        } : undefined}
+        }] : undefined}
       />
 
       <main className="container">

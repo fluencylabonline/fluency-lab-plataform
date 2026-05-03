@@ -33,11 +33,11 @@ export function LessonsPageContent({ user, initialLessons, languages }: LessonsP
                 } : undefined}
                 backHref="/hub/manager/learning"
                 onSearchChange={setSearchQuery}
-                action={{
+                actions={[{
                     label: t("create_lesson") || "Create Lesson",
                     icon: <Plus className="w-5 h-5" />,
                     onClick: () => setIsVaultOpen(true)
-                }}
+                }]}
                 className="contents"
             />
 

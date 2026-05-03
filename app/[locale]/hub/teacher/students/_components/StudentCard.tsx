@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import { useParams } from "next/navigation";
@@ -28,7 +27,7 @@ export function StudentCard({ student }: StudentCardProps) {
   const t = useTranslations("StudentCard");
   const params = useParams();
   const locale = params.locale as string;
-  
+
   const dateLocale = locale === "pt" ? ptBR : enUS;
 
   const formatNextClassDate = (date: Date) => {
@@ -54,7 +53,7 @@ export function StudentCard({ student }: StudentCardProps) {
   };
 
   return (
-    <Card className="hover:bg-accent/50 transition-colors border-none bg-card/50">
+    <div className="card">
       <Link
         href={`/hub/teacher/students/${student.id}`}
         className="flex items-center space-x-4 p-4"
@@ -71,7 +70,7 @@ export function StudentCard({ student }: StudentCardProps) {
           <p className="text-muted-foreground text-sm truncate">
             {student.email}
           </p>
-          
+
           {student.nextClass ? (
             <div className="mt-2 flex flex-row items-center gap-2">
               <Calendar className="w-4 h-4 text-primary" />
@@ -88,6 +87,6 @@ export function StudentCard({ student }: StudentCardProps) {
           )}
         </div>
       </Link>
-    </Card>
+    </div>
   );
 }

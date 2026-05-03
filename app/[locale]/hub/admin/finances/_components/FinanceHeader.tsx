@@ -20,11 +20,11 @@ export function FinanceHeader({ title, subtitle }: FinanceHeaderProps) {
       <Header 
         title={title} 
         subtitle={subtitle}
-        action={{
+        actions={[{
           label: t("helpLabel") || "Ajuda",
           icon: <HelpCircle className="w-4 h-4" />,
           onClick: () => setHelpOpen(true)
-        }}
+        }]}
       />
       <FinanceHelpWizard open={helpOpen} onOpenChange={setHelpOpen} />
     </>

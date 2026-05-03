@@ -92,11 +92,11 @@ export function ProfilesPageClient({ initialData }: ProfilesPageClientProps) {
         title="Perfis Adaptativos"
         subtitle="Gerencie os perfis pedagógicos e diagnósticos dos seus alunos."
         onSearchChange={setSearch}
-        action={{
+        actions={[{
           label: "Novo Perfil",
           icon: <Sparkles className="h-4 w-4" />,
           onClick: () => router.push("/hub/manager/students/onboarding/new")
-        }}
+        }]}
         backHref="/hub/manager/users"
       />
 

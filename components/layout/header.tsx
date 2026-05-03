@@ -17,9 +17,10 @@ import { useDebounce } from "@/hooks/common/use-debounce";
 import { useUserStore } from "@/modules/user/user.store";
 
 export interface HeaderAction {
-    label: string;
+    label?: string;
     icon: React.ReactNode;
     onClick: () => void;
+    className?: string;
 }
 
 export interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -27,7 +28,7 @@ export interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {
     subtitle?: string;
     backHref?: string;
     onSearchChange?: (value: string) => void;
-    action?: HeaderAction;
+    actions?: HeaderAction[];
     showSubHeader?: boolean;
     showHeader?: boolean;
     user?: {
@@ -43,7 +44,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
     subtitle,
     backHref,
     onSearchChange,
-    action,
+    actions = [],
     showSubHeader = true,
     showHeader = true,
     user,
@@ -70,34 +71,32 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setSearchValue(val);
-        // Removed direct onSearchChange call to use debounce effect instead
     };
 
     const closeSearch = () => {
         setIsSearchOpen(false);
         setSearchValue("");
-        // No need to call onSearchChange here, the effect will handle it via debouncedSearch
     };
 
-    const renderAction = (isMobileSlot: boolean) => {
-        if (!action) return null;
+    const renderActions = (isMobileSlot: boolean) => {
+        if (!actions || actions.length === 0) return null;
 
-        if (action) {
-            const button = (
-                <Button
-                    onClick={action.onClick}
-                    variant={isMobileSlot ? "ghost" : "default"}
-                    size={isMobileSlot ? "icon" : "default"}
-                >
-                    <p className="mr-1">{action.icon}</p>
-                    {!isMobileSlot && <span>{action.label}</span>}
-                </Button>
-            );
-
-            return button;
-        }
-
-        return null;
+        return (
+            <div className="flex items-center gap-1">
+                {actions.map((act, index) => (
+                    <Button
+                        key={index}
+                        onClick={act.onClick}
+                        variant={isMobileSlot ? "ghost" : "default"}
+                        size={isMobileSlot ? "icon" : "sm"}
+                        className={cn("rounded-xl h-9", isMobileSlot && "h-10 w-10", act.className)}
+                    >
+                        <span className={cn(act.label && !isMobileSlot && "mr-2")}>{act.icon}</span>
+                        {!isMobileSlot && act.label && <span className="text-xs font-bold">{act.label}</span>}
+                    </Button>
+                ))}
+            </div>
+        );
     };
 
     return (
@@ -148,7 +147,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                             <span className="sr-only">Voltar</span>
                                         </Link>
                                     ) : (
-                                        isMobile ? renderAction(true) : null
+                                        isMobile ? renderActions(true) : null
                                     )}
                                 </div>
 
@@ -168,7 +167,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                                     <Search className="h-5 w-5" />
                                                 </Button>
                                             )}
-                                            {backHref ? renderAction(true) : null}
+                                            {backHref ? renderActions(true) : null}
                                             {displayUser && <UserMenu user={displayUser} />}
                                         </>
                                     ) : (
@@ -261,7 +260,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                 )}
 
                                 <div className={cn("transition-all duration-300", isSearchOpen && subtitle ? "hidden lg:block" : "block")}>
-                                    {renderAction(false)}
+                                    {renderActions(false)}
                                 </div>
                             </div>
                         </div>
@@ -271,6 +270,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
         </div>
     );
 });
+
 
 Header.displayName = "Header";
 
