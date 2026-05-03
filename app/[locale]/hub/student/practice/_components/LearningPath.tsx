@@ -14,6 +14,7 @@ import {
   Headphones,
   History as HistoryIcon
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { PracticeMode } from "@/modules/learning/learning.types";
 import { ReplayConfirmVault } from "./ReplayConfirmVault";
 import { useState } from "react";
@@ -45,6 +46,7 @@ const CONFIG = {
 };
 
 export function LearningPath({ planId, days, todayDay, userXP }: LearningPathProps) {
+  const t = useTranslations("LearningPath");
   const router = useRouter();
   const [replayNode, setReplayNode] = useState<DayNode | null>(null);
 
@@ -74,7 +76,7 @@ export function LearningPath({ planId, days, todayDay, userXP }: LearningPathPro
     <div className="w-full flex flex-col">
       <div className="flex flex-row justify-between items-center mt-3 px-4">
         <div />
-        <span className="text-lg font-bold text-primary">Plano</span>
+        <span className="text-lg font-bold text-primary">{t("roadmapLabel")}</span>
         <Link
           className="text-muted-foreground hover:text-primary"
           href="/student/practice"
@@ -197,6 +199,7 @@ function NodeItem({
   isMobile: boolean;
   onClick: () => void;
 }) {
+  const t = useTranslations("LearningPath");
   const isToday = day.status === "available";
 
   const renderIcon = () => {
@@ -252,7 +255,7 @@ function NodeItem({
               }}
               className="absolute -top-12 bg-white dark:bg-slate-200 text-primary px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl border-2 border-primary/10 z-20 whitespace-nowrap"
             >
-              HOJE
+              {t("todayBalloon")}
               <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-slate-200 border-b-2 border-r-2 border-primary/10 rotate-45"></div>
             </motion.div>
           )}
@@ -279,7 +282,7 @@ function NodeItem({
           isToday ? "text-primary" : "text-slate-500 dark:text-slate-600",
         )}
       >
-        Dia {day.dayIndex}
+        {t("dayLabel", { order: day.dayIndex })}
       </div>
     </div>
   );

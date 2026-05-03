@@ -17,7 +17,7 @@ import { aiService } from "@/modules/ai/ai.service";
 import { notificationService } from "@/modules/notification/notification.service";
 import { userRepository } from "@/modules/user/user.repository";
 import { isSameDay, differenceInDays } from "date-fns";
-import { StudentLearningStats, LearningItemDetail } from "./learning.types";
+import { StudentLearningStats, LearningItemDetail, StudentRoadmap } from "./learning.types";
 
 export const learningService = {
   // Profiles
@@ -504,7 +504,7 @@ export const learningService = {
     return learningRepository.reorderPlanLessons(planId, lessonIds);
   },
 
-  async getStudentRoadmap(studentId: string) {
+  async getStudentRoadmap(studentId: string): Promise<StudentRoadmap | null> {
     const activePlan = await learningRepository.findActivePlanWithLessons(studentId);
     if (!activePlan) return null;
 
@@ -518,13 +518,19 @@ export const learningService = {
       }
 
       return {
-        ...pl,
+        id: pl.lessonId,
+        title: pl.lesson?.title || "Lesson",
+        isCompleted: pl.isCompleted,
         status,
+        order: pl.order,
+        scheduledDate: pl.scheduledDate,
+        completedPracticeDays: pl.completedPracticeDays,
       };
     });
 
     return {
-      ...activePlan,
+      id: activePlan.id,
+      name: activePlan.name,
       lessons: lessonsWithStatus,
     };
   },

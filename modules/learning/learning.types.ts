@@ -135,3 +135,19 @@ export interface LearningItemDetail {
   learnedAt?: Date | string;
   reviewedAt?: Date | string;
 }
+
+export interface RoadmapLesson {
+  id: string;
+  title: string;
+  isCompleted: boolean;
+  status: "completed" | "current" | "future";
+  order: number;
+  scheduledDate?: Date | null;
+  completedPracticeDays: number;
+}
+
+export interface StudentRoadmap {
+  id: string;
+  name: string;
+  lessons: RoadmapLesson[];
+}

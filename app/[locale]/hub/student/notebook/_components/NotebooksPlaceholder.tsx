@@ -43,7 +43,7 @@ export function NotebooksPlaceholder({ isVaultMode = false }: NotebooksPlacehold
   }, [notebooks, searchQuery]);
 
   const handleDownloadPDF = (title: string) => {
-    notify.success(`${t("successDownload") || "Iniciando download do PDF..."}: ${title}`);
+    notify.success(`${t("successDownload")}: ${title}`);
   };
 
   return (
@@ -57,7 +57,7 @@ export function NotebooksPlaceholder({ isVaultMode = false }: NotebooksPlacehold
         isVaultMode && "pt-1"
       )}>
         <SearchBar
-          placeholder={t("searchPlaceholder") || "Pesquisar notebooks..."}
+          placeholder={t("searchPlaceholder")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -70,8 +70,8 @@ export function NotebooksPlaceholder({ isVaultMode = false }: NotebooksPlacehold
             <EmptyResults
               searchQuery={searchQuery}
               customMessage={{
-                withSearch: t("noResultsSearch", { query: searchQuery }) || `Nenhum resultado para "${searchQuery}"`,
-                withoutSearch: t("noResults") || "Nenhum notebook encontrado"
+                withSearch: t("noResultsSearch", { query: searchQuery }),
+                withoutSearch: t("noResults")
               }}
             />
           ) : (

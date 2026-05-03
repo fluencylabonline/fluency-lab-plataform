@@ -6,17 +6,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-interface RoadmapLesson {
-  lessonId: string;
-  order: number;
-  scheduledDate: Date | null;
-  completedPracticeDays: number;
-  isCompleted: boolean;
-  status: "completed" | "current" | "future";
-  lesson?: {
-    title: string;
-  };
-}
+import { RoadmapLesson } from "@/modules/learning/learning.types";
 
 interface RoadmapTimelineProps {
   lessons: RoadmapLesson[];
@@ -31,7 +21,7 @@ export function RoadmapTimeline({ lessons }: RoadmapTimelineProps) {
         const isFuture = lesson.status === "future";
 
         return (
-          <div key={lesson.lessonId} className="relative">
+          <div key={lesson.id} className="relative">
             {/* Icon/Indicator */}
             <div
               className={cn(
@@ -59,7 +49,7 @@ export function RoadmapTimeline({ lessons }: RoadmapTimelineProps) {
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <h3 className={cn("font-bold text-base", isFuture && "text-muted-foreground")}>
-                    {lesson.lesson?.title || `Lição ${lesson.order + 1}`}
+                    {lesson.title || `Lição ${lesson.order + 1}`}
                   </h3>
                   {lesson.scheduledDate && (
                     <p className="text-xs text-muted-foreground">

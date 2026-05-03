@@ -87,9 +87,9 @@ export function LearningPath({ lessons }: LearningPathProps) {
         <div className="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center mb-2">
           <Brain size={48} className="text-primary" />
         </div>
-        <h3 className="text-xl font-bold">{t("noLessonsTitle") || "Nenhum Plano Ativo"}</h3>
+        <h3 className="text-xl font-bold">{t("noLessonsTitle")}</h3>
         <p className="text-muted-foreground max-w-[250px]">
-          {t("noLessonsMessage") || "Você ainda não possui lições agendadas."}
+          {t("noLessonsMessage")}
         </p>
       </div>
     );
@@ -99,7 +99,7 @@ export function LearningPath({ lessons }: LearningPathProps) {
     <div className="card w-full flex flex-col lg:h-[calc(100vh-10rem)] overflow-hidden">
       <div className="flex flex-row justify-between items-center py-2 px-6 sticky top-0 z-30">
         <div className="w-8" />
-        <span className="text-md font-black uppercase tracking-widest text-primary">Plano</span>
+        <span className="text-md font-black uppercase tracking-widest text-primary">{t("roadmapLabel")}</span>
         <Link
           className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-lg hover:bg-primary/5"
           href="/hub/student/practice"
@@ -230,6 +230,7 @@ function NodeItem({
   isMobile: boolean;
   onClick: () => void;
 }) {
+  const t = useTranslations("LearningPath");
   const isCurrent = lesson.status === "current";
 
   const renderIcon = () => {
@@ -286,7 +287,7 @@ function NodeItem({
               }}
               className="absolute -top-12 bg-white dark:bg-slate-200 text-primary px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl border-2 border-primary/10 z-20 whitespace-nowrap"
             >
-              START
+              {t("startBalloon")}
               <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-slate-200 border-b-2 border-r-2 border-primary/10 rotate-45"></div>
             </motion.div>
           )}
@@ -300,7 +301,7 @@ function NodeItem({
           isCurrent ? "text-primary" : "text-slate-500 dark:text-slate-600",
         )}
       >
-        Day {lesson.order}
+        {t("dayLabel", { order: lesson.order })}
       </div>
       <div className="text-[11px] font-medium opacity-40 text-center max-w-[120px] truncate">
         {lesson.title}

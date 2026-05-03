@@ -1758,20 +1758,10 @@
     "confirm": "Confirmar"
   },
   "NotebooksCard": {
-    "title": "Notebooks",
-    "create": "Novo",
     "searchPlaceholder": "Pesquisar notebooks...",
-    "noResults": "Nenhum notebook encontrado",
-    "noResultsSearch": "Nenhum resultado encontrado para \"{query}\"",
-    "successCreated": "Notebook criado com sucesso!",
     "successDownload": "Iniciando download do PDF...",
-    "successTask": "Tarefa adicionada ao plano!",
-    "createTitle": "Criar Novo Notebook",
-    "createDescription": "Dê um título para o novo caderno de aula do aluno.",
-    "inputTitle": "Título do Notebook",
-    "inputPlaceholder": "Ex: Aula 05 - Business English",
-    "cancel": "Cancelar",
-    "creating": "Criando..."
+    "noResults": "Nenhum notebook encontrado",
+    "noResultsSearch": "Nenhum resultado para \"{query}\""
   },
   "PlanCard": {
     "title": "Plano de Estudos",
@@ -1853,5 +1843,64 @@
       "noLessons": "Nenhuma aula agendada para hoje.",
       "noStudent": "Sem aluno"
     }
+  },
+  "NotebookHub": {
+    "title": "Meu Caderno",
+    "subtitle": "Acompanhe seu progresso e revise seu aprendizado.",
+    "notebooksLabel": "Cadernos",
+    "wordOfTheDayLabel": "Palavra do Dia",
+    "myProgress": "Meu Progresso",
+    "viewNotebooks": "Ver Cadernos",
+    "vaultTitle": "Meus Cadernos",
+    "vaultDescription": "Acesse todas as anotações das suas aulas passadas."
+  },
+  "StatsDashboard": {
+    "reviewedToday": "Revisados",
+    "dueToday": "Para Revisar",
+    "totalLearned": "Aprendidos",
+    "practiceDay": "Prática"
+  },
+  "LearningPath": {
+    "noLessonsTitle": "Nenhum Plano Ativo",
+    "roadmapLabel": "Plano",
+    "startBalloon": "START",
+    "todayBalloon": "HOJE",
+    "dayLabel": "Dia {order}"
+  },
+  "WordOfTheDay": {
+    "title": "Palavra do Dia",
+    "description": "Uma dose diária de vocabulário novo para acelerar seu aprendizado.",
+    "usageExample": "Exemplo de Uso",
+    "experimentalFeature": "Esta é uma funcionalidade experimental."
+  },
+  "LearnedItemsVault": {
+    "title": "Itens Aprendidos",
+    "description": "Estes são os itens que você já domina no seu aprendizado adaptativo.",
+    "noItems": "Nenhum item aprendido ainda.",
+    "learnedAt": "Aprendido em",
+    "typeStructure": "Estrutura",
+    "typeVocabulary": "Vocabulário"
+  },
+  "ReviewedItemsVault": {
+    "title": "Revisados Hoje",
+    "description": "Estes são os itens que você revisou na sua prática diária de hoje.",
+    "noItems": "Você ainda não revisou itens hoje.",
+    "reviewedAt": "Revisado às",
+    "typeStructure": "Estrutura",
+    "typeVocabulary": "Vocabulário"
+  },
+  "ReplayConfirmVault": {
+    "title": "Replay de Prática",
+    "description": "Você deseja refazer a prática adaptativa do Dia {dayIndex}?",
+    "yourBalance": "Seu Saldo",
+    "replayCost": "Custo do Replay",
+    "finalBalance": "Saldo Final",
+    "insufficientXP": "Você não possui XP suficiente para este replay. Pratique hoje para ganhar mais!",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar Replay",
+    "processing": "Processando...",
+    "success": "Prática do Dia {dayIndex} desbloqueada!",
+    "error": "Erro ao processar XP. Tente novamente.",
+    "unexpectedError": "Ocorreu um erro inesperado."
   }
 }

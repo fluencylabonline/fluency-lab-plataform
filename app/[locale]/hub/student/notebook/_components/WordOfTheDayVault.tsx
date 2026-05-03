@@ -10,6 +10,7 @@ import {
   VaultIcon
 } from "@/components/ui/vault";
 import { Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface WordOfTheDayVaultProps {
   open: boolean;
@@ -17,14 +18,15 @@ interface WordOfTheDayVaultProps {
 }
 
 export function WordOfTheDayVault({ open, onOpenChange }: WordOfTheDayVaultProps) {
+  const t = useTranslations("WordOfTheDay");
   return (
     <Vault open={open} onOpenChange={onOpenChange}>
       <VaultContent>
         <VaultHeader>
           <VaultIcon type="success" />
-          <VaultTitle>Palavra do Dia</VaultTitle>
+          <VaultTitle>{t("title")}</VaultTitle>
           <VaultDescription>
-            Uma dose diária de vocabulário novo para acelerar seu aprendizado.
+            {t("description")}
           </VaultDescription>
         </VaultHeader>
         <VaultBody className="flex flex-col items-center justify-center py-6 space-y-6">
@@ -41,14 +43,14 @@ export function WordOfTheDayVault({ open, onOpenChange }: WordOfTheDayVaultProps
           </div>
 
           <div className="w-full max-w-xs space-y-4 pt-6 border-t border-dashed">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center">Exemplo de Uso</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center">{t("usageExample")}</p>
             <p className="text-sm text-center italic text-balance leading-relaxed">
               &quot;The survivors showed remarkable <span className="font-bold text-primary">resilience</span> in the face of disaster.&quot;
             </p>
           </div>
 
           <div className="pt-4">
-            <p className="text-[10px] text-muted-foreground italic">Esta é uma funcionalidade experimental.</p>
+            <p className="text-[10px] text-muted-foreground italic">{t("experimentalFeature")}</p>
           </div>
         </VaultBody>
       </VaultContent>

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { LearnedItemsVault } from "./LearnedItemsVault";
 import { ReviewedItemsVault } from "./ReviewedItemsVault";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface StatsDashboardProps {
   stats: StudentLearningStats;
@@ -20,9 +21,10 @@ export function StatsDashboard({
   reviewedItems,
   variant = "grid"
 }: StatsDashboardProps) {
+  const t = useTranslations("StatsDashboard");
   const items = [
     {
-      label: "Revisados",
+      label: t("reviewedToday"),
       value: stats.reviewedToday,
       icon: CheckCircle,
       color: "text-white",
@@ -32,14 +34,14 @@ export function StatsDashboard({
       ),
     },
     {
-      label: "Para Revisar",
+      label: t("dueToday"),
       value: stats.dueToday,
       icon: Clock,
       color: "text-white",
       bgColor: "bg-amber-500",
     },
     {
-      label: "Aprendidos",
+      label: t("totalLearned"),
       value: stats.totalLearned,
       icon: BookOpen,
       color: "text-white",
@@ -49,7 +51,7 @@ export function StatsDashboard({
       ),
     },
     {
-      label: "Prática",
+      label: t("practiceDay"),
       value: stats.currentDay,
       icon: Calendar,
       color: "text-white",

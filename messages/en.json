@@ -1758,20 +1758,10 @@
     "confirm": "Confirm"
   },
   "NotebooksCard": {
-    "title": "Notebooks",
-    "create": "New",
     "searchPlaceholder": "Search notebooks...",
-    "noResults": "No notebooks found",
-    "noResultsSearch": "No results found for \"{query}\"",
-    "successCreated": "Notebook created successfully!",
     "successDownload": "Starting PDF download...",
-    "successTask": "Task added to plan!",
-    "createTitle": "Create New Notebook",
-    "createDescription": "Give a title to the student's new class notebook.",
-    "inputTitle": "Notebook Title",
-    "inputPlaceholder": "Ex: Lesson 05 - Business English",
-    "cancel": "Cancel",
-    "creating": "Creating..."
+    "noResults": "No notebooks found",
+    "noResultsSearch": "No results for \"{query}\""
   },
   "PlanCard": {
     "title": "Learning Plan",
@@ -1853,5 +1843,64 @@
       "noLessons": "No lessons scheduled for today.",
       "noStudent": "No student"
     }
+  },
+  "NotebookHub": {
+    "title": "My Notebook",
+    "subtitle": "Track your progress and review your learning.",
+    "notebooksLabel": "Notebooks",
+    "wordOfTheDayLabel": "Word of the Day",
+    "myProgress": "My Progress",
+    "viewNotebooks": "View Notebooks",
+    "vaultTitle": "My Notebooks",
+    "vaultDescription": "Access all your past lesson notes."
+  },
+  "StatsDashboard": {
+    "reviewedToday": "Reviewed",
+    "dueToday": "Due Today",
+    "totalLearned": "Learned",
+    "practiceDay": "Practice"
+  },
+  "LearningPath": {
+    "noLessonsTitle": "No Active Plan",
+    "roadmapLabel": "Plan",
+    "startBalloon": "START",
+    "todayBalloon": "TODAY",
+    "dayLabel": "Day {order}"
+  },
+  "WordOfTheDay": {
+    "title": "Word of the Day",
+    "description": "A daily dose of new vocabulary to accelerate your learning.",
+    "usageExample": "Usage Example",
+    "experimentalFeature": "This is an experimental feature."
+  },
+  "LearnedItemsVault": {
+    "title": "Learned Items",
+    "description": "These are the items you already master in your adaptive learning.",
+    "noItems": "No learned items yet.",
+    "learnedAt": "Learned at",
+    "typeStructure": "Structure",
+    "typeVocabulary": "Vocabulary"
+  },
+  "ReviewedItemsVault": {
+    "title": "Reviewed Today",
+    "description": "These are the items you reviewed in your daily practice today.",
+    "noItems": "You haven't reviewed any items today.",
+    "reviewedAt": "Reviewed at",
+    "typeStructure": "Structure",
+    "typeVocabulary": "Vocabulary"
+  },
+  "ReplayConfirmVault": {
+    "title": "Practice Replay",
+    "description": "Do you want to redo the adaptive practice for Day {dayIndex}?",
+    "yourBalance": "Your Balance",
+    "replayCost": "Replay Cost",
+    "finalBalance": "Final Balance",
+    "insufficientXP": "You don't have enough XP for this replay. Practice today to earn more!",
+    "cancel": "Cancel",
+    "confirm": "Confirm Replay",
+    "processing": "Processing...",
+    "success": "Day {dayIndex} practice unlocked!",
+    "error": "Error processing XP. Please try again.",
+    "unexpectedError": "An unexpected error occurred."
   }
 }

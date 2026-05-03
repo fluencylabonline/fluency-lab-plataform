@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
-import { StudentLearningStats, LearningItemDetail } from "@/modules/learning/learning.types";
+import { useTranslations } from "next-intl";
+import { StudentLearningStats, LearningItemDetail, StudentRoadmap } from "@/modules/learning/learning.types";
 import {
   Sparkles,
   BookOpen,
@@ -25,15 +26,7 @@ interface StudentNotebookClientProps {
   stats: StudentLearningStats;
   learnedItems: LearningItemDetail[];
   reviewedItems: LearningItemDetail[];
-  roadmap: {
-    lessons: Array<{
-      id: string;
-      title: string;
-      isCompleted: boolean;
-      status: "completed" | "current" | "future";
-      order: number;
-    }>;
-  };
+  roadmap: StudentRoadmap | null;
   user: {
     name: string | null;
     email: string | null;
@@ -49,24 +42,25 @@ export function StudentNotebookClient({
   roadmap,
   user
 }: StudentNotebookClientProps) {
+  const t = useTranslations("NotebookHub");
   const [wordOfTheDayOpen, setWordOfTheDayOpen] = useState(false);
   const [notebooksOpen, setNotebooksOpen] = useState(false);
 
   return (
     <div>
       <Header
-        title="Meu Caderno"
-        subtitle="Acompanhe seu progresso e revise seu aprendizado."
+        title={t("title")}
+        subtitle={t("subtitle")}
         user={user}
         actions={[
           {
-            label: "Cadernos",
+            label: t("notebooksLabel"),
             icon: <BookOpen className="w-4 h-4" />,
             onClick: () => setNotebooksOpen(true),
             className: "lg:hidden"
           },
           {
-            label: "Palavra do Dia",
+            label: t("wordOfTheDayLabel"),
             icon: <Sparkles className="w-4 h-4" />,
             onClick: () => setWordOfTheDayOpen(true)
           }
@@ -93,12 +87,12 @@ export function StudentNotebookClient({
           {/* Column 2: Learning Path (Desktop & Mobile) */}
           <section className="lg:col-span-2 space-y-6">
             <div className="flex items-center justify-between lg:hidden px-1">
-              <h2 className="text-lg font-bold tracking-tight">Meu Progresso</h2>
+              <h2 className="text-lg font-bold tracking-tight">{t("myProgress")}</h2>
               <button
                 onClick={() => setNotebooksOpen(true)}
                 className="text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-1"
               >
-                Ver Cadernos <ChevronRight className="w-3 h-3" />
+                {t("viewNotebooks")} <ChevronRight className="w-3 h-3" />
               </button>
             </div>
 
@@ -121,8 +115,8 @@ export function StudentNotebookClient({
       <Vault open={notebooksOpen} onOpenChange={setNotebooksOpen}>
         <VaultContent>
           <VaultHeader>
-            <VaultTitle>Meus Cadernos</VaultTitle>
-            <VaultDescription>Acesse todas as anotações das suas aulas passadas.</VaultDescription>
+            <VaultTitle>{t("vaultTitle")}</VaultTitle>
+            <VaultDescription>{t("vaultDescription")}</VaultDescription>
           </VaultHeader>
           <VaultBody className="p-0">
             <NotebooksPlaceholder isVaultMode={true} />

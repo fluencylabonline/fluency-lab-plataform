@@ -12,8 +12,10 @@ import {
 } from "@/components/ui/vault";
 import { LearningItemDetail } from "@/modules/learning/learning.types";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { ptBR, enUS } from "date-fns/locale";
 import { Clock } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 
 interface ReviewedItemsVaultProps {
   items: LearningItemDetail[];
@@ -21,21 +23,26 @@ interface ReviewedItemsVaultProps {
 }
 
 export function ReviewedItemsVault({ items, trigger }: ReviewedItemsVaultProps) {
+  const t = useTranslations("ReviewedItemsVault");
+  const params = useParams();
+  const locale = params.locale as string;
+  const dateLocale = locale === "pt" ? ptBR : enUS;
+
   return (
     <Vault>
       <VaultTrigger asChild>{trigger}</VaultTrigger>
       <VaultContent>
         <VaultHeader>
           <VaultIcon type="calendar" />
-          <VaultTitle>Revisados Hoje</VaultTitle>
+          <VaultTitle>{t("title")}</VaultTitle>
           <VaultDescription>
-            Estes são os itens que você revisou na sua prática diária de hoje.
+            {t("description")}
           </VaultDescription>
         </VaultHeader>
         <VaultBody className="max-h-[60vh] overflow-y-auto no-scrollbar">
           <div className="space-y-3">
             {items.length === 0 ? (
-              <div className="text-center py-10 opacity-50">Você ainda não revisou itens hoje.</div>
+              <div className="text-center py-10 opacity-50">{t("noItems")}</div>
             ) : (
               items.map((item) => (
                 <div key={item.id} className="item p-3 flex items-center justify-between">
@@ -46,14 +53,14 @@ export function ReviewedItemsVault({ items, trigger }: ReviewedItemsVaultProps) 
                     <div>
                       <p className="font-bold text-sm">{item.title}</p>
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                        {item.type === "structure" ? "Estrutura" : "Vocabulário"}
+                        {item.type === "structure" ? t("typeStructure") : t("typeVocabulary")}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] text-muted-foreground">Revisado às</p>
+                    <p className="text-[10px] text-muted-foreground">{t("reviewedAt")}</p>
                     <p className="text-[10px] font-bold">
-                      {item.reviewedAt ? format(new Date(item.reviewedAt), "HH:mm", { locale: ptBR }) : "--"}
+                      {item.reviewedAt ? format(new Date(item.reviewedAt), "HH:mm", { locale: dateLocale }) : "--"}
                     </p>
                   </div>
                 </div>
