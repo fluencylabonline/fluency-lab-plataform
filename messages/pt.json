@@ -1803,6 +1803,35 @@
     "structuresTitle": "Estruturas",
     "noStructures": "Nenhuma estrutura listada.",
     "tabContent": "Conteúdo"
+  },
+  "Profile": {
+    "Contract": {
+      "status": "Status do Contrato",
+      "active": "Contrato Ativo",
+      "expired": "Contrato Expirado",
+      "cancelled": "Contrato Cancelado",
+      "pending": "Assinatura Pendente",
+      "noContract": "Sem contrato ativo",
+      "noContractDescription": "Entre em contato com o suporte para regularizar sua situação.",
+      "expiresAt": "Expira em"
+    },
+    "Payouts": {
+      "pendingPayout": "A Receber",
+      "pendingDescription": "Aulas concluídas ainda não pagas",
+      "projectedEarnings": "Projeção do Mês",
+      "projectedDescription": "Estimativa baseada em aulas agendadas",
+      "totalExpected": "Total Esperado",
+      "historyTitle": "Histórico de Pagamentos",
+      "allMonths": "Todos os meses",
+      "noPayouts": "Nenhum pagamento encontrado para este período.",
+      "paid": "Pago",
+      "pending": "Pendente"
+    },
+    "DailySummary": {
+      "title": "Aulas de Hoje",
+      "completed": "Concluídas",
+      "noLessons": "Nenhuma aula agendada para hoje.",
+      "noStudent": "Sem aluno"
+    }
   }
-
 }

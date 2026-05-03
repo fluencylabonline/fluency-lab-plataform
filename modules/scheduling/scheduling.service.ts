@@ -943,6 +943,19 @@ export const schedulingService = {
   async getTeacherCompletedClasses(teacherId: string, start: Date, end: Date) {
     return schedulingRepository.findCompletedByTeacherInRange(teacherId, start, end);
   },
+  async findByStudentAndTeacherInRange(studentId: string, teacherId: string, start: Date, end: Date) {
+    return schedulingRepository.findByStudentAndTeacherInRange(studentId, teacherId, start, end);
+  },
+
+  async getTeacherDailySummary(teacherId: string) {
+    const today = new Date();
+    const start = startOfDay(today);
+    const end = new Date(today);
+    end.setHours(23, 59, 59, 999);
+
+    return schedulingRepository.findByTeacherInRange(teacherId, start, end);
+  },
+
   async getTeacherClassesInRange(teacherId: string, start: Date, end: Date) {
     return schedulingRepository.findByTeacherInRange(teacherId, start, end);
   },

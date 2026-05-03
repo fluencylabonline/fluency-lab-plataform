@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { payoutsTable } from "./payout.schema";
 import { slotInstances } from "@/modules/scheduling/scheduling.schema";
-import { eq, and, isNull, between, inArray, sum } from "drizzle-orm";
+import { eq, and, isNull, between, inArray, sum, desc } from "drizzle-orm";
 
 export const payoutRepository = {
   async createPayout(data: typeof payoutsTable.$inferInsert) {
@@ -56,7 +56,14 @@ export const payoutRepository = {
         eq(payoutsTable.status, filters.status),
         between(payoutsTable.createdAt, filters.start, filters.end)
       ));
-    
+
     return Number(result?.total || 0);
+  },
+
+  async findPayoutsByTeacher(teacherId: string) {
+    return db.query.payoutsTable.findMany({
+      where: eq(payoutsTable.teacherId, teacherId),
+      orderBy: [desc(payoutsTable.createdAt)],
+    });
   }
 };

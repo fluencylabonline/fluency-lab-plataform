@@ -462,5 +462,11 @@ export const contractService = {
       subscriptionId: subscription?.id,
       status: "pending",
     });
+  },
+
+  async getTeacherActiveContract(teacherId: string) {
+    const contracts = await contractRepository.findUserInstances(teacherId);
+    // Usually the most recent signed contract
+    return contracts.find(c => c.status === "signed") || contracts[0] || null;
   }
 };

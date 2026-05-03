@@ -1803,6 +1803,35 @@
     "structuresTitle": "Structures",
     "noStructures": "No structures listed.",
     "tabContent": "Content"
+  },
+  "Profile": {
+    "Contract": {
+      "status": "Contract Status",
+      "active": "Active Contract",
+      "expired": "Expired Contract",
+      "cancelled": "Cancelled Contract",
+      "pending": "Pending Signature",
+      "noContract": "No active contract",
+      "noContractDescription": "Please contact support to regularize your situation.",
+      "expiresAt": "Expires on"
+    },
+    "Payouts": {
+      "pendingPayout": "To Receive",
+      "pendingDescription": "Completed classes not yet paid",
+      "projectedEarnings": "Month Projection",
+      "projectedDescription": "Estimated based on scheduled classes",
+      "totalExpected": "Total Expected",
+      "historyTitle": "Payment History",
+      "allMonths": "All months",
+      "noPayouts": "No payments found for this period.",
+      "paid": "Paid",
+      "pending": "Pending"
+    },
+    "DailySummary": {
+      "title": "Today's Lessons",
+      "completed": "Completed",
+      "noLessons": "No lessons scheduled for today.",
+      "noStudent": "No student"
+    }
   }
-
 }
