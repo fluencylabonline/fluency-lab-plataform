@@ -110,7 +110,7 @@ export function StudentPlanCard({ isVaultMode = false }: StudentPlanCardProps) {
     <>
       <div className={cn(
         !isVaultMode && "card",
-        "flex flex-col h-full bg-transparent sm:p-4 p-2"
+        "flex flex-col h-full sm:p-4 p-2"
       )}>
         {/* Header Sticky */}
         <div className={cn(
@@ -159,12 +159,12 @@ export function StudentPlanCard({ isVaultMode = false }: StudentPlanCardProps) {
                 value={selectedMonth.toString()}
                 onValueChange={(val) => setSelectedMonth(parseInt(val))}
               >
-                <SelectTrigger className="h-9">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {monthNames.map((month, index) => (
-                    <SelectItem key={index} value={index.toString()} className="rounded-lg">
+                    <SelectItem key={index} value={index.toString()}>
                       {month}
                     </SelectItem>
                   ))}
@@ -175,14 +175,14 @@ export function StudentPlanCard({ isVaultMode = false }: StudentPlanCardProps) {
                 value={selectedYear.toString()}
                 onValueChange={(val) => setSelectedYear(parseInt(val))}
               >
-                <SelectTrigger className="h-9">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {[...Array(5)].map((_, i) => {
                     const year = new Date().getFullYear() - 2 + i;
                     return (
-                      <SelectItem key={year} value={year.toString()} className="rounded-lg">
+                      <SelectItem key={year} value={year.toString()}>
                         {year}
                       </SelectItem>
                     );

@@ -94,7 +94,7 @@ export function StudentNotebooksCard({ studentId, isVaultMode = false }: Student
   return (
     <div className={cn(
       !isVaultMode && "card",
-      "flex flex-col h-full bg-transparent sm:p-4 p-2"
+      "flex flex-col h-full sm:p-4 p-2"
     )}>
       {/* Header Sticky */}
       <div className={cn(

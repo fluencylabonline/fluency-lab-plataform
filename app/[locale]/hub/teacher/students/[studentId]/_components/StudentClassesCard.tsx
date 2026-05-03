@@ -223,7 +223,7 @@ export function StudentClassesCard({
   return (
     <div className={cn(
       !isMobileMode && "card p-4",
-      "flex flex-col h-full bg-transparent"
+      "flex flex-col h-full"
     )}>
       <div className={cn(
         "pb-6 sticky top-0 z-10 bg-transparent",
