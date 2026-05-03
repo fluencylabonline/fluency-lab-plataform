@@ -476,3 +476,48 @@ export const getArchivedPlansAction = protectedAction
   .action(async ({ ctx }) => {
     return learningService.getArchivedPlans(ctx.user.id);
   });
+
+/**
+ * Action to fetch learning statistics for the current student.
+ */
+export const getStudentLearningStatsAction = protectedAction
+  .schema(z.object({}))
+  .action(async ({ ctx }) => {
+    try {
+      const data = await learningService.getStudentLearningStats(ctx.user.id);
+      return { success: true, data };
+    } catch (error) {
+      console.error("[getStudentLearningStatsAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+/**
+ * Action to fetch detailed info about items learned by the student.
+ */
+export const getLearnedItemsAction = protectedAction
+  .schema(z.object({}))
+  .action(async ({ ctx }) => {
+    try {
+      const data = await learningService.getLearnedItemsDetails(ctx.user.id);
+      return { success: true, data };
+    } catch (error) {
+      console.error("[getLearnedItemsAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+/**
+ * Action to fetch detailed info about items reviewed today.
+ */
+export const getReviewedItemsAction = protectedAction
+  .schema(z.object({}))
+  .action(async ({ ctx }) => {
+    try {
+      const data = await learningService.getReviewedItemsDetails(ctx.user.id);
+      return { success: true, data };
+    } catch (error) {
+      console.error("[getReviewedItemsAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });

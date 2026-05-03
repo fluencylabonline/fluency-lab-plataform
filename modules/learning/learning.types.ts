@@ -118,3 +118,20 @@ export interface DailyPracticeSession {
   items: PracticeItem[];
   error?: string;
 }
+
+export interface StudentLearningStats {
+  reviewedToday: number;
+  dueToday: number;
+  totalLearned: number;
+  currentDay: number;
+  daysSinceClass: number;
+  hasActiveLesson: boolean;
+}
+
+export interface LearningItemDetail {
+  id: string;
+  title: string;
+  type: "item" | "structure";
+  learnedAt?: Date | string;
+  reviewedAt?: Date | string;
+}

@@ -1,0 +1,67 @@
+"use client";
+
+import { 
+  Vault, 
+  VaultTrigger, 
+  VaultContent, 
+  VaultHeader, 
+  VaultTitle, 
+  VaultDescription,
+  VaultBody,
+  VaultIcon
+} from "@/components/ui/vault";
+import { LearningItemDetail } from "@/modules/learning/learning.types";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Clock } from "lucide-react";
+
+interface ReviewedItemsVaultProps {
+  items: LearningItemDetail[];
+  trigger: React.ReactNode;
+}
+
+export function ReviewedItemsVault({ items, trigger }: ReviewedItemsVaultProps) {
+  return (
+    <Vault>
+      <VaultTrigger asChild>{trigger}</VaultTrigger>
+      <VaultContent>
+        <VaultHeader>
+          <VaultIcon type="calendar" />
+          <VaultTitle>Revisados Hoje</VaultTitle>
+          <VaultDescription>
+            Estes são os itens que você revisou na sua prática diária de hoje.
+          </VaultDescription>
+        </VaultHeader>
+        <VaultBody className="max-h-[60vh] overflow-y-auto no-scrollbar">
+          <div className="space-y-3">
+            {items.length === 0 ? (
+              <div className="text-center py-10 opacity-50">Você ainda não revisou itens hoje.</div>
+            ) : (
+              items.map((item) => (
+                <div key={item.id} className="item p-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-amber-500/10 p-2 rounded-lg">
+                      <Clock className="w-4 h-4 text-amber-500" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm">{item.title}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                        {item.type === "structure" ? "Estrutura" : "Vocabulário"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] text-muted-foreground">Revisado às</p>
+                    <p className="text-[10px] font-bold">
+                      {item.reviewedAt ? format(new Date(item.reviewedAt), "HH:mm", { locale: ptBR }) : "--"}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </VaultBody>
+      </VaultContent>
+    </Vault>
+  );
+}

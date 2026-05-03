@@ -7,15 +7,17 @@ import {
   learningPlans, 
   planLessons,
   learningXpTransactions,
+  studentItemProgress,
 } from "./learning.schema";
 import { lessons, languages } from "@/modules/curriculum/curriculum.schema";
 import { usersTable, type NotificationPrefs } from "@/modules/user/user.schema";
 import { slotInstances } from "@/modules/scheduling/scheduling.schema";
-import { eq, and, asc, gte } from "drizzle-orm";
+import { eq, and, asc, gte, desc, sql } from "drizzle-orm";
 import { aiService } from "@/modules/ai/ai.service";
 import { notificationService } from "@/modules/notification/notification.service";
 import { userRepository } from "@/modules/user/user.repository";
-import { isSameDay } from "date-fns";
+import { isSameDay, differenceInDays } from "date-fns";
+import { StudentLearningStats, LearningItemDetail } from "./learning.types";
 
 export const learningService = {
   // Profiles
@@ -832,6 +834,109 @@ export const learningService = {
     });
 
     return { success: true, cost };
+  },
+
+  /**
+   * Calculates real-time learning statistics for a student.
+   */
+  async getStudentLearningStats(studentId: string): Promise<StudentLearningStats> {
+    const activePlan = await learningRepository.findActivePlanWithLessons(studentId);
+    
+    const now = new Date();
+    const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
+
+    // 1. Items due today (nextReviewDate <= now)
+    const dueItems = await db.select({ count: sql<number>`count(*)` })
+      .from(studentItemProgress)
+      .where(and(
+        eq(studentItemProgress.studentId, studentId),
+        sql`${studentItemProgress.nextReviewDate} <= ${now}`,
+        sql`${studentItemProgress.status} IN ('ACTIVE', 'RECEPTIVE', 'MASTERED')`
+      ));
+
+    // 2. Items reviewed today
+    const reviewedToday = await db.select({ count: sql<number>`count(*)` })
+      .from(studentItemProgress)
+      .where(and(
+        eq(studentItemProgress.studentId, studentId),
+        gte(studentItemProgress.lastReviewedAt, startOfToday)
+      ));
+
+    // 3. Total learned
+    const learnedCount = await db.select({ count: sql<number>`count(*)` })
+      .from(studentItemProgress)
+      .where(and(
+        eq(studentItemProgress.studentId, studentId),
+        sql`${studentItemProgress.status} IN ('RECEPTIVE', 'MASTERED')`
+      ));
+
+    // 4. Progress and classes
+    const activeLesson = activePlan?.lessons.find(l => !l.isCompleted) || activePlan?.lessons[activePlan?.lessons.length - 1];
+    
+    const lastClass = await db.query.slotInstances.findFirst({
+        where: and(
+            eq(slotInstances.studentId, studentId),
+            eq(slotInstances.status, "completed")
+        ),
+        orderBy: [desc(slotInstances.startAt)]
+    });
+
+    return {
+      reviewedToday: reviewedToday[0]?.count || 0,
+      dueToday: dueItems[0]?.count || 0,
+      totalLearned: learnedCount[0]?.count || 0,
+      currentDay: activeLesson ? activeLesson.completedPracticeDays + 1 : 1,
+      daysSinceClass: lastClass ? differenceInDays(new Date(), new Date(lastClass.startAt)) : 0,
+      hasActiveLesson: !!activeLesson
+    };
+  },
+
+  /**
+   * Fetches detailed information about items already learned by the student.
+   */
+  async getLearnedItemsDetails(studentId: string): Promise<LearningItemDetail[]> {
+    const items = await db.query.studentItemProgress.findMany({
+      where: and(
+        eq(studentItemProgress.studentId, studentId),
+        sql`${studentItemProgress.status} IN ('RECEPTIVE', 'MASTERED')`
+      ),
+      with: {
+        item: true
+      },
+      orderBy: [desc(studentItemProgress.updatedAt)]
+    });
+
+    return items.map(i => ({
+      id: i.id,
+      title: i.item?.lemma || "Unknown",
+      type: i.item?.type === "STRUCTURE" ? "structure" : "item",
+      learnedAt: i.createdAt
+    }));
+  },
+
+  /**
+   * Fetches detailed information about items reviewed today.
+   */
+  async getReviewedItemsDetails(studentId: string): Promise<LearningItemDetail[]> {
+    const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
+    
+    const items = await db.query.studentItemProgress.findMany({
+      where: and(
+        eq(studentItemProgress.studentId, studentId),
+        gte(studentItemProgress.lastReviewedAt, startOfToday)
+      ),
+      with: {
+        item: true
+      },
+      orderBy: [desc(studentItemProgress.lastReviewedAt)]
+    });
+
+    return items.map(i => ({
+      id: i.id,
+      title: i.item?.lemma || "Unknown",
+      type: i.item?.type === "STRUCTURE" ? "structure" : "item",
+      reviewedAt: i.lastReviewedAt as Date
+    }));
   },
 
   /**

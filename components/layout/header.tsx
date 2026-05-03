@@ -89,7 +89,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                         onClick={act.onClick}
                         variant={isMobileSlot ? "ghost" : "default"}
                         size={isMobileSlot ? "icon" : "sm"}
-                        className={cn("rounded-xl h-9", isMobileSlot && "h-10 w-10", act.className)}
+                        className={cn("h-9", isMobileSlot && "h-10 w-10", act.className)}
                     >
                         <span className={cn(act.label && !isMobileSlot && "mr-2")}>{act.icon}</span>
                         {!isMobileSlot && act.label && <span className="text-xs font-bold">{act.label}</span>}
