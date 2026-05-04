@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useFormatter } from "next-intl";
 import {
   CloudDownload
 } from "lucide-react";
@@ -10,7 +10,6 @@ import { SearchBar } from "@/components/ui/search-bar";
 import { EmptyResults } from "@/components/ui/empty";
 import { notify } from "@/components/ui/toaster";
 import { Link } from "@/i18n/navigation";
-import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 interface Notebook {
@@ -25,8 +24,7 @@ interface NotebooksPlaceholderProps {
 
 export function NotebooksPlaceholder({ isVaultMode = false }: NotebooksPlaceholderProps) {
   const t = useTranslations("NotebooksCard");
-  const params = useParams();
-  const locale = params.locale as string;
+  const formatIntl = useFormatter();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -90,7 +88,7 @@ export function NotebooksPlaceholder({ isVaultMode = false }: NotebooksPlacehold
                       {notebook.title}
                     </h3>
                     <p className="text-[10px] text-muted-foreground">
-                      {new Date(notebook.createdAt).toLocaleDateString(locale === "pt" ? "pt-BR" : "en-US")}
+                      {formatIntl.dateTime(new Date(notebook.createdAt), { day: '2-digit', month: '2-digit', year: 'numeric' })}
                     </p>
                   </Link>
 

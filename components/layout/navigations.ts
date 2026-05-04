@@ -133,7 +133,7 @@ const studentItems: MenuItemType[] = [
         iconProps: { size: 20 },
     },
     {
-        href: "/student/classes",
+        href: "/student/schedule",
         label: "Calendário",
         labelKey: "calendar",
         Icon: CalendarDaysIcon,

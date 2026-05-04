@@ -11,11 +11,8 @@ import {
   VaultIcon
 } from "@/components/ui/vault";
 import { LearningItemDetail } from "@/modules/learning/learning.types";
-import { format } from "date-fns";
-import { ptBR, enUS } from "date-fns/locale";
 import { CheckCircle2 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useParams } from "next/navigation";
+import { useTranslations, useFormatter } from "next-intl";
 
 interface LearnedItemsVaultProps {
   items: LearningItemDetail[];
@@ -24,9 +21,7 @@ interface LearnedItemsVaultProps {
 
 export function LearnedItemsVault({ items, trigger }: LearnedItemsVaultProps) {
   const t = useTranslations("LearnedItemsVault");
-  const params = useParams();
-  const locale = params.locale as string;
-  const dateLocale = locale === "pt" ? ptBR : enUS;
+  const formatIntl = useFormatter();
 
   return (
     <Vault>
@@ -60,7 +55,7 @@ export function LearnedItemsVault({ items, trigger }: LearnedItemsVaultProps) {
                   <div className="text-right">
                     <p className="text-[10px] text-muted-foreground">{t("learnedAt")}</p>
                     <p className="text-[10px] font-bold">
-                      {item.learnedAt ? format(new Date(item.learnedAt), "dd MMM, yyyy", { locale: dateLocale }) : "--"}
+                      {item.learnedAt ? formatIntl.dateTime(new Date(item.learnedAt), { day: '2-digit', month: 'short', year: 'numeric' }) : "--"}
                     </p>
                   </div>
                 </div>

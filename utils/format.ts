@@ -44,3 +44,41 @@ export function truncate(str: string, maxLength: number): string {
   if (str.length <= maxLength) return str;
   return str.slice(0, maxLength) + "...";
 }
+
+/**
+ * Mask a CPF/CNPJ document.
+ * @example maskDocument("000.000.000-00") → "000.***.***-**"
+ */
+export function maskDocument(doc?: string): string {
+  if (!doc) return "—";
+  const digits = doc.replace(/\D/g, "");
+  if (digits.length === 11) {
+    return doc.replace(/(\d{3})\.\d{3}\.(\d{3})-\d{2}/, "$1.***.***-**");
+  }
+  return doc.replace(
+    /(\d{2})\.\d{3}\.\d{3}\/\d{4}-\d{2}/,
+    "$1.***.***\/****-**"
+  );
+}
+
+/**
+ * Mask an email address.
+ * @example maskEmail("user@example.com") → "us***@example.com"
+ */
+export function maskEmail(email?: string): string {
+  if (!email) return "—";
+  const [user, domain] = email.split("@");
+  if (!domain) return email;
+  return `${user.slice(0, 2)}***@${domain}`;
+}
+
+/**
+ * Mask a name showing only first name and last initial.
+ * @example maskName("Matheus Fernandes") → "Matheus F."
+ */
+export function maskName(name?: string): string {
+  if (!name) return "—";
+  const parts = name.trim().split(" ");
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+}

@@ -16,8 +16,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Practice" });
   return {
-    title: t("pageTitle") || "Prática Diária | FluencyLab",
-    description: t("pageDescription") || "Sua trilha de aprendizagem adaptativa e roteiro de estudos.",
+    title: t("pageTitle"),
+    description: t("pageDescription"),
   };
 }
 
@@ -38,7 +38,7 @@ export default async function PracticePage({ params }: { params: Promise<{ local
 
   const user = await userService.getUser(sessionUser.id);
   
-  if (!user) return <div>{t('userNotFound') || "Usuário não encontrado"}</div>;
+  if (!user) return <div>{t('userNotFound')}</div>;
 
   const roadmap = await learningService.getStudentRoadmap(user.id);
   const archivedPlans = await learningService.getArchivedPlans(user.id);
@@ -80,19 +80,19 @@ export default async function PracticePage({ params }: { params: Promise<{ local
 
         <Tabs defaultValue="practice" className="w-full">
           <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1 rounded-xl">
-            <TabsTrigger value="practice" className="rounded-lg font-bold text-xs">{t('practiceTab') || "Prática"}</TabsTrigger>
-            <TabsTrigger value="roadmap" className="rounded-lg font-bold text-xs">{t('roadmapTab') || "Roteiro"}</TabsTrigger>
-            <TabsTrigger value="history" className="rounded-lg font-bold text-xs">{t('historyTab') || "Histórico"}</TabsTrigger>
+            <TabsTrigger value="practice" className="rounded-lg font-bold text-xs">{t('practiceTab')}</TabsTrigger>
+            <TabsTrigger value="roadmap" className="rounded-lg font-bold text-xs">{t('roadmapTab')}</TabsTrigger>
+            <TabsTrigger value="history" className="rounded-lg font-bold text-xs">{t('historyTab')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="practice" className="pt-6">
             <div className="flex flex-col items-center">
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-black">{t('myPath') || "Minha Trilha"}</h2>
+                <h2 className="text-2xl font-black">{t('myPath')}</h2>
                 {activePlan ? (
-                  <p className="text-sm text-muted-foreground">{t('dayOfPlan', { day: clampedDay, total: 6, plan: activePlan.name }) || `Dia ${clampedDay} de 6 · ${activePlan.name}`}</p>
+                  <p className="text-sm text-muted-foreground">{t('dayOfPlan', { day: clampedDay, total: 6, plan: activePlan.name })}</p>
                 ) : (
-                  <p className="text-sm text-muted-foreground">{t('noActivePlan') || "Nenhum plano em andamento"}</p>
+                  <p className="text-sm text-muted-foreground">{t('noActivePlan')}</p>
                 )}
               </div>
               
@@ -106,8 +106,8 @@ export default async function PracticePage({ params }: { params: Promise<{ local
               ) : (
                 <div className="w-full py-12">
                   <EmptyResults
-                    title={t('noActivePlanTitle') || "Nenhum plano ativo"}
-                    description={t('noActivePlanDesc') || "Você não possui um plano de estudos ativo no momento. Entre em contato com seu professor para iniciar sua jornada!"}
+                    title={t('noActivePlanTitle')}
+                    description={t('noActivePlanDesc')}
                   />
                 </div>
               )}
@@ -116,16 +116,16 @@ export default async function PracticePage({ params }: { params: Promise<{ local
 
           <TabsContent value="roadmap" className="pt-6">
             <div className="mb-6">
-              <h2 className="text-xl font-black">{t('roadmapTitle') || "Roadmap"}</h2>
-              <p className="text-sm text-muted-foreground">{t('roadmapDesc') || "Sua jornada de lições programadas"}</p>
+              <h2 className="text-xl font-black">{t('roadmapTitle')}</h2>
+              <p className="text-sm text-muted-foreground">{t('roadmapDesc')}</p>
             </div>
             {roadmap ? (
               <RoadmapTimeline lessons={roadmap.lessons} />
             ) : (
               <div className="w-full py-12">
                 <EmptyResults
-                  title={t('emptyRoadmapTitle') || "Roadmap vazio"}
-                  description={t('emptyRoadmapDesc') || "Ainda não há lições programadas para você. Assim que seu professor organizar seu plano, elas aparecerão aqui!"}
+                  title={t('emptyRoadmapTitle')}
+                  description={t('emptyRoadmapDesc')}
                 />
               </div>
             )}
@@ -133,8 +133,8 @@ export default async function PracticePage({ params }: { params: Promise<{ local
 
           <TabsContent value="history" className="pt-6">
             <div className="mb-6">
-              <h2 className="text-xl font-black">{t('completedTitle') || "Concluídos"}</h2>
-              <p className="text-sm text-muted-foreground">{t('completedDesc') || "Revisite lições e planos passados"}</p>
+              <h2 className="text-xl font-black">{t('completedTitle')}</h2>
+              <p className="text-sm text-muted-foreground">{t('completedDesc')}</p>
             </div>
             <HistoryAccordion plans={archivedPlans} />
           </TabsContent>

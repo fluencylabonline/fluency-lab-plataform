@@ -1379,5 +1379,10 @@ export const schedulingService = {
       return { success: true };
     });
   },
+
+  async findNextClassForStudent(studentId: string) {
+    return schedulingRepository.findNextClassForStudent(studentId);
+  },
 };
+
 

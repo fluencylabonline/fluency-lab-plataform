@@ -164,5 +164,34 @@ export const billingRepository = {
       },
       orderBy: (table, { asc }) => [asc(table.dueDate)]
     });
+  },
+
+  async findInstallmentsByStudent(studentId: string) {
+    return db.query.installmentsTable.findMany({
+      where: (table, { inArray }) => inArray(
+        table.subscriptionId,
+        db.select({ id: subscriptionsTable.id }).from(subscriptionsTable).where(eq(subscriptionsTable.studentId, studentId))
+      ),
+      with: {
+        subscription: {
+          with: { plan: true }
+        }
+      },
+      orderBy: (table, { desc }) => [desc(table.dueDate)]
+    });
+  },
+
+  async findInstallmentWithDetails(id: string) {
+    return db.query.installmentsTable.findFirst({
+      where: eq(installmentsTable.id, id),
+      with: {
+        subscription: {
+          with: {
+            plan: true,
+            student: true
+          }
+        }
+      }
+    });
   }
 };

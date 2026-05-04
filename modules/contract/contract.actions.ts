@@ -122,10 +122,23 @@ export const getContractDownloadUrlAction = protectedAction
       if (!instance.pdfUrl) throw new Error("PDF ainda não foi gerado para este contrato.");
 
       const downloadUrl = await contractService.getSignedUrl(instance.pdfUrl);
-      return { success: true, downloadUrl };
+      return { success: true, downloadUrl } as { success: boolean; error?: string; downloadUrl?: string };
     } catch (error) {
       const err = error as Error;
       console.error("[getContractDownloadUrlAction] Error:", err.message);
       return { success: false, error: err.message || "Falha ao gerar URL de download." };
+    }
+  });
+
+export const resendContractEmailAction = protectedAction
+  .schema(z.object({ instanceId: z.string() }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const result = await contractService.resendContractEmail(ctx.user.id, parsedInput.instanceId);
+      return result as { success: boolean; error?: string };
+    } catch (error) {
+      const err = error as Error;
+      console.error("[resendContractEmailAction] Error:", err.message);
+      return { success: false, error: err.message || "Falha ao reenviar e-mail do contrato." };
     }
   });

@@ -11,11 +11,8 @@ import {
   VaultIcon
 } from "@/components/ui/vault";
 import { LearningItemDetail } from "@/modules/learning/learning.types";
-import { format } from "date-fns";
-import { ptBR, enUS } from "date-fns/locale";
 import { Clock } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useParams } from "next/navigation";
+import { useTranslations, useFormatter } from "next-intl";
 
 interface ReviewedItemsVaultProps {
   items: LearningItemDetail[];
@@ -24,9 +21,7 @@ interface ReviewedItemsVaultProps {
 
 export function ReviewedItemsVault({ items, trigger }: ReviewedItemsVaultProps) {
   const t = useTranslations("ReviewedItemsVault");
-  const params = useParams();
-  const locale = params.locale as string;
-  const dateLocale = locale === "pt" ? ptBR : enUS;
+  const formatIntl = useFormatter();
 
   return (
     <Vault>
@@ -60,7 +55,7 @@ export function ReviewedItemsVault({ items, trigger }: ReviewedItemsVaultProps) 
                   <div className="text-right">
                     <p className="text-[10px] text-muted-foreground">{t("reviewedAt")}</p>
                     <p className="text-[10px] font-bold">
-                      {item.reviewedAt ? format(new Date(item.reviewedAt), "HH:mm", { locale: dateLocale }) : "--"}
+                      {item.reviewedAt ? formatIntl.dateTime(new Date(item.reviewedAt), { hour: '2-digit', minute: '2-digit' }) : "--"}
                     </p>
                   </div>
                 </div>

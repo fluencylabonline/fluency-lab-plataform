@@ -5,6 +5,7 @@ import { env } from "@/env";
 import { communicationService } from "@/modules/communication/communication.service";
 import { abacate } from "@/lib/abacate-pay";
 import { decrypt } from "@/lib/cryptography";
+import { mapEloToCEFR } from "@/lib/adaptive-scoring";
 
 export const userService = {
   async syncUser(uid: string, data: Partial<NewUser>): Promise<User> {
@@ -187,4 +188,22 @@ export const userService = {
   async countActiveStudents(): Promise<number> {
     return userRepository.countActiveStudents();
   },
-};
+
+  getLevelInfo(elo: number) {
+    const code = mapEloToCEFR(elo);
+    
+    const levels: Record<string, { label: string, min: number, max: number }> = {
+      "A1": { label: "Beginner", min: 0, max: 274 },
+      "A2": { label: "Elementary", min: 275, max: 424 },
+      "B1": { label: "Intermediate", min: 425, max: 574 },
+      "B2": { label: "Upper Intermediate", min: 575, max: 724 },
+      "C1": { label: "Advanced", min: 725, max: 874 },
+      "C2": { label: "Proficient", min: 875, max: 1200 },
+    };
+
+    return {
+      code,
+      ...levels[code]
+    };
+  }
+};

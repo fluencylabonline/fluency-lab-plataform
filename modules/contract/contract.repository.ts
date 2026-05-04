@@ -138,5 +138,19 @@ export const contractRepository = {
       .where(eq(schoolSettingsTable.id, id))
       .returning();
     return updated;
-  }
+  },
+
+  async findActiveContractByUserId(userId: string) {
+    return db.query.contractInstancesTable.findFirst({
+      where: and(
+        eq(contractInstancesTable.userId, userId),
+        eq(contractInstancesTable.status, "signed")
+      ),
+      orderBy: [desc(contractInstancesTable.createdAt)],
+      with: {
+        template: true,
+      },
+    });
+  },
 };
+

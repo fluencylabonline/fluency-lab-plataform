@@ -139,3 +139,23 @@ export const updateInstallmentAction = adminAction
       return { success: false, error: "Erro ao atualizar parcela" };
     }
   });
+
+export const getStudentPaymentsAction = protectedAction
+  .action(async ({ ctx }) => {
+    const payments = await billingService.getStudentPayments(ctx.user.id);
+    return { success: true, data: payments };
+  });
+
+export const getPaymentDetailsAction = protectedAction
+  .inputSchema(z.object({ id: z.string().uuid() }))
+  .action(async ({ parsedInput, ctx }) => {
+    const details = await billingService.getPaymentDetailsForReceipt(parsedInput.id);
+    if (!details) return { success: false, error: "Pagamento não encontrado" };
+
+    // Ownership check (simplified, could be more robust)
+    if (ctx.user.role !== "admin" && details.studentEmail !== ctx.user.email) {
+      return { success: false, error: "Acesso negado" };
+    }
+
+    return { success: true, data: details };
+  });

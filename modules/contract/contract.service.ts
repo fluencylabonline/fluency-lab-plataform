@@ -468,5 +468,66 @@ export const contractService = {
     const contracts = await contractRepository.findUserInstances(teacherId);
     // Usually the most recent signed contract
     return contracts.find(c => c.status === "signed") || contracts[0] || null;
-  }
+  },
+
+  async getActiveContract(userId: string) {
+    return contractRepository.findActiveContractByUserId(userId);
+  },
+
+  async getLatestContract(userId: string) {
+    const contracts = await contractRepository.findUserInstances(userId);
+    if (contracts.length === 0) return null;
+    
+    // findUserInstances doesn't include template by default in the repo, 
+    // but findInstanceById does. Let's use findInstanceById for the first one to get full data.
+    return contractRepository.findInstanceById(contracts[0].id);
+  },
+
+  /**
+   * Reenvia o e-mail com o contrato assinado (PDF) para o usuário.
+   */
+  async resendContractEmail(userId: string, instanceId: string) {
+    const instance = await contractRepository.findInstanceById(instanceId);
+    
+    if (!instance) {
+      throw new Error("Contrato não encontrado.");
+    }
+    
+    if (instance.userId !== userId) {
+      throw new Error("Sem permissão para acessar este contrato.");
+    }
+
+    if (!instance.pdfUrl) {
+      throw new Error("Este contrato ainda não possui um arquivo PDF gerado.");
+    }
+
+    if (instance.status !== "signed") {
+      throw new Error("Somente contratos assinados podem ser reenviados por e-mail.");
+    }
+
+    const user = await userService.getUser(userId);
+    if (!user || !user.email) {
+      throw new Error("Usuário ou e-mail não encontrado.");
+    }
+
+    const bucket = adminStorage.bucket(env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
+    
+    try {
+      const file = bucket.file(instance.pdfUrl);
+      const [pdfBuffer] = await file.download();
+
+      await communicationService.sendContractSignedEmail(
+        user.email,
+        user.name,
+        instance.template.name,
+        new Uint8Array(pdfBuffer)
+      );
+
+      return { success: true };
+    } catch (error) {
+      console.error("[ContractService.resendContractEmail] Error:", error);
+      throw new Error("Falha ao baixar PDF ou enviar e-mail. Tente novamente mais tarde.");
+    }
+  },
 };
+

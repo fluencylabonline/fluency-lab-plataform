@@ -27,8 +27,9 @@ export default async function StudentSchedulePage() {
     return (
         <div>
             <Header
-                title={t("title") || "Meu Cronograma"}
-                subtitle={t("description") || "Gerencie suas aulas e créditos de reposição."}
+                title={t("title")}
+                subtitle={t("description")}
+                backHref="/hub/student/profile"
             />
 
             <main className="container">

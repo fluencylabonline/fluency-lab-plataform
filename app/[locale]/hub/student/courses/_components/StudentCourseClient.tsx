@@ -30,10 +30,10 @@ export function StudentCourseClient({ currentUser }: StudentCourseClientProps) {
   const handleEnroll = async (courseId: string) => {
     const result = await enrollAction({ courseId });
     if (result?.data?.success) {
-      notify.success("Matrícula realizada com sucesso!");
+      notify.success(t("enrollSuccess"));
       mutate();
     } else {
-      notify.error(result?.data?.error || "Erro ao realizar matrícula");
+      notify.error(result?.data?.error || t("enrollError"));
     }
   };
 
@@ -43,8 +43,9 @@ export function StudentCourseClient({ currentUser }: StudentCourseClientProps) {
     <div className="flex flex-col h-full w-full">
       <Header
         title={t("title")}
-        subtitle="Explore nossos cursos e acelere sua fluência."
+        subtitle={t("subtitle")}
         user={currentUser}
+        backHref="/hub/student/profile"
       />
 
       <main className="flex-1 overflow-y-auto p-4 md:p-6">
@@ -108,7 +109,7 @@ export function StudentCourseClient({ currentUser }: StudentCourseClientProps) {
                     </h3>
 
                     <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px]">
-                      {course.description || "Sem descrição disponível."}
+                      {course.description || t("noDescriptionAvailable")}
                     </p>
 
                     {/* Progress Section */}

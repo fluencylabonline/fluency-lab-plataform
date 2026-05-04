@@ -412,6 +412,35 @@ export const billingService = {
     };
   },
 
+  async getStudentPaymentStatus(studentId: string) {
+    const sub = await billingRepository.findActiveSubscriptionByStudent(studentId);
+    if (!sub) return null;
+
+    const installments = await billingRepository.findInstallmentsBySubscription(sub.id);
+    
+    // Find the current installment (the first one that is NOT paid)
+    const currentInstallment = installments.find(i => i.status !== "paid") || installments[installments.length - 1];
+    
+    const lastPaidInstallment = [...installments].reverse().find(i => i.status === "paid");
+
+    return {
+      subscriptionId: sub.id,
+      subscriptionStatus: sub.status,
+      planName: sub.plan?.name,
+      currentInstallment: currentInstallment ? {
+        id: currentInstallment.id,
+        amount: currentInstallment.amount,
+        dueDate: currentInstallment.dueDate,
+        status: currentInstallment.status,
+        pixCode: currentInstallment.pixPayload,
+        pixQrCode: currentInstallment.pixImage,
+        orderIndex: currentInstallment.orderIndex,
+        totalMonths: sub.plan?.durationMonths ?? 0,
+      } : null,
+      lastPaymentDate: lastPaidInstallment?.paidAt || null,
+    };
+  },
+
   async markInstallmentAsPaid(
     installmentId: string,
     abacatePayBillingId?: string,
@@ -710,5 +739,37 @@ export const billingService = {
 
   async getDetailedRevenueForecast(start: Date, end: Date) {
     return billingRepository.findInstallmentsDetails({ status: "pending", start, end });
+  },
+
+  async getStudentPayments(studentId: string) {
+    return billingRepository.findInstallmentsByStudent(studentId);
+  },
+
+  async getPaymentDetailsForReceipt(id: string) {
+    const installment = await billingRepository.findInstallmentWithDetails(id);
+    if (!installment) return null;
+
+    const student = installment.subscription.student;
+    const plan = installment.subscription.plan;
+
+    let taxId = student.taxId;
+    if (taxId?.includes(":")) taxId = decrypt(taxId);
+
+    let guardianTaxId = student.guardianTaxId;
+    if (guardianTaxId?.includes(":")) guardianTaxId = decrypt(guardianTaxId);
+
+    return {
+      id: installment.id,
+      amount: installment.amount,
+      paymentDate: installment.paidAt || installment.updatedAt,
+      paymentMethod: "PIX",
+      description: `Mensalidade ${plan?.name} - ${installment.orderIndex}/${plan?.durationMonths}`,
+      studentName: student.name,
+      studentEmail: student.email,
+      guardianName: student.guardianName || "",
+      birthDate: student.birthDate ? student.birthDate.toISOString().split("T")[0] : "",
+      payerDocument: guardianTaxId || taxId || "",
+      receiverDocument: "56.096.388/0001-34", // Exemplo de CNPJ da escola, pode ser dinâmico depois
+    };
   }
 };

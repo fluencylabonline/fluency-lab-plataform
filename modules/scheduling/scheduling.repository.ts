@@ -300,16 +300,36 @@ export const schedulingRepository = {
     return results.map(r => r.studentId as string);
   },
 
-  async findNextClassForStudent(studentId: string, teacherId: string) {
-    return db.query.slotInstances.findFirst({
-      where: and(
-        eq(slotInstances.studentId, studentId),
-        eq(slotInstances.teacherId, teacherId),
-        gte(slotInstances.startAt, new Date()),
-        eq(slotInstances.status, "scheduled")
-      ),
-      orderBy: [asc(slotInstances.startAt)]
-    });
+  async findNextClassForStudent(studentId: string, teacherId?: string) {
+    const filters = [
+      eq(slotInstances.studentId, studentId),
+      gte(slotInstances.startAt, new Date()),
+      eq(slotInstances.status, "scheduled")
+    ];
+
+    if (teacherId) {
+      filters.push(eq(slotInstances.teacherId, teacherId));
+    }
+
+    const result = await db
+      .select({
+        id: slotInstances.id,
+        startAt: slotInstances.startAt,
+        endAt: slotInstances.endAt,
+        type: slotInstances.type,
+        lessonTitle: slotInstances.lessonTitle,
+        teacher: {
+          name: usersTable.name,
+          photoUrl: usersTable.photoUrl,
+        }
+      })
+      .from(slotInstances)
+      .leftJoin(usersTable, eq(slotInstances.teacherId, usersTable.id))
+      .where(and(...filters))
+      .orderBy(asc(slotInstances.startAt))
+      .limit(1);
+
+    return result[0] || null;
   },
 
   async findByStudentAndTeacherInRange(studentId: string, teacherId: string, start: Date, end: Date) {
