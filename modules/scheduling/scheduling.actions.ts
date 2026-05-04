@@ -278,20 +278,43 @@ export const getStudentScheduleAction = protectedAction
       const start = startOfMonth(baseDate);
       const end = endOfMonth(baseDate);
       
-      console.log(`[getStudentScheduleAction] Fetching for ${parsedInput.studentId} range:`, {
-        start: start.toISOString(),
-        end: end.toISOString()
-      });
-
       const schedule = await schedulingService.getStudentClassesInRange(parsedInput.studentId, start, end);
-      
-      // Filter only NORMAL classes for the curriculum view
-      const normalClasses = schedule.filter(s => s.type === "NORMAL");
-      
-      return { success: true, data: normalClasses };
+      return { success: true, data: schedule };
     } catch (error) {
       console.error("[getStudentScheduleAction] Error:", error);
       return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const getStudentCreditBalanceAction = protectedAction
+  .inputSchema(z.object({ studentId: z.string() }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const balance = await schedulingService.getStudentCreditBalance(parsedInput.studentId);
+      return { success: true, data: balance } as { success: boolean; data: unknown; error?: string };
+    } catch (error) {
+      console.error("[getStudentCreditBalanceAction] Error:", error);
+      return { success: false, error: (error as Error).message } as { success: boolean; data?: unknown; error: string };
+    }
+  });
+
+export const getStudentRescheduleStatsAction = protectedAction
+  .inputSchema(z.object({
+    studentId: z.string(),
+    month: z.number().min(0).max(11),
+    year: z.number(),
+  }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const stats = await schedulingService.getStudentRescheduleStats(
+        parsedInput.studentId,
+        parsedInput.month,
+        parsedInput.year
+      );
+      return { success: true, data: stats } as { success: boolean; data: unknown; error?: string };
+    } catch (error) {
+      console.error("[getStudentRescheduleStatsAction] Error:", error);
+      return { success: false, error: (error as Error).message } as { success: boolean; data?: unknown; error: string };
     }
   });
 export const getAvailableRulesAction = permissionAction("class.update.any")
@@ -497,5 +520,47 @@ export const updateClassNotesAction = protectedAction
     } catch (error) {
       console.error("[updateClassNotesAction] Error:", error);
       return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const getTeacherAvailabilityAction = protectedAction
+  .inputSchema(z.object({
+    teacherId: z.string(),
+    startDate: z.date(),
+    endDate: z.date(),
+  }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const slots = await schedulingService.getTeacherAvailableSlots(
+        parsedInput.teacherId,
+        parsedInput.startDate,
+        parsedInput.endDate
+      );
+      return { success: true, data: slots } as { success: boolean; data: unknown; error?: string };
+    } catch (error) {
+      console.error("[getTeacherAvailabilityAction] Error:", error);
+      return { success: false, error: (error as Error).message } as { success: boolean; data?: unknown; error: string };
+    }
+  });
+
+export const rescheduleAction = protectedAction
+  .inputSchema(z.object({
+    originalClassId: z.string(),
+    newSlotId: z.string(),
+    creditId: z.string().optional(),
+  }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      await schedulingService.rescheduleClass(
+        ctx.user.id,
+        parsedInput.originalClassId,
+        parsedInput.newSlotId,
+        parsedInput.creditId
+      );
+      revalidatePath("/");
+      return { success: true } as { success: boolean; error?: string };
+    } catch (error) {
+      console.error("[rescheduleAction] Error:", error);
+      return { success: false, error: (error as Error).message } as { success: boolean; error: string };
     }
   });

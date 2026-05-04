@@ -1902,5 +1902,68 @@
     "success": "Prática do Dia {dayIndex} desbloqueada!",
     "error": "Erro ao processar XP. Tente novamente.",
     "unexpectedError": "Ocorreu um erro inesperado."
+  },
+  "Schedule": {
+    "title": "Meu Cronograma",
+    "description": "Gerencie suas aulas e créditos de reposição.",
+    "Credits": {
+      "title": "Seus Créditos",
+      "totalCredits": "Total de Créditos",
+      "bonus": "Créditos Bônus",
+      "lateStudents": "Atraso Aluno",
+      "teacherCancellation": "Canc. Professor",
+      "rescheduleQuota": "Cota de Reagendamento",
+      "used": "usado"
+    },
+    "Reschedule": {
+      "monthlyQuota": "Cota Mensal",
+      "limitNotice": "Limite de 2 reagendamentos por mês (não acumulativo).",
+      "title": "Reagendar Aula",
+      "confirmTitle": "Confirmar Reagendamento",
+      "selectSlot": "Escolha um novo horário",
+      "loadingSlots": "Buscando horários disponíveis...",
+      "noSlots": "Nenhum horário disponível nos próximos 14 dias.",
+      "paymentMethod": "Método de Reagendamento",
+      "used": "usados",
+      "useCredit": "Ou use um crédito",
+      "creditNotice": "Se você tiver créditos, eles serão listados aqui para uso.",
+      "originalClass": "Aula Original",
+      "newDate": "Nova Data",
+      "quotaNotice": "Será consumido 1 crédito da sua cota mensal de reagendamentos.",
+      "creditNoticeConfirm": "Será consumido 1 crédito de reposição.",
+      "confirmFinal": "Confirmar e Salvar",
+      "confirm": "Confirmar Reagendamento",
+      "saving": "Salvando reagendamento..."
+    },
+    "Details": {
+      "date": "Data",
+      "time": "Horário",
+      "teacher": "Professor",
+      "status": "Status",
+      "cancelPolicy": "Cancelamentos feitos com menos de 4h de antecedência serão considerados No-Show."
+    },
+    "CancelConfirm": {
+      "title": "Confirmar Cancelamento",
+      "description": "Você tem certeza que deseja cancelar esta aula? Esta ação não pode ser desfeita.",
+      "confirm": "Sim, cancelar aula",
+      "back": "Voltar"
+    },
+    "Actions": {
+      "reschedule": "Reagendar Aula",
+      "cancel": "Cancelar Aula",
+      "viewDetails": "Ver Aula",
+      "canceling": "Cancelando aula...",
+      "back": "Voltar"
+    },
+    "Success": {
+      "canceled": "Aula cancelada com sucesso!",
+      "rescheduled": "Aula reagendada com sucesso!"
+    },
+    "Default": {
+      "classTitle": "Aula de Inglês"
+    },
+    "Error": {
+      "generic": "Ocorreu um erro. Tente novamente."
+    }
   }
 }

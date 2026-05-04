@@ -6,6 +6,7 @@ import {
   schedulingAuditLogs,
   recessRequestsTable
 } from "./scheduling.schema";
+import { usersTable } from "@/modules/user/user.schema";
 import { eq, and, lte, gte, isNull, inArray, between, ne, isNotNull, asc } from "drizzle-orm";
 import {
   NewRecurrenceRule,
@@ -323,6 +324,41 @@ export const schedulingRepository = {
       },
       orderBy: [asc(slotInstances.startAt)],
     });
-  }
+  },
+
+  async findStudentClassesInRange(studentId: string, start: Date, end: Date) {
+    const rows = await db.select({
+      instance: slotInstances,
+      rule: recurrenceRules,
+      teacher: {
+        id: usersTable.id,
+        name: usersTable.name,
+      },
+    })
+    .from(slotInstances)
+    .leftJoin(recurrenceRules, eq(slotInstances.ruleId, recurrenceRules.id))
+    .leftJoin(usersTable, eq(slotInstances.teacherId, usersTable.id))
+    .where(and(
+      eq(slotInstances.studentId, studentId),
+      between(slotInstances.startAt, start, end)
+    ))
+    .orderBy(asc(slotInstances.startAt));
+
+    return rows.map(row => ({
+      ...row.instance,
+      rule: row.rule,
+      teacher: row.teacher,
+    }));
+  },
+  async findTeacherAvailableSlotsInRange(teacherId: string, start: Date, end: Date) {
+    return db.query.slotInstances.findMany({
+      where: and(
+        eq(slotInstances.teacherId, teacherId),
+        eq(slotInstances.status, "available"),
+        between(slotInstances.startAt, start, end)
+      ),
+      orderBy: [asc(slotInstances.startAt)],
+    });
+  },
 };
 

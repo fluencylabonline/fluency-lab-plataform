@@ -157,6 +157,10 @@ export const slotInstancesRelations = relations(slotInstances, ({ one }) => ({
     fields: [slotInstances.studentId],
     references: [usersTable.id],
   }),
+  teacher: one(usersTable, {
+    fields: [slotInstances.teacherId],
+    references: [usersTable.id],
+  }),
 }));
 
 export const studentCreditsRelations = relations(studentCredits, ({ one }) => ({

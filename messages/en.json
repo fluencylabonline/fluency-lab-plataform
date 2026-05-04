@@ -1902,5 +1902,68 @@
     "success": "Day {dayIndex} practice unlocked!",
     "error": "Error processing XP. Please try again.",
     "unexpectedError": "An unexpected error occurred."
+  },
+  "Schedule": {
+    "title": "My Schedule",
+    "description": "Manage your classes and makeup credits.",
+    "Credits": {
+      "title": "Your Credits",
+      "totalCredits": "Total Credits",
+      "bonus": "Bonus Credits",
+      "lateStudents": "Student Late",
+      "teacherCancellation": "Teacher Canc.",
+      "rescheduleQuota": "Reschedule Quota",
+      "used": "used"
+    },
+    "Reschedule": {
+      "monthlyQuota": "Monthly Quota",
+      "limitNotice": "Limit of 2 reschedules per month (non-accumulative).",
+      "title": "Reschedule Class",
+      "confirmTitle": "Confirm Reschedule",
+      "selectSlot": "Choose a new slot",
+      "loadingSlots": "Fetching available slots...",
+      "noSlots": "No slots available in the next 14 days.",
+      "paymentMethod": "Reschedule Method",
+      "used": "used",
+      "useCredit": "Or use a credit",
+      "creditNotice": "If you have credits, they will be listed here for use.",
+      "originalClass": "Original Class",
+      "newDate": "New Date",
+      "quotaNotice": "1 credit will be consumed from your monthly reschedule quota.",
+      "creditNoticeConfirm": "1 makeup credit will be consumed.",
+      "confirmFinal": "Confirm and Save",
+      "confirm": "Confirm Reschedule",
+      "saving": "Saving reschedule..."
+    },
+    "Details": {
+      "date": "Date",
+      "time": "Time",
+      "teacher": "Teacher",
+      "status": "Status",
+      "cancelPolicy": "Cancellations made with less than 4h notice will be considered No-Show."
+    },
+    "CancelConfirm": {
+      "title": "Confirm Cancellation",
+      "description": "Are you sure you want to cancel this class? This action cannot be undone.",
+      "confirm": "Yes, cancel class",
+      "back": "Back"
+    },
+    "Actions": {
+      "reschedule": "Reschedule Class",
+      "cancel": "Cancel Class",
+      "viewDetails": "View Class",
+      "canceling": "Canceling class...",
+      "back": "Back"
+    },
+    "Success": {
+      "canceled": "Class cancelled successfully!",
+      "rescheduled": "Class rescheduled successfully!"
+    },
+    "Default": {
+      "classTitle": "English Class"
+    },
+    "Error": {
+      "generic": "An error occurred. Please try again."
+    }
   }
 }

@@ -11,7 +11,7 @@ import {
 } from "./scheduling.schema";
 import { usersTable, type User } from "@/modules/user/user.schema";
 import { contractInstancesTable } from "@/modules/contract/contract.schema";
-import { eq, and, gte, lt, asc, desc, inArray } from "drizzle-orm";
+import { eq, and, gte, lt, asc, desc, inArray, isNotNull, between } from "drizzle-orm";
 import { communicationService } from "@/modules/communication/communication.service";
 import { userService } from "@/modules/user/user.service";
 import {
@@ -26,6 +26,7 @@ import {
   addHours,
   addMinutes,
   endOfMonth,
+  startOfMonth,
   differenceInCalendarDays
 } from "date-fns";
 import { notificationService } from "@/modules/notification/notification.service";
@@ -1250,6 +1251,133 @@ export const schedulingService = {
       .where(eq(slotInstances.id, classId));
 
     return { success: true };
+  },
+
+
+  async getStudentCreditBalance(studentId: string) {
+    const credits = await schedulingRepository.findCreditsByStudent(studentId, true);
+    
+    const summary = {
+      bonus: 0,
+      "late-students": 0,
+      "teacher-cancellation": 0,
+      total: 0,
+    };
+
+    credits.forEach(c => {
+      summary[c.type] += c.amount;
+      summary.total += c.amount;
+    });
+
+    return summary;
+  },
+
+  async getStudentRescheduleStats(studentId: string, month: number, year: number) {
+    const start = startOfMonth(new Date(year, month, 1));
+    const end = endOfMonth(new Date(year, month, 1));
+
+    const reschedules = await db.query.slotInstances.findMany({
+      where: and(
+        eq(slotInstances.studentId, studentId),
+        isNotNull(slotInstances.rescheduledFrom),
+        between(slotInstances.startAt, start, end)
+      )
+    });
+
+    return {
+      count: reschedules.length,
+      limit: 2, // Hardcoded as per user confirmation
+      month: format(start, "MM/yyyy"),
+    };
+  },
+
+  async getTeacherAvailableSlots(teacherId: string, start: Date, end: Date) {
+    return await schedulingRepository.findTeacherAvailableSlotsInRange(teacherId, start, end);
+  },
+
+  async rescheduleClass(
+    studentId: string,
+    originalClassId: string,
+    newSlotId: string,
+    creditId?: string
+  ) {
+    const originalSlot = await schedulingRepository.findById(originalClassId);
+    if (!originalSlot || originalSlot.studentId !== studentId) {
+      throw new Error("Original class not found or not owned by student");
+    }
+
+    const targetSlot = await schedulingRepository.findById(newSlotId);
+    if (!targetSlot || targetSlot.status !== "available") {
+      throw new Error("Target slot is no longer available");
+    }
+
+    let creditToUse = null;
+
+    if (creditId) {
+      creditToUse = await schedulingRepository.findCreditById(creditId);
+      if (!creditToUse || creditToUse.studentId !== studentId || creditToUse.usedAt || creditToUse.expiresAt < new Date()) {
+        throw new Error("Invalid or expired credit");
+      }
+    } else {
+      // Check Monthly Quota
+      const now = new Date();
+      const stats = await this.getStudentRescheduleStats(studentId, now.getMonth(), now.getFullYear());
+      if (stats.count >= stats.limit) {
+        throw new Error("Monthly reschedule quota exceeded. Please use a credit.");
+      }
+    }
+
+    return await db.transaction(async (tx) => {
+      // 1. If using a credit, mark it as used
+      if (creditToUse && creditId) {
+        await tx.update(studentCredits)
+          .set({ usedAt: new Date(), usedForClassId: newSlotId })
+          .where(eq(studentCredits.id, creditId));
+      }
+
+      // 2. If original is still scheduled, cancel it
+      if (originalSlot.status === "scheduled") {
+        await tx.update(slotInstances)
+          .set({ status: "canceled-student", updatedAt: new Date() })
+          .where(eq(slotInstances.id, originalClassId));
+        
+        await tx.insert(schedulingAuditLogs).values({
+          slotId: originalClassId,
+          actorId: studentId,
+          actorRole: "student",
+          previousStatus: "scheduled",
+          newStatus: "canceled-student",
+          reason: "Rescheduled by student",
+        });
+      }
+
+      // 3. Update target slot
+      await tx.update(slotInstances)
+        .set({
+          studentId,
+          status: "scheduled",
+          creditId: creditId || null,
+          creditType: creditToUse?.type || null,
+          isReschedulable: false,
+          rescheduledFrom: {
+            originalClassId,
+            originalScheduledAt: originalSlot.startAt,
+          },
+          updatedAt: new Date(),
+        })
+        .where(eq(slotInstances.id, newSlotId));
+
+      // 4. Notify Teacher
+      await notificationService.sendNotification({
+        title: "Aula Reagendada",
+        body: `Um aluno reagendou uma aula para ${format(targetSlot.startAt, "dd/MM HH:mm")}.`,
+        targetType: "specific",
+        userIds: [targetSlot.teacherId],
+        channels: { inApp: true, push: true },
+      });
+
+      return { success: true };
+    });
   },
 };
 

@@ -60,3 +60,9 @@ export type SlotInstanceWithDetails = SlotInstance & {
   teacherName?: string | null;
 };
 
+export type ScheduledClass = SlotInstance & {
+  rule?: RecurrenceRule | null;
+  teacher?: {
+    name: string | null;
+  } | null;
+};
