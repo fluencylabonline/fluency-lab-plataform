@@ -1682,10 +1682,6 @@
     "enrollError": "Error enrolling in course",
     "noDescriptionAvailable": "No description available."
   },
-  "Placement": {
-    "title": "Placement Test",
-    "subtitle": "Evaluate your level and track your progress"
-  },
   "Settings": {
     "title": "Settings",
     "subtitle": "Manage your account and preferences",
@@ -1963,12 +1959,6 @@
     "confirmStatusDescription": "Are you sure you want to change this class status to",
     "confirm": "Confirm"
   },
-  "NotebooksCard": {
-    "searchPlaceholder": "Search notebooks...",
-    "successDownload": "Starting PDF download...",
-    "noResults": "No notebooks found",
-    "noResultsSearch": "No results for \"{query}\""
-  },
   "PlanCard": {
     "title": "Learning Plan",
     "searchPlaceholder": "Filter lessons...",
@@ -2171,5 +2161,20 @@
     "Error": {
       "generic": "An error occurred. Please try again."
     }
+  },
+  "NotebooksCard": {
+    "title": "Notebooks",
+    "create": "New",
+    "creating": "Creating...",
+    "searchPlaceholder": "Search notebooks...",
+    "noResultsSearch": "No results for \"{query}\"",
+    "noResults": "No notebooks found",
+    "createTitle": "Create New Notebook",
+    "createDescription": "Give a title for the student's new class notebook.",
+    "inputTitle": "Notebook Title",
+    "inputPlaceholder": "Ex: Class 05 - Business English",
+    "cancel": "Cancel",
+    "successCreated": "Notebook created successfully!",
+    "errorCreated": "Error creating notebook."
   }
 }

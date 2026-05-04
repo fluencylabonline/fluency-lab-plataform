@@ -43,6 +43,13 @@
       "when": 1776773576991,
       "tag": "0005_jittery_mad_thinker",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1777907061333,
+      "tag": "0006_normal_thunderball",
+      "breakpoints": true
     }
   ]
 }

@@ -26,36 +26,28 @@ import {
 import { Input } from "@/components/ui/input";
 import { notify } from "@/components/ui/toaster";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-
-interface Notebook {
-  id: string;
-  title: string;
-  createdAt: string;
-  student: string;
-}
+import { createNotebookAction } from "@/modules/notebook/notebook.actions";
+import type { Notebook } from "@/modules/notebook/notebook.schema";
 
 interface StudentNotebooksCardProps {
   studentId: string;
+  initialNotebooks?: Notebook[];
   isVaultMode?: boolean;
 }
 
-export function StudentNotebooksCard({ studentId, isVaultMode = false }: StudentNotebooksCardProps) {
+export function StudentNotebooksCard({ studentId, initialNotebooks = [], isVaultMode = false }: StudentNotebooksCardProps) {
   const t = useTranslations("NotebooksCard");
   const params = useParams();
   const locale = params.locale as string;
+  const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [newNotebookTitle, setNewNotebookTitle] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  // Mock data - will be replaced by server data later
-  const [notebooks, setNotebooks] = useState<Notebook[]>([
-    { id: "1", title: "Aula 01 - Introdução", createdAt: "2024-05-01T10:00:00.000Z", student: studentId },
-    { id: "2", title: "Aula 02 - Verbos Irregulares", createdAt: "2024-04-30T10:00:00.000Z", student: studentId },
-  ]);
+  const [notebooks, setNotebooks] = useState<Notebook[]>(initialNotebooks);
 
   const filteredNotebooks = useMemo(() => {
     return notebooks.filter(nb =>
@@ -67,20 +59,24 @@ export function StudentNotebooksCard({ studentId, isVaultMode = false }: Student
     if (!newNotebookTitle.trim()) return;
     setIsLoading(true);
 
-    // Mock simulation
-    setTimeout(() => {
-      const newNb: Notebook = {
-        id: Math.random().toString(),
-        title: newNotebookTitle,
-        createdAt: new Date().toISOString(),
-        student: studentId
-      };
-      setNotebooks([newNb, ...notebooks]);
-      setNewNotebookTitle("");
-      setIsVaultOpen(false);
-      setIsLoading(false);
-      notify.success(t("successCreated") || "Notebook criado com sucesso!");
-    }, 1000);
+    const result = await createNotebookAction({
+      title: newNotebookTitle,
+      studentId,
+    });
+
+    setIsLoading(false);
+
+    if (result?.serverError || !result?.data?.notebook) {
+      notify.error(result?.serverError || t("errorCreated") || "Erro ao criar notebook.");
+      return;
+    }
+
+    const created = result.data.notebook;
+    setNotebooks((prev) => [created, ...prev]);
+    setNewNotebookTitle("");
+    setIsVaultOpen(false);
+    notify.success(t("successCreated") || "Notebook criado com sucesso!");
+    router.push(`/${locale}/notebook/${created.id}`);
   };
 
   const handleDownloadPDF = () => {
@@ -144,7 +140,7 @@ export function StudentNotebooksCard({ studentId, isVaultMode = false }: Student
                   className="item flex items-center justify-between p-4 group"
                 >
                   <Link
-                    href={`/hub/teacher/students/${studentId}/notebook/${notebook.id}`}
+                    href={`/${locale}/notebook/${notebook.id}`}
                     className="flex-1 min-w-0"
                   >
                     <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">

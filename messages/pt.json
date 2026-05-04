@@ -1682,10 +1682,6 @@
     "enrollError": "Erro ao realizar matrícula",
     "noDescriptionAvailable": "Sem descrição disponível."
   },
-  "Placement": {
-    "title": "Teste de Nível",
-    "subtitle": "Avalie seu nível e acompanhe seu progresso"
-  },
   "Settings": {
     "title": "Configurações",
     "subtitle": "Gerencie sua conta e preferências",
@@ -1963,12 +1959,6 @@
     "confirmStatusDescription": "Você tem certeza que deseja alterar o status desta aula para",
     "confirm": "Confirmar"
   },
-  "NotebooksCard": {
-    "searchPlaceholder": "Pesquisar notebooks...",
-    "successDownload": "Iniciando download do PDF...",
-    "noResults": "Nenhum notebook encontrado",
-    "noResultsSearch": "Nenhum resultado para \"{query}\""
-  },
   "PlanCard": {
     "title": "Plano de Estudos",
     "searchPlaceholder": "Filtrar lições...",
@@ -2171,5 +2161,20 @@
     "Error": {
       "generic": "Ocorreu um erro. Tente novamente."
     }
+  },
+  "NotebooksCard": {
+    "title": "Notebooks",
+    "create": "Novo",
+    "creating": "Criando...",
+    "searchPlaceholder": "Pesquisar notebooks...",
+    "noResultsSearch": "Nenhum resultado para \"{query}\"",
+    "noResults": "Nenhum notebook encontrado",
+    "createTitle": "Criar Novo Notebook",
+    "createDescription": "Dê um título para o novo caderno de aula do aluno.",
+    "inputTitle": "Título do Notebook",
+    "inputPlaceholder": "Ex: Aula 05 - Business English",
+    "cancel": "Cancelar",
+    "successCreated": "Notebook criado com sucesso!",
+    "errorCreated": "Erro ao criar notebook."
   }
 }

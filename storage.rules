@@ -38,10 +38,23 @@ service firebase.storage {
       // Course covers are publicly readable
       allow read: if true;
       
-      // Managers and Admins can upload course covers
       allow write: if request.auth != null 
                     && request.resource.size < 5 * 1024 * 1024 
                     && request.resource.contentType.matches('image/(jpeg|png|webp|jpg)');
+    }
+
+    match /notebooks/{notebookId}/{userId}/{fileName} {
+      // Notebook images are readable by authenticated users (RBAC is secondary here, path contains userId)
+      allow read: if request.auth != null;
+      
+      // Validates:
+      // 1. User is authenticated and matches the folder userId
+      // 2. File size is under 5MB
+      // 3. Content type is a standard web image
+      allow write: if request.auth != null 
+                    && request.auth.uid == userId
+                    && request.resource.size < 5 * 1024 * 1024 
+                    && request.resource.contentType.matches('image/(jpeg|png|webp|jpg|gif)');
     }
   }
 }

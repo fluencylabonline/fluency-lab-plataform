@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper to check if user is student or teacher of the notebook
+    function canAccessNotebook(notebookId) {
+      let notebook = get(/databases/$(database)/documents/Notebooks/$(notebookId)).data;
+      return request.auth != null && (
+        notebook.studentId == request.auth.uid || 
+        notebook.teacherId == request.auth.uid
+      );
+    }
+
+    match /Notebooks/{notebookId} {
+      // Allow read/write for the notebook document itself
+      allow read, write: if request.auth != null && (
+        (resource == null && request.resource.data.teacherId == request.auth.uid) || // Allow creation by teacher
+        (resource != null && (resource.data.studentId == request.auth.uid || resource.data.teacherId == request.auth.uid))
+      );
+
+      // Allow full access to subcollections (yjs, history, etc) if parent access is valid
+      match /{allPaths=**} {
+        allow read, write: if canAccessNotebook(notebookId);
+      }
+    }
+  }
+}

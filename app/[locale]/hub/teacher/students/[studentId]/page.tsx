@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
 import { userService } from "@/modules/user/user.service";
 import { schedulingService } from "@/modules/scheduling/scheduling.service";
+import { notebookService } from "@/modules/notebook/notebook.service";
 import { StudentDetailsClient } from "./_components/StudentDetailsClient";
 import { startOfMonth, endOfMonth } from "date-fns";
 
@@ -26,18 +27,22 @@ export default async function StudentDetailsPage({ params }: StudentDetailsPageP
   }
 
   const now = new Date();
-  const initialClasses = await schedulingService.getStudentClassesByTeacher(
-    user,
-    studentId,
-    startOfMonth(now),
-    endOfMonth(now)
-  );
+  const [initialClasses, initialNotebooks] = await Promise.all([
+    schedulingService.getStudentClassesByTeacher(
+      user,
+      studentId,
+      startOfMonth(now),
+      endOfMonth(now)
+    ),
+    notebookService.getNotebooksForStudent(user.id, user.role, studentId),
+  ]);
 
   return (
     <StudentDetailsClient 
       studentId={studentId}
       studentName={student.name}
       initialClasses={initialClasses}
+      initialNotebooks={initialNotebooks}
     />
   );
 }

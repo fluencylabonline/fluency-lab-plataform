@@ -37,7 +37,10 @@ export type Permission =
   | "material.view"
   | "course.manage"
   | "course.view"
-  | "course.learn";
+  | "course.learn"
+  | "notebook.create"
+  | "notebook.view.own"
+  | "notebook.view.student";
 
 export type Role = "admin" | "teacher" | "student" | "manager";
 export enum UserRoles {
@@ -93,6 +96,8 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "class.create.with.credits",
     "credits.view.students",
     "material.view",
+    "notebook.create",
+    "notebook.view.student",
   ],
   student: [
     "class.view",
@@ -106,6 +111,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "material.view",
     "course.view",
     "course.learn",
+    "notebook.view.own",
   ],
 };
 
