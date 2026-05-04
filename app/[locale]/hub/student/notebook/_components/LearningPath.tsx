@@ -18,14 +18,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 
-// --- Interfaces ---
-interface Lesson {
-  id: string;
-  title: string;
-  isCompleted: boolean;
-  status: "completed" | "current" | "future";
-  order: number;
-}
+import type { RoadmapLesson as Lesson } from "@/modules/learning/learning.types";
 
 interface LearningPathProps {
   lessons: Lesson[];
@@ -42,18 +35,7 @@ export function LearningPath({ lessons }: LearningPathProps) {
   const t = useTranslations("LearningPath");
   const router = useRouter();
 
-  // Mock data as fallback if empty
-  const mockLessons: Lesson[] = [
-    { id: "1", title: "Introdução ao Idioma", isCompleted: true, status: "completed", order: 1 },
-    { id: "2", title: "Verbos no Presente", isCompleted: true, status: "completed", order: 2 },
-    { id: "3", title: "Conversação Básica", isCompleted: false, status: "current", order: 3 },
-    { id: "4", title: "Vocabulário de Viagem", isCompleted: false, status: "future", order: 4 },
-    { id: "5", title: "Expressões Idiomáticas", isCompleted: false, status: "future", order: 5 },
-    { id: "6", title: "Revisão Geral", isCompleted: false, status: "future", order: 6 },
-  ];
-
-  const displayLessons = lessons.length > 0 ? lessons : mockLessons;
-  const sortedLessons = [...displayLessons].sort((a, b) => a.order - b.order);
+  const sortedLessons = [...lessons].sort((a, b) => a.order - b.order);
 
   // Busca o índice da lição atual
   const currentIndex = sortedLessons.findIndex(l => l.status === "current");
@@ -77,11 +59,11 @@ export function LearningPath({ lessons }: LearningPathProps) {
     // If it's locked, do nothing
     if (lesson.status === "future") return;
 
-    // Navigate to practice (example route)
-    router.push(`/hub/student/practice/${lesson.id}`);
+    // Navigate to practice session
+    router.push(`/hub/student/practice/session`);
   };
 
-  if (displayLessons.length === 0) {
+  if (lessons.length === 0) {
     return (
       <div className="w-full flex flex-col items-center justify-center py-12 text-center space-y-4">
         <div className="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center mb-2">

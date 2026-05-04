@@ -40,6 +40,9 @@ export const env = createEnv({
     UNSPLASH_ACCESS_KEY: z.string().min(1),
     UNSPLASH_SECRET_KEY: z.string().min(1),
 
+    // Stream Video
+    STREAM_SECRET: z.string().min(1),
+
     // Security
     ENCRYPTION_KEY: z.string().length(64), // 32 bytes in hex
 
@@ -64,6 +67,9 @@ export const env = createEnv({
 
     //URL
     NEXT_PUBLIC_APP_URL: z.string().min(1),
+
+    // Stream Video (public API key)
+    NEXT_PUBLIC_STREAM_API_KEY: z.string().min(1),
   },
   runtimeEnv: {
     // Server
@@ -95,6 +101,7 @@ export const env = createEnv({
     WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID,
     WHATSAPP_BUSINESS_ACCOUNT_ID: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
     WHATSAPP_VERIFY_TOKEN: process.env.WHATSAPP_VERIFY_TOKEN,
+    STREAM_SECRET: process.env.STREAM_SECRET,
 
     // Client
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -110,5 +117,6 @@ export const env = createEnv({
     NEXT_PUBLIC_FIREBASE_DATABASE_URL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_STREAM_API_KEY: process.env.NEXT_PUBLIC_STREAM_API_KEY,
   },
 });

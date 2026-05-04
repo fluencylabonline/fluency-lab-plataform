@@ -24,8 +24,10 @@ import { TeacherEarningsTab } from "./userDetails/TeacherEarningsTab";
 import { ContractsTab } from "./userDetails/ContractsTab";
 import { TeacherScheduleTab } from "./userDetails/TeacherScheduleTab";
 import { StudentCurriculumTab } from "./userDetails/StudentCurriculumTab";
+import { VideoCallsTab } from "./userDetails/VideoCallsTab";
 import { ActionsTab } from "./userDetails/ActionsTab";
 import { Header } from "@/components/layout/header";
+import type { CallSession } from "../../call/call.schema";
 
 const rateSchema = z.object({
   rate: z.number().min(0),
@@ -44,6 +46,7 @@ interface UserDetailsClientProps {
   teacherClasses?: SlotInstanceWithDetails[];
   earningsSummary?: { count: number; total: number };
   contracts?: ContractWithTemplate[];
+  callHistory?: CallSession[];
   basePath: string;
   isAdmin: boolean;
 }
@@ -57,6 +60,7 @@ export function UserDetailsClient({
   teacherClasses = [],
   earningsSummary = { count: 0, total: 0 },
   contracts = [],
+  callHistory = [],
   basePath,
   isAdmin,
 }: UserDetailsClientProps) {
@@ -246,6 +250,15 @@ export function UserDetailsClient({
               </TabsTrigger>
             )}
 
+            {user.role === "student" && (
+              <TabsTrigger
+                value="video-calls"
+                className="shrink-0 [&[data-state=active]]:!bg-transparent [&[data-state=active]]:!shadow-none [&[data-state=active]]:!text-primary [&[data-state=active]]:!border-none focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+              >
+                Aulas (Vídeo)
+              </TabsTrigger>
+            )}
+
             {user.role === "student" && isAdmin && (
               <TabsTrigger
                 value="actions"
@@ -311,6 +324,12 @@ export function UserDetailsClient({
         {user.role === "student" && (
           <TabsContent value="curriculum" className="mt-4">
             <StudentCurriculumTab studentId={user.id} isAdmin={isAdmin} />
+          </TabsContent>
+        )}
+
+        {user.role === "student" && (
+          <TabsContent value="video-calls" className="mt-4">
+            <VideoCallsTab callHistory={callHistory} />
           </TabsContent>
         )}
 

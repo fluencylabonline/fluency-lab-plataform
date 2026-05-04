@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { userService } from "@/modules/user/user.service";
 import { schedulingService } from "@/modules/scheduling/scheduling.service";
 import { notebookService } from "@/modules/notebook/notebook.service";
+import { learningService } from "@/modules/learning/learning.service";
 import { StudentDetailsClient } from "./_components/StudentDetailsClient";
 import { startOfMonth, endOfMonth } from "date-fns";
 
@@ -27,7 +28,7 @@ export default async function StudentDetailsPage({ params }: StudentDetailsPageP
   }
 
   const now = new Date();
-  const [initialClasses, initialNotebooks] = await Promise.all([
+  const [initialClasses, initialNotebooks, initialRoadmap] = await Promise.all([
     schedulingService.getStudentClassesByTeacher(
       user,
       studentId,
@@ -35,6 +36,7 @@ export default async function StudentDetailsPage({ params }: StudentDetailsPageP
       endOfMonth(now)
     ),
     notebookService.getNotebooksForStudent(user.id, user.role, studentId),
+    learningService.getStudentRoadmap(studentId),
   ]);
 
   return (
@@ -43,6 +45,7 @@ export default async function StudentDetailsPage({ params }: StudentDetailsPageP
       studentName={student.name}
       initialClasses={initialClasses}
       initialNotebooks={initialNotebooks}
+      initialRoadmap={initialRoadmap}
     />
   );
 }

@@ -144,10 +144,13 @@ export interface RoadmapLesson {
   order: number;
   scheduledDate?: Date | null;
   completedPracticeDays: number;
+  isDraft?: boolean;
+  goal?: string;
 }
 
 export interface StudentRoadmap {
   id: string;
   name: string;
+  progress: number;
   lessons: RoadmapLesson[];
 }

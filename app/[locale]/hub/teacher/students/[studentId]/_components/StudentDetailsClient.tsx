@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { SlotInstanceWithDetails } from "@/modules/scheduling/scheduling.types";
 import type { Notebook } from "@/modules/notebook/notebook.schema";
+import { StudentRoadmap } from "@/modules/learning/learning.types";
 import {
   BookOpen,
   Target,
@@ -25,6 +26,7 @@ interface StudentDetailsClientProps {
   studentName: string;
   initialClasses: SlotInstanceWithDetails[];
   initialNotebooks: Notebook[];
+  initialRoadmap: StudentRoadmap | null;
 }
 
 export function StudentDetailsClient({
@@ -32,6 +34,7 @@ export function StudentDetailsClient({
   studentName,
   initialClasses,
   initialNotebooks,
+  initialRoadmap,
 }: StudentDetailsClientProps) {
   const [isNotebooksOpen, setIsNotebooksOpen] = useState(false);
   const [isPlanOpen, setIsPlanOpen] = useState(false);
@@ -72,7 +75,10 @@ export function StudentDetailsClient({
             />
           </div>
           <div className="h-[calc(100vh-110px)]">
-            <StudentPlanCard studentId={studentId} />
+            <StudentPlanCard 
+              studentId={studentId} 
+              initialData={initialRoadmap}
+            />
           </div>
           <div className="h-[calc(100vh-110px)] overflow-y-auto no-scrollbar">
             <StudentClassesCard
@@ -127,7 +133,11 @@ export function StudentDetailsClient({
             </VaultDescription>
           </VaultHeader>
           <VaultBody className="p-0 h-full overflow-hidden">
-            <StudentPlanCard studentId={studentId} isVaultMode={true} />
+            <StudentPlanCard 
+              studentId={studentId} 
+              initialData={initialRoadmap}
+              isVaultMode={true} 
+            />
           </VaultBody>
         </VaultContent>
       </Vault>

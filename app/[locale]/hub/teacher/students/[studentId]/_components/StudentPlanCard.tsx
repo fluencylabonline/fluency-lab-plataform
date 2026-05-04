@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import {
@@ -35,23 +33,15 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
-
-interface Lesson {
-  id: string;
-  title: string;
-  status: "completed" | "pending" | "current";
-  order: number;
-  scheduledDate?: string;
-  isDraft?: boolean;
-  goal?: string;
-}
+import { StudentRoadmap } from "@/modules/learning/learning.types";
 
 interface StudentPlanCardProps {
   studentId: string;
+  initialData: StudentRoadmap | null;
   isVaultMode?: boolean;
 }
 
-export function StudentPlanCard({ isVaultMode = false }: StudentPlanCardProps) {
+export function StudentPlanCard({ initialData, isVaultMode = false }: StudentPlanCardProps) {
   const t = useTranslations("PlanCard");
   const tMonths = useTranslations("Months");
   const locale = useLocale();
@@ -62,21 +52,6 @@ export function StudentPlanCard({ isVaultMode = false }: StudentPlanCardProps) {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [isVaultOpen, setIsVaultOpen] = useState(false);
 
-  // Mock data - will be replaced by server data later
-  const [plan] = useState({
-    id: "plan-1",
-    name: "General English - B1 Intermediate",
-    progress: 45,
-    lessons: [
-      { id: "1", title: "Present Perfect vs Past Simple", status: "completed", order: 1, scheduledDate: new Date(2026, 4, 10).toISOString() },
-      { id: "2", title: "Passive Voice Intro", status: "completed", order: 2, scheduledDate: new Date(2026, 4, 15).toISOString() },
-      { id: "3", title: "Modal Verbs of Deduction", status: "current", order: 3, scheduledDate: new Date(2026, 4, 20).toISOString(), isDraft: true, goal: "Understand high-probability modals" },
-      { id: "4", title: "Conditionals Type 2", status: "pending", order: 4, scheduledDate: new Date(2026, 5, 2).toISOString() },
-      { id: "5", title: "Reported Speech Basics", status: "pending", order: 5, scheduledDate: new Date(2026, 5, 10).toISOString() },
-      { id: "6", title: "Phrasal Verbs - Travel", status: "pending", order: 6, scheduledDate: new Date(2026, 6, 1).toISOString() },
-    ] as Lesson[]
-  });
-
   const monthNames = [
     tMonths("january"), tMonths("february"), tMonths("march"), tMonths("april"),
     tMonths("may"), tMonths("june"), tMonths("july"), tMonths("august"),
@@ -84,7 +59,8 @@ export function StudentPlanCard({ isVaultMode = false }: StudentPlanCardProps) {
   ];
 
   const filteredLessons = useMemo(() => {
-    return plan.lessons.filter(lesson => {
+    if (!initialData) return [];
+    return initialData.lessons.filter(lesson => {
       // Filter by text search
       const matchesSearch = lesson.title.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -96,7 +72,7 @@ export function StudentPlanCard({ isVaultMode = false }: StudentPlanCardProps) {
 
       return matchesSearch && matchesDate;
     });
-  }, [plan.lessons, searchQuery, selectedMonth, selectedYear]);
+  }, [initialData, searchQuery, selectedMonth, selectedYear]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -105,6 +81,59 @@ export function StudentPlanCard({ isVaultMode = false }: StudentPlanCardProps) {
       default: return <Circle className="h-4 w-4 text-muted-foreground/30" />;
     }
   };
+
+  if (!initialData) {
+    return (
+      <div className={cn(
+        !isVaultMode && "card",
+        "flex flex-col h-full sm:p-4 p-2 items-center justify-center text-center space-y-4"
+      )}>
+        <Target className="h-12 w-12 text-muted-foreground/20" />
+        <div className="space-y-2">
+          <h3 className="font-bold text-muted-foreground">
+            {t("noPlanTitle") || "Sem Plano Ativo"}
+          </h3>
+          <p className="text-xs text-muted-foreground max-w-[200px]">
+            {t("noPlanDescription") || "Este aluno ainda não possui um plano de estudos vinculado."}
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsVaultOpen(true)}
+        >
+          {t("createPlan") || "Criar Plano"}
+        </Button>
+
+        <Vault open={isVaultOpen} onOpenChange={setIsVaultOpen}>
+          <VaultContent className="max-w-7xl max-h-[90vh]">
+            <VaultHeader>
+              <VaultTitle>{t("createPlan")}</VaultTitle>
+              <VaultDescription>
+                {t("planEditorDescription") || "Gerencie as lições e objetivos do plano de estudos."}
+              </VaultDescription>
+            </VaultHeader>
+            <VaultBody>
+              <div className="p-12 text-center border-2 border-dashed rounded-2xl">
+                <BookOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30" />
+                <p className="text-muted-foreground">
+                  PlanEditor Placeholder - Será implementado posteriormente.
+                </p>
+              </div>
+            </VaultBody>
+            <VaultFooter>
+              <VaultSecondaryButton onClick={() => setIsVaultOpen(false)}>
+                {t("cancel") || "Cancelar"}
+              </VaultSecondaryButton>
+              <VaultPrimaryButton onClick={() => setIsVaultOpen(false)}>
+                {t("save") || "Salvar Alterações"}
+              </VaultPrimaryButton>
+            </VaultFooter>
+          </VaultContent>
+        </Vault>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -126,7 +155,7 @@ export function StudentPlanCard({ isVaultMode = false }: StudentPlanCardProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="rounded-full bg-primary/5 text-primary border-primary/10 mr-2">
-                    {plan.progress}%
+                    {initialData.progress}%
                   </Badge>
                   <Button
                     size="icon"
@@ -141,12 +170,12 @@ export function StudentPlanCard({ isVaultMode = false }: StudentPlanCardProps) {
 
               <div className="space-y-1">
                 <h3 className="text-sm font-semibold text-muted-foreground truncate">
-                  {plan.name}
+                  {initialData.name}
                 </h3>
                 <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-primary transition-all duration-500"
-                    style={{ width: `${plan.progress}%` }}
+                    style={{ width: `${initialData.progress}%` }}
                   />
                 </div>
               </div>
@@ -265,7 +294,7 @@ export function StudentPlanCard({ isVaultMode = false }: StudentPlanCardProps) {
       <Vault open={isVaultOpen} onOpenChange={setIsVaultOpen}>
         <VaultContent className="max-w-7xl max-h-[90vh]">
           <VaultHeader>
-            <VaultTitle>{plan ? t("editPlan") : t("createPlan")}</VaultTitle>
+            <VaultTitle>{initialData ? t("editPlan") : t("createPlan")}</VaultTitle>
             <VaultDescription>
               {t("planEditorDescription") || "Gerencie as lições e objetivos do plano de estudos."}
             </VaultDescription>

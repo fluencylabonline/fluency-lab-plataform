@@ -517,6 +517,13 @@ export const learningService = {
         status = "current";
       }
 
+      // Extract goal from contentText if it exists (Format: "Objetivo: ...")
+      let goal = undefined;
+      if (pl.lesson?.contentText) {
+        const goalMatch = pl.lesson.contentText.match(/Objetivo:\s*(.*)/i);
+        if (goalMatch) goal = goalMatch[1].split("\n")[0].trim();
+      }
+
       return {
         id: pl.lessonId,
         title: pl.lesson?.title || "Lesson",
@@ -525,12 +532,20 @@ export const learningService = {
         order: pl.order,
         scheduledDate: pl.scheduledDate,
         completedPracticeDays: pl.completedPracticeDays,
+        isDraft: pl.lesson?.status !== "ready",
+        goal,
       };
     });
+
+    const completedCount = lessonsWithStatus.filter(l => l.isCompleted).length;
+    const progress = lessonsWithStatus.length > 0 
+      ? Math.round((completedCount / lessonsWithStatus.length) * 100) 
+      : 0;
 
     return {
       id: activePlan.id,
       name: activePlan.name,
+      progress,
       lessons: lessonsWithStatus,
     };
   },

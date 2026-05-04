@@ -19,6 +19,12 @@ import { CollaborationCaret } from "@tiptap/extension-collaboration-caret";
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
 import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
 
+// --- Call Feature ---
+import { FloatCallButton } from "./call/FloatCallButton";
+import { VideoCall } from "./call/VideoCall";
+import { useCallStore } from "@/hooks/data/use-call-store";
+import { useStudentCallListener } from "@/hooks/data/use-student-call-listener";
+
 // --- Hooks & Components ---
 import { useNotebookSession } from "../_hooks/use-notebook-session";
 import { useNotebookCollaboration } from "../_hooks/use-notebook-collaboration";
@@ -47,6 +53,8 @@ interface NotebookEditorProps {
   userName: string;
   userRole: string;
   userColor: string;
+  /** Optional: used by Stream SDK for avatar rendering */
+  userPhotoUrl?: string | null;
 }
 
 export function NotebookEditor({
@@ -56,6 +64,7 @@ export function NotebookEditor({
   userName,
   userRole,
   userColor,
+  userPhotoUrl,
 }: NotebookEditorProps) {
   const params = useParams();
   const locale = params.locale as string;
@@ -69,7 +78,13 @@ export function NotebookEditor({
   const getEditorContent = useCallback(() => editorRef.current?.getHTML(), []);
   useNotebookSession({ notebookId, getEditorContent });
 
-  // 3. Image Upload Handler
+  // 3. Video Call Logic
+  // Students: listen for incoming calls via Firestore onSnapshot (scoped to this page only)
+  // Teachers: this hook is a no-op (enabled = false)
+  useStudentCallListener(userId, userRole === "student");
+  const { callState } = useCallStore();
+
+  // 4. Image Upload Handler
   const handleNotebookImageUpload = useCallback(async (
     file: File,
     onProgress?: (event: { progress: number }) => void
@@ -106,7 +121,7 @@ export function NotebookEditor({
     });
   }, [notebookId, userId]);
 
-  // 4. Editor Instance
+  // 5. Editor Instance
   const editor = useEditor({
     immediatelyRender: false,
     shouldRerenderOnTransaction: false,
@@ -152,7 +167,7 @@ export function NotebookEditor({
     ],
   }, [ydoc, provider]);
 
-  // 4. UI Helpers
+  // 6. UI Helpers
   const toolbarRect = useRefRect(toolbarRef);
   const rect = useCursorVisibility({
     editor,
@@ -178,6 +193,31 @@ export function NotebookEditor({
           className="simple-editor-content"
         />
       </EditorContext.Provider>
+
+      {/*
+        Video Call Integration:
+        - FloatCallButton: visible only to teacher when no call is active.
+          Clicking → startCallAction → populates useCallStore.
+        - useStudentCallListener (above): when student's Firestore doc gets callId,
+          generateStreamTokenAction fires → populates useCallStore.
+        - VideoCall: renders whenever callState is set (for both roles).
+      */}
+      <FloatCallButton
+        studentId={studentId}
+        notebookId={notebookId}
+        userRole={userRole}
+      />
+
+      {callState && (
+        <VideoCall
+          userId={userId}
+          userName={userName}
+          userRole={userRole}
+          userPhotoUrl={userPhotoUrl}
+          studentId={studentId}
+          notebookId={notebookId}
+        />
+      )}
     </div>
   );
 }
