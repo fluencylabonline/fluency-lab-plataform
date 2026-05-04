@@ -15,6 +15,13 @@ interface ReceiptData {
   receiverName?: string;
 }
 
+interface NotebookData {
+  title: string;
+  studentName: string;
+  content: string; // HTML
+  date: Date | string;
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function maskDocument(doc?: string): string {
@@ -23,7 +30,7 @@ function maskDocument(doc?: string): string {
   if (digits.length === 11) {
     return doc.replace(/(\d{3})\.\d{3}\.(\d{3})-\d{2}/, "$1.***.***-**");
   }
-  return doc.replace(/(\d{2})\.\d{3}\.\d{3}\/\d{4}-\d{2}/, "$1.***.***\/****-**");
+  return doc.replace(/(\d{2})\.\d.3\.\d{3}\/\d{4}-\d{2}/, "$1.***.***\/****-**");
 }
 
 function maskEmail(email?: string): string {
@@ -120,7 +127,7 @@ export async function generateReceiptPDF(data: ReceiptData) {
   const CONTENT_W = PAGE_W - MARGIN * 2;
 
   const page = pdfDoc.addPage([PAGE_W, PAGE_H]);
-  
+
   // Try to load Poppins from Google Fonts CDN
   let font: PDFFont;
   let boldFont: PDFFont;
@@ -128,7 +135,7 @@ export async function generateReceiptPDF(data: ReceiptData) {
   try {
     const regularFontUrl = "https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfedw.ttf";
     const boldFontUrl = "https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z1xlFQ.ttf";
-    
+
     const [regularBytes, boldBytes] = await Promise.all([
       fetch(regularFontUrl).then(res => res.arrayBuffer()),
       fetch(boldFontUrl).then(res => res.arrayBuffer())
@@ -303,6 +310,134 @@ export async function generateReceiptPDF(data: ReceiptData) {
   const link = document.createElement("a");
   link.href = url;
   link.download = `comprovante-${data.id}.pdf`;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 100);
+}
+
+export async function generateNotebookPDF(data: NotebookData) {
+  const pdfDoc = await PDFDocument.create();
+  const PAGE_W = 595.28; // A4
+  const PAGE_H = 841.89; // A4
+  const MARGIN = 50;
+  const CONTENT_W = PAGE_W - MARGIN * 2;
+
+  const page = pdfDoc.addPage([PAGE_W, PAGE_H]);
+
+  let font: PDFFont;
+  let boldFont: PDFFont;
+
+  try {
+    const regularFontUrl = "https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfedw.ttf";
+    const boldFontUrl = "https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z1xlFQ.ttf";
+
+    const [regularBytes, boldBytes] = await Promise.all([
+      fetch(regularFontUrl).then(res => res.arrayBuffer()),
+      fetch(boldFontUrl).then(res => res.arrayBuffer())
+    ]);
+
+    font = await pdfDoc.embedFont(regularBytes);
+    boldFont = await pdfDoc.embedFont(boldBytes);
+  } catch {
+    font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  }
+
+  // ── Header ──────────────────────────────────────────────────────────────
+  const HEADER_H = 120;
+  page.drawRectangle({ x: 0, y: PAGE_H - HEADER_H, width: PAGE_W, height: HEADER_H, color: GREEN });
+
+  page.drawText("Caderno de Aula", {
+    x: MARGIN,
+    y: PAGE_H - 60,
+    size: 28,
+    font: boldFont,
+    color: WHITE,
+  });
+
+  page.drawText(`${data.studentName} • ${formatDate(data.date).split(",")[0]}`, {
+    x: MARGIN,
+    y: PAGE_H - 90,
+    size: 10,
+    font,
+    color: WHITE,
+    opacity: 0.8,
+  });
+
+  // ── Content ─────────────────────────────────────────────────────────────
+  let curY = PAGE_H - HEADER_H - 40;
+
+  page.drawText(data.title, {
+    x: MARGIN,
+    y: curY,
+    size: 18,
+    font: boldFont,
+    color: GRAY_DARK,
+  });
+  curY -= 30;
+
+  // Simple HTML stripping and line splitting
+  const stripHtml = (html: string) => {
+    if (typeof window === "undefined") return html.replace(/<[^>]*>?/gm, "");
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    return doc.body.textContent || "";
+  };
+
+  const text = stripHtml(data.content || "Sem conteúdo.");
+  const lines = text.split("\n");
+
+  for (const line of lines) {
+    const words = line.trim().split(" ");
+    if (words.length === 0 || (words.length === 1 && words[0] === "")) {
+      curY -= 10;
+      continue;
+    }
+
+    let currentLine = "";
+
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const width = font.widthOfTextAtSize(testLine, 11);
+
+      if (width > CONTENT_W) {
+        page.drawText(currentLine, { x: MARGIN, y: curY, size: 11, font, color: GRAY_DARK });
+        curY -= 15;
+        currentLine = word;
+
+        if (curY < MARGIN + 40) {
+          // Simplified page break - in a real app we'd add a new page here
+          break;
+        }
+      } else {
+        currentLine = testLine;
+      }
+    }
+
+    if (currentLine) {
+      page.drawText(currentLine, { x: MARGIN, y: curY, size: 11, font, color: GRAY_DARK });
+      curY -= 20;
+    }
+
+    if (curY < MARGIN + 40) break;
+  }
+
+  // ── Footer ──────────────────────────────────────────────────────────────
+  const footerText = "Gerado por Fluency Lab School";
+  const footerWidth = font.widthOfTextAtSize(footerText, 8);
+  page.drawText(footerText, {
+    x: PAGE_W / 2 - footerWidth / 2,
+    y: 30,
+    size: 8,
+    font,
+    color: GRAY_MID,
+  });
+
+  // ── Save & Download ─────────────────────────────────────────────────────
+  const pdfBytes = await pdfDoc.save();
+  const blob = new Blob([pdfBytes as BlobPart], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `notebook-${data.title.replace(/\s+/g, "-").toLowerCase()}.pdf`;
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 100);
 }

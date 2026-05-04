@@ -65,7 +65,11 @@ export function StudentDetailsClient({
         {/* Layout Desktop (3 Colunas) */}
         <div className="hidden lg:grid lg:grid-cols-3 gap-3">
           <div className="h-[calc(100vh-110px)]">
-            <StudentNotebooksCard studentId={studentId} initialNotebooks={initialNotebooks} />
+            <StudentNotebooksCard 
+              studentId={studentId} 
+              studentName={studentName}
+              initialNotebooks={initialNotebooks} 
+            />
           </div>
           <div className="h-[calc(100vh-110px)]">
             <StudentPlanCard studentId={studentId} />
@@ -101,7 +105,12 @@ export function StudentDetailsClient({
             </VaultDescription>
           </VaultHeader>
           <VaultBody className="p-0 h-full overflow-hidden">
-            <StudentNotebooksCard studentId={studentId} initialNotebooks={initialNotebooks} isVaultMode={true} />
+            <StudentNotebooksCard 
+              studentId={studentId} 
+              studentName={studentName}
+              initialNotebooks={initialNotebooks} 
+              isVaultMode={true} 
+            />
           </VaultBody>
         </VaultContent>
       </Vault>

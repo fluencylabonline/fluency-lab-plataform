@@ -117,3 +117,18 @@ export const registerNotebookAssetAction = protectedAction
     });
     return { success: true };
   });
+
+/**
+ * Gets a single notebook by ID.
+ */
+export const getNotebookAction = protectedAction
+  .schema(z.object({ notebookId: z.string().uuid() }))
+  .action(async ({ parsedInput, ctx }) => {
+    const { user } = ctx;
+    const notebook = await notebookService.getNotebook(
+      user.id,
+      user.role,
+      parsedInput.notebookId
+    );
+    return { notebook };
+  });

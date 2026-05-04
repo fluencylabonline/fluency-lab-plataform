@@ -2,6 +2,7 @@ import { learningService } from "@/modules/learning/learning.service";
 import { getCurrentUser } from "@/lib/auth-server";
 import { StudentNotebookClient } from "./_components/StudentNotebookClient";
 import { redirect } from "next/navigation";
+import { notebookService } from "@/modules/notebook/notebook.service";
 
 export default async function NotebookPage() {
   const user = await getCurrentUser();
@@ -10,12 +11,12 @@ export default async function NotebookPage() {
     redirect("/signin");
   }
 
-  // Fetch all required data in parallel using the service layer
-  const [stats, learnedItems, reviewedItems, roadmap] = await Promise.all([
+  const [stats, learnedItems, reviewedItems, roadmap, notebooks] = await Promise.all([
     learningService.getStudentLearningStats(user.id),
     learningService.getLearnedItemsDetails(user.id),
     learningService.getReviewedItemsDetails(user.id),
-    learningService.getStudentRoadmap(user.id)
+    learningService.getStudentRoadmap(user.id),
+    notebookService.getNotebooksForStudent(user.id, user.role, user.id)
   ]);
 
   return (
@@ -24,6 +25,7 @@ export default async function NotebookPage() {
       learnedItems={learnedItems}
       reviewedItems={reviewedItems}
       roadmap={roadmap}
+      initialNotebooks={notebooks}
       user={{
         name: user.name,
         email: user.email,

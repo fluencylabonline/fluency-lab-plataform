@@ -2175,6 +2175,8 @@
     "inputPlaceholder": "Ex: Class 05 - Business English",
     "cancel": "Cancel",
     "successCreated": "Notebook created successfully!",
-    "errorCreated": "Error creating notebook."
+    "errorCreated": "Error creating notebook.",
+    "successDownload": "Starting PDF download...",
+    "successTask": "Task added to plan!"
   }
 }

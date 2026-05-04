@@ -2175,6 +2175,8 @@
     "inputPlaceholder": "Ex: Aula 05 - Business English",
     "cancel": "Cancelar",
     "successCreated": "Notebook criado com sucesso!",
-    "errorCreated": "Erro ao criar notebook."
+    "errorCreated": "Erro ao criar notebook.",
+    "successDownload": "Iniciando download do PDF...",
+    "successTask": "Tarefa adicionada ao plano!"
   }
 }

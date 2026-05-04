@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import {
   Plus,
   CloudDownload,
-  Luggage,
   BookOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,16 +27,23 @@ import { notify } from "@/components/ui/toaster";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { createNotebookAction } from "@/modules/notebook/notebook.actions";
+import { createNotebookAction, getNotebookAction } from "@/modules/notebook/notebook.actions";
 import type { Notebook } from "@/modules/notebook/notebook.schema";
+import { generateNotebookPDF } from "@/lib/pdfGenerator";
 
 interface StudentNotebooksCardProps {
   studentId: string;
+  studentName?: string;
   initialNotebooks?: Notebook[];
   isVaultMode?: boolean;
 }
 
-export function StudentNotebooksCard({ studentId, initialNotebooks = [], isVaultMode = false }: StudentNotebooksCardProps) {
+export function StudentNotebooksCard({
+  studentId,
+  studentName = "Estudante",
+  initialNotebooks = [],
+  isVaultMode = false
+}: StudentNotebooksCardProps) {
   const t = useTranslations("NotebooksCard");
   const params = useParams();
   const locale = params.locale as string;
@@ -47,6 +53,7 @@ export function StudentNotebooksCard({ studentId, initialNotebooks = [], isVault
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [newNotebookTitle, setNewNotebookTitle] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState<string | null>(null);
   const [notebooks, setNotebooks] = useState<Notebook[]>(initialNotebooks);
 
   const filteredNotebooks = useMemo(() => {
@@ -79,12 +86,29 @@ export function StudentNotebooksCard({ studentId, initialNotebooks = [], isVault
     router.push(`/${locale}/notebook/${created.id}`);
   };
 
-  const handleDownloadPDF = () => {
-    notify.success(t("successDownload") || "Iniciando download do PDF...");
-  };
+  const handleDownloadPDF = async (notebookId: string) => {
+    try {
+      setIsDownloading(notebookId);
+      notify.success(t("successDownload") || "Iniciando download do PDF...");
 
-  const handleAddTask = () => {
-    notify.success(t("successTask") || "Tarefa adicionada ao plano!");
+      const result = await getNotebookAction({ notebookId });
+
+      if (!result?.data?.notebook) {
+        throw new Error("Notebook not found");
+      }
+
+      await generateNotebookPDF({
+        title: result.data.notebook.title,
+        studentName,
+        content: result.data.notebook.content || "",
+        date: result.data.notebook.createdAt
+      });
+    } catch (error) {
+      console.error("[handleDownloadPDF] Error:", error);
+      notify.error("Erro ao gerar PDF.");
+    } finally {
+      setIsDownloading(null);
+    }
   };
 
   return (
@@ -156,17 +180,10 @@ export function StudentNotebooksCard({ studentId, initialNotebooks = [], isVault
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5"
-                      onClick={() => handleDownloadPDF()}
+                      disabled={isDownloading === notebook.id}
+                      onClick={() => handleDownloadPDF(notebook.id)}
                     >
-                      <CloudDownload className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5"
-                      onClick={() => handleAddTask()}
-                    >
-                      <Luggage className="h-4 w-4" />
+                      <CloudDownload className={cn("h-4 w-4", isDownloading === notebook.id && "animate-pulse")} />
                     </Button>
                   </div>
                 </div>

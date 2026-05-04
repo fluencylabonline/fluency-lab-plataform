@@ -11,28 +11,27 @@ import { EmptyResults } from "@/components/ui/empty";
 import { notify } from "@/components/ui/toaster";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { getNotebookAction } from "@/modules/notebook/notebook.actions";
+import { generateNotebookPDF } from "@/lib/pdfGenerator";
+import type { Notebook } from "@/modules/notebook/notebook.schema";
 
-interface Notebook {
-  id: string;
-  title: string;
-  createdAt: string;
-}
-
-interface NotebooksPlaceholderProps {
+interface NotebooksCardProps {
   isVaultMode?: boolean;
+  initialNotebooks?: Notebook[];
+  studentName?: string;
 }
 
-export function NotebooksPlaceholder({ isVaultMode = false }: NotebooksPlaceholderProps) {
+export function NotebooksCard({
+  isVaultMode = false,
+  initialNotebooks = [],
+  studentName = "Estudante"
+}: NotebooksCardProps) {
   const t = useTranslations("NotebooksCard");
   const formatIntl = useFormatter();
 
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Mock data for student
-  const [notebooks] = useState<Notebook[]>([
-    { id: "1", title: "Aula 01 - Introdução", createdAt: "2024-05-01T10:00:00.000Z" },
-    { id: "2", title: "Aula 02 - Verbos Irregulares", createdAt: "2024-04-30T10:00:00.000Z" },
-  ]);
+  const [notebooks] = useState<Notebook[]>(initialNotebooks);
+  const [isDownloading, setIsDownloading] = useState<string | null>(null);
 
   const filteredNotebooks = useMemo(() => {
     return notebooks.filter(nb =>
@@ -40,8 +39,29 @@ export function NotebooksPlaceholder({ isVaultMode = false }: NotebooksPlacehold
     );
   }, [notebooks, searchQuery]);
 
-  const handleDownloadPDF = (title: string) => {
-    notify.success(`${t("successDownload")}: ${title}`);
+  const handleDownloadPDF = async (notebookId: string) => {
+    try {
+      setIsDownloading(notebookId);
+      notify.success(t("successDownload") || "Iniciando download do PDF...");
+
+      const result = await getNotebookAction({ notebookId });
+
+      if (!result?.data?.notebook) {
+        throw new Error("Notebook not found");
+      }
+
+      await generateNotebookPDF({
+        title: result.data.notebook.title,
+        studentName,
+        content: result.data.notebook.content || "",
+        date: result.data.notebook.createdAt
+      });
+    } catch (error) {
+      console.error("[handleDownloadPDF] Error:", error);
+      notify.error("Erro ao gerar PDF.");
+    } finally {
+      setIsDownloading(null);
+    }
   };
 
   return (
@@ -97,9 +117,10 @@ export function NotebooksPlaceholder({ isVaultMode = false }: NotebooksPlacehold
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5"
-                      onClick={() => handleDownloadPDF(notebook.title)}
+                      disabled={isDownloading === notebook.id}
+                      onClick={() => handleDownloadPDF(notebook.id)}
                     >
-                      <CloudDownload className="h-4 w-4" />
+                      <CloudDownload className={cn("h-4 w-4", isDownloading === notebook.id && "animate-pulse")} />
                     </Button>
                   </div>
                 </div>

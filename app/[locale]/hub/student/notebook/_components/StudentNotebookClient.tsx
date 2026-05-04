@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { StatsDashboard } from "./StatsDashboard";
 import { LearningPath } from "./LearningPath";
-import { NotebooksPlaceholder } from "./NotebooksPlaceholder";
+import { NotebooksCard } from "./NotebooksCard";
 import { WordOfTheDayVault } from "./WordOfTheDayVault";
 import {
   Vault,
@@ -22,11 +22,14 @@ import {
   VaultBody
 } from "@/components/ui/vault";
 
+import { Notebook } from "@/modules/notebook/notebook.schema";
+
 interface StudentNotebookClientProps {
   stats: StudentLearningStats;
   learnedItems: LearningItemDetail[];
   reviewedItems: LearningItemDetail[];
   roadmap: StudentRoadmap | null;
+  initialNotebooks: Notebook[];
   user: {
     name: string | null;
     email: string | null;
@@ -40,6 +43,7 @@ export function StudentNotebookClient({
   learnedItems,
   reviewedItems,
   roadmap,
+  initialNotebooks,
   user
 }: StudentNotebookClientProps) {
   const t = useTranslations("NotebookHub");
@@ -81,7 +85,10 @@ export function StudentNotebookClient({
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 items-start">
           {/* Column 1: Notebooks (Desktop only) */}
           <section className="hidden lg:block lg:col-span-1 h-[calc(100vh-10rem)] sticky top-24 overflow-hidden">
-            <NotebooksPlaceholder />
+            <NotebooksCard
+              initialNotebooks={initialNotebooks}
+              studentName={user.name || "Estudante"}
+            />
           </section>
 
           {/* Column 2: Learning Path (Desktop & Mobile) */}
@@ -119,7 +126,11 @@ export function StudentNotebookClient({
             <VaultDescription>{t("vaultDescription")}</VaultDescription>
           </VaultHeader>
           <VaultBody className="p-0">
-            <NotebooksPlaceholder isVaultMode={true} />
+            <NotebooksCard
+              isVaultMode={true}
+              initialNotebooks={initialNotebooks}
+              studentName={user.name || "Estudante"}
+            />
           </VaultBody>
         </VaultContent>
       </Vault>
