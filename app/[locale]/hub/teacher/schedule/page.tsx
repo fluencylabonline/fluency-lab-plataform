@@ -44,6 +44,7 @@ export default async function TeacherSchedulePage() {
       <Header 
         title="Minha Agenda" 
         subtitle="Gerencie suas aulas e períodos de recesso"
+        className="contents"
       />
       
       <main className="px-4 pb-10">
