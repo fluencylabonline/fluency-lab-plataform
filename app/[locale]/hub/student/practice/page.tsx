@@ -10,6 +10,7 @@ import { XPHeader } from "./_components/XPHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyResults } from "@/components/ui/empty";
 import type { PracticeMode } from "@/modules/learning/learning.types";
+import { Header } from "@/components/layout/header";
 
 // Metadata
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -65,8 +66,14 @@ export default async function PracticePage({ params }: { params: Promise<{ local
   });
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="max-w-md mx-auto px-4 pt-6 space-y-6">
+    <div>
+      <Header 
+        title={t("pageTitle")}
+        subtitle={t("pageDescription")} 
+        backHref="/hub/student/notebook"
+        className="contents"
+      />
+      <div className="w-full px-4 pt-6 space-y-6">
         {/* Profile Header */}
         <XPHeader 
           user={{
@@ -115,7 +122,7 @@ export default async function PracticePage({ params }: { params: Promise<{ local
           </TabsContent>
 
           <TabsContent value="roadmap" className="pt-6">
-            <div className="mb-6">
+            <div className="mb-6 flex flex-col items-center text-center">
               <h2 className="text-xl font-black">{t('roadmapTitle')}</h2>
               <p className="text-sm text-muted-foreground">{t('roadmapDesc')}</p>
             </div>
@@ -132,7 +139,7 @@ export default async function PracticePage({ params }: { params: Promise<{ local
           </TabsContent>
 
           <TabsContent value="history" className="pt-6">
-            <div className="mb-6">
+            <div className="mb-6 flex flex-col items-center text-center">
               <h2 className="text-xl font-black">{t('completedTitle')}</h2>
               <p className="text-sm text-muted-foreground">{t('completedDesc')}</p>
             </div>

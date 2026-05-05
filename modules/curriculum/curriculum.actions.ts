@@ -404,4 +404,10 @@ export const upsertRecessActivityAction = protectedAction
     }
   });
 
+export const getWordOfTheDayAction = protectedAction
+  .inputSchema(z.object({}))
+  .action(async ({ ctx }) => {
+    return await curriculumService.getWordOfTheDay(ctx.user.id);
+  });
+
 

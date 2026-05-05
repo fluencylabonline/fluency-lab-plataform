@@ -602,6 +602,20 @@ export const curriculumService = {
       creationStep: 12
     });
   },
+
+  async getWordOfTheDay(userId: string) {
+    const { userService } = await import("@/modules/user/user.service");
+    const user = await userService.getUser(userId);
+    if (!user) throw new Error("User not found");
+
+    const languages = user.languages || [];
+    if (languages.length === 0) {
+      // Fallback: if no languages selected, get any vocabulary
+      return await curriculumRepository.getRandomVocabularyItem([]);
+    }
+
+    return await curriculumRepository.getRandomVocabularyItem(languages);
+  },
 };
 
 

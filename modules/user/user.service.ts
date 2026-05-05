@@ -172,6 +172,14 @@ export const userService = {
     });
   },
 
+  async addXP(userId: string, amount: number): Promise<User | undefined> {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new Error("USER_NOT_FOUND");
+    return userRepository.updateGamification(userId, {
+      currentXP: (user.currentXP || 0) + amount,
+    });
+  },
+
   async updateGamification(userId: string, data: { xp?: number, streak?: number, lastPracticeDate?: Date }): Promise<User | undefined> {
     const updateData: { currentXP?: number, streakCount?: number, lastPracticeDate?: Date } = {};
     if (data.xp !== undefined) updateData.currentXP = data.xp;

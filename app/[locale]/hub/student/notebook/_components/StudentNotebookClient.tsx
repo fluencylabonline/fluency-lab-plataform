@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { useTranslations } from "next-intl";
 import { StudentLearningStats, LearningItemDetail, StudentRoadmap } from "@/modules/learning/learning.types";
+import { LearningItem } from "@/modules/curriculum/curriculum.types";
 import {
   Sparkles,
   BookOpen,
@@ -30,6 +31,7 @@ interface StudentNotebookClientProps {
   reviewedItems: LearningItemDetail[];
   roadmap: StudentRoadmap | null;
   initialNotebooks: Notebook[];
+  wordOfTheDay: LearningItem | null;
   user: {
     name: string | null;
     email: string | null;
@@ -44,11 +46,27 @@ export function StudentNotebookClient({
   reviewedItems,
   roadmap,
   initialNotebooks,
+  wordOfTheDay,
   user
 }: StudentNotebookClientProps) {
   const t = useTranslations("NotebookHub");
-  const [wordOfTheDayOpen, setWordOfTheDayOpen] = useState(false);
   const [notebooksOpen, setNotebooksOpen] = useState(false);
+  // Lazy initializers read localStorage once on mount — no extra render, no effect needed
+  const [wordOfTheDayOpen, setWordOfTheDayOpen] = useState(() => {
+    if (typeof window === "undefined" || !wordOfTheDay) return false;
+    const today = new Date().toISOString().slice(0, 10);
+    const lastShown = localStorage.getItem("wotd_last_shown");
+    if (lastShown !== today) {
+      localStorage.setItem("wotd_last_shown", today);
+      return true;
+    }
+    return false;
+  });
+  const [xpAlreadyClaimed, setXpAlreadyClaimed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const today = new Date().toISOString().slice(0, 10);
+    return localStorage.getItem("wotd_xp_claimed") === today;
+  });
 
   return (
     <div>
@@ -138,6 +156,13 @@ export function StudentNotebookClient({
       <WordOfTheDayVault
         open={wordOfTheDayOpen}
         onOpenChange={setWordOfTheDayOpen}
+        item={wordOfTheDay}
+        xpAlreadyClaimed={xpAlreadyClaimed}
+        onXPClaimed={() => {
+          setXpAlreadyClaimed(true);
+          const today = new Date().toISOString().slice(0, 10);
+          localStorage.setItem("wotd_xp_claimed", today);
+        }}
       />
     </div>
   );

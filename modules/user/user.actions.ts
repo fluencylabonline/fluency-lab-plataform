@@ -222,7 +222,9 @@ export const updateUserAction = adminAction
       const { id, ...data } = parsedInput;
       await userService.updateUser(id, data);
       revalidatePath("/hub/admin/users");
+      revalidatePath(`/hub/admin/users/${id}`);
       revalidatePath("/hub/manager/users");
+      revalidatePath(`/hub/manager/users/${id}`);
       return { success: true };
     } catch (error) {
       console.error("[updateUserAction] Error:", error);
@@ -260,6 +262,13 @@ export const revealSensitiveDataAction = adminAction
       console.error("[revealSensitiveDataAction] Error:", error);
       return { success: false, error: "error" };
     }
+  });
+
+export const claimWordOfTheDayXPAction = protectedAction
+  .action(async ({ ctx }) => {
+    await userService.addXP(ctx.user.id, 10);
+    revalidatePath("/hub/student/notebook");
+    return { success: true };
   });
 
 export const requestStudentDeactivationAction = adminAction

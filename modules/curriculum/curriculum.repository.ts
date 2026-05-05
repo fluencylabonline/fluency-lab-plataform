@@ -3,7 +3,7 @@ import {
   languages, media, learningItems, lessons, lessonLearningItems
 } from "./curriculum.schema";
 import { LessonWithDetails, LessonSummary } from "./curriculum.types";
-import { eq, and, isNull, sql, desc } from "drizzle-orm";
+import { eq, and, isNull, sql, desc, inArray } from "drizzle-orm";
 
 export const curriculumRepository = {
   // Languages
@@ -246,5 +246,30 @@ export const curriculumRepository = {
       },
       orderBy: [desc(lessons.createdAt)]
     }) as unknown as Promise<LessonSummary[]>;
+  },
+
+  async getRandomVocabularyItem(languageCodes: string[]) {
+    const filters = [eq(learningItems.type, "VOCABULARY")];
+
+    if (languageCodes.length > 0) {
+      filters.push(inArray(languages.code, languageCodes));
+    }
+
+    const results = await db.select({
+      item: learningItems,
+      languageCode: languages.code
+    })
+      .from(learningItems)
+      .innerJoin(languages, eq(learningItems.languageId, languages.id))
+      .where(and(...filters))
+      .orderBy(sql`MD5(concat(${learningItems.id}, CURRENT_DATE::text))`)
+      .limit(1);
+    
+    if (!results[0]) return null;
+    
+    return {
+      ...results[0].item,
+      languageCode: results[0].languageCode
+    };
   },
 };

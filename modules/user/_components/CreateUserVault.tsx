@@ -34,6 +34,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Button } from "@/components/ui/button";
 import { Check, Plus, X } from "lucide-react";
 import { getPlansAction } from "@/modules/billing/billing.actions";
+import { getLanguagesAction } from "@/modules/curriculum/curriculum.actions";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
@@ -41,12 +42,6 @@ interface CreateUserVaultProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const AVAILABLE_LANGUAGES = [
-  { id: "english", label: "Inglês" },
-  { id: "portuguese", label: "Português" },
-  { id: "spanish", label: "Espanhol" },
-];
 
 export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
   const t = useTranslations("UserManagement");
@@ -67,12 +62,18 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
   });
 
   const [plans, setPlans] = useState<{ id: string, name: string }[]>([]);
+  const [availableLanguages, setAvailableLanguages] = useState<{ code: string, name: string }[]>([]);
 
   useEffect(() => {
     if (open) {
       getPlansAction().then(result => {
         if (result?.data?.success) {
           setPlans(result.data.data);
+        }
+      });
+      getLanguagesAction({}).then(result => {
+        if (result?.data) {
+          setAvailableLanguages(result.data.map(l => ({ code: l.code, name: l.name })));
         }
       });
     }
@@ -232,23 +233,22 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
 
                 <VaultField label={t("studyingLanguages")}>
                   <div className="flex flex-wrap gap-4 mt-2">
-                    {AVAILABLE_LANGUAGES.map((lang) => (
-                      <label key={lang.id} className="flex items-center gap-2 cursor-pointer group">
+                    {availableLanguages.map((lang) => (
+                      <label key={lang.code} className="flex items-center gap-2 cursor-pointer group">
                         <Checkbox
-                          checked={selectedLanguages.includes(lang.id)}
-                          onChange={(e) => {
-                            const checked = (e.target as HTMLInputElement).checked;
+                          checked={selectedLanguages.includes(lang.code)}
+                          onCheckedChange={(checked) => {
                             const current = getValues("languages") || [];
                             if (checked) {
-                              setValue("languages", [...current, lang.id]);
+                              setValue("languages", [...current, lang.code]);
                             } else {
-                              setValue("languages", current.filter((l) => l !== lang.id));
+                              setValue("languages", current.filter((l) => l !== lang.code));
                             }
                           }}
                           className="rounded-md border-gray-300 dark:border-gray-600 accent-primary"
                         />
                         <span className="text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-primary transition-colors">
-                          {lang.label}
+                          {lang.name}
                         </span>
                       </label>
                     ))}

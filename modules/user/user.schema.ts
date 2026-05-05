@@ -212,6 +212,7 @@ export const updateUserSchema = z.object({
   role: z.enum(roleEnum.enumValues).optional(),
   isActive: z.boolean().optional(),
   teacherHourlyRate: z.number().int().optional(),
+  languages: z.array(z.string()).optional(),
 });
 
 export type User = typeof usersTable.$inferSelect;

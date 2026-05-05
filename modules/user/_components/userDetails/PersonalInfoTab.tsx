@@ -20,7 +20,10 @@ import { UseFormReturn, FieldValues } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import type { User } from "../../user.schema";
 import { Badge } from "@/components/ui/badge";
-import { revealSensitiveDataAction } from "../../user.actions";
+import { revealSensitiveDataAction, updateUserAction } from "../../user.actions";
+import { Checkbox } from "@/components/ui/checkbox";
+import { getLanguagesAction } from "@/modules/curriculum/curriculum.actions";
+import type { LanguageWithLessons } from "@/modules/curriculum/curriculum.types";
 
 interface PersonalInfoTabProps {
   user: User;
@@ -45,6 +48,45 @@ export function PersonalInfoTab({
   const [isRevealing, setIsRevealing] = React.useState(false);
   const [revealedValues, setRevealedValues] = React.useState<Record<string, string>>({});
   const [isVaultOpen, setIsVaultOpen] = React.useState(false);
+  const [availableLanguages, setAvailableLanguages] = React.useState<LanguageWithLessons[]>([]);
+  const [isTogglingLanguage, setIsTogglingLanguage] = React.useState(false);
+
+  React.useEffect(() => {
+    const fetchLanguages = async () => {
+      const result = await getLanguagesAction({});
+      if (result?.data) {
+        setAvailableLanguages(result.data);
+      }
+    };
+    fetchLanguages();
+  }, []);
+
+  const handleLanguageToggle = async (langId: string) => {
+    if (isTogglingLanguage) return;
+
+    setIsTogglingLanguage(true);
+    try {
+      const currentLanguages = user.languages || [];
+      const newLanguages = currentLanguages.includes(langId)
+        ? currentLanguages.filter(id => id !== langId)
+        : [...currentLanguages, langId];
+
+      const result = await updateUserAction({
+        id: user.id,
+        languages: newLanguages
+      });
+
+      if (result?.data?.success) {
+        notify.success(t("success"));
+      } else {
+        notify.error(t("error"));
+      }
+    } catch {
+      notify.error(t("error"));
+    } finally {
+      setIsTogglingLanguage(false);
+    }
+  };
 
   const handleReveal = async () => {
     if (!revealingField || !adminPassword) return;
@@ -250,6 +292,48 @@ export function PersonalInfoTab({
                     </VaultContent>
                   </Vault>
                 )}
+              </div>
+            </DataRow>
+          )}
+
+          {user.role === "student" && (
+            <DataRow label={t("studyingLanguages")}>
+              <div className="flex flex-col items-end gap-2">
+                <div className="flex flex-wrap gap-2 justify-end">
+                  {isAdmin ? (
+                    availableLanguages.length > 0 ? (
+                      availableLanguages.map((lang) => (
+                        <div key={lang.id} className="flex items-center space-x-2 bg-muted/30 px-2 py-1 rounded-md border border-border/50 hover:bg-primary/5 transition-colors">
+                          <Checkbox
+                            id={`lang-${lang.id}`}
+                            checked={user.languages?.includes(lang.code)}
+                            onCheckedChange={() => handleLanguageToggle(lang.code)}
+                            disabled={isTogglingLanguage}
+                            className="h-3.5 w-3.5"
+                          />
+                          <label
+                            htmlFor={`lang-${lang.id}`}
+                            className="text-[10px] font-black uppercase tracking-tight cursor-pointer select-none"
+                          >
+                            {lang.code}
+                          </label>
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-[10px] text-muted-foreground animate-pulse">{t("loadingLanguages")}</span>
+                    )
+                  ) : (
+                    (user.languages && user.languages.length > 0) ? (
+                      user.languages.map((langId) => (
+                        <Badge key={langId} variant="secondary" className="text-[9px] font-black uppercase py-0 px-1.5 h-4">
+                          {langId}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-[10px] text-muted-foreground font-bold italic">{t("noLanguagesSelected")}</span>
+                    )
+                  )}
+                </div>
               </div>
             </DataRow>
           )}
