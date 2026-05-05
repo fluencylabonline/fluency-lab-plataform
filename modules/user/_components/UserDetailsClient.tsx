@@ -26,6 +26,7 @@ import { TeacherScheduleTab } from "./userDetails/TeacherScheduleTab";
 import { StudentCurriculumTab } from "./userDetails/StudentCurriculumTab";
 import { VideoCallsTab } from "./userDetails/VideoCallsTab";
 import { ActionsTab } from "./userDetails/ActionsTab";
+import { CertificateTab } from "./userDetails/CertificateTab";
 import { Header } from "@/components/layout/header";
 import type { CallSession } from "../../call/call.schema";
 
@@ -255,7 +256,7 @@ export function UserDetailsClient({
                 value="video-calls"
                 className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
               >
-                Aulas (Vídeo)
+                Aulas
               </TabsTrigger>
             )}
 
@@ -265,6 +266,15 @@ export function UserDetailsClient({
                 className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
               >
                 {t("actions")}
+              </TabsTrigger>
+            )}
+
+            {user.role === "student" && (isAdmin || currentUser.role === "manager") && (
+              <TabsTrigger
+                value="certificate"
+                className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+              >
+                Certificado
               </TabsTrigger>
             )}
           </TabsList>
@@ -342,6 +352,12 @@ export function UserDetailsClient({
               activeSubscription={activeSubscription}
               installments={installments}
             />
+          </TabsContent>
+        )}
+
+        {user.role === "student" && (isAdmin || currentUser.role === "manager") && (
+          <TabsContent value="certificate" className="mt-4">
+            <CertificateTab user={user} />
           </TabsContent>
         )}
       </Tabs>

@@ -284,5 +284,24 @@ export const placementRepository = {
         question: true,
       }
     });
-  }
+  },
+
+  async getLastCompletedTest(userId: string, languageId?: string) {
+    const filters = [
+      eq(placementTestsTable.userId, userId),
+      eq(placementTestsTable.status, "completed")
+    ];
+
+    if (languageId) {
+      filters.push(eq(placementTestsTable.languageId, languageId));
+    }
+
+    return db.query.placementTestsTable.findFirst({
+      where: and(...filters),
+      orderBy: [desc(placementTestsTable.completedAt)],
+      with: {
+        language: true,
+      }
+    });
+  },
 };

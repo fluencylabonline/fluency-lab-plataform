@@ -229,6 +229,8 @@
     "feeNotification": "Cancellation fee generated. The student has been notified.",
     "pixCopySuccess": "PIX code copied!",
     "adminPasswordRequired": "Admin password is required.",
+    "loadingLanguages": "Loading languages...",
+    "noLanguagesSelected": "No languages selected",
     "editClassRate": "Ajustar Valor desta Aula",
     "processPayout": "Processar Pagamento",
     "payoutReview": "Revisão de Pagamento",
@@ -2207,5 +2209,23 @@
     "errorCreated": "Error creating notebook.",
     "successDownload": "Starting PDF download...",
     "successTask": "Task added to plan!"
+  },
+    "Certificates": {
+    "issueTitle": "Emitir Novo Certificado",
+    "issuedTitle": "Certificados Emitidos",
+    "languageLabel": "Idioma do Curso",
+    "languagePlaceholder": "Selecione o idioma",
+    "issueButton": "Emitir e Enviar",
+    "emptyState": "Nenhum certificado emitido para este aluno.",
+    "description": "O certificado será gerado automaticamente com base no progresso do aluno (aulas completadas e último nivelamento).",
+    "viewButton": "Ver Certificado",
+    "levelLabel": "Nível",
+    "hoursLabel": "Horas",
+    "issueSuccess": "Certificado emitido e enviado com sucesso!",
+    "selectLanguageError": "Por favor, selecione um idioma.",
+    "pdfNotFoundError": "URL do PDF não encontrada.",
+    "fetchError": "Erro ao obter dados do certificado.",
+    "saveError": "Erro ao salvar PDF e enviar e-mail.",
+    "issueError": "Erro ao emitir certificado."
   }
 }

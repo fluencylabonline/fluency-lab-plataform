@@ -241,7 +241,9 @@
     "deactivationSuccess": "Aluno desativado com sucesso.",
     "feeNotification": "Taxa de cancelamento gerada. O aluno foi notificado.",
     "pixCopySuccess": "Código PIX copiado!",
-    "adminPasswordRequired": "A senha administrativa é obrigatória."
+    "adminPasswordRequired": "A senha administrativa é obrigatória.",
+    "loadingLanguages": "Carregando idiomas...",
+    "noLanguagesSelected": "Nenhum idioma selecionado"
   },
   "UserRoles": {
     "admin": "Administrador",
@@ -2207,5 +2209,23 @@
     "errorCreated": "Erro ao criar notebook.",
     "successDownload": "Iniciando download do PDF...",
     "successTask": "Tarefa adicionada ao plano!"
+  },
+  "Certificates": {
+    "issueTitle": "Emitir Novo Certificado",
+    "issuedTitle": "Certificados Emitidos",
+    "languageLabel": "Idioma do Curso",
+    "languagePlaceholder": "Selecione o idioma",
+    "issueButton": "Emitir e Enviar",
+    "emptyState": "Nenhum certificado emitido para este aluno.",
+    "description": "O certificado será gerado automaticamente com base no progresso do aluno (aulas completadas e último nivelamento).",
+    "viewButton": "Ver Certificado",
+    "levelLabel": "Nível",
+    "hoursLabel": "Horas",
+    "issueSuccess": "Certificado emitido e enviado com sucesso!",
+    "selectLanguageError": "Por favor, selecione um idioma.",
+    "pdfNotFoundError": "URL do PDF não encontrada.",
+    "fetchError": "Erro ao obter dados do certificado.",
+    "saveError": "Erro ao salvar PDF e enviar e-mail.",
+    "issueError": "Erro ao emitir certificado."
   }
 }

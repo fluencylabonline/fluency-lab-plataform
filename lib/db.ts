@@ -15,6 +15,7 @@ import * as courseSchema from "@/modules/course/course.schema";
 import * as communicationSchema from "@/modules/communication/communication.schema";
 import * as notebookSchema from "@/modules/notebook/notebook.schema";
 import * as callSchema from "@/modules/call/call.schema";
+import * as certificateSchema from "@/modules/certificate/certificate.schema";
 
 const sql = neon(env.DATABASE_URL);
 
@@ -34,6 +35,7 @@ export const db = drizzle(sql, {
     ...communicationSchema,
     ...notebookSchema,
     ...callSchema,
+    ...certificateSchema,
   },
 });
 

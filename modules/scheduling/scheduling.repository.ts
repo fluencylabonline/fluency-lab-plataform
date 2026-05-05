@@ -7,7 +7,7 @@ import {
   recessRequestsTable
 } from "./scheduling.schema";
 import { usersTable } from "@/modules/user/user.schema";
-import { eq, and, lte, gte, isNull, inArray, between, ne, isNotNull, asc } from "drizzle-orm";
+import { eq, and, lte, gte, isNull, inArray, between, ne, isNotNull, asc, desc } from "drizzle-orm";
 import {
   NewRecurrenceRule,
   NewStudentCredit,
@@ -378,6 +378,15 @@ export const schedulingRepository = {
         between(slotInstances.startAt, start, end)
       ),
       orderBy: [asc(slotInstances.startAt)],
+    });
+  },
+  async findCompletedByStudent(studentId: string) {
+    return db.query.slotInstances.findMany({
+      where: and(
+        eq(slotInstances.studentId, studentId),
+        eq(slotInstances.status, "completed")
+      ),
+      orderBy: [desc(slotInstances.startAt)],
     });
   },
 };

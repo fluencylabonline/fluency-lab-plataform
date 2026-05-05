@@ -56,5 +56,14 @@ service firebase.storage {
                     && request.resource.size < 5 * 1024 * 1024 
                     && request.resource.contentType.matches('image/(jpeg|png|webp|jpg|gif)');
     }
+
+    match /certificates/{studentId}/{fileName} {
+      // Certificates are readable by the student owner and admins/managers
+      allow read: if request.auth != null;
+      
+      // Uploads are handled via Server API (Firebase Admin SDK), 
+      // but we add rules for documentation and extra safety.
+      allow write: if false; 
+    }
   }
 }

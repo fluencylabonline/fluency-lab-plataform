@@ -26,6 +26,7 @@ import {
   ContractRenewedEmail,
 } from "./templates/ContractStatusEmails";
 import { ScheduleAlertEmail } from "./templates/ScheduleAlertEmail";
+import { CertificateEmail } from "./templates/CertificateEmail";
 import type {
   SendWhatsAppTemplateOptions,
   WhatsAppResponse,
@@ -261,6 +262,26 @@ export class CommunicationService {
       });
     } catch (error) {
       console.error("[CommunicationService.sendContractRenewedEmail] Error:", error);
+    }
+  }
+
+  async sendCertificateEmail(email: string, name: string, courseLanguage: string, verifyUrl: string, pdfBase64: string) {
+    try {
+      // Remove data:application/pdf;base64, if present
+      const base64Data = pdfBase64.split(",")[1] || pdfBase64;
+      const pdfBuffer = Buffer.from(base64Data, "base64");
+
+      await this.sendEmail({
+        to: email,
+        subject: `🎓 Seu certificado de ${courseLanguage} chegou!`,
+        template: React.createElement(CertificateEmail, { name, courseLanguage, verifyUrl }),
+        attachments: [{
+          filename: `certificado-${courseLanguage.toLowerCase()}.pdf`,
+          content: pdfBuffer,
+        }],
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendCertificateEmail] Error:", error);
     }
   }
 
