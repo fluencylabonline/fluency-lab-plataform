@@ -1,4 +1,3 @@
-import React from "react";
 import { getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/header";
 import { getCurrentUser } from "@/lib/auth-server";

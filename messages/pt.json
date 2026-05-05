@@ -495,7 +495,8 @@
       "validUntil": "Válido até {date}",
       "expiringSoon": "Atenção: Seu contrato expira em {days} dias.",
       "signPending": "Você tem uma assinatura pendente.",
-      "signNow": "Assinar Agora"
+      "signNow": "Assinar Agora",
+      "signed": "Assinado"
     },
     "Payments": {
       "title": "Histórico de Pagamentos",

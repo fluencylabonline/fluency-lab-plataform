@@ -495,7 +495,8 @@
       "validUntil": "Valid until {date}",
       "expiringSoon": "Attention: Your contract expires in {days} days.",
       "signPending": "You have a pending signature.",
-      "signNow": "Sign Now"
+      "signNow": "Sign Now",
+      "signed": "Contract Signed"
     },
     "Payments": {
       "title": "Payment History",
