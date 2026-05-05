@@ -17,13 +17,13 @@ interface ProvidersProps {
 
 export function Providers({ children, locale, messages, themeMode }: ProvidersProps) {
   return (
-    <NextIntlClientProvider messages={messages} locale={locale} timeZone="America/Sao_Paulo">
-      <ThemeProvider
-        attribute="class"
-        defaultTheme={themeMode}
-        enableSystem
-        disableTransitionOnChange
-      >
+    <ThemeProvider
+      attribute="class"
+      defaultTheme={themeMode}
+      enableSystem
+      disableTransitionOnChange
+    >
+      <NextIntlClientProvider messages={messages} locale={locale} timeZone="America/Sao_Paulo">
         <TooltipProvider>
           {children}
         </TooltipProvider>
@@ -31,7 +31,7 @@ export function Providers({ children, locale, messages, themeMode }: ProvidersPr
         <PwaHandler />
         <NotificationPermissionVault />
         <PwaVault />
-      </ThemeProvider>
-    </NextIntlClientProvider>
+      </NextIntlClientProvider>
+    </ThemeProvider>
   );
 }

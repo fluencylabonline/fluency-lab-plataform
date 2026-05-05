@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Plus, Mail, Shield, Circle, Sparkles } from "lucide-react";
 import { CreateUserVault } from "./CreateUserVault";
 import { Header } from "@/components/layout/header";
-import { hasPermission, Role } from "@/lib/rbac";
+import { hasPermission, Role, UserRoles } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
 import type { User } from "@/modules/user/user.schema";
 import {
@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "@/i18n/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
+import { RoleGuard } from "@/components/ui/role-guard";
 
 interface UsersPageClientProps {
   initialData: User[];
@@ -101,12 +102,14 @@ export function UsersPageClient({ initialData, currentUser, basePath }: UsersPag
 
           <div className="flex-1" />
 
-          <Link
-            href="/hub/manager/students/onboarding"
-            className={cn(buttonVariants({ variant: "outline" }), "shrink-0 border-primary/20 text-primary hover:bg-primary/5")}
-          >
-            <Sparkles className="mr-2 h-4 w-4 fill-primary/10" /> Perfil Adaptativo
-          </Link>
+          <RoleGuard roles={UserRoles.MANAGER}>
+            <Link
+              href="/hub/manager/students/onboarding"
+              className={cn(buttonVariants({ variant: "outline" }), "shrink-0 border-primary/20 text-primary hover:bg-primary/5")}
+            >
+              <Sparkles className="mr-2 h-4 w-4 fill-primary/10" /> Perfil Adaptativo
+            </Link>
+          </RoleGuard>
         </div>
 
         {filteredUsers.length > 0 ? (

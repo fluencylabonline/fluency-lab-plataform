@@ -44,6 +44,24 @@ export async function checkPermission(permission: Permission) {
 }
 
 /**
+ * Checks if the user has one of the allowed roles.
+ * Redirects to the hub root if not authorized.
+ */
+import { redirect } from "next/navigation";
+import { type Role } from "./rbac";
+
+export async function requireRole(allowedRoles: Role | Role[]) {
+  const user = await getCurrentUser();
+  const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+
+  if (!user || !roles.includes(user.role)) {
+    redirect("/hub");
+  }
+
+  return user;
+}
+
+/**
  * Verifies the user's password using Firebase Auth REST API.
  * Useful for "sudo" mode or sensitive actions.
  */

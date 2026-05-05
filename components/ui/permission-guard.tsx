@@ -11,6 +11,7 @@ interface PermissionGuardProps {
   /** Content to show if permission is granted */
   children: ReactNode;
   /** 
+   * 
    * Optional fallback to show if permission is denied. 
    * Useful for showing "Access Denied" messages or empty states.
    */
