@@ -88,9 +88,9 @@ export const authClient = {
     try {
       const idToken = await user.getIdToken();
       const { loginAction } = await import("@/modules/user/user.actions");
-      
-      const result = await loginAction({ 
-        idToken, 
+
+      const result = await loginAction({
+        idToken,
         rememberMe,
         name: user.displayName || undefined,
         photoUrl: user.photoURL || undefined,
@@ -98,9 +98,9 @@ export const authClient = {
       });
 
       if (!result?.data?.success) {
-        return { 
-          success: false, 
-          error: result?.data?.error || "error" 
+        return {
+          success: false,
+          error: result?.data?.error || "error"
         };
       }
 
