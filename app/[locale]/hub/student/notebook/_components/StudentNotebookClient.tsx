@@ -74,6 +74,7 @@ export function StudentNotebookClient({
         title={t("title")}
         subtitle={t("subtitle")}
         user={user}
+        className="contents"
         actions={[
           {
             label: t("notebooksLabel"),

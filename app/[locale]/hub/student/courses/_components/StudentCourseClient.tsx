@@ -46,6 +46,7 @@ export function StudentCourseClient({ currentUser }: StudentCourseClientProps) {
         subtitle={t("subtitle")}
         user={currentUser}
         backHref="/hub/student/profile"
+        className="contents"
       />
 
       <main className="flex-1 overflow-y-auto p-4 md:p-6">
@@ -71,14 +72,14 @@ export function StudentCourseClient({ currentUser }: StudentCourseClientProps) {
                   className="card group relative flex flex-col overflow-hidden transition-all"
                 >
                   {/* Top Image */}
-                  <div className="aspect-[16/10] w-full overflow-hidden relative">
+                  <div className="aspect-16/10 w-full overflow-hidden relative">
                     <Image
                       src={course.imageUrl || "/placeholder-course.jpg"}
                       alt={course.title}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                     {/* Enrolled Badge */}
                     {course.isEnrolled && (
