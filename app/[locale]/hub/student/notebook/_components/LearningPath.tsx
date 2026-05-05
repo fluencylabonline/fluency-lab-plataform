@@ -65,7 +65,7 @@ export function LearningPath({ lessons }: LearningPathProps) {
 
   if (lessons.length === 0) {
     return (
-      <div className="w-full flex flex-col items-center justify-center py-12 text-center space-y-4">
+      <div className="card w-full min-h-full flex flex-col items-center justify-center py-12 text-center space-y-4">
         <div className="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center mb-2">
           <Brain size={48} className="text-primary" />
         </div>

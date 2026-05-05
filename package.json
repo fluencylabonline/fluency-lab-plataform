@@ -102,6 +102,11 @@
     "zod": "^4.3.6",
     "zustand": "^5.0.12"
   },
+  "overrides": {
+    "@gmcfall/yjs-firestore-provider": {
+      "firebase": "$firebase"
+    }
+  },
   "devDependencies": {
     "@base-ui/react": "^1.4.1",
     "@tailwindcss/postcss": "^4",

@@ -2058,6 +2058,7 @@
   },
   "LearningPath": {
     "noLessonsTitle": "Nenhum Plano Ativo",
+    "noLessonsMessage": "Você ainda não possui lições programadas. Entre em contato com seu professor.",
     "roadmapLabel": "Plano",
     "startBalloon": "START",
     "todayBalloon": "HOJE",

@@ -92,7 +92,7 @@ export function StudentNotebookClient({
           </section>
 
           {/* Column 2: Learning Path (Desktop & Mobile) */}
-          <section className="lg:col-span-2 space-y-6">
+          <section className="lg:col-span-2 space-y-6 h-[calc(100vh-10rem)]">
             <div className="flex items-center justify-between lg:hidden px-1">
               <h2 className="text-lg font-bold tracking-tight">{t("myProgress")}</h2>
               <button

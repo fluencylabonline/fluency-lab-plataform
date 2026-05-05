@@ -2058,6 +2058,7 @@
   },
   "LearningPath": {
     "noLessonsTitle": "No Active Plan",
+    "noLessonsMessage": "You don't have any scheduled lessons yet. Please contact your teacher.",
     "roadmapLabel": "Plan",
     "startBalloon": "START",
     "todayBalloon": "TODAY",
