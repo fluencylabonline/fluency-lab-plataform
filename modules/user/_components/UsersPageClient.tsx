@@ -68,6 +68,7 @@ export function UsersPageClient({ initialData, currentUser, basePath }: UsersPag
           icon: <Plus className="w-4 h-4" />,
           onClick: () => setIsOpen(true)
         }] : undefined}
+        className="contents"
       />
 
       <main className="container">

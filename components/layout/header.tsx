@@ -102,7 +102,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
     return (
         <div ref={ref} className={cn("w-full flex flex-col", className)} {...props}>
             {showHeader && (
-                <header className="header-layout sticky top-0 z-40 flex h-14 w-full items-center justify-between px-4 md:px-6">
+                <header className="header-layout sticky top-0 z-40 flex h-12 w-full items-center justify-between px-4 md:px-6">
                     <AnimatePresence mode="wait">
                         {isMobile && isSearchOpen ? (
                             <motion.div

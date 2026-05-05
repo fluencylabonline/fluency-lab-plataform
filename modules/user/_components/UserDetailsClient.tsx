@@ -211,7 +211,7 @@ export function UserDetailsClient({
 
             <TabsTrigger
               value="personal"
-              className="shrink-0 [&[data-state=active]]:!bg-transparent [&[data-state=active]]:!shadow-none [&[data-state=active]]:!text-primary [&[data-state=active]]:!border-none focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+              className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
             >
               {t("personalInfo")}
             </TabsTrigger>
@@ -219,7 +219,7 @@ export function UserDetailsClient({
             {(user.role === "student" || user.role === "teacher") && (
               <TabsTrigger
                 value="payment"
-                className="shrink-0 [&[data-state=active]]:!bg-transparent [&[data-state=active]]:!shadow-none [&[data-state=active]]:!text-primary [&[data-state=active]]:!border-none focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+                className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
               >
                 {user.role === "student" ? t("payment") : t("earningsStatement")}
               </TabsTrigger>
@@ -227,7 +227,7 @@ export function UserDetailsClient({
 
             <TabsTrigger
               value="contracts"
-              className="shrink-0 [&[data-state=active]]:!bg-transparent [&[data-state=active]]:!shadow-none [&[data-state=active]]:!text-primary [&[data-state=active]]:!border-none focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+              className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
             >
               {t("contracts")}
             </TabsTrigger>
@@ -235,7 +235,7 @@ export function UserDetailsClient({
             {user.role === "teacher" && (
               <TabsTrigger
                 value="schedule"
-                className="shrink-0 [&[data-state=active]]:!bg-transparent [&[data-state=active]]:!shadow-none [&[data-state=active]]:!text-primary [&[data-state=active]]:!border-none focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+                className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
               >
                 {t("schedule")}
               </TabsTrigger>
@@ -244,7 +244,7 @@ export function UserDetailsClient({
             {user.role === "student" && (
               <TabsTrigger
                 value="curriculum"
-                className="shrink-0 [&[data-state=active]]:!bg-transparent [&[data-state=active]]:!shadow-none [&[data-state=active]]:!text-primary [&[data-state=active]]:!border-none focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+                className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
               >
                 Currículo
               </TabsTrigger>
@@ -253,7 +253,7 @@ export function UserDetailsClient({
             {user.role === "student" && (
               <TabsTrigger
                 value="video-calls"
-                className="shrink-0 [&[data-state=active]]:!bg-transparent [&[data-state=active]]:!shadow-none [&[data-state=active]]:!text-primary [&[data-state=active]]:!border-none focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+                className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
               >
                 Aulas (Vídeo)
               </TabsTrigger>
@@ -262,7 +262,7 @@ export function UserDetailsClient({
             {user.role === "student" && isAdmin && (
               <TabsTrigger
                 value="actions"
-                className="shrink-0 [&[data-state=active]]:!bg-transparent [&[data-state=active]]:!shadow-none [&[data-state=active]]:!text-primary [&[data-state=active]]:!border-none focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+                className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
               >
                 {t("actions")}
               </TabsTrigger>
