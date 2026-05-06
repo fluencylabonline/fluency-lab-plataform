@@ -14,6 +14,7 @@ import { contractInstancesTable } from "@/modules/contract/contract.schema";
 import { eq, and, gte, lt, asc, desc, inArray, isNotNull, between } from "drizzle-orm";
 import { communicationService } from "@/modules/communication/communication.service";
 import { userService } from "@/modules/user/user.service";
+import { env } from "@/env";
 import {
   addWeeks,
   addMonths,
@@ -493,6 +494,37 @@ export const schedulingService = {
             userIds: [targetUserId],
             channels: { inApp: true, push: true },
           });
+
+          // Special notification for teacher with conversion link if student canceled
+          if (reason === "canceled-student") {
+            const [teacher, student] = await Promise.all([
+              userRepository.findById(slot.teacherId),
+              userRepository.findById(slot.studentId!),
+            ]);
+
+            if (teacher && student) {
+              const convertLink = `${env.NEXT_PUBLIC_APP_URL}/convert-class/${slot.id}`;
+              
+              // Push/In-app notification with link
+              await notificationService.sendNotification({
+                title: "\u26A0\uFE0F Aula Cancelada: Converter em Dispon\u00EDvel?",
+                body: `O aluno ${student.name} cancelou a aula de ${format(slot.startAt, "dd/MM HH:mm")}. Clique aqui para converter esse hor\u00E1rio em uma aula de reposi\u00E7\u00E3o dispon\u00EDvel.`,
+                targetType: "specific",
+                userIds: [slot.teacherId],
+                actionUrl: convertLink,
+                channels: { inApp: true, push: true },
+              });
+
+              // Email notification with link
+              await communicationService.sendClassCancelledWithConvertEmail(teacher.email, {
+                teacherName: teacher.name,
+                studentName: student.name,
+                classDate: format(slot.startAt, "dd/MM/yyyy"),
+                classTime: format(slot.startAt, "HH:mm"),
+                convertUrl: convertLink
+              });
+            }
+          }
         }
       }
 

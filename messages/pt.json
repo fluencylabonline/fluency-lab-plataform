@@ -2227,5 +2227,17 @@
     "fetchError": "Erro ao obter dados do certificado.",
     "saveError": "Erro ao salvar PDF e enviar e-mail.",
     "issueError": "Erro ao emitir certificado."
+  },
+  "ConvertClass": {
+    "title": "Converter Aula em Disponível",
+    "description": "Você está convertendo o horário que seria com <strong>{studentName}</strong> em uma aula de reposição disponível para outros alunos.",
+    "scheduleDetails": "Detalhes do Horário",
+    "confirmButton": "Confirmar Conversão",
+    "cancelButton": "Cancelar",
+    "disclaimer": "Essa ação não pode ser desfeita. O horário ficará imediatamente disponível para agendamento por outros alunos que possuem créditos.",
+    "success": "Aula convertida com sucesso!",
+    "error": "Erro ao converter aula",
+    "notFound": "Aula não encontrada ou já convertida.",
+    "converting": "Convertendo..."
   }
 }

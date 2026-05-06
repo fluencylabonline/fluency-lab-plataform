@@ -2227,5 +2227,17 @@
     "fetchError": "Erro ao obter dados do certificado.",
     "saveError": "Erro ao salvar PDF e enviar e-mail.",
     "issueError": "Erro ao emitir certificado."
+  },
+  "ConvertClass": {
+    "title": "Convert Class to Available",
+    "description": "You are converting the slot that would have been with <strong>{studentName}</strong> into a makeup class available for other students.",
+    "scheduleDetails": "Schedule Details",
+    "confirmButton": "Confirm Conversion",
+    "cancelButton": "Cancel",
+    "disclaimer": "This action cannot be undone. The slot will immediately become available for scheduling by other students with credits.",
+    "success": "Class converted successfully!",
+    "error": "Error converting class",
+    "notFound": "Class not found or already converted.",
+    "converting": "Converting..."
   }
 }

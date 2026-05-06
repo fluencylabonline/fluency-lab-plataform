@@ -125,10 +125,10 @@ export const convertToAvailableAction = protectedAction
     try {
       await schedulingService.convertToAvailable(ctx.user, parsedInput.classId);
       revalidatePath("/");
-      return { success: true };
+      return { success: true } as { success: boolean; error?: string };
     } catch (error) {
       console.error("[convertToAvailableAction] Error:", error);
-      return { success: false, error: (error as Error).message };
+      return { success: false, error: (error as Error).message } as { success: boolean; error: string };
     }
   });
 

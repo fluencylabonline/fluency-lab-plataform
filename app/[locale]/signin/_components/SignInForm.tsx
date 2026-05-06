@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { DoorOpen as DoorOpenIcon } from "lucide-react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -22,6 +22,8 @@ export function SignInForm() {
   const tv = useTranslations("Validation");
   const tc = useTranslations("Common");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo");
 
   const [isLoading, setIsLoading] = useState(false);
   const [isCredentialsLoading, setIsCredentialsLoading] = useState(false);
@@ -69,7 +71,7 @@ export function SignInForm() {
     }
 
     notify.success(t("welcomeTitle") || "Bem-vindo!");
-    router.push(`/hub`);
+    router.push(redirectTo || `/hub`);
     router.refresh();
     setIsLoading(false);
     setIsCredentialsLoading(false);
@@ -102,7 +104,7 @@ export function SignInForm() {
     }
 
     notify.success(t("welcomeTitle") || "Login bem-sucedido!");
-    router.push(`/hub`);
+    router.push(redirectTo || `/hub`);
     router.refresh();
     setIsLoading(false);
   };

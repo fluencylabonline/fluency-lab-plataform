@@ -17,6 +17,7 @@ import { BillingReminderEmail } from "./templates/BillingReminderEmail";
 import { BillingDueDateEmail } from "./templates/BillingDueDateEmail";
 import { BillingOverdueEmail } from "./templates/BillingOverdueEmail";
 import { ClassOverdueTeacherEmail } from "./templates/ClassOverdueTeacherEmail";
+import { ClassCancelledWithConvertEmail } from "./templates/ClassCancelledWithConvertEmail";
 import {
   ContractSignedEmail,
 } from "./templates/ContractSignedEmail";
@@ -196,6 +197,27 @@ export class CommunicationService {
       });
     } catch (error) {
       console.error("[CommunicationService.sendClassOverdueTeacherEmail] Error:", error);
+    }
+  }
+
+  async sendClassCancelledWithConvertEmail(
+    email: string,
+    data: {
+      teacherName: string;
+      studentName: string;
+      classDate: string;
+      classTime: string;
+      convertUrl: string;
+    }
+  ) {
+    try {
+      await this.sendEmail({
+        to: email,
+        subject: `\u26A0\uFE0F Aula cancelada: ${data.studentName} - Veja como converter`,
+        template: React.createElement(ClassCancelledWithConvertEmail, data),
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendClassCancelledWithConvertEmail] Error:", error);
     }
   }
 
