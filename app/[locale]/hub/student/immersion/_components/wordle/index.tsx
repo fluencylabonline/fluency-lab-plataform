@@ -14,7 +14,8 @@ import { WordleHistoryModal } from "./WordleHistoryModal";
 import { useWordleGame, WordleGameProps } from "./useWordleGame";
 import { Spinner } from "@/components/ui/spinner";
 import { ImmersionButton } from "../ImmersionButton";
-import { ImmersionGameHeader } from "../ImmersionGameHeader";
+import { Header } from "@/components/layout/header";
+import { History } from "lucide-react";
 import { LanguageSelect } from "../LanguageSelect";
 
 export default function WordleGame(props: WordleGameProps) {
@@ -49,29 +50,11 @@ export default function WordleGame(props: WordleGameProps) {
     </div>
   );
 
-  if (!target) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center gap-4 p-4 text-center">
-        <div className="text-3xl">🧩</div>
-        <div className="text-muted-foreground font-medium">
-          Sem palavras disponíveis no seu vocabulário.
-        </div>
-        <ImmersionButton 
-          variant="outline"
-          onClick={() => startNewGame(selectedLang)}
-          className="mt-2"
-        >
-          Tentar Novamente
-        </ImmersionButton>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col h-full max-w-2xl mx-auto overflow-hidden">
-      <ImmersionGameHeader className="px-4 justify-between items-center">
+  const headerActions = [
+    {
+      component: (
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">
+          <span className="hidden md:inline text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
             Idioma:
           </span>
           <LanguageSelect
@@ -81,10 +64,50 @@ export default function WordleGame(props: WordleGameProps) {
             disabled={loading}
           />
         </div>
-        
-      </ImmersionGameHeader>
+      )
+    },
+    {
+      icon: <History className="w-5 h-5" />,
+      onClick: () => setHistoryOpen(true),
+      label: "Histórico",
+      className: "rounded-full"
+    }
+  ];
 
-      <div className="flex-1 flex flex-col items-center justify-center overflow-hidden">
+  if (!target) {
+    return (
+      <div>
+        <Header 
+          title="Wordle" 
+          backHref="/hub/student/immersion"
+          actions={headerActions}
+        />
+        <div className="container flex-1 flex flex-col items-center justify-center gap-4 p-4 text-center">
+          <div className="text-3xl">🧩</div>
+          <div className="text-muted-foreground font-medium">
+            Sem palavras disponíveis no seu vocabulário.
+          </div>
+          <ImmersionButton 
+            variant="outline"
+            onClick={() => startNewGame(selectedLang)}
+            className="mt-2"
+          >
+            Tentar Novamente
+          </ImmersionButton>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <Header 
+        title="Wordle" 
+        backHref="/hub/student/immersion"
+        actions={headerActions}
+      />
+
+      <div className="container flex-1 flex flex-col items-center justify-center overflow-hidden">
         <Carousel
           className="w-full"
           opts={{

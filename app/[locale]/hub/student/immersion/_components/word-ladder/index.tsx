@@ -13,7 +13,7 @@ import { WordLadderBoard } from "./WordLadderBoard";
 import { WordLadderOptionsModal } from "./WordLadderOptionsModal";
 import { Spinner } from "@/components/ui/spinner";
 import { ImmersionButton } from "../ImmersionButton";
-import { ImmersionGameHeader } from "../ImmersionGameHeader";
+import { Header } from "@/components/layout/header";
 import { LanguageSelect } from "../LanguageSelect";
 import { useWordLadderGame, WordLadderGameProps } from "./useWordLadderGame";
 import { WordDetailsModal } from "../WordDetailsModal";
@@ -58,31 +58,11 @@ export default function WordLadderGame(props: WordLadderGameProps) {
     </div>
   );
 
-  if (!startWord || !goalWord) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center gap-4 p-4 text-center">
-        <div className="text-3xl">🧩</div>
-        <div className="text-muted-foreground font-medium">
-          Poucas palavras no seu vocabulário para gerar um desafio.
-        </div>
-        <ImmersionButton 
-          variant="outline"
-          onClick={() => startNewGame(selectedLang)}
-          className="mt-2"
-        >
-          Tentar Novamente
-        </ImmersionButton>
-      </div>
-    );
-  }
-
-  const finished = status === "win" || status === "end";
-
-  return (
-    <div className="flex flex-col h-full max-w-2xl mx-auto overflow-hidden">
-      <ImmersionGameHeader className="px-4 justify-between items-center">
+  const headerActions = [
+    {
+      component: (
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">
+          <span className="hidden md:inline text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
             Idioma:
           </span>
           <LanguageSelect
@@ -92,16 +72,52 @@ export default function WordLadderGame(props: WordLadderGameProps) {
             disabled={loading}
           />
         </div>
+      )
+    },
+    {
+      icon: <Settings2 className="w-5 h-5" />,
+      onClick: () => setOptionsOpen(true),
+      label: "Opções",
+      className: "rounded-full"
+    }
+  ];
 
-        <button 
-          onClick={() => setOptionsOpen(true)}
-          className="p-2 rounded-xl hover:bg-muted/50 transition-colors"
-        >
-          <Settings2 className="w-5 h-5 text-muted-foreground" />
-        </button>
-      </ImmersionGameHeader>
+  if (!startWord || !goalWord) {
+    return (
+      <div>
+        <Header 
+          title="Word Ladder" 
+          backHref="/hub/student/immersion"
+          actions={headerActions}
+        />
+        <div className="container flex-1 flex flex-col items-center justify-center gap-4 p-4 text-center">
+          <div className="text-3xl">🧩</div>
+          <div className="text-muted-foreground font-medium">
+            Poucas palavras no seu vocabulário para gerar um desafio.
+          </div>
+          <ImmersionButton 
+            variant="outline"
+            onClick={() => startNewGame(selectedLang)}
+            className="mt-2"
+          >
+            Tentar Novamente
+          </ImmersionButton>
+        </div>
+      </div>
+    );
+  }
 
-      <div className="flex-1 flex flex-col items-center justify-center overflow-hidden">
+  const finished = status === "win" || status === "end";
+
+  return (
+    <div>
+      <Header 
+        title="Word Ladder" 
+        backHref="/hub/student/immersion"
+        actions={headerActions}
+      />
+
+      <div className="container flex-1 flex flex-col items-center justify-center overflow-hidden">
         <Carousel
           className="w-full"
           opts={{
@@ -124,7 +140,7 @@ export default function WordLadderGame(props: WordLadderGameProps) {
                 />
               </div>
 
-              <div className="w-full px-2 pb-6 mt-auto">
+              <div className="w-full max-w-sm px-2 pb-6 mt-auto">
                 <AnimatePresence mode="wait">
                   {!finished ? (
                     <motion.div
@@ -221,7 +237,6 @@ export default function WordLadderGame(props: WordLadderGameProps) {
                     )}
                     
                     <ImmersionButton
-                      className="w-full h-14 rounded-2xl font-bold text-lg shadow-lg active:scale-[0.98] transition-all"
                       onClick={() => startNewGame(selectedLang)}
                     >
                       Jogar Novamente

@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { LyricsTrainingResultBanner } from "./LyricsTrainingResultBanner";
 import { Spinner } from "@/components/ui/spinner";
 import { LyricsTrainingState } from "@/modules/immersion/immersion.types";
+import { Header } from "@/components/layout/header";
 
 
 
@@ -122,10 +123,14 @@ export default function LyricsTrainingGame({ initialProgress }: LyricsTrainingGa
   };
 
   return (
-    <div className="container-padding space-y-4">
-    
+    <div>
+      <Header 
+        title="Lyrics Training" 
+        backHref="/hub/student/immersion"
+      />
 
-      <div>
+      <div className="container flex-1 overflow-y-auto py-4 space-y-4">
+        <div>
         {videoUrl && status !== "setup" ? (
           <div className="mx-auto aspect-video w-[95vw] sm:w-[30vw] overflow-hidden rounded-xl bg-black mb-6 shadow-md border border-border/40">
             <div ref={playerContainerRef} className="w-full h-full" />
@@ -529,6 +534,7 @@ export default function LyricsTrainingGame({ initialProgress }: LyricsTrainingGa
             </motion.div>
           ) : null}
         </AnimatePresence>
+      </div>
       </div>
     </div>
   );

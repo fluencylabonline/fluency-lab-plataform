@@ -51,7 +51,7 @@ export default function Page() {
 | `subtitle` | `string` | — | Descrição exibida no sub-header. |
 | `backHref` | `string` | — | Exibe botão de voltar com link. |
 | `onSearchChange` | `(value: string) => void` | — | Ativa o campo de busca quando fornecido. |
-| `action` | `HeaderAction` | — | Objeto com label, ícone e callback de clique. |
+| `actions` | `HeaderAction[]` | — | Lista de ações (botões ou componentes customizados). |
 | `showSubHeader` | `boolean` | `true` | Exibe ou oculta a faixa inferior com subtitle e ações. |
 | `user` | `UserObject` | — | Dados do usuário para o `UserMenu`. |
 | `className` | `string` | — | Classes extras no wrapper externo. |
@@ -62,9 +62,11 @@ Aceita também todas as props nativas de `HTMLDivElement` via `...props`.
 
 ```ts
 {
-  label: string;
-  icon: React.ReactNode;
-  onClick: () => void;
+  label?: string;
+  icon?: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+  component?: React.ReactNode; // Para renderizar componentes customizados (ex: Select)
 }
 ```
 
@@ -151,12 +153,35 @@ const filtered = users.filter((u) =>
 <Header
   title="Produtos"
   subtitle="Gerencie o catálogo"
-  action={{
+  actions={[{
     label: "Novo produto",
     icon: <Plus className="w-4 h-4" />,
     onClick: () => router.push("/produtos/novo")
-  }}
+  }]}
   user={currentUser}
+/>
+```
+
+### Com componente customizado (ex: Select)
+
+```tsx
+<Header
+  title="Wordle"
+  actions={[
+    {
+      component: (
+        <LanguageSelect
+          value={lang}
+          onChange={setLang}
+          options={['en', 'pt']}
+        />
+      )
+    },
+    {
+      icon: <History />,
+      onClick: () => setHistoryOpen(true)
+    }
+  ]}
 />
 ```
 

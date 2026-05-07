@@ -37,7 +37,6 @@ export default async function ImmersionPage() {
       <Header 
         title="My Immersion" 
         subtitle="Practice your listening and reading skills."
-        backHref="/hub/student"
         className="contents"
       />
       

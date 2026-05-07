@@ -18,9 +18,10 @@ import { useUserStore } from "@/modules/user/user.store";
 
 export interface HeaderAction {
     label?: string;
-    icon: React.ReactNode;
-    onClick: () => void;
+    icon?: React.ReactNode;
+    onClick?: () => void;
     className?: string;
+    component?: React.ReactNode;
 }
 
 export interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -83,18 +84,24 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
 
         return (
             <div className="flex items-center gap-1">
-                {actions.map((act, index) => (
-                    <Button
-                        key={index}
-                        onClick={act.onClick}
-                        variant={isMobileSlot ? "ghost" : "default"}
-                        size={isMobileSlot ? "icon" : "sm"}
-                        className={cn("h-9", isMobileSlot && "h-10 w-10", act.className)}
-                    >
-                        <span className={cn(act.label && !isMobileSlot && "mr-2")}>{act.icon}</span>
-                        {!isMobileSlot && act.label && <span className="text-xs font-bold">{act.label}</span>}
-                    </Button>
-                ))}
+                {actions.map((act, index) => {
+                    if (act.component) {
+                        return <React.Fragment key={index}>{act.component}</React.Fragment>;
+                    }
+
+                    return (
+                        <Button
+                            key={index}
+                            onClick={act.onClick}
+                            variant={isMobileSlot ? "ghost" : "default"}
+                            size={isMobileSlot ? "icon" : "sm"}
+                            className={cn("h-9", isMobileSlot && "h-10 w-10", act.className)}
+                        >
+                            <span className={cn(act.label && !isMobileSlot && "mr-2")}>{act.icon}</span>
+                            {!isMobileSlot && act.label && <span className="text-xs font-bold">{act.label}</span>}
+                        </Button>
+                    );
+                })}
             </div>
         );
     };
