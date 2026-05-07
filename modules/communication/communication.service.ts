@@ -124,10 +124,6 @@ export class CommunicationService {
     }
   }
 
-  async sendClassScheduledEmail() { /* TODO */ }
-  async sendClassRescheduledEmail() { /* TODO */ }
-  async sendClassCanceledEmail() { /* TODO */ }
-
   async sendPaymentConfirmedEmail(email: string, data: { studentName: string; amount: number }) {
     try {
       await this.sendEmail({

@@ -51,7 +51,7 @@ export const usersTable = pgTable("users", {
   guardianRelationship: text("guardian_relationship"),
 
   // Audit
-  lastLoginAt: timestamp("last_login_at"), //TODO: Verificar se será usado
+  lastLoginAt: timestamp("last_login_at"), //TODO: Não está sendo usado
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .notNull()
@@ -237,7 +237,6 @@ export type TeacherOnboardingAvailabilityValues = z.input<typeof teacherOnboardi
 export type NotificationPrefs = z.infer<typeof notificationPrefsSchema>;
 
 // Rate Limiting Table 
-// TODO: TEMPORARY
 export const rateLimitsTable = pgTable("rate_limits", {
   key: text("key").primaryKey(),
   points: integer("points").notNull().default(0),

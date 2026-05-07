@@ -121,7 +121,7 @@ const EmptyResults: React.FC<EmptyResultsProps> = ({
   description,
   className,
 }) => {
-  const t = useTranslations("EmptyResults"); //TODO
+  const t = useTranslations("EmptyResults");
   const defaultMessages = {
     withSearch: t("withSearch"),
     withoutSearch: t("withoutSearch"),

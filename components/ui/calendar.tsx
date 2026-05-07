@@ -10,7 +10,9 @@ import {
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react"
+import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon, CalendarIcon } from "lucide-react"
+import { format } from "date-fns"
+import { Vault, VaultContent, VaultHeader, VaultTitle, VaultTrigger } from "@/components/ui/vault"
 
 function Calendar({
   className,
@@ -219,3 +221,61 @@ function CalendarDayButton({
 }
 
 export { Calendar, CalendarDayButton }
+
+type CalendarVaultProps = Omit<React.ComponentProps<typeof DayPicker>, "mode" | "onSelect" | "selected"> & {
+  date?: Date
+  onSelect: (date?: Date) => void
+  placeholder?: string
+  disabled?: (date: Date) => boolean
+  className?: string
+  label?: string
+  buttonVariant?: React.ComponentProps<typeof Button>["variant"]
+}
+
+export function CalendarVault({
+  date,
+  onSelect,
+  placeholder = "Pick a date",
+  disabled,
+  className,
+  label,
+  buttonVariant = "outline",
+  ...props
+}: CalendarVaultProps) {
+  const [open, setOpen] = React.useState(false)
+
+  return (
+    <Vault open={open} onOpenChange={setOpen}>
+      <VaultTrigger
+        type="button"
+        className={cn(
+          buttonVariants({ variant: buttonVariant }),
+          "w-full pl-3 text-left font-normal justify-start h-10",
+          !date && "text-muted-foreground",
+          className
+        )}
+      >
+        {date ? format(date, "PPP") : <span>{placeholder}</span>}
+        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+      </VaultTrigger>
+      <VaultContent>
+        <VaultHeader>
+          <VaultTitle>{label || placeholder}</VaultTitle>
+        </VaultHeader>
+        <div className="flex items-center justify-center p-4 pb-10">
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={(d) => {
+              onSelect(d)
+              setOpen(false)
+            }}
+            disabled={disabled}
+            initialFocus
+            {...props}
+          />
+        </div>
+      </VaultContent>
+    </Vault>
+  )
+}

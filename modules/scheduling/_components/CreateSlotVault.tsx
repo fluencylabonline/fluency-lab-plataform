@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
-import { Calendar as CalendarIcon, Clock, AlertTriangle, AlertCircle } from "lucide-react";
+import { Clock, AlertTriangle, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 
 import {
@@ -29,14 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { CalendarVault } from "@/components/ui/calendar";
 import { notify } from "@/components/ui/toaster";
 
 import { createRecurrenceRuleSchema, type CreateRecurrenceRuleValues } from "../scheduling.schema";
@@ -204,26 +197,13 @@ export function CreateSlotVault({
             </div>
 
             <VaultField label={t("startDate") || "Data"} error={errors.startDate?.message}>
-              <Popover>
-                <PopoverTrigger
-                  className={cn(
-                    buttonVariants({ variant: "outline", fullWidth: true }),
-                    "h-10 justify-start text-left font-normal bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl",
-                    !startDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, "PPP") : <span>Selecione uma data</span>}
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={(date) => date && setValue("startDate", date)}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <CalendarVault
+                date={startDate}
+                onSelect={(date) => date && setValue("startDate", date)}
+                placeholder={t("selectDate") || "Selecione uma data"}
+                label={t("startDate") || "Data"}
+                className="h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl"
+              />
             </VaultField>
 
             <div className="grid grid-cols-2 gap-4">
@@ -273,26 +253,13 @@ export function CreateSlotVault({
 
             {frequency !== "NONE" && (
               <VaultField label={t("endDateLabel") || "Data Término (Opcional)"} error={errors.endDate?.message}>
-                <Popover>
-                  <PopoverTrigger
-                    className={cn(
-                      buttonVariants({ variant: "outline", fullWidth: true }),
-                      "h-10 justify-start text-left font-normal bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl",
-                      !endDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, "PPP") : <span>Sem data de término</span>}
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={endDate || undefined}
-                      onSelect={(date) => setValue("endDate", date || null)}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <CalendarVault
+                  date={endDate || undefined}
+                  onSelect={(date) => setValue("endDate", date || null)}
+                  placeholder={t("noEndDate") || "Sem data de término"}
+                  label={t("endDateLabel") || "Data Término"}
+                  className="h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl"
+                />
               </VaultField>
             )}
 
