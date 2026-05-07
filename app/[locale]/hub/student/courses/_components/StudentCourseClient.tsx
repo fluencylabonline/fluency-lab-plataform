@@ -45,7 +45,6 @@ export function StudentCourseClient({ currentUser }: StudentCourseClientProps) {
         title={t("title")}
         subtitle={t("subtitle")}
         user={currentUser}
-        backHref="/hub/student/profile"
         className="contents"
       />
 

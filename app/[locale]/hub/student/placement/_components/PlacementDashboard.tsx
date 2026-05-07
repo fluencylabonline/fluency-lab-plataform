@@ -40,6 +40,7 @@ interface PlacementDashboardProps {
     availableLanguages: LanguageItem[];
     eligibility: {
       isEligible: boolean;
+      reason?: 'cooldown' | 'active_test';
       nextEligibleDate: Date | string | null | undefined;
       lastTestDate: Date | string | null | undefined;
     };
@@ -94,7 +95,10 @@ export function PlacementDashboard({ initialData }: PlacementDashboardProps) {
 
   const handleStartTest = (languageId: string) => {
     if (!initialData.eligibility.isEligible) {
-      notify.error(t("eligibilityError") || "You must wait 6 months between tests.");
+      const errorMsg = initialData.eligibility.reason === 'active_test'
+        ? t("activeTestDesc")
+        : t("eligibilityError");
+      notify.error(errorMsg || "You cannot start a new test at this time.");
       return;
     }
     router.push(`/hub/student/placement/test?languageId=${languageId}`);
@@ -105,29 +109,56 @@ export function PlacementDashboard({ initialData }: PlacementDashboardProps) {
 
   return (
     <div className="max-w-3xl mx-auto space-y-12 py-2">
-      {/* ── Cooldown Card ── */}
-      {isCooldown && (
+      {/* ── Cooldown / Active Test Card ── */}
+      {!initialData.eligibility.isEligible && (
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-6"
+          className={cn(
+            "border rounded-3xl p-6 flex flex-col md:flex-row items-center gap-6",
+            initialData.eligibility.reason === 'active_test'
+              ? "bg-orange-50 dark:bg-orange-950/20 border-orange-100 dark:border-orange-900/40"
+              : "bg-indigo-50 dark:bg-indigo-950/20 border-indigo-100 dark:border-indigo-900/40"
+          )}
         >
-          <div className="w-16 h-16 bg-white dark:bg-indigo-900/40 rounded-2xl flex items-center justify-center shadow-sm">
-            <Clock className="w-8 h-8 text-indigo-600" />
+          <div className={cn(
+            "w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm",
+            initialData.eligibility.reason === 'active_test'
+              ? "bg-white dark:bg-orange-900/40"
+              : "bg-white dark:bg-indigo-900/40"
+          )}>
+            <Clock className={cn(
+              "w-8 h-8",
+              initialData.eligibility.reason === 'active_test' ? "text-orange-600" : "text-indigo-600"
+            )} />
           </div>
           <div className="flex-1 text-center md:text-left">
-            <h3 className="font-bold text-lg text-indigo-950 dark:text-indigo-100">
-              {t("cooldownTitle") || "Take a break!"}
+            <h3 className={cn(
+              "font-bold text-lg",
+              initialData.eligibility.reason === 'active_test' ? "text-orange-950 dark:text-orange-100" : "text-indigo-950 dark:text-indigo-100"
+            )}>
+              {initialData.eligibility.reason === 'active_test' 
+                ? t("activeTestError") 
+                : t("cooldownTitle") || "Take a break!"}
             </h3>
-            <p className="text-sm text-indigo-900/60 dark:text-indigo-300/60 mt-1">
-              {t("cooldownDesc", { 
-                date: format.dateTime(new Date(initialData.eligibility.nextEligibleDate!), { dateStyle: 'long' }) 
-              })}
+            <p className={cn(
+              "text-sm mt-1",
+              initialData.eligibility.reason === 'active_test' 
+                ? "text-orange-900/60 dark:text-orange-300/60" 
+                : "text-indigo-900/60 dark:text-indigo-300/60"
+            )}>
+              {initialData.eligibility.reason === 'active_test'
+                ? t("activeTestDesc")
+                : t("cooldownDesc", { 
+                    date: initialData.eligibility.nextEligibleDate ? format.dateTime(new Date(initialData.eligibility.nextEligibleDate!), { dateStyle: 'long' }) : ""
+                  })}
             </p>
           </div>
-          <Badge variant="secondary" className="bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 px-4 py-1.5 rounded-xl border-none font-bold">
-            {format.dateTime(new Date(initialData.eligibility.nextEligibleDate!), { day: '2-digit', month: 'short' })}
-          </Badge>
+          {initialData.eligibility.reason === 'cooldown' && initialData.eligibility.nextEligibleDate && (
+            <Badge variant="secondary" className="bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 px-4 py-1.5 rounded-xl border-none font-bold">
+              {format.dateTime(new Date(initialData.eligibility.nextEligibleDate!), { day: '2-digit', month: 'short' })}
+            </Badge>
+          )}
         </motion.div>
       )}
 

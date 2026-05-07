@@ -14,37 +14,49 @@ const PLACEMENT_TEST_LESSON_ID = "00000000-0000-0000-0000-000000000000"; // Mock
 export const placementService = {
   /**
    * Check if user is eligible to take the placement test.
-   * A user can only take the test once every 6 months.
+   * A user can only take the test once every 6 months and cannot have another active test.
    */
-  async checkEligibility(userId: string): Promise<boolean> {
+  async checkEligibility(userId: string): Promise<{ isEligible: boolean; reason?: 'cooldown' | 'active_test' }> {
     const user = await userRepository.findById(userId);
     if (!user) throw new Error("User not found");
 
-    if (!user.lastPlacementTestDate) return true;
+    // 1. Check for active tests first
+    const activeTests = await placementRepository.getActiveTests(userId);
+    if (activeTests.length > 0) {
+      return { isEligible: false, reason: 'active_test' };
+    }
+
+    // 2. Check 6-month cooldown
+    if (!user.lastPlacementTestDate) return { isEligible: true };
 
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    return user.lastPlacementTestDate <= sixMonthsAgo;
+    const isEligible = user.lastPlacementTestDate <= sixMonthsAgo;
+    return { isEligible, reason: isEligible ? undefined : 'cooldown' };
   },
 
   /**
    * Starts a new placement test or resumes an existing one.
    */
   async startOrResumeTest(userId: string, languageId: string): Promise<{ test: PlacementTest; answeredCount: number; currentElo: number }> {
-    const isEligible = await this.checkEligibility(userId);
-    if (!isEligible) {
-      throw new Error("You must wait 6 months before taking the test again.");
-    }
-
     const user = await userRepository.findById(userId);
     if (!user) throw new Error("User not found");
 
-    // Check if there is an active test for this specific language
+    // 1. Check if there is an active test for this specific language
     let test = await placementRepository.getActiveTest(userId, languageId);
 
-    // If not, create one
+    // 2. If it's a new test, verify eligibility
     if (!test) {
+      const eligibility = await this.checkEligibility(userId);
+      if (!eligibility.isEligible) {
+        if (eligibility.reason === 'active_test') {
+          throw new Error("You already have an active test in progress. Please finish or cancel it before starting a new one.");
+        }
+        throw new Error("You must wait 6 months before taking the test again.");
+      }
+      
+      // Create new test
       test = await placementRepository.createNewTest(userId, languageId, user.currentEloScore);
     }
 
@@ -498,14 +510,15 @@ export const placementService = {
 
     const user = await userRepository.findById(userId);
     const lastDate = user?.lastPlacementTestDate;
+    
+    // Check eligibility using the internal method for consistency
+    const eligibilityResult = await this.checkEligibility(userId);
+    
     let nextEligibleDate = null;
-    let isEligible = true;
-
     if (lastDate) {
       const nextDate = new Date(lastDate);
       nextDate.setMonth(nextDate.getMonth() + 6);
       nextEligibleDate = nextDate;
-      isEligible = new Date() >= nextDate;
     }
 
     return {
@@ -513,7 +526,8 @@ export const placementService = {
       activeTests,
       availableLanguages: availableLanguages.filter(l => l.hasActiveTest),
       eligibility: {
-        isEligible,
+        isEligible: eligibilityResult.isEligible,
+        reason: eligibilityResult.reason,
         nextEligibleDate,
         lastTestDate: lastDate
       }

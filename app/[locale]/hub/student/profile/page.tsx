@@ -88,19 +88,17 @@ export default async function ProfilePage() {
         }
     };
 
-    // Calculate all proficiencies using utility
     const proficiencies = getStudentProficiencies(user, placementHistory as (PlacementTest & { language: { code: string } })[]);
-
 
     return (
         <div className="flex flex-col min-h-screen">
             <Header title={t("title")} user={user} showSubHeader={false} className="contents" />
 
-            <main className="container py-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            <main className="container">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items-start">
 
                     {/* Column 1: Identity & Onboarding */}
-                    <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-3">
                         <ProfileCard user={user} />
                         <OnboardingStatusCard
                             contract={onboardingData.contract}
@@ -110,7 +108,7 @@ export default async function ProfilePage() {
                     </div>
 
                     {/* Column 2: Performance & Achievements */}
-                    <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-3">
                         <ProgressStatusCard
                             retentionRate={retentionRate}
                             vocabularyLevel={vocabularyLevel}
@@ -124,9 +122,8 @@ export default async function ProfilePage() {
                         />
                     </div>
 
-
                     {/* Column 3: Financial & Scheduling */}
-                    <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-3">
                         <StudentPaymentStatusCard subscription={subscriptionData} />
                         <NextClassCard nextClass={nextClassMapped} />
                     </div>

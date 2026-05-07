@@ -1599,6 +1599,8 @@
     "unit": "Unit 4"
   },
   "Placement": {
+    "title": "Placement",
+    "subtitle": "Discover your current level and track your progress.",
     "actions": "Actions",
     "active": "Active",
     "active_questions": "Active Questions",
@@ -1629,6 +1631,8 @@
     "edit": "Edit",
     "edit_question": "Edit Question",
     "edit_question_desc": "Update the question details.",
+    "activeTestError": "Test in progress",
+    "activeTestDesc": "You already have a placement test in progress. Finish it before starting a new one.",
     "eligibilityError": "You must wait 6 months between placement tests.",
     "error": "An unexpected error occurred",
     "error_generating": "Failed to generate questions",

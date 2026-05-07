@@ -1599,6 +1599,8 @@
     "unit": "Unidade 4"
   },
   "Placement": {
+    "title": "Nivelamento",
+    "subtitle": "Descubra seu nível atual e acompanhe sua evolução.",
     "actions": "Ações",
     "active": "Ativo",
     "active_questions": "Questões Ativas",
@@ -1629,6 +1631,8 @@
     "edit": "Editar",
     "edit_question": "Editar Questão",
     "edit_question_desc": "Atualize os detalhes da questão.",
+    "activeTestError": "Teste em andamento",
+    "activeTestDesc": "Você já possui um teste de nivelamento em andamento. Finalize-o antes de iniciar um novo.",
     "eligibilityError": "Você precisa esperar 6 meses entre os testes de nivelamento.",
     "error": "Ocorreu um erro inesperado",
     "error_generating": "Falha ao gerar questões",

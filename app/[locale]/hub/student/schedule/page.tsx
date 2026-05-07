@@ -29,7 +29,6 @@ export default async function StudentSchedulePage() {
             <Header
                 title={t("title")}
                 subtitle={t("description")}
-                backHref="/hub/student/profile"
             />
 
             <main className="container">

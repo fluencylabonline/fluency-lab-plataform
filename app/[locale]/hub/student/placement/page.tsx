@@ -24,14 +24,15 @@ export default async function PlacementPage() {
     const t = await getTranslations("Placement");
 
     return (
-        <div className="flex flex-col flex-1">
+        <div>
             <Header
                 title={t("title")}
                 subtitle={t("subtitle")}
                 user={user}
                 backHref="/hub/student/profile"
+                className="contents"
             />
-            <main className="flex-1 p-4 md:p-8">
+            <main className="container flex-1 p-4 md:p-8">
                 <PlacementDashboard initialData={data} />
             </main>
         </div>

@@ -18,7 +18,7 @@ export default async function ContractPage() {
 
   return (
     <div>
-      <Header title={t("title")} user={user} showSubHeader={false} backHref="/hub/student/profile" />
+      <Header title={t("title")} user={user} showSubHeader={false} backHref="/hub/student/profile" className="contents" />
 
       <main className="container">
         <ContractDetails contract={latestContract as ContractWithTemplate} />
