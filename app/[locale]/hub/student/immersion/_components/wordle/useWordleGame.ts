@@ -9,7 +9,7 @@ import type {
   WordleState,
   PlayedEntry,
 } from "@/modules/immersion/immersion.types";
-import { evaluateGuess } from "./evaluateGuess";
+import { evaluateGuess } from "../evaluateGuess";
 import {
   clearPersistedWordleState,
   loadPersistedWordleState,

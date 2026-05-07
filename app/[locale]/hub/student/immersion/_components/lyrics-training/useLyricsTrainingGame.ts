@@ -8,7 +8,7 @@ import {
   savePersistedLyricsTrainingState,
 } from "./persistence";
 import { getStudentLanguages } from "../Database";
-import { evaluateGuess } from "../wordle/evaluateGuess";
+import { evaluateGuess } from "../evaluateGuess";
 
 type LrcLine = { ms: number; text: string };
 interface YouTubeVideo {

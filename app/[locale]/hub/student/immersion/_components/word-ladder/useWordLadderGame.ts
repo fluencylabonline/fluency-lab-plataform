@@ -14,7 +14,7 @@ import {
   savePersistedWordLadderState, 
   WORD_LADDER_MAX_ROWS 
 } from "./persistence";
-import { evaluateGuess } from "../wordle/evaluateGuess";
+import { evaluateGuess } from "../evaluateGuess";
 import { 
   saveImmersionProgressAction, 
   recordImmersionResultAction 
