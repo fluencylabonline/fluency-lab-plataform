@@ -154,6 +154,14 @@
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
   }
+
+  .fade-in {
+    animation: fadeIn 0.5s ease-in forwards;
+  }
+
+  .fade-out {
+    animation: fadeOut 0.5s ease-out forwards;
+  }
 }
 
 @layer base {

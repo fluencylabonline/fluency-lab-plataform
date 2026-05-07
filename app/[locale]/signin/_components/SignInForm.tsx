@@ -16,6 +16,7 @@ import { notify } from "@/components/ui/toaster";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { signInSchema, type SignInValues } from "@/modules/user/user.schema";
+import { TransitionAnimation } from "@/components/ui/transition-animation";
 
 export function SignInForm() {
   const t = useTranslations("Auth");
@@ -27,6 +28,7 @@ export function SignInForm() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isCredentialsLoading, setIsCredentialsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const {
     register,
@@ -71,10 +73,13 @@ export function SignInForm() {
     }
 
     notify.success(t("welcomeTitle") || "Bem-vindo!");
-    router.push(redirectTo || `/hub`);
-    router.refresh();
-    setIsLoading(false);
-    setIsCredentialsLoading(false);
+    
+    setIsSuccess(true);
+    
+    setTimeout(() => {
+      router.push(redirectTo || `/hub`);
+      router.refresh();
+    }, 3500);
   };
 
   const handleGoogleSignIn = async () => {
@@ -104,13 +109,18 @@ export function SignInForm() {
     }
 
     notify.success(t("welcomeTitle") || "Login bem-sucedido!");
-    router.push(redirectTo || `/hub`);
-    router.refresh();
-    setIsLoading(false);
+    
+    setIsSuccess(true);
+    
+    setTimeout(() => {
+      router.push(redirectTo || `/hub`);
+      router.refresh();
+    }, 3500);
   };
 
   return (
     <div className="max-w-md mx-auto w-full">
+      {isSuccess && <TransitionAnimation />}
       <h2 className="text-3xl lg:text-4xl font-bold text-text mb-2">
         {t("signIn") || "Entrar"}
       </h2>

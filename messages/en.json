@@ -233,6 +233,18 @@
     "welcomeSubtitle": "Sign in to access the platform",
     "welcomeTitle": "Welcome to FluencyLab"
   },
+  "Transition": {
+    "sentences": [
+      "Looking for your notebooks.",
+      "Gathering the best materials.",
+      "Loading games for practice.",
+      "Preparing study area.",
+      "Get ready to improve your communication skills!",
+      "Have fun and happy learning!",
+      "Your journey starts here!",
+      "Have fun and happy learning!"
+    ]
+  },
   "Billing": {
     "active": "Active",
     "cancel": "Cancel",

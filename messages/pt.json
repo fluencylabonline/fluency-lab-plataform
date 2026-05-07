@@ -233,6 +233,18 @@
     "welcomeSubtitle": "Faça login para acessar a plataforma",
     "welcomeTitle": "Bem-vindo à FluencyLab"
   },
+  "Transition": {
+    "sentences": [
+      "Procurando seus cadernos.",
+      "Reunindo os melhores materiais.",
+      "Carregando os jogos para praticar.",
+      "Preparando área de estudo.",
+      "Prepare-se para aprimorar suas habilidades de comunicação!",
+      "Divirta-se e boa aprendizagem!",
+      "Sua jornada começa aqui!",
+      "Divirta-se e boa aprendizagem!"
+    ]
+  },
   "Billing": {
     "active": "Ativo",
     "cancel": "Cancelar",
