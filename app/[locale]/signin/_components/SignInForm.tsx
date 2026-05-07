@@ -181,8 +181,6 @@ export function SignInForm() {
           {isCredentialsLoading ? (
             <>
               <Spinner aria-hidden="true" className="mr-2 h-4 w-4" />
-              <span className="sr-only">{tc("loading") || "Carregando..."}</span>
-              <span>{tc("loading") || "Carregando..."}</span>
             </>
           ) : (
             <div className="flex flex-row items-center justify-center">

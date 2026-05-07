@@ -15,7 +15,7 @@ export function PwaWelcomeScreen() {
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-100 dark:opacity-[0.15] pointer-events-none" />
 
             <div className="w-full max-w-md relative z-10">
-                <div className="card border-none rounded-xl backdrop-blur-sm">
+                <div>
                     <div className="flex flex-col items-center pt-10 pb-10 px-6 text-center space-y-6">
                         <div className="relative w-42 h-20 mb-2">
                             <Image
@@ -39,7 +39,7 @@ export function PwaWelcomeScreen() {
 
                         <div className="w-full pt-4">
                             <Link href="/signin">
-                                <Button className="w-full font-medium gap-2">
+                                <Button className="w-fit font-medium" variant='outline'>
                                     <LogIn className="w-4 h-4 mr-2" />
                                     {t("enterButton") || "Entrar"}
                                 </Button>
