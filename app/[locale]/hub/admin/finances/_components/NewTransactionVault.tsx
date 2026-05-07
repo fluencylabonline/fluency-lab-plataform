@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAction } from "next-safe-action/hooks";
 import { useTranslations } from "next-intl";
@@ -313,10 +313,16 @@ export function NewTransactionVault() {
 
             {form.watch("type") === "expense" && (
               <div className="flex items-center gap-2 p-3 rounded-xl bg-muted/30 border border-border">
-                <Checkbox
-                  id="deductible"
-                  checked={form.watch("deductible")}
-                  onChange={(e) => form.setValue("deductible", e.target.checked)}
+                <Controller
+                  name="deductible"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="deductible"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
                 />
                 <label
                   htmlFor="deductible"

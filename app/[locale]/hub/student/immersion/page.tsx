@@ -3,10 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { 
   Headphones, 
-  BookOpen, 
-  ALargeSmall, 
-  Music, 
-  Layers 
+  BookOpen
 } from "lucide-react";
 import { ActivityCarousel } from "./_components/ActivityCarousel";
 

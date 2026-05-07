@@ -37,10 +37,10 @@ export default function Footer() {
 
     return (
         <footer id="footer" className="pb-4 md:pb-0">
-            <div className="relative rounded-3xl md:rounded-[2rem] overflow-hidden transition-all">
+            <div className="relative rounded-3xl md:rounded-4xl overflow-hidden transition-all">
                 <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] dark:opacity-[0.05] pointer-events-none" />
 
-                <div className="mx-auto px-22 py-8 md:py-16 relative z-10 bg-background">
+                <div className="mx-auto px-4 sm::px-22 py-8 md:py-16 relative z-10 bg-background">
                     <div className="flex flex-col lg:flex-row items-center justify-between gap-3 mb-12 md:mb-16 md:px-4">
                         <div className="space-y-3 text-center lg:text-left">
                             <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">

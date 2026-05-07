@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Vault,
@@ -55,7 +55,7 @@ export function SendNotificationVault({ open, onOpenChange }: SendNotificationVa
     isSearching
   } = useSearch<User>(searchTerm, searchUsersAction, { domain: "users" });
 
-  const { register, handleSubmit, watch, setValue, formState: { errors }, reset } = useForm<SendNotificationValues>({
+  const { register, handleSubmit, watch, setValue, control, formState: { errors }, reset } = useForm<SendNotificationValues>({
     resolver: zodResolver(sendNotificationSchema),
     defaultValues: {
       targetType: "all",
@@ -223,7 +223,7 @@ export function SendNotificationVault({ open, onOpenChange }: SendNotificationVa
                                   isSelected && "bg-primary/5"
                                 )}
                               >
-                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                                   <UserIcon className="w-4 h-4 text-primary" />
                                 </div>
                                 <div className="flex flex-col flex-1 min-w-0">
@@ -248,18 +248,30 @@ export function SendNotificationVault({ open, onOpenChange }: SendNotificationVa
 
             <div className="flex gap-6 pt-2">
               <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="inApp"
-                  defaultChecked
-                  onChange={(e) => setValue("channels.inApp", e.target.checked)}
+                <Controller
+                  name="channels.inApp"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="inApp"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
                 />
                 <Label htmlFor="inApp" className="text-sm cursor-pointer">In-App</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="push"
-                  defaultChecked
-                  onChange={(e) => setValue("channels.push", e.target.checked)}
+                <Controller
+                  name="channels.push"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="push"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
                 />
                 <Label htmlFor="push" className="text-sm cursor-pointer">Push Notification</Label>
               </div>

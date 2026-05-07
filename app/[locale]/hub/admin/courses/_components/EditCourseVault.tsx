@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAction } from "next-safe-action/hooks";
 import { useTranslations } from "next-intl";
@@ -68,6 +68,7 @@ export function EditCourseVault({ open, onOpenChange, course }: EditCourseVaultP
     setValue,
     watch,
     reset,
+    control,
     formState: { errors },
   } = useForm<UpdateValues>({
     resolver: zodResolver(updateSchema),
@@ -238,10 +239,17 @@ export function EditCourseVault({ open, onOpenChange, course }: EditCourseVaultP
                     {isPublished ? t("publishedDesc") : t("draftDesc")}
                   </p>
                 </div>
-                <Checkbox
-                  checked={isPublished}
-                  onChange={(e) => setValue("isPublished", e.target.checked)}
-                  className="h-5 w-5"
+                <Controller
+                  name="isPublished"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="isPublished"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="h-5 w-5"
+                    />
+                  )}
                 />
               </div>
             </div>

@@ -263,7 +263,7 @@ export function StudentProfileSurvey({
                 <Checkbox
                   id="previousStudy"
                   checked={field.value}
-                  onChange={(e) => field.onChange(e.target.checked)}
+                  onCheckedChange={field.onChange}
                 />
               )}
             />
@@ -666,7 +666,7 @@ export function StudentProfileSurvey({
               className={cn(
                 "h-1.5 rounded-full transition-all duration-500",
                 i === currentStep
-                  ? "flex-[4] bg-primary shadow-[0_0_10px_rgba(var(--primary),0.3)]"
+                  ? "flex-4 bg-primary shadow-[0_0_10px_rgba(var(--primary),0.3)]"
                   : i < currentStep
                     ? "flex-1 bg-primary/40"
                     : "flex-1 bg-border/40"

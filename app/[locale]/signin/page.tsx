@@ -5,6 +5,14 @@ import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import BackgroundLogin from "@/public/backgrounds/login";
 import { SignInForm } from "./_components/SignInForm";
 
+import { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Login - Fluency Lab",
+  };
+}
+
 export default async function SignInPage() {
   const t = await getTranslations("Auth");
 

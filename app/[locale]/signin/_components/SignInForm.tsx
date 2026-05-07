@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { DoorOpen as DoorOpenIcon } from "lucide-react";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,6 @@ import { TransitionAnimation } from "@/components/ui/transition-animation";
 export function SignInForm() {
   const t = useTranslations("Auth");
   const tv = useTranslations("Validation");
-  const tc = useTranslations("Common");
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo");
@@ -33,6 +32,7 @@ export function SignInForm() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<SignInValues>({
     resolver: zodResolver(signInSchema),
@@ -162,10 +162,17 @@ export function SignInForm() {
         </div>
 
         <div className="flex items-center space-x-2 py-2">
-          <Checkbox
-            id="rememberMe"
-            {...register("rememberMe")}
-            disabled={isLoading}
+          <Controller
+            name="rememberMe"
+            control={control}
+            render={({ field }) => (
+              <Checkbox
+                id="rememberMe"
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                disabled={isLoading}
+              />
+            )}
           />
           <Label htmlFor="rememberMe" className="text-sm font-medium cursor-pointer">
             {t("rememberMe") || "Permanecer logado"}

@@ -15,14 +15,20 @@ export function PwaSplash() {
     const hasShown = sessionStorage.getItem("pwa-splash-shown");
 
     if (isStandalone && !hasShown) {
-      setShowSplash(true);
-      sessionStorage.setItem("pwa-splash-shown", "true");
+      // Use a timeout to avoid synchronous setState inside useEffect
+      const startTimer = setTimeout(() => {
+        setShowSplash(true);
+        sessionStorage.setItem("pwa-splash-shown", "true");
+      }, 0);
       
-      const timer = setTimeout(() => {
+      const hideTimer = setTimeout(() => {
         setShowSplash(false);
       }, 4000); // Show for 4 seconds
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(startTimer);
+        clearTimeout(hideTimer);
+      };
     }
   }, [isStandalone]);
 

@@ -41,7 +41,7 @@ export function ActivityCarousel({ items }: ActivityCarouselProps) {
         className="w-full"
       >
         <CarouselContent className="-ml-4">
-          {items.map((item, index) => {
+          {items.map((item) => {
             const IconComponent = ICON_MAP[item.icon] || Construction;
             
             return (

@@ -105,7 +105,7 @@ export function PlacementDashboard({ initialData }: PlacementDashboardProps) {
   };
 
   const completedHistory = initialData.history.filter((t) => t.status === "completed");
-  const isCooldown = !initialData.eligibility.isEligible && initialData.eligibility.nextEligibleDate;
+  // const isCooldown = !initialData.eligibility.isEligible && initialData.eligibility.nextEligibleDate;
 
   return (
     <div className="max-w-3xl mx-auto space-y-12 py-2">
