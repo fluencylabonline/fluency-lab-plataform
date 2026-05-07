@@ -2,6 +2,13 @@ import { env } from "@/env";
 import { checkRateLimit } from "@/lib/rate-limit";
 import admin from "firebase-admin";
 
+export interface YouTubeVideo {
+  videoId: string;
+  title: string;
+  channelTitle: string;
+  thumbnail: string;
+}
+
 export const mediaService = {
   /**
    * Searches for a relevant image on Unsplash based on keywords.
@@ -36,6 +43,45 @@ export const mediaService = {
     } catch (error) {
       console.error("Unsplash Search Failed:", error);
       return null;
+    }
+  },
+
+  /**
+   * Searches for videos on YouTube.
+   */
+  async searchYouTube(query: string, maxResults: number = 6): Promise<YouTubeVideo[]> {
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
+          query
+        )}&maxResults=${maxResults}&type=video&key=${env.YOUTUBE_API_KEY}`
+      );
+
+      if (!response.ok) {
+        console.error("YouTube API Error:", await response.text());
+        return [];
+      }
+
+      const data = await response.json();
+      return (data.items || []).map((item: { 
+        id: { videoId: string }; 
+        snippet: { 
+          title: string; 
+          channelTitle: string; 
+          thumbnails: { 
+            medium?: { url: string }; 
+            default?: { url: string } 
+          } 
+        } 
+      }) => ({
+        videoId: item.id.videoId,
+        title: item.snippet.title,
+        channelTitle: item.snippet.channelTitle,
+        thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url,
+      }));
+    } catch (error) {
+      console.error("YouTube Search Failed:", error);
+      return [];
     }
   },
 

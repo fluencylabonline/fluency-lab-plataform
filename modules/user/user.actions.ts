@@ -314,3 +314,9 @@ export const requestStudentDeactivationAction = adminAction
       return { success: false, error: (error as Error).message };
     }
   });
+
+export const getStudentLanguagesAction = protectedAction
+  .action(async ({ ctx }) => {
+    const user = await userService.getUserById(ctx.user.id);
+    return user?.languages || [];
+  });
