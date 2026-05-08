@@ -1993,7 +1993,7 @@
     "mfaGetStarted": "Começar Configuração",
     "mfaScanTitle": "1. Escaneie o QR Code",
     "mfaScanDesc": "Abra seu app de autenticação e escaneie a imagem acima.",
-    "mfaVerifyTitle": "2. Insira o código",
+    "mfaVerifyTitle": "Insira o código",
     "mfaVerifyDesc": "Digite o código de 6 dígitos gerado pelo seu aplicativo.",
     "mfaVerifyButton": "Verificar e Ativar",
     "mfaSuccessTitle": "MFA Ativado!",

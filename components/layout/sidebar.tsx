@@ -47,7 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
                     width: isCollapsed ? 48 : 256,
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="hidden md:flex flex-col items-center mx-1 max-h-full"
+                className="hidden md:flex flex-col items-center mx-auto lg:ml-2 max-h-full"
             >
                 <motion.div
                     layout

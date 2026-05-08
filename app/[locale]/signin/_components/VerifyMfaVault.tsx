@@ -56,26 +56,27 @@ export function VerifyMfaVault({ open, onOpenChange, onSuccess }: VerifyMfaVault
         </VaultHeader>
         
         <VaultBody>
-          <div className="space-y-6 text-center py-4">
+          <div className="space-y-2 text-center py-4">
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mx-auto">
               <Shield className="w-8 h-8" />
             </div>
             
             <div className="space-y-2">
               <h4 className="font-bold text-lg">{t("mfaVerifyTitle") || "Insira o código"}</h4>
-              <p className="text-sm text-muted-foreground">
+              <p className="hidden text-sm text-muted-foreground">
                 {t("mfaLoginDesc") || "Digite o código de 6 dígitos do seu aplicativo de autenticação."}
               </p>
             </div>
 
-            <div className="max-w-[240px] mx-auto">
+            <div className="max-w-[240px] mx-auto py-4">
               <Input
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                 placeholder="000000"
-                className="text-center text-3xl tracking-[0.5em] font-mono h-16 rounded-2xl"
+                className="text-center text-3xl tracking-[0.5em] font-mono h-16 rounded-xl"
                 autoFocus
                 disabled={loading}
+                type="number"
               />
             </div>
 

@@ -307,13 +307,13 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
 
             {/* Listen buttons */}
             <div className="flex flex-col items-center gap-2">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+              <p className="hidden text-xs font-bold text-muted-foreground uppercase tracking-widest">
                 {t("listenFirst") || "Ouça a palavra"}
               </p>
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleSpeakWord}
-                  className="w-16 h-16 bg-primary text-primary-foreground rounded-full flex items-center justify-center hover:scale-105 transition-transform border-b-4 border-black/20 active:border-b-0 active:translate-y-1"
+                  className="hidden w-16 h-16 bg-primary text-primary-foreground rounded-full items-center justify-center hover:scale-105 transition-transform border-b-4 border-black/20 active:border-b-0 active:translate-y-1"
                   title={t("listenWord") || "Ouvir a palavra"}
                 >
                   <Play className="w-7 h-7 fill-current ml-1" />

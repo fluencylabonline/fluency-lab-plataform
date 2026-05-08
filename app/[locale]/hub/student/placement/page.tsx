@@ -32,7 +32,7 @@ export default async function PlacementPage() {
                 backHref="/hub/student/profile"
                 className="contents"
             />
-            <main className="container flex-1 p-4 md:p-8">
+            <main className="container">
                 <PlacementDashboard initialData={data} />
             </main>
         </div>
