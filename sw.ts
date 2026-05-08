@@ -35,8 +35,8 @@ self.addEventListener("push", (event: PushEvent) => {
   if (data) {
     const title = data.title || "Notificação";
     const body = data.body || "";
-    const icon = data.icon || "/icons/android/android-launchericon-192-192.png";
-    const badge = data.badge || "/icons/android/android-launchericon-96-96.png";
+    const icon = data.icon || "/icons/notification/notification-192.png";
+    const badge = data.badge || "/icons/notification/notification-96.png";
     const url = data.url || "/hub";
     const type = data.type || "info";
 
