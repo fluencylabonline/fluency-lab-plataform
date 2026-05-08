@@ -2097,6 +2097,7 @@
     "title": "We'll miss you!"
   },
   "Tasks": {
+    "deleteProjectWarning": "This action cannot be undone.",
     "add": "Add",
     "addAssignee": "Add assignee",
     "addColumn": "Add Column",

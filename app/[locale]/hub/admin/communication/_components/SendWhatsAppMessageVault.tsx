@@ -99,8 +99,8 @@ export function SendWhatsAppMessageVault({ open, onOpenChange, templates }: Send
       setIsSearching(true);
       try {
         const result = await searchUsersAction({ term: searchTerm });
-        if (result?.data) {
-          setSearchResults(result.data);
+        if (result?.data?.success && Array.isArray(result.data.data)) {
+          setSearchResults(result.data.data);
         }
       } catch (error) {
         console.error("Search error:", error);

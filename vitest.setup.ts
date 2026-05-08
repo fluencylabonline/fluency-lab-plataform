@@ -17,7 +17,7 @@ vi.mock('@/env', () => ({
     GOOGLE_CLIENT_SECRET: 'test',
     VAPID_PUBLIC_KEY: 'test',
     VAPID_PRIVATE_KEY: 'test',
-    VAPID_SUBJECT: 'test',
+    VAPID_SUBJECT: 'mailto:test@test.com',
     NODE_ENV: 'test',
     ABACATEPAY_API_KEY: 'test',
     ABACATEPAY_WEBHOOK_SECRET: 'test',
@@ -25,6 +25,7 @@ vi.mock('@/env', () => ({
     GEMINI_API_KEY: 'test',
     UNSPLASH_ACCESS_KEY: 'test',
     UNSPLASH_SECRET_KEY: 'test',
+    ENCRYPTION_KEY: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
     NEXT_PUBLIC_FIREBASE_API_KEY: 'test',
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: 'test',
     NEXT_PUBLIC_FIREBASE_PROJECT_ID: 'test',
@@ -36,3 +37,43 @@ vi.mock('@/env', () => ({
     NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
   },
 }));
+
+// Mock firebase-admin globally to avoid PEM issues in tests
+vi.mock('web-push', () => {
+  const mock = {
+    setVapidDetails: vi.fn(),
+    sendNotification: vi.fn(),
+  };
+  return { default: mock, ...mock };
+});
+
+vi.mock('firebase-admin', () => {
+  const admin = {
+    apps: [],
+    initializeApp: vi.fn(),
+    credential: {
+      cert: vi.fn(),
+    },
+    auth: vi.fn(() => ({
+      verifyIdToken: vi.fn(),
+      createSessionCookie: vi.fn(),
+      verifySessionCookie: vi.fn(),
+      revokeRefreshTokens: vi.fn(),
+      getUser: vi.fn(),
+      getUserByEmail: vi.fn(),
+      createUser: vi.fn(),
+      setCustomUserClaims: vi.fn(),
+      generatePasswordResetLink: vi.fn(),
+    })),
+    firestore: vi.fn(() => ({
+      collection: vi.fn(),
+      doc: vi.fn(),
+      settings: vi.fn(),
+    })),
+    storage: vi.fn(() => ({
+      bucket: vi.fn(),
+    })),
+  };
+  return { default: admin, ...admin };
+});
+

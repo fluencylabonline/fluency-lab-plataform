@@ -82,7 +82,7 @@ export function TaskCard({
         onClick={() => setIsDetailOpen(true)}
         className={cn(
           "bg-card text-card-foreground p-4 border rounded-xl cursor-pointer transition-all active:scale-[0.98]",
-          mode === "list" ? "flex items-center gap-4" : "flex flex-col gap-3",
+          mode === "list" ? "flex items-center gap-4 mb-2" : "flex flex-col gap-3 mb-2",
           "hover:border-primary/50",
           isOptimisticDone && "opacity-60 bg-muted/30"
         )}

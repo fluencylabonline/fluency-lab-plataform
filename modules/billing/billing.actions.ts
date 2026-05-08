@@ -96,7 +96,7 @@ export const getInstallmentStatusAction = protectedAction
 
     const subscription = await billingRepository.findSubscriptionById(installment.subscriptionId);
     if (ctx.user.role !== "admin" && subscription?.studentId !== ctx.user.id) {
-      throw new Error("Acesso não autorizado.");
+      throw new Error("UNAUTHORIZED");
     }
 
     return { success: true, data: { status: installment.status } };

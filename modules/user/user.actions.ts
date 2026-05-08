@@ -237,31 +237,45 @@ export const requestNewInviteAction = actionClient
 export const searchStudentsAction = permissionAction("material.view")
   .inputSchema(z.object({ term: z.string().min(1) }))
   .action(async ({ parsedInput, ctx }) => {
-    // 1. Rate Limit: 10 searches per minute per user
-    const rateLimit = await checkRateLimit("search_students", ctx.user.id, 10, 60 * 1000);
-    if (!rateLimit.success) throw new Error("RATE_LIMIT_EXCEEDED");
+    try {
+      // 1. Rate Limit: 10 searches per minute per user
+      const rateLimit = await checkRateLimit("search_students", ctx.user.id, 10, 60 * 1000);
+      if (!rateLimit.success) throw new Error("RATE_LIMIT_EXCEEDED");
 
-    const results = await userService.searchStudents(parsedInput.term);
-    
-    // 2. Safe Logging (GDPR/LGPD): Redact terms, log count
-    const hashedTerm = crypto.createHash("sha256").update(parsedInput.term).digest("hex").substring(0, 8);
-    console.log(`[searchStudentsAction] user=${ctx.user.id} term_hash=${hashedTerm} found=${results.length}`);
+      const results = await userService.searchStudents(parsedInput.term);
+      
+      // 2. Safe Logging (GDPR/LGPD): Redact terms, log count
+      const hashedTerm = crypto.createHash("sha256").update(parsedInput.term).digest("hex").substring(0, 8);
+      console.log(`[searchStudentsAction] user=${ctx.user.id} term_hash=${hashedTerm} found=${results.length}`);
 
-    // 3. Prevent Data Leakage: Return only non-sensitive fields
-    return results.map(s => ({
-      id: s.id,
-      name: s.name,
-      email: s.email,
-      photoUrl: s.photoUrl,
-    }));
+      // 3. Prevent Data Leakage: Return only non-sensitive fields
+      const data = results.map(s => ({
+        id: s.id,
+        name: s.name,
+        email: s.email,
+        photoUrl: s.photoUrl,
+      }));
+
+      return { success: true, data };
+    } catch (error) {
+      if ((error as Error).message === "RATE_LIMIT_EXCEEDED") return { success: false, error: "rateLimitExceeded" };
+      console.error("[searchStudentsAction] Error:", error);
+      return { success: false, error: "error" };
+    }
   });
 
 export const searchUsersAction = protectedAction
   .inputSchema(z.object({ term: z.string().min(1) }))
   .action(async ({ parsedInput, ctx }) => {
-    // Apenas admin pode buscar todos os usuários
-    if (ctx.user.role !== "admin") throw new Error("UNAUTHORIZED");
-    return userService.searchUsers(parsedInput.term);
+    try {
+      // Apenas admin pode buscar todos os usuários
+      if (ctx.user.role !== "admin") return { success: false, error: "UNAUTHORIZED" };
+      const data = await userService.searchUsers(parsedInput.term);
+      return { success: true, data };
+    } catch (error) {
+      console.error("[searchUsersAction] Error:", error);
+      return { success: false, error: "error" };
+    }
   });
 
 export const getTeachersAction = protectedAction

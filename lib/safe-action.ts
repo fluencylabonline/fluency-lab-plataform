@@ -12,6 +12,11 @@ export const actionClient = createSafeActionClient({
     // Log the real error server-side for debugging
     console.error("[ActionError]", error.message);
 
+    // If it's an authorization error, we can return it as is
+    if (error.message === "unauthorized" || error.message === "UNAUTHORIZED") {
+      return "unauthorized";
+    }
+
     // Return a safe, translated message to the client
     const t = await getTranslations("Common");
     return t("error");

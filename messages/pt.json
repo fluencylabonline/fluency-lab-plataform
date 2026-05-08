@@ -2097,6 +2097,7 @@
     "title": "Sentiremos sua falta!"
   },
   "Tasks": {
+    "deleteProjectWarning": "Esta ação não pode ser desfeita.",
     "add": "Adicionar",
     "addAssignee": "Adicionar responsável",
     "addColumn": "Nova Coluna",

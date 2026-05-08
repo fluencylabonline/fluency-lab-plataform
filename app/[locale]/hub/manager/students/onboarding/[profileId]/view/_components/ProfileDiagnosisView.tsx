@@ -81,8 +81,9 @@ export function ProfileDiagnosisView({ profile }: ProfileDiagnosisViewProps) {
     setIsSearching(true);
     try {
       const results = await searchStudentsAction({ term: query });
-      if (results?.data) {
-        setSearchResults(results.data);
+      const payload = results?.data as { success?: boolean; data?: { id: string; name: string; email: string }[] };
+      if (payload?.success && Array.isArray(payload.data)) {
+        setSearchResults(payload.data);
       }
     } catch (error) {
       console.error(error);
