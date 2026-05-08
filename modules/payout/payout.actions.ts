@@ -52,8 +52,13 @@ export const getTeacherUnpaidClassesAction = protectedAction
     month: z.number().min(0).max(11),
     year: z.number(),
   }))
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     try {
+      // Security: Only the teacher themselves or an admin/manager can see unpaid classes
+      if (ctx.user.role !== "admin" && ctx.user.role !== "manager" && ctx.user.id !== parsedInput.teacherId) {
+        throw new Error("Acesso negado.");
+      }
+
       const classes = await payoutService.getTeacherUnpaidClasses(
         parsedInput.teacherId,
         parsedInput.month,

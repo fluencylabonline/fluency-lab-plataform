@@ -133,4 +133,5 @@ export const callService = {
   generateStreamToken,
   handleTranscriptionWebhook,
   getStudentCallHistory,
+  getCallByStreamId: async (streamCallId: string) => callRepository.findByStreamId(streamCallId),
 };

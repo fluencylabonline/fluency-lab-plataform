@@ -90,9 +90,16 @@ export const getPlansAction = protectedAction
 
 export const getInstallmentStatusAction = protectedAction
   .inputSchema(z.object({ installmentId: z.uuid() }))
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     const installment = await billingService.getInstallmentById(parsedInput.installmentId);
-    return { success: true, data: { status: installment?.status } };
+    if (!installment) return { success: false, error: "notFound" };
+
+    const subscription = await billingRepository.findSubscriptionById(installment.subscriptionId);
+    if (ctx.user.role !== "admin" && subscription?.studentId !== ctx.user.id) {
+      throw new Error("Acesso não autorizado.");
+    }
+
+    return { success: true, data: { status: installment.status } };
   });
 
 import { verifySudoMode } from "@/lib/auth-server";

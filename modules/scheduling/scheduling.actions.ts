@@ -78,8 +78,11 @@ export const grantCreditAction = permissionAction("credits.grant")
 
 export const getStudentCreditsAction = protectedAction
   .inputSchema(z.object({ studentId: z.string(), onlyActive: z.boolean().default(true) }))
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     try {
+      if (ctx.user.role !== "admin" && ctx.user.id !== parsedInput.studentId) {
+        throw new Error("Acesso não autorizado aos dados do aluno.");
+      }
       const credits = await schedulingRepository.findCreditsByStudent(parsedInput.studentId, parsedInput.onlyActive);
       return { success: true, data: credits };
     } catch (error) {
@@ -272,8 +275,11 @@ export const getStudentScheduleAction = protectedAction
     month: z.number().min(0).max(11),
     year: z.number(),
   }))
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     try {
+      if (ctx.user.role !== "admin" && ctx.user.id !== parsedInput.studentId) {
+        throw new Error("Acesso não autorizado aos dados do aluno.");
+      }
       const baseDate = new Date(parsedInput.year, parsedInput.month, 1);
       const start = startOfMonth(baseDate);
       const end = endOfMonth(baseDate);
@@ -288,8 +294,11 @@ export const getStudentScheduleAction = protectedAction
 
 export const getStudentCreditBalanceAction = protectedAction
   .inputSchema(z.object({ studentId: z.string() }))
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     try {
+      if (ctx.user.role !== "admin" && ctx.user.id !== parsedInput.studentId) {
+        throw new Error("Acesso não autorizado aos dados do aluno.");
+      }
       const balance = await schedulingService.getStudentCreditBalance(parsedInput.studentId);
       return { success: true, data: balance } as { success: boolean; data: unknown; error?: string };
     } catch (error) {
@@ -304,8 +313,11 @@ export const getStudentRescheduleStatsAction = protectedAction
     month: z.number().min(0).max(11),
     year: z.number(),
   }))
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     try {
+      if (ctx.user.role !== "admin" && ctx.user.id !== parsedInput.studentId) {
+        throw new Error("Acesso não autorizado aos dados do aluno.");
+      }
       const stats = await schedulingService.getStudentRescheduleStats(
         parsedInput.studentId,
         parsedInput.month,
@@ -333,8 +345,11 @@ export const getAvailableRulesAction = permissionAction("class.update.any")
 
 export const getStudentRulesAction = protectedAction
   .inputSchema(z.object({ studentId: z.string() }))
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     try {
+      if (ctx.user.role !== "admin" && ctx.user.id !== parsedInput.studentId) {
+        throw new Error("Acesso não autorizado aos dados do aluno.");
+      }
       const rules = await schedulingRepository.findAllRules();
       const studentRules = rules.filter((r) => r.studentId === parsedInput.studentId && r.type === "NORMAL");
       return { success: true, data: studentRules };
@@ -495,6 +510,9 @@ export const getStudentClassesByTeacherAction = protectedAction
   }))
   .action(async ({ parsedInput, ctx }) => {
     try {
+      if (ctx.user.role !== "admin" && ctx.user.id !== parsedInput.studentId) {
+        throw new Error("Acesso não autorizado aos dados do aluno.");
+      }
       const baseDate = new Date(parsedInput.year, parsedInput.month, 1);
       const start = startOfMonth(baseDate);
       const end = endOfMonth(baseDate);

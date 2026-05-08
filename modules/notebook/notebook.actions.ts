@@ -114,6 +114,7 @@ export const registerNotebookAssetAction = protectedAction
     await notebookService.registerNotebookAsset({
       ...parsedInput,
       uploadedBy: ctx.user.id,
+      userRole: ctx.user.role,
     });
     return { success: true };
   });

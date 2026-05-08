@@ -1,6 +1,6 @@
 "use server";
 
-import { protectedAction } from "@/lib/safe-action";
+import { actionClient, protectedAction } from "@/lib/safe-action";
 import { signContractSchema, type ContractInstance } from "./contract.schema";
 import { contractService } from "./contract.service";
 import { contractRepository } from "./contract.repository";
@@ -79,9 +79,11 @@ export const signContractAction = protectedAction
 /**
  * Ação pública para verificar validade de um contrato via hash.
  */
-export const verifyContractAction = async (hash: string) => {
-  return await contractService.verifyContract(hash);
-};
+export const verifyContractAction = actionClient
+  .inputSchema(z.object({ hash: z.string() }))
+  .action(async ({ parsedInput }) => {
+    return await contractService.verifyContract(parsedInput.hash);
+  });
 
 /**
  * Ação para buscar contratos do usuário (Read).

@@ -11,7 +11,7 @@ import {
 } from "./scheduling.schema";
 import { usersTable, type User } from "@/modules/user/user.schema";
 import { contractInstancesTable } from "@/modules/contract/contract.schema";
-import { eq, and, gte, lt, asc, desc, inArray, isNotNull, between } from "drizzle-orm";
+import { eq, and, gte, lt, asc, desc, inArray, isNotNull, isNull, between, gt } from "drizzle-orm";
 import { communicationService } from "@/modules/communication/communication.service";
 import { userService } from "@/modules/user/user.service";
 import { env } from "@/env";
@@ -570,26 +570,37 @@ export const schedulingService = {
     newSlotId: string,
     creditId: string
   ) {
-    const credit = await schedulingRepository.findCreditById(creditId);
-    if (!credit || credit.studentId !== studentId || credit.usedAt || credit.expiresAt < new Date()) {
-      throw new Error("Invalid or expired credit");
-    }
-
-    const originalSlot = await schedulingRepository.findById(originalClassId);
-    if (!originalSlot || originalSlot.studentId !== studentId) {
-      throw new Error("Original class not found or not owned by student");
-    }
-
-    const targetSlot = await schedulingRepository.findById(newSlotId);
-    if (!targetSlot || targetSlot.status !== "available") {
-      throw new Error("Target slot is no longer available");
-    }
-
     return await db.transaction(async (tx) => {
-      // 1. Use the credit
-      await tx.update(studentCredits)
-        .set({ usedAt: new Date(), usedForClassId: newSlotId })
-        .where(eq(studentCredits.id, creditId));
+      // 1. Atomically consume the credit and check if it was actually available
+      const [updatedCredit] = await tx.update(studentCredits)
+        .set({ 
+          usedAt: new Date(), 
+          usedForClassId: newSlotId,
+          updatedAt: new Date()
+        })
+        .where(
+          and(
+            eq(studentCredits.id, creditId),
+            eq(studentCredits.studentId, studentId),
+            isNull(studentCredits.usedAt),
+            gt(studentCredits.expiresAt, new Date())
+          )
+        )
+        .returning();
+
+      if (!updatedCredit) {
+        throw new Error("Crédito inválido, já utilizado ou expirado.");
+      }
+
+      const originalSlot = await schedulingRepository.findById(originalClassId);
+      if (!originalSlot || originalSlot.studentId !== studentId) {
+        throw new Error("Aula original não encontrada ou não pertence ao aluno.");
+      }
+
+      const targetSlot = await schedulingRepository.findById(newSlotId);
+      if (!targetSlot || targetSlot.status !== "available") {
+        throw new Error("O horário de destino não está mais disponível.");
+      }
 
       // 2. Update target slot
       await tx.update(slotInstances)
@@ -597,7 +608,7 @@ export const schedulingService = {
           studentId,
           status: "scheduled",
           creditId,
-          creditType: credit.type,
+          creditType: updatedCredit.type,
           isReschedulable: false, // Prevent infinite loops
           rescheduledFrom: {
             originalClassId,

@@ -153,8 +153,19 @@ export const notebookService = {
     contentType: string;
     sizeBytes: number;
     uploadedBy: string;
+    userRole: string;
   }) {
-    return notebookRepository.addNotebookAsset(asset);
+    // Security: Verify that the uploader has access to the notebook
+    await this.getNotebook(asset.uploadedBy, asset.userRole, asset.notebookId);
+
+    return notebookRepository.addNotebookAsset({
+      notebookId: asset.notebookId,
+      filePath: asset.filePath,
+      fileName: asset.fileName,
+      contentType: asset.contentType,
+      sizeBytes: asset.sizeBytes,
+      uploadedBy: asset.uploadedBy,
+    });
   },
 
   /**

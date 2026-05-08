@@ -45,6 +45,7 @@ export const recurrenceRules = pgTable("recurrence_rules", {
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // 2. Tabela de Créditos
@@ -59,6 +60,7 @@ export const studentCredits = pgTable("student_credits", {
   usedAt: timestamp("used_at"),
   usedForClassId: uuid("used_for_class_id"), // Relaciona com a aula onde foi gasto
   reason: varchar("reason", { length: 255 }),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // 3. Instâncias de Aulas

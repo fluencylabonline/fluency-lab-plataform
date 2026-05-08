@@ -6,7 +6,7 @@ import { notificationService } from "../notification/notification.service";
 import { addMonths, startOfDay, setDate, addDays, endOfDay, endOfMonth, getDate, getDaysInMonth } from "date-fns";
 import { env } from "@/env";
 import { db } from "@/lib/db";
-import { Installment, installmentsTable, Subscription } from "./billing.schema";
+import { Installment, installmentsTable, Subscription, abacatePayWebhookSchema, abacatePayMetadataSchema, subscriptionsTable } from "./billing.schema";
 import { eq, asc, and } from "drizzle-orm";
 import { decrypt } from "@/lib/cryptography";
 import { revalidatePath } from "next/cache";
@@ -94,72 +94,76 @@ export const billingService = {
     const startDate = new Date();
     const endDate = addMonths(startDate, plan.durationMonths);
 
-    const subscription = await billingRepository.createSubscription({
-      studentId,
-      planId,
-      dueDay,
-      status: "active",
-      startDate,
-      endDate,
-    });
+    const subscription = await db.transaction(async (tx) => {
+      const [sub] = await tx.insert(subscriptionsTable).values({
+        studentId,
+        planId,
+        dueDay,
+        status: "active",
+        startDate,
+        endDate,
+      }).returning();
 
-    // Generate N installments with pro-rata logic
-    const installments = [];
-    const now = new Date();
+      // Generate N installments with pro-rata logic
+      const installments = [];
+      const now = new Date();
 
-    // Use classesStartDate for pro-rata calculation if it's in the future
-    const billingBaseDate = student.classesStartDate && student.classesStartDate > now
-      ? student.classesStartDate
-      : now;
+      // Use classesStartDate for pro-rata calculation if it's in the future
+      const billingBaseDate = student.classesStartDate && student.classesStartDate > now
+        ? student.classesStartDate
+        : now;
 
-    const currentDay = getDate(billingBaseDate);
-    const totalDaysInMonth = getDaysInMonth(billingBaseDate);
+      const currentDay = getDate(billingBaseDate);
+      const totalDaysInMonth = getDaysInMonth(billingBaseDate);
 
-    let firstInstallmentAmount: number;
-    let firstInstallmentDueDate: Date;
+      let firstInstallmentAmount: number;
+      let firstInstallmentDueDate: Date;
 
-    if (currentDay > dueDay) {
-      // Pro-rata logic: charge for remaining days of the month
-      const daysRemaining = totalDaysInMonth - currentDay + 1; // Including today
-      firstInstallmentAmount = Math.round((plan.price / totalDaysInMonth) * daysRemaining);
-      firstInstallmentDueDate = endOfMonth(billingBaseDate);
-    } else {
-      // Full charge logic: due in 7 days
-      firstInstallmentAmount = plan.price;
-      firstInstallmentDueDate = addDays(now, 7); // First payment always due in 7 days from now (onboarding)
-    }
+      if (currentDay > dueDay) {
+        // Pro-rata logic: charge for remaining days of the month
+        const daysRemaining = totalDaysInMonth - currentDay + 1; // Including today
+        firstInstallmentAmount = Math.round((plan.price / totalDaysInMonth) * daysRemaining);
+        firstInstallmentDueDate = endOfMonth(billingBaseDate);
+      } else {
+        // Full charge logic: due in 7 days
+        firstInstallmentAmount = plan.price;
+        firstInstallmentDueDate = addDays(now, 7); // First payment always due in 7 days from now (onboarding)
+      }
 
-    // 1. Create first installment (can be pro-rata or full)
-    installments.push({
-      subscriptionId: subscription.id,
-      status: "pending" as const,
-      dueDate: startOfDay(firstInstallmentDueDate),
-      amount: firstInstallmentAmount,
-      orderIndex: 1,
-    });
-
-    // 2. Generate subsequent installments (full price)
-    for (let i = 2; i <= plan.durationMonths; i++) {
-      // Subsequent charges always on the chosen dueDay of the following months
-      const dueDate = setDate(addMonths(now, i - 1), dueDay);
-
+      // 1. Create first installment (can be pro-rata or full)
       installments.push({
-        subscriptionId: subscription.id,
+        subscriptionId: sub.id,
         status: "pending" as const,
-        dueDate: startOfDay(dueDate),
-        amount: plan.price,
-        orderIndex: i,
+        dueDate: startOfDay(firstInstallmentDueDate),
+        amount: firstInstallmentAmount,
+        orderIndex: 1,
       });
-    }
 
-    const createdInstallments = await billingRepository.createInstallments(installments);
+      // 2. Generate subsequent installments (full price)
+      for (let i = 2; i <= plan.durationMonths; i++) {
+        // Subsequent charges always on the chosen dueDay of the following months
+        const dueDate = setDate(addMonths(now, i - 1), dueDay);
+
+        installments.push({
+          subscriptionId: sub.id,
+          status: "pending" as const,
+          dueDate: startOfDay(dueDate),
+          amount: plan.price,
+          orderIndex: i,
+        });
+      }
+
+      const createdInstallments = await tx.insert(installmentsTable).values(installments).returning();
+      
+      // Use the transaction-created subscription for the return
+      return { subscription: sub, firstInstallment: createdInstallments[0] };
+    });
 
     // 3. Immediately generate AbacatePay billing for the first installment 
     // so the student can see it and we have it ready
-    const firstInstallment = createdInstallments[0];
-    if (firstInstallment) {
+    if (subscription.firstInstallment) {
       try {
-        await this.generateInvoiceForInstallment(firstInstallment.id);
+        await this.generateInvoiceForInstallment(subscription.firstInstallment.id);
       } catch (error) {
         console.error("Failed to generate first AbacatePay invoice:", error);
         // We don't throw here to avoid blocking the onboarding flow, 
@@ -167,7 +171,7 @@ export const billingService = {
       }
     }
 
-    return subscription;
+    return subscription.subscription;
   },
 
   async updateSubscription(id: string, data: Partial<Subscription>) {
@@ -511,18 +515,21 @@ export const billingService = {
 
   // 6. Webhook logic
   async processWebhook(payload: Record<string, unknown>) {
-    interface WebhookEvent {
-      event: string;
-      data: Record<string, Record<string, unknown>>;
+    // 1. Validate the overall webhook structure
+    const validatedPayload = abacatePayWebhookSchema.safeParse(payload);
+    
+    if (!validatedPayload.success) {
+      console.error("[AbacatePay Webhook] Invalid payload structure:", validatedPayload.error.format());
+      return;
     }
 
-    const event = payload as unknown as WebhookEvent;
+    const event = validatedPayload.data;
 
     if (event.event === "billing.paid" || event.event === "transparent.completed") {
       const data = event.data;
       // For billing.paid, resource might be 'billing' or 'pixQrCode'
       // For transparent.completed, resource is 'transparent'
-      const resource = (data.billing || data.transparent || data.pixQrCode) as (Record<string, unknown> & { id: string }) | undefined;
+      const resource = (data.billing || data.transparent || data.pixQrCode);
 
       if (!resource) {
         console.warn("[AbacatePay Webhook] No resource found in event data:", JSON.stringify(data));
@@ -531,32 +538,36 @@ export const billingService = {
 
       console.log(`[AbacatePay Webhook] Processing ${event.event}. Resource ID:`, resource.id);
 
-      interface BillingMetadata {
-        installmentId?: string;
-        installment?: { id: string };
-        subscriptionId?: string;
-        subscription?: { id: string };
-        type?: string;
-        info?: { type: string };
-      }
+      const rawMetadata = resource.metadata;
 
-      let metadata = resource.metadata as string | BillingMetadata | undefined;
-
-      // Safety: Parse metadata if it comes as a string
-      if (typeof metadata === "string") {
+      // 2. Extract and Parse Metadata
+      let metadataObj: Record<string, unknown> = {};
+      
+      if (typeof rawMetadata === "string") {
         try {
-          metadata = JSON.parse(metadata) as BillingMetadata;
+          metadataObj = JSON.parse(rawMetadata);
         } catch {
-          console.error("[AbacatePay Webhook] Failed to parse metadata string:", metadata);
+          console.error("[AbacatePay Webhook] Failed to parse metadata string:", rawMetadata);
+          return;
         }
+      } else if (rawMetadata && typeof rawMetadata === "object") {
+        metadataObj = rawMetadata;
       }
 
-      const meta = metadata as BillingMetadata | undefined;
-      console.log("[AbacatePay Webhook] Metadata processed:", JSON.stringify(meta, null, 2));
+      // 3. Validate Metadata with Schema
+      const validatedMetadata = abacatePayMetadataSchema.safeParse(metadataObj);
+      
+      if (!validatedMetadata.success) {
+        console.error("[AbacatePay Webhook] Invalid metadata content:", validatedMetadata.error.format());
+        return;
+      }
 
-      const installmentId = meta?.installmentId || meta?.installment?.id;
-      const subscriptionId = meta?.subscriptionId || meta?.subscription?.id;
-      const type = meta?.type || meta?.info?.type;
+      const meta = validatedMetadata.data;
+      console.log("[AbacatePay Webhook] Metadata validated successfully");
+
+      const installmentId = meta.installmentId || meta.installment?.id;
+      const subscriptionId = meta.subscriptionId || meta.subscription?.id;
+      const type = meta.type || meta.info?.type;
 
       if (installmentId) {
         console.log("[AbacatePay Webhook] Attempting to mark installment as paid:", installmentId);
@@ -566,11 +577,10 @@ export const billingService = {
       }
 
       // Handle Cancellation Fee
-      const subId = subscriptionId;
-      if (type === "cancellation_fee" && subId) {
+      if (type === "cancellation_fee" && subscriptionId) {
         const { contractService } = await import("../contract/contract.service");
         const { contractRepository } = await import("../contract/contract.repository");
-        const contract = await contractRepository.findInstanceBySubscriptionId(subId);
+        const contract = await contractRepository.findInstanceBySubscriptionId(subscriptionId);
         if (contract) {
           await contractService.finalizeCancellation(contract.id);
         }

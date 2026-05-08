@@ -46,9 +46,14 @@ export const endCallAction = protectedAction
   .action(async ({ parsedInput, ctx }) => {
     const { user } = ctx;
 
-    // Teacher ends call for everyone; admin can also do it
-    if (user.role !== "teacher" && user.role !== "admin") {
-      throw new Error("Only teachers can end calls");
+    // 1. Get call session to verify ownership
+    const session = await callService.getCallByStreamId(parsedInput.callId);
+    if (!session) throw new Error("Call not found");
+
+    // 2. Teacher ends call for everyone; admin can also do it
+    // Security: Only the teacher of this specific call or an admin can end it
+    if (user.role !== "admin" && session.teacherId !== user.id) {
+      throw new Error("Only the assigned teacher can end this call");
     }
 
     await callService.endCall(
@@ -73,6 +78,11 @@ export const leaveCallAction = protectedAction
 
     if (user.role !== "student") {
       throw new Error("Only students can leave calls (teachers use endCall)");
+    }
+
+    // Security: A student can only leave their own call state
+    if (user.id !== parsedInput.studentId) {
+      throw new Error("Cannot leave a call for another student");
     }
 
     await callService.studentLeaveCall(parsedInput.studentId);

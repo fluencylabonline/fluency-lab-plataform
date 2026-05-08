@@ -130,7 +130,7 @@ export const schedulingRepository = {
 
   async updateRule(id: string, data: Partial<NewRecurrenceRule>) {
     return db.update(recurrenceRules)
-      .set(data)
+      .set({ ...data, updatedAt: new Date() })
       .where(eq(recurrenceRules.id, id))
       .returning();
   },
@@ -205,7 +205,8 @@ export const schedulingRepository = {
     return db.update(studentCredits)
       .set({
         usedAt: new Date(),
-        usedForClassId
+        usedForClassId,
+        updatedAt: new Date()
       })
       .where(eq(studentCredits.id, id))
       .returning();
@@ -214,7 +215,7 @@ export const schedulingRepository = {
   async expireCredits(now: Date) {
     // This is more logic-heavy, usually handled in service or with a specific update
     return db.update(studentCredits)
-      .set({ usedAt: now }) // Or another way to mark expired
+      .set({ usedAt: now, updatedAt: new Date() }) // Or another way to mark expired
       .where(
         and(
           isNull(studentCredits.usedAt),

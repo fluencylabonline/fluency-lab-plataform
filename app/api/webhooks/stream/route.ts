@@ -1,13 +1,36 @@
 import { NextResponse } from "next/server";
 import { callService } from "@/modules/call/call.service";
+import { env } from "@/env";
+import crypto from "node:crypto";
 
 /**
  * app/api/webhooks/stream/route.ts
  * Receives events from Stream (transcription, call events, etc.)
  */
 export async function POST(req: Request) {
+  const signature = req.headers.get("x-signature");
+
+  if (!signature) {
+    console.error("[Stream Webhook] Missing x-signature header");
+    return NextResponse.json({ error: "Missing signature" }, { status: 401 });
+  }
+
+  const rawBody = await req.text();
+  const expectedSignature = crypto
+    .createHmac("sha256", env.STREAM_SECRET)
+    .update(rawBody)
+    .digest("hex");
+
+  if (
+    signature.length !== expectedSignature.length ||
+    !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
+  ) {
+    console.error("[Stream Webhook] Invalid signature");
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  }
+
   try {
-    const body = await req.json();
+    const body = JSON.parse(rawBody);
     const { type, call_cid, call_transcription } = body;
 
     console.log(`[Stream Webhook] Received event: ${type}`);

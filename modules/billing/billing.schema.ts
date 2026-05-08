@@ -143,6 +143,36 @@ export const updateInstallmentSchema = z.object({
   password: z.string().optional(), // For sensitive manual changes
 });
 
+// AbacatePay Webhook Schemas
+export const abacatePayMetadataSchema = z.object({
+  installmentId: z.string().uuid().optional(),
+  subscriptionId: z.string().uuid().optional(),
+  type: z.string().optional(),
+  // Support for legacy/alternative naming patterns
+  installment: z.object({ id: z.string().uuid() }).optional(),
+  subscription: z.object({ id: z.string().uuid() }).optional(),
+  info: z.object({ type: z.string() }).optional(),
+});
+
+export const abacatePayWebhookSchema = z.object({
+  event: z.string(),
+  id: z.string(),
+  data: z.object({
+    billing: z.object({
+      id: z.string(),
+      metadata: z.union([z.string(), z.record(z.string(), z.any())]).optional(),
+    }).optional(),
+    transparent: z.object({
+      id: z.string(),
+      metadata: z.union([z.string(), z.record(z.string(), z.any())]).optional(),
+    }).optional(),
+    pixQrCode: z.object({
+      id: z.string(),
+      metadata: z.union([z.string(), z.record(z.string(), z.any())]).optional(),
+    }).optional(),
+  }),
+});
+
 export type Plan = typeof plansTable.$inferSelect;
 export type Subscription = typeof subscriptionsTable.$inferSelect;
 export type Installment = typeof installmentsTable.$inferSelect;
