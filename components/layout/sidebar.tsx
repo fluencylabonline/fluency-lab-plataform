@@ -11,6 +11,8 @@ import { MenuItemType } from "@/components/layout/types";
 import { useCollapsedStore } from "./collapsed-store";
 import { SidebarTrigger } from "./sidebar-trigger";
 import { ArrowUp } from "lucide-react";
+import Logo from "@/public/brand/logo.png";
+import Image from "next/image";
 
 export interface SidebarProps {
     items: MenuItemType[];
@@ -66,7 +68,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
                             "flex items-center mb-4 transition-all duration-300",
                             isCollapsed ? "justify-center" : "px-3 justify-between"
                         )}>
-                            {!isCollapsed && <span className="text-xs font-bold text-muted-foreground tracking-widest uppercase">FluencyLab</span>}
+                            {!isCollapsed && <Image src={Logo} alt="Logo" width={140} style={{ height: "auto" }} priority /> }
                             <SidebarTrigger />
                         </div>
 

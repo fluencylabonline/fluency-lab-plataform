@@ -72,7 +72,7 @@ export function SignInForm() {
       return;
     }
 
-    notify.success(t("welcomeTitle") || "Bem-vindo!");
+    //notify.success(t("welcomeTitle") || "Bem-vindo!");
     
     setIsSuccess(true);
     

@@ -2,6 +2,11 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
 import { Sidebar } from "@/components/layout/sidebar";
 import { getSidebarItemsByRole } from "@/components/layout/navigations";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Hub - Fluency Lab",
+};
 
 interface HubLayoutProps {
     children: React.ReactNode;

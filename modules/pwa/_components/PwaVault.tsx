@@ -25,8 +25,8 @@ export function PwaVault() {
 
   useEffect(() => {
     const checkState = () => {
-      // 1. Check for Update (Global Priority)
-      if (updateAvailable) {
+      // 1. Check for Update (ONLY for PWA)
+      if (updateAvailable && isStandalone) {
         setType("update");
         setIsOpen(true);
         return;
@@ -34,7 +34,7 @@ export function PwaVault() {
 
       // 2. Check for Install (Only on Profile Page and NOT standalone)
       const isProfilePage = pathname?.includes("/profile");
-      if (isInstallable && isProfilePage && !isStandalone) {
+      if (isInstallable && !isStandalone && isProfilePage) {
         setType("install");
         setIsOpen(true);
         return;
