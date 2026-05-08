@@ -141,7 +141,7 @@ export function QuizPlayer({ quizId, questions, initialResult, onComplete }: Qui
               onClick={() => handleOptionSelect(option)}
             >
               <RadioGroupItem value={option} id={`opt-${idx}`} className="sr-only" />
-              <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${answers[currentQuestion.id] === option ? "border-primary bg-primary" : "border-muted-foreground/30"
+              <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center shrink-0 ${answers[currentQuestion.id] === option ? "border-primary bg-primary" : "border-muted-foreground/30"
                 }`}>
                 {answers[currentQuestion.id] === option && <div className="h-2 w-2 rounded-full bg-white" />}
               </div>

@@ -4,8 +4,14 @@ import type { User, NewUser, NotificationPrefs } from "./user.schema";
 import { env } from "@/env";
 import { communicationService } from "@/modules/communication/communication.service";
 import { abacate } from "@/lib/abacate-pay";
-import { decrypt } from "@/lib/cryptography";
+import { encrypt, decrypt } from "@/lib/cryptography";
 import { mapEloToCEFR } from "@/lib/adaptive-scoring";
+import { TOTP, NobleCryptoPlugin, ScureBase32Plugin } from "otplib";
+
+const totp = new TOTP({
+  crypto: new NobleCryptoPlugin(),
+  base32: new ScureBase32Plugin(),
+});
 
 export const userService = {
   async syncUser(uid: string, data: Partial<NewUser>): Promise<User> {
@@ -213,5 +219,47 @@ export const userService = {
       code,
       ...levels[code]
     };
+  },
+
+  async generateMfaSecret(userId: string): Promise<{ secret: string; otpAuthUrl: string }> {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new Error("USER_NOT_FOUND");
+
+    const secret = totp.generateSecret();
+    const otpAuthUrl = totp.toURI({ 
+      label: user.email, 
+      issuer: "FluencyLab", 
+      secret 
+    });
+
+    return { secret, otpAuthUrl };
+  },
+
+  async verifyAndEnableMfa(userId: string, secret: string, token: string): Promise<boolean> {
+    const result = await totp.verify(token, { secret });
+    if (!result.valid) return false;
+
+    await userRepository.update(userId, {
+      mfaSecret: encrypt(secret),
+      mfaEnabled: true,
+    });
+
+    return true;
+  },
+
+  async disableMfa(userId: string): Promise<void> {
+    await userRepository.update(userId, {
+      mfaSecret: null,
+      mfaEnabled: false,
+    });
+  },
+
+  async verifyMfaToken(userId: string, token: string): Promise<boolean> {
+    const user = await userRepository.findById(userId);
+    if (!user || !user.mfaEnabled || !user.mfaSecret) return false;
+
+    const decryptedSecret = decrypt(user.mfaSecret);
+    const result = await totp.verify(token, { secret: decryptedSecret });
+    return result.valid;
   }
-};
+};

@@ -27,7 +27,10 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
 
     return user ?? null;
   } catch (error) {
-    console.error("[getCurrentUser] Error verifying session:", error);
+    // Only log if it's not a revoked session error
+    if ((error as { code?: string })?.code !== "auth/session-cookie-revoked") {
+      console.error("[getCurrentUser] Error verifying session:", error);
+    }
     return null;
   }
 });

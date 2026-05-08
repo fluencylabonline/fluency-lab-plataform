@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Palette, Sun, Moon, Monitor } from "lucide-react";
 import { ColorSwitcher } from "@/components/ui/color-switcher";
 import { useTheme } from "next-themes";
@@ -22,17 +21,20 @@ export function AppearanceSettings() {
     ] as const;
 
     return (
-        <Card className="border-none bg-secondary/30">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Palette className="w-5 h-5 text-primary" />
-                    {tc("appearance")}
-                </CardTitle>
-                <CardDescription>
-                    {t("appearanceDesc")}
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-8">
+        <div className="card p-6 space-y-8">
+            <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <Palette className="w-5 h-5" />
+                </div>
+                <div>
+                    <h3 className="font-bold text-lg">{tc("appearance")}</h3>
+                    <p className="text-sm text-muted-foreground">
+                        {t("appearanceDesc")}
+                    </p>
+                </div>
+            </div>
+
+            <div className="space-y-8">
                 <div className="space-y-4">
                     <div className="flex flex-col space-y-1">
                         <span className="font-bold">{t("themeColor")}</span>
@@ -70,7 +72,7 @@ export function AppearanceSettings() {
                         ))}
                     </div>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }

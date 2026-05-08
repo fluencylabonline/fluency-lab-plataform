@@ -12,7 +12,7 @@ import { communicationService } from "@/modules/communication/communication.serv
 import { checkRateLimit } from "@/lib/rate-limit";
 import { locales } from "@/i18n/config";
 import { decrypt } from "@/lib/cryptography";
-import { verifySudoMode } from "@/lib/auth-server";
+import { verifySudoMode, getCurrentUser } from "@/lib/auth-server";
 
 // --- Funções Auxiliares Privadas ---
 const generateInviteLink = async (email: string, locale: string = "pt") => {
@@ -53,10 +53,25 @@ export const loginAction = actionClient
         throw error;
       }
 
+      // Check if MFA is enabled for this user
+      const user = await userService.getUserById(uid);
       const sessionCookie = await userService.createSessionCookie(idToken);
       const cookieStore = await cookies();
       const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24;
 
+      if (user?.mfaEnabled) {
+        // Set a temporary "mfa_pending" cookie instead of "session"
+        cookieStore.set("mfa_pending", sessionCookie, {
+          maxAge: 300, // 5 minutes
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          path: "/",
+          sameSite: "lax",
+        });
+        return { success: true, mfaRequired: true };
+      }
+
+      // Standard login (No MFA)
       cookieStore.set("session", sessionCookie, {
         maxAge,
         httpOnly: true,
@@ -72,11 +87,50 @@ export const loginAction = actionClient
     }
   });
 
-export const logoutAction = protectedAction.action(async ({ ctx }) => {
+export const verifyMfaLoginAction = actionClient
+  .inputSchema(z.object({ token: z.string().length(6) }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const cookieStore = await cookies();
+      const mfaPendingCookie = cookieStore.get("mfa_pending");
+      if (!mfaPendingCookie) return { success: false, error: "sessionExpired" };
+
+      const sessionCookie = mfaPendingCookie.value;
+      const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+      
+      const isValid = await userService.verifyMfaToken(decodedClaims.uid, parsedInput.token);
+      if (!isValid) return { success: false, error: "invalidToken" };
+
+      // Success! Set the real session cookie
+      cookieStore.set("session", sessionCookie, {
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        sameSite: "lax",
+      });
+      
+      cookieStore.delete("mfa_pending");
+      return { success: true };
+    } catch (error) {
+      console.error("[verifyMfaLoginAction] Error:", error);
+      return { success: false, error: "error" };
+    }
+  });
+
+export const logoutAction = actionClient.action(async () => {
   try {
-    await userService.revokeSessions(ctx.user.id);
+    const user = await getCurrentUser();
+    
+    // If we have a user, revoke all sessions in Firebase Admin
+    if (user) {
+      await userService.revokeSessions(user.id);
+    }
+
+    // Always clear the session cookie
     const cookieStore = await cookies();
     cookieStore.delete("session");
+    cookieStore.delete("mfa_pending");
 
     revalidatePath("/");
     return { success: true };
@@ -319,4 +373,45 @@ export const getStudentLanguagesAction = protectedAction
   .action(async ({ ctx }) => {
     const user = await userService.getUserById(ctx.user.id);
     return user?.languages || [];
+  });
+
+export const generateMfaSecretAction = protectedAction
+  .action(async ({ ctx }) => {
+    try {
+      const result = await userService.generateMfaSecret(ctx.user.id);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error("[generateMfaSecretAction] Error:", error);
+      return { success: false, error: "error" };
+    }
+  });
+
+export const enrollMfaAction = protectedAction
+  .inputSchema(z.object({
+    secret: z.string().min(1),
+    token: z.string().length(6),
+  }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const success = await userService.verifyAndEnableMfa(ctx.user.id, parsedInput.secret, parsedInput.token);
+      if (!success) return { success: false, error: "invalidToken" };
+      
+      revalidatePath("/hub/student/settings");
+      return { success: true };
+    } catch (error) {
+      console.error("[enrollMfaAction] Error:", error);
+      return { success: false, error: "error" };
+    }
+  });
+
+export const disableMfaAction = protectedAction
+  .action(async ({ ctx }) => {
+    try {
+      await userService.disableMfa(ctx.user.id);
+      revalidatePath("/hub/student/settings");
+      return { success: true };
+    } catch (error) {
+      console.error("[disableMfaAction] Error:", error);
+      return { success: false, error: "error" };
+    }
   });

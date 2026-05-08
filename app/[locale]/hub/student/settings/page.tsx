@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/lib/auth-server";
+import { getCurrentUser, checkUserHasPassword } from "@/lib/auth-server";
 import { userService } from "@/modules/user/user.service";
 import { redirect } from "next/navigation";
 import { SettingsPageContent } from "@/modules/user/_components/SettingsPageContent";
@@ -21,5 +21,7 @@ export default async function SettingsPage() {
     marketing: false,
   };
 
-  return <SettingsPageContent initialNotificationPrefs={prefs} />;
+  const hasPassword = await checkUserHasPassword(sessionUser.id);
+  
+  return <SettingsPageContent initialNotificationPrefs={prefs} hasPassword={hasPassword} />;
 }

@@ -6,7 +6,11 @@ import {
   User as FirebaseUser,
   verifyPasswordResetCode,
   confirmPasswordReset as firebaseConfirmPasswordReset,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  updatePassword as firebaseUpdatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+  linkWithCredential
 } from "firebase/auth";
 import { auth } from "./firebase";
 
@@ -15,8 +19,8 @@ import { auth } from "./firebase";
  * The component NEVER needs try/catch — it just checks result.success.
  */
 export type AuthResult<T = undefined> =
-  | { success: true; data?: T }
-  | { success: false; error: string };
+  | { success: true; data?: T; mfaRequired?: boolean }
+  | { success: false; error: string; mfaRequired?: boolean };
 
 /**
  * Known Firebase error codes that are "expected" and should be silenced.
@@ -51,6 +55,13 @@ function getFirebaseErrorMessage(error: unknown): string | null {
  * No try/catch in components. No inline error state.
  */
 export const authClient = {
+  /**
+   * 0. Get current user (Client-side)
+   */
+  getUser() {
+    return auth.currentUser;
+  },
+
   /**
    * 1. Login with Email/Password
    */
@@ -104,7 +115,10 @@ export const authClient = {
         };
       }
 
-      return { success: true };
+      return { 
+        success: true, 
+        mfaRequired: !!result.data.mfaRequired 
+      };
     } catch {
       return { success: false, error: "error" };
     }
@@ -186,6 +200,112 @@ export const authClient = {
     } catch (error) {
       const key = getFirebaseErrorMessage(error);
       return { success: false, error: key || "error" };
+    }
+  },
+
+  /**
+   * 9. Update current user password
+   * Requires re-authentication with current password.
+   */
+  async updatePassword(currentPassword: string, newPassword: string): Promise<AuthResult> {
+    const user = auth.currentUser;
+    if (!user || !user.email) return { success: false, error: "unauthorized" };
+
+    try {
+      // Re-authenticate first
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+
+      // Update password
+      await firebaseUpdatePassword(user, newPassword);
+      return { success: true };
+    } catch (error) {
+      const key = getFirebaseErrorMessage(error);
+      return { success: false, error: key || "error" };
+    }
+  },
+
+  /**
+   * 10. Set password for a user (linking EmailAuthProvider)
+   * Used for Google-only users who want to add a password.
+   */
+  async linkPassword(password: string): Promise<AuthResult> {
+    const user = auth.currentUser;
+    if (!user || !user.email) return { success: false, error: "unauthorized" };
+
+    try {
+      const credential = EmailAuthProvider.credential(user.email, password);
+      await linkWithCredential(user, credential);
+      return { success: true };
+    } catch (error) {
+      const key = getFirebaseErrorMessage(error);
+      return { success: false, error: key || "error" };
+    }
+  },
+
+  /**
+   * 11. Check if MFA is enabled
+   */
+  async getMfaStatus(): Promise<boolean> {
+    const { useUserStore } = await import("@/modules/user/user.store");
+    const user = useUserStore.getState().user;
+    return !!user?.mfaEnabled;
+  },
+
+  /**
+   * 12. Generate TOTP secret for MFA enrollment
+   */
+  async getTotpSecret(): Promise<AuthResult<{ secret: string; otpAuthUrl: string }>> {
+    try {
+      const { generateMfaSecretAction } = await import("@/modules/user/user.actions");
+      const result = await generateMfaSecretAction();
+      
+      if (!result?.data?.success || !result.data.data) {
+        return { success: false, error: "error" };
+      }
+
+      return { success: true, data: result.data.data };
+    } catch (error) {
+      console.error("[getTotpSecret] Error:", error);
+      return { success: false, error: "error" };
+    }
+  },
+
+  /**
+   * 13. Enroll TOTP factor
+   */
+  async enrollTotp(secret: string, code: string): Promise<AuthResult> {
+    try {
+      const { enrollMfaAction } = await import("@/modules/user/user.actions");
+      const result = await enrollMfaAction({ secret, token: code });
+      
+      if (!result?.data?.success) {
+        return { success: false, error: result?.data?.error || "error" };
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error("[enrollTotp] Error:", error);
+      return { success: false, error: "error" };
+    }
+  },
+
+  /**
+   * 14. Disable MFA
+   */
+  async disableMfa(): Promise<AuthResult> {
+    try {
+      const { disableMfaAction } = await import("@/modules/user/user.actions");
+      const result = await disableMfaAction();
+      
+      if (!result?.data?.success) {
+        return { success: false, error: "error" };
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error("[disableMfa] Error:", error);
+      return { success: false, error: "error" };
     }
   },
 };

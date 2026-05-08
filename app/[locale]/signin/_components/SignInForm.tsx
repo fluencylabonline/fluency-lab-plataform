@@ -17,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { signInSchema, type SignInValues } from "@/modules/user/user.schema";
 import { TransitionAnimation } from "@/components/ui/transition-animation";
+import { VerifyMfaVault } from "./VerifyMfaVault";
 
 export function SignInForm() {
   const t = useTranslations("Auth");
@@ -28,6 +29,7 @@ export function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isCredentialsLoading, setIsCredentialsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showMfa, setShowMfa] = useState(false);
 
   const {
     register,
@@ -42,6 +44,15 @@ export function SignInForm() {
       rememberMe: false,
     },
   });
+
+  const handleLoginSuccess = () => {
+    setIsSuccess(true);
+    setShowMfa(false);
+    setTimeout(() => {
+      router.push(redirectTo || `/hub`);
+      router.refresh();
+    }, 3500);
+  };
 
   const onSubmit: SubmitHandler<SignInValues> = async (data) => {
     setIsLoading(true);
@@ -61,6 +72,13 @@ export function SignInForm() {
     const user = signInResult.data!;
     const sessionResult = await authClient.createSession(user, data.rememberMe);
 
+    if (sessionResult.mfaRequired) {
+      setShowMfa(true);
+      setIsLoading(false);
+      setIsCredentialsLoading(false);
+      return;
+    }
+
     if (!sessionResult.success) {
       const errorMsg = sessionResult.error === "notInvited"
         ? t("notInvited")
@@ -72,14 +90,7 @@ export function SignInForm() {
       return;
     }
 
-    //notify.success(t("welcomeTitle") || "Bem-vindo!");
-    
-    setIsSuccess(true);
-    
-    setTimeout(() => {
-      router.push(redirectTo || `/hub`);
-      router.refresh();
-    }, 3500);
+    handleLoginSuccess();
   };
 
   const handleGoogleSignIn = async () => {
@@ -98,6 +109,12 @@ export function SignInForm() {
     const user = signInResult.data!;
     const sessionResult = await authClient.createSession(user, false);
 
+    if (sessionResult.mfaRequired) {
+      setShowMfa(true);
+      setIsLoading(false);
+      return;
+    }
+
     if (!sessionResult.success) {
       const errorMsg = sessionResult.error === "notInvited"
         ? t("notInvited")
@@ -109,18 +126,13 @@ export function SignInForm() {
     }
 
     notify.success(t("welcomeTitle") || "Login bem-sucedido!");
-    
-    setIsSuccess(true);
-    
-    setTimeout(() => {
-      router.push(redirectTo || `/hub`);
-      router.refresh();
-    }, 3500);
+    handleLoginSuccess();
   };
 
   return (
     <div className="max-w-md mx-auto w-full">
       {isSuccess && <TransitionAnimation />}
+      
       <h2 className="text-3xl lg:text-4xl font-bold text-text mb-2">
         {t("signIn") || "Entrar"}
       </h2>
@@ -236,6 +248,12 @@ export function SignInForm() {
           {t("forgotPassword") || "Esqueci minha senha"}
         </a>
       </div>
+
+      <VerifyMfaVault 
+        open={showMfa}
+        onOpenChange={setShowMfa}
+        onSuccess={handleLoginSuccess}
+      />
     </div>
   );
 }

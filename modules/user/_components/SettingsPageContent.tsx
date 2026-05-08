@@ -2,6 +2,7 @@
 
 import { Header } from "@/components/layout/header";
 import { NotificationSettings } from "./NotificationSettings";
+import { SecuritySettings } from "./SecuritySettings";
 import { AppearanceSettings } from "@/modules/appearance/_components/AppearanceSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Palette, Bell, User, Shield } from "lucide-react";
@@ -10,9 +11,10 @@ import { useTranslations } from "next-intl";
 
 interface SettingsPageContentProps {
   initialNotificationPrefs: NotificationPrefs;
+  hasPassword: boolean;
 }
 
-export function SettingsPageContent({ initialNotificationPrefs }: SettingsPageContentProps) {
+export function SettingsPageContent({ initialNotificationPrefs, hasPassword }: SettingsPageContentProps) {
   const t = useTranslations("Settings");
   const tc = useTranslations("Common");
 
@@ -76,11 +78,7 @@ export function SettingsPageContent({ initialNotificationPrefs }: SettingsPageCo
           </TabsContent>
 
           <TabsContent value="security" className="mt-0">
-             <div className="p-12 border-2 border-dashed border-secondary rounded-3xl flex flex-col items-center justify-center text-center opacity-50 bg-secondary/10">
-                <Shield className="w-12 h-12 mb-4 text-muted-foreground" />
-                <p className="font-bold text-lg">{t("securityPlaceholderTitle")}</p>
-                <p className="text-sm">{t("securityPlaceholderDesc")}</p>
-             </div>
+             <SecuritySettings hasPassword={hasPassword} />
           </TabsContent>
         </Tabs>
       </div>

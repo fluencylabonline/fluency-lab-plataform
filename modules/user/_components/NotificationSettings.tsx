@@ -4,8 +4,6 @@ import { useTransition } from "react";
 import { updateNotificationPrefsAction } from "@/modules/user/user.actions";
 import { notify } from "@/components/ui/toaster";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bell, Zap, Map as MapIcon, Calendar, Megaphone } from "lucide-react";
 import type { NotificationPrefs } from "@/modules/user/user.schema";
 import { useTranslations } from "next-intl";
@@ -33,23 +31,26 @@ export function NotificationSettings({ initialPrefs }: NotificationSettingsProps
   };
 
   return (
-    <Card className="border-none bg-secondary/30">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Bell className="w-5 h-5 text-primary" />
-          {tc("notifications")}
-        </CardTitle>
-        <CardDescription>
-          {t("notificationsDesc")}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <div className="card p-6 space-y-6">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+          <Bell className="w-5 h-5" />
+        </div>
+        <div>
+          <h3 className="font-bold text-lg">{tc("notifications")}</h3>
+          <p className="text-sm text-muted-foreground">
+            {t("notificationsDesc")}
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-6">
         <div className="flex items-center justify-between space-x-2">
           <div className="flex flex-col space-y-1">
-            <Label className="flex items-center gap-2 font-bold">
+            <div className="flex items-center gap-2 font-bold">
               <Zap className="w-4 h-4 text-orange-500" />
               {t("notifications.streak")}
-            </Label>
+            </div>
             <span className="text-sm text-muted-foreground">
               {t("notifications.streakDesc")}
             </span>
@@ -63,10 +64,10 @@ export function NotificationSettings({ initialPrefs }: NotificationSettingsProps
 
         <div className="flex items-center justify-between space-x-2">
           <div className="flex flex-col space-y-1">
-            <Label className="flex items-center gap-2 font-bold">
+            <div className="flex items-center gap-2 font-bold">
               <MapIcon className="w-4 h-4 text-green-500" />
               {t("notifications.roadmap")}
-            </Label>
+            </div>
             <span className="text-sm text-muted-foreground">
               {t("notifications.roadmapDesc")}
             </span>
@@ -80,10 +81,10 @@ export function NotificationSettings({ initialPrefs }: NotificationSettingsProps
 
         <div className="flex items-center justify-between space-x-2">
           <div className="flex flex-col space-y-1">
-            <Label className="flex items-center gap-2 font-bold">
+            <div className="flex items-center gap-2 font-bold">
               <Calendar className="w-4 h-4 text-blue-500" />
               {t("notifications.classes")}
-            </Label>
+            </div>
             <span className="text-sm text-muted-foreground">
               {t("notifications.classesDesc")}
             </span>
@@ -97,10 +98,10 @@ export function NotificationSettings({ initialPrefs }: NotificationSettingsProps
 
         <div className="flex items-center justify-between space-x-2">
           <div className="flex flex-col space-y-1">
-            <Label className="flex items-center gap-2 font-bold">
+            <div className="flex items-center gap-2 font-bold">
               <Megaphone className="w-4 h-4 text-purple-500" />
               {t("notifications.marketing")}
-            </Label>
+            </div>
             <span className="text-sm text-muted-foreground">
               {t("notifications.marketingDesc")}
             </span>
@@ -111,7 +112,7 @@ export function NotificationSettings({ initialPrefs }: NotificationSettingsProps
             disabled={isPending}
           />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

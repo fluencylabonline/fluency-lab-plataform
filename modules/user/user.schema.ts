@@ -79,6 +79,10 @@ export const usersTable = pgTable("users", {
 
   // Payment
   teacherHourlyRate: integer("teacher_hourly_rate").notNull().default(4200),
+  
+  // Custom MFA (Manual)
+  mfaEnabled: boolean("mfa_enabled").notNull().default(false),
+  mfaSecret: text("mfa_secret"),
 });
 
 // Schemas
@@ -112,6 +116,27 @@ export const twoFactorSchema = z.object({
     .length(6, "Validation.invalid2faCode")
     .regex(/^\d+$/, "Validation.onlyNumbers"),
 });
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Validation.required"),
+    newPassword: z.string().min(8, "Validation.passwordMin"),
+    confirmPassword: z.string().min(8, "Validation.passwordMin"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Validation.passwordMismatch",
+    path: ["confirmPassword"],
+  });
+
+export const setPasswordSchema = z
+  .object({
+    password: z.string().min(8, "Validation.passwordMin"),
+    confirmPassword: z.string().min(8, "Validation.passwordMin"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Validation.passwordMismatch",
+    path: ["confirmPassword"],
+  });
 
 export const requestNewInviteSchema = z.object({
   email: z.email("Validation.emailInvalid"),
@@ -222,6 +247,8 @@ export type SignInValues = z.input<typeof signInSchema>;
 export type ForgotPasswordValues = z.input<typeof forgotPasswordSchema>;
 export type ResetPasswordValues = z.input<typeof resetPasswordSchema>;
 export type TwoFactorValues = z.input<typeof twoFactorSchema>;
+export type ChangePasswordValues = z.input<typeof changePasswordSchema>;
+export type SetPasswordValues = z.input<typeof setPasswordSchema>;
 export type RequestNewInviteValues = z.input<typeof requestNewInviteSchema>;
 
 export type OnboardingWelcomeValues = z.input<typeof onboardingWelcomeSchema>;
