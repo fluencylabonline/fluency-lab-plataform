@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
+import DOMPurify from "isomorphic-dompurify";
 import { HomeScreen } from "@/components/landing/screens/HomeScreen";
 import { PathScreen } from "@/components/landing/screens/PathScreen";
 import { EditorScreen } from "./screens/EditScreen";
@@ -29,6 +30,8 @@ export function LandingHero({ user }: { user: User | null }) {
     return () => clearInterval(interval);
   }, []);
 
+  const sanitizedSubtitle = DOMPurify.sanitize(t.raw("heroSubtitle") || "");
+
   return (
     <main className="w-full h-full relative grid grid-cols-1 lg:grid-cols-2 flex-1">
       <div className="flex flex-col justify-center lg:justify-end px-6 md:px-12 lg:px-14 pb-12 lg:pb-20 z-20 order-1 pt-22 lg:pt-0">
@@ -36,7 +39,7 @@ export function LandingHero({ user }: { user: User | null }) {
           <p className="text-gray-200 dark:text-gray-300 font-medium text-sm md:text-sm max-w-md">
             <span
               dangerouslySetInnerHTML={{
-                __html: t.raw("heroSubtitle") || "",
+                __html: sanitizedSubtitle,
               }}
             />
           </p>

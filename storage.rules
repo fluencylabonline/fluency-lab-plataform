@@ -38,7 +38,9 @@ service firebase.storage {
       // Course covers are publicly readable
       allow read: if true;
       
+      // Only Admins and Managers can upload course covers
       allow write: if request.auth != null 
+                    && (request.auth.token.role == 'admin' || request.auth.token.role == 'manager')
                     && request.resource.size < 5 * 1024 * 1024 
                     && request.resource.contentType.matches('image/(jpeg|png|webp|jpg)');
     }
@@ -58,11 +60,13 @@ service firebase.storage {
     }
 
     match /certificates/{studentId}/{fileName} {
-      // Certificates are readable by the student owner and admins/managers
-      allow read: if request.auth != null;
+      // Certificates are readable by the student owner and staff (admins/managers)
+      allow read: if request.auth != null 
+                   && (request.auth.uid == studentId 
+                       || request.auth.token.role == 'admin' 
+                       || request.auth.token.role == 'manager');
       
-      // Uploads are handled via Server API (Firebase Admin SDK), 
-      // but we add rules for documentation and extra safety.
+      // Uploads are handled via Server API (Firebase Admin SDK)
       allow write: if false; 
     }
   }

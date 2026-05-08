@@ -298,6 +298,10 @@ export const revealSensitiveDataAction = adminAction
     try {
       const { userId, field, password } = parsedInput;
 
+      // Rate limit: 5 reveals per hour to prevent brute-force or abuse
+      const limit = await checkRateLimit("sudo_reveal", ctx.user.id, 5, 3600 * 1000);
+      if (!limit.success) return { success: false, error: "rateLimitExceeded" };
+
       // Verify admin password (Sudo Mode)
       const isValid = await verifySudoMode(ctx.user.id, ctx.user.email!, password);
       if (!isValid) return { success: false, error: "authError" };
@@ -335,6 +339,10 @@ export const requestStudentDeactivationAction = adminAction
   .action(async ({ parsedInput, ctx }) => {
     try {
       const { userId, password } = parsedInput;
+
+      // Rate limit: 3 deactivations per hour to prevent brute-force or destructive abuse
+      const limit = await checkRateLimit("sudo_deactivate", ctx.user.id, 3, 3600 * 1000);
+      if (!limit.success) return { success: false, error: "rateLimitExceeded" };
 
       // 1. Sudo Mode Verification
       const isValid = await verifySudoMode(ctx.user.id, ctx.user.email!, password);

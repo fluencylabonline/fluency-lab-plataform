@@ -1,5 +1,6 @@
 "use client";
 
+import DOMPurify from "isomorphic-dompurify";
 import { useTranslations } from "next-intl";
 import { signContractAction, getPendingContractAction } from "@/modules/contract/contract.actions";
 import { notify } from "@/components/ui/toaster";
@@ -113,7 +114,7 @@ export function StepContract({
                             href={downloadUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] text-sm text-slate-400 transition-all hover:border-white/[0.14] hover:text-slate-200"
+                            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/8 text-sm text-slate-400 transition-all hover:border-white/[0.14] hover:text-slate-200"
                         >
                             <Download className="h-4 w-4" />
                             Baixar contrato (PDF)
@@ -158,14 +159,16 @@ export function StepContract({
         })
         : "";
 
+    const sanitizedPreview = DOMPurify.sanitize(previewContent);
+
     return (
         <div className="space-y-6">
 
             {/* Contract scroll area */}
             {contract ? (
-                <div className="overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.03]">
+                <div className="overflow-hidden rounded-xl border border-white/[0.07] bg-white/3">
                     {/* Header */}
-                    <div className="flex items-center gap-2.5 border-b border-white/[0.06] px-5 py-3.5">
+                    <div className="flex items-center gap-2.5 border-b border-white/6 px-5 py-3.5">
                         <FileText className="h-4 w-4 text-violet-400" />
                         <span className="text-sm font-medium text-slate-400">
                             {t("contract.title")}
@@ -179,7 +182,7 @@ export function StepContract({
                                 prose-headings:text-slate-300 prose-headings:font-medium
                                 prose-strong:text-slate-300 prose-strong:font-medium
                                 prose-p:text-slate-500"
-                            dangerouslySetInnerHTML={{ __html: previewContent }}
+                            dangerouslySetInnerHTML={{ __html: sanitizedPreview }}
                         />
                     </div>
                 </div>
@@ -195,7 +198,7 @@ export function StepContract({
                     type="button"
                     onClick={onBack}
                     disabled={loading}
-                    className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-white/[0.08] text-sm text-slate-500 transition-all hover:border-white/[0.14] hover:text-slate-300 disabled:opacity-40"
+                    className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-white/8 text-sm text-slate-500 transition-all hover:border-white/[0.14] hover:text-slate-300 disabled:opacity-40"
                 >
                     <ArrowLeft className="h-4 w-4" />
                     {t("steps.back") || "Voltar"}
@@ -204,7 +207,7 @@ export function StepContract({
                 <button
                     onClick={onSign}
                     disabled={loading || !contract}
-                    className="flex h-11 flex-[2] items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
+                    className="flex h-11 flex-2 items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
                 >
                     {loading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />

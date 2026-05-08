@@ -25,28 +25,40 @@ interface TemplateData {
 }
 
 /**
+ * Escapes HTML special characters to prevent XSS when rendering via dangerouslySetInnerHTML.
+ */
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/**
  * Injeta dados dinâmicos no template de contrato usando placeholders {{key}}.
  */
 export function injectTemplateData(template: string, data: TemplateData): string {
   let content = template;
   
   const mapping: Record<string, string> = {
-    "user.name": data.user.name || "",
-    "user.taxId": data.user.taxId || "",
-    "user.email": data.user.email || "",
-    "user.businessTaxId": data.user.businessTaxId || "",
-    "user.pixKey": data.user.pixKey || "",
-    "school.name": data.school.name || "",
-    "school.legalName": data.school.legalName || "",
-    "school.taxId": data.school.taxId || "",
-    "school.representative": data.school.representativeName || "",
-    "date": data.date,
+    "user.name": escapeHtml(data.user.name || ""),
+    "user.taxId": escapeHtml(data.user.taxId || ""),
+    "user.email": escapeHtml(data.user.email || ""),
+    "user.businessTaxId": escapeHtml(data.user.businessTaxId || ""),
+    "user.pixKey": escapeHtml(data.user.pixKey || ""),
+    "school.name": escapeHtml(data.school.name || ""),
+    "school.legalName": escapeHtml(data.school.legalName || ""),
+    "school.taxId": escapeHtml(data.school.taxId || ""),
+    "school.representative": escapeHtml(data.school.representativeName || ""),
+    "date": escapeHtml(data.date),
   };
 
   if (data.guardian) {
-    mapping["guardian.name"] = data.guardian.name || "";
-    mapping["guardian.taxId"] = data.guardian.taxId || "";
-    mapping["guardian.relationship"] = data.guardian.relationship || "";
+    mapping["guardian.name"] = escapeHtml(data.guardian.name || "");
+    mapping["guardian.taxId"] = escapeHtml(data.guardian.taxId || "");
+    mapping["guardian.relationship"] = escapeHtml(data.guardian.relationship || "");
   }
 
   // Iteramos sobre o mapeamento e substituímos no template
