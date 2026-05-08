@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useUserStore } from "../user.store";
 import { User } from "../user.schema";
 
@@ -9,17 +9,14 @@ interface UserStoreInitializerProps {
 }
 
 export function UserStoreInitializer({ user }: UserStoreInitializerProps) {
-  const initialized = useRef(false);
-
-  if (!initialized.current && user) {
-    useUserStore.getState().setUser(user);
-    initialized.current = true;
-  }
-
   useEffect(() => {
-    if (user) {
+    if (!user) return;
+
+    const id = setTimeout(() => {
       useUserStore.getState().setUser(user);
-    }
+    }, 0);
+
+    return () => clearTimeout(id);
   }, [user]);
 
   return null;

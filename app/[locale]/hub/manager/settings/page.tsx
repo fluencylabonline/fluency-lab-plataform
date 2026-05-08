@@ -1,4 +1,5 @@
 import { getCurrentUser, checkUserHasPassword } from "@/lib/auth-server";
+import { adminAuth } from "@/lib/firebase-admin";
 import { userService } from "@/modules/user/user.service";
 import { redirect } from "next/navigation";
 import { SettingsPageContent } from "@/modules/user/_components/SettingsPageContent";
@@ -21,7 +22,21 @@ export default async function ManagerSettingsPage() {
     marketing: false,
   };
 
-  const hasPassword = await checkUserHasPassword(sessionUser.id);
-  
-  return <SettingsPageContent initialNotificationPrefs={prefs} hasPassword={hasPassword} />;
+  const [hasPassword, firebaseUser] = await Promise.all([
+    checkUserHasPassword(sessionUser.id),
+    adminAuth.getUser(sessionUser.id),
+  ]);
+
+  const emailVerified = firebaseUser.emailVerified;
+
+  return (
+    <SettingsPageContent
+      initialData={{
+        user,
+        emailVerified,
+        initialNotificationPrefs: prefs,
+        hasPassword,
+      }}
+    />
+  );
 }

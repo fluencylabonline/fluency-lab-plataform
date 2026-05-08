@@ -83,6 +83,12 @@ export const usersTable = pgTable("users", {
   // Custom MFA (Manual)
   mfaEnabled: boolean("mfa_enabled").notNull().default(false),
   mfaSecret: text("mfa_secret"),
+
+  // Cancellation Flow
+  cancellationPending: boolean("cancellation_pending").notNull().default(false),
+  cancellationPixCode: text("cancellation_pix_code"),
+  cancellationPixImage: text("cancellation_pix_image"),
+  cancellationAmount: integer("cancellation_amount"),
 });
 
 // Schemas

@@ -28,6 +28,7 @@ import {
 } from "./templates/ContractStatusEmails";
 import { ScheduleAlertEmail } from "./templates/ScheduleAlertEmail";
 import { CertificateEmail } from "./templates/CertificateEmail";
+import { FarewellEmail } from "./templates/FarewellEmail";
 import type {
   SendWhatsAppTemplateOptions,
   WhatsAppResponse,
@@ -300,6 +301,18 @@ export class CommunicationService {
       });
     } catch (error) {
       console.error("[CommunicationService.sendCertificateEmail] Error:", error);
+    }
+  }
+
+  async sendFarewellEmail(email: string, name: string) {
+    try {
+      await this.sendEmail({
+        to: email,
+        subject: "Sentiremos sua falta! 👋",
+        template: React.createElement(FarewellEmail, { name }),
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendFarewellEmail] Error:", error);
     }
   }
 

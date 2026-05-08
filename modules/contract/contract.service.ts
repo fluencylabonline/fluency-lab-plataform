@@ -233,7 +233,8 @@ export const contractService = {
         success: true, 
         feeRequired: true, 
         pixCode: result.pixCode, 
-        pixImage: result.pixImage 
+        pixImage: result.pixImage,
+        amount: result.amount
       };
     }
 
@@ -256,8 +257,14 @@ export const contractService = {
     // 1. Cancel future classes
     await schedulingService.cancelFutureClassesForStudent(instance.userId);
 
-    // 2. Deactivate user
-    await userService.updateUser(instance.userId, { isActive: false });
+    // 2. Deactivate user and clear pending cancellation info
+    await userService.updateUser(instance.userId, { 
+      isActive: false,
+      cancellationPending: false,
+      cancellationPixCode: null,
+      cancellationPixImage: null,
+      cancellationAmount: null
+    });
 
     // 2.1 Update subscription status if exists
     if (instance.subscriptionId) {

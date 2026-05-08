@@ -18,6 +18,17 @@ import {
   type ChangePasswordValues, 
   type SetPasswordValues 
 } from "@/modules/user/user.schema";
+import { 
+  Vault, 
+  VaultHeader, 
+  VaultContent, 
+  VaultTitle, 
+  VaultDescription, 
+  VaultIcon,
+  VaultFooter,
+  VaultPrimaryButton,
+  VaultSecondaryButton
+} from "@/components/ui/vault";
 import { Spinner } from "@/components/ui/spinner";
 import { useEffect } from "react";
 
@@ -35,6 +46,7 @@ export function SecuritySettings({ hasPassword: initialHasPassword }: SecuritySe
   const [isSettingPassword, setIsSettingPassword] = useState(false);
   const [mfaEnabled, setMfaEnabled] = useState(false);
   const [isTotpVaultOpen, setIsTotpVaultOpen] = useState(false);
+  const [isConfirmMfaVaultOpen, setIsConfirmMfaVaultOpen] = useState(false);
   const [isDisablingMfa, setIsDisablingMfa] = useState(false);
 
   const fetchMfaStatus = () => {
@@ -88,6 +100,20 @@ export function SecuritySettings({ hasPassword: initialHasPassword }: SecuritySe
       setForm.reset();
     } else {
       notify.error(ta(`errors.${result.error}`) || tc("error"));
+    }
+  };
+
+  const onDisableMfa = async () => {
+    setIsDisablingMfa(true);
+    const result = await authClient.disableMfa();
+    setIsDisablingMfa(false);
+
+    if (result.success) {
+      notify.success(t("mfaDisabled") || "MFA desativado com sucesso.");
+      setMfaEnabled(false);
+      setIsConfirmMfaVaultOpen(false);
+    } else {
+      notify.error(tc("error"));
     }
   };
 
@@ -187,18 +213,7 @@ export function SecuritySettings({ hasPassword: initialHasPassword }: SecuritySe
               if (val) {
                 setIsTotpVaultOpen(true);
               } else {
-                // Confirm disable
-                if (confirm(t("confirmDisableMfa") || "Tem certeza que deseja desativar a autenticação em duas etapas?")) {
-                  setIsDisablingMfa(true);
-                  const result = await authClient.disableMfa();
-                  setIsDisablingMfa(false);
-                  if (result.success) {
-                    notify.success(t("mfaDisabled") || "MFA desativado com sucesso.");
-                    setMfaEnabled(false);
-                  } else {
-                    notify.error(tc("error"));
-                  }
-                }
+                setIsConfirmMfaVaultOpen(true);
               }
             }}
           />
@@ -219,6 +234,32 @@ export function SecuritySettings({ hasPassword: initialHasPassword }: SecuritySe
           setMfaEnabled(true);
         }}
       />
+
+      <Vault open={isConfirmMfaVaultOpen} onOpenChange={setIsConfirmMfaVaultOpen}>
+        <VaultContent>
+          <VaultHeader>
+            <VaultIcon type="warning" />
+            <VaultTitle>{t("confirmDisableMfaTitle") || "Desativar MFA?"}</VaultTitle>
+            <VaultDescription>
+              {t("confirmDisableMfa") || "Tem certeza que deseja desativar a autenticação em duas etapas?"}
+            </VaultDescription>
+          </VaultHeader>
+          
+          <VaultFooter>
+            <VaultSecondaryButton onClick={() => setIsConfirmMfaVaultOpen(false)}>
+              {tc("cancel") || "Cancelar"}
+            </VaultSecondaryButton>
+            <VaultPrimaryButton 
+              variant="destructive" 
+              onClick={onDisableMfa} 
+              disabled={isDisablingMfa}
+            >
+              {isDisablingMfa ? <Spinner className="mr-2" /> : null}
+              {t("disable") || "Desativar"}
+            </VaultPrimaryButton>
+          </VaultFooter>
+        </VaultContent>
+      </Vault>
     </div>
   );
 }

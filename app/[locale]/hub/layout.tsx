@@ -24,6 +24,10 @@ export default async function HubLayout({ children }: HubLayoutProps) {
         redirect(`/suspended`);
     }
 
+    if (user.cancellationPending) {
+        redirect(`/pending-cancellation`);
+    }
+
     if (user.role === "student" && !user.onboarded) {
         redirect(`/onboarding`);
     }

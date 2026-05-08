@@ -368,10 +368,12 @@ export const billingService = {
         });
       }
 
-      return {
-        success: true,
-        pixCode: pix.brCode,
-        pixImage: pix.brCodeBase64
+      return { 
+        success: true, 
+        feeRequired: true, 
+        pixCode: pix.brCode, 
+        pixImage: pix.brCodeBase64,
+        amount: feeAmount
       };
     }
 

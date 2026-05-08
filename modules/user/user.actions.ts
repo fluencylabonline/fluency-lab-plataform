@@ -4,13 +4,13 @@ import { cookies } from "next/headers";
 import { actionClient, protectedAction, permissionAction, adminAction } from "@/lib/safe-action";
 import { userService } from "./user.service";
 import { z } from "zod";
+import { locales } from "@/i18n/config";
 import { revalidatePath } from "next/cache";
 import { adminAuth } from "@/lib/firebase-admin";
 import { NewUser, createUserSchema, requestNewInviteSchema, updateUserSchema, notificationPrefsSchema } from "./user.schema";
 import { env } from "@/env";
 import { communicationService } from "@/modules/communication/communication.service";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { locales } from "@/i18n/config";
 import { decrypt } from "@/lib/cryptography";
 import { verifySudoMode, getCurrentUser } from "@/lib/auth-server";
 
@@ -414,4 +414,70 @@ export const disableMfaAction = protectedAction
       console.error("[disableMfaAction] Error:", error);
       return { success: false, error: "error" };
     }
+  });
+
+export const updateLocaleAction = protectedAction
+  .schema(z.object({ locale: z.enum(locales) }))
+  .action(async ({ parsedInput, ctx }) => {
+    await userService.updateUser(ctx.user.id, { locale: parsedInput.locale });
+    revalidatePath("/hub/student/settings");
+    return { success: true } as { success: boolean; error?: string };
+  });
+
+export const syncUserPhotoAction = protectedAction
+  .schema(z.object({ photoUrl: z.string().url() }))
+  .action(async ({ parsedInput, ctx }) => {
+    await userService.updateUser(ctx.user.id, { photoUrl: parsedInput.photoUrl });
+    revalidatePath("/hub/student/settings");
+    return { success: true } as { success: boolean; error?: string };
+  });
+
+export const requestSelfCancellationAction = protectedAction
+  .action(async ({ ctx }) => {
+    try {
+      const { contractRepository } = await import("../contract/contract.repository");
+      const { contractService } = await import("../contract/contract.service");
+      const { communicationService } = await import("../communication/communication.service");
+
+      // 1. Encontra contrato assinado (ativo)
+      const contracts = await contractRepository.findUserInstances(ctx.user.id);
+      const activeContract = contracts.find((c) => c.status === "signed");
+
+      if (!activeContract) {
+        // Sem contrato: cancela direto
+        const { schedulingService } = await import("../scheduling/scheduling.service");
+        await schedulingService.cancelFutureClassesForStudent(ctx.user.id);
+        await userService.updateUser(ctx.user.id, { isActive: false });
+        await communicationService.sendFarewellEmail(ctx.user.email, ctx.user.name);
+        return { success: true, feeRequired: false };
+      }
+
+      // 2. Verifica se há taxa de cancelamento
+      const result = (await contractService.requestCancellation(activeContract.id)) as { success: boolean; feeRequired: boolean; pixCode?: string; pixImage?: string; amount?: number; error?: string };
+
+      if (result.feeRequired) {
+        // Se houver taxa, marca como pendente e armazena info do PIX
+        await userService.updateUser(ctx.user.id, {
+          cancellationPending: true,
+          cancellationPixCode: result.pixCode,
+          cancellationPixImage: result.pixImage,
+          cancellationAmount: result.amount,
+        });
+      } else {
+        // Se não houve taxa (o finalizedCancellation já foi chamado no service), envia e-mail
+        await communicationService.sendFarewellEmail(ctx.user.email, ctx.user.name);
+      }
+
+      revalidatePath("/hub/student/settings");
+      return result as { success: boolean; error?: string; feeRequired?: boolean; pixCode?: string; pixImage?: string; amount?: number };
+    } catch (error) {
+      console.error("[requestSelfCancellationAction] Error:", error);
+      return { success: false, error: (error as Error).message } as { success: boolean; error?: string; feeRequired?: boolean };
+    }
+  });
+
+export const getUserStatusAction = protectedAction
+  .action(async ({ ctx }) => {
+    const user = await userService.getUser(ctx.user.id);
+    return { isActive: user?.isActive, cancellationPending: user?.cancellationPending } as { isActive?: boolean; cancellationPending?: boolean; success: boolean; error?: string };
   });

@@ -3,18 +3,23 @@
 import { Header } from "@/components/layout/header";
 import { NotificationSettings } from "./NotificationSettings";
 import { SecuritySettings } from "./SecuritySettings";
+import { AccountSettings } from "./AccountSettings";
 import { AppearanceSettings } from "@/modules/appearance/_components/AppearanceSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Palette, Bell, User, Shield } from "lucide-react";
-import type { NotificationPrefs } from "@/modules/user/user.schema";
+import type { NotificationPrefs, User as UserType } from "@/modules/user/user.schema";
 import { useTranslations } from "next-intl";
 
 interface SettingsPageContentProps {
-  initialNotificationPrefs: NotificationPrefs;
-  hasPassword: boolean;
+  initialData: {
+    user: UserType;
+    emailVerified: boolean;
+    initialNotificationPrefs: NotificationPrefs;
+    hasPassword: boolean;
+  };
 }
 
-export function SettingsPageContent({ initialNotificationPrefs, hasPassword }: SettingsPageContentProps) {
+export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
   const t = useTranslations("Settings");
   const tc = useTranslations("Common");
 
@@ -27,15 +32,15 @@ export function SettingsPageContent({ initialNotificationPrefs, hasPassword }: S
       />
 
       <div className="container">
-        <Tabs defaultValue="appearance" className="w-full">
+        <Tabs defaultValue="account" className="w-full">
           <div className="overflow-x-auto pb-2 mb-4 scrollbar-none">
             <TabsList className="w-full justify-start md:w-fit bg-transparent gap-2 p-0 h-auto">
               <TabsTrigger 
-                value="profile" 
+                value="account" 
                 className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-xl border-none transition-all flex items-center gap-2"
               >
                 <User className="w-4 h-4" />
-                {tc("profile")}
+                {tc("account")}
               </TabsTrigger>
               <TabsTrigger 
                 value="appearance" 
@@ -61,12 +66,13 @@ export function SettingsPageContent({ initialNotificationPrefs, hasPassword }: S
             </TabsList>
           </div>
 
-          <TabsContent value="profile" className="mt-0">
-             <div className="p-12 border-2 border-dashed border-secondary rounded-3xl flex flex-col items-center justify-center text-center opacity-50 bg-secondary/10">
-                <User className="w-12 h-12 mb-4 text-muted-foreground" />
-                <p className="font-bold text-lg">{t("profilePlaceholderTitle")}</p>
-                <p className="text-sm">{t("profilePlaceholderDesc")}</p>
-             </div>
+          <TabsContent value="account" className="mt-0">
+             <AccountSettings 
+                initialData={{
+                  user: initialData.user,
+                  emailVerified: initialData.emailVerified
+                }} 
+             />
           </TabsContent>
 
           <TabsContent value="appearance" className="mt-0">
@@ -74,11 +80,11 @@ export function SettingsPageContent({ initialNotificationPrefs, hasPassword }: S
           </TabsContent>
 
           <TabsContent value="notifications" className="mt-0">
-            <NotificationSettings initialPrefs={initialNotificationPrefs} />
+            <NotificationSettings initialPrefs={initialData.initialNotificationPrefs} />
           </TabsContent>
 
           <TabsContent value="security" className="mt-0">
-             <SecuritySettings hasPassword={hasPassword} />
+             <SecuritySettings hasPassword={initialData.hasPassword} />
           </TabsContent>
         </Tabs>
       </div>
