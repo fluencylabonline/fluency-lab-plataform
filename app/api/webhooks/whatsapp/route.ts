@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { env } from "@/env";
 import { communicationRepository } from "@/modules/communication/communication.repository";
+import crypto from "node:crypto";
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -16,9 +17,36 @@ export async function GET(req: NextRequest) {
   return new NextResponse("Forbidden", { status: 403 });
 }
 
+
 export async function POST(req: NextRequest) {
+  const signature = req.headers.get("x-hub-signature-256");
+
+  if (!signature) {
+    console.error("[WhatsApp Webhook] Missing x-hub-signature-256 header");
+    return NextResponse.json({ error: "Missing signature" }, { status: 401 });
+  }
+
+  const rawBody = await req.text();
+  const expectedSig =
+    "sha256=" +
+    crypto
+      .createHmac("sha256", env.WHATSAPP_APP_SECRET)
+      .update(rawBody)
+      .digest("hex");
+
+  const sigBuffer = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expectedSig);
+
+  if (
+    sigBuffer.length !== expectedBuffer.length ||
+    !crypto.timingSafeEqual(sigBuffer, expectedBuffer)
+  ) {
+    console.error("[WhatsApp Webhook] Invalid signature");
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  }
+
   try {
-    const body = await req.json();
+    const body = JSON.parse(rawBody);
 
     // Verificação de payload da Meta
     if (body.object !== "whatsapp_business_account") {

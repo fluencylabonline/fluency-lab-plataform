@@ -67,6 +67,12 @@ export const notebookRepository = {
     return session;
   },
 
+  async findSessionById(sessionId: string): Promise<typeof notebookSessionsTable.$inferSelect | undefined> {
+    return db.query.notebookSessionsTable.findFirst({
+      where: eq(notebookSessionsTable.id, sessionId),
+    });
+  },
+
   async updateSessionHeartbeat(sessionId: string) {
     const now = new Date();
     const session = await db.query.notebookSessionsTable.findFirst({

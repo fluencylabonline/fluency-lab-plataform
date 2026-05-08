@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { schedulingService } from "@/modules/scheduling/scheduling.service";
 import { env } from "@/env";
 
+import crypto from "node:crypto";
+
 /**
  * CRON: Scheduling Tasks
  * This route is called by a scheduler (e.g., Vercel Cron or GitHub Actions)
@@ -9,9 +11,13 @@ import { env } from "@/env";
  */
 export async function POST(req: Request) {
   const authHeader = req.headers.get("authorization");
+  const expected = `Bearer ${env.CRON_SECRET}`;
+  const provided = authHeader ?? "";
+  const isAuthorized =
+    provided.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
 
-  // Validate CRON_SECRET to prevent unauthorized external calls
-  if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
+  if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

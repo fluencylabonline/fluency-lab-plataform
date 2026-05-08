@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server";
 import { notebookService } from "@/modules/notebook/notebook.service";
+import { env } from "@/env";
+import crypto from "node:crypto";
 
 export async function POST(req: Request) {
   try {
-    // 1. Verify Authorization Header
     const authHeader = req.headers.get("authorization");
-    const secret = process.env.CRON_SECRET;
+    const expected = `Bearer ${env.CRON_SECRET}`;
+    const provided = authHeader ?? "";
+    
+    const isAuthorized =
+      provided.length === expected.length &&
+      crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
 
-    if (!secret || authHeader !== `Bearer ${secret}`) {
+    if (!isAuthorized) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

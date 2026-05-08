@@ -2,11 +2,17 @@ import { NextResponse } from "next/server";
 import { billingService } from "@/modules/billing/billing.service";
 import { env } from "@/env";
 
+import crypto from "node:crypto";
+
 export async function POST(req: Request) {
   const authHeader = req.headers.get("authorization");
+  const expected = `Bearer ${env.CRON_SECRET}`;
+  const provided = authHeader ?? "";
+  const isAuthorized =
+    provided.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
 
-  // Simple CRON_SECRET check to prevent unauthorized calls
-  if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
+  if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

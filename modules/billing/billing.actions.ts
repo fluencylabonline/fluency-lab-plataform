@@ -3,6 +3,7 @@
 import { adminAction, protectedAction } from "@/lib/safe-action";
 import { createPlanSchema, createSubscriptionSchema, updatePlanSchema, updateInstallmentSchema } from "./billing.schema";
 import { billingService } from "./billing.service";
+import { billingRepository } from "./billing.repository";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
@@ -62,10 +63,12 @@ export const createSubscriptionAction = adminAction
 export const cancelSubscriptionAction = protectedAction
   .inputSchema(z.object({ subscriptionId: z.uuid() }))
   .action(async ({ parsedInput, ctx }) => {
-    // ABAC: Student can only cancel their own, Admin can cancel any
-    if (ctx.user.role !== "admin") {
-      await billingService.getActivePayment(ctx.user.id);
-      // This is a bit loose, service should handle ownership check
+    // 1. Ownership validation (IDOR prevention)
+    const subscription = await billingRepository.findSubscriptionById(parsedInput.subscriptionId);
+    if (!subscription) return { success: false, error: "notFound" };
+
+    if (ctx.user.role !== "admin" && subscription.studentId !== ctx.user.id) {
+      throw new Error("UNAUTHORIZED");
     }
 
     const result = await billingService.cancelSubscription(parsedInput.subscriptionId);
@@ -152,8 +155,11 @@ export const getPaymentDetailsAction = protectedAction
     const details = await billingService.getPaymentDetailsForReceipt(parsedInput.id);
     if (!details) return { success: false, error: "Pagamento não encontrado" };
 
-    // Ownership check (simplified, could be more robust)
-    if (ctx.user.role !== "admin" && details.studentEmail !== ctx.user.email) {
+    // Ownership check by studentId
+    const isOwner = details.studentId === ctx.user.id;
+    const isAdmin = ctx.user.role === "admin" || ctx.user.role === "manager";
+
+    if (!isOwner && !isAdmin) {
       return { success: false, error: "Acesso negado" };
     }
 

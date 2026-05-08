@@ -49,9 +49,10 @@ export const env = createEnv({
 
     // WhatsApp Business API
     WHATSAPP_ACCESS_TOKEN: z.string().min(1),
+    WHATSAPP_APP_SECRET: z.string().min(1),
     WHATSAPP_PHONE_NUMBER_ID: z.string().min(1),
     WHATSAPP_BUSINESS_ACCOUNT_ID: z.string().optional(),
-    WHATSAPP_VERIFY_TOKEN: z.string().min(1).default("fluencylab_whatsapp_token"),
+    WHATSAPP_VERIFY_TOKEN: z.string().min(1),
   },
   client: {
     // Firebase Client (public)
@@ -95,11 +96,12 @@ export const env = createEnv({
 
     // AI & External Services
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-    YOUTUBE_API_KEY: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || process.env.YOUTUBE_API_KEY,
+    YOUTUBE_API_KEY: process.env.YOUTUBE_API_KEY,
     UNSPLASH_ACCESS_KEY: process.env.UNSPLASH_ACCESS_KEY,
     UNSPLASH_SECRET_KEY: process.env.UNSPLASH_SECRET_KEY,
     ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
     WHATSAPP_ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN,
+    WHATSAPP_APP_SECRET: process.env.WHATSAPP_APP_SECRET,
     WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID,
     WHATSAPP_BUSINESS_ACCOUNT_ID: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
     WHATSAPP_VERIFY_TOKEN: process.env.WHATSAPP_VERIFY_TOKEN,

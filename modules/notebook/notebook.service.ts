@@ -120,11 +120,19 @@ export const notebookService = {
     });
   },
 
-  async heartbeatNotebookSession(sessionId: string) {
+  async heartbeatNotebookSession(sessionId: string, requesterId: string) {
+    const session = await notebookRepository.findSessionById(sessionId);
+    if (!session) throw new Error("Session not found");
+    if (session.userId !== requesterId) throw new Error("Unauthorized");
+
     return notebookRepository.updateSessionHeartbeat(sessionId);
   },
 
-  async endNotebookSession(sessionId: string, content?: string) {
+  async endNotebookSession(sessionId: string, requesterId: string, content?: string) {
+    const sessionRecord = await notebookRepository.findSessionById(sessionId);
+    if (!sessionRecord) throw new Error("Session not found");
+    if (sessionRecord.userId !== requesterId) throw new Error("Unauthorized");
+
     const session = await notebookRepository.endSession(sessionId);
     
     if (session && content) {

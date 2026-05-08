@@ -1,7 +1,7 @@
 import { curriculumRepository } from "./curriculum.repository";
 import { aiService } from "@/modules/ai/ai.service";
 import { mediaService } from "@/modules/media/media.service";
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { CEFRLevel, LearningItemMetadata, PracticeItem, VocabMetadata, StructureMetadata, AnalysisResult, QuizData, QuizQuestion } from "./curriculum.types";
 import { lessons, media } from "./curriculum.schema";
 

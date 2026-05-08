@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { learningService } from "@/modules/learning/learning.service";
 import { env } from "@/env";
 
+import crypto from "node:crypto";
+
 /**
  * CRON: Learning & Practice Reminders
  * This route should be called periodically (e.g., every 4 hours)
@@ -9,9 +11,13 @@ import { env } from "@/env";
  */
 export async function POST(req: Request) {
   const authHeader = req.headers.get("authorization");
+  const expected = `Bearer ${env.CRON_SECRET}`;
+  const provided = authHeader ?? "";
+  const isAuthorized =
+    provided.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
 
-  // Validate CRON_SECRET
-  if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
+  if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -81,8 +81,8 @@ export const startNotebookSessionAction = protectedAction
  */
 export const heartbeatNotebookSessionAction = protectedAction
   .schema(z.object({ sessionId: z.string().uuid() }))
-  .action(async ({ parsedInput }) => {
-    await notebookService.heartbeatNotebookSession(parsedInput.sessionId);
+  .action(async ({ parsedInput, ctx }) => {
+    await notebookService.heartbeatNotebookSession(parsedInput.sessionId, ctx.user.id);
     return { success: true };
   });
 
@@ -94,8 +94,8 @@ export const endNotebookSessionAction = protectedAction
     sessionId: z.string().uuid(),
     content: z.string().optional()
   }))
-  .action(async ({ parsedInput }) => {
-    await notebookService.endNotebookSession(parsedInput.sessionId, parsedInput.content);
+  .action(async ({ parsedInput, ctx }) => {
+    await notebookService.endNotebookSession(parsedInput.sessionId, ctx.user.id, parsedInput.content);
     return { success: true };
   });
 

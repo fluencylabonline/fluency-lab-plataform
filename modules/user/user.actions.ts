@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { actionClient, protectedAction, permissionAction, adminAction } from "@/lib/safe-action";
+import crypto from "node:crypto";
 import { userService } from "./user.service";
 import { z } from "zod";
 import { locales } from "@/i18n/config";
@@ -235,10 +236,24 @@ export const requestNewInviteAction = actionClient
 
 export const searchStudentsAction = permissionAction("material.view")
   .inputSchema(z.object({ term: z.string().min(1) }))
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
+    // 1. Rate Limit: 10 searches per minute per user
+    const rateLimit = await checkRateLimit("search_students", ctx.user.id, 10, 60 * 1000);
+    if (!rateLimit.success) throw new Error("RATE_LIMIT_EXCEEDED");
+
     const results = await userService.searchStudents(parsedInput.term);
-    console.log(`[searchStudentsAction] term="${parsedInput.term}", found ${results.length} students:`, results.map(s => s.name));
-    return results;
+    
+    // 2. Safe Logging (GDPR/LGPD): Redact terms, log count
+    const hashedTerm = crypto.createHash("sha256").update(parsedInput.term).digest("hex").substring(0, 8);
+    console.log(`[searchStudentsAction] user=${ctx.user.id} term_hash=${hashedTerm} found=${results.length}`);
+
+    // 3. Prevent Data Leakage: Return only non-sensitive fields
+    return results.map(s => ({
+      id: s.id,
+      name: s.name,
+      email: s.email,
+      photoUrl: s.photoUrl,
+    }));
   });
 
 export const searchUsersAction = protectedAction

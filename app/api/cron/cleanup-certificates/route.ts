@@ -4,11 +4,19 @@ import { adminStorage } from "@/lib/firebase-admin";
 import { subYears } from "date-fns";
 import { env } from "@/env";
 
+import crypto from "node:crypto";
+
 export async function POST(req: Request) {
   // Check for cron secret
   const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
-    return new Response("Unauthorized", { status: 401 });
+  const expected = `Bearer ${env.CRON_SECRET}`;
+  const provided = authHeader ?? "";
+  const isAuthorized =
+    provided.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
+
+  if (!isAuthorized) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {

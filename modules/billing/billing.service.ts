@@ -762,6 +762,7 @@ export const billingService = {
 
     return {
       id: installment.id,
+      studentId: student.id,
       amount: installment.amount,
       paymentDate: installment.paidAt || installment.updatedAt,
       paymentMethod: "PIX",
