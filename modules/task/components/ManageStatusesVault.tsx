@@ -1,9 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
-import { Vault, VaultContent, VaultHeader, VaultTitle, VaultDescription } from "@/components/ui/vault";
+import { 
+  Vault, 
+  VaultContent, 
+  VaultHeader, 
+  VaultTitle, 
+  VaultDescription,
+  VaultFooter,
+  VaultPrimaryButton,
+  VaultSecondaryButton,
+  VaultIcon
+} from "@/components/ui/vault";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,6 +36,7 @@ interface ManageStatusesVaultProps {
 
 export function ManageStatusesVault({ open, onOpenChange, project }: ManageStatusesVaultProps) {
   const t = useTranslations("Tasks");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const form = useForm<CreateStatusValues>({
     resolver: zodResolver(createStatusSchema),
@@ -81,12 +93,11 @@ export function ManageStatusesVault({ open, onOpenChange, project }: ManageStatu
   };
 
   const onDeleteProject = async () => {
-    if (!confirm(t("confirmDeleteProject"))) return;
-    
     await notify.promise(deleteProjectAction({ id: project.id }), {
       loading: t("notifications.deletingProject"),
       success: (result) => {
         if (!result?.data?.success) throw new Error(result?.data?.error || t("notifications.error"));
+        setShowDeleteConfirm(false);
         onOpenChange(false);
         return t("notifications.projectDeleted");
       },
@@ -94,7 +105,7 @@ export function ManageStatusesVault({ open, onOpenChange, project }: ManageStatu
     });
   };
 
-  return (
+  return (<>
     <Vault 
       open={open} 
       onOpenChange={onOpenChange}
@@ -114,7 +125,7 @@ export function ManageStatusesVault({ open, onOpenChange, project }: ManageStatu
             <Button 
               variant="destructive" 
               size="sm" 
-              onClick={onDeleteProject}
+              onClick={() => setShowDeleteConfirm(true)}
             >
               <Trash2 className="w-4 h-4 mr-2" />
               {t("deleteProject")}
@@ -208,5 +219,28 @@ export function ManageStatusesVault({ open, onOpenChange, project }: ManageStatu
       </div>
     </VaultContent>
   </Vault>
+
+  <Vault open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+    <VaultContent>
+      <VaultHeader>
+        <VaultIcon type="delete" />
+        <VaultTitle>{t("confirmDeleteProject")}</VaultTitle>
+        <VaultDescription>{t("deleteProjectWarning") || "Esta ação não pode ser desfeita."}</VaultDescription>
+      </VaultHeader>
+      
+      <VaultFooter>
+        <VaultSecondaryButton onClick={() => setShowDeleteConfirm(false)}>
+          {t("cancel") || "Cancelar"}
+        </VaultSecondaryButton>
+        <VaultPrimaryButton 
+          variant="destructive" 
+          onClick={onDeleteProject}
+        >
+          {t("delete") || "Excluir"}
+        </VaultPrimaryButton>
+      </VaultFooter>
+    </VaultContent>
+  </Vault>
+  </>
   );
 }

@@ -22,7 +22,6 @@ import {
   ArrowLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -120,7 +119,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
           
           {/* Sidebar Settings */}
           <div className="lg:col-span-4 space-y-6">
-            <Card className="p-6 space-y-6">
+            <div className="card p-6 space-y-6">
               <form onSubmit={handleSubmit(handleSave)} className="space-y-4">
                 <Field label={t('title') || "Título"} required error={errors.title?.message}>
                   <Input {...form.register("title")} placeholder={t('titlePlaceholder') || "Ex: Prática de Conversação"} />
@@ -189,7 +188,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                   {quizQuestions.length > 0 && <Badge className="ml-auto">{quizQuestions.length}</Badge>}
                 </Button>
               </div>
-            </Card>
+            </div>
           </div>
 
           {/* Main Content Area */}
@@ -203,7 +202,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                   exit={{ opacity: 0, y: -10 }}
                   className="space-y-4"
                 >
-                  <Card className="p-6">
+                  <div className="card p-6">
                     <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
                       <FileText className="w-5 h-5 text-primary" />
                       {t('activityText') || "Texto da Atividade"}
@@ -212,7 +211,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                       content={form.getValues("contentJson")} 
                       onChange={(val) => form.setValue("contentJson", val, { shouldDirty: true })}
                     />
-                  </Card>
+                  </div>
                 </motion.div>
               ) : (
                 <motion.div
@@ -222,7 +221,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                   exit={{ opacity: 0, y: -10 }}
                   className="space-y-6"
                 >
-                  <Card className="p-6">
+                  <div className="card p-6">
                     <div className="flex items-center justify-between mb-8">
                       <div>
                         <h3 className="text-xl font-bold">{t('evaluation') || "Avaliação"}</h3>
@@ -305,7 +304,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                         </div>
                       )}
                     </div>
-                  </Card>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

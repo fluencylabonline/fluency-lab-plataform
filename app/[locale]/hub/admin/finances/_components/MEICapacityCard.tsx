@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useTranslations, useFormatter } from "next-intl";
 import { Users, TrendingUp, AlertCircle } from "lucide-react";
 import { MEICapacity } from "@/modules/finance/finance.types";
@@ -18,14 +17,14 @@ export function MEICapacityCard({ capacity }: MEICapacityCardProps) {
   const isNearLimit = committedProgress > 80;
 
   return (
-    <Card className="border-border shadow-xs overflow-hidden bg-linear-to-br from-card to-muted/30">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-semibold flex items-center gap-2">
+    <div className="card border-border overflow-hidden bg-linear-to-br from-card to-muted/30">
+      <div className="p-6 pb-2">
+        <h3 className="subtitle flex items-center gap-2">
           <TrendingUp className="size-5 text-blue-500" />
           {t("title") || "Limite MEI"}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-6">
+        </h3>
+      </div>
+      <div className="p-6 flex flex-col gap-6">
         {/* Revenue Limit Progress */}
         <div className="flex flex-col gap-2">
           <div className="flex justify-between text-sm">
@@ -88,7 +87,7 @@ export function MEICapacityCard({ capacity }: MEICapacityCardProps) {
             <span className="font-bold">{capacity.maxStudents}</span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

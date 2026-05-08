@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { OnboardingStepStats } from "@/modules/dashboard/dashboard.types";
 import { Users } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -15,12 +14,12 @@ export function OnboardingFunnel({ data }: OnboardingFunnelProps) {
   const firstCount = data[0]?.count ?? 1;
 
   return (
-    <Card className="border bg-card shadow-sm h-full">
-      <CardHeader className="px-6 pt-6 pb-3">
-        <CardTitle className="text-base font-semibold">{t("title")}</CardTitle>
-        <CardDescription>{t("subtitle")}</CardDescription>
-      </CardHeader>
-      <CardContent className="px-6 pb-6">
+    <div className="card h-full">
+      <div className="px-6 pt-6 pb-3">
+        <h3 className="subtitle">{t("title")}</h3>
+        <div className="paragraph">{t("subtitle")}</div>
+      </div>
+      <div className="px-6 pb-6">
         {data.length > 0 ? (
           <div className="space-y-4">
             {data.map((step, idx) => {
@@ -35,13 +34,13 @@ export function OnboardingFunnel({ data }: OnboardingFunnelProps) {
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       {/* Step number pill */}
-                      <span className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">
+                      <span className="shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">
                         {idx + 1}
                       </span>
                       <span className="text-sm font-medium truncate">{step.label}</span>
                     </div>
 
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       {conversionFromFirst !== null && (
                         <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
                           {conversionFromFirst}%
@@ -87,7 +86,7 @@ export function OnboardingFunnel({ data }: OnboardingFunnelProps) {
             <span className="text-sm">{t("empty")}</span>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

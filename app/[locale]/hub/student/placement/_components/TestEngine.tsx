@@ -12,6 +12,17 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { type PlacementResult } from "./ResultView";
+import { 
+  Vault, 
+  VaultContent, 
+  VaultHeader, 
+  VaultTitle, 
+  VaultDescription, 
+  VaultFooter, 
+  VaultPrimaryButton, 
+  VaultSecondaryButton,
+  VaultIcon
+} from "@/components/ui/vault";
 
 interface TestEngineProps {
   initialQuestion: Question;
@@ -36,6 +47,7 @@ export function TestEngine({
   const [isStarted, setIsStarted] = useState(false);
   const [feedback, setFeedback] = useState<{ isCorrect: boolean; correctAnswer?: string } | null>(null);
   const [nextQuestionData, setNextQuestionData] = useState<Question | null>(null);
+  const [showExitVault, setShowExitVault] = useState(false);
 
   const { playSound } = usePlacementSound();
   const router = useRouter();
@@ -166,10 +178,12 @@ export function TestEngine({
   }, [isSubmitting, feedback, testId, currentQuestion, playSound, t]);
 
   const handleExit = useCallback(() => {
-    if (confirm(t("exitConfirm") || "Are you sure you want to exit? Your progress will be saved.")) {
-      router.push("/hub/student/placement");
-    }
-  }, [router, t]);
+    setShowExitVault(true);
+  }, []);
+
+  const confirmExit = useCallback(() => {
+    router.push("/hub/student/placement");
+  }, [router]);
 
   if (testResult) {
     return (
@@ -223,6 +237,7 @@ export function TestEngine({
   }
 
   return (
+    <>
     <TestView
       currentQuestion={currentQuestion}
       answeredCount={answeredCount}
@@ -236,5 +251,28 @@ export function TestEngine({
       isSubmitting={isSubmitting}
       feedback={feedback}
     />
+    
+    <Vault open={showExitVault} onOpenChange={setShowExitVault}>
+      <VaultContent>
+        <VaultHeader>
+          <VaultIcon type="warning" />
+          <VaultTitle>{t("exitConfirmTitle") || "Sair do Teste?"}</VaultTitle>
+          <VaultDescription>{t("exitConfirm") || "Tem certeza que deseja sair? Seu progresso será salvo."}</VaultDescription>
+        </VaultHeader>
+        
+        <VaultFooter>
+          <VaultSecondaryButton onClick={() => setShowExitVault(false)}>
+            {t("continueTesting") || "Continuar Teste"}
+          </VaultSecondaryButton>
+          <VaultPrimaryButton 
+            variant="destructive" 
+            onClick={confirmExit}
+          >
+            {t("exit") || "Sair"}
+          </VaultPrimaryButton>
+        </VaultFooter>
+      </VaultContent>
+    </Vault>
+    </>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCardData } from "@/modules/dashboard/dashboard.types";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -50,7 +49,7 @@ export function StatCard({ data }: StatCardProps) {
   const Icon = config.icon;
 
   return (
-    <Card className="relative overflow-hidden border bg-card shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+    <div className="card relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5">
       {/* Subtle top accent bar */}
       <div
         className={cn(
@@ -61,16 +60,16 @@ export function StatCard({ data }: StatCardProps) {
         )}
       />
 
-      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3 pt-5 px-5">
-        <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+      <div className="flex flex-row items-start justify-between space-y-0 pb-3 pt-5 px-5">
+        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
           {data.title}
-        </CardTitle>
+        </div>
         <div className={cn("flex items-center justify-center w-7 h-7 rounded-lg", config.bg, config.border, "border")}>
           <Icon className={cn("h-3.5 w-3.5", config.color)} />
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="px-5 pb-5">
+      <div className="px-5 pb-5">
         <div className="text-2xl font-bold tracking-tight tabular-nums">
           {formattedValue}
         </div>
@@ -85,7 +84,7 @@ export function StatCard({ data }: StatCardProps) {
             </span>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

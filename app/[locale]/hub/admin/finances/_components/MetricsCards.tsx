@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { useTranslations, useFormatter } from "next-intl";
 import { ArrowUpCircle, ArrowDownCircle, Wallet, LandmarkIcon, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -72,8 +71,8 @@ export function MetricsCards({ metrics, monthlyBreakdown, currentMonth }: Metric
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.map((card, i) => (
-        <Card key={i} className="border-border shadow-xs overflow-hidden">
-          <CardContent className="p-5 flex flex-col gap-3">
+        <div key={i} className="card border-border overflow-hidden">
+          <div className="p-5 flex flex-col gap-3">
             <div className="flex justify-between items-start">
               <div className={cn("p-2 rounded-lg", card.bgColor)}>
                 <card.icon className={cn("size-5", card.color)} />
@@ -117,8 +116,8 @@ export function MetricsCards({ metrics, monthlyBreakdown, currentMonth }: Metric
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ))}
     </div>
   );

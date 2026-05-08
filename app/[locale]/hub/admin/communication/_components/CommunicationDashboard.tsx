@@ -16,6 +16,17 @@ import { getWhatsAppTemplatesAction, deleteWhatsAppTemplateAction } from "@/modu
 import { notify } from "@/components/ui/toaster";
 import { WhatsAppChat } from "@/app/[locale]/hub/admin/communication/_components/WhatsAppChat";
 import { SendWhatsAppMessageVault } from "@/app/[locale]/hub/admin/communication/_components/SendWhatsAppMessageVault";
+import { 
+  Vault, 
+  VaultContent, 
+  VaultHeader, 
+  VaultTitle, 
+  VaultDescription, 
+  VaultFooter, 
+  VaultPrimaryButton, 
+  VaultSecondaryButton,
+  VaultIcon
+} from "@/components/ui/vault";
 
 
 interface CommunicationDashboardProps {
@@ -28,6 +39,8 @@ export function CommunicationDashboard({ initialTemplates, initialHistory }: Com
   const [isWabaOpen, setIsWabaOpen] = useState(false);
   const [isSendWaOpen, setIsSendWaOpen] = useState(false);
   const [templates, setTemplates] = useState<WhatsAppTemplate[]>(initialTemplates);
+  const [showDeleteVault, setShowDeleteVault] = useState(false);
+  const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -46,8 +59,14 @@ export function CommunicationDashboard({ initialTemplates, initialHistory }: Com
     }
   };
 
-  const handleDeleteTemplate = async (name: string) => {
-    if (!confirm(`Tem certeza que deseja excluir o template "${name}"? Esta ação é irreversível na Meta.`)) return;
+  const handleDeleteTemplate = (name: string) => {
+    setTemplateToDelete(name);
+    setShowDeleteVault(true);
+  };
+
+  const confirmDeleteTemplate = async () => {
+    if (!templateToDelete) return;
+    const name = templateToDelete;
 
     try {
       const result = await deleteWhatsAppTemplateAction({ name });
@@ -57,6 +76,9 @@ export function CommunicationDashboard({ initialTemplates, initialHistory }: Com
       }
     } catch {
       notify.error("Erro ao excluir template");
+    } finally {
+      setShowDeleteVault(false);
+      setTemplateToDelete(null);
     }
   };
 
@@ -215,6 +237,30 @@ export function CommunicationDashboard({ initialTemplates, initialHistory }: Com
       <SendNotificationVault open={isNotifyOpen} onOpenChange={setIsNotifyOpen} />
       <CreateWhatsAppTemplateVault open={isWabaOpen} onOpenChange={setIsWabaOpen} />
       <SendWhatsAppMessageVault open={isSendWaOpen} onOpenChange={setIsSendWaOpen} templates={templates} />
+
+      <Vault open={showDeleteVault} onOpenChange={setShowDeleteVault}>
+        <VaultContent>
+          <VaultHeader>
+            <VaultIcon type="delete" />
+            <VaultTitle>Excluir Template?</VaultTitle>
+            <VaultDescription>
+              Tem certeza que deseja excluir o template <strong>&quot;{templateToDelete}&quot;</strong>? Esta ação é irreversível na Meta.
+            </VaultDescription>
+          </VaultHeader>
+          
+          <VaultFooter>
+            <VaultSecondaryButton onClick={() => setShowDeleteVault(false)}>
+              Cancelar
+            </VaultSecondaryButton>
+            <VaultPrimaryButton 
+              variant="destructive" 
+              onClick={confirmDeleteTemplate}
+            >
+              Excluir Permanentemente
+            </VaultPrimaryButton>
+          </VaultFooter>
+        </VaultContent>
+      </Vault>
     </div>
 
   );

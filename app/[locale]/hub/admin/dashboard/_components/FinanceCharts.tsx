@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { MonthlyFinance } from "@/modules/dashboard/dashboard.types";
 import {
   BarChart,
@@ -130,17 +129,17 @@ export function FinanceCharts({ data, pendingIncome }: FinanceChartsProps) {
   ];
 
   return (
-    <Card className="col-span-full border bg-card shadow-sm">
-      <CardHeader className="px-6 pt-6 pb-0">
+    <div className="card col-span-full">
+      <div className="px-6 pt-6 pb-0">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <CardTitle className="text-base font-semibold">{t("cashFlow")}</CardTitle>
-            <CardDescription className="mt-0.5">{t("cashFlowDesc")}</CardDescription>
+            <h3 className="subtitle">{t("cashFlow")}</h3>
+            <div className="paragraph mt-0.5">{t("cashFlowDesc")}</div>
           </div>
 
           {pendingIncome > 0 && (
             <div className="flex items-center gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-900/60 px-3 py-2 self-start">
-              <Clock className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
+              <Clock className="h-3.5 w-3.5 text-amber-500 shrink-0" />
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400 leading-none">
                   {t("pendingIncome")}
@@ -152,12 +151,12 @@ export function FinanceCharts({ data, pendingIncome }: FinanceChartsProps) {
             </div>
           )}
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="px-6 pb-6 pt-5">
+      <div className="px-6 pb-6 pt-5">
         <div className="flex flex-col lg:flex-row gap-5">
           {/* KPI summaries */}
-          <div className="flex flex-row lg:flex-col gap-3 lg:w-48 lg:flex-shrink-0">
+          <div className="flex flex-row lg:flex-col gap-3 lg:w-48 lg:shrink-0">
             {summaries.map((s) => (
               <div key={s.label} className={cn("flex-1 lg:flex-none rounded-xl px-3.5 py-3 space-y-1.5", s.bg)}>
                 <div className="flex items-center justify-between">
@@ -246,7 +245,7 @@ export function FinanceCharts({ data, pendingIncome }: FinanceChartsProps) {
             </ResponsiveContainer>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

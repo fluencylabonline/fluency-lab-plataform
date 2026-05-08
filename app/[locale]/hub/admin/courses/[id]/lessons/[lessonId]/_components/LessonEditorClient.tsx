@@ -28,7 +28,6 @@ import {
   Settings2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { VideoPlayer } from "@/components/ui/video-player";
 import { motion, AnimatePresence } from "framer-motion";
@@ -201,7 +200,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
             animate={{ opacity: 1, x: 0 }}
             className="lg:col-span-4 space-y-6 lg:sticky lg:top-24"
           >
-            <Card className="p-6 space-y-6">
+            <div className="card p-6 space-y-6">
               <div className="flex items-center gap-3 pb-4 border-b">
                 <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <Settings2 className="h-5 w-5" />
@@ -296,10 +295,10 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                   </div>
                 </button>
               </div>
-            </Card>
+            </div>
 
             {/* Status Info */}
-            <Card className="p-6 bg-primary/5 border-primary/10">
+            <div className="card p-6 bg-primary/5 border-primary/10">
               <div className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-full bg-white dark:bg-slate-900 flex items-center justify-center text-primary shadow-sm">
                   {blocks.length}
@@ -309,7 +308,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                   <p className="text-xs text-muted-foreground">{t('videosAndTexts', { videos: blocks.filter(b => b.type === "video").length, texts: blocks.filter(b => b.type === "text").length }) || `${blocks.filter(b => b.type === "video").length} Vídeos e ${blocks.filter(b => b.type === "text").length} Textos`}</p>
                 </div>
               </div>
-            </Card>
+            </div>
           </motion.div>
 
           {/* Right Column: Tab Contents */}
@@ -329,7 +328,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                   className="space-y-6"
                 >
                   {blocks.map((block, index) => (
-                    <Card key={index} className="relative group border-slate-200 dark:border-slate-800 shadow-sm p-6 overflow-hidden">
+                    <div key={index} className="card relative group border-slate-200 dark:border-slate-800 p-6 overflow-hidden">
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -367,7 +366,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                       ) : (
                         <RichTextEditor content={block.content} onChange={(content) => updateTextBlock(index, content)} />
                       )}
-                    </Card>
+                    </div>
                   ))}
 
                   <div className="grid grid-cols-2 gap-4 pt-4">
@@ -399,7 +398,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Card className="p-8 border-slate-200 dark:border-slate-800 shadow-sm">
+                  <div className="card p-8 border-slate-200 dark:border-slate-800">
                     <div className="flex items-center justify-between mb-8">
                       <div>
                         <h3 className="text-xl font-bold">{t('lessonAssessment') || "Avaliação da Aula"}</h3>
@@ -502,7 +501,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                         </div>
                       )}
                     </div>
-                  </Card>
+                  </div>
                 </motion.div>
               )}
 
@@ -679,7 +678,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                             <div className="pt-12 border-t border-slate-100 dark:border-slate-800">
                               <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">{t('finalAssessmentAvailable') || "AVALIAÇÃO FINAL DISPONÍVEL"}</Badge>
                               <h3 className="text-2xl font-bold mb-6">{t('testYourKnowledge') || "Teste seus conhecimentos"}</h3>
-                              <Card className="p-10 border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col items-center text-center shadow-inner">
+                              <div className="card p-10 border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col items-center text-center">
                                 <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-6">
                                   <HelpCircle className="h-10 w-10" />
                                 </div>
@@ -687,7 +686,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                                 <Button className="rounded-3xl h-14 px-12 font-black text-lg shadow-xl shadow-primary/20 transition-transform hover:scale-105 active:scale-95" onClick={() => setIsPreviewingQuiz(true)}>
                                   {t('startQuizPreview') || "Iniciar Visualização do Quiz"}
                                 </Button>
-                              </Card>
+                              </div>
                             </div>
                           )}
                         </div>

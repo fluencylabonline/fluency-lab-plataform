@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { AttendanceStats, PopularCourse } from "@/modules/dashboard/dashboard.types";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { BookOpen } from "lucide-react";
@@ -60,15 +59,15 @@ export function AcademicStats({ attendance, popularCourses }: AcademicStatsProps
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* Pie card */}
-      <Card className="border bg-card shadow-sm">
-        <CardHeader className="px-6 pt-6 pb-3">
-          <CardTitle className="text-base font-semibold">{t("attendanceTitle")}</CardTitle>
-          <CardDescription>{t("attendanceDesc")}</CardDescription>
-        </CardHeader>
-        <CardContent className="px-6 pb-6">
+      <div className="card">
+        <div className="px-6 pt-6 pb-3">
+          <h3 className="subtitle">{t("attendanceTitle")}</h3>
+          <div className="paragraph">{t("attendanceDesc")}</div>
+        </div>
+        <div className="px-6 pb-6">
           {attendanceData.length > 0 ? (
             <div className="flex flex-col sm:flex-row items-center gap-6">
-              <div className="relative h-[180px] w-[180px] flex-shrink-0">
+              <div className="relative h-[180px] w-[180px] shrink-0">
                 <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                   <PieChart>
                     <Pie
@@ -104,12 +103,12 @@ export function AcademicStats({ attendance, popularCourses }: AcademicStatsProps
                     <div key={entry.name} className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 min-w-0">
                         <span
-                          className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+                          className="inline-block w-2 h-2 rounded-full shrink-0"
                           style={{ background: entry.color }}
                         />
                         <span className="text-xs text-muted-foreground truncate">{entry.name}</span>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-2 shrink-0">
                         <span className="text-xs font-semibold tabular-nums">{entry.value}</span>
                         <span className={`text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md ${cfg.bg} ${cfg.text}`}>
                           {pct}%
@@ -126,16 +125,16 @@ export function AcademicStats({ attendance, popularCourses }: AcademicStatsProps
               <span className="text-sm">{t("emptyClasses")}</span>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Popular courses card */}
-      <Card className="border bg-card shadow-sm">
-        <CardHeader className="px-6 pt-6 pb-3">
-          <CardTitle className="text-base font-semibold">{t("coursesTitle")}</CardTitle>
-          <CardDescription>{t("coursesDesc")}</CardDescription>
-        </CardHeader>
-        <CardContent className="px-6 pb-6">
+      <div className="card">
+        <div className="px-6 pt-6 pb-3">
+          <h3 className="subtitle">{t("coursesTitle")}</h3>
+          <div className="paragraph">{t("coursesDesc")}</div>
+        </div>
+        <div className="px-6 pb-6">
           {popularCourses.length > 0 ? (
             <div className="space-y-1">
               {popularCourses.map((course, idx) => {
@@ -147,14 +146,14 @@ export function AcademicStats({ attendance, popularCourses }: AcademicStatsProps
                     <div className="flex items-center justify-between py-2.5 gap-3">
                       <div className="flex items-center gap-3 min-w-0">
                         <span
-                          className={`flex-shrink-0 w-5 h-5 flex items-center justify-center text-xs font-bold ${idx < 3 ? MEDAL_COLORS[idx] : "text-muted-foreground"
+                          className={`shrink-0 w-5 h-5 flex items-center justify-center text-xs font-bold ${idx < 3 ? MEDAL_COLORS[idx] : "text-muted-foreground"
                             }`}
                         >
                           {idx + 1}
                         </span>
                         <span className="text-sm font-medium truncate">{course.title}</span>
                       </div>
-                      <span className="text-xs font-semibold text-muted-foreground tabular-nums flex-shrink-0">
+                      <span className="text-xs font-semibold text-muted-foreground tabular-nums shrink-0">
                         {course.enrollments}
                       </span>
                     </div>
@@ -175,8 +174,8 @@ export function AcademicStats({ attendance, popularCourses }: AcademicStatsProps
               <span className="text-sm">{t("emptyCourses")}</span>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

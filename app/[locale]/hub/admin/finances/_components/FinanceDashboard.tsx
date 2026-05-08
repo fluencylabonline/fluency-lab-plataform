@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FiscalConfigVault } from "./FiscalConfigVault";
 import { ForecastCards } from "./ForecastCards";
 import { MetricsCards } from "./MetricsCards";
@@ -133,30 +132,30 @@ export function FinanceDashboard({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Transactions Section */}
         <div className="lg:col-span-2 flex flex-col gap-6">
-          <Card className="border-border shadow-xs">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg font-semibold">{t("transactions.title")}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
+          <div className="card border-border">
+            <div className="p-6 flex flex-row items-center justify-between">
+              <h3 className="subtitle">{t("transactions.title")}</h3>
+            </div>
+            <div className="p-0">
               <TransactionsTable transactions={initialTransactions} />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Forecast Section */}
         <div className="flex flex-col gap-6">
-          <Card className="border-border shadow-xs">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">{t("forecast.title")}</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
+          <div className="card border-border">
+            <div className="p-6">
+              <h3 className="subtitle">{t("forecast.title")}</h3>
+            </div>
+            <div className="p-6 pt-0 flex flex-col gap-4">
               <ForecastCards
                 forecast={initialForecast}
                 month={currentMonth}
                 year={currentYear}
               />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           <MEICapacityCard capacity={initialMEICapacity} />
         </div>
