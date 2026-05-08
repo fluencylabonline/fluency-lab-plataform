@@ -116,7 +116,7 @@ const VaultContent = React.forwardRef<
                     ) as HTMLElement;
 
                     if (firstInput) {
-                        setTimeout(() => firstInput.focus(), 10);
+                        firstInput.focus();
                     } else {
                         container.focus();
                     }

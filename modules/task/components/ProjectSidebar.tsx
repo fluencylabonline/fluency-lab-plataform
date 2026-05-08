@@ -51,7 +51,7 @@ export function ProjectSidebar({ projects, selectedId, onSelect, className, hide
             <button
               onClick={() => onSelect(project.id)}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all pr-12 active:scale-[0.98]",
+                "w-full flex items-center gap-3 px-4 py-2.5 rounded-md text-sm transition-all pr-12 active:scale-[0.98]",
                 selectedId === project.id 
                   ? "text-white font-semibold shadow-lg" 
                   : "hover:bg-accent text-muted-foreground hover:text-accent-foreground"

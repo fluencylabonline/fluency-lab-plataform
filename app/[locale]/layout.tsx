@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { getMessages } from "next-intl/server";
+import { getMessages, getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
 import { Providers } from "@/components/layout/providers";
 import { Quicksand } from "next/font/google";
@@ -9,19 +9,28 @@ const quicksand = Quicksand({
   subsets: ["latin"],
   variable: "--font-quicksand",
 });
-export const metadata: Metadata = {
-  title: "FluencyLab",
-  description: "Plataforma de ensino de idiomas",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "FluencyLab",
-  },
-  formatDetection: {
-    telephone: false,
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Metadata.root" });
+
+  return {
+    title: t("title"),
+    description: t("description"),
+    manifest: "/manifest.json",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: t("title"),
+    },
+    formatDetection: {
+      telephone: false,
+    },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",

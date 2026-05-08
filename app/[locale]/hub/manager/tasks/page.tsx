@@ -3,9 +3,19 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { taskService } from "@/modules/task/task.service";
 import { TasksPageClient } from "@/modules/task/components/TasksPageClient";
 
-export const metadata: Metadata = {
-  title: "Tarefas | FluencyLab",
-};
+import { getTranslations } from "next-intl/server";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Metadata.tasks" });
+  return {
+    title: t("title"),
+  };
+}
 
 export default async function ManagerTasksPage() {
   await getCurrentUser();

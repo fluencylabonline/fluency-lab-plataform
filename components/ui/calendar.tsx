@@ -229,7 +229,6 @@ type CalendarVaultProps = Omit<React.ComponentProps<typeof DayPicker>, "mode" | 
   disabled?: (date: Date) => boolean
   className?: string
   label?: string
-  buttonVariant?: React.ComponentProps<typeof Button>["variant"]
 }
 
 export function CalendarVault({
@@ -239,7 +238,6 @@ export function CalendarVault({
   disabled,
   className,
   label,
-  buttonVariant = "outline",
   ...props
 }: CalendarVaultProps) {
   const [open, setOpen] = React.useState(false)
@@ -249,8 +247,8 @@ export function CalendarVault({
       <VaultTrigger
         type="button"
         className={cn(
-          buttonVariants({ variant: buttonVariant }),
-          "w-full pl-3 text-left font-normal justify-start h-10",
+          "input",
+          "w-full flex flex-row items-center justify-between pl-3 pr-2 text-left font-normal h-10",
           !date && "text-muted-foreground",
           className
         )}

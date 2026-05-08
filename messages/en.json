@@ -2453,5 +2453,30 @@
     "usageExample": "Usage Example",
     "wellDone": "Well done!",
     "xpEarned": "+10 XP earned! Keep it up!"
+  },
+  "Metadata": {
+    "root": {
+      "title": "FluencyLab",
+      "description": "Language teaching platform"
+    },
+    "hub": {
+      "title": "Hub - Fluency Lab"
+    },
+    "login": {
+      "title": "Login - Fluency Lab"
+    },
+    "tasks": {
+      "title": "Tasks | FluencyLab"
+    },
+    "onboarding": {
+      "title": "Adaptive Profiles | FluencyLab",
+      "description": "Manage students' pedagogical profiles."
+    },
+    "diagnosis": {
+      "title": "Pedagogical Diagnosis | FluencyLab"
+    },
+    "notebook": {
+      "description": "{title}'s Notebook"
+    }
   }
 }

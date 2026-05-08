@@ -8,10 +8,12 @@ interface NotebookPageProps {
   params: Promise<{ notebookId: string; locale: string }>;
 }
 
+import { getTranslations } from "next-intl/server";
+
 export async function generateMetadata({
   params,
 }: NotebookPageProps): Promise<Metadata> {
-  const { notebookId } = await params;
+  const { notebookId, locale } = await params;
   const user = await getCurrentUser();
   if (!user) redirect("/");
 
@@ -22,9 +24,11 @@ export async function generateMetadata({
     notFound();
   }
 
+  const t = await getTranslations({ locale, namespace: "Metadata.notebook" });
+
   return {
     title: notebook.title,
-    description: "Notebook de " + notebook.title,
+    description: t("description", { title: notebook.title }),
   };
 }
 

@@ -4,7 +4,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useState, useEffect, useMemo } from "react";
-import { Vault, VaultContent, VaultHeader, VaultTitle, VaultDescription } from "@/components/ui/vault";
+import { Vault, VaultContent, VaultHeader, VaultTitle, VaultDescription, VaultFooter, VaultSecondaryButton, VaultPrimaryButton } from "@/components/ui/vault";
 import { User } from "@/modules/user/user.schema";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -327,15 +327,15 @@ export function CreateTaskVault({ open, onOpenChange, projectId, projects, initi
           />
         )}
 
-        <div className="flex justify-end gap-3 pt-4">
-          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+        <VaultFooter>
+          <VaultSecondaryButton onClick={() => onOpenChange(false)}>
             {t("cancel")}
-          </Button>
-          <Button onClick={form.handleSubmit(onSubmit)} disabled={form.formState.isSubmitting}>
+          </VaultSecondaryButton>
+          <VaultPrimaryButton onClick={form.handleSubmit(onSubmit)} disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {t("createTask")}
-          </Button>
-        </div>
+          </VaultPrimaryButton>
+        </VaultFooter>
       </div>
     </VaultContent>
   </Vault>

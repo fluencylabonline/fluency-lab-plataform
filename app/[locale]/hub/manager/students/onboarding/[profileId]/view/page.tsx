@@ -3,9 +3,20 @@ import { learningService } from "@/modules/learning/learning.service";
 import { redirect, notFound } from "next/navigation";
 import { ProfileDiagnosisView } from "./_components/ProfileDiagnosisView";
 
-export const metadata = {
-  title: "Diagnóstico Pedagógico | FluencyLab",
-};
+import { getTranslations } from "next-intl/server";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Metadata.diagnosis" });
+  return {
+    title: t("title"),
+  };
+}
 
 interface DiagnosisPageProps {
   params: Promise<{

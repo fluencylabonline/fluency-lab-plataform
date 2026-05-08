@@ -58,7 +58,10 @@ export function TasksPageClient({ initialProjects, initialTasks, initialInboxSta
                 variant="ghost" 
                 size="icon" 
                 className="md:hidden shrink-0"
-                onClick={() => setIsMobileSidebarOpen(true)}
+                onClick={(e) => {
+                  e.currentTarget.blur();
+                  setIsMobileSidebarOpen(true);
+                }}
               >
                 <Menu className="w-5 h-5" />
               </Button>
@@ -96,9 +99,15 @@ export function TasksPageClient({ initialProjects, initialTasks, initialInboxSta
               >
                 {view === "list" ? <LayoutGrid className="w-5 h-5" /> : <List className="w-5 h-5" />}
               </Button>
-              <Button onClick={() => setIsCreateVaultOpen(true)} size="sm" className="gap-2 rounded-full shadow-lg shadow-primary/20">
-                <Plus className="w-4 h-4" />
-                <span className="hidden sm:inline font-medium">{t("newTask")}</span>
+              <Button 
+                onClick={(e) => {
+                  e.currentTarget.blur();
+                  setIsCreateVaultOpen(true);
+                }} 
+                size="sm" 
+                variant="ghost"
+              >
+                <Plus className="w-5 h-5 text-primary" />
               </Button>
             </div>
           </div>

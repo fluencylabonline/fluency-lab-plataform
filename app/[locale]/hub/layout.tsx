@@ -4,10 +4,19 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { getSidebarItemsByRole } from "@/components/layout/navigations";
 import { Metadata } from "next";
 import { UserStoreInitializer } from "@/modules/user/_components/UserStoreInitializer";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-    title: "Hub - Fluency Lab",
-};
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+    const { locale } = await params;
+    const t = await getTranslations({ locale, namespace: "Metadata.hub" });
+    return {
+        title: t("title"),
+    };
+}
 
 interface HubLayoutProps {
     children: React.ReactNode;

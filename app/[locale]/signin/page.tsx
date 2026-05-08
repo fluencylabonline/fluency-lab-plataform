@@ -7,9 +7,15 @@ import { SignInForm } from "./_components/SignInForm";
 
 import { Metadata } from "next";
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Metadata.login" });
   return {
-    title: "Login - Fluency Lab",
+    title: t("title"),
   };
 }
 
