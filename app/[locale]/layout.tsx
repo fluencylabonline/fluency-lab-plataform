@@ -21,6 +21,9 @@ export async function generateMetadata({
     title: t("title"),
     description: t("description"),
     manifest: "/manifest.json",
+    icons: {
+      apple: "/icons/ios/180.png",
+    },
     appleWebApp: {
       capable: true,
       statusBarStyle: "default",
