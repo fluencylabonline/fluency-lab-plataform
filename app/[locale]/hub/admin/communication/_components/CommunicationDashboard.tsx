@@ -4,6 +4,16 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Plus, Bell, MessageSquare, History, CheckCircle2, Clock, XCircle, RotateCcw, Trash2, MessageCircle } from "lucide-react";
+import { Header, HeaderAction } from "@/components/layout/header";
+import { useIsMobile } from "@/hooks/ui/use-device";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { WhatsAppTemplate, WhatsAppMetaComponent } from "@/modules/communication/communication.types";
 import { NotificationHistoryItem } from "@/modules/notification/notification.types";
@@ -32,15 +42,29 @@ import {
 interface CommunicationDashboardProps {
   initialTemplates: WhatsAppTemplate[];
   initialHistory: NotificationHistoryItem[];
+  user: {
+    name: string | null;
+    email: string | null;
+    photoUrl?: string | null;
+    role?: string;
+  };
 }
 
-export function CommunicationDashboard({ initialTemplates, initialHistory }: CommunicationDashboardProps) {
+export function CommunicationDashboard({ initialTemplates, initialHistory, user }: CommunicationDashboardProps) {
   const [isNotifyOpen, setIsNotifyOpen] = useState(false);
   const [isWabaOpen, setIsWabaOpen] = useState(false);
   const [isSendWaOpen, setIsSendWaOpen] = useState(false);
   const [templates, setTemplates] = useState<WhatsAppTemplate[]>(initialTemplates);
   const [showDeleteVault, setShowDeleteVault] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(initialHistory.length / itemsPerPage);
+  const paginatedHistory = initialHistory.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -82,54 +106,104 @@ export function CommunicationDashboard({ initialTemplates, initialHistory }: Com
     }
   };
 
-  return (
-    <div className="flex flex-col h-full space-y-6">
-      <Tabs defaultValue="history" className="w-full">
-        <div className="flex flex-col gap-4 sm:flex-row items-center justify-between mb-4">
-          <TabsList>
-            <TabsTrigger value="history" className="flex items-center gap-2">
-              <History className="w-4 h-4" />
-              Notificações
-            </TabsTrigger>
-            <TabsTrigger value="whatsapp" className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4" />
-              WhatsApp Business
-            </TabsTrigger>
-            <TabsTrigger value="chat" className="flex items-center gap-2">
-              <MessageCircle className="w-4 h-4" />
-              Conversas
-            </TabsTrigger>
-          </TabsList>
+  const isMobile = useIsMobile();
 
-
-          <div className="flex gap-2">
-            <Button
-              onClick={() => setIsNotifyOpen(true)}
-              size="sm"
-              leftIcon={<Plus className="w-4 h-4" />}
-            >
+  const headerActions: HeaderAction[] = isMobile ? [
+    {
+      component: (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-10 w-10">
+              <Plus className="w-5 h-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Ações de Comunicação</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setIsNotifyOpen(true)}>
+              <Bell className="w-4 h-4 mr-2" />
               Enviar Notificação
-            </Button>
-            <Button
-              onClick={() => setIsWabaOpen(true)}
-              variant="outline"
-              size="sm"
-              leftIcon={<Plus className="w-4 h-4" />}
-            >
-              Novo Template
-            </Button>
-            <Button
-              onClick={() => setIsSendWaOpen(true)}
-              variant="outline"
-              size="sm"
-              className="bg-green-500/10 text-green-600 hover:bg-green-500/20 hover:text-green-700 border-green-500/20"
-              leftIcon={<MessageSquare className="w-4 h-4" />}
-            >
-              Nova Conversa
-            </Button>
-          </div>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setIsWabaOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Template WhatsApp
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setIsSendWaOpen(true)}>
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Nova Conversa WhatsApp
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    }
+  ] : [
+    {
+      component: (
+        <Button
+          onClick={() => setIsNotifyOpen(true)}
+          variant="outline"
+          size="sm"
+          leftIcon={<Plus className="w-4 h-4" />}
+        >
+          Enviar Notificação
+        </Button>
+      )
+    },
+    {
+      component: (
+        <Button
+          onClick={() => setIsWabaOpen(true)}
+          variant="outline"
+          size="sm"
+          leftIcon={<Plus className="w-4 h-4" />}
+        >
+          Novo Template
+        </Button>
+      )
+    },
+    {
+      component: (
+        <Button
+          onClick={() => setIsSendWaOpen(true)}
+          variant="outline"
+          size="sm"
+          className="bg-green-500/10 text-green-600 hover:bg-green-500/20 hover:text-green-700 border-green-500/20"
+          leftIcon={<MessageSquare className="w-4 h-4" />}
+        >
+          Nova Conversa
+        </Button>
+      )
+    }
+  ];
 
-        </div>
+  return (
+    <div>
+      <Header
+        title="Comunicação"
+        subtitle="Gerencie notificações e templates do WhatsApp"
+        user={user}
+        actions={headerActions}
+        className="contents"
+      />
+
+      <main className="container">
+        <Tabs defaultValue="history" className="w-full">
+          <div className="flex flex-col gap-4 sm:flex-row items-center justify-between mb-4">
+            <TabsList>
+              <TabsTrigger value="history" className="flex items-center gap-2">
+                <History className="w-4 h-4" />
+                Notificações
+              </TabsTrigger>
+              <TabsTrigger value="whatsapp" className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                WhatsApp Business
+              </TabsTrigger>
+              <TabsTrigger value="chat" className="flex items-center gap-2">
+                <MessageCircle className="w-4 h-4" />
+                Conversas
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
         <TabsContent value="history" className="space-y-4">
           <div className="grid gap-3">
@@ -138,7 +212,7 @@ export function CommunicationDashboard({ initialTemplates, initialHistory }: Com
                 Nenhuma notificação enviada recentemente.
               </div>
             ) : (
-              initialHistory.map((item) => (
+              paginatedHistory.map((item) => (
                 <div key={item.id} className="card p-4 flex items-start gap-4">
                   <div className="p-2 bg-primary/10 rounded-full">
                     <Bell className="w-4 h-4 text-primary" />
@@ -161,6 +235,32 @@ export function CommunicationDashboard({ initialTemplates, initialHistory }: Com
               ))
             )}
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t">
+              <p className="text-xs text-muted-foreground">
+                Página {currentPage} de {totalPages}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="xs"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Anterior
+                </Button>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Próximo
+                </Button>
+              </div>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="whatsapp" className="space-y-4">
@@ -231,8 +331,8 @@ export function CommunicationDashboard({ initialTemplates, initialHistory }: Com
         <TabsContent value="chat" className="space-y-4">
           <WhatsAppChat />
         </TabsContent>
-      </Tabs>
-
+        </Tabs>
+      </main>
 
       <SendNotificationVault open={isNotifyOpen} onOpenChange={setIsNotifyOpen} />
       <CreateWhatsAppTemplateVault open={isWabaOpen} onOpenChange={setIsWabaOpen} />

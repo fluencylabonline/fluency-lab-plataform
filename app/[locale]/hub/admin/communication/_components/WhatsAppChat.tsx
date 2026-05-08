@@ -11,15 +11,18 @@ import {
 import { WhatsAppConversation, WhatsAppMessage } from "@/modules/communication/communication.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, User, MessageCircle, Clock, Check, CheckCheck } from "lucide-react";
+import { Send, User, MessageCircle, Clock, Check, CheckCheck, ChevronLeft } from "lucide-react";
 import { format } from "date-fns";
 import { notify } from "@/components/ui/toaster";
+import { useIsMobile } from "@/hooks/ui/use-device";
+import { cn } from "@/lib/utils";
 
 export function WhatsAppChat() {
   const [selectedConv, setSelectedConv] = useState<WhatsAppConversation | null>(null);
   const [messageText, setMessageText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   // Fetch Conversations
   const { data: conversations, mutate: mutateConvs, isLoading: isLoadingConvs } = useSWR(
@@ -81,9 +84,12 @@ export function WhatsAppChat() {
   };
 
   return (
-    <div className="flex h-[600px] border rounded-xl overflow-hidden bg-background">
+    <div className="flex flex-col md:flex-row h-[80vh] md:h-[600px] border rounded-xl overflow-hidden bg-background">
       {/* Sidebar - Conversations */}
-      <div className="w-1/3 border-r bg-muted/10 flex flex-col">
+      <div className={cn(
+        "w-full md:w-1/3 border-r bg-muted/10 flex flex-col",
+        isMobile && selectedConv ? "hidden" : "flex"
+      )}>
         <div className="p-4 border-b bg-muted/20">
           <h3 className="font-semibold flex items-center gap-2">
             <MessageCircle className="w-4 h-4" />
@@ -93,7 +99,9 @@ export function WhatsAppChat() {
         <div className="flex-1 overflow-y-auto">
           {isLoadingConvs ? (
             <div className="p-4 space-y-3">
-              <div />
+              <div className="h-12 bg-muted/50 rounded-lg animate-pulse" />
+              <div className="h-12 bg-muted/50 rounded-lg animate-pulse" />
+              <div className="h-12 bg-muted/50 rounded-lg animate-pulse" />
             </div>
           ) : conversations?.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground text-sm">
@@ -107,7 +115,7 @@ export function WhatsAppChat() {
                 className={`w-full p-4 flex items-start gap-3 transition-colors hover:bg-muted/30 border-b text-left ${selectedConv?.id === conv.id ? "bg-primary/5 border-l-4 border-l-primary" : ""
                   }`}
               >
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <User className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -133,22 +141,35 @@ export function WhatsAppChat() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col bg-muted/5">
+      <div className={cn(
+        "flex-1 flex flex-col bg-muted/5 min-h-0",
+        isMobile && !selectedConv ? "hidden" : "flex"
+      )}>
         {selectedConv ? (
           <>
             <div className="p-4 border-b bg-background flex items-center gap-3">
+              {isMobile && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setSelectedConv(null)}
+                  className="mr-1 h-8 w-8"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </Button>
+              )}
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                 <User className="w-4 h-4 text-primary" />
               </div>
-              <div>
-                <h4 className="text-sm font-semibold">+{selectedConv.waId}</h4>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-semibold truncate">+{selectedConv.waId}</h4>
                 <p className="text-[10px] text-green-500 font-medium">Online (Meta API)</p>
               </div>
             </div>
 
             <div
               ref={scrollRef}
-              className="flex-1 overflow-y-auto p-4 space-y-4 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-repeat opacity-90"
+              className="flex-1 overflow-y-auto p-4 space-y-4 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-repeat opacity-90 overscroll-contain min-h-0"
             >
               {isLoadingMessages ? (
                 <div className="flex justify-center py-8">
@@ -161,12 +182,12 @@ export function WhatsAppChat() {
                     className={`flex ${msg.direction === "outbound" ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm shadow-sm relative group ${msg.direction === "outbound"
+                      className={`max-w-[85%] md:max-w-[80%] rounded-2xl px-4 py-2 text-sm shadow-sm relative group ${msg.direction === "outbound"
                           ? "bg-primary text-primary-foreground rounded-tr-none"
                           : "bg-background border rounded-tl-none"
                         }`}
                     >
-                      <p className="mb-1">{msg.content}</p>
+                      <p className="mb-1 leading-relaxed">{msg.content}</p>
                       <div className={`flex items-center justify-end gap-1 text-[9px] opacity-70`}>
                         {format(new Date(msg.createdAt), "HH:mm")}
                         {msg.direction === "outbound" && (
@@ -186,10 +207,10 @@ export function WhatsAppChat() {
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
                 placeholder="Digite sua mensagem..."
-                className="flex-1"
-                autoFocus
+                className="flex-1 h-10"
+                autoFocus={!isMobile}
               />
-              <Button type="submit" size="icon" disabled={!messageText.trim() || isSending}>
+              <Button type="submit" size="icon" disabled={!messageText.trim() || isSending} className="h-10 w-10">
                 <Send className="w-4 h-4" />
               </Button>
             </form>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useDevice } from "@/hooks/ui/use-device";
-import { TransitionAnimation } from "@/components/ui/transition-animation";
+import { PWATransitionAnimation } from "../ui/pwa-transition-animation";
 
 export function PwaSplash() {
   const { isStandalone } = useDevice();
@@ -34,5 +34,5 @@ export function PwaSplash() {
 
   if (!showSplash) return null;
 
-  return <TransitionAnimation />;
+  return <PWATransitionAnimation />;
 }

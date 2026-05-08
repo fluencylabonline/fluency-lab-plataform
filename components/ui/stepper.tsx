@@ -90,7 +90,7 @@ function StepCircle({
             animate={isActive ? { scale: 1.12 } : { scale: 1 }}
             transition={SPRING}
             className={cn(
-                "relative z-10 flex-shrink-0 w-9 h-9 rounded-full border-[1.5px]",
+                "relative z-10 shrink-0 w-9 h-9 rounded-full border-[1.5px]",
                 "flex items-center justify-center font-medium text-sm",
                 "transition-colors duration-300",
                 isActive &&

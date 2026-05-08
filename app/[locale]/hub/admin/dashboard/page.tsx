@@ -24,6 +24,7 @@ export default async function AdminDashboardPage() {
         title={t("title")}
         subtitle={t("subtitle")}
         user={user}
+        className="contents"
       />
 
       <main className="container max-w-7xl pb-12 pt-2 flex flex-col gap-8">
