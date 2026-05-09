@@ -297,5 +297,5 @@
 
 .pwa-initializing body {
   overflow: hidden !important;
-  background-color: var(--base-content) !important;
-}
+  background-color: #212121 !important;
+}

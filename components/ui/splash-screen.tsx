@@ -24,8 +24,9 @@ export function SplashScreen() {
     };
   }, []);
 
-  // Se já terminou, remove da árvore do DOM
-  if (stage === 'finished') return null;
+  // O componente agora permanece no DOM até ser removido pelo pai (PwaSplash)
+  // Isso evita flashes entre o fim da animação e a remoção da classe de bloqueio
+
 
   // Variantes de animação para o overlay de revelação circular
   const overlayVariants = {
