@@ -44,7 +44,7 @@ export const viewport: Viewport = {
   //   { media: "(prefers-color-scheme: light)", color: "oklch(70.9% 0.00008 271.152)" }, //header-base
   //   { media: "(prefers-color-scheme: dark)", color: "oklch(12.048% 0.02283 254.114)" }, //header-base
   // ],
-  themeColor: "#000000",
+  themeColor: "#212121",
 };
 
 export default async function RootLayout({
