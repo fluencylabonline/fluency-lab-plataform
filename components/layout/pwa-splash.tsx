@@ -17,10 +17,16 @@ export function PwaSplash() {
     if (showSplash) {
       sessionStorage.setItem("pwa-splash-shown", "true");
       
+      // Hide the static splash as soon as the animated one is ready
+      const staticSplash = document.getElementById("pwa-static-splash");
+      if (staticSplash) {
+        staticSplash.style.display = "none";
+      }
+
       const hideTimer = setTimeout(() => {
         setShowSplash(false);
         document.documentElement.classList.remove("pwa-initializing");
-      }, 3000); // Synced with SplashScreen.tsx total time
+      }, 3000); 
 
       return () => {
         clearTimeout(hideTimer);

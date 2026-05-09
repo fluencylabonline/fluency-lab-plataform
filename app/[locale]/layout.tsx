@@ -69,6 +69,28 @@ export default async function RootLayout({
       data-scroll-behavior="smooth"
     >
       <head>
+        <link 
+          rel="preload" 
+          as="image" 
+          href="/icons/android/launchericon-transparent-512x512.png" 
+        />
+      </head>
+
+      <body className={`${quicksand.className} min-h-full flex flex-col`}>
+        {/* Static Splash - Mostrado IMEDIATAMENTE antes da hidratação do React */}
+        <div 
+          id="pwa-static-splash" 
+          className="fixed inset-0 z-9990 flex items-center justify-center bg-[#212121] transition-opacity duration-300"
+          style={{ display: 'none' }}
+        >
+          <img 
+            src="/icons/android/launchericon-transparent-512x512.png" 
+            alt="Loading..."
+            className="w-72 h-72 object-contain"
+          />
+        </div>
+
+
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -77,17 +99,20 @@ export default async function RootLayout({
                 var hasShown = sessionStorage.getItem('pwa-splash-shown');
                 if (isStandalone && !hasShown) {
                   document.documentElement.classList.add('pwa-initializing');
+                  var staticSplash = document.getElementById('pwa-static-splash');
+                  if (staticSplash) staticSplash.style.display = 'flex';
+                  
                   // Fail-safe: remove after 5 seconds if PwaSplash doesn't
                   setTimeout(function() {
                     document.documentElement.classList.remove('pwa-initializing');
+                    if (staticSplash) staticSplash.style.display = 'none';
                   }, 5000);
                 }
               })();
             `,
           }}
         />
-      </head>
-      <body className={`${quicksand.className} min-h-full flex flex-col`}>
+
 
         <Providers
           locale={locale}
