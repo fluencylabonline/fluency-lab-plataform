@@ -5,35 +5,50 @@ import { routing } from "./i18n/routing";
 
 const handleIntl = createIntlMiddleware(routing);
 
-const AUTH_PAGES = ["/signin", "/invite", "/reset-password", "/create-password", "/forgot-password"];
-const PUBLIC_API_ROUTES = ["/api/"];
+/**
+ * List of paths that should be considered as auth pages.
+ */
+const AUTH_PAGES = ["/signin", "/signup", "/forgot-password", "/reset-password"];
+
+/**
+ * Normalizes the pathname by removing the locale prefix.
+ */
+function normalizePathname(pathname: string): string {
+  for (const locale of routing.locales) {
+    if (pathname === `/${locale}`) return "/";
+    if (pathname.startsWith(`/${locale}/`)) {
+      return pathname.slice(`/${locale}`.length + 1) || "/";
+    }
+  }
+  return pathname;
+}
 
 /**
  * Next.js 16 Proxy (formerly Middleware).
  * Handles both i18n and Route Protection.
  */
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const session = request.cookies.get("session")?.value;
 
-  // 1. Allow public assets and metadata
-  if (
-    pathname.includes(".") || // files with extensions (favicon.ico, etc)
+  // 1. Static and public assets exclusion
+  const isPublicAsset =
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/api/public")
-  ) {
+    pathname.startsWith("/static") ||
+    pathname.startsWith("/api") ||
+    pathname.includes(".") ||
+    pathname === "/favicon.ico" ||
+    pathname === "/sw.js";
+
+  if (isPublicAsset) {
     return NextResponse.next();
   }
 
-  // 2. Allow Public API routes
-  if (PUBLIC_API_ROUTES.some((route) => pathname.startsWith(route))) {
-    return NextResponse.next();
-  }
+  // 2. Normalization
+  const normalizedPath = normalizePathname(pathname);
 
   // 3. Route Protection Logic
-  // Normalize pathname to remove locale prefix (e.g. /pt-BR/signin -> /signin)
-  const normalizedPath = pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?\//, "/") || "/";
-  const isAuthPage = AUTH_PAGES.some((page) => normalizedPath.startsWith(page) || normalizedPath === page);
+  const isAuthPage = AUTH_PAGES.some((page) => normalizedPath.startsWith(page));
 
   if (!session && !isAuthPage && normalizedPath !== "/") {
     // Redirect unauthenticated users to signin
@@ -43,21 +58,15 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
-  /* if (session && isAuthPage) {
-    // Redirect authenticated users away from auth pages (e.g. to dashboard)
-    // For now, redirect to root
-    return NextResponse.redirect(new URL("/", request.url));
-  } */
-
   // 4. Continue with i18n handling
   return handleIntl(request);
 }
 
 export const config = {
-  // Match all request paths except for the ones starting with:
-  // - api (API routes, except those we explicitly allow/protect)
-  // - _next/static (static files)
-  // - _next/image (image optimization files)
-  // - favicon.ico (favicon file)
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // Match all pathnames except for
+  // - /api (API routes)
+  // - /_next (Next.js internals)
+  // - /_static (inside /public)
+  // - all root files inside /public (e.g. /favicon.ico)
+  matcher: ["/((?!api|_next|_static|_vercel|[\\w-]+\\.\\w+).*)"],
 };

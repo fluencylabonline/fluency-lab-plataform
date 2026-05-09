@@ -23,6 +23,8 @@ export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
   const t = useTranslations("Settings");
   const tc = useTranslations("Common");
 
+  //TODO: Adicionar cards para atualizar app caso ele clique em agora nao e exista uma atualização e um card para instalar caso nao esteja instalado
+
   return (
     <div>
       <Header

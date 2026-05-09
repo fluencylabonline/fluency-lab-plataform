@@ -1,33 +1,33 @@
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
 import { UserRoles } from "@/lib/rbac";
-import { redirect } from "next/navigation";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
+/**
+ * Hub Redirector Page
+ * 
+ * This page serves as a landing point for the /hub route.
+ * It detects the user's role and redirects them to their specific dashboard.
+ * Runs in the Node.js runtime, allowing for database and firebase-admin access.
+ */
 export default async function HubPage() {
-    const user = await getCurrentUser();
-    const roleRoutes = {
-        [UserRoles.ADMIN]: "admin",
-        [UserRoles.TEACHER]: "teacher",
-        [UserRoles.STUDENT]: "student",
-        [UserRoles.MANAGER]: "manager",
-    };
+  const user = await getCurrentUser();
 
-    if (!user) {
-        redirect(`/signin`);
-    }
+  // Basic security check (should already be handled by layout/middleware, but good for safety)
+  if (!user) {
+    redirect("/signin");
+  }
 
-    // Redirecionar para onboarding se não tiver finalizado
-    if (!user.onboarded && (user.role === UserRoles.STUDENT || user.role === UserRoles.TEACHER)) {
-        redirect(`/onboarding`);
-    }
+  // Role-based routing table
+  const roleRoutes: Record<string, string> = {
+    [UserRoles.ADMIN]: "admin",
+    [UserRoles.TEACHER]: "teacher",
+    [UserRoles.STUDENT]: "student",
+    [UserRoles.MANAGER]: "manager",
+  };
 
-    const route = roleRoutes[user.role];
+  // Determine destination based on role, fallback to student dashboard
+  const route = roleRoutes[user.role] || "student";
 
-    if (route) {
-        redirect(`/hub/${route}/profile`);
-    }
-
-    redirect(`/hub/student/profile`);
-
-    return <LoadingSpinner />;
+  // Perform the redirection
+  redirect(`/hub/${route}/profile`);
 }
