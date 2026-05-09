@@ -2044,7 +2044,9 @@
     "consequenceAccess": "Você perderá acesso à plataforma imediatamente após a conclusão.",
     "consequenceFee": "Pode haver uma taxa de cancelamento dependendo do seu contrato.",
     "cancelConfirm": "Sim, desejo cancelar",
-    "keepAccount": "Manter minha conta"
+    "keepAccount": "Manter minha conta",
+    "app": "Aplicativo",
+    "appDescription": "Gerencie as configurações do aplicativo e atualizações."
   },
   "PendingCancellation": {
     "title": "Cancelamento Pendente",

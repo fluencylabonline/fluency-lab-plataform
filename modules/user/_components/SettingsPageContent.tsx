@@ -6,7 +6,8 @@ import { SecuritySettings } from "./SecuritySettings";
 import { AccountSettings } from "./AccountSettings";
 import { AppearanceSettings } from "@/modules/appearance/_components/AppearanceSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Palette, Bell, User, Shield } from "lucide-react";
+import { Palette, Bell, User, Shield, Smartphone } from "lucide-react";
+import { AppSettings } from "./AppSettings";
 import type { NotificationPrefs, User as UserType } from "@/modules/user/user.schema";
 import { useTranslations } from "next-intl";
 
@@ -22,8 +23,6 @@ interface SettingsPageContentProps {
 export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
   const t = useTranslations("Settings");
   const tc = useTranslations("Common");
-
-  //TODO: Adicionar cards para atualizar app caso ele clique em agora nao e exista uma atualização e um card para instalar caso nao esteja instalado
 
   return (
     <div>
@@ -65,6 +64,13 @@ export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
                 <Shield className="w-4 h-4" />
                 {t("security")}
               </TabsTrigger>
+              <TabsTrigger 
+                value="app" 
+                className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-xl border-none transition-all flex items-center gap-2"
+              >
+                <Smartphone className="w-4 h-4" />
+                {t("app")}
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -87,6 +93,10 @@ export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
 
           <TabsContent value="security" className="mt-0">
              <SecuritySettings hasPassword={initialData.hasPassword} />
+          </TabsContent>
+
+          <TabsContent value="app" className="mt-0">
+            <AppSettings />
           </TabsContent>
         </Tabs>
       </div>
