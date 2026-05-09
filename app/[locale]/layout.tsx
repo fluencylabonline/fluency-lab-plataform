@@ -68,7 +68,27 @@ export default async function RootLayout({
       suppressHydrationWarning
       data-scroll-behavior="smooth"
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+                var hasShown = sessionStorage.getItem('pwa-splash-shown');
+                if (isStandalone && !hasShown) {
+                  document.documentElement.classList.add('pwa-initializing');
+                  // Fail-safe: remove after 5 seconds if PwaSplash doesn't
+                  setTimeout(function() {
+                    document.documentElement.classList.remove('pwa-initializing');
+                  }, 5000);
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={`${quicksand.className} min-h-full flex flex-col`}>
+
         <Providers
           locale={locale}
           messages={messages}

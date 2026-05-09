@@ -5,32 +5,31 @@ import { useDevice } from "@/hooks/ui/use-device";
 import { SplashScreen } from "../ui/splash-screen";
 
 export function PwaSplash() {
-  const { isStandalone } = useDevice();
   const [showSplash, setShowSplash] = useState(false);
 
   useEffect(() => {
-    // Only show splash in standalone (PWA) mode
-    // We use sessionStorage to ensure it only shows once per "session" (app open)
-    // even if the RootLayout re-mounts (unlikely in Next.js but safe)
+    // Check synchronously on mount (client-side)
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || 
+                         (window.navigator as any).standalone === true;
     const hasShown = sessionStorage.getItem("pwa-splash-shown");
 
     if (isStandalone && !hasShown) {
-      // Use a timeout to avoid synchronous setState inside useEffect
-      const startTimer = setTimeout(() => {
-        setShowSplash(true);
-        sessionStorage.setItem("pwa-splash-shown", "true");
-      }, 0);
+      setShowSplash(true);
+      sessionStorage.setItem("pwa-splash-shown", "true");
       
       const hideTimer = setTimeout(() => {
         setShowSplash(false);
-      }, 2000); // Show for 4 seconds
+        // Remove the blocking class after the splash is done
+        document.documentElement.classList.remove("pwa-initializing");
+      }, 3500); 
 
       return () => {
-        clearTimeout(startTimer);
         clearTimeout(hideTimer);
+        document.documentElement.classList.remove("pwa-initializing");
       };
     }
-  }, [isStandalone]);
+  }, []);
+
 
   if (!showSplash) return null;
 
