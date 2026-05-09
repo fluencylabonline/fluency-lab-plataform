@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "name": "FluencyLab",
   "short_name": "FluencyLab",
   "description": "Plataforma de ensino de idiomas",
@@ -9,8 +10,8 @@
     "standalone",
     "window-controls-overlay"
   ],
-  "background_color": "black",
-  "theme_color": "black",
+  "background_color": "#212121",
+  "theme_color": "#212121",
   "orientation": "portrait",
   "categories": [
     "education",
@@ -29,7 +30,8 @@
       "icons": [
         {
           "src": "brand/logo-icon.png",
-          "sizes": "512x512"
+          "sizes": "512x512",
+          "type": "image/png"
         }
       ]
     }
@@ -48,7 +50,8 @@
     {
       "src": "/icons/android/launchericon-96x96.png",
       "sizes": "96x96",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icons/android/launchericon-144x144.png",
@@ -63,7 +66,8 @@
     {
       "src": "/icons/android/launchericon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

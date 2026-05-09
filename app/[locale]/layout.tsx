@@ -40,10 +40,11 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "oklch(70.9% 0.00008 271.152)" }, //header-base
-    { media: "(prefers-color-scheme: dark)", color: "oklch(12.048% 0.02283 254.114)" }, //header-base
-  ],
+  // themeColor: [
+  //   { media: "(prefers-color-scheme: light)", color: "oklch(70.9% 0.00008 271.152)" }, //header-base
+  //   { media: "(prefers-color-scheme: dark)", color: "oklch(12.048% 0.02283 254.114)" }, //header-base
+  // ],
+  themeColor: "#02060e",
 };
 
 export default async function RootLayout({
@@ -57,7 +58,7 @@ export default async function RootLayout({
   const messages = await getMessages();
   const cookieStore = await cookies();
 
-  const themeColor = cookieStore.get("fluency-lab-theme-color")?.value || "violet";
+  const themeColor = cookieStore.get("fluency-lab-theme-color")?.value || "indigo";
   const themeMode = cookieStore.get("fluency-lab-mode")?.value || "system";
 
   return (
