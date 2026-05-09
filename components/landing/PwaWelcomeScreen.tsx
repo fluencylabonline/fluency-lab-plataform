@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Logo from "@/public/brand/logo.png";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
@@ -38,7 +38,7 @@ export function PwaWelcomeScreen() {
                         </div>
 
                         <div className="w-full pt-4">
-                            <Link href="/signin">
+                            <Link href="/signin" className="z-99">
                                 <Button className="w-fit font-medium" variant='outline'>
                                     <LogIn className="w-4 h-4 mr-2" />
                                     {t("enterButton") || "Entrar"}

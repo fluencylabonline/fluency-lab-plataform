@@ -43,11 +43,11 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
-  if (session && isAuthPage) {
+  /* if (session && isAuthPage) {
     // Redirect authenticated users away from auth pages (e.g. to dashboard)
     // For now, redirect to root
     return NextResponse.redirect(new URL("/", request.url));
-  }
+  } */
 
   // 4. Continue with i18n handling
   return handleIntl(request);

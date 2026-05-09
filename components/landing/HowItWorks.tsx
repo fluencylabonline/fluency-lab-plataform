@@ -96,7 +96,7 @@ export default function HowItWorks() {
                 animate={{
                   opacity: isActive ? 1 : 0,
                 }}
-                className="absolute inset-0 bg-primary/[0.03] pointer-events-none"
+                className="absolute inset-0 bg-primary/3 pointer-events-none"
                 transition={{ duration: 0.3 }}
               />
               <div className="flex items-start justify-between gap-4 md:gap-8">

@@ -55,9 +55,10 @@ export const notificationService = {
         } catch (error: unknown) {
           const webPushError = error as { statusCode?: number };
           console.error(`Error sending push to user ${sub.userId}:`, error);
-          // If error is 410 (Gone) or 404 (Not Found), we should probably delete the subscription
+          // If error is 410 (Gone) or 404 (Not Found), we should delete the subscription
           if (webPushError.statusCode === 410 || webPushError.statusCode === 404) {
-            // TODO: Delete invalid subscription
+            console.warn(`Deleting stale subscription for user ${sub.userId} (Endpoint: ${sub.endpoint})`);
+            await notificationRepository.deleteSubscription(sub.endpoint);
           }
         }
       });

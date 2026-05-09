@@ -54,6 +54,10 @@ export const notificationRepository = {
     });
   },
 
+  async deleteSubscription(endpoint: string) {
+    return db.delete(pushSubscriptionsTable).where(eq(pushSubscriptionsTable.endpoint, endpoint));
+  },
+
   async findAllSubscriptions() {
     return db.query.pushSubscriptionsTable.findMany();
   },
