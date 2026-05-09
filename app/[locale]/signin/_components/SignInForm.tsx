@@ -149,7 +149,7 @@ export function SignInForm() {
             {...register("email")}
             placeholder={t("email") || "Email"}
             autoComplete="username"
-            className={`h-12 ${errors.email ? "border-destructive focus-visible:ring-destructive" : ""}`}
+            className={`h-12 scroll-mt-28 ${errors.email ? "border-destructive focus-visible:ring-destructive" : ""}`}
             disabled={isLoading}
           />
           {errors.email && (
@@ -165,7 +165,7 @@ export function SignInForm() {
             {...register("password")}
             placeholder={t("password") || "Senha"}
             autoComplete="current-password"
-            className={`h-12 ${errors.password ? "border-destructive focus-visible:ring-destructive" : ""}`}
+            className={`h-12 scroll-mt-28 ${errors.password ? "border-destructive focus-visible:ring-destructive" : ""}`}
             disabled={isLoading}
           />
           {errors.password && (

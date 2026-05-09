@@ -412,7 +412,6 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
                 <p className="text-sm font-medium leading-relaxed text-center w-full">
                   {correctWords.map((word, i) => (
                     <span key={i} className="inline-flex items-center gap-1 mr-1.5">
-                      <span className="text-xs text-muted-foreground font-bold">{i + 1}</span>
                       <span className={word.toLowerCase() === item.lemma.toLowerCase()
                         ? "text-primary font-black bg-primary/10 px-1 rounded-md"
                         : "text-foreground font-medium"
@@ -436,7 +435,6 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
                     onClick={() => handleRemoveWord(word)}
                     className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
                   >
-                    <span className="text-xs opacity-70 font-bold">{idx + 1}</span>
                     {word.word}
                   </motion.button>
                 ))
@@ -455,7 +453,6 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
                     onClick={() => handlePickWord(word)}
                     className="flex items-center gap-1.5 px-3 py-2 bg-muted border border-border rounded-xl text-sm font-medium hover:bg-accent hover:border-primary/30 transition-colors"
                   >
-                    <span className="text-xs text-muted-foreground font-bold w-4 text-right">{word.id + 1}</span>
                     <span>{word.word}</span>
                   </motion.button>
                 ))}

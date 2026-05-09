@@ -40,6 +40,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  interactiveWidget: "resizes-content",
   // themeColor: [
   //   { media: "(prefers-color-scheme: light)", color: "oklch(70.9% 0.00008 271.152)" }, //header-base
   //   { media: "(prefers-color-scheme: dark)", color: "oklch(12.048% 0.02283 254.114)" }, //header-base
@@ -86,7 +87,7 @@ export default async function RootLayout({
           <img 
             src="/icons/android/launchericon-transparent-512x512.png" 
             alt="Loading..."
-            className="w-72 h-72 object-contain"
+            className="w-70 h-70 object-contain"
           />
         </div>
 
@@ -112,7 +113,6 @@ export default async function RootLayout({
             `,
           }}
         />
-
 
         <Providers
           locale={locale}
