@@ -426,7 +426,7 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
                   {t("clickToPlace") || "Clique nas palavras abaixo para montar a frase..."}
                 </p>
               ) : (
-                scrambleAnswer.map((word, idx) => (
+                scrambleAnswer.map((word) => (
                   <motion.button
                     key={word.id}
                     layout

@@ -84,10 +84,11 @@ export default async function RootLayout({
           className="fixed inset-0 z-9990 flex items-center justify-center bg-[#212121] transition-opacity duration-300"
           style={{ display: 'none' }}
         >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
             src="/icons/android/launchericon-transparent-512x512.png" 
             alt="Loading..."
-            className="w-70 h-70 object-contain"
+            className="w-64 h-64 object-contain"
           />
         </div>
 

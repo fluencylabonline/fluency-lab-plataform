@@ -76,9 +76,9 @@ export function SplashScreen() {
             src="/icons/android/launchericon-transparent-512x512.png"
             alt="FluencyLab Logo"
             priority
-            width={280}
-            height={280}
-            className="w-70 h-70 object-contain"
+            width={256}
+            height={256}
+            className="w-64 h-64 object-contain"
           />
         </motion.div>
 
