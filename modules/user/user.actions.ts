@@ -58,7 +58,7 @@ export const loginAction = actionClient
       const user = await userService.getUserById(uid);
       const sessionCookie = await userService.createSessionCookie(idToken, rememberMe);
       const cookieStore = await cookies();
-      const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7; // 30 days or 1 week
+      const maxAge = rememberMe ? 60 * 60 * 24 * 14 : 60 * 60 * 24 * 7; // 14 days or 1 week
 
       if (user?.mfaEnabled) {
         // Set a temporary "mfa_pending" cookie instead of "session"
@@ -110,7 +110,7 @@ export const verifyMfaLoginAction = actionClient
 
       // Success! Set the real session cookie
       cookieStore.set("session", sessionCookie, {
-        maxAge: parsedInput.rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7,
+        maxAge: parsedInput.rememberMe ? 60 * 60 * 24 * 14 : 60 * 60 * 24 * 7,
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         path: "/",

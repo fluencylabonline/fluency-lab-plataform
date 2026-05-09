@@ -821,6 +821,18 @@
       }
     }
   },
+  "StudentImmersion": {
+    "title": "Minha Imersão",
+    "subtitle": "Pratique suas habilidades de audição e leitura.",
+    "podcastsTitle": "Podcasts",
+    "podcastsDescription": "Aprenda ouvindo. Episódios selecionados para o seu nível.",
+    "blogTitle": "Blog",
+    "blogDescription": "Artigos diários e histórias curtas para expandir seu vocabulário.",
+    "comingSoon": "Em breve",
+    "wordleTitle": "Wordle",
+    "lyricsTitle": "Lyrics",
+    "wordLadderTitle": "Word Ladder"
+  },
   "LandingPage": {
     "Comparison": {
       "badge": "Diferenciais",

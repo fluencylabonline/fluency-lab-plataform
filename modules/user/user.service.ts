@@ -51,7 +51,7 @@ export const userService = {
   },
 
   async createSessionCookie(idToken: string, rememberMe = false): Promise<string> {
-    const expiresIn = rememberMe ? 60 * 60 * 24 * 30 * 1000 : 60 * 60 * 24 * 5 * 1000;
+    const expiresIn = rememberMe ? 60 * 60 * 24 * 14 * 1000 : 60 * 60 * 24 * 7 * 1000;
     return adminAuth.createSessionCookie(idToken, { expiresIn });
   },
 

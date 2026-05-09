@@ -821,6 +821,18 @@
       }
     }
   },
+  "StudentImmersion": {
+    "title": "My Immersion",
+    "subtitle": "Practice your listening and reading skills.",
+    "podcastsTitle": "Podcasts",
+    "podcastsDescription": "Learn by listening. Handpicked episodes for your level.",
+    "blogTitle": "Blog",
+    "blogDescription": "Daily articles and short stories to expand your vocabulary.",
+    "comingSoon": "Coming Soon",
+    "wordleTitle": "Wordle",
+    "lyricsTitle": "Lyrics",
+    "wordLadderTitle": "Word Ladder"
+  },
   "LandingPage": {
     "Comparison": {
       "badge": "Differentials",
