@@ -63,7 +63,7 @@ export function SplashScreen() {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-9999 flex items-center justify-center bg-content-color overflow-hidden">
+      <div className="fixed inset-0 z-9999 flex items-center justify-center bg-[#212121] overflow-hidden">
         {/* Camada do Logo - Esmaece quando a revelação começa */}
         <motion.div
           className="relative"
@@ -76,7 +76,7 @@ export function SplashScreen() {
 
         {/* Camada da Máscara de Revelação Circular */}
         <motion.div
-          className="absolute inset-0 bg-background/50" // Camada preta idêntica ao fundo
+          className="absolute inset-0 bg-content-color" // Camada preta idêntica ao fundo
           variants={overlayVariants}
           initial="initial"
           // Só começa a animação quando entra no estágio 'reveal'

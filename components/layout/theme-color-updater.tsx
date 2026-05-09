@@ -2,12 +2,12 @@
 
 import { useEffect } from "react";
 
-export function ThemeColorUpdater({ isDarkMode }: { isDarkMode: boolean }) {
+export function ThemeColorUpdater({isDarkMode}: {isDarkMode: boolean}) {
   useEffect(() => {
     // Define as cores reais que você quer na barra de status
     // Você pode usar HEX, RGB ou HSL. (Nem todos os navegadores suportam OKLCH na barra de status ainda, prefira HEX).
-    const lightColor = "#f3f4f6"; // Exemplo: cinza bem claro
-    const darkColor = "#111827";  // Exemplo: quase preto
+    const lightColor = "oklch(70.9% 0.00008 271.152)"; // Exemplo: cinza bem claro
+    const darkColor = "oklch(12.048% 0.02283 254.114)";  // Exemplo: quase preto
 
     const currentColor = isDarkMode ? darkColor : lightColor;
 

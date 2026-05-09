@@ -8,7 +8,7 @@ import { PwaHandler } from "./pwa-handler";
 import { NotificationPermissionVault } from "@/modules/notification/_components/NotificationPermissionVault";
 import { PwaVault } from "@/modules/pwa/_components/PwaVault";
 import { ThemeColorUpdater } from "./theme-color-updater";
-import { SplashScreen } from "../ui/splash-screen";
+import { PwaSplash } from "./pwa-splash";
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -32,7 +32,7 @@ export function Providers({ children, locale, messages, themeMode }: ProvidersPr
         <Toaster />
         <PwaHandler />
         <ThemeColorUpdater isDarkMode={themeMode === 'dark'} />
-        <SplashScreen />
+        <PwaSplash />
         <NotificationPermissionVault />
         <PwaVault />
       </NextIntlClientProvider>

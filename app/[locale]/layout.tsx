@@ -44,7 +44,7 @@ export const viewport: Viewport = {
   //   { media: "(prefers-color-scheme: light)", color: "oklch(70.9% 0.00008 271.152)" }, //header-base
   //   { media: "(prefers-color-scheme: dark)", color: "oklch(12.048% 0.02283 254.114)" }, //header-base
   // ],
-  themeColor: "#02060e",
+  themeColor: "#000000",
 };
 
 export default async function RootLayout({
@@ -68,7 +68,13 @@ export default async function RootLayout({
       suppressHydrationWarning
       data-scroll-behavior="smooth"
     >
+      <head />
       <body className={`${quicksand.className} min-h-full flex flex-col`}>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true){if(!sessionStorage.getItem('pwa-splash-shown')){document.documentElement.classList.add('pwa-initializing');}}}catch(e){}`,
+          }}
+        />
         <Providers
           locale={locale}
           messages={messages}

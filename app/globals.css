@@ -288,3 +288,14 @@
 ::view-transition-new(root) {
   z-index: 1;
 }
+
+/* PWA Splash Screen Optimization */
+.pwa-initializing #vault-root {
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+.pwa-initializing body {
+  overflow: hidden !important;
+  background-color: var(--base-content) !important;
+}
