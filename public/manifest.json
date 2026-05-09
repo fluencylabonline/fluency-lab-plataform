@@ -3,7 +3,7 @@
   "name": "FluencyLab",
   "short_name": "FluencyLab",
   "description": "Plataforma de ensino de idiomas",
-  "start_url": "/signin",
+  "start_url": "/hub",
   "scope": "/",
   "display": "standalone",
   "display_override": [

@@ -58,6 +58,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
+  if (session && (isAuthPage || normalizedPath === "/")) {
+    // Redirect authenticated users to the hub
+    return NextResponse.redirect(new URL("/hub", request.url));
+  }
+
   // 4. Continue with i18n handling
   return handleIntl(request);
 }
