@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FluencyLabLogo } from "../animated-icons/fluencylab-logo";
 
 export function SplashScreen() {
   const [stage, setStage] = useState<'logo' | 'reveal' | 'finished'>('logo');
@@ -71,7 +70,13 @@ export function SplashScreen() {
           initial="logoActive"
           animate={stage === 'logo' ? "logoActive" : "revealActive"}
         >
-          <FluencyLabLogo width={192} height="auto" />
+          <img
+            src="/icons/android/launchericon-transparent-512x512.png"
+            alt="FluencyLab Logo"
+            width={192}
+            height={192}
+            className="w-48 h-48"
+          />
         </motion.div>
 
         {/* Camada da Máscara de Revelação Circular */}
