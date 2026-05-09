@@ -50,8 +50,8 @@ export const userService = {
     return userRepository.findByEmail(email);
   },
 
-  async createSessionCookie(idToken: string): Promise<string> {
-    const expiresIn = 60 * 60 * 24 * 5 * 1000;
+  async createSessionCookie(idToken: string, rememberMe = false): Promise<string> {
+    const expiresIn = rememberMe ? 60 * 60 * 24 * 30 * 1000 : 60 * 60 * 24 * 5 * 1000;
     return adminAuth.createSessionCookie(idToken, { expiresIn });
   },
 

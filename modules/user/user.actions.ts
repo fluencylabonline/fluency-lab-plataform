@@ -56,9 +56,9 @@ export const loginAction = actionClient
 
       // Check if MFA is enabled for this user
       const user = await userService.getUserById(uid);
-      const sessionCookie = await userService.createSessionCookie(idToken);
+      const sessionCookie = await userService.createSessionCookie(idToken, rememberMe);
       const cookieStore = await cookies();
-      const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24;
+      const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7; // 30 days or 1 week
 
       if (user?.mfaEnabled) {
         // Set a temporary "mfa_pending" cookie instead of "session"
@@ -69,6 +69,9 @@ export const loginAction = actionClient
           path: "/",
           sameSite: "lax",
         });
+        
+        // Also store rememberMe flag temporarily if needed, or pass it from UI
+        // We'll pass it from UI for simplicity in VerifyMfaVault
         return { success: true, mfaRequired: true };
       }
 
@@ -89,7 +92,10 @@ export const loginAction = actionClient
   });
 
 export const verifyMfaLoginAction = actionClient
-  .inputSchema(z.object({ token: z.string().length(6) }))
+  .inputSchema(z.object({ 
+    token: z.string().length(6),
+    rememberMe: z.boolean().optional().default(false)
+  }))
   .action(async ({ parsedInput }) => {
     try {
       const cookieStore = await cookies();
@@ -104,7 +110,7 @@ export const verifyMfaLoginAction = actionClient
 
       // Success! Set the real session cookie
       cookieStore.set("session", sessionCookie, {
-        maxAge: 60 * 60 * 24 * 7, // 1 week
+        maxAge: parsedInput.rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7,
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         path: "/",

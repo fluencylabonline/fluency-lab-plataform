@@ -35,6 +35,7 @@ export function SignInForm() {
     register,
     handleSubmit,
     control,
+    getValues,
     formState: { errors },
   } = useForm<SignInValues>({
     resolver: zodResolver(signInSchema),
@@ -58,7 +59,7 @@ export function SignInForm() {
     setIsLoading(true);
     setIsCredentialsLoading(true);
 
-    const signInResult = await authClient.signIn(data.email, data.password);
+    const signInResult = await authClient.signIn(data.email, data.password, data.rememberMe);
 
     if (!signInResult.success) {
       if (signInResult.error) {
@@ -96,7 +97,8 @@ export function SignInForm() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
 
-    const signInResult = await authClient.signInWithGoogle();
+    const rememberMe = getValues("rememberMe");
+    const signInResult = await authClient.signInWithGoogle(rememberMe);
 
     if (!signInResult.success) {
       if (signInResult.error) {
@@ -107,7 +109,7 @@ export function SignInForm() {
     }
 
     const user = signInResult.data!;
-    const sessionResult = await authClient.createSession(user, false);
+    const sessionResult = await authClient.createSession(user, rememberMe);
 
     if (sessionResult.mfaRequired) {
       setShowMfa(true);
@@ -253,6 +255,7 @@ export function SignInForm() {
         open={showMfa}
         onOpenChange={setShowMfa}
         onSuccess={handleLoginSuccess}
+        rememberMe={getValues("rememberMe")}
       />
     </div>
   );

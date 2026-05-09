@@ -10,7 +10,9 @@ import {
   updatePassword as firebaseUpdatePassword,
   reauthenticateWithCredential,
   EmailAuthProvider,
-  linkWithCredential
+  linkWithCredential,
+  setPersistence,
+  browserLocalPersistence
 } from "firebase/auth";
 import { auth } from "./firebase";
 
@@ -65,8 +67,11 @@ export const authClient = {
   /**
    * 1. Login with Email/Password
    */
-  async signIn(email: string, password: string): Promise<AuthResult<FirebaseUser>> {
+  async signIn(email: string, password: string, rememberMe = false): Promise<AuthResult<FirebaseUser>> {
     try {
+      if (rememberMe) {
+        await setPersistence(auth, browserLocalPersistence);
+      }
       const credential = await signInWithEmailAndPassword(auth, email, password);
       return { success: true, data: credential.user };
     } catch (error) {
@@ -79,8 +84,11 @@ export const authClient = {
   /**
    * 2. Login with Google
    */
-  async signInWithGoogle(): Promise<AuthResult<FirebaseUser>> {
+  async signInWithGoogle(rememberMe = false): Promise<AuthResult<FirebaseUser>> {
     try {
+      if (rememberMe) {
+        await setPersistence(auth, browserLocalPersistence);
+      }
       const provider = new GoogleAuthProvider();
       const credential = await signInWithPopup(auth, provider);
       return { success: true, data: credential.user };

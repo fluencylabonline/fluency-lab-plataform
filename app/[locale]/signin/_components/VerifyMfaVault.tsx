@@ -22,9 +22,10 @@ interface VerifyMfaVaultProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  rememberMe?: boolean;
 }
 
-export function VerifyMfaVault({ open, onOpenChange, onSuccess }: VerifyMfaVaultProps) {
+export function VerifyMfaVault({ open, onOpenChange, onSuccess, rememberMe = false }: VerifyMfaVaultProps) {
   const t = useTranslations("Settings");
   const ta = useTranslations("Auth");
   const tc = useTranslations("Common");
@@ -36,7 +37,7 @@ export function VerifyMfaVault({ open, onOpenChange, onSuccess }: VerifyMfaVault
     if (code.length !== 6) return;
 
     setLoading(true);
-    const result = await verifyMfaLoginAction({ token: code });
+    const result = await verifyMfaLoginAction({ token: code, rememberMe });
     setLoading(false);
 
     if (result?.data?.success) {

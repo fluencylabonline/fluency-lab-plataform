@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { PwaHandler } from "./pwa-handler";
 import { NotificationPermissionVault } from "@/modules/notification/_components/NotificationPermissionVault";
 import { PwaVault } from "@/modules/pwa/_components/PwaVault";
-import { PwaSplash } from "./pwa-splash";
+// import { PwaSplash } from "./pwa-splash"; // Not working for now
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -30,7 +30,7 @@ export function Providers({ children, locale, messages, themeMode }: ProvidersPr
         </TooltipProvider>
         <Toaster />
         <PwaHandler />
-        <PwaSplash />
+        {/* <PwaSplash /> Not working for now */}
         <NotificationPermissionVault />
         <PwaVault />
       </NextIntlClientProvider>
