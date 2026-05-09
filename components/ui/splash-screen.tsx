@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 export function SplashScreen() {
   const [stage, setStage] = useState<'logo' | 'reveal' | 'finished'>('logo');
@@ -70,12 +71,13 @@ export function SplashScreen() {
           initial="logoActive"
           animate={stage === 'logo' ? "logoActive" : "revealActive"}
         >
-          <img
+          <Image
             src="/icons/android/launchericon-transparent-512x512.png"
             alt="FluencyLab Logo"
-            width={192}
-            height={192}
-            className="w-48 h-48"
+            priority
+            width={288}
+            height={288}
+            className="w-72 h-72 object-contain"
           />
         </motion.div>
 
