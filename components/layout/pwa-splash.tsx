@@ -9,26 +9,26 @@ export function PwaSplash() {
   const [showSplash, setShowSplash] = useState(false);
 
   useEffect(() => {
-    // Check if the inline script flagged this as a cold start
-    const isInitializing = document.documentElement.classList.contains("pwa-initializing");
-    
-    if (isStandalone && isInitializing) {
-      setTimeout(() => {
+    // Only show splash in standalone (PWA) mode
+    // We use sessionStorage to ensure it only shows once per "session" (app open)
+    // even if the RootLayout re-mounts (unlikely in Next.js but safe)
+    const hasShown = sessionStorage.getItem("pwa-splash-shown");
+
+    if (isStandalone && !hasShown) {
+      // Use a timeout to avoid synchronous setState inside useEffect
+      const startTimer = setTimeout(() => {
         setShowSplash(true);
         sessionStorage.setItem("pwa-splash-shown", "true");
       }, 0);
-
-      // The SplashScreen component handles its own animation (approx 3s)
-      // We wait slightly longer than the internal timers to ensure a smooth transition
-      const timer = setTimeout(() => {
+      
+      const hideTimer = setTimeout(() => {
         setShowSplash(false);
-        document.documentElement.classList.remove("pwa-initializing");
-      }, 3200); 
+      }, 2000); // Show for 4 seconds
 
-      return () => clearTimeout(timer);
-    } else {
-      // If we're not initializing, ensure the class is removed just in case
-      document.documentElement.classList.remove("pwa-initializing");
+      return () => {
+        clearTimeout(startTimer);
+        clearTimeout(hideTimer);
+      };
     }
   }, [isStandalone]);
 

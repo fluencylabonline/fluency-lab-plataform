@@ -68,13 +68,7 @@ export default async function RootLayout({
       suppressHydrationWarning
       data-scroll-behavior="smooth"
     >
-      <head />
       <body className={`${quicksand.className} min-h-full flex flex-col`}>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{if(window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true){if(!sessionStorage.getItem('pwa-splash-shown')){document.documentElement.classList.add('pwa-initializing');}}}catch(e){}`,
-          }}
-        />
         <Providers
           locale={locale}
           messages={messages}
