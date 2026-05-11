@@ -2,8 +2,6 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { learningService } from "@/modules/learning/learning.service";
 import { ProfilesPageClient } from "./_components/ProfilesPageClient";
 import { redirect } from "next/navigation";
-
-//TODO: COLOCAR NAS OUTRAS PÁGINAS TAMBÉM
 import { getTranslations } from "next-intl/server";
 import { Metadata } from "next";
 

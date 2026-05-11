@@ -11,6 +11,7 @@ import { EditorScreen } from "./screens/EditScreen";
 import { User } from "@/modules/user/user.schema";
 import { CalendarDaysIcon } from "../animated-icons/calendar";
 import { PhoneMockup } from "./PhoneMockup";
+import Link from "next/link";
 
 export function LandingHero({ user }: { user: User | null }) {
   const t = useTranslations("LandingPage");
@@ -49,14 +50,22 @@ export function LandingHero({ user }: { user: User | null }) {
           </h1>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex flex-row items-center justify-center gap-2 bg-primary/90 hover:bg-primary/95 text-white px-8 py-4 rounded-full font-bold duration-300 ease-in-out transform-all"
+            <Link
+              href={`https://wa.me/5511999999999?text=${encodeURIComponent(
+                "Olá! Vi o site da Fluency Lab e gostaria de saber mais sobre as aulas personalizadas."
+              )}`}
+              target="_blank"
+              className="w-full sm:w-auto"
             >
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex flex-row items-center justify-center gap-2 bg-primary/90 hover:bg-primary/95 text-white px-8 py-4 rounded-full font-bold duration-300 ease-in-out transform-all"
+              >
               <CalendarDaysIcon size={24} />
               {t("primaryCta") || "Start now"}
             </motion.button>
+            </Link>
           </div>
         </div>
       </div>
