@@ -20,6 +20,7 @@ import {
   recordImmersionResultAction 
 } from "@/modules/immersion/immersion.actions";
 import { getAvailableWordsAction } from "@/modules/immersion/immersion.actions";
+import { useLanguages } from "@/hooks/data/use-languages";
 
 const DEFAULT_LENGTH = 5 as const;
 const MAX_PATH_LENGTH = WORD_LADDER_MAX_ROWS;
@@ -268,8 +269,12 @@ export function useWordLadderGame({
   const [shaking, setShaking] = useState(false);
   const shakeTimeoutRef = useRef<number | null>(null);
 
+  const { languages: dbLanguages } = useLanguages();
+
   const length = DEFAULT_LENGTH;
-  const availableLangs = ["en", "pt"]; // TODO: Get from system
+  const availableLangs = useMemo(() => {
+    return dbLanguages.map((l) => l.code.toLowerCase());
+  }, [dbLanguages]);
 
   const wordsOfLength = useMemo(() => {
     return availableWords.map(w => w.word.toLowerCase()).filter(w => w.length === length);

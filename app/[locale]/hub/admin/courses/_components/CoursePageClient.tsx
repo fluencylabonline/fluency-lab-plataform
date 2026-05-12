@@ -174,7 +174,7 @@ export function CoursePageClient({ initialData, currentUser }: CoursePageClientP
                   onClick={() => router.push(`/hub/admin/courses/${course.id}`)}
                 >
                   {/* Top Image */}
-                  <div className="aspect-[16/10] w-full overflow-hidden relative">
+                  <div className="aspect-16/10 w-full overflow-hidden relative">
                     <Image
                       src={FallbackPlaceholder || course.imageUrl}
                       alt={course.title}
@@ -183,7 +183,7 @@ export function CoursePageClient({ initialData, currentUser }: CoursePageClientP
                       height={1600}
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                     {/* Badge at corner */}
                     <div className="absolute top-3 left-3">
