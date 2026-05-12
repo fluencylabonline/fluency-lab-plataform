@@ -32,10 +32,20 @@ export function TranscriptionReviewStep({ lessonId, media, onComplete, status }:
   const [savedRows, setSavedRows] = useState<Set<number>>(new Set());
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const initialSegments: Segment[] = (media.transcriptionTimestamps || media.config?.segments || []) as Segment[];
+  const initialSegments = (media.transcriptionTimestamps?.length ? media.transcriptionTimestamps : media.config?.segments) || [];
   const [localSentences, setLocalSentences] = useState<Sentence[]>(
-    groupSegmentsIntoSentences(initialSegments)
+    mapSegmentsToSentences(initialSegments as Segment[])
   );
+
+  // Sync state with props when they arrive (fixes "empty initially" issue)
+  useEffect(() => {
+    if (localSentences.length === 0) {
+      const segments = (media.transcriptionTimestamps?.length ? media.transcriptionTimestamps : media.config?.segments) || [];
+      if (segments.length > 0) {
+        setLocalSentences(mapSegmentsToSentences(segments as Segment[]));
+      }
+    }
+  }, [media.transcriptionTimestamps, media.config?.segments, localSentences.length]);
 
   useEffect(() => {
     const audio = new Audio(media.url);
@@ -192,14 +202,14 @@ export function TranscriptionReviewStep({ lessonId, media, onComplete, status }:
 
         {/* ── Audio Player ── */}
         <div className={cn(
-          "card flex-shrink-0 flex md:flex-col items-center justify-between md:justify-center gap-4 md:gap-6 p-4 md:p-8 border border-border rounded-xl bg-background",
+          "card shrink-0 flex md:flex-col items-center justify-between md:justify-center gap-4 md:gap-6 p-4 md:p-8 border border-border rounded-xl bg-background",
           "w-full md:w-64 sticky top-0 md:relative z-10 md:z-0 md:shadow-none"
         )}>
 
           {/* State indicator (Compact on mobile) */}
           <div className="flex items-center md:flex-col gap-3 w-auto md:w-full overflow-hidden">
             <div className={cn(
-              "flex-shrink-0 w-10 h-10 md:w-14 md:h-14 rounded-full border-2 flex items-center justify-center transition-colors duration-300",
+              "shrink-0 w-10 h-10 md:w-14 md:h-14 rounded-full border-2 flex items-center justify-center transition-colors duration-300",
               isPlaying
                 ? "border-foreground bg-foreground text-background"
                 : "border-border bg-muted text-muted-foreground"
@@ -285,82 +295,20 @@ export function TranscriptionReviewStep({ lessonId, media, onComplete, status }:
                 </div>
               )}
 
-              {localSentences.map((sentence, idx) => {
-                const isActive = currentTime >= sentence.start && currentTime <= sentence.end;
-                const wasSaved = savedRows.has(idx);
-
-                return (
-                  <div
-                    key={idx}
-                    className={cn(
-                      "rounded-xl border transition-all duration-300",
-                      wasSaved
-                        ? "border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/20"
-                        : isActive
-                          ? "border-primary bg-primary/10 dark:bg-primary/20"
-                          : "border-transparent hover:border-border/50 bg-muted/20 md:bg-transparent"
-                    )}
-                  >
-                    {/* Timestamps row */}
-                    <div className="flex items-center gap-3 px-4 pt-3 pb-1">
-                      <button
-                        onClick={() => jumpTo(sentence.start)}
-                        className={cn(
-                          "w-6 h-6 flex items-center justify-center rounded-md transition-colors",
-                          isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                        )}
-                        title={t("jump_to_segment")}
-                      >
-                        <Play className="w-2.5 h-2.5 fill-current" />
-                      </button>
-
-                      <div className="flex items-center gap-2">
-                        <div className="flex flex-col">
-                          <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">
-                            {t("timestamp_start")}
-                          </span>
-                          <input
-                            className="w-14 text-[11px] md:text-xs font-mono bg-transparent border-none outline-none text-muted-foreground focus:text-foreground focus:font-bold transition-all"
-                            defaultValue={formatTime(sentence.start)}
-                            onBlur={(e) => updateTimestamp(idx, "start", e.target.value)}
-                            onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
-                          />
-                        </div>
-
-                        <span className="text-muted-foreground/20 text-xs mt-2">→</span>
-
-                        <div className="flex flex-col">
-                          <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">
-                            {t("timestamp_end")}
-                          </span>
-                          <input
-                            className="w-14 text-[11px] md:text-xs font-mono bg-transparent border-none outline-none text-muted-foreground focus:text-foreground focus:font-bold transition-all"
-                            defaultValue={formatTime(sentence.end)}
-                            onBlur={(e) => updateTimestamp(idx, "end", e.target.value)}
-                            onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Text input */}
-                    <div className="px-4 pb-3">
-                      <textarea
-                        value={sentence.text}
-                        onChange={(e) => updateText(idx, e.target.value)}
-                        rows={1}
-                        className="w-full bg-transparent border-none p-0 focus:ring-0 text-sm md:text-base leading-relaxed resize-none overflow-hidden min-h-[1.5em]"
-                        placeholder={t("transcription_placeholder")}
-                        onInput={(e) => {
-                          const target = e.target as HTMLTextAreaElement;
-                          target.style.height = "auto";
-                          target.style.height = `${target.scrollHeight}px`;
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+              {localSentences.map((sentence, idx) => (
+                <SentenceRow
+                  key={idx}
+                  idx={idx}
+                  sentence={sentence}
+                  currentTime={currentTime}
+                  isPlaying={isPlaying}
+                  savedRows={savedRows}
+                  jumpTo={jumpTo}
+                  updateTimestamp={updateTimestamp}
+                  updateText={updateText}
+                  t={t}
+                />
+              ))}
 
             </div>
           </ScrollArea>
@@ -370,37 +318,147 @@ export function TranscriptionReviewStep({ lessonId, media, onComplete, status }:
   );
 }
 
-function groupSegmentsIntoSentences(segments: Segment[]): Sentence[] {
-  if (!segments || segments.length === 0) return [];
-  const isAlreadySentenceLevel = segments.some(s => s.word.includes(" "));
-  if (isAlreadySentenceLevel) {
-    return segments.map(s => ({ text: s.word, start: s.start, end: s.end }));
-  }
-  const result: Sentence[] = [];
-  let current: { text: string[]; start: number; end: number } | null = null;
-  segments.forEach((seg, i) => {
-    if (!current) { current = { text: [seg.word], start: seg.start, end: seg.end }; }
-    else { current.text.push(seg.word); current.end = seg.end; }
-    if (seg.word.match(/[.?!]$/) || current.text.length >= 10 || i === segments.length - 1) {
-      result.push({ text: current.text.join(" "), start: current.start, end: current.end });
-      current = null;
+interface SentenceRowProps {
+  idx: number;
+  sentence: Sentence;
+  currentTime: number;
+  isPlaying: boolean;
+  savedRows: Set<number>;
+  jumpTo: (time: number) => void;
+  updateTimestamp: (idx: number, field: "start" | "end", raw: string) => void;
+  updateText: (idx: number, text: string) => void;
+  t: (key: string) => string;
+}
+
+function SentenceRow({
+  idx,
+  sentence,
+  currentTime,
+  isPlaying,
+  savedRows,
+  jumpTo,
+  updateTimestamp,
+  updateText,
+  t
+}: SentenceRowProps) {
+  const isActive = currentTime >= sentence.start && currentTime <= sentence.end;
+  const wasSaved = savedRows.has(idx);
+  const segmentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isActive && isPlaying) {
+      segmentRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
     }
-  });
-  return result;
+  }, [isActive, isPlaying]);
+
+  return (
+    <div
+      ref={segmentRef}
+      className={cn(
+        "rounded-xl border transition-all duration-300",
+        wasSaved
+          ? "border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/20"
+          : isActive
+            ? "border-primary bg-primary/10 dark:bg-primary/20"
+            : "border-transparent hover:border-border/50 bg-muted/20 md:bg-transparent"
+      )}
+    >
+      <div className="flex items-center gap-3 px-4 pt-3 pb-1">
+        <button
+          onClick={() => jumpTo(sentence.start)}
+          className={cn(
+            "w-6 h-6 flex items-center justify-center rounded-md transition-colors",
+            isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          )}
+          title={t("jump_to_segment")}
+        >
+          <Play className="w-2.5 h-2.5 fill-current" />
+        </button>
+
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col">
+            <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">
+              {t("timestamp_start")}
+            </span>
+            <input
+              key={`start-${idx}-${sentence.start}`}
+              className="w-14 text-[11px] md:text-xs font-mono bg-transparent border-none outline-none text-muted-foreground focus:text-foreground focus:font-bold transition-all"
+              defaultValue={formatTime(sentence.start)}
+              onBlur={(e) => updateTimestamp(idx, "start", e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+            />
+          </div>
+
+          <span className="text-muted-foreground/20 text-xs mt-2">→</span>
+
+          <div className="flex flex-col">
+            <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">
+              {t("timestamp_end")}
+            </span>
+            <input
+              key={`end-${idx}-${sentence.end}`}
+              className="w-14 text-[11px] md:text-xs font-mono bg-transparent border-none outline-none text-muted-foreground focus:text-foreground focus:font-bold transition-all"
+              defaultValue={formatTime(sentence.end)}
+              onBlur={(e) => updateTimestamp(idx, "end", e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="px-4 pb-3">
+        <textarea
+          value={sentence.text}
+          onChange={(e) => updateText(idx, e.target.value)}
+          rows={1}
+          className="w-full bg-transparent border-none p-0 focus:ring-0 text-sm md:text-base leading-relaxed resize-none overflow-hidden min-h-[1.5em]"
+          placeholder={t("transcription_placeholder")}
+          onInput={(e) => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = "auto";
+            target.style.height = `${target.scrollHeight}px`;
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function mapSegmentsToSentences(segments: Segment[]): Sentence[] {
+  if (!segments || segments.length === 0) return [];
+
+  return segments.map(s => ({
+    text: s.word.trim(),
+    start: s.start,
+    end: s.end
+  }));
 }
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
-  const ms = Math.floor((seconds % 1) * 10);
-  return `${m}:${s.toString().padStart(2, "0")}.${ms}`;
+  const ms = Math.round((seconds % 1) * 1000);
+  return `${m}:${s.toString().padStart(2, "0")}.${ms.toString().padStart(3, "0")}`;
 }
 
 function parseTime(str: string): number | null {
-  const match = str.match(/^(\d+):(\d{1,2})(?:\.(\d))?$/);
+  // Support M:SS.mmm or M:SS.m or M:SS
+  const match = str.match(/^(\d+):(\d{1,2})(?:\.(\d+))?$/);
   if (match) {
-    const [, m, s, ms] = match;
-    return parseInt(m) * 60 + parseInt(s) + (ms ? parseInt(ms) / 10 : 0);
+    const [, m, s, msStr] = match;
+    const minutes = parseInt(m, 10);
+    const seconds = parseInt(s, 10);
+    let milliseconds = 0;
+    
+    if (msStr) {
+      const paddedMs = msStr.padEnd(3, '0').substring(0, 3);
+      milliseconds = parseInt(paddedMs, 10);
+    }
+    
+    return minutes * 60 + seconds + milliseconds / 1000;
   }
   const raw = parseFloat(str);
   return isNaN(raw) ? null : raw;

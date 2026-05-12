@@ -9,7 +9,7 @@ export const curriculumService = {
   /**
    * Step 1: Creates a new lesson record.
    */
-  async createLesson(data: { title: string, difficulty: CEFRLevel, languageId: string }) {
+  async createLesson(data: { title: string, difficulty: CEFRLevel, languageId: string, nativeLanguageId: string }) {
     const lesson = await curriculumRepository.createLesson({
       ...data,
       status: "draft",
@@ -19,20 +19,51 @@ export const curriculumService = {
   },
 
   /**
+   * Step 2 (Prep): Reserves a media record for a lesson.
+   * This ensures we have a database record to track the upload.
+   */
+  async reserveMedia(lessonId: string) {
+    const lesson = await curriculumRepository.findLessonById(lessonId);
+    if (!lesson) throw new Error("Lesson not found");
+
+    if (lesson.mediaId) {
+      return lesson.media;
+    }
+
+    // Create a placeholder media record
+    const mediaRecord = await curriculumRepository.createMedia({
+      url: "uploading...", // Temporary URL
+      status: "pending_review"
+    });
+
+    // Link it to the lesson
+    await curriculumRepository.updateLesson(lessonId, {
+      mediaId: mediaRecord.id
+    });
+
+    return mediaRecord;
+  },
+
+  /**
    * Step 2: Processes lesson media and generates transcription.
    */
   async processLessonMedia(lessonId: string, mediaUrl: string) {
     const lesson = await curriculumRepository.findLessonById(lessonId);
     if (!lesson) throw new Error("Lesson not found");
 
-    // 1. Create or reuse Media record (persist URL before transcription)
+    // 1. Update existing Media record or create new one
     let mediaRecord = lesson.media;
-    if (!mediaRecord || mediaRecord.url !== mediaUrl) {
+    if (mediaRecord) {
+      await curriculumRepository.updateMedia(mediaRecord.id, {
+        url: mediaUrl,
+        status: "pending_review"
+      });
+    } else {
       mediaRecord = await curriculumRepository.createMedia({
         url: mediaUrl,
         status: "pending_review"
       });
-      // Link media to lesson immediately
+      // Link media to lesson
       await curriculumRepository.updateLesson(lessonId, {
         mediaId: mediaRecord.id,
       });
@@ -59,45 +90,54 @@ export const curriculumService = {
     // Determine the source based on the current step
     // Step 4: Analyzes Transcription
     // Step 6: Analyzes Lesson Content
-    const sourceText = lesson.creationStep === 3 || lesson.creationStep === 4
-      ? lesson.media?.transcriptionText
-      : lesson.contentText;
-
-    if (!sourceText) throw new Error("No source text available for analysis");
-
-    await curriculumRepository.updateLesson(lessonId, { status: "analyzing" });
-
     try {
-      const { vocabulary, structures } = await aiService.parseLessonContent(
-        sourceText,
-        lesson.difficulty as CEFRLevel,
-        userId
-      );
+      const transcriptionText = lesson.media?.transcriptionText;
+      const contentText = lesson.contentText;
+      const level = lesson.difficulty as CEFRLevel;
 
-      // Merge with existing items if any
+      let vocabulary: AnalysisResult["vocabulary"] = [];
+      let structures: AnalysisResult["structures"] = [];
+
+      // T1.5: Parallelize if both sources exist
+      if (transcriptionText && contentText && lesson.creationStep >= 6) {
+        const targetLanguage = lesson.language!.name;
+        const nativeLanguage = lesson.nativeLanguage!.name;
+
+        const [transResult, contentResult] = await Promise.all([
+          aiService.parseLessonContent(transcriptionText, level, targetLanguage, nativeLanguage, userId),
+          aiService.parseLessonContent(contentText, level, targetLanguage, nativeLanguage, userId),
+        ]);
+        vocabulary = [...transResult.vocabulary, ...contentResult.vocabulary];
+        structures = [...transResult.structures, ...contentResult.structures];
+      } else {
+        const sourceText = (lesson.creationStep === 3 || lesson.creationStep === 4)
+          ? transcriptionText
+          : contentText;
+
+        if (!sourceText) throw new Error("No source text available for analysis");
+
+        const targetLanguage = lesson.language!.name;
+        const nativeLanguage = lesson.nativeLanguage!.name;
+
+        const result = await aiService.parseLessonContent(sourceText, level, targetLanguage, nativeLanguage, userId);
+        vocabulary = result.vocabulary;
+        structures = result.structures;
+      }
+
+      // Deduplicate using AI Service helpers
       const existingJson = (lesson.analysisResultJson as unknown as AnalysisResult) || { vocabulary: [], structures: [] };
 
-      const mergedVocabulary = [...(existingJson.vocabulary || [])];
-      const mergedStructures = [...(existingJson.structures || [])];
+      const mergedVocabulary = aiService.mergeAndDeduplicateItems(
+        existingJson.vocabulary || [],
+        vocabulary
+      );
 
-      // Simple deduplication based on lemma
-      vocabulary.forEach((v) => {
-        if (!mergedVocabulary.find((mv) => mv.lemma === v.lemma)) {
-          mergedVocabulary.push(v);
-        }
-      });
+      const mergedStructures = aiService.mergeAndDeduplicateStructures(
+        existingJson.structures || [],
+        structures
+      );
 
-      structures.forEach((s) => {
-        if (!mergedStructures.find((ms) => ms.name === s.name)) {
-          mergedStructures.push({
-            name: s.name,
-            type: s.type,
-            example_from_text: s.example_from_text
-          });
-        }
-      });
-
-      const nextStep = (lesson.creationStep === 3 || lesson.creationStep === 4) ? 5 : 7;
+      const nextStep = (lesson.creationStep === 3 || lesson.creationStep === 4) ? 5 : 8;
 
       await curriculumRepository.updateLesson(lessonId, {
         status: "reviewing",
@@ -135,8 +175,8 @@ export const curriculumService = {
       const isB1 = difficulty === "B1";
 
       const targetLang = lesson.language?.code || "en";
-      const targetLanguageName = lesson.language?.name || "English";
-      const nativeLanguageName = targetLang === "en" ? "Portuguese" : "English";
+      const targetLanguageName = lesson.language!.name;
+      const nativeLanguageName = lesson.nativeLanguage!.name;
 
       const translationPrompt = isA1A2
         ? `translate lemma, meanings and examples to ${nativeLanguageName}`
@@ -153,7 +193,6 @@ export const curriculumService = {
         targetLanguageName,
         nativeLanguageName,
         translationPrompt,
-        difficulty,
         userId
       );
 
@@ -210,7 +249,7 @@ export const curriculumService = {
    * Step 8 (entry): Enrich items from analysisResultJson in batches.
    * Acts as a queue processor.
    */
-  async enrichLinkedItems(lessonId: string, userId?: string, batchSize: number = 31) {
+  async enrichLinkedItems(lessonId: string, userId?: string, batchSize: number = 10) {
     const lesson = await curriculumRepository.findLessonById(lessonId);
     if (!lesson) throw new Error("Lesson not found");
 
@@ -299,6 +338,8 @@ export const curriculumService = {
         contentText: lesson.contentText,
         items: lesson.items || [],
         level: lesson.difficulty as CEFRLevel,
+        targetLanguage: lesson.language!.name,
+        nativeLanguage: lesson.nativeLanguage!.name,
         transcriptionSegments: (lesson.media?.config as { segments?: Array<{ word: string, start: number, end: number }> })?.segments || lesson.media?.transcriptionTimestamps || [],
         userId
       });
@@ -460,6 +501,7 @@ export const curriculumService = {
     // 1. Create new lesson
     const newLesson = await curriculumRepository.createLesson({
       languageId: oldLesson.languageId,
+      nativeLanguageId: oldLesson.nativeLanguageId!,
       mediaId: oldLesson.mediaId,
       title: oldLesson.title,
       difficulty: oldLesson.difficulty as CEFRLevel,
@@ -556,6 +598,7 @@ export const curriculumService = {
     const { full_text, segments } = await aiService.transcribeMedia(
       mediaRecord.url,
       "audio",
+      undefined,
       userId
     );
 
@@ -566,12 +609,14 @@ export const curriculumService = {
     });
   },
 
-  async getLearningItems(params: { languageId: string, type?: "VOCABULARY" | "STRUCTURE", search?: string, limit?: number }) {
+  async getLearningItems(params: { languageId?: string, type?: "VOCABULARY" | "STRUCTURE", level?: string, search?: string, limit?: number, offset?: number }) {
     return await curriculumRepository.findLearningItems({
       languageId: params.languageId,
       type: params.type,
+      level: params.level,
       search: params.search,
-      limit: params.limit || 50
+      limit: params.limit || 50,
+      offset: params.offset || 0
     });
   },
 
@@ -583,6 +628,7 @@ export const curriculumService = {
     id?: string,
     title: string,
     languageId: string,
+    nativeLanguageId: string,
     difficulty: CEFRLevel,
     contentJson?: Record<string, unknown> | null,
     quizData?: { questions: QuizQuestion[]; passingScore: number } | null,

@@ -6,12 +6,15 @@ import { mediaService } from "@/modules/media/media.service";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { curriculumRepository } from "./curriculum.repository";
-import { LanguageWithLessons, MediaWithLessons } from "./curriculum.types";
+import { LanguageWithLessons, MediaWithLessons, Segment, QuizData, QuizQuestion, AnalysisResult, QualityResult, MediaConfig } from "./curriculum.types";
+import type { JSONContent } from "@tiptap/core";
+import crypto from "node:crypto";
 
 const createLessonSchema = z.object({
   title: z.string().min(3),
   difficulty: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]),
   languageId: z.uuid(),
+  nativeLanguageId: z.uuid(),
 });
 
 const attachMediaSchema = z.object({
@@ -46,7 +49,7 @@ const generateQuizSchema = z.object({
 
 const updateQuizSchema = z.object({
   lessonId: z.uuid(),
-  quizData: z.any(),
+  quizData: z.unknown(),
 });
 
 const finalizeLessonSchema = z.object({
@@ -60,16 +63,18 @@ const deleteLessonSchema = z.object({
 const updateMediaSchema = z.object({
   mediaId: z.uuid(),
   transcriptionText: z.string().optional(),
-  transcriptionTimestamps: z.any().optional(),
-  config: z.any().optional(),
+  transcriptionTimestamps: z.unknown().optional(),
+  config: z.unknown().optional(),
 });
 
 const updateLessonActionSchema = z.object({
   id: z.uuid(),
   contentText: z.string().optional(),
-  contentJson: z.any().optional(),
+  contentJson: z.unknown().optional(),
   creationStep: z.number().optional(),
-  analysisResultJson: z.any().optional(),
+  analysisResultJson: z.unknown().optional(),
+  qualityAnalysisJson: z.unknown().optional(),
+  status: z.enum(["draft", "transcribing", "analyzing", "processing_items", "reviewing", "reviewing_quiz", "ready", "error"]).optional(),
 });
 
 const cloneLessonSchema = z.object({
@@ -77,6 +82,7 @@ const cloneLessonSchema = z.object({
 });
 
 const getSignedMediaUploadUrlSchema = z.object({
+  lessonId: z.uuid().optional(),
   fileName: z.string(),
   contentType: z.string(),
 });
@@ -85,9 +91,10 @@ const upsertRecessActivitySchema = z.object({
   id: z.string().uuid().optional(),
   title: z.string().min(1),
   languageId: z.string().uuid(),
+  nativeLanguageId: z.string().uuid(),
   difficulty: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]),
-  contentJson: z.any().optional(),
-  quizData: z.any().optional(),
+  contentJson: z.unknown().optional(),
+  quizData: z.unknown().optional(),
 });
 
 
@@ -97,7 +104,11 @@ const upsertRecessActivitySchema = z.object({
 export const updateMediaAction = managerAction
   .inputSchema(updateMediaSchema)
   .action(async ({ parsedInput }) => {
-    await curriculumService.updateMedia(parsedInput.mediaId, parsedInput);
+    await curriculumService.updateMedia(parsedInput.mediaId, {
+      ...parsedInput,
+      transcriptionTimestamps: parsedInput.transcriptionTimestamps as Segment[],
+      config: parsedInput.config as MediaConfig,
+    });
     return { success: true };
   });
 
@@ -107,7 +118,12 @@ export const updateMediaAction = managerAction
 export const updateLessonAction = managerAction
   .inputSchema(updateLessonActionSchema)
   .action(async ({ parsedInput }) => {
-    await curriculumService.updateLesson(parsedInput.id, parsedInput);
+    await curriculumService.updateLesson(parsedInput.id, {
+      ...parsedInput,
+      contentJson: parsedInput.contentJson as JSONContent,
+      analysisResultJson: parsedInput.analysisResultJson as AnalysisResult,
+      qualityAnalysisJson: parsedInput.qualityAnalysisJson as QualityResult,
+    });
     revalidatePath(`/hub/manager/learning/lessons/${parsedInput.id}`);
     return { success: true };
   });
@@ -125,11 +141,28 @@ export const createLessonAction = managerAction
 
 /**
  * Action to generate a signed URL for client-side direct upload.
+ * Uses a deterministic path based on lessonId to prevent storage pollution.
  */
 export const getSignedMediaUploadUrlAction = managerAction
   .inputSchema(getSignedMediaUploadUrlSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const path = `curriculum/media/${ctx.user.id}/${Date.now()}-${parsedInput.fileName.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+    let path: string;
+
+    if (parsedInput.lessonId) {
+      // 1. Reserve the record in the DB first (only for lesson-linked media)
+      await curriculumService.reserveMedia(parsedInput.lessonId);
+
+      // 2. Generate the deterministic path for the lesson
+      const extension = parsedInput.fileName.split(".").pop();
+      const sanitizedName = `main.${extension}`;
+      path = `curriculum/lessons/${parsedInput.lessonId}/media/${sanitizedName}`;
+    } else {
+      // General library upload path
+      const extension = parsedInput.fileName.split(".").pop();
+      const randomId = crypto.randomUUID();
+      path = `media-library/${ctx.user.id}/${randomId}.${extension}`;
+    }
+
     const url = await mediaService.getSignedUploadUrl(path, parsedInput.contentType, ctx.user.id);
     return { url, path };
   });
@@ -211,7 +244,7 @@ export const generateQuizAction = managerAction
 export const updateQuizAction = managerAction
   .inputSchema(updateQuizSchema)
   .action(async ({ parsedInput }) => {
-    await curriculumService.updateLessonQuiz(parsedInput.lessonId, parsedInput.quizData);
+    await curriculumService.updateLessonQuiz(parsedInput.lessonId, parsedInput.quizData as QuizData);
     revalidatePath(`/hub/manager/learning/lessons/${parsedInput.lessonId}`);
     return { success: true };
   });
@@ -344,10 +377,12 @@ export const transcribeMediaAction = managerAction
  */
 export const getLearningItemsAction = managerAction
   .inputSchema(z.object({
-    languageId: z.uuid(),
+    languageId: z.string().uuid().optional(),
     type: z.enum(["VOCABULARY", "STRUCTURE"]).optional(),
+    level: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]).optional(),
     search: z.string().optional(),
     limit: z.number().optional().default(50),
+    offset: z.number().optional().default(0),
   }))
   .action(async ({ parsedInput }) => {
     return await curriculumService.getLearningItems(parsedInput);
@@ -394,6 +429,8 @@ export const upsertRecessActivityAction = protectedAction
     try {
       const result = await curriculumService.upsertRecessActivity({
         ...parsedInput,
+        contentJson: parsedInput.contentJson as Record<string, unknown>,
+        quizData: (parsedInput.quizData as unknown) as { questions: QuizQuestion[]; passingScore: number } | null,
         teacherId: ctx.user.id,
       });
       revalidatePath("/hub/teacher/recess");

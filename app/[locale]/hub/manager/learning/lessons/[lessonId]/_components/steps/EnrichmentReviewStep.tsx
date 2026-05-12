@@ -360,7 +360,7 @@ function ItemCard({
             className={cn(
                 "group flex items-start gap-3.5 p-4 rounded-xl border transition-all cursor-pointer animate-in fade-in slide-in-from-bottom-2 duration-300",
                 isCore
-                    ? "border-amber-500/25 bg-amber-500/[0.02] hover:bg-amber-500/[0.04] shadow-[0_2px_10px_-4px_rgba(245,158,11,0.1)]"
+                    ? "border-amber-500/25 bg-amber-500/2 hover:bg-amber-500/4 shadow-[0_2px_10px_-4px_rgba(245,158,11,0.1)]"
                     : "border-border bg-card hover:bg-muted/40 shadow-sm"
             )}
             style={{ animationDelay: `${delay}ms` }}

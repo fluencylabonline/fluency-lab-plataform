@@ -244,9 +244,11 @@ export const placementService = {
 
       try {
         const aiQuestion = await aiService.generatePlacementQuestionFromItem(
-          { lemma: item.lemma, type: item.type, metadata: item.metadata as Record<string, unknown> },
+          { lemma: item.lemma, type: item.type, metadata: item.metadata as LearningItemMetadata },
           cefrLevel,
           skill,
+          language.name,
+          "Portuguese",
           userId
         );
 
@@ -449,10 +451,15 @@ export const placementService = {
         for (let i = 0; i < validItems.length; i += batchSize) {
           const itemBatch = validItems.slice(i, i + batchSize);
           try {
-            const aiQuestions = await aiService.generatePlacementQuestionsBatch(
-              itemBatch as Array<{ lemma: string; type: string; metadata: Record<string, unknown> }>,
+            const language = await curriculumRepository.findLanguageById(languageId);
+            const targetLangName = language?.name || "English";
+            
+            const { questions: aiQuestions } = await aiService.generatePlacementQuestionsBatch(
+              itemBatch as Array<{ lemma: string; type: string; metadata: LearningItemMetadata }>,
               "A1", // Target level, could be dynamic
               skill,
+              targetLangName,
+              "Portuguese",
               userId
             );
 

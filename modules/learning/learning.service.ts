@@ -34,8 +34,14 @@ export const learningService = {
     const profile = await learningRepository.findProfileById(profileId);
     if (!profile) throw new Error("Profile not found");
 
+    let nativeLanguage = "Portuguese";
+    if (profile.studentId) {
+      const student = await db.query.usersTable.findFirst({ where: eq(usersTable.id, profile.studentId) });
+      if (student?.locale === "en") nativeLanguage = "English";
+    }
+
     // 1. Generate Pedagogical Summary using Gemini 2.0 Flash
-    const summary = await aiService.generateStudentProfileSummary(profile.responses as Record<string, unknown>, userId);
+    const summary = await aiService.generateStudentProfileSummary(profile.responses as Record<string, unknown>, nativeLanguage, userId);
 
     // 2. Generate Embedding Vector
     const vector = await aiService.getEmbeddings(summary, userId);
@@ -177,13 +183,30 @@ export const learningService = {
     // 2. Determine target language (default to English if not specified)
     // We'll use the first language from the student's languages array or a default
     let languageId = student.languages?.[0];
+    let targetLanguageName = "English";
     if (!languageId) {
       const enLang = await db.query.languages.findFirst({
         where: eq(languages.code, "en")
       });
-      if (enLang) languageId = enLang.id;
+      if (enLang) {
+        languageId = enLang.id;
+        targetLanguageName = enLang.name;
+      }
+    } else {
+      const lang = await db.query.languages.findFirst({ where: eq(languages.id, languageId) });
+      if (lang) targetLanguageName = lang.name;
     }
     if (!languageId) throw new Error("Target language not found for plan generation");
+
+    let nativeLanguage = "Portuguese";
+    const nativeLanguageCode = student.locale || "pt";
+    if (student.locale === "en") nativeLanguage = "English";
+    
+    const nativeLangObj = await db.query.languages.findFirst({
+      where: eq(languages.code, nativeLanguageCode)
+    });
+    const fallbackLang = nativeLangObj || await db.query.languages.findFirst();
+    const nativeLanguageId = fallbackLang?.id || languageId;
 
     // 3. Find top 40 similar lessons to give as candidates to the AI
     const similarRows = await learningRepository.findSimilarLessons(
@@ -203,7 +226,9 @@ export const learningService = {
       profileSummary: profile.qualitativeNotes,
       currentLevel: `Elo Score: ${student.currentEloScore} (CEFR approx target mapping)`,
       availableLessons,
-      allowSuggestions: options.allowSuggestions
+      allowSuggestions: options.allowSuggestions,
+      targetLanguage: targetLanguageName,
+      nativeLanguage
     }, userId);
 
     // 5. Create the Plan in DB
@@ -224,6 +249,7 @@ export const learningService = {
         if (slot.type === "suggestion" && slot.suggestion) {
           const [suggestedLesson] = await tx.insert(lessons).values({
             languageId,
+            nativeLanguageId,
             title: `[SUGESTÃO] ${slot.suggestion.title}`,
             difficulty: "A1", // Default, AI should specify in future
             status: "draft",
