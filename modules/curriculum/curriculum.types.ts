@@ -216,7 +216,7 @@ export interface Language {
 }
 
 export interface LanguageWithLessons extends Language {
-  lessons: Array<{ id: string }>;
+  targetLessons: Array<{ id: string }>;
 }
 
 export interface Sentence {
@@ -275,6 +275,7 @@ export interface MediaWithLessons extends Media {
 export interface Lesson {
   id: string;
   languageId: string;
+  nativeLanguageId: string | null;
   mediaId: string | null;
   title: string;
   difficulty: CEFRLevel | string;
@@ -298,6 +299,7 @@ export interface Lesson {
 
 export interface LessonSummary extends Pick<Lesson, "id" | "title" | "difficulty" | "status" | "creationStep" | "version" | "createdAt" | "languageId" | "isRecessActivity" | "teacherId" | "contentText"> {
   language: Language | null;
+  nativeLanguage: Language | null;
   media: Media | null;
 }
 
@@ -306,13 +308,16 @@ export interface LearningItem {
   languageId: string;
   type: "VOCABULARY" | "STRUCTURE" | string;
   lemma: string;
+  translation: string | null;
   metadata: LearningItemMetadata;
+  language?: Language | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 export interface LessonWithDetails extends Lesson {
   language: Language | null;
+  nativeLanguage: Language | null;
   media: Media | null;
   items: Array<{
     priority: "CORE" | "SECONDARY";

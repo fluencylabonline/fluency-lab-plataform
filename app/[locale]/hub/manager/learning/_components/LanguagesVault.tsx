@@ -170,7 +170,7 @@ export function LanguagesVault({ initialData }: LanguagesVaultProps) {
                                 ) : (
                                     <div className="grid gap-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                                         {languages?.map((lang: LanguageWithLessons) => {
-                                            const isLinkedToLesson = lang.lessons && lang.lessons.length > 0;
+                                            const isLinkedToLesson = lang.targetLessons && lang.targetLessons.length > 0;
 
                                             return (
                                                 <div
@@ -187,7 +187,7 @@ export function LanguagesVault({ initialData }: LanguagesVaultProps) {
                                                                 {isLinkedToLesson && (
                                                                     <span className="text-[10px] bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1 rounded-md flex items-center gap-0.5 font-bold">
                                                                         <Link2 className="w-2 h-2" />
-                                                                        {lang.lessons.length}
+                                                                        {lang.targetLessons.length}
                                                                     </span>
                                                                 )}
                                                             </div>

@@ -89,6 +89,7 @@ export function MediaStep({ lessonId, existingMediaUrl, existingTranscription, o
 
             // 1. Get signed URL
             const signedRes = await getSignedMediaUploadUrlAction({
+                lessonId,
                 fileName: file.name,
                 contentType: file.type
             });
@@ -276,7 +277,7 @@ export function MediaStep({ lessonId, existingMediaUrl, existingTranscription, o
                             <div
                                 className={cn(
                                     "h-full bg-primary transition-all duration-500",
-                                    status === "transcribing" && "animate-shimmer bg-gradient-to-r from-primary via-primary/60 to-primary bg-[length:200%_100%]"
+                                    status === "transcribing" && "animate-shimmer bg-linear-to-r from-primary via-primary/60 to-primary bg-size-[200%_100%]"
                                 )}
                                 style={{ width: `${status === "uploading" ? progress : 100}%` }}
                             />

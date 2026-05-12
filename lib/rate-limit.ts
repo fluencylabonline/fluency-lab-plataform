@@ -51,3 +51,13 @@ export async function checkRateLimit(
 
   return { success: true, remaining: limit - updated.count };
 }
+
+export async function checkDailyBudget(
+  serviceName: string,
+  identifier: string,
+  limit: number
+) {
+  // Uses a fixed 24h window for daily budget
+  const DAILY_WINDOW = 24 * 60 * 60 * 1000;
+  return checkRateLimit(`${serviceName}_daily`, identifier, limit, DAILY_WINDOW);
+}

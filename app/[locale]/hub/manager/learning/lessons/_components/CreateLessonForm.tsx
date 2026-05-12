@@ -28,6 +28,7 @@ const createLessonSchema = z.object({
     title: z.string().min(3, { message: "Title must be at least 3 characters" }),
     difficulty: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]),
     languageId: z.string().uuid({ message: "Please select a language" }),
+    nativeLanguageId: z.string().uuid({ message: "Please select a native language" }),
 });
 
 type CreateLessonValues = z.infer<typeof createLessonSchema>;
@@ -49,6 +50,7 @@ export function CreateLessonForm({ languages }: CreateLessonFormProps) {
             title: "",
             difficulty: undefined,
             languageId: "",
+            nativeLanguageId: "",
         },
     });
 
@@ -112,6 +114,28 @@ export function CreateLessonForm({ languages }: CreateLessonFormProps) {
                     >
                         <SelectTrigger className="h-12 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-2xl">
                             <SelectValue placeholder={t("select_language") || "Select language"} />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                            {languages.map((lang) => (
+                                <SelectItem key={lang.id} value={lang.id} className="py-2.5">
+                                    {lang.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </VaultField>
+
+                <VaultField
+                    label={t("lesson_native_language")}
+                    required
+                    error={form.formState.errors.nativeLanguageId?.message}
+                >
+                    <Select
+                        onValueChange={(value) => form.setValue("nativeLanguageId", value)}
+                        defaultValue={form.getValues("nativeLanguageId")}
+                    >
+                        <SelectTrigger className="h-12 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-2xl">
+                            <SelectValue placeholder={t("select_native_language")} />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl">
                             {languages.map((lang) => (

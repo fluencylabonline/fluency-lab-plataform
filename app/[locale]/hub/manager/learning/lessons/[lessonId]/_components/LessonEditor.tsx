@@ -86,7 +86,18 @@ function StepRenderer({ activeStep, lesson, onComplete }: { activeStep: number; 
                 />
             ) : null;
         case 4:
-            return <AnalysisStep lessonId={lesson.id} step={4} onComplete={onComplete} initialData={lesson.analysisResultJson ?? undefined} creationStep={lesson.creationStep} status={lesson.status} />;
+            return (
+                <AnalysisStep
+                    lessonId={lesson.id}
+                    step={4}
+                    onComplete={onComplete}
+                    initialData={lesson.analysisResultJson ?? undefined}
+                    creationStep={lesson.creationStep}
+                    status={lesson.status}
+                    transcriptionText={lesson.media?.transcriptionText}
+                    contentText={lesson.contentText}
+                />
+            );
         case 5:
             return (
                 <LessonContentStep
@@ -107,6 +118,8 @@ function StepRenderer({ activeStep, lesson, onComplete }: { activeStep: number; 
                     initialData={lesson.analysisResultJson ?? undefined}
                     creationStep={lesson.creationStep}
                     status={lesson.status}
+                    transcriptionText={lesson.media?.transcriptionText}
+                    contentText={lesson.contentText}
                 />
             );
         case 8:

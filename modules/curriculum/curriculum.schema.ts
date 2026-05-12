@@ -48,7 +48,7 @@ export const languages = pgTable("curriculum_languages", {
 // 2. Media (Transcription & Timestamps)
 export const media = pgTable("curriculum_media", {
   id: uuid("id").primaryKey().defaultRandom(),
-  url: varchar("url", { length: 255 }).notNull(),
+  url: varchar("url", { length: 512 }).notNull(),
   transcriptionText: text("transcription_text"),
   transcriptionTimestamps: jsonb("transcription_timestamps").$type<Segment[]>(),
   config: jsonb("config").$type<MediaConfig | null>(),
@@ -85,6 +85,7 @@ export const learningItems = pgTable("curriculum_learning_items", {
 export const lessons = pgTable("curriculum_lessons", {
   id: uuid("id").primaryKey().defaultRandom(),
   languageId: uuid("language_id").references(() => languages.id).notNull(),
+  nativeLanguageId: uuid("native_language_id").references(() => languages.id).notNull(),
   mediaId: uuid("media_id").references(() => media.id),
   title: varchar("title", { length: 255 }).notNull(),
   difficulty: cefrLevelEnum("difficulty").notNull(),
@@ -131,11 +132,22 @@ export const rateLimits = pgTable("curriculum_rate_limits", {
   count: integer("count").default(0).notNull(),
 });
 
+// 7. AI Cache
+export const aiCache = pgTable("ai_cache", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  hash: varchar("hash", { length: 64 }).notNull().unique(), // SHA-256 of the prompt/input
+  serviceName: varchar("service_name", { length: 50 }).notNull(), // e.g., "embedding", "enrich", "placement"
+  response: jsonb("response").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at"),
+});
+
 // ================= RELATIONS =================
 
 export const languagesRelations = relations(languages, ({ many }) => ({
   learningItems: many(learningItems),
-  lessons: many(lessons),
+  targetLessons: many(lessons, { relationName: "targetLanguage" }),
+  nativeLessons: many(lessons, { relationName: "nativeLanguage" }),
 }));
 
 export const mediaRelations = relations(media, ({ many }) => ({
@@ -158,6 +170,12 @@ export const lessonsRelations = relations(lessons, ({ one, many }) => ({
   language: one(languages, {
     fields: [lessons.languageId],
     references: [languages.id],
+    relationName: "targetLanguage",
+  }),
+  nativeLanguage: one(languages, {
+    fields: [lessons.nativeLanguageId],
+    references: [languages.id],
+    relationName: "nativeLanguage",
   }),
   items: many(lessonLearningItems),
 }));

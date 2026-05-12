@@ -60,10 +60,12 @@ export async function GET(request: NextRequest) {
             return;
           }
 
-          const result = await aiService.streamTranscription(
+          const mediaType = media.url.match(/\.(mp3|wav|m4a|aac|ogg)$/) ? "audio" : "video";
+
+          const result = await aiService.transcribeMedia(
             media.url,
-            "video",
-            (chunk) => sendEvent("chunk", chunk),
+            mediaType,
+            (chunk: string) => sendEvent("chunk", chunk),
             user.id
           );
 
@@ -85,17 +87,20 @@ export async function GET(request: NextRequest) {
             return;
           }
 
-          const result = await aiService.streamAnalysis(
+          const result = await aiService.parseLessonContent(
             transcription,
             lesson.difficulty as CEFRLevel,
-            (chunk) => sendEvent("chunk", chunk),
+            lesson.language!.name,
+            lesson.nativeLanguage!.name,
+            (chunk: string) => sendEvent("chunk", chunk),
             user.id
           );
 
-          // Persist analysis
+          // 3. Save results and update status
           await curriculumRepository.updateLesson(lesson.id, {
             analysisResultJson: result,
-            status: "reviewing"
+            status: "reviewing",
+            creationStep: 5
           });
 
           sendEvent("result", JSON.stringify(result));
@@ -112,6 +117,7 @@ export async function GET(request: NextRequest) {
             lesson.contentText,
             lesson.difficulty as CEFRLevel,
             (chunk) => sendEvent("chunk", chunk),
+            lesson.nativeLanguage!.name,
             user.id
           );
 
@@ -124,17 +130,28 @@ export async function GET(request: NextRequest) {
 
         } else if (step === "7") {
           // Step 7: Extract learning items from lesson content + merge with transcription items
-          if (!lesson.contentText) {
-            sendEvent("error", "No lesson content available for item extraction");
-            controller.close();
+          // OPTIMIZATION: If content hasn't changed from transcription, skip re-analysis
+          const isIdentical = lesson.contentText?.trim() === lesson.media?.transcriptionText?.trim();
+          
+          if (isIdentical && lesson.analysisResultJson) {
+            console.log(`[SSE] Step 7: Content identical to transcription. Skipping AI.`);
+            sendEvent("status", "completed");
+            sendEvent("result", JSON.stringify(lesson.analysisResultJson));
+            
+            // Still update creation step to move forward
+            await curriculumRepository.updateLesson(lesson.id, {
+              creationStep: 8,
+            });
             return;
           }
 
           // Extract vocab/structures from the lesson content
-          const lessonAnalysis = await aiService.streamAnalysis(
-            lesson.contentText,
+          const lessonAnalysis = await aiService.parseLessonContent(
+            lesson.contentText!,
             lesson.difficulty as CEFRLevel,
-            (chunk) => sendEvent("chunk", chunk),
+            lesson.language!.code,
+            lesson.nativeLanguage!.code,
+            (chunk: string) => sendEvent("chunk", chunk),
             user.id
           );
 
@@ -146,11 +163,10 @@ export async function GET(request: NextRequest) {
             lessonAnalysis.vocabulary ?? []
           );
 
-          // Structures: simple concat (no dedup needed, examples are unique)
-          const mergedStructures = [
-            ...(transcriptionAnalysis?.structures ?? []),
-            ...(lessonAnalysis.structures ?? []),
-          ];
+          const mergedStructures = aiService.mergeAndDeduplicateStructures(
+            transcriptionAnalysis?.structures ?? [],
+            lessonAnalysis.structures ?? []
+          );
 
           const mergedResult = { vocabulary: mergedVocabulary, structures: mergedStructures };
 
@@ -171,14 +187,14 @@ export async function GET(request: NextRequest) {
 
           // Fetch items linked to this lesson to filter by priority if needed
           const lessonItems = await curriculumRepository.findLessonItems(lessonId);
-          // For now, use all items or prioritize CORE in the prompt if we want
-          // Let's pass the items to the AI service
           
           const result = await aiService.generateQuiz({
             contentText: lesson.contentText,
             level: lesson.difficulty as CEFRLevel,
             items: lessonItems,
-            onChunk: (chunk) => sendEvent("chunk", chunk),
+            targetLanguage: lesson.language!.name,
+            nativeLanguage: lesson.nativeLanguage!.name,
+            onChunk: (chunk: string) => sendEvent("chunk", chunk),
             transcriptionSegments: (lesson.media?.config as { segments?: Segment[] } | null)?.segments || lesson.media?.transcriptionTimestamps || [],
             userId: user.id
           });

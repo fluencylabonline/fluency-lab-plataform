@@ -33,6 +33,7 @@ import { useTranslations } from "next-intl";
 const activityFormSchema = z.object({
   title: z.string().min(1, "O título é obrigatório"),
   languageId: z.string().uuid("Selecione um idioma"),
+  nativeLanguageId: z.string().uuid("Selecione o idioma nativo"),
   difficulty: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]),
   contentJson: z.any().optional(),
 });
@@ -64,6 +65,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
     defaultValues: {
       title: initialActivity?.title || "",
       languageId: initialActivity?.languageId || "",
+      nativeLanguageId: initialActivity?.nativeLanguageId || "",
       difficulty: (initialActivity?.difficulty as ActivityFormValues["difficulty"]) || "A1",
       contentJson: initialActivity?.contentJson || { type: "doc", content: [] },
     } as ActivityFormValues
@@ -125,11 +127,45 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                   <Input {...form.register("title")} placeholder={t('titlePlaceholder') || "Ex: Prática de Conversação"} />
                 </Field>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label={tCommon('language') || "Idioma"} required error={errors.languageId?.message}>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <Field label={tCommon('language') || "Idioma Alvo"} required error={errors.languageId?.message}>
+                      <Select 
+                        onValueChange={(val) => form.setValue("languageId", val, { shouldDirty: true })}
+                        defaultValue={form.getValues("languageId")}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={tCommon('select') || "Selecione"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {languages.map(lang => (
+                            <SelectItem key={lang.id} value={lang.id}>{lang.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </Field>
+
+                    <Field label={tCommon('level') || "Nível"} required error={errors.difficulty?.message}>
+                      <Select 
+                        onValueChange={(val: ActivityFormValues["difficulty"]) => form.setValue("difficulty", val, { shouldDirty: true })}
+                        defaultValue={form.getValues("difficulty")}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={tCommon('select') || "Selecione"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["A1", "A2", "B1", "B2", "C1", "C2"].map(lvl => (
+                            <SelectItem key={lvl} value={lvl}>{lvl}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                  </div>
+
+                  <Field label={tCommon('native_language') || "Idioma Nativo"} required error={errors.nativeLanguageId?.message}>
                     <Select 
-                      onValueChange={(val) => form.setValue("languageId", val, { shouldDirty: true })}
-                      defaultValue={form.getValues("languageId")}
+                      onValueChange={(val) => form.setValue("nativeLanguageId", val, { shouldDirty: true })}
+                      defaultValue={form.getValues("nativeLanguageId")}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder={tCommon('select') || "Selecione"} />
@@ -137,22 +173,6 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                       <SelectContent>
                         {languages.map(lang => (
                           <SelectItem key={lang.id} value={lang.id}>{lang.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
-
-                  <Field label={tCommon('level') || "Nível"} required error={errors.difficulty?.message}>
-                    <Select 
-                      onValueChange={(val: ActivityFormValues["difficulty"]) => form.setValue("difficulty", val, { shouldDirty: true })}
-                      defaultValue={form.getValues("difficulty")}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={tCommon('select') || "Selecione"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {["A1", "A2", "B1", "B2", "C1", "C2"].map(lvl => (
-                          <SelectItem key={lvl} value={lvl}>{lvl}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

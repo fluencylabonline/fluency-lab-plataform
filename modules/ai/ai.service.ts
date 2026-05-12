@@ -1,18 +1,78 @@
 import { GoogleGenerativeAI, SchemaType, Schema } from "@google/generative-ai";
 import { env } from "@/env";
-import { QuizData, CEFRLevel, QuizItem, AnalysisResult } from "@/modules/curriculum/curriculum.types";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { QuizData, CEFRLevel, QuizItem, AnalysisResult, LearningItemMetadata } from "@/modules/curriculum/curriculum.types";
+import { checkRateLimit, checkDailyBudget } from "@/lib/rate-limit";
+import { aiRepository } from "./ai.repository";
+import { generateHash, approximateTokens, truncateByTokens } from "./ai.utils";
 
 const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
-const STRUCTURE_TAXONOMY = `
-ESTRUTURAS (USE ESTES CÓDIGOS EM "type"):
+
+const MODELS = {
+  fast: "gemini-2.0-flash",
+  pro: process.env.TRANSCRIPTION_MODEL || "gemini-2.0-flash",
+  embedding: "gemini-embedding-2-preview",
+  media: "gemini-2.5-flash",
+};
+
+export interface PlacementAIQuestion {
+  learningItemId?: string;
+  content: string;
+  context?: string;
+  audio_script?: string;
+  options: { id: string; text: string }[];
+  correct_option_id: string;
+}
+
+const getStructureTaxonomy = (language: string) => `
+STRUCTURES (USE THESE CODES IN "type"):
 - A1: "s-v", "s-v-o", "s-v-p-o", "s-av", "s-v-adv"
 - A2: "s-v-do-io", "s-v-o-o", "s-av-v-o", "s-v-inf", "s-v-ing"
 - B1: "s-v-o-adv", "s-v-o-p-o", "s-v-that-s-v-o", "s-v-wh"
 - B2: "passive-s-v-o", "s-modal-v-o", "s-v-o-to-v", "s-v-o-ing"
 - C1: "conditional-zero", "conditional-first", "conditional-second", "conditional-third", "relative-clause-def", "relative-clause-nondef", "s-v-o-which-s-v"
 - C2: "mixed-conditional", "passive-perfect", "cleft-sentence", "inversion-negative", "s-v-o-participle"
+(Provide explanations in ${language})
 `;
+
+const getEnrichFormatRules = (nativeLanguage: string) => `
+REGRAS DE FORMATO POR TIPO:
+1. Se o item for VOCABULARY (noun, verb, adjective, etc):
+{
+  "type": "noun/verb/...",
+  "level": "A1-C2",
+  "phonetic": "/.../",
+  "translation": "tradução principal para ${nativeLanguage}",
+  "is_visual": boolean,
+  "key_image_words": "keywords for unsplash",
+  "meanings": [{ "definition": "em ${nativeLanguage}", "translation": "em ${nativeLanguage}" }],
+  "forms": { "base": "...", "past": "...", "participle": "...", "plural": "..." },
+  "examples": [{ "text": "no idioma alvo", "translation": "em ${nativeLanguage}" }],
+  "synonyms": ["no idioma alvo"]
+}
+
+2. Se o item for STRUCTURE (ex: gramática, padrões de frase):
+{
+  "level": "A1-C2",
+  "structure_type": "Nome pedagógico (ex: Passive Voice, Mixed Conditional)",
+  "syntactic_pattern": "SVO/SV/SVC/SVOO/etc",
+  "translation": "nome da estrutura em ${nativeLanguage}",
+  "explanation": "explicação didática clara em ${nativeLanguage}",
+  "examples": [{ 
+    "text": "no idioma alvo", 
+    "translation": "em ${nativeLanguage}", 
+    "word_order": [{ "word": "...", "index": 0, "role": "subject/verb/object/etc" }] 
+  }]
+}
+`;
+
+const getQualityAnalysisCriteria = (language: string) => `
+1. Objective (2-3 min): Connection with reality and the "why" of learning.
+2. Vocabulary and Grammar (15-20 min): Contextualization, practical examples, and linguistic contrast.
+3. Contextualization (5-10 min): Use of mini-texts or dialogues.
+4. Guided Practice (20-30 min): Scaffolding exercises.
+5. Free Conversation (15-20 min): Autonomous oral production.
+6. Consolidation (5 min): Technical review and checklist.
+(All feedback must be in ${language})`;
 
 /**
  * Robustly cleans a JSON string that might be wrapped in markdown blocks
@@ -42,48 +102,63 @@ export const aiService = {
    * Returns a 768-dimension vector.
    */
   async getEmbeddings(text: string, userId?: string): Promise<number[]> {
+    const hash = generateHash(text);
+    const cached = await aiRepository.getCache(hash, "gemini_embedding");
+    if (cached) return cached as number[];
+
     if (userId) {
       const limit = await checkRateLimit("gemini_embedding", userId, 200);
       if (!limit.success) throw new Error("Rate limit exceeded for AI embeddings");
     }
-    const model = genAI.getGenerativeModel({ model: "models/gemini-embedding-2-preview" });
+    const model = genAI.getGenerativeModel({ model: `models/${MODELS.embedding}` });
     const result = await model.embedContent(text);
-    return result.embedding.values;
+    const embedding = result.embedding.values;
+
+    // Cache results for 90 days for embeddings
+    await aiRepository.setCache(hash, "gemini_embedding", embedding, 90);
+    return embedding;
   },
 
   /**
    * Generates a qualitative pedagogical summary based on the student survey responses.
    * This summary is used to generate the embedding for RAG.
    */
-  async generateStudentProfileSummary(responses: Record<string, unknown>, userId?: string): Promise<string> {
+  async generateStudentProfileSummary(responses: Record<string, unknown>, nativeLanguage: string, userId?: string): Promise<string> {
+    const hash = generateHash({ responses, nativeLanguage });
+    const cached = await aiRepository.getCache(hash, "gemini_summary");
+    if (cached) return cached as string;
+
     if (userId) {
       const limit = await checkRateLimit("gemini_summary", userId, 50);
       if (!limit.success) throw new Error("Rate limit exceeded for AI summary");
     }
 
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.0-flash",
+      model: `models/${MODELS.fast}`,
     });
 
-    const prompt = `Atue como um Especialista em Pedagogia e Design Instrucional.
-    Analise as respostas do questionário de onboarding de um aluno e gere um resumo qualitativo detalhado (Pedagogical Profile) em PORTUGUÊS.
+    const prompt = `Act as a Pedagogical Specialist and Instructional Designer.
+    Analyze the student's onboarding questionnaire responses and generate a detailed qualitative summary (Pedagogical Profile) in ${nativeLanguage.toUpperCase()}.
     
-    Este resumo deve capturar:
-    1. Perfil Profissional e Interesses: Como o aluno usa o idioma e o que o motiva.
-    2. Nível e Histórico: Onde ele está agora e qual sua bagagem.
-    3. Objetivos e Prazos: O que ele quer alcançar e em quanto tempo.
-    4. Estilo de Aprendizagem e Preferências: Como ele prefere aprender e que tipo de correções espera.
-    5. Desafios e Bloqueios: O que o impede de avançar (ex: ansiedade ao falar).
+    This summary must capture:
+    1. Professional Profile and Interests: How the student uses the language and what motivates them.
+    2. Level and Background: Where they are now and their previous experience.
+    3. Goals and Timelines: What they want to achieve and in what timeframe.
+    4. Learning Style and Preferences: How they prefer to learn and what kind of feedback they expect.
+    5. Challenges and Blocks: What prevents them from advancing (e.g., speaking anxiety).
     
-    O resumo deve ser escrito de forma narrativa e técnica, focado em ajudar a IA a selecionar as melhores lições para ele.
+    The summary should be written in a narrative and technical manner, focused on helping the AI select the best lessons for them.
     
-    RESPOSTAS DO ALUNO:
+    STUDENT RESPONSES:
     ${JSON.stringify(responses, null, 2)}
     
-    Resumo Qualitativo:`;
+    Qualitative Summary:`;
 
     const result = await model.generateContent(prompt);
-    return result.response.text();
+    const summary = result.response.text();
+
+    await aiRepository.setCache(hash, "gemini_summary", summary, 30);
+    return summary;
   },
 
   /**
@@ -96,9 +171,15 @@ export const aiService = {
       currentLevel: string;
       availableLessons: Array<{ id: string; title: string; difficulty: string }>;
       allowSuggestions: boolean;
+      targetLanguage: string;
+      nativeLanguage: string;
     },
     userId?: string
   ) {
+    const hash = generateHash(params);
+    const cached = await aiRepository.getCache(hash, "gemini_plan_gen");
+    if (cached) return cached;
+
     if (userId) {
       const limit = await checkRateLimit("gemini_plan_gen", userId, 50);
       if (!limit.success) throw new Error("Rate limit exceeded for AI plan generation");
@@ -138,39 +219,62 @@ export const aiService = {
       }
     });
 
-    const prompt = `Atue como um Diretor Pedagógico de uma escola de idiomas de elite.
-    Seu objetivo é criar um Plano de Estudos de 24 AULAS personalizado para este aluno.
+    const prompt = `Act as a Pedagogical Director of an elite language school.
+    Your goal is to create a personalized 24-LESSON Study Plan for this student to learn ${params.targetLanguage}.
     
-    PERFIL DO ALUNO:
+    STUDENT PROFILE:
     "${params.profileSummary}"
-    NÍVEL ATUAL: ${params.currentLevel}
+    CURRENT LEVEL: ${params.currentLevel}
+    NATIVE LANGUAGE: ${params.nativeLanguage}
     
-    AULAS DISPONÍVEIS NO BANCO:
+    AVAILABLE LESSONS IN BANK:
     ${JSON.stringify(params.availableLessons, null, 2)}
     
-    INSTRUÇÕES:
-    1. Crie uma sequência lógica de EXATAMENTE 24 aulas que leve o aluno do nível atual para o próximo objetivo.
-    2. Se uma aula disponível no banco for uma excelente combinação para o perfil e nível, use-a (type: "existing").
-    3. Se NÃO houver uma aula ideal no banco para um determinado passo necessário na jornada:
-       - Se allowSuggestions for TRUE: Crie uma SUGESTÃO de aula (type: "suggestion") com tema, descrição e objetivo.
-       - Se allowSuggestions for FALSE: Tente adaptar a aula disponível mais próxima.
-    4. O plano deve ser equilibrado entre interesses profissionais e gramática necessária para o nível.
+    INSTRUCTIONS:
+    1. Create a logical sequence of EXACTLY 24 lessons that takes the student from their current level to the next goal.
+    2. If an available lesson in the bank is an excellent match for the profile and level, use it (type: "existing").
+    3. If there is NO ideal lesson in the bank for a specific step needed in the journey:
+       - If allowSuggestions is TRUE: Create a lesson SUGGESTION (type: "suggestion") with title, description, and objective.
+       - If allowSuggestions is FALSE: Try to adapt the closest available lesson.
+    4. The plan must be balanced between professional interests and necessary grammar for the level.
+    5. The plan name and suggestions must be in ${params.nativeLanguage}.
     
-    Permitir Sugestões: ${params.allowSuggestions ? "SIM" : "NÃO"}
+    Allow Suggestions: ${params.allowSuggestions ? "YES" : "NO"}
     
     Retorne o JSON conforme o esquema definido com exatamente 24 slots.`;
 
     const result = await model.generateContent(prompt);
-    return JSON.parse(result.response.text());
+    const plan = JSON.parse(result.response.text());
+
+    await aiRepository.setCache(hash, "gemini_plan_gen", plan, 7);
+    return plan;
   },
 
   /**
    * Step 3: Parser Semântico. 
    * Extrair vocabulário e estruturas sugeridas de um texto.
    */
-  async parseLessonContent(text: string, level: CEFRLevel, userId?: string): Promise<AnalysisResult> {
-    if (userId) {
-      const limit = await checkRateLimit("gemini_parse", userId, 50);
+
+  async parseLessonContent(
+    text: string,
+    level: CEFRLevel,
+    targetLanguage: string,
+    nativeLanguage: string,
+    onChunkOrUserId?: ((chunk: string) => void) | string,
+    userId?: string
+  ): Promise<AnalysisResult> {
+    const onChunk = typeof onChunkOrUserId === "function" ? onChunkOrUserId : undefined;
+    const resolvedUserId = typeof onChunkOrUserId === "string" ? onChunkOrUserId : userId;
+
+    const hash = generateHash({ text, level, targetLanguage, nativeLanguage });
+    const cached = await aiRepository.getCache(hash, "gemini_parse");
+    if (cached) {
+      if (onChunk) onChunk(JSON.stringify(cached));
+      return cached as AnalysisResult;
+    }
+
+    if (resolvedUserId) {
+      const limit = await checkRateLimit("gemini_parse", resolvedUserId, 50);
       if (!limit.success) throw new Error("Rate limit exceeded for AI parsing");
     }
     const model = genAI.getGenerativeModel({
@@ -197,7 +301,7 @@ export const aiService = {
               items: {
                 type: SchemaType.OBJECT,
                 properties: {
-                  type: { type: SchemaType.STRING }, // Devem ser os códigos como 's-v-o', 'passive-s-v-o', etc.
+                  type: { type: SchemaType.STRING }, // Should be codes like 's-v-o', 'passive-s-v-o', etc.
                   name: { type: SchemaType.STRING },
                   example_from_text: { type: SchemaType.STRING },
                 },
@@ -210,157 +314,196 @@ export const aiService = {
       }
     });
 
-    const prompt = `Analise o seguinte texto em nível ${level} para ensino de idiomas. 
-    1. Extraia o vocabulário mais relevante (lemmatized) e classifique-o (noun, verb, etc).
-    2. Identifique as estruturas gramaticais principais e mapeie-as para os códigos de estrutura oficiais abaixo.
-    
-    ${STRUCTURE_TAXONOMY}
-    
-    Importante: No campo "type" da estrutura, use EXCLUSIVAMENTE um dos códigos acima.
-    
-    Texto: "${text}"`;
+    const safeText = truncateByTokens(text, 8000); // Max ~8k tokens for parsing safely
+    const tokens = approximateTokens(safeText);
+    console.log(`[aiService.parseLessonContent] Input tokens: ${tokens}`);
 
-    const result = await model.generateContent(prompt);
-    return JSON.parse(result.response.text());
+    const prompt = `Analyze the following text at level ${level} for teaching ${targetLanguage}. 
+    The student speaks ${nativeLanguage}.
+    1. Extract the most relevant vocabulary (lemmatized) and classify it (noun, verb, etc.). Provide the "contextual_meaning" in ${nativeLanguage}.
+    2. Identify the main grammatical structures and map them to the official structure codes below.
+    
+    ${getStructureTaxonomy(nativeLanguage)}
+    
+    Important: In the structure "type" field, use EXCLUSIVELY one of the codes above.
+    
+    Text: "${safeText}"`;
+
+    let finalResult: AnalysisResult;
+    if (onChunk) {
+      const result = await model.generateContentStream(prompt);
+      let fullText = "";
+      for await (const chunk of result.stream) {
+        const t = chunk.text();
+        fullText += t;
+        onChunk(t);
+      }
+      finalResult = JSON.parse(fullText);
+    } else {
+      const result = await model.generateContent(prompt);
+      finalResult = JSON.parse(result.response.text());
+    }
+
+    await aiRepository.setCache(hash, "gemini_parse", finalResult, 60);
+    return finalResult;
   },
 
   /**
    * Step 5: Enriquecimento de Dados em Lote (Batch Enrichment).
    * Gera metadados detalhados para múltiplos itens de vocabulário ou estrutura em uma única chamada.
    */
+
   async enrichBatchLearningItems(
     items: Array<{ lemma: string; type: string; context: string }>,
     targetLanguage: string,
     nativeLanguage: string,
     translationInstruction: string,
-    level?: string,
+    onChunkOrUserId?: ((chunk: string) => void) | string,
     userId?: string
-  ) {
-    if (userId) {
-      const limit = await checkRateLimit("gemini_enrich", userId, 50); // Batch consumes 1 limit
+  ): Promise<{ results: LearningItemMetadata[] }> {
+    const onChunk = typeof onChunkOrUserId === "function" ? onChunkOrUserId : undefined;
+    const resolvedUserId = typeof onChunkOrUserId === "string" ? onChunkOrUserId : userId;
+
+    const hash = generateHash({ items, targetLanguage, nativeLanguage, translationInstruction });
+    const cached = await aiRepository.getCache(hash, "gemini_enrich");
+    if (cached) {
+      if (onChunk) onChunk(JSON.stringify(cached));
+      return cached as { results: LearningItemMetadata[] };
+    }
+
+    if (resolvedUserId) {
+      const limit = await checkRateLimit("gemini_enrich", resolvedUserId, 50);
       if (!limit.success) throw new Error("Rate limit exceeded for AI enrichment");
     }
     const model = genAI.getGenerativeModel({
       model: "models/gemini-2.0-flash",
       generationConfig: {
-        responseMimeType: "application/json"
-      }
-    });
-
-    const prompt = `Gere metadados pedagógicos os seguintes itens no idioma ${targetLanguage}.
-    ${translationInstruction}. Idioma nativo do aluno: ${nativeLanguage}.
-    
-    ${STRUCTURE_TAXONOMY}
-    
-    Itens para enriquecer:
-    ${JSON.stringify(items, null, 2)}
-    
-    REGRAS DE FORMATO POR TIPO:
-    1. Se o item for VOCABULARY (noun, verb, adjective, etc):
-    {
-      "type": "noun/verb/...",
-      "level": "A1-C2",
-      "phonetic": "/.../",
-      "translation": "tradução principal",
-      "is_visual": boolean,
-      "key_image_words": "keywords for unsplash",
-      "meanings": [{ "definition": "...", "translation": "..." }],
-      "forms": { "base": "...", "past": "...", "participle": "...", "plural": "..." },
-      "examples": [{ "text": "...", "translation": "..." }],
-      "synonyms": ["..."]
-    }
-
-    2. Se o item for STRUCTURE (ex: gramática, padrões de frase):
-    {
-      "level": "A1-C2",
-      "structure_type": "Nome pedagógico (ex: Passive Voice, Mixed Conditional)",
-      "syntactic_pattern": "SVO/SV/SVC/SVOO/etc",
-      "translation": "nome da estrutura em PT",
-      "explanation": "explicação didática clara em PT",
-      "examples": [{ 
-        "text": "...", 
-        "translation": "...", 
-        "word_order": [{ "word": "...", "index": 0, "role": "subject/verb/object/etc" }] 
-      }]
-    }
-
-    Retorne um JSON com a chave "results", que deve ser um array mantendo A MESMA ORDEM dos itens enviados.`;
-
-    const result = await model.generateContent(prompt);
-    return JSON.parse(cleanJsonString(result.response.text()));
-  },
-
-
-
-  /**
-   * Step 2: Transcrição Automática.
-   * Usa recursos multimodais do Gemini para transcrever vídeo/áudio e gerar segmentos.
-   */
-  async transcribeMedia(url: string, type: 'video' | 'audio', userId?: string) {
-    if (userId) {
-      const limit = await checkRateLimit("gemini_transcribe", userId, 20); // Heavy action
-      if (!limit.success) throw new Error("Rate limit exceeded for AI transcription");
-    }
-
-    const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.5-pro"
-    });
-
-    // Fetch media and convert to Part
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to fetch media for transcription");
-    const buffer = await response.arrayBuffer();
-    const mimeType = response.headers.get("content-type") || (type === "video" ? "video/mp4" : "audio/mpeg");
-
-    const prompt = `Transcreva o conteúdo deste arquivo de ${type} de forma literal e exata, palavra por palavra.
-    NÃO adicione descrições de cena, diálogos explicativos, resumos ou comentários.
-    
-    Responda EXATAMENTE neste formato:
-    TRANSCRIPTION_START
-    (texto completo da transcrição aqui)
-    TRANSCRIPTION_END
-    SEGMENTS_JSON_START
-    [
-      { "word": "palavra", "start": 0.0, "end": 0.5 }
-    ]
-    SEGMENTS_JSON_END`;
-
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          data: Buffer.from(buffer).toString("base64"),
-          mimeType
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            results: {
+              type: SchemaType.ARRAY,
+              items: {
+                type: SchemaType.OBJECT,
+                properties: {
+                  type: { type: SchemaType.STRING },
+                  level: { type: SchemaType.STRING },
+                  translation: { type: SchemaType.STRING },
+                  explanation: { type: SchemaType.STRING },
+                  phonetic: { type: SchemaType.STRING },
+                  forms: { 
+                    type: SchemaType.OBJECT,
+                    properties: {
+                      base: { type: SchemaType.STRING },
+                      past: { type: SchemaType.STRING },
+                      participle: { type: SchemaType.STRING },
+                      plural: { type: SchemaType.STRING }
+                    }
+                  },
+                  examples: { 
+                    type: SchemaType.ARRAY,
+                    items: {
+                      type: SchemaType.OBJECT,
+                      properties: {
+                        text: { type: SchemaType.STRING },
+                        translation: { type: SchemaType.STRING }
+                      }
+                    }
+                  },
+                  synonyms: { 
+                    type: SchemaType.ARRAY,
+                    items: { type: SchemaType.STRING }
+                  },
+                  meanings: { 
+                    type: SchemaType.ARRAY,
+                    items: {
+                      type: SchemaType.OBJECT,
+                      properties: {
+                        definition: { type: SchemaType.STRING },
+                        translation: { type: SchemaType.STRING }
+                      }
+                    }
+                  },
+                  is_visual: { type: SchemaType.BOOLEAN },
+                  key_image_words: { type: SchemaType.STRING }
+                }
+              }
+            }
+          },
+          required: ["results"]
         }
       }
-    ]);
+    });
 
-    const fullResponse = result.response.text();
-    const fullTextMatch = fullResponse.match(/TRANSCRIPTION_START([\s\S]*?)TRANSCRIPTION_END/);
-    const segmentsMatch = fullResponse.match(/SEGMENTS_JSON_START([\s\S]*?)SEGMENTS_JSON_END/);
+    const prompt = `Generate pedagogical metadata for the following items in the ${targetLanguage} language.
+    ${translationInstruction}. Student's native language: ${nativeLanguage}.
+    
+    ${getStructureTaxonomy(nativeLanguage)}
+    
+    Items to enrich:
+    ${JSON.stringify(items, null, 2)}
+    
+    ${getEnrichFormatRules(nativeLanguage)}
 
-    const full_text = fullTextMatch ? fullTextMatch[1].trim() : "";
-    const segments = segmentsMatch ? JSON.parse(cleanJsonString(segmentsMatch[1])) : [];
+    Return a JSON with the "results" key, which must be an array maintaining THE SAME ORDER as the items sent.`;
 
-    return { full_text, segments };
+    let finalResult: { results: LearningItemMetadata[] };
+    let rawText = "";
+    try {
+      if (onChunk) {
+        const result = await model.generateContentStream(prompt);
+        for await (const chunk of result.stream) {
+          const t = chunk.text();
+          rawText += t;
+          onChunk(t);
+        }
+      } else {
+        const result = await model.generateContent(prompt);
+        rawText = result.response.text();
+      }
+
+      try {
+        finalResult = JSON.parse(rawText);
+      } catch {
+        const cleaned = cleanJsonString(rawText);
+        finalResult = JSON.parse(cleaned);
+      }
+    } catch (error) {
+      console.error("[aiService.enrichBatchLearningItems] Failed to process AI response.");
+      console.error("Raw Response Text (potentially truncated):", rawText);
+      throw error;
+    }
+
+    await aiRepository.setCache(hash, "gemini_enrich", finalResult, 120);
+    return finalResult;
   },
-
   /**
-   * Stream version of transcribeMedia. Yields text chunks via callback for SSE.
+   * Step 2: Media Transcription.
+   * Uses Gemini Pro's multimodal features to transcribe video/audio and generate word-level segments.
+   * Supports both synchronous (returns full result) and streaming (via onChunk callback).
    */
-  async streamTranscription(
+
+  async transcribeMedia(
     url: string,
     type: 'video' | 'audio',
-    onChunk: (chunk: string) => void,
+    onChunkOrUserId?: ((chunk: string) => void) | string,
     userId?: string
-  ) {
-    if (userId) {
-      const limit = await checkRateLimit("gemini_transcribe", userId, 20);
+  ): Promise<{ full_text: string; segments: Array<{ word: string; start: number; end: number }> }> {
+    const onChunk = typeof onChunkOrUserId === "function" ? onChunkOrUserId : undefined;
+    const resolvedUserId = typeof onChunkOrUserId === "string" ? onChunkOrUserId : userId;
+
+    if (resolvedUserId) {
+      const limit = await checkRateLimit("gemini_transcribe", resolvedUserId, 20);
       if (!limit.success) throw new Error("Rate limit exceeded for AI transcription");
+
+      // T4.3: Daily budget (max 10 transcriptions per day)
+      const dailyBudget = await checkDailyBudget("gemini_transcribe", resolvedUserId, 15);
+      if (!dailyBudget.success) throw new Error("Daily transcription budget exceeded (max 10/day)");
     }
 
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.5-pro"
+      model: `models/${MODELS.media}`
     });
 
     // Fetch media and convert to Part
@@ -369,16 +512,25 @@ export const aiService = {
     const buffer = await response.arrayBuffer();
     const mimeType = response.headers.get("content-type") || (type === "video" ? "video/mp4" : "audio/mpeg");
 
-    const prompt = `Transcreva o conteúdo deste arquivo de ${type} de forma literal e exata, palavra por palavra.
-    NÃO adicione descrições de cena, diálogos explicativos, resumos ou comentários.
+    const prompt = `Transcribe the content of this ${type} file exactly as spoken.
+    Respond with segments as complete, natural sentences.
+    DO NOT add scene descriptions, explanatory dialogues, summaries, or comments.
+    The transcription must be in the language spoken in the media.
     
-    Responda EXATAMENTE neste formato:
+    CRITICAL: The "start" and "end" timestamps MUST be STRINGS in "MM:SS.mmm" format.
+    - 1 minute and 10.425 seconds must be "01:10.425".
+    - 10 seconds must be "00:10.000".
+    - 2 minutes and 5 seconds must be "02:05.000".
+    
+    DO NOT use numbers. DO NOT use total seconds. If you return a number like 70.425 or 110.425, it will fail.
+    
+    Respond EXACTLY in this format:
     TRANSCRIPTION_START
-    (texto completo da transcrição aqui)
+    (full transcription text here)
     TRANSCRIPTION_END
     SEGMENTS_JSON_START
     [
-      { "word": "palavra", "start": 0.0, "end": 0.5 }
+      { "word": "Full sentence text here...", "start": "MM:SS.mmm", "end": "MM:SS.mmm" }
     ]
     SEGMENTS_JSON_END`;
 
@@ -411,7 +563,7 @@ export const aiService = {
         const currentContent = fullResponse.substring(contentStart, effectiveEnd);
 
         const newChunk = currentContent.substring(lastSentLength);
-        if (newChunk) {
+        if (newChunk && onChunk) {
           onChunk(newChunk);
           lastSentLength = currentContent.length;
         }
@@ -423,82 +575,55 @@ export const aiService = {
     const segmentsMatch = fullResponse.match(/SEGMENTS_JSON_START([\s\S]*?)SEGMENTS_JSON_END/);
 
     const full_text = fullTextMatch ? fullTextMatch[1].trim() : "";
-    const segments = segmentsMatch ? JSON.parse(cleanJsonString(segmentsMatch[1])) : [];
+    const rawSegmentsData = segmentsMatch ? segmentsMatch[1] : "[]";
+    
+    console.log(`[AI_TRANSCRIPTION] Raw segments string length: ${rawSegmentsData.length}`);
+    const rawSegments = JSON.parse(cleanJsonString(rawSegmentsData));
+
+    // Helper to parse MM:SS.mmm to seconds
+    const parseAiTime = (timeValue: unknown): number => {
+      if (timeValue === undefined || timeValue === null) return 0;
+      const str = String(timeValue).trim();
+      
+      // 1. Handle MM:SS.mmm (The intended format)
+      const colonMatch = str.match(/^(\d+):(\d{1,2})(?:\.(\d+))?$/);
+      if (colonMatch) {
+        const [, m, s, ms] = colonMatch;
+        return parseInt(m, 10) * 60 + parseInt(s, 10) + (ms ? parseInt(ms.padEnd(3, "0").substring(0, 3), 10) / 1000 : 0);
+      }
+
+      // 2. Handle numeric or "dot" formatted hallucinations (e.g. 110.425 or "110.425")
+      const numValue = parseFloat(str);
+      if (!isNaN(numValue)) {
+         const parts = str.split(".");
+         const integerPart = Math.abs(parseInt(parts[0], 10));
+         
+         // If it's something like 110.425, it's almost certainly M:SS.mmm represented as MSS.mmm
+         // Rule: If it's 100 or more, we assume the first digits are minutes.
+         if (integerPart >= 100) {
+            const mins = Math.floor(integerPart / 100);
+            const secs = integerPart % 100;
+            const ms = parts[1] ? parseInt(parts[1].padEnd(3, "0").substring(0, 3), 10) : 0;
+            const repaired = mins * 60 + (secs >= 60 ? 59 : secs) + ms / 1000;
+            console.warn(`[AI_TIME_REPAIR] Fixed numeric hallucination: ${str} -> ${repaired}s`);
+            return repaired;
+         }
+         return numValue; 
+      }
+      
+      return 0;
+    };
+
+    const segments = (rawSegments as Array<{ start: unknown; end: unknown; word: string }>).map((s) => ({
+      ...s,
+      start: parseAiTime(s.start),
+      end: parseAiTime(s.end),
+    }));
 
     return { full_text, segments };
+
   },
 
-  /**
-   * Stream version of parseLessonContent. Yields text chunks via callback for SSE.
-   */
-  async streamAnalysis(
-    text: string,
-    level: CEFRLevel,
-    onChunk: (chunk: string) => void,
-    userId?: string
-  ): Promise<AnalysisResult> {
-    if (userId) {
-      const limit = await checkRateLimit("gemini_parse", userId, 50);
-      if (!limit.success) throw new Error("Rate limit exceeded for AI parsing");
-    }
-
-    const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.0-flash",
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: SchemaType.OBJECT,
-          properties: {
-            vocabulary: {
-              type: SchemaType.ARRAY,
-              items: {
-                type: SchemaType.OBJECT,
-                properties: {
-                  lemma: { type: SchemaType.STRING },
-                  type: { type: SchemaType.STRING, format: "enum", enum: ["noun", "verb", "adjective", "adverb", "preposition", "conjunction", "pronoun", "determiner", "particle"] },
-                  contextual_meaning: { type: SchemaType.STRING },
-                },
-                required: ["lemma", "type", "contextual_meaning"]
-              }
-            },
-            structures: {
-              type: SchemaType.ARRAY,
-              items: {
-                type: SchemaType.OBJECT,
-                properties: {
-                  type: { type: SchemaType.STRING },
-                  name: { type: SchemaType.STRING },
-                  example_from_text: { type: SchemaType.STRING },
-                },
-                required: ["type", "name", "example_from_text"]
-              }
-            }
-          },
-          required: ["vocabulary", "structures"]
-        }
-      }
-    });
-
-    const prompt = `Analise o seguinte texto em nível ${level} para ensino de idiomas. 
-    Extraia o vocabulário mais relevante e as estruturas gramaticais principais.
-    
-    IMPORTANTE: Retorne OBJETOS para cada item.
-    Vocabulário: lemma, type (noun, verb, etc), contextual_meaning.
-    Estruturas: type (ex: 's-v-o', 'passive-s-v-o'), name (nome amigável), example_from_text.
-    
-    Texto: "${text}"`;
-
-    const result = await model.generateContentStream(prompt);
-
-    let fullText = "";
-    for await (const chunk of result.stream) {
-      const t = chunk.text();
-      fullText += t;
-      onChunk(t);
-    }
-
-    return JSON.parse(fullText);
-  },
 
   /**
    * Step 6: Pedagogical Quality Audit.
@@ -509,6 +634,7 @@ export const aiService = {
     contentText: string,
     level: CEFRLevel,
     onChunk: (chunk: string) => void,
+    nativeLanguage: string,
     userId?: string
   ) {
     if (userId) {
@@ -554,29 +680,30 @@ export const aiService = {
       },
     });
 
-    const AUDIT_CRITERIA = `
-1. Objetivo (2-3 min): Conexão com a realidade e "porquê" do aprendizado.
-2. Vocabulário e Gramática (15-20 min): Contextualização, exemplos práticos e contraste linguístico.
-3. Contextualização (5-10 min): Uso de mini textos ou diálogos.
-4. Prática Guiada (20-30 min): Exercícios com andaime (scaffolding).
-5. Conversação Livre (15-20 min): Produção oral autônoma.
-6. Consolidação (5 min): Revisão técnica e checklist.`;
+    const MAX_QUALITY_TOKENS = 8500; // ~30k chars
+    const safeContent = truncateByTokens(contentText, MAX_QUALITY_TOKENS);
+    const tokens = approximateTokens(safeContent);
+    
+    if (safeContent !== contentText) {
+      console.warn(`[aiService.streamQualityAnalysis] Content truncated to ${MAX_QUALITY_TOKENS} tokens.`);
+    }
+    console.log(`[aiService.streamQualityAnalysis] Input tokens: ${tokens}`);
 
-    const prompt = `Atue como um Especialista em Design Instrucional e Mentor de Professores de Idiomas.
-Analise o roteiro de aula abaixo (nível CEFR ${level}) com base na Matriz de Auditoria Pedagógica.
+    const prompt = `Act as an Instructional Design Expert and Language Teacher Mentor.
+Analyze the lesson script below (CEFR level ${level}) based on the Pedagogical Audit Matrix. Your entire response must be in ${nativeLanguage}.
 
-CRITÉRIOS DE ANÁLISE (MATRIZ):
-${AUDIT_CRITERIA}
+PEDAGOGICAL AUDIT MATRIX:
+${getQualityAnalysisCriteria(nativeLanguage)}
 
-INSTRUÇÕES:
-1. Analise se cada um dos 6 pilares está presente (pass), parcial ou ausente (fail).
-2. Estime o score geral de 0 a 100.
-3. Sugira o nível CEFR real com base no vocabulário e gramática usados.
-4. Forneça feedback geral profissional e direto em Português.
+INSTRUCTIONS:
+1. Analyze if each of the 6 pillars is present (pass), partial, or missing (fail).
+2. Estimate the overall score from 0 to 100.
+3. Suggest the actual CEFR level based on the vocabulary and grammar used.
+4. Provide professional and direct general feedback in ${nativeLanguage}.
 
-CONTEÚDO DA AULA:
+LESSON CONTENT:
 """
-${contentText.slice(0, 30000)}
+${safeContent}
 """`;
 
     const result = await model.generateContentStream(prompt);
@@ -614,91 +741,47 @@ ${contentText.slice(0, 30000)}
   },
 
   /**
-   * Stream version of enrichBatchLearningItems. Yields text chunks via callback for SSE.
+   * Deduplicates structures by name (case-insensitive).
    */
-  async streamEnrichBatch(
-    items: Array<{ lemma: string; type: string; context: string }>,
-    targetLanguage: string,
-    nativeLanguage: string,
-    translationInstruction: string,
-    onChunk: (chunk: string) => void,
-    userId?: string
+  mergeAndDeduplicateStructures(
+    transcriptionStructures: Array<{ name: string; type: string; example_from_text: string }>,
+    lessonStructures: Array<{ name: string; type: string; example_from_text: string }>
   ) {
-    if (userId) {
-      const limit = await checkRateLimit("gemini_enrich", userId, 50);
-      if (!limit.success) throw new Error("Rate limit exceeded for AI enrichment");
-    }
+    const map = new Map<string, { name: string; type: string; example_from_text: string }>();
 
-    const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.0-flash",
-      generationConfig: {
-        responseMimeType: "application/json"
+    for (const item of [...transcriptionStructures, ...lessonStructures]) {
+      const key = item.name.toLowerCase().trim();
+      const existing = map.get(key);
+      if (!existing) {
+        map.set(key, item);
       }
-    });
-
-    const prompt = `Gere metadados pedagógicos os seguintes itens no idioma ${targetLanguage}.
-    ${translationInstruction}. Idioma nativo do aluno: ${nativeLanguage}.
-    
-    ${STRUCTURE_TAXONOMY}
-    
-    Itens para enriquecer:
-    ${JSON.stringify(items, null, 2)}
-    
-    REGRAS DE FORMATO POR TIPO:
-    1. Se o item for VOCABULARY (noun, verb, adjective, etc):
-    {
-      "type": "noun/verb/...",
-      "level": "A1-C2",
-      "phonetic": "/.../",
-      "translation": "tradução principal",
-      "is_visual": boolean,
-      "key_image_words": "keywords for unsplash",
-      "meanings": [{ "definition": "...", "translation": "..." }],
-      "forms": { "base": "...", "past": "...", "participle": "...", "plural": "..." },
-      "examples": [{ "text": "...", "translation": "..." }],
-      "synonyms": ["..."]
     }
 
-    2. Se o item for STRUCTURE (ex: gramática, padrões de frase):
-    {
-      "level": "A1-C2",
-      "structure_type": "Nome pedagógico (ex: Passive Voice, Mixed Conditional)",
-      "syntactic_pattern": "SVO/SV/SVC/SVOO/etc",
-      "translation": "nome da estrutura em PT",
-      "explanation": "explicação didática clara em PT",
-      "examples": [{ 
-        "text": "...", 
-        "translation": "...", 
-        "word_order": [{ "word": "...", "index": 0, "role": "subject/verb/object/etc" }] 
-      }]
-    }
-
-    Retorne um JSON com a chave "results", que deve ser um array mantendo A MESMA ORDEM dos itens enviados.`;
-
-    const result = await model.generateContentStream(prompt);
-
-    let fullText = "";
-    for await (const chunk of result.stream) {
-      const t = chunk.text();
-      fullText += t;
-      onChunk(t);
-    }
-
-    return JSON.parse(fullText);
+    return Array.from(map.values());
   },
+
+
 
   /**
    * Generates a batch of placement test questions in a single AI call.
    * This is much more efficient for API quotas than generating one by one.
    */
   async generatePlacementQuestionsBatch(
-    items: Array<{ lemma: string; type: string; metadata: Record<string, unknown> }>,
+    items: Array<{ lemma: string; type: string; metadata: LearningItemMetadata }>,
     cefrLevel: CEFRLevel,
     skill: "grammar" | "vocabulary" | "reading" | "listening",
+    targetLanguage: string,
+    nativeLanguage: string,
     userId?: string
-  ) {
+  ): Promise<{ questions: PlacementAIQuestion[] }> {
+    const hash = generateHash({ items, cefrLevel, skill, targetLanguage, nativeLanguage });
+    const cached = await aiRepository.getCache(hash, "gemini_placement_batch");
+    if (cached) {
+      return cached as { questions: PlacementAIQuestion[] };
+    }
+
     if (userId) {
-      const limit = await checkRateLimit("gemini_placement_gen", userId, 500);
+      const limit = await checkRateLimit("gemini_placement_gen", userId, 25);
       if (!limit.success) throw new Error("Rate limit exceeded for AI generation");
     }
 
@@ -740,39 +823,49 @@ ${contentText.slice(0, 30000)}
       }
     });
 
-    const prompt = `Gere um lote de questões de múltipla escolha para um teste de nivelamento de Inglês.
-    Nível Alvo: ${cefrLevel}.
-    Habilidade: ${skill}.
+    const prompt = `Generate a batch of multiple-choice questions for a ${targetLanguage} placement test.
+    Target Level: ${cefrLevel}.
+    Skill: ${skill}.
     
-    Itens de Aprendizado:
+    Learning Items:
     ${items.map(item => `- ${item.lemma} (${item.type})`).join("\n")}
     
-    Regras:
-    1. Gere EXATAMENTE uma questão para cada item da lista acima.
-    2. O campo "learningItemId" deve ser o "lemma" correspondente para mapeamento.
-    3. Cada questão deve ter 4 opções (ids: a, b, c, d).
-    4. ${skill === "listening" ? "Gere um 'audio_script' para cada questão." : "O 'content' deve ser a pergunta."}
+    Rules:
+    1. Generate EXACTLY one question for each item in the list above.
+    2. The "learningItemId" field must be the corresponding "lemma" for mapping.
+    3. Each question must have 4 options (ids: a, b, c, d).
+    4. ${skill === "listening" ? "Generate an 'audio_script' for each question." : "The 'content' field must be the question."}
+    5. The questions, options, and scripts must be in ${targetLanguage}. 
+    6. If contextual help is needed, it should be in ${nativeLanguage}.
     
-    Retorne o JSON no formato especificado.`;
+    Return the JSON in the specified format.`;
 
     const result = await model.generateContent(prompt);
-    const data = JSON.parse(result.response.text());
-    return data.questions;
+    const finalResult = JSON.parse(result.response.text()) as { questions: PlacementAIQuestion[] };
+
+    await aiRepository.setCache(hash, "gemini_placement_batch", finalResult, 90);
+    return finalResult;
   },
 
   async generatePlacementQuestionFromItem(
-    item: { lemma: string; type: string; metadata: Record<string, unknown> },
+    item: { lemma: string; type: string; metadata: LearningItemMetadata },
     cefrLevel: CEFRLevel,
     skill: "grammar" | "vocabulary" | "reading" | "listening",
+    targetLanguage: string,
+    nativeLanguage: string,
     userId?: string
-  ) {
+  ): Promise<PlacementAIQuestion> {
+    const hash = generateHash({ item, cefrLevel, skill, targetLanguage, nativeLanguage });
+    const cached = await aiRepository.getCache(hash, "gemini_placement_single");
+    if (cached) return cached as PlacementAIQuestion;
+
     if (userId) {
       const limit = await checkRateLimit("gemini_placement_gen", userId, 50);
       if (!limit.success) throw new Error("Rate limit exceeded for AI generation");
     }
 
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.0-flash", // Use fast model for single question generation
+      model: `models/${MODELS.fast}`, // Use fast model for single question generation
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -801,23 +894,27 @@ ${contentText.slice(0, 30000)}
 
     const isListening = skill === "listening";
     const meta = item.metadata as { meanings?: Array<{ definition: string }> };
-    const prompt = `Gere uma questão de múltipla escolha para um teste de nivelamento adaptativo.
-    Idioma: Inglês.
-    Nível Alvo: ${cefrLevel}.
-    Habilidade: ${skill}.
-    Conceito Base: "${item.lemma}" (${item.type}).
-    Definição: ${JSON.stringify(meta.meanings?.[0]?.definition || "")}.
+    const prompt = `Generate a multiple-choice question for an adaptive placement test.
+    Language: ${targetLanguage}.
+    Target Level: ${cefrLevel}.
+    Skill: ${skill}.
+    Base Concept: "${item.lemma}" (${item.type}).
+    Definition: ${JSON.stringify(meta.meanings?.[0]?.definition || "")}.
     
-    Regras:
-    1. A questão deve ser impossível de responder sem entender o conceito base.
-    2. Gere 4 opções. Os IDs das opções devem ser "a", "b", "c", "d".
-    ${isListening ? "3. Como a habilidade é LISTENING, gere um 'audio_script' (um monólogo curto e simples) que o aluno ouviria. O 'content' deve ser a pergunta sobre o que foi ouvido." : "3. O 'content' é o texto da pergunta."}
-    4. Forneça um 'context' opcional se ajudar na compreensão da situação da pergunta.
+    Rules:
+    1. The question must be impossible to answer without understanding the base concept.
+    2. Generate 4 options. Option IDs must be "a", "b", "c", "d".
+    ${isListening ? "3. Since the skill is LISTENING, generate an 'audio_script' (a short, simple monologue) that the student would hear. The 'content' must be the question about what was heard." : "3. The 'content' is the text of the question."}
+    4. Provide an optional 'context' in ${nativeLanguage} if it helps in understanding the question's situation.
+    5. The question and options themselves must be in ${targetLanguage}.
     
-    Retorne apenas o JSON.`;
+    Return only the JSON.`;
 
     const result = await model.generateContent(prompt);
-    return JSON.parse(result.response.text());
+    const question = JSON.parse(result.response.text()) as PlacementAIQuestion;
+
+    await aiRepository.setCache(hash, "gemini_placement_single", question, 90);
+    return question;
   },
 
   /**
@@ -829,6 +926,8 @@ ${contentText.slice(0, 30000)}
     contentText,
     level,
     items,
+    targetLanguage,
+    nativeLanguage,
     onChunk,
     transcriptionSegments,
     userId
@@ -836,17 +935,26 @@ ${contentText.slice(0, 30000)}
     contentText: string;
     level: CEFRLevel;
     items: QuizItem[];
+    targetLanguage: string;
+    nativeLanguage: string;
     onChunk?: (chunk: string) => void;
     transcriptionSegments?: Array<{ word: string, start: number, end: number }>;
     userId?: string;
   }): Promise<QuizData> {
+    const hash = generateHash({ contentText, level, items, targetLanguage, nativeLanguage, transcriptionSegments });
+    const cached = await aiRepository.getCache(hash, "gemini_quiz_gen");
+    if (cached) {
+      if (onChunk) onChunk(JSON.stringify(cached));
+      return cached as QuizData;
+    }
+
     if (userId) {
       const limit = await checkRateLimit("gemini_quiz_gen", userId, 20);
       if (!limit.success) throw new Error("Rate limit exceeded for quiz generation");
     }
 
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-1.5-flash",
+      model: "models/gemini-2.0-flash",
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -894,34 +1002,35 @@ ${contentText.slice(0, 30000)}
 
     const coreItems = items.filter(i => i.priority === "CORE").map(i => i.item?.lemma).filter(Boolean).join(", ");
 
-    const prompt = `Crie um quiz pedagógico estruturado para uma lição de nível ${level}.
-    Você deve basear as perguntas em DUAS fontes:
-    1. CONTEÚDO DA LIÇÃO: O texto teórico e explicativo fornecido abaixo.
-    2. TRANSCRIÇÃO DO ÁUDIO: Os segmentos reais do áudio fornecidos abaixo.
+    const prompt = `Create a structured pedagogical quiz for a level ${level} lesson.
+    You must base the questions on TWO sources:
+    1. LESSON CONTENT: The theoretical and explanatory text provided below.
+    2. AUDIO TRANSCRIPTION: The actual audio segments provided below.
     
-    Conteúdo da Lição:
+    Lesson Content:
     "${contentText}"
 
-    Itens de Aprendizado Prioritários (CORE):
+    Priority Learning Items (CORE):
     ${coreItems}
 
-    ${transcriptionSegments ? `TRANSCRIÇÃO EM SENTENÇAS (Use estas frases para criar perguntas contextualizadas):
-    ${JSON.stringify(transcriptionSegments.slice(0, 300), null, 2)}` : ""}
+    ${transcriptionSegments ? `SENTENCE TRANSCRIPTION (Use these phrases to create contextualized questions):
+    ${JSON.stringify(transcriptionSegments.slice(0, 80).map(s => ({ text: s.word, start: s.start, end: s.end })), null, 2)}` : ""}
     
-    REGRAS DE ESTRUTURA (Gere 5 seções):
-    1. vocabulary: Tradução de palavras e frases presentes tanto no texto quanto no áudio. Priorize os itens CORE listados acima.
-    2. grammar: Focada em estruturas explicadas no texto e usadas no áudio.
-    3. timestamp: Perguntas EXCLUSIVAS sobre o que foi dito no áudio. 
-       - Use a TRANSCRIÇÃO EM SENTENÇAS para criar perguntas sobre frases inteiras (pensamentos completos).
-       - Preencha "audioRange" com start/end exatos da sentença escolhida.
-    4. context: Perguntas sobre o uso prático ou nuances culturais identificadas no conteúdo ou na fala.
-    5. comprehension: Teste a compreensão geral integrando o que foi lido e o que foi ouvido.
+    STRUCTURE RULES (Generate 5 sections):
+    1. vocabulary: Translation of words and phrases present in both the text and audio. Prioritize the CORE items listed above.
+    2. grammar: Focused on structures explained in the text and used in the audio.
+    3. timestamp: Questions EXCLUSIVELY about what was said in the audio. 
+       - Use the SENTENCE TRANSCRIPTION to create questions about entire phrases (complete thoughts).
+       - Fill "audioRange" with exact start/end of the chosen sentence.
+    4. context: Questions about practical usage or cultural nuances identified in the content or speech.
+    5. comprehension: Test general understanding by integrating what was read and what was heard.
 
-    REGRAS DE IDIOMA:
-    - O enunciado da pergunta ("text") e a "explanation" devem ser em PORTUGUÊS.
-    - As "options" devem ser no IDIOMA ALVO (${level}).
-    - 4 opções por pergunta.`;
+    LANGUAGE RULES:
+    - The question prompt ("text") and the "explanation" must be in ${nativeLanguage}.
+    - The "options" must be in the TARGET LANGUAGE (${targetLanguage}).
+    - 4 options per question.`;
 
+    let finalResult: QuizData;
     if (onChunk) {
       const result = await model.generateContentStream(prompt);
       let fullText = "";
@@ -930,10 +1039,13 @@ ${contentText.slice(0, 30000)}
         fullText += text;
         onChunk(text);
       }
-      return JSON.parse(fullText);
+      finalResult = JSON.parse(fullText);
     } else {
       const result = await model.generateContent(prompt);
-      return JSON.parse(result.response.text());
+      finalResult = JSON.parse(result.response.text());
     }
+
+    await aiRepository.setCache(hash, "gemini_quiz_gen", finalResult, 60);
+    return finalResult;
   }
 };

@@ -10,7 +10,7 @@ export const curriculumRepository = {
   async findAllLanguages() {
     return db.query.languages.findMany({
       with: {
-        lessons: {
+        targetLessons: {
           where: isNull(lessons.deletedAt),
           columns: {
             id: true,
@@ -110,19 +110,27 @@ export const curriculumRepository = {
       .limit(limit);
   },
   
-  async findLearningItems(params: { languageId: string, type?: "VOCABULARY" | "STRUCTURE", search?: string, limit: number }) {
-    const { languageId, type, search, limit } = params;
-    const filters = [eq(learningItems.languageId, languageId)];
+  async findLearningItems(params: { languageId?: string, type?: "VOCABULARY" | "STRUCTURE", level?: string, search?: string, limit: number, offset?: number }) {
+    const { languageId, type, level, search, limit, offset = 0 } = params;
+    const filters = [];
 
+    if (languageId) filters.push(eq(learningItems.languageId, languageId));
     if (type) filters.push(eq(learningItems.type, type));
+    if (level) {
+      filters.push(sql`${learningItems.metadata}->>'level' = ${level}`);
+    }
     if (search) {
       filters.push(sql`${learningItems.lemma} ILIKE ${`%${search}%`}`);
     }
 
     return db.query.learningItems.findMany({
-      where: and(...filters),
+      where: filters.length > 0 ? and(...filters) : undefined,
       limit: limit,
-      orderBy: [sql`${learningItems.createdAt} DESC`]
+      offset: offset,
+      orderBy: [sql`${learningItems.createdAt} DESC`],
+      with: {
+        language: true
+      }
     });
   },
 
@@ -137,7 +145,8 @@ export const curriculumRepository = {
           }
         },
         media: true,
-        language: true
+        language: true,
+        nativeLanguage: true
       }
     }) as Promise<LessonWithDetails | null>;
   },
@@ -203,6 +212,7 @@ export const curriculumRepository = {
       orderBy: [sql`${lessons.createdAt} DESC`],
       with: {
         language: true,
+        nativeLanguage: true,
         media: true
       }
     }) as unknown as Promise<LessonSummary[]>;
@@ -220,6 +230,7 @@ export const curriculumRepository = {
       orderBy: [sql`${lessons.createdAt} DESC`],
       with: {
         language: true,
+        nativeLanguage: true,
         media: true
       }
     }) as unknown as Promise<LessonSummary[]>;
@@ -242,6 +253,7 @@ export const curriculumRepository = {
       ),
       with: {
         language: true,
+        nativeLanguage: true,
         media: true
       },
       orderBy: [desc(lessons.createdAt)]

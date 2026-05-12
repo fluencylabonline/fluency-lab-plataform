@@ -14,6 +14,7 @@ import {
     Languages,
     ImagePlay,
     ClipboardList,
+    List,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { LanguagesVault } from "./_components/LanguagesVault";
@@ -61,6 +62,14 @@ const quickActions = (languages: LanguageWithLessons[], t: (key: string) => stri
         href: `/hub/manager/learning/placement`,
         icon: <ClipboardList className="w-5 h-5" />,
         label: "Placement",
+        color: "text-rose-600 dark:text-rose-400",
+        bg: "bg-rose-50 dark:bg-rose-900/20",
+    },
+    {
+        key: "itens",
+        href: `/hub/manager/learning/learning-items`,
+        icon: <List className="w-5 h-5" />,
+        label: "Items",
         color: "text-rose-600 dark:text-rose-400",
         bg: "bg-rose-50 dark:bg-rose-900/20",
     },

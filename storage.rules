@@ -34,6 +34,18 @@ service firebase.storage {
                         || request.resource.contentType.matches('video/.*'));
     }
 
+    match /curriculum/lessons/{lessonId}/media/{fileName} {
+      // Lesson media is readable by authenticated users
+      allow read: if request.auth != null;
+
+      // Only Admins and Managers can upload lesson media
+      allow write: if request.auth != null
+                    && (request.auth.token.role == 'admin' || request.auth.token.role == 'manager')
+                    && request.resource.size < 100 * 1024 * 1024
+                    && (request.resource.contentType.matches('audio/.*')
+                        || request.resource.contentType.matches('video/.*'));
+    }
+
     match /courses/covers/{fileName} {
       // Course covers are publicly readable
       allow read: if true;
