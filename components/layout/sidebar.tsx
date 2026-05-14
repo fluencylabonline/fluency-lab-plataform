@@ -48,7 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="hidden md:flex flex-col items-center mx-auto lg:ml-2 max-h-full"
-            >
+            > 
                 <motion.div
                     layout
                     className={twMerge(

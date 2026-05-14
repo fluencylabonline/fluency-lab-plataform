@@ -22,10 +22,9 @@ export default async function PracticeSessionPage({ searchParams, params }: Sess
 
   const sParams = await searchParams;
   let planId = sParams.planId;
-  const dayOverride = sParams.day ? parseInt(sParams.day, 10) : undefined;
+  const dayIndex = sParams.day ? parseInt(sParams.day, 10) : undefined;
   const isReplay = sParams.replay === "true";
 
-  // If no planId provided, try to find the active roadmap
   if (!planId) {
     const roadmap = await learningService.getStudentRoadmap(user.id);
     if (roadmap) {
@@ -38,8 +37,9 @@ export default async function PracticeSessionPage({ searchParams, params }: Sess
   }
 
   let session: DailyPracticeSession;
+
   try {
-    session = await learningService.getPracticeCycle(planId, dayOverride);
+    session = await learningService.getPracticeCycle(planId, dayIndex);
   } catch (error) {
     console.error("[PracticeSessionPage] Error fetching cycle:", error);
     return <PracticeErrorView message={t('noPracticeItemsFound') || "Não encontramos itens de prática para esta lição. Entre em contato com seu professor."} />;
@@ -60,3 +60,5 @@ export default async function PracticeSessionPage({ searchParams, params }: Sess
     />
   );
 }
+
+

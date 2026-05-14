@@ -90,7 +90,7 @@ export function GapFillExercise({
                     onChange={(e) => setAnswer(e.target.value)}
                     disabled={isLocked}
                     className="w-32 md:w-48 text-center text-xl font-bold bg-muted border-b-4 border-primary focus:bg-background transition-all rounded-xl h-12 inline-block"
-                    placeholder="..."
+                    placeholder=""
                     autoFocus
                     autoComplete="off"
                     autoCorrect="off"
@@ -106,7 +106,7 @@ export function GapFillExercise({
           <Button
             type="submit"
             disabled={!answer.trim() || isLocked}
-            className="px-12 py-6 text-lg font-bold uppercase tracking-widest rounded-2xl bg-green-500 hover:bg-green-600 border-none text-white shadow-[0_4px_0_0_#15803d] active:shadow-none active:translate-y-1 transition-all disabled:opacity-50"
+            className="px-12 py-6 text-lg font-bold uppercase tracking-widest rounded-md bg-green-500 hover:bg-green-600 border-none text-white shadow-[0_4px_0_0_#15803d] active:shadow-none active:translate-y-1 transition-all disabled:opacity-50"
           >
             Verificar
           </Button>

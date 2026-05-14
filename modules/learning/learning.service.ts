@@ -1,5 +1,6 @@
 import { learningRepository } from "./learning.repository";
 import { curriculumRepository } from "@/modules/curriculum/curriculum.repository";
+import { VocabMetadata } from "@/modules/curriculum/curriculum.types";
 import { addDays } from "date-fns";
 import { db } from "@/lib/db";
 import { 
@@ -632,17 +633,22 @@ export const learningService = {
       case 1: // Visual Flashcard (Vocab + Structure)
       case 4: // Recall Flashcard (Vocab + Structure)
         coreItems.forEach(({ item }) => {
-          const meta = item.metadata as { translation?: string; meanings?: Array<{ translation: string }>; image_url?: string | null };
+          const isStructure = item.type?.toUpperCase() === "STRUCTURE";
+          const meta = item.metadata;
+          const vocabMeta = !isStructure ? (meta as VocabMetadata) : null;
+          const examples = meta.examples || [];
+          const example = examples.length > 0 ? examples[0] : null;
+
           practiceItems.push({
             id: item.id,
             lessonId: activeLessonRecord.lessonId,
-            type: item.type === "STRUCTURE" ? "structure" : "item",
+            type: isStructure ? "structure" : "item",
             renderMode: mode,
-            mainText: item.lemma,
+            mainText: isStructure && example ? example.text : item.lemma,
             flashcard: {
-              front: item.lemma,
-              back: meta.translation || meta.meanings?.[0]?.translation || "...",
-              imageUrl: clampedDay === 1 ? meta.image_url : null,
+              front: isStructure && example ? example.text : item.lemma,
+              back: isStructure && example ? example.translation : (meta.translation || vocabMeta?.meanings?.[0]?.translation || "..."),
+              imageUrl: clampedDay === 1 ? vocabMeta?.image_url : null,
               useTTS: true
             }
           });
@@ -715,7 +721,12 @@ export const learningService = {
                   options: q.options,
                   correctIndex: q.correctIndex ?? 0,
                   explanation: q.explanation,
-                  sectionType: section.type
+                  sectionType: section.type,
+                  audioSegment: q.audioRange && lesson.media?.url ? {
+                    start: q.audioRange.start,
+                    end: q.audioRange.end,
+                    url: lesson.media.url
+                  } : undefined
                 }
               });
             });
@@ -727,7 +738,8 @@ export const learningService = {
     return {
       dayIndex: clampedDay,
       mode,
-      items: practiceItems
+      items: practiceItems,
+      language: lesson.language?.code || "en-US"
     };
   },
 

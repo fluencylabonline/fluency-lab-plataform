@@ -9,10 +9,19 @@ import { Volume2, Eye } from "lucide-react";
 import type { PracticeQuizQuestion } from "@/modules/learning/learning.types";
 
 interface QuizExerciseProps extends PracticeQuizQuestion {
+  language?: string;
   onComplete: (isCorrect: boolean) => void;
 }
 
-export function QuizExercise({ question, options, correctIndex, sectionType, audioSegment, onComplete }: QuizExerciseProps) {
+export function QuizExercise({ 
+  question, 
+  options, 
+  correctIndex, 
+  sectionType, 
+  audioSegment, 
+  language,
+  onComplete 
+}: QuizExerciseProps) {
   const [selected, setSelected] = useState<number | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showOptions, setShowOptions] = useState(!audioSegment);
@@ -82,7 +91,7 @@ export function QuizExercise({ question, options, correctIndex, sectionType, aud
               disabled={isSubmitted}
             >
               <span className={cn(
-                "mr-3 font-mono text-xs border rounded-full w-7 h-7 flex-shrink-0 flex items-center justify-center",
+                "mr-3 font-mono text-xs border rounded-full w-7 h-7 shrink-0 flex items-center justify-center",
                 selected === idx && idx === correctIndex && "border-green-500 bg-green-200 text-green-800",
                 selected === idx && idx !== correctIndex && "border-rose-500 bg-rose-200 text-rose-800",
                 !isSubmitted && "text-muted-foreground"
@@ -103,6 +112,7 @@ export function QuizExercise({ question, options, correctIndex, sectionType, aud
           startTime={audioSegment.start}
           endTime={audioSegment.end}
           onComplete={() => setShowOptions(true)}
+          language={language}
           autoPlay
         />
       )}

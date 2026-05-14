@@ -46,14 +46,14 @@ export function UnscrambleExercise({ scrambledWords, correctOrder, onComplete }:
         </h2>
 
         {/* Answer zone */}
-        <div className="min-h-[80px] w-full border-b-2 border-border p-3 flex flex-wrap gap-2 items-center justify-start rounded-t-xl bg-muted/30">
+        <div className="min-h-[80px] w-full border-2 border-border p-3 flex flex-wrap gap-2 items-center justify-start rounded-lg bg-muted/30">
           {selected.map((w) => (
             <motion.button
               layoutId={w.id}
               key={w.id}
               onClick={() => move(w, "answer")}
               disabled={isLocked}
-              className="px-4 py-2 bg-card border-2 border-border border-b-4 active:border-b-2 rounded-xl font-semibold text-foreground text-base"
+              className="px-4 py-2 bg-muted/50 border-2 border-border border-b-4 active:border-b-2 rounded-md font-semibold text-foreground text-base"
               whileTap={{ scale: 0.95 }}
             >
               {w.word}
@@ -72,7 +72,7 @@ export function UnscrambleExercise({ scrambledWords, correctOrder, onComplete }:
               key={w.id}
               onClick={() => move(w, "bank")}
               disabled={isLocked}
-              className="px-4 py-2 bg-card border-2 border-border border-b-4 active:border-b-2 rounded-xl font-semibold text-foreground text-base"
+              className="lowercase px-4 py-2 bg-accent border-2 border-border border-b-4 active:border-b-2 rounded-md font-semibold text-foreground text-base"
               whileTap={{ scale: 0.95 }}
             >
               {w.word}
@@ -85,7 +85,7 @@ export function UnscrambleExercise({ scrambledWords, correctOrder, onComplete }:
         <Button
           onClick={checkAnswer}
           disabled={selected.length === 0 || isLocked}
-          className="w-full md:w-auto md:min-w-[220px] float-right px-8 py-6 text-lg font-bold uppercase tracking-widest rounded-2xl bg-green-500 hover:bg-green-600 border-none text-white shadow-[0_4px_0_0_#15803d] active:shadow-none active:translate-y-1 transition-all disabled:opacity-50"
+          className="w-full md:w-auto md:min-w-[220px] float-right px-8 py-6 text-lg font-bold uppercase tracking-widest rounded-md bg-green-500 hover:bg-green-600 border-none text-white shadow-[0_4px_0_0_#15803d] active:shadow-none active:translate-y-1 transition-all disabled:opacity-50"
         >
           Verificar
         </Button>

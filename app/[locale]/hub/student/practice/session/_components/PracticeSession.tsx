@@ -211,7 +211,7 @@ export function PracticeSession({ session, planId, currentStreak, isReplay = fal
               onFlashcard: handleFlashcardResult,
               onBinary: handleBinaryResult,
               onListening: handleListeningScore,
-            })}
+            }, session.language)}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -244,7 +244,7 @@ type Handlers = {
   onListening: (score: number) => void;
 };
 
-function renderExercise(item: PracticeItem, handlers: Handlers) {
+function renderExercise(item: PracticeItem, handlers: Handlers, language?: string) {
   if (!item) return null;
 
   switch (item.renderMode) {
@@ -257,6 +257,7 @@ function renderExercise(item: PracticeItem, handlers: Handlers) {
           back={item.flashcard.back}
           imageUrl={item.renderMode === "flashcard_visual" ? item.flashcard.imageUrl : null}
           useTTS={item.flashcard.useTTS ?? true}
+          language={language}
           onResult={handlers.onFlashcard}
         />
       );
@@ -268,6 +269,7 @@ function renderExercise(item: PracticeItem, handlers: Handlers) {
           sentenceWithGap={item.gapFill.sentenceWithGap}
           correctAnswer={item.gapFill.correctAnswer}
           fullSentenceForTTS={item.gapFill.fullSentenceForTTS}
+          language={language}
           onComplete={(isCorrect) =>
             handlers.onBinary(isCorrect, isCorrect ? undefined : item.gapFill!.correctAnswer)
           }
@@ -291,6 +293,7 @@ function renderExercise(item: PracticeItem, handlers: Handlers) {
       return (
         <QuizExercise
           {...item.quiz}
+          language={language}
           onComplete={(isCorrect) =>
             handlers.onBinary(isCorrect, item.quiz!.options[item.quiz!.correctIndex], item.quiz!.explanation)
           }
@@ -304,6 +307,7 @@ function renderExercise(item: PracticeItem, handlers: Handlers) {
           return (
             <QuizExercise
               {...item.quiz}
+              language={language}
               onComplete={(isCorrect) =>
                 handlers.onBinary(isCorrect, item.quiz!.options[item.quiz!.correctIndex], item.quiz!.explanation)
               }

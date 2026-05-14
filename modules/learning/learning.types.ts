@@ -116,6 +116,7 @@ export interface DailyPracticeSession {
   dayIndex: number;
   mode: PracticeMode;
   items: PracticeItem[];
+  language?: string;
   error?: string;
 }
 

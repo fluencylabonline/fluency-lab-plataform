@@ -25,7 +25,7 @@ import {
   Shuffle,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { LearningItem, VocabMetadata } from "@/modules/curriculum/curriculum.types";
+import { LearningItem, VocabMetadata, StructureMetadata } from "@/modules/curriculum/curriculum.types";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { notify } from "@/components/ui/toaster";
@@ -35,7 +35,7 @@ import { claimWordOfTheDayXPAction } from "@/modules/user/user.actions";
 interface WordOfTheDayVaultProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  item: LearningItem | null;
+  item: (LearningItem & { languageCode?: string }) | null;
   xpAlreadyClaimed?: boolean;
   onXPClaimed?: () => void;
 }
@@ -96,7 +96,7 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
       }
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      const langCode = item.id.split("_")[0].toLowerCase();
+      const langCode = item.languageCode || item.id.split("_")[0].toLowerCase();
       const targetLang =
         langCode === "en" ? "en-US" : langCode === "pt" ? "pt-BR" : langCode;
       const voices = window.speechSynthesis.getVoices();
@@ -113,8 +113,14 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
   );
 
   // --- SCRAMBLE INIT (must be before early return to satisfy Rules of Hooks) ---
-  const practiceExampleForCallback = (item?.metadata as VocabMetadata)?.examples?.[1]
-    ?? (item?.metadata as VocabMetadata)?.examples?.[0];
+  const isStructure = item?.type === "STRUCTURE";
+  const isVocab = !isStructure;
+  const vocabMeta = !isStructure ? (item?.metadata as VocabMetadata) : null;
+  const structMeta = isStructure ? (item?.metadata as StructureMetadata) : null;
+
+  const practiceExampleForCallback = isStructure 
+    ? (structMeta?.examples?.[1] ?? structMeta?.examples?.[0])
+    : (vocabMeta?.examples?.[1] ?? vocabMeta?.examples?.[0]);
 
   const initScramble = useCallback(() => {
     if (!practiceExampleForCallback?.text) return;
@@ -127,18 +133,24 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
   if (!item) return null;
 
   // --- DATA EXTRACTION ---
-  const metadata = item.metadata as VocabMetadata;
-  const phonetic = metadata.phonetic || "";
-  const mainMeaning = metadata.meanings?.[0] || { definition: "", translation: "" };
-  const translation = metadata.translation || mainMeaning.translation;
-  const definition = mainMeaning.definition;
-  // Use the correct field name from the schema
-  const imageUrl = metadata.image_url;
+  const phonetic = vocabMeta?.phonetic || "";
+  const mainMeaning = vocabMeta?.meanings?.[0] || { definition: "", translation: "" };
+  
+  // Prioritize top-level translation field from metadata
+  const translation = (isStructure ? structMeta?.translation : vocabMeta?.translation) 
+    || (isStructure ? structMeta?.examples?.[0]?.translation : mainMeaning.translation)
+    || item.translation;
+
+  const definition = isStructure ? structMeta?.explanation : mainMeaning.definition;
+  const imageUrl = vocabMeta?.image_url;
 
   // Study uses examples[0]; practice uses examples[1] (different from study), fallback to examples[0]
-  const examples = metadata.examples || [];
+  const examples = (isStructure ? structMeta?.examples : vocabMeta?.examples) || [];
   const studyExample = examples[0];
   const practiceExample = examples.length > 1 ? examples[1] : examples[0];
+
+  // For structures, we might want to show the structure_type as the main title
+  const displayLemma = isStructure ? structMeta?.structure_type : item.lemma;
 
   const handleSpeakWord = () => speak(item.lemma);
   const handleSpeakSentence = (text: string) => speak(text);
@@ -211,7 +223,7 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
       exit={{ opacity: 0, y: -10 }}
       className="flex flex-col w-full gap-5 text-left"
     >
-      {imageUrl && (
+      {imageUrl && isVocab && (
         <div className="w-full h-44 overflow-hidden rounded-2xl border border-border/50 relative group">
           <Image
             src={imageUrl}
@@ -225,7 +237,7 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
 
       <div className="flex items-start justify-between px-1">
         <div className="flex flex-col">
-          <h3 className="text-4xl font-black tracking-tight text-primary">{item.lemma}</h3>
+          <h3 className="text-4xl font-black tracking-tight text-primary">{displayLemma}</h3>
           {phonetic && (
             <p className="text-muted-foreground font-serif text-lg tracking-wide opacity-80">
               {phonetic}
@@ -294,12 +306,16 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
                             part
                           )
                         )
-                    : practiceExample.text.replace(new RegExp(item.lemma, "gi"), "____")
+                    : isStructure 
+                      ? practiceExample.text // For structures, dictation might be for the whole sentence?
+                      : practiceExample.text.replace(new RegExp(item.lemma, "gi"), "____")
                   }&rdquo;
                 </p>
                 {practiceExample.translation && step !== "revealed" && (
                   <p className="text-xs text-muted-foreground/60 text-center mt-2 italic">
-                    {practiceExample.translation.replace(new RegExp(item.lemma, "gi"), "____")}
+                    {isStructure 
+                      ? practiceExample.translation 
+                      : practiceExample.translation.replace(new RegExp(item.lemma, "gi"), "____")}
                   </p>
                 )}
               </div>
@@ -340,7 +356,7 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
                   animate={{ opacity: 1, scale: 1 }}
                   className="text-center space-y-2 w-full"
                 >
-                  <h3 className="text-4xl font-black tracking-tight text-primary">{item.lemma}</h3>
+                  <h3 className="text-4xl font-black tracking-tight text-primary">{displayLemma}</h3>
                   <div className="bg-muted px-6 py-2 rounded-xl inline-block border border-border">
                     <p className="font-medium text-foreground">{translation}</p>
                   </div>
@@ -353,19 +369,23 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
                   className="w-full space-y-3"
                 >
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest text-center">
-                    {t("thenType") || "Escreva a palavra que falta"}
+                    {isStructure 
+                      ? (t("typeFullSentence") || "Escreva a frase completa") 
+                      : (t("thenType") || "Escreva a palavra que falta")}
                   </p>
                   <VaultInput
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleCheckAnswer(item.lemma)}
-                    placeholder={t("typeWhatYouHear") || "Digite a palavra..."}
+                    onKeyDown={(e) => e.key === "Enter" && handleCheckAnswer(isStructure ? practiceExample.text : item.lemma)}
+                    placeholder={isStructure 
+                      ? (t("typeSentence") || "Digite a frase...") 
+                      : (t("typeWhatYouHear") || "Digite a palavra...")}
                     className="text-center text-lg h-14"
                     autoFocus
                   />
                   <div className="flex gap-2">
                     <Button
-                      onClick={() => handleCheckAnswer(item.lemma)}
+                      onClick={() => handleCheckAnswer(isStructure ? practiceExample.text : item.lemma)}
                       className="flex-1 h-12 rounded-2xl font-bold bg-primary text-primary-foreground"
                     >
                       <Check className="w-5 h-5 mr-2" />
@@ -412,7 +432,7 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
                 <p className="text-sm font-medium leading-relaxed text-center w-full">
                   {correctWords.map((word, i) => (
                     <span key={i} className="inline-flex items-center gap-1 mr-1.5">
-                      <span className={word.toLowerCase() === item.lemma.toLowerCase()
+                      <span className={(isStructure ? false : word.toLowerCase() === item.lemma.toLowerCase())
                         ? "text-primary font-black bg-primary/10 px-1 rounded-md"
                         : "text-foreground font-medium"
                       }>

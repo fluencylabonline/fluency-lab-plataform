@@ -1024,6 +1024,7 @@ ${safeContent}
        - Fill "audioRange" with exact start/end of the chosen sentence.
     4. context: Questions about practical usage or cultural nuances identified in the content or speech.
     5. comprehension: Test general understanding by integrating what was read and what was heard.
+       - Include "audioRange" when the question references specific spoken parts.
 
     LANGUAGE RULES:
     - The question prompt ("text") and the "explanation" must be in ${nativeLanguage}.

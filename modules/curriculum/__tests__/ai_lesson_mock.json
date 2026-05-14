@@ -1,0 +1,367 @@
+{
+  "lesson": {
+    "title": "A Day in the Park",
+    "difficulty": "B1",
+    "contentText": "It was a beautiful Sunday morning. The sun was shining brightly, and many people were enjoying the weather. I saw a group of friends running together, talking and laughing. They seemed to really understand each other. Not far away, a family set up a picnic under a large oak tree. I decided to walk around the lake to relax. The calm water reflected the blue sky perfectly. It's always nice to spend time outdoors and appreciate nature.",
+    "quizData": {
+      "quiz_sections": [
+        {
+          "type": "vocabulary",
+          "questions": [
+            {
+              "text": "Qual palavra significa 'mover-se a uma velocidade maior que caminhar'?",
+              "options": ["Relax", "Run", "Appreciate", "Understand"],
+              "correctIndex": 1,
+              "explanation": "A palavra 'run' significa correr."
+            },
+            {
+              "text": "Qual é um sinônimo para algo que é 'agradável aos sentidos'?",
+              "options": ["Beautiful", "Ugly", "Fast", "Calm"],
+              "correctIndex": 0,
+              "explanation": "'Beautiful' descreve algo bonito ou agradável aos sentidos."
+            }
+          ]
+        },
+        {
+          "type": "grammar",
+          "questions": [
+            {
+              "text": "Complete a frase corretamente: They _____ enjoying the weather.",
+              "options": ["was", "were", "is", "are"],
+              "correctIndex": 1,
+              "explanation": "Como o sujeito 'They' é plural, a forma correta do verbo no passado contínuo é 'were'."
+            },
+            {
+              "text": "Qual é a função da estrutura 'to relax' na frase 'I decided to walk around the lake to relax'?",
+              "options": ["To show time", "To show place", "To express purpose", "To describe a person"],
+              "correctIndex": 2,
+              "explanation": "O infinitivo 'to relax' (para relaxar) expressa o propósito (purpose) da ação de caminhar ao redor do lago."
+            }
+          ]
+        },
+        {
+          "type": "timestamp",
+          "questions": [
+            {
+              "text": "Em que momento do áudio a pessoa menciona que o sol estava brilhando?",
+              "options": ["At the very beginning", "In the middle", "At the end", "Not mentioned"],
+              "correctIndex": 0,
+              "audioRange": {
+                "start": 0,
+                "end": 5
+              },
+              "explanation": "O sol é mencionado logo nas primeiras frases, no começo da história."
+            },
+            {
+              "text": "Quando a pessoa fala sobre uma família fazendo um piquenique?",
+              "options": ["Before seeing the friends", "After seeing the friends", "While walking around the lake", "At the end of the day"],
+              "correctIndex": 1,
+              "audioRange": {
+                "start": 10,
+                "end": 15
+              },
+              "explanation": "Ela menciona a família 'Not far away...' logo após falar sobre o grupo de amigos."
+            }
+          ]
+        },
+        {
+          "type": "context",
+          "questions": [
+            {
+              "text": "Que tipo de atmosfera a história transmite baseada nas palavras do texto?",
+              "options": ["Stressful", "Sad", "Peaceful", "Scary"],
+              "correctIndex": 2,
+              "explanation": "A descrição do tempo bom e das pessoas aproveitando a natureza transmite muita paz (peaceful)."
+            },
+            {
+              "text": "De acordo com o contexto, qual foi o principal motivo para a pessoa ir ao parque?",
+              "options": ["To work", "To buy food", "To appreciate nature", "To meet friends"],
+              "correctIndex": 2,
+              "explanation": "A frase final indica que é bom passar o tempo ao ar livre e 'appreciate nature' (apreciar a natureza)."
+            }
+          ]
+        },
+        {
+          "type": "comprehension",
+          "questions": [
+            {
+              "text": "O que o grupo de amigos estava fazendo juntos?",
+              "options": ["Eating a picnic", "Running and talking", "Swimming in the lake", "Sleeping under a tree"],
+              "correctIndex": 1,
+              "explanation": "O narrador diz que viu um grupo de amigos 'running together, talking and laughing' (correndo juntos, conversando e rindo).",
+              "audioRange": { "start": 5, "end": 10 }
+            },
+            {
+              "text": "Onde a família montou o seu piquenique?",
+              "options": ["By the lake", "Under a large oak tree", "On a bench", "In the parking lot"],
+              "correctIndex": 1,
+              "explanation": "A família montou o piquenique 'under a large oak tree' (debaixo de um grande carvalho).",
+              "audioRange": { "start": 10, "end": 15 }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "learningItems": [
+    {
+      "id": "en_voc_run_1",
+      "type": "VOCABULARY",
+      "lemma": "run",
+      "metadata": {
+        "type": "verb",
+        "level": "A1",
+        "translation": "Correr",
+        "phonetic": "/rʌn/",
+        "is_visual": true,
+        "key_image_words": "person running park fitness",
+        "image_url": "https://images.unsplash.com/photo-1461988320302-91bde64fc8e4?w=1200&auto=format",
+        "meanings": [
+          {
+            "definition": "Mover-se a uma velocidade maior que a caminhada.",
+            "translation": "Mover-se a uma velocidade maior que a caminhada."
+          }
+        ],
+        "forms": {
+          "base": "run",
+          "past": "ran",
+          "participle": "run",
+          "plural": "runs"
+        },
+        "examples": [
+          {
+            "text": "I like to run every morning.",
+            "translation": "Eu gosto de correr todas as manhãs."
+          },
+          {
+            "text": "I saw a group of friends running together.",
+            "translation": "Eu vi um grupo de amigos correndo juntos."
+          }
+        ],
+        "synonyms": ["jog", "sprint", "dash"]
+      }
+    },
+    {
+      "id": "en_voc_understand_2",
+      "type": "VOCABULARY",
+      "lemma": "understand",
+      "metadata": {
+        "type": "verb",
+        "level": "A2",
+        "translation": "Entender",
+        "phonetic": "/ˌʌndərˈstænd/",
+        "is_visual": false,
+        "key_image_words": "person thinking idea lightbulb",
+        "image_url": "https://images.unsplash.com/photo-1503428593586-e225b39bddfe",
+        "meanings": [
+          {
+            "definition": "Perceber o significado pretendido de palavras ou ações.",
+            "translation": "Perceber o significado pretendido de palavras ou ações."
+          }
+        ],
+        "forms": {
+          "base": "understand",
+          "past": "understood",
+          "participle": "understood",
+          "plural": "understands"
+        },
+        "examples": [
+          {
+            "text": "Do you understand what I mean?",
+            "translation": "Você entende o que eu quero dizer?"
+          },
+          {
+            "text": "They seemed to really understand each other.",
+            "translation": "Eles pareciam se entender muito bem."
+          }
+        ],
+        "synonyms": ["comprehend", "grasp", "get"]
+      }
+    },
+    {
+      "id": "en_voc_beautiful_3",
+      "type": "VOCABULARY",
+      "lemma": "beautiful",
+      "metadata": {
+        "type": "adjective",
+        "level": "A1",
+        "translation": "Bonito(a)",
+        "phonetic": "/ˈbjuːtɪfl/",
+        "is_visual": true,
+        "key_image_words": "nature landscape beautiful scenery",
+        "image_url": "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07",
+        "meanings": [
+          {
+            "definition": "Agradável aos sentidos esteticamente.",
+            "translation": "Agradável aos sentidos esteticamente."
+          }
+        ],
+        "forms": {
+          "base": "beautiful"
+        },
+        "examples": [
+          {
+            "text": "The painting is beautiful.",
+            "translation": "A pintura é bonita."
+          },
+          {
+            "text": "It was a beautiful Sunday morning.",
+            "translation": "Era uma linda manhã de domingo."
+          }
+        ],
+        "synonyms": ["gorgeous", "pretty", "stunning"]
+      }
+    },
+    {
+      "id": "en_voc_relax_4",
+      "type": "VOCABULARY",
+      "lemma": "relax",
+      "metadata": {
+        "type": "verb",
+        "level": "A2",
+        "translation": "Relaxar",
+        "phonetic": "/rɪˈlæks/",
+        "is_visual": true,
+        "key_image_words": "person relaxing hammock nature",
+        "image_url": "https://images.unsplash.com/photo-1517487881594-2787fef5ebf7",
+        "meanings": [
+          {
+            "definition": "Ficar ou tornar-se menos tenso ou ansioso.",
+            "translation": "Ficar ou tornar-se menos tenso ou ansioso."
+          }
+        ],
+        "forms": {
+          "base": "relax",
+          "past": "relaxed",
+          "participle": "relaxed",
+          "plural": "relaxes"
+        },
+        "examples": [
+          {
+            "text": "You need to relax after work.",
+            "translation": "Você precisa relaxar depois do trabalho."
+          },
+          {
+            "text": "I decided to walk around the lake to relax.",
+            "translation": "Decidi caminhar ao redor do lago para relaxar."
+          }
+        ],
+        "synonyms": ["rest", "unwind", "chill"]
+      }
+    },
+    {
+      "id": "en_voc_appreciate_5",
+      "type": "VOCABULARY",
+      "lemma": "appreciate",
+      "metadata": {
+        "type": "verb",
+        "level": "B1",
+        "translation": "Apreciar",
+        "phonetic": "/əˈpriːʃieɪt/",
+        "is_visual": false,
+        "key_image_words": "person observing art nature grateful",
+        "image_url": "https://images.unsplash.com/photo-1472214103451-9374bd1c798e",
+        "meanings": [
+          {
+            "definition": "Reconhecer o valor total de algo ou alguém.",
+            "translation": "Reconhecer o valor total de algo ou alguém."
+          }
+        ],
+        "forms": {
+          "base": "appreciate",
+          "past": "appreciated",
+          "participle": "appreciated",
+          "plural": "appreciates"
+        },
+        "examples": [
+          {
+            "text": "I appreciate your help.",
+            "translation": "Eu aprecio sua ajuda."
+          },
+          {
+            "text": "It's always nice to spend time outdoors and appreciate nature.",
+            "translation": "É sempre bom passar tempo ao ar livre e apreciar a natureza."
+          }
+        ],
+        "synonyms": ["value", "respect", "cherish"]
+      }
+    },
+    {
+      "id": "en_str_past_continuous_1",
+      "type": "STRUCTURE",
+      "lemma": "Past Continuous",
+      "metadata": {
+        "level": "A2",
+        "structure_type": "Verb Tense",
+        "syntactic_pattern": "s-v-ing",
+        "translation": "Passado Contínuo",
+        "explanation": "Utilizado para descrever uma ação que estava em andamento em um momento específico no passado.",
+        "examples": [
+          {
+            "text": "The sun was shining brightly.",
+            "translation": "O sol estava brilhando intensamente.",
+            "word_order": [
+              { "word": "The", "index": 0, "role": "determiner" },
+              { "word": "sun", "index": 1, "role": "subject" },
+              { "word": "was", "index": 2, "role": "auxiliary verb" },
+              { "word": "shining", "index": 3, "role": "verb" },
+              { "word": "brightly", "index": 4, "role": "adverb" }
+            ]
+          },
+          {
+            "text": "Many people were enjoying the weather.",
+            "translation": "Muitas pessoas estavam aproveitando o clima.",
+            "word_order": [
+              { "word": "Many", "index": 0, "role": "adjective" },
+              { "word": "people", "index": 1, "role": "subject" },
+              { "word": "were", "index": 2, "role": "auxiliary verb" },
+              { "word": "enjoying", "index": 3, "role": "verb" },
+              { "word": "the", "index": 4, "role": "determiner" },
+              { "word": "weather", "index": 5, "role": "object" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "en_str_infinitive_purpose_2",
+      "type": "STRUCTURE",
+      "lemma": "Infinitive of Purpose",
+      "metadata": {
+        "level": "B1",
+        "structure_type": "Verb Pattern",
+        "syntactic_pattern": "s-v-to-v",
+        "translation": "Infinitivo de Propósito",
+        "explanation": "Usado para expressar a razão ou o propósito de uma ação, indicando o 'porquê' algo aconteceu.",
+        "examples": [
+          {
+            "text": "I decided to walk around the lake to relax.",
+            "translation": "Decidi caminhar ao redor do lago para relaxar.",
+            "word_order": [
+              { "word": "I", "index": 0, "role": "subject" },
+              { "word": "decided", "index": 1, "role": "verb" },
+              { "word": "to walk", "index": 2, "role": "infinitive verb" },
+              { "word": "around", "index": 3, "role": "preposition" },
+              { "word": "the", "index": 4, "role": "determiner" },
+              { "word": "lake", "index": 5, "role": "object" },
+              { "word": "to relax", "index": 6, "role": "infinitive of purpose" }
+            ]
+          },
+          {
+            "text": "She went to the store to buy milk.",
+            "translation": "Ela foi à loja para comprar leite.",
+            "word_order": [
+              { "word": "She", "index": 0, "role": "subject" },
+              { "word": "went", "index": 1, "role": "verb" },
+              { "word": "to", "index": 2, "role": "preposition" },
+              { "word": "the", "index": 3, "role": "determiner" },
+              { "word": "store", "index": 4, "role": "object" },
+              { "word": "to buy", "index": 5, "role": "infinitive of purpose" },
+              { "word": "milk", "index": 6, "role": "object" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

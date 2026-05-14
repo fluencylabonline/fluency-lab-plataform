@@ -435,6 +435,20 @@ export const curriculumService = {
         if (words.length > 0) {
           const scrambled = [...words].sort(() => Math.random() - 0.5);
 
+          // Flashcard for Structure (Requested: Example on front, Translation on back)
+          practiceItems.push({
+            id: `${item.id}_flash`,
+            type: "structure",
+            renderMode: "flashcard_visual",
+            mainText: phrase,
+            flashcard: {
+              front: phrase,
+              back: firstExample?.translation || meta.translation || "",
+              useTTS: true
+            }
+          });
+
+          // Sentence Unscramble
           practiceItems.push({
             id: item.id,
             type: "structure",

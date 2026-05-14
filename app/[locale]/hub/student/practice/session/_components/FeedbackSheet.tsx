@@ -57,7 +57,7 @@ export function FeedbackSheet({ isOpen, isCorrect, correctAnswer, explanation, g
           className={cn("fixed bottom-0 left-0 right-0 p-5 z-50 border-t-2", c.bg)}
         >
           <div className="max-w-2xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-start gap-4 w-full">
+            <div className="flex items-center gap-4 w-full">
               <div className={cn("p-2 rounded-full bg-white/70 shrink-0", c.icon)}>
                 {config.icon}
               </div>
@@ -77,7 +77,7 @@ export function FeedbackSheet({ isOpen, isCorrect, correctAnswer, explanation, g
             <Button
               onClick={onContinue}
               className={cn(
-                "w-full md:w-auto px-8 py-5 text-base font-bold uppercase tracking-wider rounded-2xl shadow-[0_4px_0_0_rgb(0,0,0,0.2)] active:shadow-none active:translate-y-1 transition-all shrink-0",
+                "w-full md:w-auto px-8 py-6 text-base font-bold uppercase tracking-wider rounded-md shadow-[0_4px_0_0_rgb(0,0,0,0.2)] active:shadow-none active:translate-y-1 transition-all shrink-0",
                 c.btn
               )}
             >
