@@ -22,6 +22,7 @@ import { getGeoLocationByIp } from "./contract.utils";
  * Ação para assinar um contrato digitalmente.
  */
 export const signContractAction = protectedAction
+  .metadata({ name: "signContract" })
   .inputSchema(signContractSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -80,6 +81,7 @@ export const signContractAction = protectedAction
  * Ação pública para verificar validade de um contrato via hash.
  */
 export const verifyContractAction = actionClient
+  .metadata({ name: "verifyContract" })
   .inputSchema(z.object({ hash: z.string() }))
   .action(async ({ parsedInput }) => {
     return await contractService.verifyContract(parsedInput.hash);
@@ -89,11 +91,13 @@ export const verifyContractAction = actionClient
  * Ação para buscar contratos do usuário (Read).
  */
 export const getMyContractsAction = protectedAction
+  .metadata({ name: "getMyContracts" })
   .action(async ({ ctx }) => {
     return await contractService.getMyContracts(ctx.user.id);
   });
 
 export const getPendingContractAction = protectedAction
+  .metadata({ name: "getPendingContract" })
   .action(async ({ ctx }) => {
     const instance = await contractService.prepareOnboardingContract(ctx.user.id);
 
@@ -110,6 +114,7 @@ export const getPendingContractAction = protectedAction
   });
 
 export const getContractDownloadUrlAction = protectedAction
+  .metadata({ name: "getContractDownloadUrl" })
   .schema(z.object({ instanceId: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -133,6 +138,7 @@ export const getContractDownloadUrlAction = protectedAction
   });
 
 export const resendContractEmailAction = protectedAction
+  .metadata({ name: "resendContractEmail" })
   .schema(z.object({ instanceId: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     try {

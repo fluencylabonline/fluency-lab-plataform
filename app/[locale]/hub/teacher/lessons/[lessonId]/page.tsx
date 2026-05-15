@@ -15,7 +15,7 @@ export default async function LessonDetailPage({ params }: LessonPageProps) {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/auth/login");
+    redirect("/signin");
   }
 
   const lesson = await curriculumService.findLessonById(lessonId);

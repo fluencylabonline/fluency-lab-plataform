@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { insertCourseSchema } from "./course.schema";
 
 export const createCourseAction = permissionAction("course.manage")
+  .metadata({ name: "createCourse" })
   .inputSchema(insertCourseSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -20,6 +21,7 @@ export const createCourseAction = permissionAction("course.manage")
   });
 
 export const updateCourseAction = permissionAction("course.manage")
+  .metadata({ name: "updateCourse" })
   .inputSchema(z.object({
     id: z.string().uuid(),
     data: insertCourseSchema.partial()
@@ -36,6 +38,7 @@ export const updateCourseAction = permissionAction("course.manage")
   });
 
 export const deleteCourseAction = permissionAction("course.manage")
+  .metadata({ name: "deleteCourse" })
   .inputSchema(z.object({ id: z.string().uuid() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -49,6 +52,7 @@ export const deleteCourseAction = permissionAction("course.manage")
   });
 
 export const enrollAction = permissionAction("course.learn")
+  .metadata({ name: "enroll" })
   .inputSchema(z.object({ courseId: z.string().uuid() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -62,6 +66,7 @@ export const enrollAction = permissionAction("course.learn")
   });
 
 export const updateProgressAction = permissionAction("course.learn")
+  .metadata({ name: "updateProgress" })
   .inputSchema(z.object({
     courseId: z.string().uuid(),
     lessonId: z.string().uuid(),
@@ -83,6 +88,7 @@ export const updateProgressAction = permissionAction("course.learn")
   });
 
 export const addSectionAction = permissionAction("course.manage")
+  .metadata({ name: "addSection" })
   .inputSchema(z.object({
     courseId: z.string().uuid(),
     title: z.string().min(1),
@@ -99,6 +105,7 @@ export const addSectionAction = permissionAction("course.manage")
   });
 
 export const addLessonAction = permissionAction("course.manage")
+  .metadata({ name: "addLesson" })
   .inputSchema(z.object({
     sectionId: z.string().uuid(),
     courseId: z.string().uuid(), // For revalidation
@@ -117,6 +124,7 @@ export const addLessonAction = permissionAction("course.manage")
   });
 
 export const deleteSectionAction = permissionAction("course.manage")
+  .metadata({ name: "deleteSection" })
   .inputSchema(z.object({
     courseId: z.string().uuid(),
     sectionId: z.string().uuid()
@@ -132,6 +140,7 @@ export const deleteSectionAction = permissionAction("course.manage")
   });
 
 export const deleteLessonAction = permissionAction("course.manage")
+  .metadata({ name: "deleteLesson" })
   .inputSchema(z.object({
     courseId: z.string().uuid(),
     lessonId: z.string().uuid()
@@ -147,6 +156,7 @@ export const deleteLessonAction = permissionAction("course.manage")
   });
 
 export const updateLessonAction = permissionAction("course.manage")
+  .metadata({ name: "updateLesson" })
   .inputSchema(z.object({
     courseId: z.string().uuid(),
     lessonId: z.string().uuid(),
@@ -168,6 +178,7 @@ export const updateLessonAction = permissionAction("course.manage")
   });
 
 export const reorderLessonsAction = permissionAction("course.manage")
+  .metadata({ name: "reorderLessons" })
   .inputSchema(z.object({
     courseId: z.string().uuid(),
     lessonIds: z.array(z.string().uuid()),
@@ -183,6 +194,7 @@ export const reorderLessonsAction = permissionAction("course.manage")
   });
 
 export const reorderSectionsAction = permissionAction("course.manage")
+  .metadata({ name: "reorderSections" })
   .inputSchema(z.object({
     courseId: z.string().uuid(),
     sectionIds: z.array(z.string().uuid()),
@@ -198,6 +210,7 @@ export const reorderSectionsAction = permissionAction("course.manage")
   });
 
 export const createQuizAction = permissionAction("course.manage")
+  .metadata({ name: "createQuiz" })
   .inputSchema(z.object({
     courseId: z.string().uuid(),
     title: z.string().min(1),
@@ -215,6 +228,7 @@ export const createQuizAction = permissionAction("course.manage")
   });
 
 export const submitQuizAction = permissionAction("course.learn")
+  .metadata({ name: "submitQuiz" })
   .inputSchema(z.object({
     quizId: z.string().uuid(),
     answers: z.record(z.string(), z.string()),

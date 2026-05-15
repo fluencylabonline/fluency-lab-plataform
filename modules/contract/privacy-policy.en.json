@@ -1,0 +1,35 @@
+{
+  "version": "1.1.0",
+  "effectiveDate": "2024-05-14",
+  "title": "Privacy Policy",
+  "sections": [
+    {
+      "title": "1. Commitment to Privacy",
+      "content": "FluencyLab values your privacy and is committed to protecting the personal data of its users (students, guardians, and teachers) in compliance with the General Data Protection Law (LGPD - Law No. 13.709/2018)."
+    },
+    {
+      "title": "2. Data Collected",
+      "content": "We collect data necessary for the provision of our educational services, including: Full name, Tax ID (CPF), E-mail, Telephone, Address and, in the case of minors, data of the legal guardian (Name and CPF). We also collect access logs and pedagogical progress."
+    },
+    {
+      "title": "3. Purpose of Processing",
+      "content": "The data is used for: Academic management, payment processing, communications about classes, issuance of certificates, compliance with legal obligations, and continuous improvement of the learning experience."
+    },
+    {
+      "title": "4. Your Rights (Art. 18 LGPD)",
+      "content": "You have the right to: \n- Confirm the existence of processing;\n- Access your data clearly and legibly;\n- Correct incomplete or inaccurate data;\n- Request data portability (Export);\n- Request anonymization, blocking, or elimination of unnecessary data;\n- Revoke consent at any time."
+    },
+    {
+      "title": "5. Portability and Deletion",
+      "content": "You can export your personal data in a structured format (JSON) directly in your account settings. If you wish to close your account, you can request permanent deletion. After the request, your personal identification data (PII) will be anonymized, except for those that FluencyLab is legally obliged to maintain for regulatory periods (e.g., tax records for 5 years)."
+    },
+    {
+      "title": "6. Protection of Minors",
+      "content": "The processing of data of minors is carried out with the specific and highlighted consent given by at least one of the parents or the legal guardian during the onboarding process."
+    },
+    {
+      "title": "7. Security",
+      "content": "We implement technical and administrative measures capable of protecting personal data from unauthorized access and from accidental or illegal situations of destruction, loss, alteration, or dissemination."
+    }
+  ]
+}

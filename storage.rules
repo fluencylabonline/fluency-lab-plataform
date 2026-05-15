@@ -81,5 +81,10 @@ service firebase.storage {
       // Uploads are handled via Server API (Firebase Admin SDK)
       allow write: if false; 
     }
+
+    match /documents/{userId}/{allPaths=**} {
+      // Documents are only accessible by the owner
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
   }
 }

@@ -154,5 +154,48 @@ export const userRepository = {
       columns: { id: true }
     });
     return result.length;
+  },
+
+  async updateLgpdConsent(id: string, data: { acceptedTermsVersion: string, guardianConsent: boolean }) {
+    const [updated] = await db
+      .update(usersTable)
+      .set({ 
+        acceptedTermsVersion: data.acceptedTermsVersion,
+        guardianConsent: data.guardianConsent,
+        acceptedAt: new Date(),
+        updatedAt: new Date() 
+      })
+      .where(eq(usersTable.id, id))
+      .returning();
+    return updated;
+  },
+
+  async anonymize(id: string) {
+    const [updated] = await db
+      .update(usersTable)
+      .set({
+        name: "Usuário Anonimizado",
+        email: `deleted_${id}@fluencylab.me`,
+        photoUrl: null,
+        cellphone: null,
+        taxId: null,
+        businessTaxId: null,
+        address: null,
+        guardianName: null,
+        guardianTaxId: null,
+        guardianRelationship: null,
+        isActive: false,
+        anonymizedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(usersTable.id, id))
+      .returning();
+    return updated;
+  },
+
+  async getComprehensiveUserData(id: string) {
+    return db.query.usersTable.findFirst({
+      where: eq(usersTable.id, id),
+    });
   }
 };

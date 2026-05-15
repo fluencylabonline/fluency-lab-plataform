@@ -12,6 +12,7 @@ import { z } from "zod";
  */
 export const createNotebookAction = protectedAction
   .schema(createNotebookSchema)
+  .metadata({ name: "createNotebookAction" })
   .action(async ({ parsedInput, ctx }) => {
     const { user } = ctx;
 
@@ -49,6 +50,7 @@ export const createNotebookAction = protectedAction
  */
 export const getStudentNotebooksAction = protectedAction
   .schema(z.object({ studentId: z.string() }))
+  .metadata({ name: "getStudentNotebooksAction" })
   .action(async ({ parsedInput, ctx }) => {
     const { user } = ctx;
 
@@ -66,6 +68,7 @@ export const getStudentNotebooksAction = protectedAction
  */
 export const startNotebookSessionAction = protectedAction
   .schema(z.object({ notebookId: z.string().uuid() }))
+  .metadata({ name: "startNotebookSessionAction" })
   .action(async ({ parsedInput, ctx }) => {
     const { user } = ctx;
     const session = await notebookService.startNotebookSession(
@@ -81,6 +84,7 @@ export const startNotebookSessionAction = protectedAction
  */
 export const heartbeatNotebookSessionAction = protectedAction
   .schema(z.object({ sessionId: z.string().uuid() }))
+  .metadata({ name: "heartbeatNotebookSessionAction" })
   .action(async ({ parsedInput, ctx }) => {
     await notebookService.heartbeatNotebookSession(parsedInput.sessionId, ctx.user.id);
     return { success: true };
@@ -94,6 +98,7 @@ export const endNotebookSessionAction = protectedAction
     sessionId: z.string().uuid(),
     content: z.string().optional()
   }))
+  .metadata({ name: "endNotebookSessionAction" })
   .action(async ({ parsedInput, ctx }) => {
     await notebookService.endNotebookSession(parsedInput.sessionId, ctx.user.id, parsedInput.content);
     return { success: true };
@@ -110,6 +115,7 @@ export const registerNotebookAssetAction = protectedAction
     contentType: z.string().min(1),
     sizeBytes: z.number().positive(),
   }))
+  .metadata({ name: "registerNotebookAssetAction" })
   .action(async ({ parsedInput, ctx }) => {
     await notebookService.registerNotebookAsset({
       ...parsedInput,
@@ -124,6 +130,7 @@ export const registerNotebookAssetAction = protectedAction
  */
 export const getNotebookAction = protectedAction
   .schema(z.object({ notebookId: z.string().uuid() }))
+  .metadata({ name: "getNotebookAction" })
   .action(async ({ parsedInput, ctx }) => {
     const { user } = ctx;
     const notebook = await notebookService.getNotebook(

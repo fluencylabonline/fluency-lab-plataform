@@ -84,6 +84,13 @@ export const usersTable = pgTable("users", {
   mfaEnabled: boolean("mfa_enabled").notNull().default(false),
   mfaSecret: text("mfa_secret"),
 
+  // LGPD Compliance
+  acceptedTermsVersion: text("accepted_terms_version"),
+  acceptedAt: timestamp("accepted_at"),
+  guardianConsent: boolean("guardian_consent").notNull().default(false),
+  dataRetentionUntil: timestamp("data_retention_until"),
+  anonymizedAt: timestamp("anonymized_at"),
+
   // Cancellation Flow
   cancellationPending: boolean("cancellation_pending").notNull().default(false),
   cancellationPixCode: text("cancellation_pix_code"),
@@ -175,6 +182,10 @@ export const onboardingWelcomeSchema = z.object({
   name: z.string().min(2, "Onboarding.validation.nameRequired"),
   nickname: z.string().optional(),
   birthDate: z.string().min(1, "Onboarding.validation.birthDateRequired"),
+  acceptedTerms: z.boolean().refine((val) => val === true, {
+    message: "Onboarding.validation.termsRequired",
+  }),
+  guardianConsent: z.boolean().optional().default(false),
 });
 
 export const onboardingGuardianSchema = z.object({
@@ -268,6 +279,13 @@ export type TeacherOnboardingPaymentValues = z.input<typeof teacherOnboardingPay
 export type TeacherOnboardingAvailabilityValues = z.input<typeof teacherOnboardingAvailabilitySchema>;
 
 export type NotificationPrefs = z.infer<typeof notificationPrefsSchema>;
+
+export const lgpdConsentSchema = z.object({
+  acceptedTermsVersion: z.string(),
+  guardianConsent: z.boolean().default(false),
+});
+
+export type LgpdConsentValues = z.input<typeof lgpdConsentSchema>;
 
 // Rate Limiting Table 
 export const rateLimitsTable = pgTable("rate_limits", {

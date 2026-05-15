@@ -7,6 +7,7 @@ import { issueCertificateSchema } from "./certificate.types";
 import { revalidatePath } from "next/cache";
 
 export const getCertificateDataAction = managerAction
+  .metadata({ name: "getCertificateData" })
   .inputSchema(z.object({ studentId: z.string(), language: z.string() }))
   .action(async ({ parsedInput }) => {
     try {
@@ -19,6 +20,7 @@ export const getCertificateDataAction = managerAction
   });
 
 export const issueCertificateAction = managerAction
+  .metadata({ name: "issueCertificate" })
   .inputSchema(issueCertificateSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -33,6 +35,7 @@ export const issueCertificateAction = managerAction
   });
 
 export const getStudentCertificatesAction = protectedAction
+  .metadata({ name: "getStudentCertificates" })
   .inputSchema(z.object({ studentId: z.string() }))
   .action(async ({ parsedInput }) => {
     try {
@@ -45,6 +48,7 @@ export const getStudentCertificatesAction = protectedAction
   });
 
 export const saveCertificatePdfAction = managerAction
+  .metadata({ name: "saveCertificatePdf" })
   .inputSchema(z.object({ code: z.string(), pdfUrl: z.string() }))
   .action(async ({ parsedInput }) => {
     try {

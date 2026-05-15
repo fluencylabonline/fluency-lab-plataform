@@ -8,6 +8,7 @@ import { checkUserHasPassword, verifySudoMode } from "@/lib/auth-server";
 
 export const checkCurrentSudoRequirementAction = protectedAction
   .schema(z.void())
+  .metadata({ name: "checkCurrentSudoRequirementAction" })
   .action(async ({ ctx }) => {
     try {
       const hasPassword = await checkUserHasPassword(ctx.user.id);
@@ -24,6 +25,7 @@ export const processTeacherPayoutAction = permissionAction("class.update.any")
     year: z.number(),
     password: z.string().optional(),
   }))
+  .metadata({ name: "processTeacherPayoutAction" })
   .action(async ({ parsedInput, ctx }) => {
     try {
       // 1. Verify sudo (Password if needed, automatic if Google)
@@ -52,6 +54,7 @@ export const getTeacherUnpaidClassesAction = protectedAction
     month: z.number().min(0).max(11),
     year: z.number(),
   }))
+  .metadata({ name: "getTeacherUnpaidClassesAction" })
   .action(async ({ parsedInput, ctx }) => {
     try {
       // Security: Only the teacher themselves or an admin/manager can see unpaid classes

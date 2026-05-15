@@ -49,8 +49,9 @@ export async function proxy(request: NextRequest) {
 
   // 3. Route Protection Logic
   const isAuthPage = AUTH_PAGES.some((page) => normalizedPath.startsWith(page));
+  const isPublicPage = ["/", "/privacy", "/terms", "/certificate"].includes(normalizedPath);
 
-  if (!session && !isAuthPage && normalizedPath !== "/") {
+  if (!session && !isAuthPage && !isPublicPage) {
     // Redirect unauthenticated users to signin
     const signInUrl = new URL("/signin", request.url);
     // Store original URL to redirect back after login

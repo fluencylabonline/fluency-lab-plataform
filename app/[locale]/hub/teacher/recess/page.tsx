@@ -13,7 +13,7 @@ export default async function RecessActivitiesPage() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/auth/login");
+    redirect("/signin");
   }
 
   const activities = await curriculumService.getRecessActivities(user.id);

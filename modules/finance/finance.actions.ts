@@ -9,6 +9,7 @@ import { z } from "zod";
 import { payoutService } from "../payout/payout.service";
 
 export const createTransactionAction = protectedAction
+  .metadata({ name: "createTransaction" })
   .schema(createTransactionSchema)
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
@@ -26,6 +27,7 @@ export const createTransactionAction = protectedAction
   });
 
 export const updateTransactionAction = protectedAction
+  .metadata({ name: "updateTransaction" })
   .schema(z.object({
     id: z.string().uuid(),
     data: createTransactionSchema.partial(),
@@ -46,6 +48,7 @@ export const updateTransactionAction = protectedAction
   });
 
 export const deleteTransactionAction = protectedAction
+  .metadata({ name: "deleteTransaction" })
   .schema(z.object({ id: z.string().uuid() }))
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.user.role !== "admin") {
@@ -63,6 +66,7 @@ export const deleteTransactionAction = protectedAction
   });
 
 export const payTeacherAction = protectedAction
+  .metadata({ name: "payTeacher" })
   .schema(z.object({
     teacherId: z.string(),
     month: z.number(),
@@ -91,6 +95,7 @@ export const payTeacherAction = protectedAction
   });
 
 export const upsertFiscalConfigAction = protectedAction
+  .metadata({ name: "upsertFiscalConfig" })
   .schema(upsertFiscalConfigSchema)
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.user.role !== "admin") {
@@ -108,6 +113,7 @@ export const upsertFiscalConfigAction = protectedAction
   });
 
 export const getTransactionsAction = protectedAction
+  .metadata({ name: "getTransactions" })
   .schema(z.object({
     type: z.enum(["income", "expense"]).optional(),
     status: z.enum(["pending", "paid", "cancelled"]).optional(),
@@ -147,6 +153,7 @@ export const getTransactionsAction = protectedAction
   });
 
 export const getCategoriesAction = protectedAction
+  .metadata({ name: "getCategories" })
   .schema(z.void())
   .action(async ({ ctx }) => {
     if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
@@ -161,6 +168,7 @@ export const getCategoriesAction = protectedAction
   });
 
 export const getFiscalConfigAction = protectedAction
+  .metadata({ name: "getFiscalConfig" })
   .schema(z.object({ year: z.number() }))
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.user.role !== "admin") {

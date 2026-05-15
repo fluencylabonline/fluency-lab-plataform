@@ -1,0 +1,23 @@
+{
+  "version": "1.1.0",
+  "effectiveDate": "2024-05-14",
+  "title": "Política de Privacidade",
+  "sections": [
+    {
+      "title": "1. Compromisso com a Privacidade",
+      "content": "A FluencyLab valoriza a sua privacidade e se compromete a proteger os dados pessoais de seus usuários (alunos, responsáveis e professores) em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018)."
+    },
+    {
+      "title": "2. Dados Coletados",
+      "content": "Coletamos dados necessários para a prestação de nossos serviços educacionais, incluindo: Nome completo, CPF, E-mail, Telefone, Endereço e, no caso de menores de idade, dados do responsável legal (Nome e CPF). Também coletamos logs de acesso e progresso pedagógico."
+    },
+    {
+      "title": "3. Finalidade do Tratamento",
+      "content": "Os dados são utilizados para: Gestão acadêmica, processamento de pagamentos, comunicações sobre aulas, emissão de certificados, cumprimento de obrigações legais e melhoria contínua da experiência de aprendizado."
+    },
+    {
+      "title": "4. Seus Direitos (Art. 18 LGPD)",
+      "content": "Você possui o direito de: \n- Confirmar a existência de tratamento;\n- Acessar seus dados de forma clara e legível;\n- Corrigir dados incompletos ou inexatos;\n- Solicitar a portabilidade dos dados (Exportação);\n- Solicitar a anonimização, bloqueio ou eliminação de dados desnecessários;\n- Revogar o consentimento a qualquer momento."
+    }
+  ]
+}

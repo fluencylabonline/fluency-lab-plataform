@@ -8,7 +8,7 @@ import { z } from "zod";
 import { locales } from "@/i18n/config";
 import { revalidatePath } from "next/cache";
 import { adminAuth } from "@/lib/firebase-admin";
-import { NewUser, createUserSchema, requestNewInviteSchema, updateUserSchema, notificationPrefsSchema } from "./user.schema";
+import { NewUser, createUserSchema, requestNewInviteSchema, updateUserSchema, notificationPrefsSchema, lgpdConsentSchema } from "./user.schema";
 import { env } from "@/env";
 import { communicationService } from "@/modules/communication/communication.service";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -28,6 +28,7 @@ const generateInviteLink = async (email: string, locale: string = "pt") => {
 // -----------------------------------
 
 export const loginAction = actionClient
+  .metadata({ name: "login" })
   .inputSchema(
     z.object({
       idToken: z.string().min(1),
@@ -92,6 +93,7 @@ export const loginAction = actionClient
   });
 
 export const verifyMfaLoginAction = actionClient
+  .metadata({ name: "verifyMfaLogin" })
   .inputSchema(z.object({ 
     token: z.string().length(6),
     rememberMe: z.boolean().optional().default(false)
@@ -125,7 +127,9 @@ export const verifyMfaLoginAction = actionClient
     }
   });
 
-export const logoutAction = actionClient.action(async () => {
+export const logoutAction = actionClient
+  .metadata({ name: "logout" })
+  .action(async () => {
   try {
     const user = await getCurrentUser();
     
@@ -148,6 +152,7 @@ export const logoutAction = actionClient.action(async () => {
 });
 
 export const syncUserAction = protectedAction
+  .metadata({ name: "syncUser" })
   .inputSchema(
     z.object({
       name: z.string().optional(),
@@ -171,6 +176,7 @@ export const syncUserAction = protectedAction
   });
 
 export const createUserAction = permissionAction("user.create")
+  .metadata({ name: "createUser" })
   .inputSchema(createUserSchema)
   .action(async ({ parsedInput }) => {
     try {
@@ -191,6 +197,7 @@ export const createUserAction = permissionAction("user.create")
   });
 
 export const updateNotificationPrefsAction = protectedAction
+  .metadata({ name: "updateNotificationPrefs" })
   .schema(notificationPrefsSchema)
   .action(async ({ parsedInput, ctx }) => {
     await userService.updateNotificationPrefs(ctx.user.id, parsedInput);
@@ -198,6 +205,7 @@ export const updateNotificationPrefsAction = protectedAction
   });
 
 export const resendInviteAction = permissionAction("user.create")
+  .metadata({ name: "resendInvite" })
   .inputSchema(
     z.object({
       email: z.string().email(),
@@ -220,6 +228,7 @@ export const resendInviteAction = permissionAction("user.create")
   });
 
 export const requestNewInviteAction = actionClient
+  .metadata({ name: "requestNewInvite" })
   .inputSchema(requestNewInviteSchema)
   .action(async ({ parsedInput }) => {
     try {
@@ -241,6 +250,7 @@ export const requestNewInviteAction = actionClient
   });
 
 export const searchStudentsAction = permissionAction("material.view")
+  .metadata({ name: "searchStudents" })
   .inputSchema(z.object({ term: z.string().min(1) }))
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -271,6 +281,7 @@ export const searchStudentsAction = permissionAction("material.view")
   });
 
 export const searchUsersAction = protectedAction
+  .metadata({ name: "searchUsers" })
   .inputSchema(z.object({ term: z.string().min(1) }))
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -285,6 +296,7 @@ export const searchUsersAction = protectedAction
   });
 
 export const getTeachersAction = protectedAction
+  .metadata({ name: "getTeachers" })
   .inputSchema(z.object({}))
   .action(async () => {
     try {
@@ -297,6 +309,7 @@ export const getTeachersAction = protectedAction
   });
 
 export const toggleNotificationAction = protectedAction
+  .metadata({ name: "toggleNotification" })
   .inputSchema(z.object({ type: z.enum(["push", "app"]), enabled: z.boolean() }))
   .action(async ({ parsedInput, ctx }) => {
     await userService.toggleNotification(ctx.user.id, parsedInput.type, parsedInput.enabled);
@@ -305,6 +318,7 @@ export const toggleNotificationAction = protectedAction
   });
 
 export const updateUserAction = adminAction
+  .metadata({ name: "updateUser" })
   .inputSchema(updateUserSchema)
   .action(async ({ parsedInput }) => {
     try {
@@ -322,6 +336,7 @@ export const updateUserAction = adminAction
   });
 
 export const revealSensitiveDataAction = adminAction
+  .metadata({ name: "revealSensitiveData" })
   .inputSchema(
     z.object({
       userId: z.string(),
@@ -358,6 +373,7 @@ export const revealSensitiveDataAction = adminAction
   });
 
 export const claimWordOfTheDayXPAction = protectedAction
+  .metadata({ name: "claimWordOfTheDayXP" })
   .action(async ({ ctx }) => {
     await userService.addXP(ctx.user.id, 10);
     revalidatePath("/hub/student/notebook");
@@ -365,6 +381,7 @@ export const claimWordOfTheDayXPAction = protectedAction
   });
 
 export const requestStudentDeactivationAction = adminAction
+  .metadata({ name: "requestStudentDeactivation" })
   .inputSchema(
     z.object({
       userId: z.string(),
@@ -413,12 +430,14 @@ export const requestStudentDeactivationAction = adminAction
   });
 
 export const getStudentLanguagesAction = protectedAction
+  .metadata({ name: "getStudentLanguages" })
   .action(async ({ ctx }) => {
     const user = await userService.getUserById(ctx.user.id);
     return user?.languages || [];
   });
 
 export const generateMfaSecretAction = protectedAction
+  .metadata({ name: "generateMfaSecret" })
   .action(async ({ ctx }) => {
     try {
       const result = await userService.generateMfaSecret(ctx.user.id);
@@ -430,6 +449,7 @@ export const generateMfaSecretAction = protectedAction
   });
 
 export const enrollMfaAction = protectedAction
+  .metadata({ name: "enrollMfa" })
   .inputSchema(z.object({
     secret: z.string().min(1),
     token: z.string().length(6),
@@ -448,6 +468,7 @@ export const enrollMfaAction = protectedAction
   });
 
 export const disableMfaAction = protectedAction
+  .metadata({ name: "disableMfa" })
   .action(async ({ ctx }) => {
     try {
       await userService.disableMfa(ctx.user.id);
@@ -460,6 +481,7 @@ export const disableMfaAction = protectedAction
   });
 
 export const updateLocaleAction = protectedAction
+  .metadata({ name: "updateLocale" })
   .schema(z.object({ locale: z.enum(locales) }))
   .action(async ({ parsedInput, ctx }) => {
     await userService.updateUser(ctx.user.id, { locale: parsedInput.locale });
@@ -468,6 +490,7 @@ export const updateLocaleAction = protectedAction
   });
 
 export const syncUserPhotoAction = protectedAction
+  .metadata({ name: "syncUserPhoto" })
   .schema(z.object({ photoUrl: z.string().url() }))
   .action(async ({ parsedInput, ctx }) => {
     await userService.updateUser(ctx.user.id, { photoUrl: parsedInput.photoUrl });
@@ -476,6 +499,7 @@ export const syncUserPhotoAction = protectedAction
   });
 
 export const requestSelfCancellationAction = protectedAction
+  .metadata({ name: "requestSelfCancellation" })
   .action(async ({ ctx }) => {
     try {
       const { contractRepository } = await import("../contract/contract.repository");
@@ -520,7 +544,47 @@ export const requestSelfCancellationAction = protectedAction
   });
 
 export const getUserStatusAction = protectedAction
+  .metadata({ name: "getUserStatus" })
   .action(async ({ ctx }) => {
     const user = await userService.getUser(ctx.user.id);
     return { isActive: user?.isActive, cancellationPending: user?.cancellationPending } as { isActive?: boolean; cancellationPending?: boolean; success: boolean; error?: string };
+  });
+
+export const acceptLegalTermsAction = protectedAction
+  .metadata({ name: "acceptLegalTerms" })
+  .inputSchema(lgpdConsentSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    await userService.recordConsent(ctx.user.id, parsedInput.acceptedTermsVersion, parsedInput.guardianConsent);
+    revalidatePath("/");
+    return { success: true };
+  });
+
+export const exportMyDataAction = protectedAction
+  .metadata({ name: "exportMyData" })
+  .inputSchema(z.object({ password: z.string() }))
+  .action(async ({ parsedInput, ctx }) => {
+    // 1. Verify Sudo Mode (Identity confirmation before exporting PII)
+    const isValid = await verifySudoMode(ctx.user.id, ctx.user.email!, parsedInput.password);
+    if (!isValid) return { success: false, error: "authError" };
+
+    const data = await userService.exportData(ctx.user.id);
+    return { success: true, data };
+  });
+
+export const requestPermanentDeletionAction = protectedAction
+  .metadata({ name: "requestPermanentDeletion" })
+  .inputSchema(z.object({ password: z.string() }))
+  .action(async ({ parsedInput, ctx }) => {
+    // 1. Verify Sudo Mode (Identity confirmation before destructive action)
+    const isValid = await verifySudoMode(ctx.user.id, ctx.user.email!, parsedInput.password);
+    if (!isValid) return { success: false, error: "authError" };
+
+    // 2. Perform purge
+    await userService.purgeUserData(ctx.user.id);
+
+    // 3. Clear session
+    const cookieStore = await cookies();
+    cookieStore.delete("session");
+
+    return { success: true };
   });

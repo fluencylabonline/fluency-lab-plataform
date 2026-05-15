@@ -11,6 +11,7 @@ import { z } from "zod";
 
 export const startPlacementTestAction = protectedAction
   .schema(z.object({ languageId: z.uuid() }))
+  .metadata({ name: "startPlacementTestAction" })
   .action(async ({ parsedInput, ctx }) => {
     // 1. Will throw if not eligible
     const { test, answeredCount, currentElo } = await placementService.startOrResumeTest(ctx.user.id, parsedInput.languageId);
@@ -28,6 +29,7 @@ export const startPlacementTestAction = protectedAction
 
 export const submitPlacementAnswerAction = protectedAction
   .schema(submitAnswerSchema)
+  .metadata({ name: "submitPlacementAnswerAction" })
   .action(async ({ parsedInput, ctx }) => {
     const result = await placementService.submitAnswer(ctx.user.id, {
       testId: parsedInput.testId,
@@ -59,6 +61,7 @@ export const generateBatchPlacementQuestionsAction = managerAction
     mediaIds: z.array(z.uuid()),
     types: z.array(z.string())
   }))
+  .metadata({ name: "generateBatchPlacementQuestionsAction" })
   .action(async ({ parsedInput, ctx }) => {
     return await placementService.generateBatch(
       parsedInput.languageId,
@@ -71,6 +74,7 @@ export const generateBatchPlacementQuestionsAction = managerAction
 
 export const commitBatchPlacementQuestionsAction = managerAction
   .schema(z.array(insertQuestionSchema))
+  .metadata({ name: "commitBatchPlacementQuestionsAction" })
   .action(async ({ parsedInput }) => {
     const results = [];
     for (const q of parsedInput) {
@@ -90,12 +94,14 @@ export const getPlacementQuestionsAction = managerAction
     limit: z.number().optional(),
     offset: z.number().optional(),
   }))
+  .metadata({ name: "getPlacementQuestionsAction" })
   .action(async ({ parsedInput }) => {
     return await placementService.getQuestions(parsedInput);
   });
 
 export const deletePlacementQuestionAction = managerAction
   .schema(z.object({ id: z.number() }))
+  .metadata({ name: "deletePlacementQuestionAction" })
   .action(async ({ parsedInput }) => {
     await placementService.deleteQuestion(parsedInput.id);
     return { success: true };
@@ -106,6 +112,7 @@ export const updatePlacementQuestionAction = managerAction
     id: z.number(),
     data: insertQuestionSchema.partial()
   }))
+  .metadata({ name: "updatePlacementQuestionAction" })
   .action(async ({ parsedInput }) => {
     await placementService.updateQuestion(parsedInput.id, parsedInput.data);
     return { success: true };
@@ -113,18 +120,21 @@ export const updatePlacementQuestionAction = managerAction
 
 export const getPlacementStatsAction = managerAction
   .schema(z.object({ languageId: z.uuid() }))
+  .metadata({ name: "getPlacementStatsAction" })
   .action(async ({ parsedInput }) => {
     return await placementService.getStats(parsedInput.languageId);
   });
 
 export const getPlacementDashboardAction = protectedAction
   .schema(z.void())
+  .metadata({ name: "getPlacementDashboardAction" })
   .action(async ({ ctx }) => {
     return await placementService.getPlacementDashboard(ctx.user.id);
   });
 
 export const getTestResultAction = protectedAction
   .schema(z.object({ testId: z.number() }))
+  .metadata({ name: "getTestResultAction" })
   .action(async ({ parsedInput, ctx }) => {
     return await placementService.getTestResult(parsedInput.testId, ctx.user.id);
   });

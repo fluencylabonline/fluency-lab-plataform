@@ -8,6 +8,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
 export const createPlanAction = adminAction
+  .metadata({ name: "createPlan" })
   .inputSchema(createPlanSchema)
   .action(async ({ parsedInput }) => {
     try {
@@ -21,6 +22,7 @@ export const createPlanAction = adminAction
   });
 
 export const updatePlanAction = adminAction
+  .metadata({ name: "updatePlan" })
   .inputSchema(updatePlanSchema)
   .action(async ({ parsedInput }) => {
     try {
@@ -35,6 +37,7 @@ export const updatePlanAction = adminAction
   });
 
 export const togglePlanStatusAction = adminAction
+  .metadata({ name: "togglePlanStatus" })
   .inputSchema(z.object({ id: z.string(), isActive: z.boolean() }))
   .action(async ({ parsedInput }) => {
     try {
@@ -48,6 +51,7 @@ export const togglePlanStatusAction = adminAction
   });
 
 export const createSubscriptionAction = adminAction
+  .metadata({ name: "createSubscription" })
   .inputSchema(createSubscriptionSchema)
   .action(async ({ parsedInput }) => {
     await billingService.createSubscription(
@@ -61,6 +65,7 @@ export const createSubscriptionAction = adminAction
   });
 
 export const cancelSubscriptionAction = protectedAction
+  .metadata({ name: "cancelSubscription" })
   .inputSchema(z.object({ subscriptionId: z.uuid() }))
   .action(async ({ parsedInput, ctx }) => {
     // 1. Ownership validation (IDOR prevention)
@@ -77,18 +82,21 @@ export const cancelSubscriptionAction = protectedAction
   });
 
 export const getActivePaymentAction = protectedAction
+  .metadata({ name: "getActivePayment" })
   .action(async ({ ctx }) => {
     const payment = await billingService.getActivePayment(ctx.user.id);
     return { success: true, data: payment };
   });
 
 export const getPlansAction = protectedAction
+  .metadata({ name: "getPlans" })
   .action(async () => {
     const plans = await billingService.listActivePlans();
     return { success: true, data: plans };
   });
 
 export const getInstallmentStatusAction = protectedAction
+  .metadata({ name: "getInstallmentStatus" })
   .inputSchema(z.object({ installmentId: z.uuid() }))
   .action(async ({ parsedInput, ctx }) => {
     const installment = await billingService.getInstallmentById(parsedInput.installmentId);
@@ -105,6 +113,7 @@ export const getInstallmentStatusAction = protectedAction
 import { verifySudoMode } from "@/lib/auth-server";
 
 export const updateInstallmentAction = adminAction
+  .metadata({ name: "updateInstallment" })
   .inputSchema(updateInstallmentSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -151,12 +160,14 @@ export const updateInstallmentAction = adminAction
   });
 
 export const getStudentPaymentsAction = protectedAction
+  .metadata({ name: "getStudentPayments" })
   .action(async ({ ctx }) => {
     const payments = await billingService.getStudentPayments(ctx.user.id);
     return { success: true, data: payments };
   });
 
 export const getPaymentDetailsAction = protectedAction
+  .metadata({ name: "getPaymentDetails" })
   .inputSchema(z.object({ id: z.string().uuid() }))
   .action(async ({ parsedInput, ctx }) => {
     const details = await billingService.getPaymentDetailsForReceipt(parsedInput.id);

@@ -19,14 +19,24 @@ import { revalidatePath } from "next/cache";
 
 export const onboardingWelcomeAction = protectedAction
   .inputSchema(onboardingWelcomeSchema)
+  .metadata({ name: "onboardingWelcomeAction" })
   .action(async ({ parsedInput, ctx }) => {
-    const { name, nickname, birthDate } = parsedInput;
+    const { name, nickname, birthDate, guardianConsent } = parsedInput;
+    const terms = await import("../contract/terms-of-use.en.json");
+
+    // Define data retention period (e.g., 5 years for legal compliance in Brazil/LGPD)
+    const dataRetentionUntil = new Date();
+    dataRetentionUntil.setFullYear(dataRetentionUntil.getFullYear() + 5);
 
     await userRepository.update(ctx.user.id, {
       name,
       nickname,
       birthDate: new Date(birthDate),
-      onboardingStep: 2
+      onboardingStep: 2,
+      acceptedTermsVersion: terms.version,
+      acceptedAt: new Date(),
+      guardianConsent: guardianConsent || false,
+      dataRetentionUntil
     });
 
     revalidatePath("/onboarding");
@@ -35,6 +45,7 @@ export const onboardingWelcomeAction = protectedAction
 
 export const onboardingAddressAction = protectedAction
   .inputSchema(onboardingAddressSchema)
+  .metadata({ name: "onboardingAddressAction" })
   .action(async ({ parsedInput, ctx }) => {
     const { nationality, taxId, cellphone, address, guardianData } = parsedInput;
 
@@ -65,6 +76,7 @@ export const onboardingAddressAction = protectedAction
 
 export const onboardingGuardianAction = protectedAction
   .inputSchema(onboardingGuardianSchema)
+  .metadata({ name: "onboardingGuardianAction" })
   .action(async ({ parsedInput, ctx }) => {
     const { guardianName, guardianTaxId, guardianRelationship } = parsedInput;
 
@@ -83,6 +95,7 @@ export const onboardingGuardianAction = protectedAction
 
 export const onboardingPaymentAction = protectedAction
   .inputSchema(onboardingPaymentSchema)
+  .metadata({ name: "onboardingPaymentAction" })
   .action(async ({ parsedInput, ctx }) => {
     const { dueDay } = parsedInput;
     const user = await userRepository.findById(ctx.user.id);
@@ -115,6 +128,7 @@ export const onboardingPaymentAction = protectedAction
   });
 
 export const completeOnboardingAction = protectedAction
+  .metadata({ name: "completeOnboardingAction" })
   .action(async ({ ctx }) => {
     await userRepository.update(ctx.user.id, {
       onboarded: true
@@ -129,6 +143,7 @@ export const completeOnboardingAction = protectedAction
 
 export const teacherOnboardingWelcomeAction = protectedAction
   .inputSchema(teacherOnboardingWelcomeSchema)
+  .metadata({ name: "teacherOnboardingWelcomeAction" })
   .action(async ({ parsedInput, ctx }) => {
     const { name, cellphone } = parsedInput;
 
@@ -144,6 +159,7 @@ export const teacherOnboardingWelcomeAction = protectedAction
 
 export const teacherOnboardingDocumentsAction = protectedAction
   .inputSchema(teacherOnboardingDocumentsSchema)
+  .metadata({ name: "teacherOnboardingDocumentsAction" })
   .action(async ({ parsedInput, ctx }) => {
     const { taxId, businessTaxId } = parsedInput;
 
@@ -159,6 +175,7 @@ export const teacherOnboardingDocumentsAction = protectedAction
 
 export const teacherOnboardingPaymentAction = protectedAction
   .inputSchema(teacherOnboardingPaymentSchema)
+  .metadata({ name: "teacherOnboardingPaymentAction" })
   .action(async ({ parsedInput, ctx }) => {
     const { pixKey, pixType } = parsedInput;
 
@@ -173,6 +190,7 @@ export const teacherOnboardingPaymentAction = protectedAction
   });
 
 export const teacherOnboardingContractAction = protectedAction
+  .metadata({ name: "teacherOnboardingContractAction" })
   .action(async ({ ctx }) => {
     await userRepository.update(ctx.user.id, {
       onboardingStep: 5
@@ -186,6 +204,7 @@ import { schedulingService } from "../scheduling/scheduling.service";
 
 export const teacherOnboardingAvailabilityAction = protectedAction
   .inputSchema(teacherOnboardingAvailabilitySchema)
+  .metadata({ name: "teacherOnboardingAvailabilityAction" })
   .action(async ({ parsedInput, ctx }) => {
     const { normalSlots, makeupSlots } = parsedInput;
 

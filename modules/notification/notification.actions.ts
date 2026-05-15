@@ -10,6 +10,7 @@ export const saveSubscriptionAction = protectedAction
   .schema(z.object({
     subscription: z.any()
   }))
+  .metadata({ name: "saveSubscriptionAction" })
   .action(async ({ parsedInput, ctx }) => {
     await notificationService.subscribeUser(ctx.user.id, parsedInput.subscription);
     return { success: true };
@@ -17,6 +18,7 @@ export const saveSubscriptionAction = protectedAction
 
 export const sendNotificationAction = adminAction
   .schema(sendNotificationSchema)
+  .metadata({ name: "sendNotificationAction" })
   .action(async ({ parsedInput }) => {
     await notificationService.sendNotification(parsedInput);
     revalidatePath("/hub/admin/notifications");
@@ -27,6 +29,7 @@ export const markNotificationAsReadAction = protectedAction
   .schema(z.object({
     id: z.string()
   }))
+  .metadata({ name: "markNotificationAsReadAction" })
   .action(async ({ parsedInput, ctx }) => {
     await notificationService.markAsRead(parsedInput.id, ctx.user.id);
     revalidatePath("/hub");
@@ -34,11 +37,13 @@ export const markNotificationAsReadAction = protectedAction
   });
 
 export const getMyNotificationsAction = protectedAction
+  .metadata({ name: "getMyNotificationsAction" })
   .action(async ({ ctx }) => {
     return await notificationService.getUserNotifications(ctx.user.id);
   });
 
 export const getGlobalHistoryAction = adminAction
+  .metadata({ name: "getGlobalHistoryAction" })
   .action(async () => {
     return await notificationService.getGlobalHistory();
   });

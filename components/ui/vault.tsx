@@ -236,7 +236,7 @@ const VaultFooter = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.2 }}
             className={twMerge(
-                "flex lg:flex-row md:flex-row flex-col justify-end gap-3 pt-4 border-t border-gray-200/50 dark:border-gray-700/50",
+                "flex lg:flex-row md:flex-row flex-col justify-center gap-3 pt-4 border-t border-gray-200/50 dark:border-gray-700/50",
                 className,
             )}
             {...props}

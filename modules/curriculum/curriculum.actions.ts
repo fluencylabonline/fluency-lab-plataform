@@ -102,6 +102,7 @@ const upsertRecessActivitySchema = z.object({
  * Action to update media record (Step 3).
  */
 export const updateMediaAction = managerAction
+  .metadata({ name: "updateMedia" })
   .inputSchema(updateMediaSchema)
   .action(async ({ parsedInput }) => {
     await curriculumService.updateMedia(parsedInput.mediaId, {
@@ -116,6 +117,7 @@ export const updateMediaAction = managerAction
  * Action to update lesson record (Step 5, 10, etc).
  */
 export const updateLessonAction = managerAction
+  .metadata({ name: "updateLesson" })
   .inputSchema(updateLessonActionSchema)
   .action(async ({ parsedInput }) => {
     await curriculumService.updateLesson(parsedInput.id, {
@@ -132,6 +134,7 @@ export const updateLessonAction = managerAction
  * Action to create a new lesson (Step 1).
  */
 export const createLessonAction = managerAction
+  .metadata({ name: "createLesson" })
   .inputSchema(createLessonSchema)
   .action(async ({ parsedInput }) => {
     const lesson = await curriculumService.createLesson(parsedInput);
@@ -144,6 +147,7 @@ export const createLessonAction = managerAction
  * Uses a deterministic path based on lessonId to prevent storage pollution.
  */
 export const getSignedMediaUploadUrlAction = managerAction
+  .metadata({ name: "getSignedMediaUploadUrl" })
   .inputSchema(getSignedMediaUploadUrlSchema)
   .action(async ({ parsedInput, ctx }) => {
     let path: string;
@@ -171,6 +175,7 @@ export const getSignedMediaUploadUrlAction = managerAction
  * Action to attach media and transcribe (Step 2).
  */
 export const attachMediaAction = managerAction
+  .metadata({ name: "attachMedia" })
   .inputSchema(attachMediaSchema)
   .action(async ({ parsedInput }) => {
     const result = await curriculumService.processLessonMedia(
@@ -185,6 +190,7 @@ export const attachMediaAction = managerAction
  * Action to analyze lesson content (Step 3).
  */
 export const analyzeLessonAction = managerAction
+  .metadata({ name: "analyzeLesson" })
   .inputSchema(analyzeLessonSchema)
   .action(async ({ parsedInput, ctx }) => {
     const result = await curriculumService.analyzeLesson(parsedInput.lessonId, ctx.user.id);
@@ -196,6 +202,7 @@ export const analyzeLessonAction = managerAction
  * Action to enrich items (Step 5).
  */
 export const enrichItemsAction = managerAction
+  .metadata({ name: "enrichItems" })
   .inputSchema(enrichItemsSchema)
   .action(async ({ parsedInput, ctx }) => {
     await curriculumService.enrichItems(parsedInput.lessonId, parsedInput.items, ctx.user.id);
@@ -208,6 +215,7 @@ export const enrichItemsAction = managerAction
  * Called at the start of Step 8 to process merged items (transcription + lesson).
  */
 export const enrichLinkedItemsAction = managerAction
+  .metadata({ name: "enrichLinkedItems" })
   .inputSchema(z.object({ lessonId: z.uuid() }))
   .action(async ({ parsedInput, ctx }) => {
     const result = await curriculumService.enrichLinkedItems(parsedInput.lessonId, ctx.user.id);
@@ -220,6 +228,7 @@ export const enrichLinkedItemsAction = managerAction
  * Called after the manager reviews enriched items in Step 8.
  */
 export const updateItemsPriorityAction = managerAction
+  .metadata({ name: "updateItemsPriority" })
   .inputSchema(updateItemsPrioritySchema)
   .action(async ({ parsedInput }) => {
     await curriculumService.updateItemsPriority(parsedInput.lessonId, parsedInput.priorities);
@@ -231,6 +240,7 @@ export const updateItemsPriorityAction = managerAction
  * Action to generate quiz (Step 6).
  */
 export const generateQuizAction = managerAction
+  .metadata({ name: "generateQuiz" })
   .inputSchema(generateQuizSchema)
   .action(async ({ parsedInput, ctx }) => {
     const quiz = await curriculumService.generateQuiz(parsedInput.lessonId, ctx.user.id);
@@ -242,6 +252,7 @@ export const generateQuizAction = managerAction
  * Action to update quiz data (Step 7).
  */
 export const updateQuizAction = managerAction
+  .metadata({ name: "updateQuiz" })
   .inputSchema(updateQuizSchema)
   .action(async ({ parsedInput }) => {
     await curriculumService.updateLessonQuiz(parsedInput.lessonId, parsedInput.quizData as QuizData);
@@ -253,6 +264,7 @@ export const updateQuizAction = managerAction
  * Action to finalize lesson (Step 8/9).
  */
 export const finalizeLessonAction = managerAction
+  .metadata({ name: "finalizeLesson" })
   .inputSchema(finalizeLessonSchema)
   .action(async ({ parsedInput }) => {
     const result = await curriculumService.finalizeLesson(parsedInput.lessonId);
@@ -265,6 +277,7 @@ export const finalizeLessonAction = managerAction
  * Action to delete a lesson.
  */
 export const deleteLessonAction = managerAction
+  .metadata({ name: "deleteLesson" })
   .inputSchema(deleteLessonSchema)
   .action(async ({ parsedInput }) => {
     await curriculumService.deleteLesson(parsedInput.lessonId);
@@ -276,6 +289,7 @@ export const deleteLessonAction = managerAction
  * Action to clone a lesson (Versioning).
  */
 export const cloneLessonAction = managerAction
+  .metadata({ name: "cloneLesson" })
   .inputSchema(cloneLessonSchema)
   .action(async ({ parsedInput }) => {
     const newLesson = await curriculumService.cloneLesson(parsedInput.lessonId);
@@ -292,6 +306,7 @@ const deleteLessonItemSchema = z.object({
  * Action to remove a learning item from a lesson.
  */
 export const deleteLessonItemAction = managerAction
+  .metadata({ name: "deleteLessonItem" })
   .inputSchema(deleteLessonItemSchema)
   .action(async ({ parsedInput }) => {
     await curriculumRepository.unlinkItemFromLesson(parsedInput.lessonId, parsedInput.itemId);
@@ -303,6 +318,7 @@ export const deleteLessonItemAction = managerAction
  * Action to fetch all available languages.
  */
 export const getLanguagesAction = protectedAction
+  .metadata({ name: "getLanguages" })
   .inputSchema(z.object({}))
   .action(async () => {
     return await curriculumRepository.findAllLanguages() as LanguageWithLessons[];
@@ -312,6 +328,7 @@ export const getLanguagesAction = protectedAction
  * Action to create a new language.
  */
 export const createLanguageAction = managerAction
+  .metadata({ name: "createLanguage" })
   .inputSchema(z.object({
     name: z.string().min(2),
     code: z.string().min(2).max(10),
@@ -326,6 +343,7 @@ export const createLanguageAction = managerAction
  * Action to delete a language.
  */
 export const deleteLanguageAction = managerAction
+  .metadata({ name: "deleteLanguage" })
   .inputSchema(z.object({ id: z.uuid() }))
   .action(async ({ parsedInput }) => {
     await curriculumService.deleteLanguage(parsedInput.id);
@@ -337,6 +355,7 @@ export const deleteLanguageAction = managerAction
  * Action to get all media for the library.
  */
 export const getMediaListAction = managerAction
+  .metadata({ name: "getMediaList" })
   .inputSchema(z.object({}))
   .action(async () => {
     return await curriculumService.getAllMedia() as MediaWithLessons[];
@@ -346,6 +365,7 @@ export const getMediaListAction = managerAction
  * Action to create a media record from a URL.
  */
 export const createMediaAction = managerAction
+  .metadata({ name: "createMedia" })
   .inputSchema(z.object({ url: z.string().url() }))
   .action(async ({ parsedInput }) => {
     const result = await curriculumService.createMedia(parsedInput.url);
@@ -356,6 +376,7 @@ export const createMediaAction = managerAction
  * Action to delete a media record.
  */
 export const deleteMediaAction = managerAction
+  .metadata({ name: "deleteMedia" })
   .inputSchema(z.object({ id: z.uuid() }))
   .action(async ({ parsedInput }) => {
     await curriculumService.deleteMedia(parsedInput.id);
@@ -366,6 +387,7 @@ export const deleteMediaAction = managerAction
  * Action to trigger standalone transcription.
  */
 export const transcribeMediaAction = managerAction
+  .metadata({ name: "transcribeMedia" })
   .inputSchema(z.object({ mediaId: z.uuid() }))
   .action(async ({ parsedInput, ctx }) => {
     const result = await curriculumService.transcribeMediaStandalone(parsedInput.mediaId, ctx.user.id);
@@ -376,6 +398,7 @@ export const transcribeMediaAction = managerAction
  * Action to get learning items with filters.
  */
 export const getLearningItemsAction = managerAction
+  .metadata({ name: "getLearningItems" })
   .inputSchema(z.object({
     languageId: z.string().uuid().optional(),
     type: z.enum(["VOCABULARY", "STRUCTURE"]).optional(),
@@ -392,6 +415,7 @@ export const getLearningItemsAction = managerAction
  * Action to get lessons with filters.
  */
 export const getLessonsAction = protectedAction
+  .metadata({ name: "getLessons" })
   .inputSchema(z.object({
     search: z.string().optional(),
     limit: z.number().optional().default(50),
@@ -404,12 +428,14 @@ export const getLessonsAction = protectedAction
   });
 
 export const getLessonByIdAction = protectedAction
+  .metadata({ name: "getLessonById" })
   .inputSchema(z.object({ id: z.string().uuid() }))
   .action(async ({ parsedInput }) => {
     return await curriculumRepository.findLessonById(parsedInput.id);
   });
 
 export const getRecessActivitiesAction = protectedAction
+  .metadata({ name: "getRecessActivities" })
   .inputSchema(z.object({
     teacherId: z.string().optional(),
   }))
@@ -424,6 +450,7 @@ export const getRecessActivitiesAction = protectedAction
   });
 
 export const upsertRecessActivityAction = protectedAction
+  .metadata({ name: "upsertRecessActivity" })
   .inputSchema(upsertRecessActivitySchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -442,6 +469,7 @@ export const upsertRecessActivityAction = protectedAction
   });
 
 export const getWordOfTheDayAction = protectedAction
+  .metadata({ name: "getWordOfTheDay" })
   .inputSchema(z.object({}))
   .action(async ({ ctx }) => {
     return await curriculumService.getWordOfTheDay(ctx.user.id);

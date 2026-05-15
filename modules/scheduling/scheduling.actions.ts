@@ -18,6 +18,7 @@ import { startOfMonth, endOfMonth } from "date-fns";
 import { schedulingRepository } from "./scheduling.repository";
 
 export const createRecurrenceRuleAction = permissionAction("class.update.any")
+  .metadata({ name: "createRecurrenceRule" })
   .inputSchema(createRecurrenceRuleSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -35,6 +36,7 @@ export const createRecurrenceRuleAction = permissionAction("class.update.any")
   });
 
 export const allocateStudentAction = permissionAction("class.update.any")
+  .metadata({ name: "allocateStudent" })
   .inputSchema(allocateStudentSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -48,6 +50,7 @@ export const allocateStudentAction = permissionAction("class.update.any")
   });
 
 export const updateClassStatusAction = protectedAction
+  .metadata({ name: "updateClassStatus" })
   .inputSchema(updateSlotStatusSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -61,6 +64,7 @@ export const updateClassStatusAction = protectedAction
   });
 
 export const grantCreditAction = permissionAction("credits.grant")
+  .metadata({ name: "grantCredit" })
   .inputSchema(grantCreditSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -77,6 +81,7 @@ export const grantCreditAction = permissionAction("credits.grant")
   });
 
 export const getStudentCreditsAction = protectedAction
+  .metadata({ name: "getStudentCredits" })
   .inputSchema(z.object({ studentId: z.string(), onlyActive: z.boolean().default(true) }))
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -92,6 +97,7 @@ export const getStudentCreditsAction = protectedAction
   });
 
 export const cancelClassAction = protectedAction
+  .metadata({ name: "cancelClass" })
   .inputSchema(cancelClassSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -105,6 +111,7 @@ export const cancelClassAction = protectedAction
   });
 
 export const rescheduleWithCreditAction = protectedAction
+  .metadata({ name: "rescheduleWithCredit" })
   .inputSchema(rescheduleWithCreditSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -123,6 +130,7 @@ export const rescheduleWithCreditAction = protectedAction
   });
 
 export const convertToAvailableAction = protectedAction
+  .metadata({ name: "convertToAvailable" })
   .inputSchema(z.object({ classId: z.uuid() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -136,6 +144,7 @@ export const convertToAvailableAction = protectedAction
   });
 
 export const getTeacherScheduleAction = permissionAction("class.update.any")
+  .metadata({ name: "getTeacherSchedule" })
   .inputSchema(z.object({
     teacherId: z.string(),
     month: z.number().min(0).max(11),
@@ -154,6 +163,7 @@ export const getTeacherScheduleAction = permissionAction("class.update.any")
   });
 
 export const checkSlotConflictAction = protectedAction
+  .metadata({ name: "checkSlotConflict" })
   .inputSchema(z.object({
     teacherId: z.string(),
     startAt: z.string().datetime(),
@@ -188,6 +198,7 @@ export const checkSlotConflictAction = protectedAction
   });
 
 export const deleteSlotAction = protectedAction
+  .metadata({ name: "deleteSlot" })
   .inputSchema(z.object({
     slotId: z.string().uuid(),
     scope: z.enum(["single", "future"])
@@ -204,6 +215,7 @@ export const deleteSlotAction = protectedAction
   });
 
 export const updateSlotAction = protectedAction
+  .metadata({ name: "updateSlot" })
   .inputSchema(z.object({
     slotId: z.string().uuid(),
     scope: z.enum(["single", "future"]),
@@ -237,6 +249,7 @@ export const updateSlotAction = protectedAction
   });
 
 export const swapSlotTeacherAction = permissionAction("class.update.any")
+  .metadata({ name: "swapSlotTeacher" })
   .inputSchema(z.object({
     slotId: z.string().uuid(),
     newTeacherId: z.string(),
@@ -253,6 +266,7 @@ export const swapSlotTeacherAction = permissionAction("class.update.any")
   });
 
 export const updateSlotLessonAction = protectedAction
+  .metadata({ name: "updateSlotLesson" })
   .inputSchema(z.object({
     slotId: z.string().uuid(),
     lessonId: z.string().uuid(),
@@ -270,6 +284,7 @@ export const updateSlotLessonAction = protectedAction
   });
 
 export const getStudentScheduleAction = protectedAction
+  .metadata({ name: "getStudentSchedule" })
   .inputSchema(z.object({
     studentId: z.string(),
     month: z.number().min(0).max(11),
@@ -293,6 +308,7 @@ export const getStudentScheduleAction = protectedAction
   });
 
 export const getStudentCreditBalanceAction = protectedAction
+  .metadata({ name: "getStudentCreditBalance" })
   .inputSchema(z.object({ studentId: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -308,6 +324,7 @@ export const getStudentCreditBalanceAction = protectedAction
   });
 
 export const getStudentRescheduleStatsAction = protectedAction
+  .metadata({ name: "getStudentRescheduleStats" })
   .inputSchema(z.object({
     studentId: z.string(),
     month: z.number().min(0).max(11),
@@ -330,6 +347,7 @@ export const getStudentRescheduleStatsAction = protectedAction
     }
   });
 export const getAvailableRulesAction = permissionAction("class.update.any")
+  .metadata({ name: "getAvailableRules" })
   .inputSchema(z.object({}))
   .action(async () => {
     try {
@@ -344,6 +362,7 @@ export const getAvailableRulesAction = permissionAction("class.update.any")
   });
 
 export const getStudentRulesAction = protectedAction
+  .metadata({ name: "getStudentRules" })
   .inputSchema(z.object({ studentId: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -360,6 +379,7 @@ export const getStudentRulesAction = protectedAction
   });
 
 export const deallocateStudentAction = permissionAction("class.update.any")
+  .metadata({ name: "deallocateStudent" })
   .inputSchema(z.object({ ruleId: z.string().uuid() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
@@ -372,6 +392,7 @@ export const deallocateStudentAction = permissionAction("class.update.any")
     }
   });
 export const getTeacherEarningsAction = permissionAction("class.update.any")
+  .metadata({ name: "getTeacherEarnings" })
   .inputSchema(z.object({
     teacherId: z.string(),
     month: z.number().min(0).max(11),
@@ -406,6 +427,7 @@ export const getTeacherEarningsAction = permissionAction("class.update.any")
   });
 
 export const updateClassEarningsAction = permissionAction("class.update.any")
+  .metadata({ name: "updateClassEarnings" })
   .inputSchema(z.object({
     classId: z.string().uuid(),
     teacherHourlyRate: z.number().int().min(0),
@@ -424,6 +446,7 @@ export const updateClassEarningsAction = permissionAction("class.update.any")
   });
 
 export const getRecessImpactAction = protectedAction
+  .metadata({ name: "getRecessImpact" })
   .inputSchema(z.object({
     startDate: z.date(),
     endDate: z.date(),
@@ -443,6 +466,7 @@ export const getRecessImpactAction = protectedAction
   });
 
 export const validateRecessSLAAction = protectedAction
+  .metadata({ name: "validateRecessSLA" })
   .inputSchema(z.object({
     startDate: z.date(),
     endDate: z.date(),
@@ -462,6 +486,7 @@ export const validateRecessSLAAction = protectedAction
   });
 
 export const getTeacherRecessesAction = protectedAction
+  .metadata({ name: "getTeacherRecesses" })
   .inputSchema(z.object({
     teacherId: z.string().optional(),
   }))
@@ -477,6 +502,7 @@ export const getTeacherRecessesAction = protectedAction
   });
 
 export const confirmRecessAction = protectedAction
+  .metadata({ name: "confirmRecess" })
   .inputSchema(z.object({
     startDate: z.date(),
     endDate: z.date(),
@@ -503,6 +529,7 @@ export const confirmRecessAction = protectedAction
   });
 
 export const getStudentClassesByTeacherAction = protectedAction
+  .metadata({ name: "getStudentClassesByTeacher" })
   .inputSchema(z.object({
     studentId: z.string(),
     month: z.number().min(0).max(11),
@@ -526,6 +553,7 @@ export const getStudentClassesByTeacherAction = protectedAction
   });
 
 export const updateClassNotesAction = protectedAction
+  .metadata({ name: "updateClassNotes" })
   .inputSchema(z.object({
     classId: z.string().uuid(),
     notes: z.string(),
@@ -542,6 +570,7 @@ export const updateClassNotesAction = protectedAction
   });
 
 export const getTeacherAvailabilityAction = protectedAction
+  .metadata({ name: "getTeacherAvailability" })
   .inputSchema(z.object({
     teacherId: z.string(),
     startDate: z.date(),
@@ -562,6 +591,7 @@ export const getTeacherAvailabilityAction = protectedAction
   });
 
 export const rescheduleAction = protectedAction
+  .metadata({ name: "reschedule" })
   .inputSchema(z.object({
     originalClassId: z.string(),
     newSlotId: z.string(),

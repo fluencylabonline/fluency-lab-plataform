@@ -10,7 +10,7 @@ export default async function TeacherSchedulePage() {
   const user = await getCurrentUser();
   
   if (!user) {
-    redirect("/auth/login");
+    redirect("/signin");
   }
 
   // Initial fetch for the current month and next 3 months

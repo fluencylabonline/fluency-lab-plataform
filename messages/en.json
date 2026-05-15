@@ -1,4 +1,16 @@
 {
+  "Legal": {
+    "privacy": {
+      "title": "Privacy Policy",
+      "subtitle": "How we handle your personal data at FluencyLab"
+    },
+    "terms": {
+      "title": "Terms of Use",
+      "subtitle": "Rules and guidelines for using our platform"
+    },
+    "version": "Version",
+    "effectiveDate": "Effective Date"
+  },
   "AdminFinances": {
     "allMonths": "All months",
     "capacity": {
@@ -1655,7 +1667,8 @@
       "stateRequired": "State is required",
       "streetRequired": "Street is required",
       "taxIdRequired": "Document is required",
-      "zipCodeRequired": "ZIP code is required"
+      "zipCodeRequired": "ZIP code is required",
+      "termsRequired": "You must accept the Terms of Use and Privacy Policy to continue."
     },
     "welcome": {
       "birthDate": "Birth Date",
@@ -1664,6 +1677,18 @@
       "nickname": "What should we call you?",
       "subtitle": "Tell us a bit about yourself.",
       "title": "Welcome to your new phase."
+    },
+    "stepWelcome": {
+      "title": "Welcome!",
+      "subtitle": "Let's start by setting up your profile for a personalized experience.",
+      "name": "What should we call you?",
+      "nickname": "Nickname (optional)",
+      "birthDate": "Birth Date",
+      "terms": "I have read and accept the {terms} and the {privacy}.",
+      "termsLink": "Terms of Use",
+      "privacyLink": "Privacy Policy",
+      "guardianConsent": "I declare that I am a minor and have consent from my parents or guardians for the processing of my data.",
+      "next": "Continue"
     }
   },
   "PathScreen": {
@@ -2072,12 +2097,30 @@
     "cancellation": "Account Cancellation",
     "requestCancellation": "Request Cancellation",
     "cancellationWarning": "Attention: This action will start the process of canceling your contract and deactivating your account.",
-    "cancellationConsequences": "Upon canceling:",
-    "consequenceClasses": "All your future classes will be canceled.",
-    "consequenceAccess": "You will lose access to the platform immediately after completion.",
-    "consequenceFee": "There may be a cancellation fee depending on your contract.",
-    "cancelConfirm": "Yes, I wish to cancel",
-    "keepAccount": "Keep my account",
+    "cancellationConsequences": "When cancelling your plan:",
+    "consequenceClasses": "Your future classes will be removed from the calendar",
+    "consequenceAccess": "Your access to the platform will be suspended after the paid period",
+    "consequenceFee": "A cancellation fee may apply according to the contract",
+    "keepAccount": "Keep my plan",
+    "cancelConfirm": "Confirm cancellation request",
+    "cancellationRequestSuccess": "Your cancellation request has been received successfully.",
+    "requestingCancellation": "Requesting cancellation...",
+    "exportData": "Export My Data",
+    "exportDataDesc": "Download a copy of all your personal data stored on our platform.",
+    "exporting": "Exporting data...",
+    "exportSuccess": "Your data has been exported successfully!",
+    "exportError": "Error exporting data.",
+    "exportSudoWarning": "For security, please confirm your identity to export your personal data.",
+    "downloadJson": "Download JSON",
+    "cancel": "Cancel",
+    "purgeData": "Permanently Delete",
+    "purgeDataWarning": "WARNING: This action is irreversible. All your personal data, class history, and progress will be permanently deleted, leaving only what is necessary to comply with legal obligations.",
+    "purgeConfirm": "Confirm Permanent Deletion",
+    "purgeRequestSuccess": "Your account and data have been deleted successfully.",
+    "requestingPurge": "Processing deletion...",
+    "purgeExplanation": "In compliance with GDPR/LGPD, you can request the deletion of your data. We keep only what is strictly necessary for tax and legal purposes for 5 years.",
+    "confirmIdentity": "Confirm your password to proceed",
+    "passwordRequired": "Password is required for this action",
     "app": "App",
     "appDescription": "Manage app settings and updates."
   },

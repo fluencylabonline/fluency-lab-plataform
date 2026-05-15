@@ -7,11 +7,13 @@ import { createWhatsAppTemplateSchema } from "./communication.schema";
 import { revalidatePath } from "next/cache";
 
 export const getWhatsAppTemplatesAction = adminAction
+  .metadata({ name: "getWhatsAppTemplates" })
   .action(async () => {
     return await communicationService.getWhatsAppTemplates();
   });
 
 export const createWhatsAppTemplateAction = adminAction
+  .metadata({ name: "createWhatsAppTemplate" })
   .schema(createWhatsAppTemplateSchema)
   .action(async ({ parsedInput }) => {
     await communicationService.createWhatsAppTemplate(parsedInput);
@@ -20,6 +22,7 @@ export const createWhatsAppTemplateAction = adminAction
   });
 
 export const deleteWhatsAppTemplateAction = adminAction
+  .metadata({ name: "deleteWhatsAppTemplate" })
   .schema(z.object({ name: z.string() }))
   .action(async ({ parsedInput }) => {
     await communicationService.deleteWhatsAppTemplate(parsedInput.name);
@@ -28,23 +31,27 @@ export const deleteWhatsAppTemplateAction = adminAction
   });
 
 export const getWhatsAppConversationsAction = adminAction
+  .metadata({ name: "getWhatsAppConversations" })
   .action(async () => {
     return await communicationService.getConversations();
   });
 
 export const getWhatsAppMessagesAction = adminAction
+  .metadata({ name: "getWhatsAppMessages" })
   .schema(z.object({ conversationId: z.string() }))
   .action(async ({ parsedInput }) => {
     return await communicationService.getMessages(parsedInput.conversationId);
   });
 
 export const sendWhatsAppTextMessageAction = adminAction
+  .metadata({ name: "sendWhatsAppTextMessage" })
   .schema(z.object({ to: z.string(), text: z.string() }))
   .action(async ({ parsedInput }) => {
     return await communicationService.sendWhatsAppTextMessage(parsedInput.to, parsedInput.text);
   });
 
 export const markWhatsAppConversationAsReadAction = adminAction
+  .metadata({ name: "markWhatsAppConversationAsRead" })
   .schema(z.object({ conversationId: z.string() }))
   .action(async ({ parsedInput }) => {
     await communicationService.markAsRead(parsedInput.conversationId);
@@ -52,6 +59,7 @@ export const markWhatsAppConversationAsReadAction = adminAction
   });
 
 export const sendWhatsAppTemplateAction = adminAction
+  .metadata({ name: "sendWhatsAppTemplate" })
   .schema(z.object({
     to: z.string(),
     templateName: z.string(),

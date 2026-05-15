@@ -1,0 +1,35 @@
+{
+  "version": "1.1.0",
+  "effectiveDate": "2024-05-14",
+  "title": "Termos de Uso",
+  "sections": [
+    {
+      "title": "1. Aceitação dos Termos",
+      "content": "Ao acessar e utilizar a plataforma FluencyLab, você concorda em cumprir e estar vinculado a estes Termos de Uso. O uso contínuo da plataforma após alterações constitui aceitação dos novos termos. O aceite formal é coletado no primeiro acesso ou em atualizações críticas."
+    },
+    {
+      "title": "2. Descrição do Serviço",
+      "content": "A FluencyLab oferece uma plataforma de ensino de idiomas online, conectando alunos a professores e materiais didáticos, com suporte pedagógico e tecnológico."
+    },
+    {
+      "title": "3. Cadastro e Segurança",
+      "content": "O usuário é responsável por manter a confidencialidade de sua senha e por todas as atividades que ocorram em sua conta. A FluencyLab reserva-se o direito de suspender contas com informações falsas ou que violem as normas de conduta."
+    },
+    {
+      "title": "4. Consentimento e Menores",
+      "content": "Para usuários menores de 18 anos, o aceite deste termo e da política de privacidade deve ser realizado por um responsável legal, que garante a veracidade das informações fornecidas."
+    },
+    {
+      "title": "5. Cancelamento e Direito ao Esquecimento",
+      "content": "O cancelamento de planos segue as diretrizes contratuais. O usuário pode exercer o 'Direito ao Esquecimento' via configurações da conta, o que resultará na anonimização definitiva de seus dados pessoais, impedindo acessos futuros à conta."
+    },
+    {
+      "title": "6. Propriedade Intelectual",
+      "content": "Todo o conteúdo da plataforma é de propriedade exclusiva da FluencyLab. O acesso à plataforma não confere ao usuário qualquer direito de propriedade sobre os materiais didáticos."
+    },
+    {
+      "title": "7. Disposições Gerais",
+      "content": "Estes termos são regidos pelas leis da República Federativa do Brasil. Qualquer litígio será resolvido no foro da comarca da sede da FluencyLab."
+    }
+  ]
+}

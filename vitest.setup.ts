@@ -62,6 +62,7 @@ vi.mock('firebase-admin', () => {
       getUser: vi.fn(),
       getUserByEmail: vi.fn(),
       createUser: vi.fn(),
+      deleteUser: vi.fn(),
       setCustomUserClaims: vi.fn(),
       generatePasswordResetLink: vi.fn(),
     })),
@@ -70,10 +71,35 @@ vi.mock('firebase-admin', () => {
       doc: vi.fn(),
       settings: vi.fn(),
     })),
-    storage: vi.fn(() => ({
-      bucket: vi.fn(),
-    })),
+    storage: vi.fn(() => {
+      const bucket = {
+        getFiles: vi.fn(() => [[], {}]),
+        file: vi.fn(() => ({
+          delete: vi.fn(),
+          exists: vi.fn(() => [true]),
+        })),
+      };
+      return {
+        bucket: vi.fn(() => bucket),
+      };
+    }),
   };
   return { default: admin, ...admin };
+});
+
+vi.mock('@abacatepay/sdk', () => {
+  return {
+    AbacatePay: vi.fn(() => ({
+      customers: {
+        create: vi.fn(),
+        list: vi.fn(),
+        get: vi.fn(),
+        delete: vi.fn(),
+      },
+      billing: {
+        create: vi.fn(),
+      }
+    }))
+  };
 });
 

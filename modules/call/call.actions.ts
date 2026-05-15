@@ -18,6 +18,7 @@ import {
  * RBAC: only teachers (and admins) can start calls.
  */
 export const startCallAction = protectedAction
+  .metadata({ name: "startCall" })
   .schema(startCallSchema)
   .action(async ({ parsedInput, ctx }) => {
     const { user } = ctx;
@@ -42,6 +43,7 @@ export const startCallAction = protectedAction
  * triggers the student's onSnapshot listener to unmount the call UI.
  */
 export const endCallAction = protectedAction
+  .metadata({ name: "endCall" })
   .schema(endCallSchema)
   .action(async ({ parsedInput, ctx }) => {
     const { user } = ctx;
@@ -72,6 +74,7 @@ export const endCallAction = protectedAction
  * own Firestore callId so they stop receiving the call signal.
  */
 export const leaveCallAction = protectedAction
+  .metadata({ name: "leaveCall" })
   .schema(leaveCallSchema)
   .action(async ({ parsedInput, ctx }) => {
     const { user } = ctx;
@@ -98,6 +101,7 @@ export const leaveCallAction = protectedAction
  * STREAM_SECRET private.
  */
 export const generateStreamTokenAction = protectedAction
+  .metadata({ name: "generateStreamToken" })
   .schema(generateStreamTokenSchema)
   .action(async ({ parsedInput, ctx }) => {
     const { user } = ctx;

@@ -12,6 +12,8 @@ import { updateLocaleAction } from "../user.actions";
 import { notify } from "@/components/ui/toaster";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import type { User } from "../user.schema";
+import { PurgeAccountVault } from "./PurgeAccountVault";
+import { ExportDataVault } from "./ExportDataVault";
 
 const LOCALES = [
   { id: "pt", name: "Português (BR)", flag: "🇧🇷" },
@@ -32,6 +34,8 @@ export function AccountSettings({ initialData }: AccountSettingsProps) {
   const locale = useLocale();
   const [isAvatarVaultOpen, setIsAvatarVaultOpen] = useState(false);
   const [isCancelVaultOpen, setIsCancelVaultOpen] = useState(false);
+  const [isPurgeVaultOpen, setIsPurgeVaultOpen] = useState(false);
+  const [isExportVaultOpen, setIsExportVaultOpen] = useState(false);
   const [isUpdatingLocale, setIsUpdatingLocale] = useState(false);
 
   const { user, emailVerified } = initialData;
@@ -138,19 +142,58 @@ export function AccountSettings({ initialData }: AccountSettingsProps) {
         </div>
       </div>
 
-      {/* Danger Zone */}
-      <div className="card p-6 border-destructive/20 bg-destructive/5">
+      {/* Data Management Section (LGPD) */}
+      <div className="card p-6">
         <div className="flex items-center gap-3 mb-4">
-          <ShieldAlert className="w-5 h-5 text-destructive" />
-          <h3 className="text-lg font-semibold text-destructive">{t("cancellation")}</h3>
+          <ShieldAlert className="w-5 h-5 text-primary" />
+          <h3 className="text-lg font-semibold">{t("exportData")}</h3>
         </div>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground md:max-w-md">
-            {t("cancellationWarning")}
+            {t("exportDataDesc")}
           </p>
-          <Button variant="outline" className="border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all" onClick={() => setIsCancelVaultOpen(true)}>
-            {t("requestCancellation")}
+          <Button 
+            variant="outline" 
+            className="gap-2"
+            onClick={() => setIsExportVaultOpen(true)}
+          >
+            {t("exportData")}
           </Button>
+        </div>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="card p-6 border-destructive/20 bg-destructive/5 space-y-6">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <ShieldAlert className="w-5 h-5 text-destructive" />
+            <h3 className="text-lg font-semibold text-destructive">{t("cancellation")}</h3>
+          </div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground md:max-w-md">
+              {t("cancellationWarning")}
+            </p>
+            <Button variant="outline" className="border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all" onClick={() => setIsCancelVaultOpen(true)}>
+              {t("requestCancellation")}
+            </Button>
+          </div>
+        </div>
+
+        <div className="h-px bg-destructive/10" />
+
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-destructive" />
+            <h3 className="text-lg font-semibold text-destructive">{t("purgeData")}</h3>
+          </div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground md:max-w-md">
+              {t("purgeDataWarning")}
+            </p>
+            <Button variant="destructive" className="transition-all" onClick={() => setIsPurgeVaultOpen(true)}>
+              {t("purgeData")}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -163,6 +206,15 @@ export function AccountSettings({ initialData }: AccountSettingsProps) {
       <CancelAccountVault
         isOpen={isCancelVaultOpen}
         onOpenChange={setIsCancelVaultOpen}
+      />
+      <PurgeAccountVault
+        isOpen={isPurgeVaultOpen}
+        onOpenChange={setIsPurgeVaultOpen}
+      />
+      <ExportDataVault
+        isOpen={isExportVaultOpen}
+        onOpenChange={setIsExportVaultOpen}
+        userId={user.id}
       />
     </div>
   );

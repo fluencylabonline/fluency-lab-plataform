@@ -8,7 +8,7 @@ export default async function TeacherStudentsPage() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/signin");
   }
   if (user.role !== "teacher" && user.role !== "admin" && user.role !== "manager") {
     redirect("/hub");

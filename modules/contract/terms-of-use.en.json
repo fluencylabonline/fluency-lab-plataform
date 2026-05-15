@@ -1,0 +1,35 @@
+{
+  "version": "1.1.0",
+  "effectiveDate": "2024-05-14",
+  "title": "Terms of Use",
+  "sections": [
+    {
+      "title": "1. Acceptance of Terms",
+      "content": "By accessing and using the FluencyLab platform, you agree to comply with and be bound by these Terms of Use. Continued use of the platform after changes constitutes acceptance of the new terms. Formal acceptance is collected on the first access or during critical updates."
+    },
+    {
+      "title": "2. Description of the Service",
+      "content": "FluencyLab offers an online language teaching platform, connecting students to teachers and teaching materials, with pedagogical and technological support."
+    },
+    {
+      "title": "3. Registration and Security",
+      "content": "The user is responsible for maintaining the confidentiality of their password and for all activities that occur in their account. FluencyLab reserves the right to suspend accounts with false information or that violate conduct standards."
+    },
+    {
+      "title": "4. Consent and Minors",
+      "content": "For users under 18, the acceptance of this term and the privacy policy must be performed by a legal guardian, who guarantees the veracity of the information provided."
+    },
+    {
+      "title": "5. Cancellation and Right to be Forgotten",
+      "content": "Cancellation of plans follows the contractual guidelines. The user can exercise the 'Right to be Forgotten' via account settings, which will result in the definitive anonymization of their personal data, preventing future access to the account."
+    },
+    {
+      "title": "6. Intellectual Property",
+      "content": "All content on the platform is the exclusive property of FluencyLab. Access to the platform does not confer on the user any property rights over the teaching materials."
+    },
+    {
+      "title": "7. General Provisions",
+      "content": "These terms are governed by the laws of the Federative Republic of Brazil. Any dispute will be resolved in the court of the district of the headquarters of FluencyLab."
+    }
+  ]
+}

@@ -15,7 +15,7 @@ export default async function PracticeSessionPage({ searchParams, params }: Sess
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Practice" });
   const sessionUser = await getCurrentUser();
-  if (!sessionUser) redirect("/login");
+  if (!sessionUser) redirect("/signin");
 
   const user = await userService.getUser(sessionUser.id);
   if (!user) return <div>{t('userNotFound') || "Usuário não encontrado"}</div>;

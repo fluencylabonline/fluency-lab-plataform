@@ -19,7 +19,7 @@ export default async function StudentDetailsPage({ params }: StudentDetailsPageP
   const user = await getCurrentUser();
 
   if (!user || (user.role !== "teacher" && user.role !== "admin" && user.role !== "manager")) {
-    redirect("/login");
+    redirect("/signin");
   }
 
   const student = await userService.getUserById(studentId);

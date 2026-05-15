@@ -8,7 +8,7 @@ import { getTranslations } from "next-intl/server";
 
 export default async function SettingsPage() {
   const sessionUser = await getCurrentUser();
-  if (!sessionUser) redirect("/login");
+  if (!sessionUser) redirect("/signin");
 
   const user = await userService.getUser(sessionUser.id);
   const tc = await getTranslations("Common");

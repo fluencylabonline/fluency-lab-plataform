@@ -7,7 +7,7 @@ export default async function LessonsPage() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/auth/login");
+    redirect("/signin");
   }
 
   const initialLessons = await curriculumService.getLessonsPaginated({ limit: 20 });

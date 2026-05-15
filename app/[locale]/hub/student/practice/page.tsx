@@ -35,7 +35,7 @@ export default async function PracticePage({ params }: { params: Promise<{ local
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Practice" });
   const sessionUser = await getCurrentUser();
-  if (!sessionUser) redirect("/login");
+  if (!sessionUser) redirect("/signin");
 
   const user = await userService.getUser(sessionUser.id);
   

@@ -1,4 +1,16 @@
 {
+  "Legal": {
+    "privacy": {
+      "title": "Política de Privacidade",
+      "subtitle": "Como tratamos seus dados pessoais na FluencyLab"
+    },
+    "terms": {
+      "title": "Termos de Uso",
+      "subtitle": "Regras e diretrizes para uso da nossa plataforma"
+    },
+    "version": "Versão",
+    "effectiveDate": "Vigência"
+  },
   "AdminFinances": {
     "allMonths": "Todos os meses",
     "capacity": {
@@ -1655,7 +1667,8 @@
       "stateRequired": "Estado é obrigatório",
       "streetRequired": "Rua é obrigatória",
       "taxIdRequired": "Documento é obrigatório",
-      "zipCodeRequired": "CEP é obrigatório"
+      "zipCodeRequired": "CEP é obrigatório",
+      "termsRequired": "Você precisa aceitar os Termos de Uso e a Política de Privacidade para continuar."
     },
     "welcome": {
       "birthDate": "Data de Nascimento",
@@ -1664,6 +1677,18 @@
       "nickname": "Como quer ser chamado?",
       "subtitle": "Conte-nos um pouco sobre você.",
       "title": "Bem-vindo à sua nova fase."
+    },
+    "stepWelcome": {
+      "title": "Bem-vindo!",
+      "subtitle": "Vamos começar configurando seu perfil para uma experiência personalizada.",
+      "name": "Como devemos te chamar?",
+      "nickname": "Apelido (opcional)",
+      "birthDate": "Data de Nascimento",
+      "terms": "Eu li e aceito os {terms} e a {privacy}.",
+      "termsLink": "Termos de Uso",
+      "privacyLink": "Política de Privacidade",
+      "guardianConsent": "Declaro que sou menor de idade e possuo consentimento dos meus pais ou responsáveis para o tratamento dos meus dados.",
+      "next": "Continuar"
     }
   },
   "PathScreen": {
@@ -2070,6 +2095,23 @@
     "verified": "Verificado",
     "notVerified": "Não Verificado",
     "cancellation": "Cancelamento de Conta",
+    "requestingCancellation": "Solicitando cancelamento...",
+    "exportData": "Exportar Meus Dados",
+    "exportDataDesc": "Baixe uma cópia de todos os seus dados pessoais armazenados em nossa plataforma.",
+    "exporting": "Exportando dados...",
+    "exportSuccess": "Seus dados foram exportados com sucesso!",
+    "exportError": "Erro ao exportar dados.",
+    "exportSudoWarning": "Por segurança, confirme sua identidade para exportar seus dados pessoais.",
+    "downloadJson": "Baixar JSON",
+    "cancel": "Cancelar",
+    "purgeData": "Excluir Permanentemente",
+    "purgeDataWarning": "AVISO: Esta ação é irreversível. Todos os seus dados pessoais, histórico de aulas e progresso serão excluídos permanentemente, restando apenas o necessário para cumprir obrigações legais.",
+    "purgeConfirm": "Confirmar Exclusão Permanente",
+    "purgeRequestSuccess": "Sua conta e dados foram excluídos com sucesso.",
+    "requestingPurge": "Processando exclusão...",
+    "purgeExplanation": "Em conformidade com a LGPD, você pode solicitar a exclusão dos seus dados. Mantemos apenas o estritamente necessário para fins fiscais e legais por 5 anos.",
+    "confirmIdentity": "Confirme sua senha para prosseguir",
+    "passwordRequired": "A senha é obrigatória para esta ação",
     "requestCancellation": "Solicitar Cancelamento",
     "cancellationWarning": "Atenção: Esta ação iniciará o processo de cancelamento do seu contrato e desativação da sua conta.",
     "cancellationConsequences": "Ao cancelar:",

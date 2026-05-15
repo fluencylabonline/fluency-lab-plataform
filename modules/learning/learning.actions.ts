@@ -90,6 +90,7 @@ const associateProfileSchema = z.object({
  * Action to record the result of a practice session (SRS).
  */
 export const recordPracticeResultAction = protectedAction
+  .metadata({ name: "recordPracticeResult" })
   .schema(recordPracticeResultSchema)
   .action(async ({ parsedInput, ctx }) => {
     const result = await learningService.recordPracticeResult(
@@ -109,6 +110,7 @@ export const recordPracticeResultAction = protectedAction
  * Action to generate a personalized plan for the student.
  */
 export const generatePlanAction = protectedAction
+  .metadata({ name: "generatePlan" })
   .schema(generatePlanSchema)
   .action(async ({ ctx }) => {
     // Find the active profile for this student
@@ -130,6 +132,7 @@ export const generatePlanAction = protectedAction
  * Action to start a lesson (unlocks items).
  */
 export const startLessonAction = protectedAction
+  .metadata({ name: "startLesson" })
   .schema(startLessonSchema)
   .action(async ({ parsedInput, ctx }) => {
     const result = await learningService.startLesson(ctx.user.id, parsedInput.lessonId);
@@ -141,6 +144,7 @@ export const startLessonAction = protectedAction
  * Action to sync a batch of practices from the offline queue.
  */
 export const syncPracticeBatchAction = protectedAction
+  .metadata({ name: "syncPracticeBatch" })
   .schema(syncPracticeBatchSchema)
   .action(async ({ parsedInput, ctx }) => {
     const result = await learningService.recordBatchResult(
@@ -163,6 +167,7 @@ export const syncPracticeBatchAction = protectedAction
  * Action for managers to create a generic plan template.
  */
 export const createPlanTemplateAction = permissionAction("material.create")
+  .metadata({ name: "createPlanTemplate" })
   .schema(createPlanTemplateSchema)
   .action(async ({ parsedInput }) => {
     const plan = await learningService.createPlanTemplate(parsedInput);
@@ -174,6 +179,7 @@ export const createPlanTemplateAction = permissionAction("material.create")
  * Action for managers to assign a plan to a student.
  */
 export const assignPlanAction = permissionAction("material.create")
+  .metadata({ name: "assignPlan" })
   .schema(assignPlanSchema)
   .action(async ({ parsedInput }) => {
     const plan = await learningService.assignPlanToStudent(
@@ -189,6 +195,7 @@ export const assignPlanAction = permissionAction("material.create")
  * Action to get plan gap analysis for a student.
  */
 export const getStudentPlanGapAction = permissionAction("material.view")
+  .metadata({ name: "getStudentPlanGap" })
   .schema(getStudentPlanGapSchema)
   .action(async ({ parsedInput }) => {
     try {
@@ -204,6 +211,7 @@ export const getStudentPlanGapAction = permissionAction("material.view")
  * Action to fetch all templates for the manager hub.
  */
 export const getTemplatesAction = permissionAction("material.view")
+  .metadata({ name: "getTemplates" })
   .schema(z.object({}))
   .action(async () => {
     try {
@@ -219,6 +227,7 @@ export const getTemplatesAction = permissionAction("material.view")
  * Action to reorder lessons in a plan.
  */
 export const reorderLessonsAction = permissionAction("material.create")
+  .metadata({ name: "reorderLessons" })
   .schema(reorderLessonsSchema)
   .action(async ({ parsedInput }) => {
     await learningService.reorderLessons(parsedInput.planId, parsedInput.lessonIds);
@@ -230,6 +239,7 @@ export const reorderLessonsAction = permissionAction("material.create")
  * Action to add a lesson to a plan.
  */
 export const addLessonToPlanAction = permissionAction("material.create")
+  .metadata({ name: "addLessonToPlan" })
   .schema(addLessonToPlanSchema)
   .action(async ({ parsedInput }) => {
     await learningService.addLessonToPlan(parsedInput.planId, parsedInput.lessonId);
@@ -241,6 +251,7 @@ export const addLessonToPlanAction = permissionAction("material.create")
  * Action to remove a lesson from a plan.
  */
 export const removeLessonFromPlanAction = permissionAction("material.create")
+  .metadata({ name: "removeLessonFromPlan" })
   .schema(removeLessonFromPlanSchema)
   .action(async ({ parsedInput }) => {
     await learningService.removeLessonFromPlan(parsedInput.planId, parsedInput.lessonId);
@@ -252,6 +263,7 @@ export const removeLessonFromPlanAction = permissionAction("material.create")
  * Action to fetch all plans assigned to a specific student.
  */
 export const getStudentPlansAction = permissionAction("material.view")
+  .metadata({ name: "getStudentPlans" })
   .schema(getStudentPlansSchema)
   .action(async ({ parsedInput }) => {
     try {
@@ -267,6 +279,7 @@ export const getStudentPlansAction = permissionAction("material.view")
  * Action to save a draft of the student profile survey.
  */
 export const saveProfileSurveyAction = protectedAction
+  .metadata({ name: "saveProfileSurvey" })
   .schema(saveProfileSurveySchema)
   .action(async ({ parsedInput, ctx }) => {
     const result = await learningService.saveProfileSurvey(parsedInput, ctx.user.id);
@@ -277,6 +290,7 @@ export const saveProfileSurveyAction = protectedAction
  * Action to finalize the student profile, triggering AI analysis and embedding.
  */
 export const finalizeProfileAction = protectedAction
+  .metadata({ name: "finalizeProfile" })
   .schema(finalizeProfileSchema)
   .action(async ({ parsedInput, ctx }) => {
     // 1. Fetch current profile to validate responses against full schema
@@ -297,6 +311,7 @@ export const finalizeProfileAction = protectedAction
  * Action for managers to associate an orphan profile to a student.
  */
 export const associateProfileToStudentAction = permissionAction("student.support")
+  .metadata({ name: "associateProfileToStudent" })
   .schema(associateProfileSchema)
   .action(async ({ parsedInput }) => {
     await learningService.associateStudentProfile(parsedInput.profileId, parsedInput.studentId);
@@ -305,6 +320,7 @@ export const associateProfileToStudentAction = permissionAction("student.support
   });
 
 export const generatePersonalizedPlanAction = protectedAction
+  .metadata({ name: "generatePersonalizedPlan" })
   .schema(z.object({
     profileId: z.string(),
     studentId: z.string(),
@@ -331,6 +347,7 @@ const archiveProfileSchema = z.object({
 });
 
 export const archiveProfileAction = permissionAction("student.support")
+  .metadata({ name: "archiveProfile" })
   .schema(archiveProfileSchema)
   .action(async ({ parsedInput }) => {
     const profile = await learningService.findProfileById(parsedInput.profileId);
@@ -396,6 +413,7 @@ const purchaseReplaySchema = z.object({
  * Returns PracticeItems ready to be rendered by the PracticeSession component.
  */
 export const getDailyPracticeAction = protectedAction
+  .metadata({ name: "getDailyPractice" })
   .schema(getDailyPracticeSchema)
   .action(async ({ parsedInput }) => {
     const session = await learningService.getPracticeCycle(
@@ -409,6 +427,7 @@ export const getDailyPracticeAction = protectedAction
  * Retrieves the saved session state for resuming an interrupted practice session.
  */
 export const getSessionProgressAction = protectedAction
+  .metadata({ name: "getSessionProgress" })
   .schema(z.object({ planId: z.string() }))
   .action(async ({ parsedInput }) => {
     return learningService.getSessionState(parsedInput.planId);
@@ -418,6 +437,7 @@ export const getSessionProgressAction = protectedAction
  * Saves the current session state so the student can resume later.
  */
 export const saveSessionProgressAction = protectedAction
+  .metadata({ name: "saveSessionProgress" })
   .schema(sessionProgressSchema)
   .action(async ({ parsedInput, ctx }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -428,6 +448,7 @@ export const saveSessionProgressAction = protectedAction
  * Clears the session state after a session is successfully completed.
  */
 export const clearSessionProgressAction = protectedAction
+  .metadata({ name: "clearSessionProgress" })
   .schema(z.object({ planId: z.string() }))
   .action(async ({ parsedInput }) => {
     return learningService.clearSessionState(parsedInput.planId);
@@ -438,6 +459,7 @@ export const clearSessionProgressAction = protectedAction
  * Calculates XP, updates SRS for each item, and returns the summary.
  */
 export const processSessionResultsAction = protectedAction
+  .metadata({ name: "processSessionResults" })
   .schema(processResultsSchema)
   .action(async ({ parsedInput, ctx }) => {
     const result = await learningService.processSessionResults(
@@ -455,6 +477,7 @@ export const processSessionResultsAction = protectedAction
  * Allows a student to purchase a replay of a completed practice day using XP.
  */
 export const purchaseReplaySessionAction = protectedAction
+  .metadata({ name: "purchaseReplaySession" })
   .schema(purchaseReplaySchema)
   .action(async ({ parsedInput, ctx }) => {
     return learningService.purchaseReplaySession(
@@ -466,12 +489,14 @@ export const purchaseReplaySessionAction = protectedAction
   });
 
 export const getRoadmapAction = protectedAction
+  .metadata({ name: "getRoadmap" })
   .schema(z.object({}))
   .action(async ({ ctx }) => {
     return learningService.getStudentRoadmap(ctx.user.id);
   });
 
 export const getArchivedPlansAction = protectedAction
+  .metadata({ name: "getArchivedPlans" })
   .schema(z.object({}))
   .action(async ({ ctx }) => {
     return learningService.getArchivedPlans(ctx.user.id);
@@ -481,6 +506,7 @@ export const getArchivedPlansAction = protectedAction
  * Action to fetch learning statistics for the current student.
  */
 export const getStudentLearningStatsAction = protectedAction
+  .metadata({ name: "getStudentLearningStats" })
   .schema(z.object({}))
   .action(async ({ ctx }) => {
     try {
@@ -496,6 +522,7 @@ export const getStudentLearningStatsAction = protectedAction
  * Action to fetch detailed info about items learned by the student.
  */
 export const getLearnedItemsAction = protectedAction
+  .metadata({ name: "getLearnedItems" })
   .schema(z.object({}))
   .action(async ({ ctx }) => {
     try {
@@ -511,6 +538,7 @@ export const getLearnedItemsAction = protectedAction
  * Action to fetch detailed info about items reviewed today.
  */
 export const getReviewedItemsAction = protectedAction
+  .metadata({ name: "getReviewedItems" })
   .schema(z.object({}))
   .action(async ({ ctx }) => {
     try {

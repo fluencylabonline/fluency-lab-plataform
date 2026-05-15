@@ -1,5 +1,5 @@
 import { userRepository } from "./user.repository";
-import { adminAuth } from "@/lib/firebase-admin";
+import { adminAuth, adminStorage } from "@/lib/firebase-admin";
 import type { User, NewUser, NotificationPrefs } from "./user.schema";
 import { env } from "@/env";
 import { communicationService } from "@/modules/communication/communication.service";
@@ -261,5 +261,97 @@ export const userService = {
     const decryptedSecret = decrypt(user.mfaSecret);
     const result = await totp.verify(token, { secret: decryptedSecret });
     return result.valid;
+  },
+
+  async recordConsent(userId: string, version: string, guardianConsent: boolean) {
+    return userRepository.updateLgpdConsent(userId, {
+      acceptedTermsVersion: version,
+      guardianConsent,
+    });
+  },
+
+  async exportData(userId: string) {
+    const rawData = await userRepository.getComprehensiveUserData(userId);
+    if (!rawData) throw new Error("USER_NOT_FOUND");
+
+    // Decrypt sensitive data for the portability report
+    return {
+      ...rawData,
+      taxId: rawData.taxId && rawData.taxId.includes(":") ? decrypt(rawData.taxId) : rawData.taxId,
+      businessTaxId: rawData.businessTaxId && rawData.businessTaxId.includes(":") ? decrypt(rawData.businessTaxId) : rawData.businessTaxId,
+      address: rawData.address && rawData.address.includes(":") ? decrypt(rawData.address) : rawData.address,
+      guardianTaxId: rawData.guardianTaxId && rawData.guardianTaxId.includes(":") ? decrypt(rawData.guardianTaxId) : rawData.guardianTaxId,
+      pixKey: rawData.pixKey && rawData.pixKey.includes(":") ? decrypt(rawData.pixKey) : rawData.pixKey,
+      mfaSecret: undefined, // SECURITY: Never export security secrets
+    };
+  },
+
+  async purgeUserData(userId: string) {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new Error("USER_NOT_FOUND");
+
+    // 1. Send Farewell Email before deleting access
+    try {
+      await communicationService.sendFarewellEmail(user.email, user.name);
+    } catch (e) {
+      console.error("[LGPD] Failed to send farewell email:", e);
+      // We continue even if email fails
+    }
+
+    // 2. Anonymize in Database (Keeps relations for 5 years legal retention, but severs identity)
+    await userRepository.anonymize(userId);
+
+    // 3. Revoke sessions and delete from Firebase Auth (Immediate removal of access)
+    try {
+      await adminAuth.revokeRefreshTokens(userId);
+      await adminAuth.deleteUser(userId);
+    } catch (e) {
+      console.error("[LGPD] Failed to delete Firebase Auth user:", e);
+      // We continue even if Firebase deletion fails, as anonymization in DB is the primary requirement
+    }
+
+    // 4. Delete files from Firebase Storage (Documents, Certificates, Avatars)
+    try {
+      const bucket = adminStorage.bucket();
+      const storagePaths = [
+        `documents/${userId}/`,
+        `certificates/${userId}/`,
+        `avatars/${userId}`,
+      ];
+
+      for (const path of storagePaths) {
+        const [files] = await bucket.getFiles({ prefix: path });
+        if (files.length > 0) {
+          await Promise.all(files.map((file) => file.delete()));
+          console.log(`[LGPD] Deleted ${files.length} files from ${path} for user ${userId}`);
+        }
+        
+        // Also try to delete as a direct file (for avatars/userId which might not have a trailing slash)
+        const file = bucket.file(path);
+        const [exists] = await file.exists();
+        if (exists) {
+          await file.delete();
+          console.log(`[LGPD] Deleted direct file ${path} for user ${userId}`);
+        }
+      }
+    } catch (e) {
+      console.error("[LGPD] Failed to cleanup storage:", e);
+    }
+
+    // 5. Delete from AbacatePay
+    if (user.abacatePayCustomerId) {
+      try {
+        await abacate.customers.delete(user.abacatePayCustomerId);
+        console.log(`[LGPD] Deleted AbacatePay customer ${user.abacatePayCustomerId}`);
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e);
+        // Se o cliente não existir no AbacatePay, consideramos sucesso (já está limpo)
+        if (message.includes("Not found")) {
+          console.warn(`[LGPD] AbacatePay customer ${user.abacatePayCustomerId} already gone or not found.`);
+        } else {
+          console.error("[LGPD] Failed to delete AbacatePay customer:", e);
+        }
+      }
+    }
   }
 };

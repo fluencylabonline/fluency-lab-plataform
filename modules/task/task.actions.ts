@@ -21,18 +21,23 @@ import { taskService } from "./task.service";
 import { revalidatePath } from "next/cache";
 
 // Projects
-export const getProjectsAction = protectedAction.action(async () => {
+export const getProjectsAction = protectedAction
+  .metadata({ name: "getProjectsAction" })
+  .action(async () => {
   const projects = await taskService.getProjects();
   return { success: true, data: projects } as { success: boolean; data: TaskProjectWithStatuses[]; error?: string };
 });
 
-export const getAssignableUsersAction = protectedAction.action(async () => {
+export const getAssignableUsersAction = protectedAction
+  .metadata({ name: "getAssignableUsersAction" })
+  .action(async () => {
   const users = await taskService.getAssignableUsers();
   return { success: true, data: users } as { success: boolean; data: User[]; error?: string };
 });
 
 export const createProjectAction = managerAction
   .schema(createProjectSchema)
+  .metadata({ name: "createProjectAction" })
   .action(async ({ parsedInput, ctx }) => {
     const project = await taskService.createProject(ctx.user.id, parsedInput);
     revalidatePath("/hub/admin/tasks");
@@ -42,6 +47,7 @@ export const createProjectAction = managerAction
 
 export const deleteProjectAction = managerAction
   .schema(deleteProjectSchema)
+  .metadata({ name: "deleteProjectAction" })
   .action(async ({ parsedInput }) => {
     await taskService.deleteProject(parsedInput.id);
     revalidatePath("/hub/admin/tasks");
@@ -52,6 +58,7 @@ export const deleteProjectAction = managerAction
 // Statuses
 export const createStatusAction = managerAction
   .schema(createStatusSchema)
+  .metadata({ name: "createStatusAction" })
   .action(async ({ parsedInput }) => {
     const status = await taskService.createStatus(parsedInput);
     revalidatePath("/hub/admin/tasks");
@@ -61,6 +68,7 @@ export const createStatusAction = managerAction
 
 export const getStatusesAction = protectedAction
   .schema(z.object({ projectId: z.string().uuid().nullable() }))
+  .metadata({ name: "getStatusesAction" })
   .action(async ({ parsedInput }) => {
     const statuses = await taskService.getStatuses(parsedInput.projectId);
     return { success: true, data: statuses } as { success: boolean; data: TaskStatus[]; error?: string };
@@ -68,6 +76,7 @@ export const getStatusesAction = protectedAction
 
 export const reorderStatusesAction = managerAction
   .schema(reorderStatusesSchema)
+  .metadata({ name: "reorderStatusesAction" })
   .action(async ({ parsedInput }) => {
     await taskService.reorderStatuses(parsedInput);
     revalidatePath("/hub/admin/tasks");
@@ -78,6 +87,7 @@ export const reorderStatusesAction = managerAction
 // Tasks
 export const getTasksByProjectAction = protectedAction
   .schema(z.object({ projectId: z.string().uuid().nullable() }))
+  .metadata({ name: "getTasksByProjectAction" })
   .action(async ({ parsedInput }) => {
     const tasks = await taskService.getTasksByProject(parsedInput.projectId);
     return { success: true, data: tasks } as { success: boolean; data: TaskWithAssignees[]; error?: string };
@@ -85,6 +95,7 @@ export const getTasksByProjectAction = protectedAction
 
 export const createTaskAction = managerAction
   .schema(createTaskSchema)
+  .metadata({ name: "createTaskAction" })
   .action(async ({ parsedInput, ctx }) => {
     const task = await taskService.createTask(ctx.user.id, parsedInput);
     revalidatePath("/hub/admin/tasks");
@@ -94,6 +105,7 @@ export const createTaskAction = managerAction
 
 export const updateTaskAction = managerAction
   .schema(updateTaskSchema)
+  .metadata({ name: "updateTaskAction" })
   .action(async ({ parsedInput, ctx }) => {
     const task = await taskService.updateTask(ctx.user.id, parsedInput);
     revalidatePath("/hub/admin/tasks");
@@ -103,6 +115,7 @@ export const updateTaskAction = managerAction
 
 export const moveTaskAction = protectedAction
   .schema(moveTaskSchema)
+  .metadata({ name: "moveTaskAction" })
   .action(async ({ parsedInput, ctx }) => {
     const task = await taskService.moveTask(ctx.user.id, parsedInput);
     revalidatePath("/hub/admin/tasks");
@@ -112,6 +125,7 @@ export const moveTaskAction = protectedAction
 
 export const completeTaskAction = protectedAction
   .schema(z.object({ id: z.string().uuid() }))
+  .metadata({ name: "completeTaskAction" })
   .action(async ({ parsedInput, ctx }) => {
     const task = await taskService.getTaskById(parsedInput.id);
     if (!task) throw new Error("Task not found");
@@ -132,6 +146,7 @@ export const completeTaskAction = protectedAction
 
 export const deleteTaskAction = managerAction
   .schema(deleteTaskSchema)
+  .metadata({ name: "deleteTaskAction" })
   .action(async ({ parsedInput }) => {
     await taskService.deleteTask(parsedInput.id);
     revalidatePath("/hub/admin/tasks");

@@ -5,7 +5,7 @@ import { PendingCancellationContent } from "./_components/PendingCancellationCon
 
 export default async function PendingCancellationPage() {
   const sessionUser = await getCurrentUser();
-  if (!sessionUser) redirect("/login");
+  if (!sessionUser) redirect("/signin");
 
   const user = await userService.getUser(sessionUser.id);
   if (!user || !user.cancellationPending) {
