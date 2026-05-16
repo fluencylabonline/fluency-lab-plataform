@@ -12,7 +12,7 @@ export function PwaWelcomeScreen() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-100 dark:opacity-[0.15] pointer-events-none" />
+            <div className="absolute inset-0 bg-[url('/textures/cubes.png')] opacity-100 dark:opacity-[0.15] pointer-events-none" />
 
             <div className="w-full max-w-md relative z-10">
                 <div>
