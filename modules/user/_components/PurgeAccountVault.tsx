@@ -79,7 +79,7 @@ export function PurgeAccountVault({ isOpen, onOpenChange }: PurgeAccountVaultPro
 
         <VaultBody>
           <div className="flex flex-col gap-6">
-            <div className="flex items-start gap-4 p-4 rounded-xl bg-destructive/10 text-destructive border border-destructive/20">
+            <div className="flex items-start gap-4 p-4 rounded-md bg-destructive/10 text-destructive border border-destructive/20">
               <AlertTriangle className="w-6 h-6 shrink-0 mt-1" />
               <div className="space-y-1">
                 <p className="font-semibold text-sm leading-tight">

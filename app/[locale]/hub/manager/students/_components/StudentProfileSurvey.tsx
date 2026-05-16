@@ -242,7 +242,7 @@ export function StudentProfileSurvey({
                       key={lvl}
                       onClick={() => field.onChange(lvl)}
                       className={cn(
-                        "flex flex-col items-center justify-center py-4 rounded-xl border transition-all duration-150 font-bold text-xl",
+                        "flex flex-col items-center justify-center py-4 rounded-md border transition-all duration-150 font-bold text-xl",
                         field.value === lvl
                           ? "border-primary bg-primary text-primary-foreground shadow-sm"
                           : "border-border/50 bg-background/60 text-muted-foreground hover:border-primary/40 hover:bg-primary/5"
@@ -255,7 +255,7 @@ export function StudentProfileSurvey({
               )}
             />
           </div>
-          <div className="flex items-center gap-3 p-4 bg-muted/40 rounded-xl border border-border/40">
+          <div className="flex items-center gap-3 p-4 bg-muted/40 rounded-md border border-border/40">
             <Controller
               name="step2.previousStudy"
               control={methods.control}
@@ -304,7 +304,7 @@ export function StudentProfileSurvey({
                         else field.onChange([...current, goal.id]);
                       }}
                       className={cn(
-                        "flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all duration-150",
+                        "flex items-center gap-3 p-3.5 rounded-md border text-left transition-all duration-150",
                         checked
                           ? "border-primary/60 bg-primary/5 text-foreground"
                           : "border-border/50 bg-background/60 text-muted-foreground hover:border-primary/30 hover:bg-muted/40"
@@ -355,7 +355,7 @@ export function StudentProfileSurvey({
                       key={opt.id}
                       onClick={() => field.onChange(opt.id)}
                       className={cn(
-                        "flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all duration-150",
+                        "flex items-center gap-3 px-4 py-3 rounded-md border text-left transition-all duration-150",
                         field.value === opt.id
                           ? "border-primary/60 bg-primary/5"
                           : "border-border/50 bg-background/60 hover:border-primary/30 hover:bg-muted/40"
@@ -469,7 +469,7 @@ export function StudentProfileSurvey({
                         else field.onChange([...current, method.id]);
                       }}
                       className={cn(
-                        "flex items-center justify-between px-4 py-3 rounded-xl border text-left transition-all duration-150",
+                        "flex items-center justify-between px-4 py-3 rounded-md border text-left transition-all duration-150",
                         checked
                           ? "border-primary/60 bg-primary/5"
                           : "border-border/50 bg-background/60 hover:border-primary/30 hover:bg-muted/40"
@@ -553,7 +553,7 @@ export function StudentProfileSurvey({
                       key={v}
                       onClick={() => field.onChange(v)}
                       className={cn(
-                        "flex-1 py-2.5 rounded-xl border text-xs font-semibold transition-all duration-150",
+                        "flex-1 py-2.5 rounded-md border text-xs font-semibold transition-all duration-150",
                         field.value === v
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border/50 bg-background/60 text-muted-foreground hover:border-primary/30"
@@ -592,7 +592,7 @@ export function StudentProfileSurvey({
                     key={opt.id}
                     onClick={() => field.onChange(opt.id)}
                     className={cn(
-                      "flex items-center gap-4 px-5 py-4 rounded-xl border-2 text-left transition-all duration-150",
+                      "flex items-center gap-4 px-5 py-4 rounded-md border-2 text-left transition-all duration-150",
                       field.value === opt.id
                         ? "border-primary/60 bg-primary/5"
                         : "border-border/40 bg-background/60 hover:border-primary/30 hover:bg-muted/30"
@@ -770,7 +770,7 @@ export function StudentProfileSurvey({
           </VaultHeader>
 
           <VaultBody>
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-destructive/8 border border-destructive/20 text-destructive">
+            <div className="flex items-center gap-3 p-4 rounded-md bg-destructive/8 border border-destructive/20 text-destructive">
               <AlertTriangle className="h-4 w-4 shrink-0" />
               <p className="text-sm">
                 O progresso atual será perdido e o perfil será movido para o arquivo.

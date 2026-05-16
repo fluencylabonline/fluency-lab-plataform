@@ -98,7 +98,7 @@ export function AutomationStep({ lessonId, step, onComplete, hasData }: Automati
                 {status === "error" && (
                     <div className="flex flex-col items-center gap-4">
                         <AlertCircle className="w-12 h-12 text-destructive" />
-                        <Button onClick={run} variant="outline" className="rounded-xl">
+                        <Button onClick={run} variant="outline" className="rounded-md">
                             {t("retry")}
                         </Button>
                     </div>

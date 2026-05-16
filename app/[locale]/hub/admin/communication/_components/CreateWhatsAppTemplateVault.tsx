@@ -93,7 +93,7 @@ export function CreateWhatsAppTemplateVault({ open, onOpenChange }: CreateWhatsA
                   onValueChange={(val) => setValue("category", val as CreateWhatsAppTemplateValues["category"])}
                   defaultValue="UTILITY"
                 >
-                  <SelectTrigger className="rounded-xl h-10">
+                  <SelectTrigger className="rounded-md h-10">
                     <SelectValue placeholder="Selecione..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -109,7 +109,7 @@ export function CreateWhatsAppTemplateVault({ open, onOpenChange }: CreateWhatsA
                   onValueChange={(val) => setValue("language", val)}
                   defaultValue="pt_BR"
                 >
-                  <SelectTrigger className="rounded-xl h-10">
+                  <SelectTrigger className="rounded-md h-10">
                     <SelectValue placeholder="Idioma..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -126,7 +126,7 @@ export function CreateWhatsAppTemplateVault({ open, onOpenChange }: CreateWhatsA
                 {...register("bodyText")}
                 placeholder="Olá {{1}}, seu boleto vence hoje!"
                 rows={4}
-                className="rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 px-4 py-3 text-sm"
+                className="rounded-md bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 px-4 py-3 text-sm"
               />
               <p className="text-[10px] text-muted-foreground mt-1">Use {"{{1}}"}, {"{{2}}"} para variáveis.</p>
             </VaultField>

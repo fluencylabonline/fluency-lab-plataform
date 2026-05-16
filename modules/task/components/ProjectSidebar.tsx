@@ -86,7 +86,7 @@ export function ProjectSidebar({ projects, selectedId, onSelect, className, hide
       <div className="p-4 border-t mt-auto">
         <Button 
           variant="outline" 
-          className="w-full justify-start gap-2 h-11 rounded-xl border-dashed hover:border-primary hover:text-primary transition-all bg-transparent"
+          className="w-full justify-start gap-2 h-11 rounded-md border-dashed hover:border-primary hover:text-primary transition-all bg-transparent"
           onClick={() => setIsCreateProjectOpen(true)}
         >
           <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">

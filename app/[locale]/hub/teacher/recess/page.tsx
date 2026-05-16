@@ -37,7 +37,7 @@ export default async function RecessActivitiesPage() {
         {/* Call to Action Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-primary/5 p-6 rounded-2xl border border-primary/10 shadow-sm">
           <div className="flex gap-4 items-start">
-            <div className="p-3 bg-primary/10 rounded-xl">
+            <div className="p-3 bg-primary/10 rounded-md">
               <Calendar className="w-6 h-6 text-primary" />
             </div>
             <div className="space-y-1">
@@ -56,7 +56,7 @@ export default async function RecessActivitiesPage() {
         </div>
 
         {/* SLA Reminder */}
-        <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-900/50">
+        <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-950/20 rounded-md border border-amber-200 dark:border-amber-900/50">
           <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-500 shrink-0" />
           <p className="text-xs md:text-sm text-amber-800 dark:text-amber-400 font-medium leading-tight">
             <span className="font-bold">Atenção:</span> Para cada aluno afetado, você deve selecionar uma atividade de fallback desta biblioteca. Atividades globais estão disponíveis, mas você pode criar as suas próprias.

@@ -68,7 +68,7 @@ export function FinanceDashboard({
   return (
     <div className="flex flex-col gap-6">
       {/* Filters & Actions */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card p-4 rounded-xl border border-border shadow-xs">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card p-4 rounded-md border border-border shadow-xs">
         <div className="flex flex-wrap items-center gap-2">
           <Select
             value={currentMonth.toString()}

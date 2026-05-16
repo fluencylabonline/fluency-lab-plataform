@@ -54,7 +54,7 @@ export default async function ImmersionPage() {
               
               <div className="absolute bottom-0 left-0 p-8 text-white w-full">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 rounded-xl bg-white/20 backdrop-blur-md border border-white/30">
+                  <div className="p-2 rounded-md bg-white/20 backdrop-blur-md border border-white/30">
                     <Headphones className="h-6 w-6" />
                   </div>
                   <h3 className="text-3xl font-black tracking-tighter">{t("podcastsTitle")}</h3>
@@ -82,7 +82,7 @@ export default async function ImmersionPage() {
               
               <div className="absolute bottom-0 left-0 p-8 text-white w-full">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 rounded-xl bg-white/20 backdrop-blur-md border border-white/30">
+                  <div className="p-2 rounded-md bg-white/20 backdrop-blur-md border border-white/30">
                     <BookOpen className="h-6 w-6" />
                   </div>
                   <h3 className="text-3xl font-black tracking-tighter">{t("blogTitle")}</h3>

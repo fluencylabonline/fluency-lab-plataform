@@ -159,7 +159,7 @@ export function ActionsTab({
                   </p>
                 </div>
 
-                <div className="p-4 bg-white rounded-xl shadow-sm border flex flex-col items-center gap-4">
+                <div className="p-4 bg-white rounded-md shadow-sm border flex flex-col items-center gap-4">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={pixData.pixImage} alt="QR Code PIX" className="w-48 h-48" />
                   <Button variant="outline" size="sm" className="w-full gap-2 font-bold text-[10px] uppercase tracking-widest" onClick={copyPix}>

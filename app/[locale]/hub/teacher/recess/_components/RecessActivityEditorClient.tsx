@@ -181,7 +181,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
 
                 <Button 
                   type="submit" 
-                  className="w-full gap-2 font-bold h-12 rounded-xl"
+                  className="w-full gap-2 font-bold h-12 rounded-md"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -192,7 +192,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
               <div className="pt-6 border-t space-y-2">
                 <Button
                   variant={activeTab === "content" ? "default" : "ghost"}
-                  className="w-full justify-start gap-3 h-12 rounded-xl"
+                  className="w-full justify-start gap-3 h-12 rounded-md"
                   onClick={() => setActiveTab("content")}
                 >
                   <FileText className="w-4 h-4" />
@@ -200,7 +200,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                 </Button>
                 <Button
                   variant={activeTab === "quiz" ? "default" : "ghost"}
-                  className="w-full justify-start gap-3 h-12 rounded-xl"
+                  className="w-full justify-start gap-3 h-12 rounded-md"
                   onClick={() => setActiveTab("quiz")}
                 >
                   <HelpCircle className="w-4 h-4" />
@@ -247,7 +247,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                         <h3 className="text-xl font-bold">{t('evaluation') || "Avaliação"}</h3>
                         <p className="text-sm text-muted-foreground">{t('addQuestionsSubtitle') || "Adicione questões para verificar o aprendizado."}</p>
                       </div>
-                      <Button variant="outline" className="rounded-xl" onClick={addQuestion}>
+                      <Button variant="outline" className="rounded-md" onClick={addQuestion}>
                         <Plus className="h-4 w-4 mr-2" />
                         {t('newQuestion') || "Nova Questão"}
                       </Button>
@@ -259,7 +259,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                           type="number"
                           value={passingScore}
                           onChange={(e) => setPassingScore(Number(e.target.value))}
-                          className="h-12 rounded-xl"
+                          className="h-12 rounded-md"
                           min={0} max={100}
                         />
                       </Field>

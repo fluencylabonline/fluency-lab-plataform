@@ -133,10 +133,10 @@ export function LessonDetailView({ lesson }: LessonDetailViewProps) {
         <div className="lg:hidden">
           <Tabs defaultValue="content" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6 h-12 p-1 bg-muted/50 rounded-2xl">
-              <TabsTrigger value="content" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <TabsTrigger value="content" className="rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
                 {t("tabContent") || "Conteúdo"}
               </TabsTrigger>
-              <TabsTrigger value="items" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <TabsTrigger value="items" className="rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
                 {t("vocabularyTitle") || "Vocabulário"}
               </TabsTrigger>
             </TabsList>

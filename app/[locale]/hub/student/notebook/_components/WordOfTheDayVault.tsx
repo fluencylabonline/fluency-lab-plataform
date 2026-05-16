@@ -357,7 +357,7 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
                   className="text-center space-y-2 w-full"
                 >
                   <h3 className="text-4xl font-black tracking-tight text-primary">{displayLemma}</h3>
-                  <div className="bg-muted px-6 py-2 rounded-xl inline-block border border-border">
+                  <div className="bg-muted px-6 py-2 rounded-md inline-block border border-border">
                     <p className="font-medium text-foreground">{translation}</p>
                   </div>
                 </motion.div>
@@ -453,7 +453,7 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     onClick={() => handleRemoveWord(word)}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
+                    className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
                   >
                     {word.word}
                   </motion.button>
@@ -471,7 +471,7 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     onClick={() => handlePickWord(word)}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-muted border border-border rounded-xl text-sm font-medium hover:bg-accent hover:border-primary/30 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-muted border border-border rounded-md text-sm font-medium hover:bg-accent hover:border-primary/30 transition-colors"
                   >
                     <span>{word.word}</span>
                   </motion.button>

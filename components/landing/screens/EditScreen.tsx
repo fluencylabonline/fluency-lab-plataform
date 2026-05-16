@@ -47,14 +47,14 @@ export function EditorScreen() {
       </header>
 
       {/* Toolbar de Formatação */}
-      <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900/50 p-1.5 rounded-xl border border-gray-100 dark:border-gray-800 overflow-x-auto scrollbar-hide">
+      <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900/50 p-1.5 rounded-md border border-gray-100 dark:border-gray-800 overflow-x-auto scrollbar-hide">
         <button className="p-2 text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
           <Bold className="w-4 h-4" />
         </button>
         <button className="p-2 text-gray-500">
           <Italic className="w-4 h-4" />
         </button>
-        <div className="w-[1px] h-4 bg-gray-300 dark:bg-gray-700 mx-1" />
+        <div className="w-px h-4 bg-gray-300 dark:bg-gray-700 mx-1" />
         <button className="p-2 text-gray-500">
           <List className="w-4 h-4" />
         </button>

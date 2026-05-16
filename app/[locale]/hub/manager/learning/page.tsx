@@ -104,7 +104,7 @@ export default async function LearningPage() {
                         {actions.map((action) => {
                             const inner = (
                                 <div className="group flex flex-col items-center justify-center gap-3 p-5 card">
-                                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${action.bg} group-hover:scale-110 transition-transform duration-200`}>
+                                    <div className={`w-11 h-11 rounded-md flex items-center justify-center ${action.bg} group-hover:scale-110 transition-transform duration-200`}>
                                         <span className={action.color}>{action.icon}</span>
                                     </div>
                                     <span className="text-[13px] font-semibold text-center leading-tight">

@@ -118,7 +118,7 @@ export const ParticipantsGrid: React.FC<ParticipantsGridProps> = ({
             className={`w-full ${isPip ? "flex-1" : "h-auto p-2"}`}
           >
             <div
-              className={`relative w-full h-full rounded-xl overflow-hidden ${isPip ? "" : "aspect-video"}`}
+              className={`relative w-full h-full rounded-md overflow-hidden ${isPip ? "" : "aspect-video"}`}
             >
               <ParticipantView
                 participant={participant}

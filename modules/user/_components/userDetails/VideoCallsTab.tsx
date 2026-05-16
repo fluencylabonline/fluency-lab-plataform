@@ -47,7 +47,7 @@ export function VideoCallsTab({ callHistory }: VideoCallsTabProps) {
   return (
     <div className="space-y-8">
       {Object.keys(groupedCalls).length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-8 text-center bg-muted/20 rounded-xl border border-dashed">
+        <div className="flex flex-col items-center justify-center p-8 text-center bg-muted/20 rounded-md border border-dashed">
           <Video className="w-12 h-12 text-muted-foreground mb-4 opacity-20" />
           <p className="text-muted-foreground">Nenhuma chamada de vídeo registrada.</p>
         </div>

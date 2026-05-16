@@ -170,7 +170,7 @@ export function PracticeAudioPlayer({
                 variant="outline"
                 size="sm"
                 onClick={changeSpeed}
-                className="text-xs font-bold w-12 h-10 rounded-xl"
+                className="text-xs font-bold w-12 h-10 rounded-md"
               >
                 {playbackRate}x
               </Button>

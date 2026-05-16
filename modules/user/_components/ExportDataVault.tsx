@@ -74,7 +74,7 @@ export function ExportDataVault({ isOpen, onOpenChange, userId }: ExportDataVaul
 
         <VaultBody>
           <div className="space-y-6">
-            <div className="flex items-start gap-4 p-4 rounded-xl bg-primary/5 text-primary border border-primary/20">
+            <div className="flex items-start gap-4 p-4 rounded-md bg-primary/5 text-primary border border-primary/20">
               <ShieldCheck className="w-6 h-6 shrink-0 mt-1" />
               <div className="space-y-1">
                 <p className="text-sm leading-relaxed">

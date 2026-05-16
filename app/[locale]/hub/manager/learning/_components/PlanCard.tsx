@@ -52,7 +52,7 @@ export function PlanCard({ plan }: PlanCardProps) {
                 {/* Header Info */}
                 <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-primary/5 dark:bg-primary/10 rounded-xl">
+                        <div className="p-2.5 bg-primary/5 dark:bg-primary/10 rounded-md">
                             <BookOpen className="w-5 h-5 text-primary" />
                         </div>
                         <div>
@@ -76,7 +76,7 @@ export function PlanCard({ plan }: PlanCardProps) {
                         <DropdownMenuTrigger className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors outline-none">
                             <MoreHorizontal className="w-5 h-5 text-gray-400" />
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 rounded-xl border-gray-200 dark:border-gray-800">
+                        <DropdownMenuContent align="end" className="w-48 rounded-md border-gray-200 dark:border-gray-800">
                             <DropdownMenuItem asChild className="cursor-pointer py-2.5 rounded-lg">
                                 <Link href={`/hub/manager/learning/${plan.id}`}>
                                     <BookOpen className="w-4 h-4 mr-2" />

@@ -84,7 +84,7 @@ export function WhatsAppChat() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-[80vh] md:h-[600px] border rounded-xl overflow-hidden bg-background">
+    <div className="flex flex-col md:flex-row h-[80vh] md:h-[600px] border rounded-md overflow-hidden bg-background">
       {/* Sidebar - Conversations */}
       <div className={cn(
         "w-full md:w-1/3 border-r bg-muted/10 flex flex-col",

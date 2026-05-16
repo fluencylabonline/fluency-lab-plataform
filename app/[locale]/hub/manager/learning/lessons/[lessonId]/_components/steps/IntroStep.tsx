@@ -57,7 +57,7 @@ export function IntroStep({ onComplete }: IntroStepProps) {
                 <div className="hidden md:grid grid-cols-3 gap-4">
                     {allSteps.map((step, idx) => (
                         <div key={idx} className="flex gap-4 p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm hover:border-primary/20 transition-all duration-300">
-                            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
+                            <div className="w-10 h-10 bg-primary/10 rounded-md flex items-center justify-center shrink-0">
                                 <step.icon className="w-5 h-5 text-primary" />
                             </div>
                             <div className="text-left">

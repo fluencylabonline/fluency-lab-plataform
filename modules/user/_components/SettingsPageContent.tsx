@@ -38,35 +38,35 @@ export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
             <TabsList className="w-full justify-start md:w-fit bg-transparent gap-2 p-0 h-auto">
               <TabsTrigger 
                 value="account" 
-                className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-xl border-none transition-all flex items-center gap-2"
+                className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-md border-none transition-all flex items-center gap-2"
               >
                 <User className="w-4 h-4" />
                 {tc("account")}
               </TabsTrigger>
               <TabsTrigger 
                 value="appearance" 
-                className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-xl border-none transition-all flex items-center gap-2"
+                className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-md border-none transition-all flex items-center gap-2"
               >
                 <Palette className="w-4 h-4" />
                 {tc("appearance")}
               </TabsTrigger>
               <TabsTrigger 
                 value="notifications" 
-                className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-xl border-none transition-all flex items-center gap-2"
+                className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-md border-none transition-all flex items-center gap-2"
               >
                 <Bell className="w-4 h-4" />
                 {tc("notifications")}
               </TabsTrigger>
               <TabsTrigger 
                 value="security" 
-                className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-xl border-none transition-all flex items-center gap-2"
+                className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-md border-none transition-all flex items-center gap-2"
               >
                 <Shield className="w-4 h-4" />
                 {t("security")}
               </TabsTrigger>
               <TabsTrigger 
                 value="app" 
-                className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-xl border-none transition-all flex items-center gap-2"
+                className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-md border-none transition-all flex items-center gap-2"
               >
                 <Smartphone className="w-4 h-4" />
                 {t("app")}

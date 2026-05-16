@@ -281,7 +281,7 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
             </div>
             <Progress value={(gap.completedClasses / gap.totalClasses) * 100} className="h-3" />
           </div>
-          <div className="card border rounded-xl p-5 flex items-center gap-4">
+          <div className="card border rounded-md p-5 flex items-center gap-4">
             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
               <BookOpen className="h-5 w-5" />
             </div>

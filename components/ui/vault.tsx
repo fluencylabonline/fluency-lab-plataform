@@ -434,7 +434,7 @@ const VaultInput = React.forwardRef<
             <Input
                 ref={ref}
                 className={twMerge(
-                    "h-10 px-4 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl",
+                    "h-10 px-4 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-md",
                     className,
                 )}
                 {...props}
@@ -466,7 +466,7 @@ const VaultPrimaryButton = React.forwardRef<
             whileTap={{ scale: 0.98 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
             className={twMerge(
-                `min-w-fit flex flex-1 items-center justify-center flex-row gap-2 px-7 py-3 lg:text-lg md:text-base text-sm font-semibold text-white rounded-xl 
+                `min-w-fit flex flex-1 items-center justify-center flex-row gap-2 px-7 py-3 lg:text-lg md:text-base text-sm font-semibold text-white rounded-md 
         transition-all duration-150 focus:outline-none 
         disabled:opacity-50 disabled:cursor-not-allowed
         ${variantStyles[variant]}`,
@@ -492,7 +492,7 @@ const VaultSecondaryButton = React.forwardRef<
                 `flex items-center justify-center gap-2 flex-row min-w-fit px-6 py-3 lg:text-lg md:text-base text-sm font-semibold 
         text-gray-700 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200
         bg-slate-300/50 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700
-        rounded-xl transition-all duration-150
+        rounded-md transition-all duration-150
         border border-gray-200/50 dark:border-gray-600/50 
         hover:border-gray-300/70 dark:hover:border-gray-500/70
         disabled:opacity-50 disabled:cursor-not-allowed`,

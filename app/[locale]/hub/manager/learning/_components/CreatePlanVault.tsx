@@ -110,7 +110,7 @@ export function CreatePlanVault({ languages, open: controlledOpen, onOpenChange:
                             onValueChange={(value) => form.setValue("languageId", value)}
                             defaultValue={form.getValues("languageId")}
                         >
-                            <SelectTrigger className="h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl">
+                            <SelectTrigger className="h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-md">
                                 <SelectValue placeholder={t("select_language") || "Select language"} />
                             </SelectTrigger>
                             <SelectContent>
@@ -130,7 +130,7 @@ export function CreatePlanVault({ languages, open: controlledOpen, onOpenChange:
                         <textarea
                             {...form.register("description")}
                             placeholder={t("plan_description_placeholder") || "A brief overview of this plan goals..."}
-                            className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl min-h-[100px] outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none text-sm"
+                            className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md min-h-[100px] outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none text-sm"
                         />
                     </VaultField>
                 </form>

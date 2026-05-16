@@ -132,7 +132,7 @@ export default function LyricsTrainingGame({ initialProgress }: LyricsTrainingGa
       <div className="container flex-1 overflow-y-auto py-4 space-y-4">
         <div>
         {videoUrl && status !== "setup" ? (
-          <div className="mx-auto aspect-video w-[95vw] sm:w-[30vw] overflow-hidden rounded-xl bg-black mb-6 shadow-md border border-border/40">
+          <div className="mx-auto aspect-video w-[95vw] sm:w-[30vw] overflow-hidden rounded-md bg-black mb-6 shadow-md border border-border/40">
             <div ref={playerContainerRef} className="w-full h-full" />
           </div>
         ) : null}
@@ -174,7 +174,7 @@ export default function LyricsTrainingGame({ initialProgress }: LyricsTrainingGa
               </div>
 
               {searchError ? (
-                <div className="text-sm text-destructive font-medium bg-destructive/10 p-3 rounded-xl">
+                <div className="text-sm text-destructive font-medium bg-destructive/10 p-3 rounded-md">
                   {searchError}
                 </div>
               ) : null}
@@ -188,7 +188,7 @@ export default function LyricsTrainingGame({ initialProgress }: LyricsTrainingGa
                       onClick={() => chooseVideo(item)}
                       type="button"
                     >
-                      <div className="relative w-20 h-14 shrink-0 overflow-hidden rounded-xl bg-muted group-hover:shadow-sm transition-shadow">
+                      <div className="relative w-20 h-14 shrink-0 overflow-hidden rounded-md bg-muted group-hover:shadow-sm transition-shadow">
                         {item.thumbnail ? (
                           <Image
                             src={item.thumbnail}
@@ -227,7 +227,7 @@ export default function LyricsTrainingGame({ initialProgress }: LyricsTrainingGa
                         value={track}
                         onChange={(e) => setTrack(e.target.value)}
                         placeholder="Ex: Shape of You"
-                        className="rounded-xl"
+                        className="rounded-md"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -238,7 +238,7 @@ export default function LyricsTrainingGame({ initialProgress }: LyricsTrainingGa
                         value={artist}
                         onChange={(e) => setArtist(e.target.value)}
                         placeholder="Ex: Ed Sheeran"
-                        className="rounded-xl"
+                        className="rounded-md"
                       />
                     </div>
                   </div>

@@ -43,7 +43,7 @@ export function HistoryAccordion({ plans }: HistoryAccordionProps) {
         <AccordionItem 
           key={plan.id} 
           value={plan.id}
-          className="border rounded-xl bg-card overflow-hidden"
+          className="border rounded-md bg-card overflow-hidden"
         >
           <AccordionTrigger className="px-4 py-4 hover:no-underline">
             <div className="flex flex-col items-start text-left">

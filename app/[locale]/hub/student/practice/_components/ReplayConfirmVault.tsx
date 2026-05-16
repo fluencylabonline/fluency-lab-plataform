@@ -73,7 +73,7 @@ export function ReplayConfirmVault({
         </VaultHeader>
 
         <VaultBody className="space-y-6">
-          <div className="bg-muted/50 rounded-xl p-4 border border-border/50">
+          <div className="bg-muted/50 rounded-md p-4 border border-border/50">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium">{t("yourBalance")}</span>
               <div className="flex items-center gap-1.5 font-bold">

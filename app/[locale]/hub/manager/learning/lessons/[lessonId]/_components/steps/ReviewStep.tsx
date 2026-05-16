@@ -147,7 +147,7 @@ export function ReviewStep({ lessonId, initialData, onComplete }: ReviewStepProp
                                     </div>
                                     <button
                                         onClick={() => openDeleteConfirmation("VOCAB", i)}
-                                        className="w-9 h-9 flex items-center justify-center rounded-xl text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all sm:opacity-0 group-hover:opacity-100 shrink-0"
+                                        className="w-9 h-9 flex items-center justify-center rounded-md text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all sm:opacity-0 group-hover:opacity-100 shrink-0"
                                         title={t("remove") || "Remove"}
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -203,7 +203,7 @@ export function ReviewStep({ lessonId, initialData, onComplete }: ReviewStepProp
                                     </div>
                                     <button
                                         onClick={() => openDeleteConfirmation("STRUCTURE", i)}
-                                        className="w-9 h-9 flex items-center justify-center rounded-xl text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all sm:opacity-0 group-hover:opacity-100 shrink-0"
+                                        className="w-9 h-9 flex items-center justify-center rounded-md text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all sm:opacity-0 group-hover:opacity-100 shrink-0"
                                         title={t("remove") || "Remove"}
                                     >
                                         <Trash2 className="w-4 h-4" />

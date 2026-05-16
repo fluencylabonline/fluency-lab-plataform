@@ -83,7 +83,7 @@ export function ForecastCards({ forecast, month, year }: ForecastCardsProps) {
         href={`/hub/admin/finances/forecast?year=${year}&month=${month}`}
         className={cn(
           buttonVariants({ variant: "outline", size: "sm" }),
-          "w-full h-9 rounded-xl text-xs gap-2"
+          "w-full h-9 rounded-md text-xs gap-2"
         )}
       >
         {t("viewDetails")}

@@ -109,7 +109,7 @@ export function ProfilesPageClient({ initialData }: ProfilesPageClientProps) {
                 key={profile.id}
                 className="card flex items-center gap-4 p-4 transition-all animate-in fade-in slide-in-from-bottom-2 duration-300"
               >
-                <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                <div className="size-12 rounded-md bg-primary/10 flex items-center justify-center text-primary shrink-0">
                   <User className="h-6 w-6" />
                 </div>
 
@@ -148,11 +148,11 @@ export function ProfilesPageClient({ initialData }: ProfilesPageClientProps) {
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="rounded-xl h-8 w-8">
+                      <Button variant="ghost" size="icon" className="rounded-md h-8 w-8">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="rounded-xl">
+                    <DropdownMenuContent align="end" className="rounded-md">
                       {profile.status === "active" && (
                         <DropdownMenuItem asChild>
                           <Link href={`/hub/manager/students/onboarding/${profile.id}/view`} className="flex items-center gap-2 cursor-pointer">

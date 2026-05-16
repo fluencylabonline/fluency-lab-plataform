@@ -36,7 +36,7 @@ export function SuspendedContent() {
 
             <div className="pt-4 flex flex-col gap-3">
                 <Button
-                    className="h-12 text-base font-medium rounded-xl"
+                    className="h-12 text-base font-medium rounded-md"
                 >
                     <a
                         href="https://wa.me/5500000000000" // TODO: Colocar link real do suporte

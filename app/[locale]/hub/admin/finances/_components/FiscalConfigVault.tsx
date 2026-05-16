@@ -167,7 +167,7 @@ export function FiscalConfigVault({ initialConfig, year }: FiscalConfigVaultProp
 
               <div className="space-y-3">
                 {fields.map((field, index) => (
-                  <div key={field.id} className="grid grid-cols-12 gap-2 items-end p-3 rounded-xl bg-muted/20 border border-border/50 relative group">
+                  <div key={field.id} className="grid grid-cols-12 gap-2 items-end p-3 rounded-md bg-muted/20 border border-border/50 relative group">
                     <div className="col-span-3">
                       <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1 block">Min (R$)</label>
                       <VaultInput 

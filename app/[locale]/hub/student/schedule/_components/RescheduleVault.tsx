@@ -124,7 +124,7 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, balance, re
             {isConfirming ? (
               <div className="flex flex-col gap-6 py-4">
                 <div className="space-y-4">
-                  <div className="p-4 rounded-xl border bg-muted/20">
+                  <div className="p-4 rounded-md border bg-muted/20">
                     <p className="text-xs text-muted-foreground uppercase font-bold mb-2">
                       {t("Reschedule.originalClass") || "Aula Original"}
                     </p>
@@ -139,7 +139,7 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, balance, re
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl border border-primary bg-primary/5 ring-1 ring-primary">
+                  <div className="p-4 rounded-md border border-primary bg-primary/5 ring-1 ring-primary">
                     <p className="text-xs text-primary uppercase font-bold mb-2">
                       {t("Reschedule.newDate") || "Nova Data"}
                     </p>
@@ -161,7 +161,7 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, balance, re
             ) : (
               <>
                 <Field label={t("Reschedule.selectSlot") || "Escolha um novo horário"}>
-                  <div className="max-h-[300px] overflow-y-auto border rounded-xl p-2 flex flex-col gap-2">
+                  <div className="max-h-[300px] overflow-y-auto border rounded-md p-2 flex flex-col gap-2">
                     {isLoading ? (
                       <div className="p-4 text-center text-sm text-muted-foreground animate-pulse">
                         {t("Reschedule.loadingSlots") || "Buscando horários disponíveis..."}
@@ -201,7 +201,7 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, balance, re
                       disabled={rescheduleStats?.count >= rescheduleStats?.limit}
                       onClick={() => setUseCreditId(undefined)}
                       className={cn(
-                        "flex items-center justify-between p-3 rounded-xl border text-left transition-all",
+                        "flex items-center justify-between p-3 rounded-md border text-left transition-all",
                         useCreditId === undefined ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-muted-foreground/20",
                         rescheduleStats?.count >= rescheduleStats?.limit && "opacity-50 grayscale cursor-not-allowed"
                       )}
@@ -221,7 +221,7 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, balance, re
                     </button>
 
                     {balance?.total > 0 && (
-                      <div className="p-1 border rounded-xl bg-muted/30">
+                      <div className="p-1 border rounded-md bg-muted/30">
                         <p className="text-[10px] uppercase font-bold text-muted-foreground px-2 py-1">
                           {t("Reschedule.useCredit") || "Ou use um crédito"}
                         </p>

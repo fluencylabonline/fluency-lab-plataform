@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { DoorOpen as DoorOpenIcon } from "lucide-react";
 import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -18,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { signInSchema, type SignInValues } from "@/modules/user/user.schema";
 import { TransitionAnimation } from "@/components/ui/transition-animation";
 import { VerifyMfaVault } from "./VerifyMfaVault";
+import { LockKeyholeIcon, type LockKeyholeIconHandle } from "@/components/animated-icons/lock-keyhole";
 
 export function SignInForm() {
   const t = useTranslations("Auth");
@@ -30,6 +30,7 @@ export function SignInForm() {
   const [isCredentialsLoading, setIsCredentialsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showMfa, setShowMfa] = useState(false);
+  const iconRef = useRef<LockKeyholeIconHandle>(null);
 
   const {
     register,
@@ -149,7 +150,7 @@ export function SignInForm() {
             {...register("email")}
             placeholder={t("email") || "Email"}
             autoComplete="username"
-            className={`h-12 scroll-mt-28 ${errors.email ? "border-destructive focus-visible:ring-destructive" : ""}`}
+            className={`h-12 scroll-mt-28 ${errors.email ? "border-destructive! focus-visible:ring-destructive!" : ""}`}
             disabled={isLoading}
           />
           {errors.email && (
@@ -165,7 +166,7 @@ export function SignInForm() {
             {...register("password")}
             placeholder={t("password") || "Senha"}
             autoComplete="current-password"
-            className={`h-12 scroll-mt-28 ${errors.password ? "border-destructive focus-visible:ring-destructive" : ""}`}
+            className={`h-12 scroll-mt-28 ${errors.password ? "border-destructive! focus-visible:ring-destructive!" : ""}`}
             disabled={isLoading}
           />
           {errors.password && (
@@ -198,6 +199,8 @@ export function SignInForm() {
           disabled={isLoading}
           className="w-full mt-4"
           size="lg"
+          onMouseEnter={() => iconRef.current?.startAnimation()}
+          onMouseLeave={() => iconRef.current?.stopAnimation()}
         >
           {isCredentialsLoading ? (
             <>
@@ -205,7 +208,7 @@ export function SignInForm() {
             </>
           ) : (
             <div className="flex flex-row items-center justify-center">
-              <DoorOpenIcon className="mr-2 w-5 h-5" />
+              <LockKeyholeIcon ref={iconRef} className="mr-2" size={20} />
               <span>{t("signIn") || "Entrar"}</span>
             </div>
           )}

@@ -243,7 +243,7 @@ export function AnalysisStep({
                         <div className="bg-card rounded-md border border-border overflow-hidden shadow-sm flex flex-col min-h-[400px]">
                             <div className="p-6 bg-primary/3 border-b border-border flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                                    <div className="w-10 h-10 bg-primary/10 rounded-md flex items-center justify-center">
                                         <Book className="w-5 h-5 text-primary" />
                                     </div>
                                     <h3 className="font-bold text-lg">{t("vocabulary_found") || "Vocabulary Found"}</h3>
@@ -286,7 +286,7 @@ export function AnalysisStep({
                         <div className="bg-card rounded-md border border-border overflow-hidden shadow-sm flex flex-col min-h-[400px]">
                             <div className="p-6 bg-amber-500/3 border-b border-border flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center">
+                                    <div className="w-10 h-10 bg-amber-500/10 rounded-md flex items-center justify-center">
                                         <Puzzle className="w-5 h-5 text-amber-500" />
                                     </div>
                                     <h3 className="font-bold text-lg">{t("structures_found") || "Structures Found"}</h3>

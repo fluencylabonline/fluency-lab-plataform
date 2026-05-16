@@ -32,7 +32,7 @@ export function StreakWidget({ streak }: StreakWidgetProps) {
       {/* Flame Button */}
       <motion.div
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        className="relative flex-shrink-0 w-16 h-16 rounded-xl bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 flex items-center justify-center"
+        className="relative flex-shrink-0 w-16 h-16 rounded-md bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 flex items-center justify-center"
       >
         <svg width="36" height="36" viewBox="0 0 44 44" fill="none">
           <path

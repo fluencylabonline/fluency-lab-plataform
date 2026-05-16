@@ -163,10 +163,10 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
                 value={role}
                 onValueChange={(val) => setValue("role", val as UserRoles)}
               >
-                <SelectTrigger className="h-10 rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 font-medium">
+                <SelectTrigger className="h-10 rounded-md bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 font-medium">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl">
+                <SelectContent className="rounded-md">
                   {Object.entries(UserRoles).map(([, value]) => (
                     <SelectItem key={value} value={value} className="rounded-lg">
                       {tRoles(value as Parameters<typeof tRoles>[0]) || value}
@@ -189,7 +189,7 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
                 <VaultField label={t("assignedPlan")} error={errors.assignedPlanId?.message}>
                   <div className="space-y-2">
                     {assignedPlanId ? (
-                      <div className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
+                      <div className="flex items-center justify-between p-3 rounded-md bg-primary/5 border border-primary/20">
                         <div className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-primary" />
                           <span className="text-sm font-medium">
@@ -207,7 +207,7 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
                         </Button>
                       </div>
                     ) : (
-                      <Command className="rounded-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+                      <Command className="rounded-md border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
                         <CommandInput placeholder={t("search")} />
                         <CommandList className="max-h-[200px]">
                           <CommandEmpty>{t("noResults")}</CommandEmpty>

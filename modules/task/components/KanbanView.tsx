@@ -96,7 +96,7 @@ export function KanbanView({ tasks, isLoading, project, inboxStatuses }: KanbanV
         {/* Desktop View */}
         <div className="hidden md:flex flex-1 overflow-x-auto p-4 gap-4 items-start h-full custom-scrollbar">
           {statuses.map((status) => (
-            <div key={status.id} className="w-80 shrink-0 flex flex-col max-h-full bg-muted/20 rounded-xl border border-border/50 backdrop-blur-sm">
+            <div key={status.id} className="w-80 shrink-0 flex flex-col max-h-full bg-muted/20 rounded-md border border-border/50 backdrop-blur-sm">
               <div className="p-3 border-b flex items-center justify-between sticky top-0 bg-background/50 backdrop-blur rounded-t-xl z-10">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.1)]" style={{ backgroundColor: status.color || "gray" }} />
@@ -128,7 +128,7 @@ export function KanbanView({ tasks, isLoading, project, inboxStatuses }: KanbanV
                   ))}
                 </AnimatePresence>
                 {tasksByStatus[status.id]?.length === 0 && (
-                  <div className="flex flex-col items-center justify-center h-24 border-2 border-dashed rounded-xl opacity-20">
+                  <div className="flex flex-col items-center justify-center h-24 border-2 border-dashed rounded-md opacity-20">
                     <p className="text-xs font-medium">{t("dropHere") || "Empty"}</p>
                   </div>
                 )}

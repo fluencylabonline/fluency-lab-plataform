@@ -49,7 +49,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   const net = income - expense;
 
   return (
-    <div className="rounded-xl border bg-card px-4 py-3 shadow-xl text-sm min-w-[190px] space-y-2">
+    <div className="rounded-md border bg-card px-4 py-3 shadow-xl text-sm min-w-[190px] space-y-2">
       <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
       <div className="space-y-1.5">
         <div className="flex items-center justify-between gap-6">
@@ -158,7 +158,7 @@ export function FinanceCharts({ data, pendingIncome }: FinanceChartsProps) {
           {/* KPI summaries */}
           <div className="flex flex-row lg:flex-col gap-3 lg:w-48 lg:shrink-0">
             {summaries.map((s) => (
-              <div key={s.label} className={cn("flex-1 lg:flex-none rounded-xl px-3.5 py-3 space-y-1.5", s.bg)}>
+              <div key={s.label} className={cn("flex-1 lg:flex-none rounded-md px-3.5 py-3 space-y-1.5", s.bg)}>
                 <div className="flex items-center justify-between">
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 leading-none">
                     {s.label}

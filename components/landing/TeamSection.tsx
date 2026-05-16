@@ -110,7 +110,7 @@ export default function TeamSection() {
                   ))}
                 </CarouselContent>
                 <div className="flex justify-center mt-4 gap-2">
-                  <span className="text-xs text-slate-300">
+                  <span className="text-xs text-slate-300/45">
                     {t("mobileSwipe") || "Deslize para ver →"}
                   </span>
                 </div>

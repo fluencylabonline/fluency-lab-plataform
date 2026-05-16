@@ -165,7 +165,7 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCours
                   onClick={() => setLangOpen(true)}
                   className={cn(
                     buttonVariants({ variant: "outline" }),
-                    "w-full justify-between h-12 rounded-xl px-4 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                    "w-full justify-between h-12 rounded-md px-4 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
                   )}
                 >
                   {selectedLanguage
@@ -256,7 +256,7 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCours
                     <Button
                       variant="outline"
                       type="button"
-                      className="w-full h-10 rounded-xl gap-2 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800"
+                      className="w-full h-10 rounded-md gap-2 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800"
                       disabled={isUploading}
                     >
                       {isUploading ? (

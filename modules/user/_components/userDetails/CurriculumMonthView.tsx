@@ -36,7 +36,7 @@ export function CurriculumMonthView({
 
   if (slots.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-xl border-muted">
+      <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-md border-muted">
         <p className="text-muted-foreground">Nenhuma aula agendada ou gerada.</p>
       </div>
     );

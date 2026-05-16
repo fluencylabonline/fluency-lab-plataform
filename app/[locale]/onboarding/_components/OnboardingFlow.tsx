@@ -35,7 +35,7 @@ interface OnboardingFlowProps {
 }
 
 const inputClass = cn(
-    "w-full rounded-xl border border-black/[0.1] dark:border-white/[0.07] bg-black/[0.07] dark:bg-white/[0.03] px-4 py-3",
+    "w-full rounded-md border border-black/[0.1] dark:border-white/[0.07] bg-black/[0.07] dark:bg-white/[0.03] px-4 py-3",
     "text-sm text-slate-700 dark:text-white placeholder:text-foreground",
     "outline-none transition-all duration-200",
     "focus:border-violet-500/50 focus:bg-violet-500/[0.04] focus:ring-0",

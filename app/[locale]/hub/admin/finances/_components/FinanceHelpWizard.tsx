@@ -32,7 +32,7 @@ export function FinanceHelpWizard({ open, onOpenChange }: FinanceHelpWizardProps
             Este módulo automatiza a gestão financeira da FluencyLab. Aqui você centraliza receitas de mensalidades,
             despesas com professores e impostos.
           </p>
-          <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
+          <div className="p-4 rounded-md bg-primary/5 border border-primary/10">
             <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
               <LandmarkIcon size={16} /> Regime de Caixa
             </h4>

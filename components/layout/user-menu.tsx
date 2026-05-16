@@ -178,7 +178,7 @@ export function UserMenu({ user }: UserMenuProps) {
                 {/* Notification banner */}
                 <Vault>
                     <VaultTrigger asChild>
-                        <button className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-muted/40 hover:bg-muted/70 transition-colors mt-4">
+                        <button className="w-full flex items-center justify-between px-3 py-3 rounded-md bg-muted/40 hover:bg-muted/70 transition-colors mt-4">
                             <div className="flex items-center gap-3">
                                 <div className="relative">
                                     <Bell className="h-5 w-5 text-foreground" />
@@ -209,7 +209,7 @@ export function UserMenu({ user }: UserMenuProps) {
                 </Vault>
 
                 {/* Appearance + Language as inline toggle rows */}
-                <div className="mt-2 rounded-xl border border-border overflow-hidden divide-y divide-border">
+                <div className="mt-2 rounded-md border border-border overflow-hidden divide-y divide-border">
                     {/* Appearance row */}
                     <div className="px-3 py-3">
                         <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60 mb-2">
@@ -256,7 +256,7 @@ export function UserMenu({ user }: UserMenuProps) {
                 </div>
 
                 {/* Nav links */}
-                <div className="mt-2 rounded-xl border border-border overflow-hidden divide-y divide-border">
+                <div className="mt-2 rounded-md border border-border overflow-hidden divide-y divide-border">
                     {menuItems.map((item) => (
                         <Link
                             key={item.label}

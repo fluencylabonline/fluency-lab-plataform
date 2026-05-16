@@ -160,7 +160,7 @@ function ItemCard({ item, index, onClick }: ItemCardProps) {
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                         <div className={cn(
-                            "w-7 h-7 rounded-xl flex items-center justify-center shadow-sm",
+                            "w-7 h-7 rounded-md flex items-center justify-center shadow-sm",
                             isVocab 
                                 ? "bg-primary/10 text-primary border border-primary/20" 
                                 : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
@@ -191,7 +191,7 @@ function ItemCard({ item, index, onClick }: ItemCardProps) {
 
             <div className="flex-1 space-y-3 relative z-10">
                 {item.translation && (
-                    <div className="bg-muted/40 p-3 rounded-xl border border-border/20 group-hover:bg-muted/60 transition-colors">
+                    <div className="bg-muted/40 p-3 rounded-md border border-border/20 group-hover:bg-muted/60 transition-colors">
                         <p className="text-xs font-semibold text-muted-foreground italic line-clamp-2">
                             {item.translation}
                         </p>

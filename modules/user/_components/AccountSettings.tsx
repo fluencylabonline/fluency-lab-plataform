@@ -107,7 +107,7 @@ export function AccountSettings({ initialData }: AccountSettingsProps) {
               key={lang.id}
               disabled={isUpdatingLocale}
               onClick={() => handleLocaleChange(lang.id)}
-              className={`flex items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all ${
+              className={`flex items-center justify-center gap-3 p-4 rounded-md border-2 transition-all ${
                 locale === lang.id
                   ? "border-primary bg-primary/5 font-bold"
                   : "border-transparent bg-muted/50 hover:bg-muted"
@@ -126,7 +126,7 @@ export function AccountSettings({ initialData }: AccountSettingsProps) {
           <Mail className="w-5 h-5 text-primary" />
           <h3 className="text-lg font-semibold">{t("email")}</h3>
         </div>
-        <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border">
+        <div className="flex items-center justify-between p-4 rounded-md bg-muted/30 border">
           <span className="text-sm font-medium">{user.email}</span>
           {emailVerified ? (
             <Badge variant="success" className="gap-1 px-3 py-1">

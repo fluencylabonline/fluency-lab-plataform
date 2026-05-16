@@ -202,7 +202,7 @@ export function TranscriptionReviewStep({ lessonId, media, onComplete, status }:
 
         {/* ── Audio Player ── */}
         <div className={cn(
-          "card shrink-0 flex md:flex-col items-center justify-between md:justify-center gap-4 md:gap-6 p-4 md:p-8 border border-border rounded-xl bg-background",
+          "card shrink-0 flex md:flex-col items-center justify-between md:justify-center gap-4 md:gap-6 p-4 md:p-8 border border-border rounded-md bg-background",
           "w-full md:w-64 sticky top-0 md:relative z-10 md:z-0 md:shadow-none"
         )}>
 
@@ -274,7 +274,7 @@ export function TranscriptionReviewStep({ lessonId, media, onComplete, status }:
         </div>
 
         {/* ── Transcription Editor ── */}
-        <div className="card flex flex-col flex-1 border border-border rounded-xl bg-background overflow-hidden min-h-[400px] md:min-h-0">
+        <div className="card flex flex-col flex-1 border border-border rounded-md bg-background overflow-hidden min-h-[400px] md:min-h-0">
 
           {/* Editor header */}
           <div className="flex items-center justify-between px-4 md:px-5 py-3 border-b border-border bg-muted/5">
@@ -358,7 +358,7 @@ function SentenceRow({
     <div
       ref={segmentRef}
       className={cn(
-        "rounded-xl border transition-all duration-300",
+        "rounded-md border transition-all duration-300",
         wasSaved
           ? "border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/20"
           : isActive

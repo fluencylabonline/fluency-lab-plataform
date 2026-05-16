@@ -58,7 +58,7 @@ export function AddLessonVault({ availableLessons, onAdd, isAdding }: AddLessonV
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <Input
                             placeholder="Search lessons by title..."
-                            className="h-12 pl-10 rounded-xl"
+                            className="h-12 pl-10 rounded-md"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />

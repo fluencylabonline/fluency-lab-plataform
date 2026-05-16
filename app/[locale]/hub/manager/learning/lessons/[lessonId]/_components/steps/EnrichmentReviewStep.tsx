@@ -240,7 +240,7 @@ export function EnrichmentReviewStep({ lessonId, onComplete, initialItems, statu
             </div>
 
             {/* Legend & Stats */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-muted/30 border border-border/50">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-md bg-muted/30 border border-border/50">
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-[13px] text-muted-foreground">
                     <span className="flex items-center gap-2">
                         <div className="w-5 h-5 rounded-md bg-amber-500/10 flex items-center justify-center">
@@ -270,7 +270,7 @@ export function EnrichmentReviewStep({ lessonId, onComplete, initialItems, statu
                 {/* Vocabulary */}
                 <section className="space-y-4">
                     <div className="flex items-center gap-3 px-1">
-                        <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center shadow-inner">
+                        <div className="w-10 h-10 bg-primary/10 rounded-md flex items-center justify-center shadow-inner">
                             <BookOpen className="w-5 h-5 text-primary" />
                         </div>
                         <div>
@@ -303,7 +303,7 @@ export function EnrichmentReviewStep({ lessonId, onComplete, initialItems, statu
                 {/* Structures */}
                 <section className="space-y-4">
                     <div className="flex items-center gap-3 px-1">
-                        <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center shadow-inner">
+                        <div className="w-10 h-10 bg-amber-500/10 rounded-md flex items-center justify-center shadow-inner">
                             <Puzzle className="w-5 h-5 text-amber-500" />
                         </div>
                         <div>
@@ -358,7 +358,7 @@ function ItemCard({
     return (
         <div
             className={cn(
-                "group flex items-start gap-3.5 p-4 rounded-xl border transition-all cursor-pointer animate-in fade-in slide-in-from-bottom-2 duration-300",
+                "group flex items-start gap-3.5 p-4 rounded-md border transition-all cursor-pointer animate-in fade-in slide-in-from-bottom-2 duration-300",
                 isCore
                     ? "border-amber-500/25 bg-amber-500/2 hover:bg-amber-500/4 shadow-[0_2px_10px_-4px_rgba(245,158,11,0.1)]"
                     : "border-border bg-card hover:bg-muted/40 shadow-sm"

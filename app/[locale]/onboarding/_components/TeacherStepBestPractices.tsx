@@ -77,7 +77,7 @@ export function TeacherStepBestPractices() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.08, duration: 0.3 }}
-                        className={`flex gap-4 rounded-xl border p-4 ${item.accent}`}
+                        className={`flex gap-4 rounded-md border p-4 ${item.accent}`}
                     >
                         <item.icon className={`mt-0.5 h-5 w-5 shrink-0 ${item.iconColor}`} />
                         <div className="space-y-1">
@@ -95,7 +95,7 @@ export function TeacherStepBestPractices() {
             <button
                 onClick={onFinish}
                 disabled={loading}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
             >
                 {loading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

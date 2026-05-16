@@ -50,7 +50,7 @@ export function ForecastFilters({ currentMonth, currentYear }: ForecastFiltersPr
         value={currentMonth.toString()}
         onValueChange={(v) => updateFilters("month", v)}
       >
-        <SelectTrigger className="w-[160px] rounded-xl border-border/40">
+        <SelectTrigger className="w-[160px] rounded-md border-border/40">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -65,7 +65,7 @@ export function ForecastFilters({ currentMonth, currentYear }: ForecastFiltersPr
         value={currentYear.toString()}
         onValueChange={(v) => updateFilters("year", v)}
       >
-        <SelectTrigger className="w-[100px] rounded-xl border-border/40">
+        <SelectTrigger className="w-[100px] rounded-md border-border/40">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

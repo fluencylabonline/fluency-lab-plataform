@@ -198,7 +198,7 @@ export function NewTransactionVault() {
                 <button
                   type="button"
                   onClick={() => setCategoryOpen(true)}
-                  className="flex h-10 w-full items-center justify-between rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                 >
                   {form.watch("category") || t("categoryPlaceholder")}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -282,7 +282,7 @@ export function NewTransactionVault() {
                   accept="image/*,.pdf,.doc,.docx"
                 />
                 {form.watch("attachmentUrl") ? (
-                  <div className="flex items-center gap-2 p-2 px-3 rounded-xl bg-accent/50 border border-border w-full">
+                  <div className="flex items-center gap-2 p-2 px-3 rounded-md bg-accent/50 border border-border w-full">
                     <Paperclip size={14} className="text-primary" />
                     <span className="text-xs truncate flex-1">{t("attachmentLoaded")}</span>
                     <button
@@ -298,7 +298,7 @@ export function NewTransactionVault() {
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
-                    className="flex items-center justify-center w-full h-10 gap-2 border-2 border-dashed border-gray-200/50 dark:border-gray-700/50 rounded-xl hover:bg-muted/50 transition-colors disabled:opacity-50"
+                    className="flex items-center justify-center w-full h-10 gap-2 border-2 border-dashed border-gray-200/50 dark:border-gray-700/50 rounded-md hover:bg-muted/50 transition-colors disabled:opacity-50"
                   >
                     {uploading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -312,7 +312,7 @@ export function NewTransactionVault() {
             </VaultField>
 
             {form.watch("type") === "expense" && (
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-muted/30 border border-border">
+              <div className="flex items-center gap-2 p-3 rounded-md bg-muted/30 border border-border">
                 <Controller
                   name="deductible"
                   control={form.control}

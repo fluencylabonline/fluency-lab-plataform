@@ -105,7 +105,7 @@ export function ForgotPasswordForm() {
               type="email"
               placeholder="seu@email.com"
               {...register("email")}
-              className={`pl-10 h-12 ${errors.email ? "border-destructive focus-visible:ring-destructive" : ""}`}
+              className={`pl-10 h-12 ${errors.email ? "border-destructive! focus-visible:ring-destructive!" : ""}`}
               disabled={isLoading}
               autoComplete="email"
             />

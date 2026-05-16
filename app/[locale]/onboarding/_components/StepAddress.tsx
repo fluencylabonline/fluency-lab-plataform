@@ -179,7 +179,7 @@ export function StepAddress({
 
             {/* Minor warning */}
             {minor && (
-                <div className="flex gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.07] px-4 py-3.5">
+                <div className="flex gap-3 rounded-md border border-amber-500/20 bg-amber-500/[0.07] px-4 py-3.5">
                     <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
                     <div className="space-y-0.5">
                         <p className="text-sm font-medium text-amber-400">
@@ -333,7 +333,7 @@ export function StepAddress({
                     type="button"
                     onClick={onBack}
                     disabled={loading}
-                    className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-white/[0.08] text-sm text-slate-500 transition-all hover:border-white/[0.14] hover:text-slate-300 disabled:opacity-40"
+                    className="flex h-11 flex-1 items-center justify-center gap-2 rounded-md border border-white/[0.08] text-sm text-slate-500 transition-all hover:border-white/[0.14] hover:text-slate-300 disabled:opacity-40"
                 >
                     <ArrowLeft className="h-4 w-4" />
                     {t("steps.back") || "Voltar"}
@@ -342,7 +342,7 @@ export function StepAddress({
                 <button
                     type="submit"
                     disabled={loading}
-                    className="flex h-11 flex-[2] items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
+                    className="flex h-11 flex-[2] items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
                 >
                     {loading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />

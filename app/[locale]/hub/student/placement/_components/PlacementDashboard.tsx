@@ -155,7 +155,7 @@ export function PlacementDashboard({ initialData }: PlacementDashboardProps) {
             </p>
           </div>
           {initialData.eligibility.reason === 'cooldown' && initialData.eligibility.nextEligibleDate && (
-            <Badge variant="secondary" className="bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 px-4 py-1.5 rounded-xl border-none font-bold">
+            <Badge variant="secondary" className="bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 px-4 py-1.5 rounded-md border-none font-bold">
               {format.dateTime(new Date(initialData.eligibility.nextEligibleDate!), { day: '2-digit', month: 'short' })}
             </Badge>
           )}
@@ -174,7 +174,7 @@ export function PlacementDashboard({ initialData }: PlacementDashboardProps) {
               <motion.div key={test.id} variants={fadeUp} initial="hidden" animate="show" custom={i}>
                 <div className="flex items-center justify-between gap-4 rounded-2xl border border-orange-200 dark:border-orange-900/40 bg-orange-50/40 dark:bg-orange-950/10 px-5 py-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center font-bold text-orange-600 dark:text-orange-400 text-sm">
+                    <div className="w-10 h-10 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center font-bold text-orange-600 dark:text-orange-400 text-sm">
                       {test.language?.code?.toUpperCase()?.substring(0, 2) || "??"}
                     </div>
                     <div>
@@ -260,7 +260,7 @@ export function PlacementDashboard({ initialData }: PlacementDashboardProps) {
                   className="w-full flex items-center justify-between gap-4 px-5 py-4 hover:bg-muted/40 transition-colors disabled:opacity-50 text-left"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center font-bold text-indigo-600 dark:text-indigo-400 text-xs">
+                    <div className="w-10 h-10 rounded-md bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center font-bold text-indigo-600 dark:text-indigo-400 text-xs">
                       {isLoading ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
@@ -315,7 +315,7 @@ export function PlacementDashboard({ initialData }: PlacementDashboardProps) {
             <>
               <VaultHeader>
                 <div className="flex items-center gap-3 text-left">
-                  <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-950/50 rounded-xl flex items-center justify-center font-bold text-indigo-600 uppercase text-sm">
+                  <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-950/50 rounded-md flex items-center justify-center font-bold text-indigo-600 uppercase text-sm">
                     {selectedTestResult.level?.substring(0, 2)}
                   </div>
                   <div>

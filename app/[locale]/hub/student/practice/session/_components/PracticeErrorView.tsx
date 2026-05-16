@@ -37,14 +37,14 @@ export function PracticeErrorView({ message }: PracticeErrorViewProps) {
         transition={{ delay: 0.2 }}
         className="flex flex-col w-full gap-3"
       >
-        <Button className="w-full py-6 rounded-xl font-bold gap-2">
+        <Button className="w-full py-6 rounded-md font-bold gap-2">
           <Link href="/hub/student/practice">
             <ArrowLeft className="w-4 h-4" />
             Voltar ao Dashboard
           </Link>
         </Button>
 
-        <Button variant="ghost" className="w-full py-6 rounded-xl font-bold gap-2 text-muted-foreground">
+        <Button variant="ghost" className="w-full py-6 rounded-md font-bold gap-2 text-muted-foreground">
           <MessageCircle className="w-4 h-4" />
           Falar com Suporte
         </Button>

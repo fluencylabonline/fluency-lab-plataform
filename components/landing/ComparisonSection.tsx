@@ -6,9 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Carousel,
   CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+  CarouselItem
 } from "@/components/ui/carousel";
 import { useTranslations } from "next-intl";
 import { containerVariants, itemVariants } from "@/lib/animations";
@@ -123,13 +121,13 @@ export default function ComparisonSection() {
           </p>
         </div>
 
-        <div className="block lg:hidden px-2">
+        <div className="block lg:hidden">
           <Carousel
             opts={{
               align: "start",
               loop: true,
             }}
-            className="w-full max-w-sm mx-auto sm:max-w-md"
+            className="w-full max-w-full mx-auto sm:max-w-full"
           >
             <CarouselContent>
               {comparisons.map((item, index) => (
@@ -140,11 +138,7 @@ export default function ComparisonSection() {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="hidden sm:block">
-              <CarouselPrevious className="-left-12" />
-              <CarouselNext className="-right-12" />
-            </div>
-            <div className="mt-4 text-center text-sm text-slate-400 sm:hidden">
+            <div className="mt-4 text-center text-sm text-slate-400/40 sm:hidden">
               {t("mobileSwipe") || "Deslize para ver mais →"}
             </div>
           </Carousel>

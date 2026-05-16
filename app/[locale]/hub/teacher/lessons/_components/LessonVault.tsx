@@ -97,7 +97,7 @@ export function LessonVault({ lessonId, onClose }: LessonVaultProps) {
                     <h4 className="text-xs font-bold uppercase text-primary/70 px-1">Vocabulário</h4>
                     <div className="space-y-2">
                       {lesson.items?.filter(i => i.item.type === "VOCABULARY").map((li, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 bg-background border border-border/50 rounded-xl hover:border-primary/30 transition-colors">
+                        <div key={idx} className="flex items-center justify-between p-3 bg-background border border-border/50 rounded-md hover:border-primary/30 transition-colors">
                           <span className="font-bold text-sm">{li.item.lemma}</span>
                           <span className="text-xs text-muted-foreground">{(li.item.metadata as { translation?: string }).translation}</span>
                         </div>
@@ -113,7 +113,7 @@ export function LessonVault({ lessonId, onClose }: LessonVaultProps) {
                     <h4 className="text-xs font-bold uppercase text-primary/70 px-1">Estruturas</h4>
                     <div className="space-y-2">
                       {lesson.items?.filter(i => i.item.type === "STRUCTURE").map((li, idx) => (
-                        <div key={idx} className="flex flex-col gap-1 p-3 bg-background border border-border/50 rounded-xl hover:border-primary/30 transition-colors">
+                        <div key={idx} className="flex flex-col gap-1 p-3 bg-background border border-border/50 rounded-md hover:border-primary/30 transition-colors">
                           <span className="font-bold text-sm">{li.item.lemma}</span>
                           <span className="text-xs text-muted-foreground">{(li.item.metadata as { translation?: string }).translation}</span>
                         </div>

@@ -25,7 +25,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   const d = payload[0];
   return (
-    <div className="rounded-xl border bg-card px-3 py-2 shadow-lg text-sm">
+    <div className="rounded-md border bg-card px-3 py-2 shadow-lg text-sm">
       <div className="flex items-center gap-2">
         <span className="inline-block w-2 h-2 rounded-full" style={{ background: d.payload.color }} />
         <span className="text-muted-foreground">{d.name}</span>

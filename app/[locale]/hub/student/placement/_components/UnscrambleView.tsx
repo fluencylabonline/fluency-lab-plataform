@@ -63,7 +63,7 @@ export function UnscrambleView({ words, correctSentence, onComplete, onChange }:
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               onClick={() => handleRemove(word)}
-              className="px-4 py-2 bg-card border-2 border-b-4 border-slate-200 dark:border-gray-800 rounded-xl font-bold text-lg hover:bg-accent transition-colors"
+              className="px-4 py-2 bg-card border-2 border-b-4 border-slate-200 dark:border-gray-800 rounded-md font-bold text-lg hover:bg-accent transition-colors"
             >
               {word.text}
             </motion.button>
@@ -86,7 +86,7 @@ export function UnscrambleView({ words, correctSentence, onComplete, onChange }:
             animate={{ scale: 1, opacity: 1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => handlePick(word)}
-            className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 border-2 border-b-4 border-indigo-200 dark:border-indigo-800 rounded-xl font-bold text-lg text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors"
+            className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 border-2 border-b-4 border-indigo-200 dark:border-indigo-800 rounded-md font-bold text-lg text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors"
           >
             {word.text}
           </motion.button>

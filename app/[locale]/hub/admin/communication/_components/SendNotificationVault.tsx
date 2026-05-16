@@ -123,7 +123,7 @@ export function SendNotificationVault({ open, onOpenChange }: SendNotificationVa
               <Textarea
                 {...register("body")}
                 placeholder="Descreva o conteúdo da notificação..."
-                className="rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 min-h-[100px]"
+                className="rounded-md bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 min-h-[100px]"
               />
             </VaultField>
 
@@ -133,7 +133,7 @@ export function SendNotificationVault({ open, onOpenChange }: SendNotificationVa
                   onValueChange={(val) => setValue("targetType", val as SendNotificationValues["targetType"])}
                   defaultValue="all"
                 >
-                  <SelectTrigger className="rounded-xl h-10">
+                  <SelectTrigger className="rounded-md h-10">
                     <SelectValue placeholder="Selecione..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -147,7 +147,7 @@ export function SendNotificationVault({ open, onOpenChange }: SendNotificationVa
               {targetType === "role" && (
                 <VaultField label="Selecione a Role">
                   <Select onValueChange={(val) => setValue("targetRole", val as SendNotificationValues["targetRole"])}>
-                    <SelectTrigger className="rounded-xl h-10">
+                    <SelectTrigger className="rounded-md h-10">
                       <SelectValue placeholder="Role..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -163,7 +163,7 @@ export function SendNotificationVault({ open, onOpenChange }: SendNotificationVa
             {targetType === "specific" && (
               <VaultField label="Destinatários" error={errors.userIds?.message}>
                 <div className="space-y-3">
-                  <div className="flex flex-wrap gap-2 min-h-[40px] p-2 rounded-xl border border-dashed border-muted-foreground/30">
+                  <div className="flex flex-wrap gap-2 min-h-[40px] p-2 rounded-md border border-dashed border-muted-foreground/30">
                     {selectedUsers.length === 0 ? (
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <Search className="w-3 h-3" /> Nenhum usuário selecionado
@@ -187,7 +187,7 @@ export function SendNotificationVault({ open, onOpenChange }: SendNotificationVa
                   <div className="space-y-2">
                     <Command 
                       shouldFilter={false} 
-                      className="rounded-xl border border-gray-200/50 dark:border-gray-700/50"
+                      className="rounded-md border border-gray-200/50 dark:border-gray-700/50"
                     >
                       <CommandInput
                         placeholder="Procurar usuários por nome, email ou ID..."

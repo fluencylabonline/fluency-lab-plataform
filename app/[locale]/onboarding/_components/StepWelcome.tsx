@@ -150,7 +150,7 @@ export function StepWelcome({
                     )}
 
                     {isMinor && (
-                        <div className="flex flex-col gap-3 p-4 rounded-xl border border-violet-500/30 bg-violet-500/5 animate-in fade-in slide-in-from-top-1 duration-300">
+                        <div className="flex flex-col gap-3 p-4 rounded-md border border-violet-500/30 bg-violet-500/5 animate-in fade-in slide-in-from-top-1 duration-300">
                             <div className="flex items-start gap-3">
                                 <div className="pt-1">
                                     <input
@@ -175,7 +175,7 @@ export function StepWelcome({
             <button
                 type="submit"
                 disabled={loading || !isComplete}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
             >
                 {loading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

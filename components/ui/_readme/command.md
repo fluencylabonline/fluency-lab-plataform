@@ -7,17 +7,17 @@ The `Command` component is a compound primitive used for command palettes, menu 
 For maximum flexibility, use the compound components:
 
 ```tsx
-import { 
-  Command, 
-  CommandInput, 
-  CommandList, 
-  CommandEmpty, 
-  CommandGroup, 
-  CommandItem 
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
 } from "@/components/ui/command";
 import { Calculator, Calendar, Smile } from "lucide-react";
 
-<Command className="rounded-xl border border-gray-200/50 dark:border-gray-700/50">
+<Command className="rounded-md border border-gray-200/50 dark:border-gray-700/50">
   <CommandInput placeholder="Type a command or search..." />
   <CommandList>
     <CommandEmpty>No results found.</CommandEmpty>
@@ -32,7 +32,7 @@ import { Calculator, Calendar, Smile } from "lucide-react";
       </CommandItem>
     </CommandGroup>
   </CommandList>
-</Command>
+</Command>;
 ```
 
 ## Specialized Usage (CommandDialog)
@@ -50,24 +50,22 @@ const [open, setOpen] = useState(false);
   <CommandList>
     <CommandEmpty>No results found.</CommandEmpty>
     <CommandGroup heading="General">
-      <CommandItem onSelect={() => console.log("Profile")}>
-        Profile
-      </CommandItem>
+      <CommandItem onSelect={() => console.log("Profile")}>Profile</CommandItem>
     </CommandGroup>
   </CommandList>
-</CommandDialog>
+</CommandDialog>;
 ```
 
 ## Available Components
 
-| Component | Description | Props |
-|-----------|-------------|-------|
-| `Command` | Root container | `className`, standard cmdk props |
-| `CommandDialog`| Vault-based modal container | `open`, `onOpenChange`, Vault props |
-| `CommandInput` | Search input with icon | `className`, placeholder |
-| `CommandList` | Container for command items | `className` |
-| `CommandEmpty` | State when no results match | `children` |
-| `CommandGroup` | Section with an optional heading | `heading`, `className` |
-| `CommandItem` | Actionable list item | `onSelect`, `className` |
-| `CommandShortcut`| Keyboard shortcut hint | `className` |
-| `CommandSeparator`| Visual divider | `className` |
+| Component          | Description                      | Props                               |
+| ------------------ | -------------------------------- | ----------------------------------- |
+| `Command`          | Root container                   | `className`, standard cmdk props    |
+| `CommandDialog`    | Vault-based modal container      | `open`, `onOpenChange`, Vault props |
+| `CommandInput`     | Search input with icon           | `className`, placeholder            |
+| `CommandList`      | Container for command items      | `className`                         |
+| `CommandEmpty`     | State when no results match      | `children`                          |
+| `CommandGroup`     | Section with an optional heading | `heading`, `className`              |
+| `CommandItem`      | Actionable list item             | `onSelect`, `className`             |
+| `CommandShortcut`  | Keyboard shortcut hint           | `className`                         |
+| `CommandSeparator` | Visual divider                   | `className`                         |

@@ -45,7 +45,7 @@ export function StudentPlanStatus({ studentId }: StudentPlanStatusProps) {
                 : "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-800/50"
             }`}>
             <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-xl ${hasGap ? "bg-amber-100 dark:bg-amber-900/30" : "bg-emerald-100 dark:bg-emerald-900/30"
+                <div className={`p-2 rounded-md ${hasGap ? "bg-amber-100 dark:bg-amber-900/30" : "bg-emerald-100 dark:bg-emerald-900/30"
                     }`}>
                     {hasGap ? (
                         <AlertTriangle className={`w-5 h-5 ${hasGap ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"}`} />

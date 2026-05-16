@@ -93,7 +93,7 @@ export function PendingCancellationContent({ user }: PendingCancellationContentP
         <div className="space-y-4 pt-6 border-t">
           <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">{t("pixCopyPaste")}</p>
           <div className="flex gap-2">
-            <div className="flex-1 bg-muted/50 p-3 rounded-xl border text-left truncate font-mono text-[10px] leading-relaxed select-all">
+            <div className="flex-1 bg-muted/50 p-3 rounded-md border text-left truncate font-mono text-[10px] leading-relaxed select-all">
               {user.cancellationPixCode}
             </div>
             <Button 

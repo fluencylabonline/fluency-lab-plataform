@@ -141,7 +141,7 @@ export function MediaLibraryVault() {
             <Vault open={isOpen} onOpenChange={setIsOpen}>
                 <VaultTrigger asChild>
                     <button className="card flex flex-col items-center justify-center p-4 group w-full">
-                        <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl mb-3 group-hover:scale-110 transition-transform">
+                        <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-md mb-3 group-hover:scale-110 transition-transform">
                             <FileAudio className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                         </div>
                         <span className="text-sm font-semibold">Biblioteca</span>
@@ -207,7 +207,7 @@ export function MediaLibraryVault() {
                                                 className="flex items-center justify-between p-4 bg-muted/30 border border-border rounded-2xl hover:border-primary/30 transition-all"
                                             >
                                                 <div className="flex items-center gap-4 flex-1 min-w-0">
-                                                    <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-xl shrink-0">
+                                                    <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-md shrink-0">
                                                         <FileAudio className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                                     </div>
                                                     <div className="flex flex-col min-w-0 flex-1">

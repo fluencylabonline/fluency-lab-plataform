@@ -163,7 +163,7 @@ export function StepPayment({
                     >
                         {/* Plan summary */}
                         {plan && (
-                            <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-5 space-y-4">
+                            <div className="rounded-md border border-white/[0.07] bg-white/[0.03] p-5 space-y-4">
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-medium text-slate-200">
                                         {plan.name}
@@ -207,7 +207,7 @@ export function StepPayment({
                                             key={day}
                                             onClick={() => setSelectedDueDay(day)}
                                             className={cn(
-                                                "h-14 w-full rounded-xl border text-lg font-semibold transition-all duration-200",
+                                                "h-14 w-full rounded-md border text-lg font-semibold transition-all duration-200",
                                                 isActive
                                                     ? "border-violet-500/50 bg-violet-500/10 text-violet-300"
                                                     : "border-white/[0.07] bg-white/[0.03] text-slate-500 hover:border-white/[0.14] hover:text-slate-300"
@@ -226,7 +226,7 @@ export function StepPayment({
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: "auto" }}
                                 exit={{ opacity: 0, height: 0 }}
-                                className="flex gap-3 rounded-xl border border-blue-500/20 bg-blue-500/[0.07] px-4 py-3 text-sm text-blue-400"
+                                className="flex gap-3 rounded-md border border-blue-500/20 bg-blue-500/[0.07] px-4 py-3 text-sm text-blue-400"
                             >
                                 <Info className="mt-0.5 h-4 w-4 shrink-0" />
                                 <span>{t("payment.prorataWarning")}</span>
@@ -238,7 +238,7 @@ export function StepPayment({
                             <button
                                 onClick={onBack}
                                 disabled={loading}
-                                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-white/[0.08] text-sm text-slate-500 transition-all hover:border-white/[0.14] hover:text-slate-300 disabled:opacity-40"
+                                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-md border border-white/[0.08] text-sm text-slate-500 transition-all hover:border-white/[0.14] hover:text-slate-300 disabled:opacity-40"
                             >
                                 <ArrowLeft className="h-4 w-4" />
                                 {t("steps.back") || "Voltar"}
@@ -246,7 +246,7 @@ export function StepPayment({
                             <Button
                                 onClick={handleConfirmDate}
                                 disabled={loading || !plan}
-                                className="flex h-11 flex-[2] items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
+                                className="flex h-11 flex-[2] items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
                             >
                                 {loading ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -268,7 +268,7 @@ export function StepPayment({
                         transition={{ duration: 0.3 }}
                         className="space-y-5"
                     >
-                        <div className="overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.03]">
+                        <div className="overflow-hidden rounded-md border border-white/[0.07] bg-white/[0.03]">
                             {/* Header */}
                             <div className="flex items-center gap-2.5 border-b border-white/[0.06] px-5 py-3.5">
                                 <QrCode className="h-4 w-4 text-violet-400" />
@@ -280,7 +280,7 @@ export function StepPayment({
                             {/* Body */}
                             <div className="flex flex-col items-center gap-5 px-6 py-6">
                                 {/* QR Code */}
-                                <div className="rounded-xl border-4 border-white bg-white p-1 shadow-lg">
+                                <div className="rounded-md border-4 border-white bg-white p-1 shadow-lg">
                                     <Image
                                         src={pixData.pixImage || ""}
                                         alt="PIX QR Code"
@@ -326,7 +326,7 @@ export function StepPayment({
                         </div>
 
                         {/* Pay later warning */}
-                        <div className="flex gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.07] px-4 py-3 text-sm text-amber-500/80">
+                        <div className="flex gap-3 rounded-md border border-amber-500/20 bg-amber-500/[0.07] px-4 py-3 text-sm text-amber-500/80">
                             <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
                             <span>
                                 {t("payment.payLaterWarning") ||
@@ -337,7 +337,7 @@ export function StepPayment({
                         {/* Navigation */}
                         <button
                             onClick={() => onNext({ dueDay: parseInt(selectedDueDay) })}
-                            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500"
+                            className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500"
                         >
                             {t("steps.next") || "Próximo"}
                             <ArrowRight className="h-4 w-4" />
@@ -355,7 +355,7 @@ export function StepPayment({
                         transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
                         className="space-y-5"
                     >
-                        <div className="flex flex-col items-center gap-4 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.07] px-6 py-10 text-center">
+                        <div className="flex flex-col items-center gap-4 rounded-md border border-emerald-500/20 bg-emerald-500/[0.07] px-6 py-10 text-center">
                             <div className="flex h-14 w-14 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10">
                                 <CheckCircle2 className="h-7 w-7 text-emerald-400" />
                             </div>
@@ -372,7 +372,7 @@ export function StepPayment({
 
                         <button
                             onClick={() => onNext({ dueDay: parseInt(selectedDueDay) })}
-                            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500"
+                            className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500"
                         >
                             {t("steps.next") || "Próximo"}
                             <ArrowRight className="h-4 w-4" />

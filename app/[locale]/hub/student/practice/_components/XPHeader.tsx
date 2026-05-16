@@ -105,7 +105,7 @@ export function XPHeader({ user }: XPHeaderProps) {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="flex items-center gap-3 bg-orange-500/10 p-4 rounded-xl border border-orange-500/20">
+        <div className="flex items-center gap-3 bg-orange-500/10 p-4 rounded-md border border-orange-500/20">
           <div className="w-10 h-10 rounded-lg bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
             <Flame className="w-6 h-6 text-white fill-white" />
           </div>
@@ -119,7 +119,7 @@ export function XPHeader({ user }: XPHeaderProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-primary/10 p-4 rounded-xl border border-primary/20">
+        <div className="flex items-center gap-3 bg-primary/10 p-4 rounded-md border border-primary/20">
           <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
             <Trophy className="w-6 h-6 text-white" />
           </div>

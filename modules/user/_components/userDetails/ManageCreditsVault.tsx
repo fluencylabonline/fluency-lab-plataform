@@ -185,11 +185,11 @@ export function ManageCreditsVault({
           {view === "list" && (
             <div className="space-y-6 px-6 pb-6">
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl flex flex-col gap-1 text-center">
+                <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-md flex flex-col gap-1 text-center">
                   <span className="text-2xl font-bold text-amber-600">{credits.length}</span>
                   <span className="text-[10px] text-amber-700 font-bold uppercase tracking-wider">Créditos Ativos</span>
                 </div>
-                <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl flex flex-col gap-1 text-center">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-md flex flex-col gap-1 text-center">
                   <span className="text-2xl font-bold text-emerald-600">{history.filter(c => c.usedAt).length}</span>
                   <span className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider">Créditos Usados</span>
                 </div>
@@ -251,7 +251,7 @@ export function ManageCreditsVault({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <VaultField label="Tipo de Crédito" error={errors.type?.message} required>
                     <Select onValueChange={(val) => setValue("type", val as GrantFormValues["type"])} defaultValue={getValues("type")}>
-                      <SelectTrigger className="h-11 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl">
+                      <SelectTrigger className="h-11 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-md">
                         <SelectValue placeholder="Selecione o tipo" />
                       </SelectTrigger>
                       <SelectContent>

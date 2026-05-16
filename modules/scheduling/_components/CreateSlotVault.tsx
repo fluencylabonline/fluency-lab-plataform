@@ -168,7 +168,7 @@ export function CreateSlotVault({
                   value={watch("type")}
                   onValueChange={(val: CreateRecurrenceRuleValues["type"]) => setValue("type", val)}
                 >
-                  <SelectTrigger className="w-full h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl">
+                  <SelectTrigger className="w-full h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-md">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -183,7 +183,7 @@ export function CreateSlotVault({
                   value={watch("frequency")}
                   onValueChange={(val: CreateRecurrenceRuleValues["frequency"]) => setValue("frequency", val)}
                 >
-                  <SelectTrigger className="w-full h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl">
+                  <SelectTrigger className="w-full h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-md">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -202,7 +202,7 @@ export function CreateSlotVault({
                 onSelect={(date) => date && setValue("startDate", date)}
                 placeholder={t("selectDate") || "Selecione uma data"}
                 label={t("startDate") || "Data"}
-                className="h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl"
+                className="h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-md"
               />
             </VaultField>
 
@@ -258,7 +258,7 @@ export function CreateSlotVault({
                   onSelect={(date) => setValue("endDate", date || null)}
                   placeholder={t("noEndDate") || "Sem data de término"}
                   label={t("endDateLabel") || "Data Término"}
-                  className="h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl"
+                  className="h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-md"
                 />
               </VaultField>
             )}

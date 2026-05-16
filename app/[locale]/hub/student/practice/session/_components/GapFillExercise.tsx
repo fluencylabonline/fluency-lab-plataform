@@ -89,7 +89,7 @@ export function GapFillExercise({
                     value={answer}
                     onChange={(e) => setAnswer(e.target.value)}
                     disabled={isLocked}
-                    className="w-32 md:w-48 text-center text-xl font-bold bg-muted border-b-4 border-primary focus:bg-background transition-all rounded-xl h-12 inline-block"
+                    className="w-32 md:w-48 text-center text-xl font-bold bg-muted border-b-4 border-primary focus:bg-background transition-all rounded-md h-12 inline-block"
                     placeholder=""
                     autoFocus
                     autoComplete="off"

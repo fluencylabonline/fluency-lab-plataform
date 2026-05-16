@@ -89,7 +89,7 @@ export function PlansPageClient({ initialPlans, user }: PlansPageClientProps) {
               </div>
               <h3 className="font-bold text-foreground">{t("noPlansRegistered") || "Nenhum plano cadastrado"}</h3>
               <p className="text-sm max-w-xs text-center mt-1">{t("noPlansDesc") || "Comece criando um plano para associar aos seus alunos."}</p>
-              <Button variant="default" className="mt-6 rounded-xl font-bold" onClick={handleCreate}>
+              <Button variant="default" className="mt-6 rounded-md font-bold" onClick={handleCreate}>
                 {t("createFirstPlan") || "Criar Primeiro Plano"}
               </Button>
             </div>
@@ -144,7 +144,7 @@ export function PlansPageClient({ initialPlans, user }: PlansPageClientProps) {
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 pt-2">
-                    <div className="flex items-center gap-2.5 p-2 bg-muted/30 rounded-xl border border-border/50">
+                    <div className="flex items-center gap-2.5 p-2 bg-muted/30 rounded-md border border-border/50">
                       <div className="p-1.5 bg-background rounded-lg shadow-sm">
                         <Clock className="w-3.5 h-3.5 text-primary" />
                       </div>
@@ -153,7 +153,7 @@ export function PlansPageClient({ initialPlans, user }: PlansPageClientProps) {
                         <span className="text-xs font-black text-foreground">{t("classesPerWeek", { count: plan.classesPerWeek || 0 }) || `${plan.classesPerWeek}x / sem`}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2.5 p-2 bg-muted/30 rounded-xl border border-border/50">
+                    <div className="flex items-center gap-2.5 p-2 bg-muted/30 rounded-md border border-border/50">
                       <div className="p-1.5 bg-background rounded-lg shadow-sm">
                         <Calendar className="w-3.5 h-3.5 text-primary" />
                       </div>

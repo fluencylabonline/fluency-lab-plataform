@@ -109,7 +109,7 @@ export function QuestionEditVault({ question, open, onOpenChange, onSuccess }: Q
                     <VaultBody className="space-y-4">
                         {question?.mediaUrl && (
                             <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800">
-                                <div className="bg-blue-500 p-2 rounded-xl text-white">
+                                <div className="bg-blue-500 p-2 rounded-md text-white">
                                     <FileAudio className="w-5 h-5" />
                                 </div>
                                 <div className="flex-1">
@@ -120,7 +120,7 @@ export function QuestionEditVault({ question, open, onOpenChange, onSuccess }: Q
                                     type="button" 
                                     onClick={toggleAudio} 
                                     size="sm" 
-                                    className="rounded-xl px-4 gap-2"
+                                    className="rounded-md px-4 gap-2"
                                 >
                                     {playing ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
                                     {playing ? t("pause") || "Pause" : t("play") || "Play"}
@@ -130,7 +130,7 @@ export function QuestionEditVault({ question, open, onOpenChange, onSuccess }: Q
 
                         <VaultField label={t("content") || "Content"}>
                             <Textarea 
-                                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl min-h-[100px]"
+                                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-md min-h-[100px]"
                                 value={formData.content} 
                                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                                 placeholder={t("content_placeholder") || "Enter question text..."}
@@ -151,7 +151,7 @@ export function QuestionEditVault({ question, open, onOpenChange, onSuccess }: Q
                                     value={formData.cefrLevel} 
                                     onValueChange={(val) => setFormData({ ...formData, cefrLevel: val })}
                                 >
-                                    <SelectTrigger className="h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl">
+                                    <SelectTrigger className="h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-md">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -167,7 +167,7 @@ export function QuestionEditVault({ question, open, onOpenChange, onSuccess }: Q
                                     value={formData.skill} 
                                     onValueChange={(val) => setFormData({ ...formData, skill: val as "grammar" | "vocabulary" | "reading" | "listening" })}
                                 >
-                                    <SelectTrigger className="h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl">
+                                    <SelectTrigger className="h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-md">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>

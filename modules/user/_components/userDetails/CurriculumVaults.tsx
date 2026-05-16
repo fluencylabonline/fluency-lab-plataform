@@ -588,7 +588,7 @@ export function CurriculumVaults({
               ) : (
                 <div className="grid gap-3">
                   {studentPlans.map((plan) => (
-                    <div key={plan.id} className="p-4 border rounded-xl flex items-center justify-between bg-accent/10">
+                    <div key={plan.id} className="p-4 border rounded-md flex items-center justify-between bg-accent/10">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-sm">{plan.name}</span>

@@ -74,7 +74,7 @@ export function WordLadderLearningPanel({
                     </p>
                   ) : (
                     <div className="space-y-3">
-                      <div className="relative w-full aspect-video overflow-hidden rounded-xl border border-border/40 bg-muted/40">
+                      <div className="relative w-full aspect-video overflow-hidden rounded-md border border-border/40 bg-muted/40">
                         <Image
                           src={image.urls.regular || image.urls.small}
                           alt={

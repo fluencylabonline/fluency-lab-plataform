@@ -86,7 +86,7 @@ export function ResetPasswordForm() {
           <Input
             type="password"
             {...register("password")}
-            className={`pl-10 h-12 ${errors.password ? "border-destructive focus-visible:ring-destructive" : ""}`}
+            className={`pl-10 h-12 ${errors.password ? "border-destructive! focus-visible:ring-destructive!" : ""}`}
             autoComplete="new-password"
             disabled={isLoading}
           />
@@ -105,7 +105,7 @@ export function ResetPasswordForm() {
           <Input
             type="password"
             {...register("confirmPassword")}
-            className={`pl-10 h-12 ${errors.confirmPassword ? "border-destructive focus-visible:ring-destructive" : ""}`}
+            className={`pl-10 h-12 ${errors.confirmPassword ? "border-destructive! focus-visible:ring-destructive!" : ""}`}
             autoComplete="new-password"
             disabled={isLoading}
           />

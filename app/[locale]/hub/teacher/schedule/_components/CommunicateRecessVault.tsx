@@ -223,11 +223,11 @@ export function CommunicateRecessVault({ teacherId }: CommunicateRecessVaultProp
                     { before: addDays(new Date(), 1) },
                     ...existingRecesses.map(r => ({ from: r.startDate, to: r.endDate }))
                   ]}
-                  className="rounded-xl border shadow-sm scale-110 my-4"
+                  className="rounded-md border shadow-sm scale-110 my-4"
                 />
 
                 {date?.from && date?.to && (
-                  <div className="w-full p-4 bg-muted/50 rounded-xl border border-border/50 text-sm flex justify-between items-center">
+                  <div className="w-full p-4 bg-muted/50 rounded-md border border-border/50 text-sm flex justify-between items-center">
                     <div className="flex flex-col">
                       <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">{t('start') || "Início"}</span>
                       <span className="font-bold">{format(date.from, "dd 'de' MMMM", { locale: ptBR })}</span>
@@ -249,7 +249,7 @@ export function CommunicateRecessVault({ teacherId }: CommunicateRecessVaultProp
 
                       if (hasOverlap) {
                         return (
-                          <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex gap-3 items-center">
+                          <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-md flex gap-3 items-center">
                             <AlertCircle className="w-4 h-4 text-red-500" />
                             <p className="text-[10px] text-red-600 font-bold">
                               {t('overlapDetected') || "Sobreposição detectada: Você já tem um recesso neste período."}
@@ -260,7 +260,7 @@ export function CommunicateRecessVault({ teacherId }: CommunicateRecessVaultProp
 
                       if (isAutomatic) {
                         return (
-                          <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex gap-3 items-center">
+                          <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-md flex gap-3 items-center">
                             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                             <p className="text-[10px] text-emerald-600 font-medium">
                               {t('withinSLA') || "Dentro do prazo: Seu recesso será validado automaticamente."}
@@ -270,7 +270,7 @@ export function CommunicateRecessVault({ teacherId }: CommunicateRecessVaultProp
                       }
 
                       return (
-                        <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex gap-3 items-center">
+                        <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-md flex gap-3 items-center">
                           <AlertCircle className="w-4 h-4 text-amber-500" />
                           <div className="flex flex-col">
                             <p className="text-[10px] text-amber-600 font-bold">
@@ -310,14 +310,14 @@ export function CommunicateRecessVault({ teacherId }: CommunicateRecessVaultProp
               </VaultHeader>
               <VaultBody className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-muted/30 rounded-xl border border-border/50">
+                  <div className="p-3 bg-muted/30 rounded-md border border-border/50">
                     <div className="flex items-center gap-2 text-primary mb-1">
                       <Users className="w-4 h-4" />
                       <span className="text-xs font-bold uppercase">{t('students') || "Alunos"}</span>
                     </div>
                     <p className="text-2xl font-black">{impactData?.totalStudents}</p>
                   </div>
-                  <div className="p-3 bg-muted/30 rounded-xl border border-border/50">
+                  <div className="p-3 bg-muted/30 rounded-md border border-border/50">
                     <div className="flex items-center gap-2 text-primary mb-1">
                       <BookOpen className="w-4 h-4" />
                       <span className="text-xs font-bold uppercase">{t('classes') || "Aulas"}</span>
@@ -327,7 +327,7 @@ export function CommunicateRecessVault({ teacherId }: CommunicateRecessVaultProp
                 </div>
 
                 {!slaResult?.isAutomatic && (
-                  <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-xl flex gap-3">
+                  <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-md flex gap-3">
                     <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
                     <div className="space-y-1">
                       <p className="text-sm font-bold text-amber-900 dark:text-amber-400">{t('insufficientNotice') || "Aviso Prévio Insuficiente"}</p>
@@ -401,7 +401,7 @@ export function CommunicateRecessVault({ teacherId }: CommunicateRecessVaultProp
                             render={({ field, fieldState }) => (
                               <div className="space-y-1">
                                 <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                  <SelectTrigger className={`h-11 rounded-xl ${fieldState.error ? "border-destructive focus:ring-destructive" : ""}`}>
+                                  <SelectTrigger className={`h-11 rounded-md ${fieldState.error ? "border-destructive focus:ring-destructive" : ""}`}>
                                     <SelectValue placeholder={t('selectLesson') || "Selecione a lição..."} />
                                   </SelectTrigger>
                                   <SelectContent>

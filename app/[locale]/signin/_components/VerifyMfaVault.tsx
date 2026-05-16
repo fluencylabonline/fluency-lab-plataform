@@ -74,7 +74,7 @@ export function VerifyMfaVault({ open, onOpenChange, onSuccess, rememberMe = fal
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                 placeholder="000000"
-                className="text-center text-3xl tracking-[0.5em] font-mono h-16 rounded-xl"
+                className="text-center text-3xl tracking-[0.5em] font-mono h-16 rounded-md"
                 autoFocus
                 disabled={loading}
                 type="number"

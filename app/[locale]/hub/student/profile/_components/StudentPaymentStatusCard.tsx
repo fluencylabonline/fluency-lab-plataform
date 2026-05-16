@@ -143,7 +143,7 @@ export function StudentPaymentStatusCard({ subscription }: StudentPaymentStatusC
         <div className="flex items-center gap-3">
           <div
             className={cn(
-              "p-2.5 rounded-xl shadow-sm border",
+              "p-2.5 rounded-md shadow-sm border",
               "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900/50 dark:text-emerald-400",
             )}
           >
@@ -176,7 +176,7 @@ export function StudentPaymentStatusCard({ subscription }: StudentPaymentStatusC
             <div className="space-y-5 animate-in fade-in zoom-in-95 duration-300">
               {subscription.currentInstallment.pixCode ? (
                 <div className="flex flex-col lg:flex-row gap-5 items-center lg:items-start">
-                  <div className="relative shrink-0 group bg-white p-2 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-700 shadow-sm">
+                  <div className="relative shrink-0 group bg-white p-2 rounded-md border-2 border-dashed border-zinc-200 dark:border-zinc-700 shadow-sm">
                     {subscription.currentInstallment.pixQrCode && (
                       <Image
                         src={`data:image/png;base64,${subscription.currentInstallment.pixQrCode}`}

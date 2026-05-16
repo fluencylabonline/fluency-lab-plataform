@@ -30,7 +30,7 @@ export function KanbanDock({ statuses, activeId, onSelect, taskCounts }: KanbanD
               key={status.id}
               onClick={() => onSelect(status.id)}
               className={cn(
-                "relative flex-1 flex flex-col items-center justify-center py-2 rounded-xl transition-all duration-200",
+                "relative flex-1 flex flex-col items-center justify-center py-2 rounded-md transition-all duration-200",
                 isActive ? "bg-primary text-primary-foreground shadow-lg scale-105" : "text-muted-foreground hover:bg-muted"
               )}
             >

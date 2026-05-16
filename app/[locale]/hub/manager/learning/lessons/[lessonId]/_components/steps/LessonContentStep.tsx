@@ -109,7 +109,7 @@ export function LessonContentStep({ lessonId, initialContentJson, onComplete, st
       </div>
 
       {/* ── Editor ── */}
-      <div className="card border border-border rounded-xl bg-background overflow-hidden">
+      <div className="card border border-border rounded-md bg-background overflow-hidden">
 
         {/* Toolbar */}
         <div className="flex items-center gap-0.5 px-3 py-2 border-b border-border">

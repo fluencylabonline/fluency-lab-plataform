@@ -89,7 +89,7 @@ export function HomeScreen({ user }: { user: User | null }) {
           </span>
         </div>
         <div className="space-y-2">
-          <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 p-2 rounded-xl">
+          <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 p-2 rounded-md">
             <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 flex items-center justify-center text-xs font-bold">
               W
             </div>
@@ -102,7 +102,7 @@ export function HomeScreen({ user }: { user: User | null }) {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 p-2 rounded-xl">
+          <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 p-2 rounded-md">
             <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400 flex items-center justify-center text-xs font-bold">
               B
             </div>

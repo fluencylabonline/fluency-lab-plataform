@@ -93,7 +93,7 @@ export function AvatarUploadVault({ userId, isOpen, onOpenChange }: AvatarUpload
         <VaultBody>
           <div className="flex flex-col gap-6">
             {!image ? (
-              <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-12 bg-muted/50 hover:bg-muted transition-colors relative group">
+              <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-md p-12 bg-muted/50 hover:bg-muted transition-colors relative group">
                 <input
                   type="file"
                   accept="image/*"
@@ -112,7 +112,7 @@ export function AvatarUploadVault({ userId, isOpen, onOpenChange }: AvatarUpload
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="relative h-72 w-full bg-zinc-950 rounded-xl overflow-hidden border">
+                <div className="relative h-72 w-full bg-zinc-950 rounded-md overflow-hidden border">
                   <Cropper
                     image={image}
                     crop={crop}

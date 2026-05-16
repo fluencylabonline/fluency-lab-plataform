@@ -165,7 +165,7 @@ export function QuizReviewStep({ lessonId, initialData, onComplete, mediaUrl, st
                                         {q.options.map((opt: string, optIdx: number) => (
                                             <div
                                                 key={optIdx}
-                                                className={`p-3 rounded-xl border text-sm flex items-center gap-3 ${optIdx === q.correctIndex
+                                                className={`p-3 rounded-md border text-sm flex items-center gap-3 ${optIdx === q.correctIndex
                                                     ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 font-bold"
                                                     : "border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 text-gray-600 dark:text-gray-400"
                                                     }`}

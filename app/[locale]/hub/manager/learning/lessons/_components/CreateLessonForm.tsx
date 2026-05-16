@@ -93,7 +93,7 @@ export function CreateLessonForm({ languages }: CreateLessonFormProps) {
                         <SelectTrigger className="h-12 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-2xl">
                             <SelectValue placeholder={t("select_difficulty") || "Select level"} />
                         </SelectTrigger>
-                        <SelectContent className="rounded-xl">
+                        <SelectContent className="rounded-md">
                             {DIFFICULTIES.map((level) => (
                                 <SelectItem key={level} value={level} className="py-2.5">
                                     {level}
@@ -115,7 +115,7 @@ export function CreateLessonForm({ languages }: CreateLessonFormProps) {
                         <SelectTrigger className="h-12 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-2xl">
                             <SelectValue placeholder={t("select_language") || "Select language"} />
                         </SelectTrigger>
-                        <SelectContent className="rounded-xl">
+                        <SelectContent className="rounded-md">
                             {languages.map((lang) => (
                                 <SelectItem key={lang.id} value={lang.id} className="py-2.5">
                                     {lang.name}
@@ -137,7 +137,7 @@ export function CreateLessonForm({ languages }: CreateLessonFormProps) {
                         <SelectTrigger className="h-12 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-2xl">
                             <SelectValue placeholder={t("select_native_language")} />
                         </SelectTrigger>
-                        <SelectContent className="rounded-xl">
+                        <SelectContent className="rounded-md">
                             {languages.map((lang) => (
                                 <SelectItem key={lang.id} value={lang.id} className="py-2.5">
                                     {lang.name}

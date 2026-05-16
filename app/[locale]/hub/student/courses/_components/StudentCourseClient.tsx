@@ -133,7 +133,7 @@ export function StudentCourseClient({ currentUser }: StudentCourseClientProps) {
                       {course.isEnrolled ? (
                         <Link
                           href={`/hub/student/courses/${course.id}`}
-                          className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground h-12 rounded-xl font-bold hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                          className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground h-12 rounded-md font-bold hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
                         >
                           {course.progressPercentage === 0 ? t("startCourse") : t("continueCourse")}
                           <PlayCircle className="h-4 w-4" />
@@ -141,7 +141,7 @@ export function StudentCourseClient({ currentUser }: StudentCourseClientProps) {
                       ) : (
                         <Button
                           onClick={() => handleEnroll(course.id)}
-                          className="w-full h-12 rounded-xl font-bold gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                          className="w-full h-12 rounded-md font-bold gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
                         >
                           {t("enroll")}
                           <CheckCircle className="h-4 w-4" />

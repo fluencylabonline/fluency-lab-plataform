@@ -166,7 +166,7 @@ export function StudentPlayerClient({ courseData, enrollment, currentUser }: Stu
                           key={lesson.id}
                           onClick={() => handleLessonSelect(lesson.id)}
                           className={cn(
-                            "w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all",
+                            "w-full flex items-center gap-3 p-3 rounded-md text-left transition-all",
                             isSelected
                               ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
                               : "hover:bg-gray-100 dark:hover:bg-gray-800"

@@ -53,7 +53,7 @@ export function WordLadderOptionsModal({
                 <button
                   key={d.value}
                   onClick={() => setDifficulty(d.value)}
-                  className={`flex-1 h-10 rounded-xl text-xs font-bold transition-all ${
+                  className={`flex-1 h-10 rounded-md text-xs font-bold transition-all ${
                     difficulty === d.value 
                       ? "bg-background shadow-sm " + d.color
                       : "text-muted-foreground hover:bg-background/50"

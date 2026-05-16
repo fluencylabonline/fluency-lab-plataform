@@ -99,7 +99,7 @@ export function LanguagesVault({ initialData }: LanguagesVaultProps) {
             <Vault open={isOpen} onOpenChange={setIsOpen}>
                 <VaultTrigger asChild>
                     <button className="card flex flex-col items-center justify-center p-4 group w-full">
-                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl mb-3 group-hover:scale-110 transition-transform">
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md mb-3 group-hover:scale-110 transition-transform">
                             <Languages className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
                         <span className="text-sm font-semibold">Idiomas</span>
@@ -175,7 +175,7 @@ export function LanguagesVault({ initialData }: LanguagesVaultProps) {
                                             return (
                                                 <div
                                                     key={lang.id}
-                                                    className="flex items-center justify-between p-3 bg-muted/30 border border-border rounded-xl hover:bg-muted/50 transition-colors"
+                                                    className="flex items-center justify-between p-3 bg-muted/30 border border-border rounded-md hover:bg-muted/50 transition-colors"
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">

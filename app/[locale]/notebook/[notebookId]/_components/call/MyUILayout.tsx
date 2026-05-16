@@ -404,7 +404,7 @@ export const MyUILayout = ({
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute bottom-16 right-0 bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col gap-2 min-w-[140px] z-50"
+                      className="absolute bottom-16 right-0 bg-white dark:bg-slate-900 p-2 rounded-md border border-slate-200 dark:border-slate-800 flex flex-col gap-2 min-w-[140px] z-50"
                     >
                       <button
                         onClick={togglePiP}

@@ -197,7 +197,7 @@ export function SendWhatsAppMessageVault({ open, onOpenChange, templates }: Send
           <div className="space-y-2">
             <Label className="text-sm font-medium">1. Selecione o Aluno</Label>
             {selectedUser ? (
-              <div className="flex items-center justify-between p-3 border rounded-xl bg-primary/5">
+              <div className="flex items-center justify-between p-3 border rounded-md bg-primary/5">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                     <UserIcon className="w-5 h-5 text-primary" />
@@ -210,7 +210,7 @@ export function SendWhatsAppMessageVault({ open, onOpenChange, templates }: Send
                 <button onClick={() => setSelectedUser(null)} className="text-xs text-muted-foreground underline">Trocar</button>
               </div>
             ) : (
-              <Command shouldFilter={false} className="rounded-xl border">
+              <Command shouldFilter={false} className="rounded-md border">
                 <CommandInput placeholder="Buscar aluno..." value={searchTerm} onValueChange={setSearchTerm} />
                 <CommandList className="max-h-[150px]">
                   {isSearching && <div className="p-4 text-center text-xs italic">Buscando...</div>}
@@ -233,7 +233,7 @@ export function SendWhatsAppMessageVault({ open, onOpenChange, templates }: Send
           <div className="space-y-2">
             <Label className="text-sm font-medium">2. Escolha o Template</Label>
             <Select value={selectedTemplateName} onValueChange={setSelectedTemplateName}>
-              <SelectTrigger className="rounded-xl h-11">
+              <SelectTrigger className="rounded-md h-11">
                 <SelectValue placeholder="Selecione um template..." />
               </SelectTrigger>
               <SelectContent>
@@ -251,7 +251,7 @@ export function SendWhatsAppMessageVault({ open, onOpenChange, templates }: Send
 
           {/* Parâmetros */}
           {selectedTemplate && params.length > 0 && (
-            <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-dashed">
+            <div className="space-y-4 p-4 rounded-md bg-muted/30 border border-dashed">
               <div className="flex items-center gap-2 text-primary">
                 <AlertCircle className="w-4 h-4" />
                 <span className="text-xs font-semibold uppercase">Variáveis</span>
@@ -275,7 +275,7 @@ export function SendWhatsAppMessageVault({ open, onOpenChange, templates }: Send
                         value={p.value}
                         onChange={(e) => handleParamChange(p.type, p.index, e.target.value, p.buttonIndex)}
                         placeholder={p.type === "button" ? "Sufixo da URL (ex: welcome-link)" : "Valor..."}
-                        className={cn("h-9 text-sm", isTooLong && "border-destructive focus-visible:ring-destructive")}
+                        className={cn("h-9 text-sm", isTooLong && "border-destructive! focus-visible:ring-destructive!")}
                       />
                       {isTooLong && <p className="text-[9px] text-destructive italic">Limite de 30 caracteres excedido!</p>}
                     </div>

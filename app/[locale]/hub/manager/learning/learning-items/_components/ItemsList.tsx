@@ -143,7 +143,7 @@ export function ItemsList({ initialData, languages }: ItemsListProps) {
                             <button 
                                 onClick={() => setSelectedLevel("all")}
                                 className={cn(
-                                    "px-4 py-2 rounded-xl text-xs font-bold transition-all border",
+                                    "px-4 py-2 rounded-md text-xs font-bold transition-all border",
                                     selectedLevel === "all" 
                                         ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20 scale-105" 
                                         : "bg-background hover:bg-muted border-border/50 text-muted-foreground hover:scale-105"
@@ -156,7 +156,7 @@ export function ItemsList({ initialData, languages }: ItemsListProps) {
                                     key={level}
                                     onClick={() => setSelectedLevel(level)}
                                     className={cn(
-                                        "px-4 py-2 rounded-xl text-xs font-bold transition-all border",
+                                        "px-4 py-2 rounded-md text-xs font-bold transition-all border",
                                         selectedLevel === level 
                                             ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20 scale-105" 
                                             : "bg-background hover:bg-muted border-border/50 text-muted-foreground hover:scale-105"
@@ -185,7 +185,7 @@ export function ItemsList({ initialData, languages }: ItemsListProps) {
                                     key={type.id}
                                     onClick={() => setSelectedType(type.id)}
                                     className={cn(
-                                        "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all border",
+                                        "flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold transition-all border",
                                         selectedType === type.id 
                                             ? "bg-secondary text-secondary-foreground border-secondary shadow-lg shadow-secondary/10 scale-105" 
                                             : "bg-background hover:bg-muted border-border/50 text-muted-foreground hover:scale-105"
@@ -241,7 +241,7 @@ export function ItemsList({ initialData, languages }: ItemsListProps) {
                                     <div className="flex flex-col gap-2">
                                         <div className="flex items-center gap-2">
                                             <div className={cn(
-                                                "w-7 h-7 rounded-xl flex items-center justify-center shadow-sm",
+                                                "w-7 h-7 rounded-md flex items-center justify-center shadow-sm",
                                                 item.type === "VOCABULARY" 
                                                     ? "bg-blue-500/10 text-blue-500 border border-blue-500/20" 
                                                     : "bg-orange-500/10 text-orange-500 border border-orange-500/20"

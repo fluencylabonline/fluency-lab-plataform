@@ -202,7 +202,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
           >
             <div className="card p-6 space-y-6">
               <div className="flex items-center gap-3 pb-4 border-b">
-                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center text-primary">
                   <Settings2 className="h-5 w-5" />
                 </div>
                 <div>
@@ -223,7 +223,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                 <div className="pt-2">
                   <Button
                     type="submit"
-                    className="w-full h-12 rounded-xl gap-2 font-bold"
+                    className="w-full h-12 rounded-md gap-2 font-bold"
                     disabled={(!isDirty && !isCreatingQuiz) || isSubmitting}
                   >
                     {isSubmitting ? (<Loader2 className="h-4 w-4 animate-spin" />) : (<div className="flex items-center gap-2"><Save className="h-4 w-4" /> {t('saveChanges') || "Salvar Alterações"}</div>)}
@@ -242,7 +242,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                   )}
                 >
                   <div className={cn(
-                    "h-10 w-10 rounded-xl flex items-center justify-center transition-colors",
+                    "h-10 w-10 rounded-md flex items-center justify-center transition-colors",
                     activeTab === "content" ? "bg-white/20" : "bg-slate-100 dark:bg-slate-900 group-hover:bg-slate-200"
                   )}>
                     <FileText className="h-5 w-5" />
@@ -263,7 +263,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                   )}
                 >
                   <div className={cn(
-                    "h-10 w-10 rounded-xl flex items-center justify-center transition-colors",
+                    "h-10 w-10 rounded-md flex items-center justify-center transition-colors",
                     activeTab === "quiz" ? "bg-white/20" : "bg-slate-100 dark:bg-slate-900 group-hover:bg-slate-200"
                   )}>
                     <HelpCircle className="h-5 w-5" />
@@ -284,7 +284,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                   )}
                 >
                   <div className={cn(
-                    "h-10 w-10 rounded-xl flex items-center justify-center transition-colors",
+                    "h-10 w-10 rounded-md flex items-center justify-center transition-colors",
                     activeTab === "preview" ? "bg-white/20" : "bg-slate-100 dark:bg-slate-900 group-hover:bg-slate-200"
                   )}>
                     <Eye className="h-5 w-5" />
@@ -331,7 +331,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                     <div key={index} className="card relative group border-slate-200 dark:border-slate-800 p-6 overflow-hidden">
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                          <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center text-primary">
                             {block.type === "video" ? <Video className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
                           </div>
                           <div>
@@ -405,7 +405,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                         <p className="text-sm text-muted-foreground">{t('configureQuestionsDesc') || "Configure as questões que o aluno deve responder ao final da aula."}</p>
                       </div>
                       {quizQuestions.length > 0 && (
-                        <Button variant="outline" className="rounded-xl" onClick={addQuestion}>
+                        <Button variant="outline" className="rounded-md" onClick={addQuestion}>
                           <Plus className="h-4 w-4 mr-2" />
                           {t('newQuestion') || "Nova Questão"}
                         </Button>
@@ -421,7 +421,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                             setPassingScore(Number(e.target.value));
                             setIsCreatingQuiz(true);
                           }}
-                          className="h-12 rounded-xl bg-slate-50 dark:bg-slate-900/50"
+                          className="h-12 rounded-md bg-slate-50 dark:bg-slate-900/50"
                           min={0} max={100}
                         />
                       </Field>
@@ -450,7 +450,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                                 setQuizQuestions(quizQuestions.map(item => item.id === q.id ? { ...item, text: e.target.value } : item));
                                 setIsCreatingQuiz(true);
                               }}
-                              className="h-12 rounded-xl bg-white dark:bg-slate-900"
+                              className="h-12 rounded-md bg-white dark:bg-slate-900"
                             />
                           </div>
 
@@ -464,7 +464,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                                     setIsCreatingQuiz(true);
                                   }}
                                   className={cn(
-                                    "h-10 w-10 rounded-xl flex items-center justify-center transition-all",
+                                    "h-10 w-10 rounded-md flex items-center justify-center transition-all",
                                     q.correctAnswer === opt && opt !== "" ? "bg-primary text-white shadow-md shadow-primary/20" : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-muted-foreground"
                                   )}
                                 >
@@ -479,7 +479,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                                     setQuizQuestions(quizQuestions.map(item => item.id === q.id ? { ...item, options: newOptions } : item));
                                     setIsCreatingQuiz(true);
                                   }}
-                                  className="h-12 rounded-xl bg-white dark:bg-slate-900"
+                                  className="h-12 rounded-md bg-white dark:bg-slate-900"
                                 />
                               </div>
                             ))}
@@ -560,7 +560,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                                 <Badge variant="outline" className="mb-2 uppercase tracking-widest text-[10px]">{t('lessonTitleBadge', { title }) || `AULA: ${title}`}</Badge>
                                 <h2 className="text-2xl font-bold">{t('knowledgeAssessment') || "Avaliação de Conhecimento"}</h2>
                               </div>
-                              <Button variant="ghost" className="rounded-xl h-10 w-10 p-0" onClick={() => setIsPreviewingQuiz(false)}>
+                              <Button variant="ghost" className="rounded-md h-10 w-10 p-0" onClick={() => setIsPreviewingQuiz(false)}>
                                 <X className="h-5 w-5" />
                               </Button>
                             </div>
@@ -613,7 +613,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                               <div className="flex justify-between pt-8 border-t">
                                 <Button
                                   variant="ghost"
-                                  className="rounded-xl h-12 px-6"
+                                  className="rounded-md h-12 px-6"
                                   disabled={currentQuestionIndex === 0}
                                   onClick={() => setCurrentQuestionIndex(currentQuestionIndex - 1)}
                                 >

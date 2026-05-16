@@ -23,7 +23,7 @@ export default async function SignInPage() {
   const t = await getTranslations("Auth");
 
   return (
-    <div className="min-h-dvh w-full bg-background dark:bg-gray-950 flex flex-col items-center justify-start lg:justify-center p-4 sm:p-6 relative overflow-y-auto">
+    <div className="min-h-dvh w-full bg-slate-200 dark:bg-slate-950 flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-y-auto">
       <BackButton
         href="/"
         ariaLabel={t("back")}
@@ -34,7 +34,7 @@ export default async function SignInPage() {
         <ThemeSwitcher />
       </div>
 
-      <div className="w-full max-w-4xl bg-slate-300/50 dark:bg-gray-900 rounded-xl overflow-hidden mt-16 mb-8 lg:my-0">
+      <div className="w-full max-w-4xl bg-slate-300/50 dark:bg-gray-900 rounded-md overflow-hidden mt-16 mb-8 lg:my-0">
         <div className="flex flex-col lg:flex-row">
           <div className="hidden lg:flex flex-col items-center justify-center lg:w-1/2 bg-gray-100 dark:bg-gray-800 p-8 lg:p-12 relative min-h-[300px] lg:min-h-[600px]">
             <BackgroundLogin />

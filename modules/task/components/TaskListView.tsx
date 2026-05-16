@@ -95,7 +95,7 @@ export function TaskListView({ tasks, isLoading, initialInboxStatuses }: TaskLis
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <AccordionItem value={statusId} className="border rounded-xl px-4 overflow-hidden bg-card/50 backdrop-blur-sm">
+                  <AccordionItem value={statusId} className="border rounded-md px-4 overflow-hidden bg-card/50 backdrop-blur-sm">
                     <AccordionTrigger className="hover:no-underline py-3">
                       <div className="flex items-center gap-3">
                         <span className="font-bold text-sm">{group.name}</span>

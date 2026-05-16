@@ -96,7 +96,7 @@ export function TeacherStepWelcome({
             <button
                 type="submit"
                 disabled={loading || !isValid}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
             >
                 {loading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

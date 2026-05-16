@@ -124,7 +124,7 @@ export function CreatePasswordForm() {
 
   return (
     <div className="min-h-screen min-w-screen flex items-center justify-center p-4">
-      <div className="bg-slate-300/50 dark:bg-gray-900 w-full max-w-[500px] border-none rounded-md overflow-hidden">
+      <div className="bg-slate-200 dark:bg-slate-950 w-full max-w-[500px] border-none rounded-md overflow-hidden">
         <div className="text-center space-y-2 pt-10 px-8">
           <div className="flex items-center justify-center gap-2">
             <LanguageSwitcher />
@@ -142,14 +142,14 @@ export function CreatePasswordForm() {
           {loading ? (
             <div className="space-y-4 animate-pulse">
               <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mx-auto" />
-              <div className="h-10 bg-gray-200 dark:bg-gray-800 rounded-xl" />
-              <div className="h-10 bg-gray-200 dark:bg-gray-800 rounded-xl" />
-              <div className="h-10 bg-gray-100 dark:bg-gray-800 rounded-xl" />
+              <div className="h-10 bg-gray-200 dark:bg-gray-800 rounded-md" />
+              <div className="h-10 bg-gray-200 dark:bg-gray-800 rounded-md" />
+              <div className="h-10 bg-gray-100 dark:bg-gray-800 rounded-md" />
             </div>
           ) : !codeValid ? (
             <div className="space-y-4">
               {error && (
-                <Alert variant="destructive" className="rounded-xl bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-900/30">
+                <Alert variant="destructive" className="rounded-md bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-900/30">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription className="text-sm">{error}</AlertDescription>
                 </Alert>
@@ -165,7 +165,7 @@ export function CreatePasswordForm() {
                       <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                       <Input
                         placeholder={t("Auth.placeholders.email") || "Seu e-mail cadastrado"}
-                        className={`pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 ${resendErrors.email ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                        className={`pl-10 h-11 rounded-md bg-gray-50 border-gray-200 ${resendErrors.email ? "border-destructive! focus-visible:ring-destructive!" : ""}`}
                         disabled={resending}
                         {...registerResend("email")}
                       />
@@ -183,7 +183,7 @@ export function CreatePasswordForm() {
               )}
 
               {resendSuccess && (
-                <Alert className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30 rounded-xl">
+                <Alert className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30 rounded-md">
                   <CheckCircle2 className="h-4 w-4" />
                   <AlertDescription>
                     {t("Auth.notifications.resendSuccess") || "Novo link enviado! Verifique sua caixa de entrada."}
@@ -213,7 +213,7 @@ export function CreatePasswordForm() {
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {email && (
-                <div className="text-xs font-medium text-gray-500 bg-gray-50 dark:bg-gray-800 p-3 rounded-xl text-center">
+                <div className="text-xs font-medium text-gray-500 bg-gray-50 dark:bg-gray-800 p-3 rounded-md text-center">
                   {t("Auth.createPassword.creatingFor") || "Criando senha para:"}{" "}
                   <span className="text-gray-900 dark:text-gray-100 font-bold">{email}</span>
                 </div>
@@ -228,7 +228,7 @@ export function CreatePasswordForm() {
                   <Input
                     type="password"
                     placeholder={t("Auth.placeholders.passwordMin") || "Mínimo de 8 caracteres"}
-                    className={`pl-10 h-11 ${errors.password ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                    className={`pl-10 h-11 ${errors.password ? "border-destructive! focus-visible:ring-destructive!" : ""}`}
                     {...register("password")}
                   />
                 </div>
@@ -248,7 +248,7 @@ export function CreatePasswordForm() {
                   <Input
                     type="password"
                     placeholder={t("Auth.placeholders.repeatPassword") || "Repita a senha"}
-                    className={`pl-10 h-11 ${errors.confirmPassword ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                    className={`pl-10 h-11 ${errors.confirmPassword ? "border-destructive! focus-visible:ring-destructive!" : ""}`}
                     {...register("confirmPassword")}
                   />
                 </div>
@@ -260,7 +260,7 @@ export function CreatePasswordForm() {
               </div>
 
               {error && (
-                <Alert variant="destructive" className="rounded-xl">
+                <Alert variant="destructive" className="rounded-md">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
@@ -274,7 +274,7 @@ export function CreatePasswordForm() {
                 {t("Auth.buttons.setPassword") || "Definir minha senha"}
               </Button>
 
-              <div className="relative flex items-center gap-4 text-gray-400 my-4 uppercase text-[10px] font-bold tracking-widest before:h-[1px] before:flex-1 before:bg-gray-200 after:h-[1px] after:flex-1 after:bg-gray-200">
+              <div className="relative flex items-center gap-4 text-gray-400 my-4 uppercase text-[10px] font-bold tracking-widest before:h-px before:flex-1 before:bg-gray-200 after:h-px after:flex-1 after:bg-gray-200">
                 {t("Common.or") || "OU"}
               </div>
 

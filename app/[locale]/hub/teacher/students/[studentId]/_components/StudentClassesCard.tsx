@@ -293,7 +293,7 @@ export function StudentClassesCard({
                   )}
 
                   <div className="flex items-center gap-4">
-                    <div className="flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-primary/5 text-primary font-bold border border-primary/10">
+                    <div className="flex flex-col items-center justify-center w-12 h-12 rounded-md bg-primary/5 text-primary font-bold border border-primary/10">
                       <span className="text-[10px] uppercase opacity-70">
                         {format(classDate, "EEE", { locale: dateLocale })}
                       </span>
@@ -328,7 +328,7 @@ export function StudentClassesCard({
                             </div>
                           </SelectValue>
                         </SelectTrigger>
-                        <SelectContent className="rounded-xl">
+                        <SelectContent className="rounded-md">
                           {Object.entries(statusConfig).map(([key, itemConfig]) => {
                             const isAllowed = ["completed", "canceled-teacher", "no-show", "scheduled"].includes(key) || key === cls.status;
                             if (!isAllowed) return null;
@@ -350,7 +350,7 @@ export function StudentClassesCard({
                       variant="ghost"
                       size="icon"
                       className={cn(
-                        "h-9 w-9 rounded-xl transition-colors",
+                        "h-9 w-9 rounded-md transition-colors",
                         cls.notes
                           ? "bg-green-100 hover:bg-green-200 text-green-600 dark:bg-green-950/50 dark:hover:bg-green-900/50 dark:text-green-400"
                           : "bg-gray-100 hover:bg-gray-200 text-gray-500 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-400"
@@ -385,7 +385,7 @@ export function StudentClassesCard({
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
                 placeholder={t("feedbackPlaceholder")}
-                className="min-h-[120px] rounded-xl resize-none bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                className="min-h-[120px] rounded-md resize-none bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
               />
             </div>
           </VaultBody>

@@ -124,7 +124,7 @@ export const JoinUI: React.FC<JoinUIProps> = ({
           <div className="flex flex-col gap-3 w-full max-w-[200px]">
             <Button
               onClick={onJoin}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl py-6 font-bold text-lg"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md py-6 font-bold text-lg"
             >
               {joinLabel}
             </Button>

@@ -89,24 +89,24 @@ export default function Footer() {
                             {
                                 title: t("sections.student.title") || "Aluno",
                                 links: [
-                                    { label: t("sections.student.links.certificate"), href: "#" },
+                                    { label: t("sections.student.links.certificate"), href: "/certificate" },
                                     { label: t("sections.student.links.rescheduling"), href: "#" },
-                                    { label: t("sections.student.links.portal"), href: "#" },
+                                    { label: t("sections.student.links.portal"), href: "/signin" },
                                 ]
                             },
                             {
                                 title: t("sections.about.title") || "Sobre",
                                 links: [
-                                    { label: t("sections.about.links.methodology"), href: "#" },
-                                    { label: t("sections.about.links.careers"), href: "#" },
-                                    { label: t("sections.about.links.terms"), href: "#" },
+                                    { label: t("sections.about.links.methodology"), href: "#" }, //TODO: Create page explaining methodology
+                                    { label: t("sections.about.links.privacy"), href: "/privacy" },
+                                    { label: t("sections.about.links.terms"), href: "/terms" },
                                 ]
                             },
                             {
                                 title: t("sections.support.title") || "Suporte",
                                 links: [
-                                    { label: t("sections.support.links.contact"), href: "#" },
-                                    { label: t("sections.support.links.faq"), href: "#" },
+                                    { label: t("sections.support.links.contact"), href: "#" }, //TODO: Create contact page
+                                    { label: t("sections.support.links.faq"), href: "#" }, //TODO: Create faq page
                                 ]
                             }
                         ].map((section, idx) => (
@@ -154,10 +154,10 @@ export default function Footer() {
 
                         <button
                             onClick={scrollToTop}
-                            className="group flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-primary transition-colors py-2 px-4 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800"
+                            className="transition-all duration-300 ease-in-out group flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-primary py-2 px-4 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800"
                         >
                             {t("backToTop") || "Voltar ao topo"}
-                            <ArrowUp className="w-3 h-3 transition-transform group-hover:-translate-y-1" />
+                            <ArrowUp className="w-3 h-3 transition-all duration-300 ease-in-out group-hover:-translate-y-1" />
                         </button>
                     </div>
                 </div>

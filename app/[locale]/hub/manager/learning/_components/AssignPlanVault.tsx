@@ -113,7 +113,7 @@ export function AssignPlanVault({ templateId, open, onOpenChange }: AssignPlanVa
 
                                     {/* Results List */}
                                     {students.length > 0 && (
-                                        <div className="border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden divide-y divide-gray-50 dark:divide-gray-900 animate-in fade-in slide-in-from-top-2">
+                                        <div className="border border-gray-100 dark:border-gray-800 rounded-md overflow-hidden divide-y divide-gray-50 dark:divide-gray-900 animate-in fade-in slide-in-from-top-2">
                                             {students.map((student) => (
                                                 <button
                                                     key={student.id}
@@ -145,7 +145,7 @@ export function AssignPlanVault({ templateId, open, onOpenChange }: AssignPlanVa
 
                                     {/* Empty Search State */}
                                     {!isSearching && searchTerm.length >= 2 && students.length === 0 && (
-                                        <div className="p-8 text-center bg-gray-50 dark:bg-gray-800/20 rounded-xl border border-dashed border-gray-200 dark:border-gray-800">
+                                        <div className="p-8 text-center bg-gray-50 dark:bg-gray-800/20 rounded-md border border-dashed border-gray-200 dark:border-gray-800">
                                             <div className="inline-flex size-10 rounded-full bg-gray-100 dark:bg-gray-800 items-center justify-center mb-3">
                                                 <Search className="size-5 text-muted-foreground" />
                                             </div>

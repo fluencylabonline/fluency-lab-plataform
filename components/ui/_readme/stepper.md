@@ -18,12 +18,7 @@ const steps = [
 export default function Page() {
   const [currentStep, setCurrentStep] = useState(1);
 
-  return (
-    <Stepper
-      steps={steps}
-      currentStep={currentStep}
-    />
-  );
+  return <Stepper steps={steps} currentStep={currentStep} />;
 }
 ```
 
@@ -31,21 +26,21 @@ export default function Page() {
 
 ## Props
 
-| Prop | Tipo | Padrão | Descrição |
-|------|------|--------|-----------|
-| `steps` | `Step[]` | — | Array de passos. Obrigatório. |
-| `currentStep` | `number` | — | ID do passo ativo. Obrigatório. |
-| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | Direção do stepper. |
-| `variant` | `"default" \| "sidebar"` | `"default"` | Visual compacto para sidebars. |
-| `className` | `string` | `""` | Classes extras no wrapper. |
+| Prop          | Tipo                         | Padrão         | Descrição                       |
+| ------------- | ---------------------------- | -------------- | ------------------------------- |
+| `steps`       | `Step[]`                     | —              | Array de passos. Obrigatório.   |
+| `currentStep` | `number`                     | —              | ID do passo ativo. Obrigatório. |
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | Direção do stepper.             |
+| `variant`     | `"default" \| "sidebar"`     | `"default"`    | Visual compacto para sidebars.  |
+| `className`   | `string`                     | `""`           | Classes extras no wrapper.      |
 
 ### Tipo `Step`
 
 ```ts
 interface Step {
-  id: number;       // Identificador único e sequencial (1, 2, 3…)
-  title: string;    // Nome curto do passo
-  subtitle?: string // Descrição opcional (ignorada na variante sidebar)
+  id: number; // Identificador único e sequencial (1, 2, 3…)
+  title: string; // Nome curto do passo
+  subtitle?: string; // Descrição opcional (ignorada na variante sidebar)
 }
 ```
 
@@ -58,11 +53,7 @@ interface Step {
 Ideal para formulários multi-etapas no topo da página. No mobile, ativa scroll horizontal com snap automático e dots indicadores.
 
 ```tsx
-<Stepper
-  steps={steps}
-  currentStep={2}
-  orientation="horizontal"
-/>
+<Stepper steps={steps} currentStep={2} orientation="horizontal" />
 ```
 
 ### Vertical
@@ -70,11 +61,7 @@ Ideal para formulários multi-etapas no topo da página. No mobile, ativa scroll
 Indicado para fluxos laterais, wizards longos ou quando há subtítulos extensos.
 
 ```tsx
-<Stepper
-  steps={steps}
-  currentStep={2}
-  orientation="vertical"
-/>
+<Stepper steps={steps} currentStep={2} orientation="vertical" />
 ```
 
 ### Sidebar
@@ -124,7 +111,7 @@ const handleNext = async () => {
   setStep((s) => s + 1);
 };
 
-<Stepper steps={steps} currentStep={step} />
+<Stepper steps={steps} currentStep={step} />;
 ```
 
 ### Com React Hook Form
@@ -140,7 +127,7 @@ const onNext = methods.handleSubmit(() => {
   <Stepper steps={steps} currentStep={step} />
   <StepContent step={step} />
   <button onClick={onNext}>Avançar</button>
-</FormProvider>
+</FormProvider>;
 ```
 
 ---
@@ -220,7 +207,7 @@ export function DashboardLayout() {
 
   return (
     <div className="flex gap-8">
-      <aside className="w-52 shrink-0 p-4 rounded-xl bg-muted">
+      <aside className="w-52 shrink-0 p-4 rounded-md bg-muted">
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">
           Configuração
         </p>
@@ -255,7 +242,7 @@ import { AnimatePresence, motion } from "framer-motion";
   >
     {STEP_COMPONENTS[currentStep]}
   </motion.div>
-</AnimatePresence>
+</AnimatePresence>;
 ```
 
 ---

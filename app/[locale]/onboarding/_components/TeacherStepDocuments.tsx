@@ -116,7 +116,7 @@ export function TeacherStepDocuments({
                     type="button"
                     onClick={onBack}
                     disabled={loading}
-                    className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-white/[0.08] text-sm text-slate-500 transition-all hover:border-white/[0.14] hover:text-slate-300 disabled:opacity-40"
+                    className="flex h-11 flex-1 items-center justify-center gap-2 rounded-md border border-white/[0.08] text-sm text-slate-500 transition-all hover:border-white/[0.14] hover:text-slate-300 disabled:opacity-40"
                 >
                     <ArrowLeft className="h-4 w-4" />
                     {t("steps.back") || "Voltar"}
@@ -125,7 +125,7 @@ export function TeacherStepDocuments({
                 <button
                     type="submit"
                     disabled={loading || !isValid}
-                    className="flex h-11 flex-[2] items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
+                    className="flex h-11 flex-[2] items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
                 >
                     {loading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />

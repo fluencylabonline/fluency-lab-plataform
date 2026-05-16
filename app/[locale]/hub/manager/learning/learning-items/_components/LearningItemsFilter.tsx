@@ -56,11 +56,11 @@ export function LearningItemsFilter({ languages, filters, setFilters }: Learning
                                 <SelectValue placeholder="Language" />
                             </SelectTrigger>
                             <SelectContent className="rounded-2xl border-border/40 shadow-2xl">
-                                    <SelectItem value="ALL" className="rounded-xl">
+                                    <SelectItem value="ALL" className="rounded-md">
                                         {t("all_languages") || "All Languages"}
                                     </SelectItem>
                                     {languages.map((lang) => (
-                                        <SelectItem key={lang.id} value={lang.id} className="rounded-xl">
+                                        <SelectItem key={lang.id} value={lang.id} className="rounded-md">
                                             {lang.name}
                                         </SelectItem>
                                     ))}
@@ -82,9 +82,9 @@ export function LearningItemsFilter({ languages, filters, setFilters }: Learning
                                 <SelectValue placeholder="All Levels" />
                             </SelectTrigger>
                             <SelectContent className="rounded-2xl border-border/40 shadow-2xl">
-                                <SelectItem value="ALL" className="rounded-xl">{t("all_levels") || "All Levels"}</SelectItem>
+                                <SelectItem value="ALL" className="rounded-md">{t("all_levels") || "All Levels"}</SelectItem>
                                 {levels.map((lvl) => (
-                                    <SelectItem key={lvl} value={lvl} className="rounded-xl">
+                                    <SelectItem key={lvl} value={lvl} className="rounded-md">
                                         {lvl}
                                     </SelectItem>
                                 ))}
@@ -106,9 +106,9 @@ export function LearningItemsFilter({ languages, filters, setFilters }: Learning
                                 <SelectValue placeholder="All Types" />
                             </SelectTrigger>
                             <SelectContent className="rounded-2xl border-border/40 shadow-2xl">
-                                <SelectItem value="ALL" className="rounded-xl">{t("all_types") || "All Types"}</SelectItem>
-                                <SelectItem value="VOCABULARY" className="rounded-xl">{t("vocabulary") || "Vocabulary"}</SelectItem>
-                                <SelectItem value="STRUCTURE" className="rounded-xl">{t("structure") || "Structure"}</SelectItem>
+                                <SelectItem value="ALL" className="rounded-md">{t("all_types") || "All Types"}</SelectItem>
+                                <SelectItem value="VOCABULARY" className="rounded-md">{t("vocabulary") || "Vocabulary"}</SelectItem>
+                                <SelectItem value="STRUCTURE" className="rounded-md">{t("structure") || "Structure"}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

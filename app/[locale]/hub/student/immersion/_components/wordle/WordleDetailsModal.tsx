@@ -84,7 +84,7 @@ export function WordleDetailsModal({
                         </p>
                       ) : (
                         <div className="space-y-2">
-                          <div className="relative w-full h-40 sm:h-48 overflow-hidden rounded-xl border border-border/40 bg-muted/40 shadow-sm">
+                          <div className="relative w-full h-40 sm:h-48 overflow-hidden rounded-md border border-border/40 bg-muted/40 shadow-sm">
                             <Image
                               src={image.urls.regular || image.urls.small}
                               alt={image.altDescription || `Imagem de ${word}`}

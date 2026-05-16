@@ -155,7 +155,7 @@ export function EditCourseVault({ open, onOpenChange, course }: EditCourseVaultP
                     onClick={() => setLangOpen(true)}
                     className={cn(
                       buttonVariants({ variant: "outline" }),
-                      "w-full justify-between h-12 rounded-xl px-4 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 font-normal"
+                      "w-full justify-between h-12 rounded-md px-4 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 font-normal"
                     )}
                   >
                     {selectedLanguage
@@ -207,7 +207,7 @@ export function EditCourseVault({ open, onOpenChange, course }: EditCourseVaultP
                     <div className="relative aspect-video rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800">
                       <Image src={imageUrl} alt="Preview" fill className="object-cover" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <label className="cursor-pointer bg-white text-black px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2">
+                        <label className="cursor-pointer bg-white text-black px-4 py-2 rounded-md text-sm font-bold flex items-center gap-2">
                           <Upload size={16} />
                           {t("changeImage")}
                           <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
@@ -258,7 +258,7 @@ export function EditCourseVault({ open, onOpenChange, course }: EditCourseVaultP
               <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
                 {tCommon("cancel")}
               </Button>
-              <Button type="submit" className="rounded-xl px-8" disabled={status === "executing" || uploading}>
+              <Button type="submit" className="rounded-md px-8" disabled={status === "executing" || uploading}>
                 {status === "executing" ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

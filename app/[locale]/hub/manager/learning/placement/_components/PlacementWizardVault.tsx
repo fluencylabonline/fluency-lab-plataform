@@ -170,7 +170,7 @@ export function PlacementWizardVault({ isOpen, onOpenChange, languageId }: Place
                                             <div
                                                 key={item.id}
                                                 onClick={() => toggleItem(item.id)}
-                                                className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between ${selectedItems.includes(item.id)
+                                                className={`p-3 rounded-md border-2 cursor-pointer transition-all flex items-center justify-between ${selectedItems.includes(item.id)
                                                     ? "border-primary bg-primary/5"
                                                     : "border-border hover:border-primary/50 bg-muted/20"
                                                     }`}
@@ -194,7 +194,7 @@ export function PlacementWizardVault({ isOpen, onOpenChange, languageId }: Place
                                             <div
                                                 key={media.id}
                                                 onClick={() => toggleMedia(media.id)}
-                                                className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between ${selectedMedia.includes(media.id)
+                                                className={`p-3 rounded-md border-2 cursor-pointer transition-all flex items-center justify-between ${selectedMedia.includes(media.id)
                                                     ? "border-primary bg-primary/5"
                                                     : "border-border hover:border-primary/50 bg-muted/20"
                                                     }`}
@@ -295,13 +295,13 @@ export function PlacementWizardVault({ isOpen, onOpenChange, languageId }: Place
                                                             )}
                                                         </div>
                                                         <div className="flex gap-1">
-                                                            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary" onClick={() => {
+                                                            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-md hover:bg-primary/10 hover:text-primary" onClick={() => {
                                                                 const newContent = prompt("Edit content:", q.content);
                                                                 if (newContent) setGeneratedQuestions(prev => prev.map((item, i) => i === idx ? { ...item, content: newContent } : item));
                                                             }}>
                                                                 <Edit2 className="w-4 h-4" />
                                                             </Button>
-                                                            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-destructive/10 hover:text-destructive" onClick={() => setGeneratedQuestions(prev => prev.filter((_, i) => i !== idx))}>
+                                                            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-md hover:bg-destructive/10 hover:text-destructive" onClick={() => setGeneratedQuestions(prev => prev.filter((_, i) => i !== idx))}>
                                                                 <Trash2 className="w-4 h-4" />
                                                             </Button>
                                                         </div>
@@ -310,7 +310,7 @@ export function PlacementWizardVault({ isOpen, onOpenChange, languageId }: Place
                                                     <div className="space-y-3">
                                                         <div className="text-base font-bold leading-tight">{q.content}</div>
                                                         {q.context && (
-                                                            <div className="text-xs text-muted-foreground bg-background/80 p-3 rounded-xl border border-border/50 italic">
+                                                            <div className="text-xs text-muted-foreground bg-background/80 p-3 rounded-md border border-border/50 italic">
                                                                 {q.context}
                                                             </div>
                                                         )}

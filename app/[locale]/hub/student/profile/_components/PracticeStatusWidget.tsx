@@ -74,7 +74,7 @@ export function PracticeStatusWidget({ status, daysLate }: PracticeStatusWidgetP
       <motion.div
         animate={active.animation}
         className={cn(
-          "relative flex-shrink-0 w-16 h-16 rounded-xl border flex items-center justify-center",
+          "relative flex-shrink-0 w-16 h-16 rounded-md border flex items-center justify-center",
           active.iconBg,
           active.iconBorder,
           active.color

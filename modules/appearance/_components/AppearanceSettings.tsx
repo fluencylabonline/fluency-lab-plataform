@@ -23,7 +23,7 @@ export function AppearanceSettings() {
     return (
         <div className="card p-6 space-y-8">
             <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center text-primary">
                     <Palette className="w-5 h-5" />
                 </div>
                 <div>

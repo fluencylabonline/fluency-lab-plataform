@@ -60,14 +60,14 @@ export function MEICapacityCard({ capacity }: MEICapacityCardProps) {
 
         {/* Student Stats */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col p-3 rounded-xl bg-background border border-border shadow-sm">
+          <div className="flex flex-col p-3 rounded-md bg-background border border-border shadow-sm">
             <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
               <Users className="size-3" />
               {t("currentStudents") || "Alunos Ativos"}
             </div>
             <span className="text-xl font-bold">{capacity.currentStudents}</span>
           </div>
-          <div className="flex flex-col p-3 rounded-xl bg-background border border-border shadow-sm">
+          <div className="flex flex-col p-3 rounded-md bg-background border border-border shadow-sm">
             <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
               <TrendingUp className="size-3" />
               {t("availableSlots") || "Vagas Restantes"}

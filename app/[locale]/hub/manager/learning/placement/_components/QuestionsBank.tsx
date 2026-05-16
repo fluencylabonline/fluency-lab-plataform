@@ -111,7 +111,7 @@ export function QuestionsBank({ languageId }: QuestionsBankProps) {
         return (
             <div className="grid gap-3">
                 {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="h-20 rounded-xl bg-muted/40 animate-pulse" />
+                    <div key={i} className="h-20 rounded-md bg-muted/40 animate-pulse" />
                 ))}
             </div>
         );
@@ -119,7 +119,7 @@ export function QuestionsBank({ languageId }: QuestionsBankProps) {
 
     if (!questions || questions.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 rounded-xl border-2 border-dashed border-border bg-muted/20">
+            <div className="flex flex-col items-center justify-center py-20 rounded-md border-2 border-dashed border-border bg-muted/20">
                 <LayoutList className="w-10 h-10 text-muted-foreground/40 mb-3" />
                 <p className="text-sm font-medium text-muted-foreground">{t("no_questions") || "No questions found"}</p>
                 <p className="text-xs text-muted-foreground/60 mt-1">{t("no_questions_desc") || "Start by generating some questions."}</p>
@@ -134,7 +134,7 @@ export function QuestionsBank({ languageId }: QuestionsBankProps) {
                 {paginatedQuestions.map((q) => (
                     <div
                         key={q.id}
-                        className="group flex items-start gap-3 rounded-xl border border-border bg-white dark:bg-gray-900 px-4 py-3 transition-shadow hover:shadow-sm"
+                        className="group flex items-start gap-3 rounded-md border border-border bg-white dark:bg-gray-900 px-4 py-3 transition-shadow hover:shadow-sm"
                     >
                         {/* Type icon */}
                         <div className="mt-0.5 flex-shrink-0 w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center">

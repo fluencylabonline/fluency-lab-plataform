@@ -79,7 +79,7 @@ function RecessList({ recesses }: { recesses: RecessRequest[] }) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-4 p-3 bg-background rounded-xl border border-border/30">
+          <div className="flex items-center justify-between gap-4 p-3 bg-background rounded-md border border-border/30">
             <div className="flex flex-col">
               <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">{t('start') || "Início"}</span>
               <span className="text-sm font-bold">{format(new Date(recess.startDate), "dd 'de' MMM", { locale: ptBR })}</span>

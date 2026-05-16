@@ -73,7 +73,7 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
             {/* Toolbar */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2">
                 <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md">
                         <Filter className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-muted-foreground">{t("filter_status") || "Status"}:</span>
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -91,7 +91,7 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
                         </Select>
                     </div>
 
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md">
                         <Filter className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-muted-foreground">{t("filter_language") || "Language"}:</span>
                         <Select value={languageFilter} onValueChange={setLanguageFilter}>

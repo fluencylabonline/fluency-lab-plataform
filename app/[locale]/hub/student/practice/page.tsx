@@ -86,7 +86,7 @@ export default async function PracticePage({ params }: { params: Promise<{ local
         />
 
         <Tabs defaultValue="practice" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1 rounded-xl">
+          <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1 rounded-md">
             <TabsTrigger value="practice" className="rounded-lg font-bold text-xs">{t('practiceTab')}</TabsTrigger>
             <TabsTrigger value="roadmap" className="rounded-lg font-bold text-xs">{t('roadmapTab')}</TabsTrigger>
             <TabsTrigger value="history" className="rounded-lg font-bold text-xs">{t('historyTab')}</TabsTrigger>

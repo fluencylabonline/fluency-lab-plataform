@@ -42,7 +42,7 @@ export function RoadmapTimeline({ lessons }: RoadmapTimelineProps) {
             {/* Content Card */}
             <div
               className={cn(
-                "p-4 rounded-xl border transition-all duration-200",
+                "p-4 rounded-md border transition-all duration-200",
                 isCurrent ? "bg-card border-primary shadow-sm ring-1 ring-primary/20" : "bg-card/50 border-border"
               )}
             >
