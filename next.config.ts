@@ -9,6 +9,9 @@ const withSerwist = withSerwistInit({
   swDest: "public/sw.js",
   disable: process.env.NODE_ENV === "development",
   additionalPrecacheEntries: [{ url: "/offline", revision: "1" }],
+  exclude: [
+    /\.(?:webm|mp4|png|mp3)$/i, // Exclude heavy media from precache to avoid mandatory huge initial download
+  ],
 });
 
 const nextConfig: NextConfig = {
@@ -35,7 +38,6 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
       },
-
       {
         protocol: "https",
         hostname: "i.pravatar.cc",
@@ -89,6 +91,15 @@ const nextConfig: NextConfig = {
               "base-uri 'self'",
               "form-action 'self'",
             ].join("; "),
+          },
+        ],
+      },
+      {
+        source: "/(brand|icons|images|textures|backgrounds|fallback-images|immersion)/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },

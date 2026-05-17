@@ -9,6 +9,7 @@ import { NotificationPermissionVault } from "@/modules/notification/_components/
 import { PwaVault } from "@/modules/pwa/_components/PwaVault";
 import { ThemeColorUpdater } from "./theme-color-updater";
 import { PwaSplash } from "./pwa-splash";
+import { SWRConfig } from "swr";
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -26,9 +27,18 @@ export function Providers({ children, locale, messages, themeMode }: ProvidersPr
       disableTransitionOnChange
     >
       <NextIntlClientProvider messages={messages} locale={locale} timeZone="America/Sao_Paulo">
-        <TooltipProvider>
-          {children}
-        </TooltipProvider>
+        <SWRConfig
+          value={{
+            provider: () => new Map(),
+            dedupingInterval: 60000, // 60 seconds to deduplicate parallel component requests
+            revalidateOnFocus: false, // Disable aggressive automatic revalidation on tab/window focus
+            revalidateOnReconnect: true, // Seamless revalidation when internet reconnects
+          }}
+        >
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
+        </SWRConfig>
         <Toaster />
         <PwaHandler />
         <ThemeColorUpdater isDarkMode={themeMode === 'dark'} />

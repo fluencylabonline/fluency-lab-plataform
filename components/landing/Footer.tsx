@@ -30,6 +30,7 @@ export default function Footer() {
     };
 
     const onSubmit = async () => {
+        // TODO: implement newsletter
         await new Promise((resolve) => setTimeout(resolve, 1000));
         notify.success(t("newsletter.success") || "Inscrição realizada!");
         reset();

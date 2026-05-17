@@ -10,6 +10,7 @@ export interface OfflinePractice {
 }
 
 const QUEUE_KEY = "learning_practice_queue";
+const MAX_QUEUE_SIZE = 200;
 
 export const offlineStorage = {
   /**
@@ -21,7 +22,15 @@ export const offlineStorage = {
       ...practice,
       id: crypto.randomUUID(),
     };
-    await set(QUEUE_KEY, [...queue, newPractice]);
+    
+    // Strict safety cap of 200 items (FIFO - First-In-First-Out queue eviction)
+    // to prevent memory/IndexedDB storage explosion when offline for prolonged periods.
+    let updatedQueue = [...queue, newPractice];
+    if (updatedQueue.length > MAX_QUEUE_SIZE) {
+      updatedQueue = updatedQueue.slice(updatedQueue.length - MAX_QUEUE_SIZE);
+    }
+    
+    await set(QUEUE_KEY, updatedQueue);
     return newPractice;
   },
 
