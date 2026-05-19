@@ -25,19 +25,33 @@ export function PwaVault() {
 
   useEffect(() => {
     const checkState = () => {
+      const now = Date.now();
+
       // 1. Check for Update (ONLY for PWA)
       if (updateAvailable && isStandalone) {
-        setType("update");
-        setIsOpen(true);
-        return;
+        const lastDismiss = localStorage.getItem("pwa_update_dismissed_at");
+        const lastDismissVal = lastDismiss ? parseInt(lastDismiss, 10) : 0;
+        const oneDay = 24 * 60 * 60 * 1000;
+
+        if (isNaN(lastDismissVal) || now - lastDismissVal > oneDay) {
+          setType("update");
+          setIsOpen(true);
+          return;
+        }
       }
 
       // 2. Check for Install (Only on Profile Page and NOT standalone)
       const isProfilePage = pathname?.includes("/profile");
       if (isInstallable && !isStandalone && isProfilePage) {
-        setType("install");
-        setIsOpen(true);
-        return;
+        const lastDismiss = localStorage.getItem("pwa_install_dismissed_at");
+        const lastDismissVal = lastDismiss ? parseInt(lastDismiss, 10) : 0;
+        const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+
+        if (isNaN(lastDismissVal) || now - lastDismissVal > thirtyDays) {
+          setType("install");
+          setIsOpen(true);
+          return;
+        }
       }
 
       // Otherwise close
@@ -59,13 +73,26 @@ export function PwaVault() {
   };
 
   const handleDismiss = () => {
+    if (type === "install") {
+      localStorage.setItem("pwa_install_dismissed_at", Date.now().toString());
+    } else if (type === "update") {
+      localStorage.setItem("pwa_update_dismissed_at", Date.now().toString());
+    }
     setIsOpen(false);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      handleDismiss();
+    } else {
+      setIsOpen(true);
+    }
   };
 
   if (!type) return null;
 
   return (
-    <Vault open={isOpen} onOpenChange={setIsOpen}>
+    <Vault open={isOpen} onOpenChange={handleOpenChange}>
       <VaultContent>
         <VaultHeader>
           <VaultIcon type={type === "install" ? "download" : "success"} />
@@ -88,3 +115,4 @@ export function PwaVault() {
     </Vault>
   );
 }
+
