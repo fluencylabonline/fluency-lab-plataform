@@ -1,8 +1,11 @@
 "use client";
+import { useState, useEffect } from "react";
 import { Calendar, Clock, User, Video } from "lucide-react";
 import { useTranslations, useFormatter } from "next-intl";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface NextClassCardProps {
   nextClass: {
@@ -13,11 +16,42 @@ interface NextClassCardProps {
     teacherPhoto: string | null;
     topic?: string | null;
   } | null;
+  studentId: string;
 }
 
-export function NextClassCard({ nextClass }: NextClassCardProps) {
+export function NextClassCard({ nextClass, studentId }: NextClassCardProps) {
   const t = useTranslations("Hub.StudentProfile.NextClass");
   const format = useFormatter();
+  const [activeCall, setActiveCall] = useState<{ callId: string; notebookId: string } | null>(null);
+
+  useEffect(() => {
+    if (!studentId) return;
+
+    const docRef = doc(db, "users", studentId);
+    const unsubscribe = onSnapshot(
+      docRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data?.callId && data?.notebookId) {
+            setActiveCall({
+              callId: data.callId,
+              notebookId: data.notebookId,
+            });
+          } else {
+            setActiveCall(null);
+          }
+        } else {
+          setActiveCall(null);
+        }
+      },
+      (error) => {
+        console.error("[NextClassCard] Error listening to user call status:", error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [studentId]);
 
   if (!nextClass) {
     return (
@@ -83,17 +117,19 @@ export function NextClassCard({ nextClass }: NextClassCardProps) {
         </div>
       </div>
 
-      <div className="mt-8">
-        <Link
-          href={`/hub/student/classes/${nextClass.id}`}
-          className={buttonVariants({
-            className: "w-full h-12 rounded-md shadow-none font-bold"
-          })}
-        >
-          <Video className="w-5 h-5 mr-2" />
-          {t("join_class")}
-        </Link>
-      </div>
+      {activeCall && (
+        <div className="mt-8">
+          <Link
+            href={`/notebook/${activeCall.notebookId}`}
+            className={buttonVariants({
+              className: "w-full h-12 rounded-md shadow-none font-bold"
+            })}
+          >
+            <Video className="w-5 h-5 mr-2" />
+            {t("join_class")}
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

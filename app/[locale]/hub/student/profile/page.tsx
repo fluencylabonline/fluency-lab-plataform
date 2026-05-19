@@ -125,7 +125,7 @@ export default async function ProfilePage() {
                     {/* Column 3: Financial & Scheduling */}
                     <div className="flex flex-col gap-3">
                         <StudentPaymentStatusCard subscription={subscriptionData} />
-                        <NextClassCard nextClass={nextClassMapped} />
+                        <NextClassCard nextClass={nextClassMapped} studentId={user.id} />
                     </div>
 
                 </div>
