@@ -16,15 +16,17 @@ interface ProvidersProps {
   locale: string;
   messages: AbstractIntlMessages;
   themeMode: string;
+  nonce?: string;
 }
 
-export function Providers({ children, locale, messages, themeMode }: ProvidersProps) {
+export function Providers({ children, locale, messages, themeMode, nonce }: ProvidersProps) {
   return (
     <ThemeProvider
       attribute="class"
       defaultTheme={themeMode}
       enableSystem
       disableTransitionOnChange
+      nonce={nonce}
     >
       <NextIntlClientProvider messages={messages} locale={locale} timeZone="America/Sao_Paulo">
         <SWRConfig

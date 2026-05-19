@@ -121,6 +121,7 @@ export default async function RootLayout({
           locale={locale}
           messages={messages}
           themeMode={themeMode}
+          nonce={nonce}
         >
           <div id="vault-root" className="h-full">
             {children}
