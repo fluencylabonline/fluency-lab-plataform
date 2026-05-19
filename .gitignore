@@ -35,6 +35,7 @@ yarn-error.log*
 .env*
 /.agents/docs
 serviceAccountKey.json
+serviceAccountKeyProduction.json
 implementation
 scripts
 improvements.json

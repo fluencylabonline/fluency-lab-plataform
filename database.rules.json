@@ -1,0 +1,19 @@
+{
+  "rules": {
+    "notebooks": {
+      "$notebookId": {
+        ".read": "data.child('metadata/isPublic').val() === true || auth != null",
+        ".write": "auth != null",
+        "metadata": {
+          ".write": "auth != null"
+        },
+        "content": {
+          ".write": "auth != null"
+        },
+        "awareness": {
+          ".write": "auth != null"
+        }
+      }
+    }
+  }
+}

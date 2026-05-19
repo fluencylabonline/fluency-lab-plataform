@@ -84,7 +84,7 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://images.unsplash.com https://i.ytimg.com https://lh3.googleusercontent.com https://i.pravatar.cc https://*.stream-io-video.com https://*.stream-io-api.com",
               "connect-src 'self' http://localhost:3000 ws://localhost:3000 https://*.firebaseio.com wss://*.firebaseio.com https://firebasestorage.googleapis.com https://*.googleapis.com https://apis.google.com https://*.stream-io-api.com wss://*.stream-io-api.com wss://*.getstream.io https://api.abacatepay.com https://lrclib.net https://*.stream-io-video.com wss://*.stream-io-video.com https://lh3.googleusercontent.com https://images.unsplash.com https://i.ytimg.com https://i.pravatar.cc",
               "media-src 'self' blob: https://firebasestorage.googleapis.com",
-              "frame-src https://www.youtube.com https://drive.google.com https://fluency-lab-plataform.firebaseapp.com",
+              "frame-src https://www.youtube.com https://drive.google.com https://fluency-lab-plataform.firebaseapp.com https://fluencylabplataform.firebaseapp.com https://fluencylabplataform.web.app",
               "object-src 'none'",
               "worker-src 'self' blob:",
               "child-src 'self' blob:",
