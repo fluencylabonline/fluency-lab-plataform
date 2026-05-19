@@ -17,7 +17,7 @@ import { startOfDay, endOfDay } from "date-fns";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { schedulingRepository } from "./scheduling.repository";
 
-export const createRecurrenceRuleAction = permissionAction("class.update.any")
+export const createRecurrenceRuleAction = protectedAction
   .metadata({ name: "createRecurrenceRule" })
   .inputSchema(createRecurrenceRuleSchema)
   .action(async ({ parsedInput, ctx }) => {
