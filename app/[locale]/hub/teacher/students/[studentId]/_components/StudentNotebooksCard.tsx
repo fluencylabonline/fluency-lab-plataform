@@ -2,11 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import {
-  Plus,
-  CloudDownload,
-  BookOpen
-} from "lucide-react";
+import { Plus, CloudDownload, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/ui/search-bar";
 import { EmptyResults } from "@/components/ui/empty";
@@ -20,14 +16,17 @@ import {
   VaultFooter,
   VaultPrimaryButton,
   VaultSecondaryButton,
-  VaultIcon
+  VaultIcon,
 } from "@/components/ui/vault";
 import { Input } from "@/components/ui/input";
 import { notify } from "@/components/ui/toaster";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { createNotebookAction, getNotebookAction } from "@/modules/notebook/notebook.actions";
+import {
+  createNotebookAction,
+  getNotebookAction,
+} from "@/modules/notebook/notebook.actions";
 import type { Notebook } from "@/modules/notebook/notebook.schema";
 import { generateNotebookPDF } from "@/lib/pdfGenerator";
 
@@ -42,7 +41,7 @@ export function StudentNotebooksCard({
   studentId,
   studentName = "Estudante",
   initialNotebooks = [],
-  isVaultMode = false
+  isVaultMode = false,
 }: StudentNotebooksCardProps) {
   const t = useTranslations("NotebooksCard");
   const params = useParams();
@@ -57,8 +56,8 @@ export function StudentNotebooksCard({
   const [notebooks, setNotebooks] = useState<Notebook[]>(initialNotebooks);
 
   const filteredNotebooks = useMemo(() => {
-    return notebooks.filter(nb =>
-      nb.title.toLowerCase().includes(searchQuery.toLowerCase())
+    return notebooks.filter((nb) =>
+      nb.title.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [notebooks, searchQuery]);
 
@@ -74,7 +73,9 @@ export function StudentNotebooksCard({
     setIsLoading(false);
 
     if (result?.serverError || !result?.data?.notebook) {
-      notify.error(result?.serverError || t("errorCreated") || "Erro ao criar notebook.");
+      notify.error(
+        result?.serverError || t("errorCreated") || "Erro ao criar notebook.",
+      );
       return;
     }
 
@@ -101,7 +102,7 @@ export function StudentNotebooksCard({
         title: result.data.notebook.title,
         studentName,
         content: result.data.notebook.content || "",
-        date: result.data.notebook.createdAt
+        date: result.data.notebook.createdAt,
       });
     } catch (error) {
       console.error("[handleDownloadPDF] Error:", error);
@@ -112,36 +113,54 @@ export function StudentNotebooksCard({
   };
 
   return (
-    <div className={cn(
-      !isVaultMode && "card",
-      "flex flex-col h-full sm:p-4 p-2"
-    )}>
+    <div
+      className={cn(!isVaultMode && "card", "flex flex-col h-full sm:p-4 p-2")}
+    >
       {/* Header Sticky */}
-      <div className={cn(
-        "pb-6 sticky top-0 z-10 bg-transparent",
-        isVaultMode && "pt-1"
-      )}>
+      <div
+        className={cn(
+          "pb-6 sticky top-0 z-10 bg-transparent",
+          isVaultMode && "pt-1",
+        )}
+      >
         {!isVaultMode && (
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div className="text-xl font-bold flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-primary" />
-              {t("title") || "Notebooks"}
+          <>
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <div className="text-xl font-bold flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-primary" />
+                {t("title") || "Notebooks"}
+              </div>
+              <Button size="sm" onClick={() => setIsVaultOpen(true)}>
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline ml-2">
+                  {t("create") || "Novo"}
+                </span>
+              </Button>
             </div>
+            <SearchBar
+              placeholder={t("searchPlaceholder") || "Pesquisar notebooks..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </>
+        )}
+
+        {isVaultMode && (
+          <div className="flex flex-row w-full gap-2 justify-between items-center">
+            <SearchBar
+              placeholder={t("searchPlaceholder") || "Pesquisar notebooks..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
             <Button
+              variant="ghost"
               size="sm"
               onClick={() => setIsVaultOpen(true)}
             >
               <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline ml-2">{t("create") || "Novo"}</span>
             </Button>
           </div>
         )}
-
-        <SearchBar
-          placeholder={t("searchPlaceholder") || "Pesquisar notebooks..."}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
       </div>
 
       {/* List Area */}
@@ -151,13 +170,19 @@ export function StudentNotebooksCard({
             <EmptyResults
               searchQuery={searchQuery}
               customMessage={{
-                withSearch: t("noResultsSearch", { query: searchQuery }) || `Nenhum resultado para "${searchQuery}"`,
-                withoutSearch: t("noResults") || "Nenhum notebook encontrado"
+                withSearch:
+                  t("noResultsSearch", { query: searchQuery }) ||
+                  `Nenhum resultado para "${searchQuery}"`,
+                withoutSearch: t("noResults") || "Nenhum notebook encontrado",
               }}
             />
           ) : (
             filteredNotebooks
-              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+              .sort(
+                (a, b) =>
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime(),
+              )
               .map((notebook) => (
                 <div
                   key={notebook.id}
@@ -171,7 +196,9 @@ export function StudentNotebooksCard({
                       {notebook.title}
                     </h3>
                     <p className="text-[10px] text-muted-foreground">
-                      {new Date(notebook.createdAt).toLocaleDateString(locale === "pt" ? "pt-BR" : "en-US")}
+                      {new Date(notebook.createdAt).toLocaleDateString(
+                        locale === "pt" ? "pt-BR" : "en-US",
+                      )}
                     </p>
                   </Link>
 
@@ -183,7 +210,12 @@ export function StudentNotebooksCard({
                       disabled={isDownloading === notebook.id}
                       onClick={() => handleDownloadPDF(notebook.id)}
                     >
-                      <CloudDownload className={cn("h-4 w-4", isDownloading === notebook.id && "animate-pulse")} />
+                      <CloudDownload
+                        className={cn(
+                          "h-4 w-4",
+                          isDownloading === notebook.id && "animate-pulse",
+                        )}
+                      />
                     </Button>
                   </div>
                 </div>
@@ -199,7 +231,8 @@ export function StudentNotebooksCard({
             <VaultIcon type="confirm" />
             <VaultTitle>{t("createTitle") || "Criar Novo Notebook"}</VaultTitle>
             <VaultDescription>
-              {t("createDescription") || "Dê um título para o novo caderno de aula do aluno."}
+              {t("createDescription") ||
+                "Dê um título para o novo caderno de aula do aluno."}
             </VaultDescription>
           </VaultHeader>
 
@@ -212,7 +245,9 @@ export function StudentNotebooksCard({
                 <Input
                   value={newNotebookTitle}
                   onChange={(e) => setNewNotebookTitle(e.target.value)}
-                  placeholder={t("inputPlaceholder") || "Ex: Aula 05 - Business English"}
+                  placeholder={
+                    t("inputPlaceholder") || "Ex: Aula 05 - Business English"
+                  }
                   autoFocus
                   onKeyDown={(e) => e.key === "Enter" && handleCreateNotebook()}
                 />
@@ -228,7 +263,9 @@ export function StudentNotebooksCard({
               onClick={handleCreateNotebook}
               disabled={!newNotebookTitle.trim() || isLoading}
             >
-              {isLoading ? t("creating") || "Criando..." : t("create") || "Criar"}
+              {isLoading
+                ? t("creating") || "Criando..."
+                : t("create") || "Criar"}
             </VaultPrimaryButton>
           </VaultFooter>
         </VaultContent>
@@ -236,4 +273,3 @@ export function StudentNotebooksCard({
     </div>
   );
 }
-

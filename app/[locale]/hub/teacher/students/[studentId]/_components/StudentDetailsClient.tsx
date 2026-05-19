@@ -20,6 +20,7 @@ import {
 import { StudentNotebooksCard } from "./StudentNotebooksCard";
 import { StudentPlanCard } from "./StudentPlanCard";
 import { StudentClassesCard } from "./StudentClassesCard";
+import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 
 interface StudentDetailsClientProps {
   studentId: string;
@@ -38,20 +39,21 @@ export function StudentDetailsClient({
 }: StudentDetailsClientProps) {
   const [isNotebooksOpen, setIsNotebooksOpen] = useState(false);
   const [isPlanOpen, setIsPlanOpen] = useState(false);
+  const isTabletSize = useIsBreakpoint("max", 1024);
 
-  // Botões de ação para o Header (Apenas Mobile)
+  // Botões de ação para o Header (Apenas Tablet e Mobile)
   const headerActions = [
     {
       id: "notebooks",
       icon: <BookOpen className="h-5 w-5" />,
       onClick: () => setIsNotebooksOpen(true),
-      className: "lg:hidden" // Esconde no desktop
+      className: "lg:hidden" // Esconde no desktop e mostra no tablet
     },
     {
       id: "plan",
       icon: <Target className="h-5 w-5" />,
       onClick: () => setIsPlanOpen(true),
-      className: "lg:hidden" // Esconde no desktop
+      className: "lg:hidden" // Esconde no desktop e mostra no tablet
     }
   ];
 
@@ -59,8 +61,8 @@ export function StudentDetailsClient({
     <div>
       <Header
         title={studentName}
-        showSubHeader={false}
         actions={headerActions}
+        showSubHeader={isTabletSize}
         className="contents"
       />
 
@@ -106,9 +108,6 @@ export function StudentDetailsClient({
               <BookOpen className="h-5 w-5 text-primary" />
               Notebooks
             </VaultTitle>
-            <VaultDescription>
-              Cadernos de aula e materiais do aluno.
-            </VaultDescription>
           </VaultHeader>
           <VaultBody className="p-0 h-full overflow-hidden">
             <StudentNotebooksCard 

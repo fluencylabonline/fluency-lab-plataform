@@ -93,7 +93,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                         <Button
                             key={index}
                             onClick={act.onClick}
-                            variant={isMobileSlot ? "ghost" : "default"}
+                            variant={isMobileSlot ? "ghost" : "outline"}
                             size={isMobileSlot ? "icon" : "sm"}
                             className={cn("h-9", isMobileSlot && "h-10 w-10", act.className)}
                         >
