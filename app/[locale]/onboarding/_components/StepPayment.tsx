@@ -163,7 +163,7 @@ export function StepPayment({
                     >
                         {/* Plan summary */}
                         {plan && (
-                            <div className="rounded-md border border-white/[0.07] bg-white/[0.03] p-5 space-y-4">
+                            <div className="rounded-md border border-white/[0.07] bg-white/3 p-5 space-y-4">
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-medium text-slate-200">
                                         {plan.name}
@@ -173,7 +173,7 @@ export function StepPayment({
                                     </span>
                                 </div>
 
-                                <div className="border-t border-white/[0.06] pt-4 space-y-2">
+                                <div className="border-t border-white/6 pt-4 space-y-2">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-slate-500">
                                             {t("payment.totalValue")}
@@ -210,7 +210,7 @@ export function StepPayment({
                                                 "h-14 w-full rounded-md border text-lg font-semibold transition-all duration-200",
                                                 isActive
                                                     ? "border-violet-500/50 bg-violet-500/10 text-violet-300"
-                                                    : "border-white/[0.07] bg-white/[0.03] text-slate-500 hover:border-white/[0.14] hover:text-slate-300"
+                                                    : "border-white/[0.07] bg-white/3 text-slate-500 hover:border-white/[0.14] hover:text-slate-300"
                                             )}
                                         >
                                             {day}
@@ -238,7 +238,7 @@ export function StepPayment({
                             <button
                                 onClick={onBack}
                                 disabled={loading}
-                                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-md border border-white/[0.08] text-sm text-slate-500 transition-all hover:border-white/[0.14] hover:text-slate-300 disabled:opacity-40"
+                                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-md border border-white/8 text-sm text-slate-500 transition-all hover:border-white/[0.14] hover:text-slate-300 disabled:opacity-40"
                             >
                                 <ArrowLeft className="h-4 w-4" />
                                 {t("steps.back") || "Voltar"}
@@ -246,7 +246,7 @@ export function StepPayment({
                             <Button
                                 onClick={handleConfirmDate}
                                 disabled={loading || !plan}
-                                className="flex h-11 flex-[2] items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
+                                className="flex h-11 flex-2 items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
                             >
                                 {loading ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -268,9 +268,9 @@ export function StepPayment({
                         transition={{ duration: 0.3 }}
                         className="space-y-5"
                     >
-                        <div className="overflow-hidden rounded-md border border-white/[0.07] bg-white/[0.03]">
+                        <div className="overflow-hidden rounded-md border border-white/[0.07] bg-white/3">
                             {/* Header */}
-                            <div className="flex items-center gap-2.5 border-b border-white/[0.06] px-5 py-3.5">
+                            <div className="flex items-center gap-2.5 border-b border-white/6 px-5 py-3.5">
                                 <QrCode className="h-4 w-4 text-violet-400" />
                                 <span className="text-sm font-medium text-slate-400">
                                     {t("payment.payNowTitle") || "Pagar com PIX"}
@@ -309,14 +309,14 @@ export function StepPayment({
                                         {t("payment.copyPaste") || "Copia e Cola"}
                                     </p>
                                     <div className="flex gap-2">
-                                        <div className="flex-1 overflow-hidden rounded-lg border border-white/[0.07] bg-white/[0.03] px-3 py-2.5 font-mono text-[11px] text-slate-600 truncate">
+                                        <div className="flex-1 overflow-hidden rounded-lg border border-white/[0.07] bg-white/3 px-3 py-2.5 font-mono text-[11px] text-slate-600 truncate">
                                             {pixData.pixPayload}
                                         </div>
                                         <button
                                             onClick={() =>
                                                 copyToClipboard(pixData.pixPayload || "")
                                             }
-                                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/[0.07] bg-white/[0.03] text-slate-500 transition-all hover:border-violet-500/30 hover:bg-violet-500/10 hover:text-violet-400"
+                                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/[0.07] bg-white/3 text-slate-500 transition-all hover:border-violet-500/30 hover:bg-violet-500/10 hover:text-violet-400"
                                         >
                                             <Copy className="h-3.5 w-3.5" />
                                         </button>

@@ -1684,7 +1684,7 @@
       "name": "Como devemos te chamar?",
       "nickname": "Apelido (opcional)",
       "birthDate": "Data de Nascimento",
-      "terms": "Eu li e aceito os {terms} e a {privacy}.",
+      "terms": "Eu li e aceito os <terms>Termos de Uso</terms> e a <privacy>Política de Privacidade</privacy>.",
       "termsLink": "Termos de Uso",
       "privacyLink": "Política de Privacidade",
       "guardianConsent": "Declaro que sou menor de idade e possuo consentimento dos meus pais ou responsáveis para o tratamento dos meus dados.",

@@ -132,14 +132,14 @@ export function StepWelcome({
                         </div>
                         <label htmlFor="acceptedTerms" className="text-sm leading-relaxed text-slate-400">
                             {t.rich("stepWelcome.terms", {
-                                terms: () => (
+                                terms: (chunks) => (
                                     <Link href="/terms" target="_blank" className="text-violet-400 hover:underline inline-flex items-center gap-1">
-                                        {t("stepWelcome.termsLink")} <ExternalLink className="h-3 w-3" />
+                                        {chunks} <ExternalLink className="h-3 w-3" />
                                     </Link>
                                 ),
-                                privacy: () => (
+                                privacy: (chunks) => (
                                     <Link href="/privacy" target="_blank" className="text-violet-400 hover:underline inline-flex items-center gap-1">
-                                        {t("stepWelcome.privacyLink")} <ExternalLink className="h-3 w-3" />
+                                        {chunks} <ExternalLink className="h-3 w-3" />
                                     </Link>
                                 )
                             })}

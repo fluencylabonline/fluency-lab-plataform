@@ -1684,7 +1684,7 @@
       "name": "What should we call you?",
       "nickname": "Nickname (optional)",
       "birthDate": "Birth Date",
-      "terms": "I have read and accept the {terms} and the {privacy}.",
+      "terms": "I have read and accept the <terms>Terms of Use</terms> and the <privacy>Privacy Policy</privacy>.",
       "termsLink": "Terms of Use",
       "privacyLink": "Privacy Policy",
       "guardianConsent": "I declare that I am a minor and have consent from my parents or guardians for the processing of my data.",

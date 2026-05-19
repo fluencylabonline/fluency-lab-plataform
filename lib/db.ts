@@ -1,5 +1,6 @@
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import { neonConfig, Pool } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-serverless";
+import ws from "ws";
 import { env } from "@/env";
 import * as userSchema from "@/modules/user/user.schema";
 import * as notificationSchema from "@/modules/notification/notification.schema";
@@ -19,9 +20,12 @@ import * as certificateSchema from "@/modules/certificate/certificate.schema";
 import * as taskSchema from "@/modules/task/task.schema";
 import * as immersionSchema from "@/modules/immersion/immersion.schema";
 
-const sql = neon(env.DATABASE_URL);
+//We did differently for a reason I think, but I don't remember it now
+neonConfig.webSocketConstructor = ws;
 
-export const db = drizzle(sql, {
+const pool = new Pool({ connectionString: env.DATABASE_URL });
+
+export const db = drizzle(pool, {
   schema: { 
     ...userSchema, 
     ...notificationSchema, 
