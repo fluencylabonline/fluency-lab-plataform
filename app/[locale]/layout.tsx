@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { getMessages, getTranslations } from "next-intl/server";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { Providers } from "@/components/layout/providers";
 import { Quicksand } from "next/font/google";
 import "../globals.css";
@@ -58,6 +58,7 @@ export default async function RootLayout({
   const { locale } = await params;
   const messages = await getMessages();
   const cookieStore = await cookies();
+  const nonce = (await headers()).get("x-nonce") || undefined;
 
   const themeColor = cookieStore.get("fluency-lab-theme-color")?.value || "indigo";
   const themeMode = cookieStore.get("fluency-lab-mode")?.value || "system";
@@ -94,6 +95,7 @@ export default async function RootLayout({
 
 
         <script
+          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: `
               (function() {

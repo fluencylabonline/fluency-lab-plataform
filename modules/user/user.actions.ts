@@ -66,7 +66,7 @@ export const loginAction = actionClient
         cookieStore.set("mfa_pending", sessionCookie, {
           maxAge: 300, // 5 minutes
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
+          secure: process.env.NODE_ENV !== "development",
           path: "/",
           sameSite: "lax",
         });
@@ -80,7 +80,7 @@ export const loginAction = actionClient
       cookieStore.set("session", sessionCookie, {
         maxAge,
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: process.env.NODE_ENV !== "development",
         path: "/",
         sameSite: "lax",
       });
@@ -114,7 +114,7 @@ export const verifyMfaLoginAction = actionClient
       cookieStore.set("session", sessionCookie, {
         maxAge: parsedInput.rememberMe ? 60 * 60 * 24 * 14 : 60 * 60 * 24 * 7,
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: process.env.NODE_ENV !== "development",
         path: "/",
         sameSite: "lax",
       });

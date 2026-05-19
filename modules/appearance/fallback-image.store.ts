@@ -7,6 +7,6 @@ export const getOrSetFallbackImage = (images: string[]) => {
   if (saved && images.includes(saved)) return saved;
 
   const randomImage = images[Math.floor(Math.random() * images.length)];
-  Cookies.set("fluency-lab-fallback-avatar", randomImage, { expires: 365 });
+  Cookies.set("fluency-lab-fallback-avatar", randomImage, { expires: 365, secure: true, sameSite: "lax" });
   return randomImage;
 };

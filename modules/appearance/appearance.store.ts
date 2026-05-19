@@ -26,7 +26,7 @@ export const useAppearanceStore = create<AppearanceStore>()(
             setThemeColor: (color) => {
                 set({ themeColor: color });
 
-                Cookies.set("fluency-lab-theme-color", color, { expires: 365 });
+                Cookies.set("fluency-lab-theme-color", color, { expires: 365, secure: true, sameSite: "lax" });
 
                 if (typeof window !== "undefined") {
                     applyColorClass(color);
@@ -35,7 +35,7 @@ export const useAppearanceStore = create<AppearanceStore>()(
 
             setMode: (mode) => {
                 set({ mode });
-                Cookies.set("fluency-lab-mode", mode, { expires: 365 });
+                Cookies.set("fluency-lab-mode", mode, { expires: 365, secure: true, sameSite: "lax" });
             },
         }),
         {
