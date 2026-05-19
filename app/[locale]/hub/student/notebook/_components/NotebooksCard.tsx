@@ -101,7 +101,7 @@ export function NotebooksCard({
                   className="item flex items-center justify-between p-4 group"
                 >
                   <Link
-                    href={`/student/notebook/${notebook.id}`}
+                    href={`/notebook/${notebook.id}`}
                     className="flex-1 min-w-0"
                   >
                     <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">

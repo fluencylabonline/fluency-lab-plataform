@@ -13,10 +13,13 @@ if (!admin.apps.length) {
       privateKey: env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
     }),
     storageBucket: env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    databaseURL: env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
   });
 }
 
 export const adminAuth = admin.auth();
 export const adminDb = admin.firestore();
 export const adminStorage = admin.storage();
+export const adminRtdb = admin.database();
 export { admin };
+

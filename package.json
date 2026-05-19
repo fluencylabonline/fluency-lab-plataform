@@ -14,6 +14,7 @@
     "db:studio": "drizzle-kit studio",
     "storage:deploy": "npx -y firebase-tools@latest deploy --only storage --project fluency-lab-plataform",
     "firestore:deploy": "npx -y firebase-tools@latest deploy --only firestore --project fluency-lab-plataform",
+    "database:deploy": "npx -y firebase-tools@latest deploy --only database --project fluency-lab-plataform",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -115,6 +116,7 @@
   },
   "devDependencies": {
     "@base-ui/react": "^1.4.1",
+    "@firebase/rules-unit-testing": "^5.0.1",
     "@tailwindcss/postcss": "^4",
     "@types/js-cookie": "^3.0.6",
     "@types/lodash.throttle": "^4.1.9",

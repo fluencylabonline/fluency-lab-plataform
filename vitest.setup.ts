@@ -83,9 +83,17 @@ vi.mock('firebase-admin', () => {
         bucket: vi.fn(() => bucket),
       };
     }),
+    database: vi.fn(() => ({
+      ref: vi.fn(() => ({
+        set: vi.fn().mockResolvedValue(undefined),
+        remove: vi.fn().mockResolvedValue(undefined),
+        get: vi.fn().mockResolvedValue({ exists: () => false, val: () => null }),
+      })),
+    })),
   };
   return { default: admin, ...admin };
 });
+
 
 vi.mock('@abacatepay/sdk', () => {
   return {

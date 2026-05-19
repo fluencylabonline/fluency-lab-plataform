@@ -20,7 +20,7 @@ export function BackButton({ href, ariaLabel, className }: BackButtonProps) {
         className={cn("rounded-full", className)}
         aria-label={ariaLabel}
       >
-        <ChevronLeft className="h-5 w-5" />
+        <ChevronLeft suppressHydrationWarning className="h-5 w-5" />
       </Button>
     </Link>
   );

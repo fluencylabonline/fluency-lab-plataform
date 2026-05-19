@@ -1804,6 +1804,8 @@
     "isDraft": "Rascunho",
     "lesson": "Lição {order}: {title}",
     "noPlan": "Este aluno ainda não possui um plano de estudos.",
+    "noPlanDescription": "Este aluno ainda não possui um plano de estudos vinculado.",
+    "noPlanTitle": "Sem Plano Ativo",
     "noResults": "Nenhuma lição vinculada ao plano",
     "noResultsSearch": "Nenhuma lição encontrada para \"{query}\"",
     "planEditorDescription": "Gerencie as lições e objetivos do plano de estudos.",

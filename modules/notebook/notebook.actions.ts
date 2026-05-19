@@ -25,7 +25,7 @@ export const createNotebookAction = protectedAction
       studentId: parsedInput.studentId,
     });
 
-    // Initialize Firestore document for security rules
+    // Sync to Firestore (for Firestore security rules on the Notebooks collection)
     try {
       const { adminDb } = await import("@/lib/firebase-admin");
       await adminDb.collection("Notebooks").doc(notebook.id).set({
@@ -36,14 +36,31 @@ export const createNotebookAction = protectedAction
       });
     } catch (error) {
       console.error("[createNotebookAction] Firestore sync error:", error);
-      // We don't fail the whole action if Firestore sync fails, 
-      // but the notebook won't be accessible until fixed.
     }
+
+    // Sync metadata to RTDB so ownership-based security rules can validate reads/writes.
+    // The RTDB rules check notebooks/{id}/metadata/studentId and teacherId before allowing access.
+    try {
+      const { adminRtdb } = await import("@/lib/firebase-admin");
+      await adminRtdb
+        .ref(`notebooks/${notebook.id}/metadata`)
+        .set({
+          studentId: notebook.studentId,
+          teacherId: notebook.teacherId,
+          createdAt: new Date().toISOString(),
+        });
+    } catch (error) {
+      console.error("[createNotebookAction] RTDB metadata sync error:", error);
+      // Non-fatal: the notebook will still exist but RTDB access will be blocked
+      // until the metadata is written. It will be retried on the next access.
+    }
+
 
     revalidatePath(`/hub/teacher/students/${parsedInput.studentId}`);
 
     return { notebook };
   });
+
 
 /**
  * Lists notebooks for a student.

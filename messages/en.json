@@ -1804,6 +1804,8 @@
     "isDraft": "Draft",
     "lesson": "Lesson {order}: {title}",
     "noPlan": "This student doesn't have a learning plan yet.",
+    "noPlanDescription": "This student does not have an active learning plan linked yet.",
+    "noPlanTitle": "No Active Plan",
     "noResults": "No lessons linked to the plan",
     "noResultsSearch": "No lessons found for \"{query}\"",
     "planEditorDescription": "Manage lessons and goals for the learning plan.",

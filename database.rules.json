@@ -2,18 +2,20 @@
   "rules": {
     "notebooks": {
       "$notebookId": {
-        ".read": "data.child('metadata/isPublic').val() === true || auth != null",
-        ".write": "auth != null",
+        ".read": "auth != null && (data.child('metadata/studentId').val() === auth.uid || data.child('metadata/teacherId').val() === auth.uid)",
+
         "metadata": {
-          ".write": "auth != null"
+          ".write": "auth != null && (!data.exists() || data.parent().child('metadata/studentId').val() === auth.uid || data.parent().child('metadata/teacherId').val() === auth.uid)"
         },
         "content": {
-          ".write": "auth != null"
+          ".write": "auth != null && (data.parent().child('metadata/studentId').val() === auth.uid || data.parent().child('metadata/teacherId').val() === auth.uid)"
         },
         "awareness": {
-          ".write": "auth != null"
+          "$userId": {
+            ".write": "auth != null && auth.uid === $userId && (root.child('notebooks').child($notebookId).child('metadata/studentId').val() === auth.uid || root.child('notebooks').child($notebookId).child('metadata/teacherId').val() === auth.uid)"
+          }
         }
       }
     }
   }
-}
+}

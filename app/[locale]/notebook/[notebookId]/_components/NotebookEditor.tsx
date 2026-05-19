@@ -2,7 +2,6 @@
 
 import { useCallback, useRef } from "react";
 import { EditorContent, EditorContext, useEditor, type Editor } from "@tiptap/react";
-import { useParams } from "next/navigation";
 
 // --- Tiptap Extensions ---
 import { StarterKit } from "@tiptap/starter-kit";
@@ -66,13 +65,15 @@ export function NotebookEditor({
   userColor,
   userPhotoUrl,
 }: NotebookEditorProps) {
-  const params = useParams();
-  const locale = params.locale as string;
   const toolbarRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<Editor | null>(null);
 
   // 1. Collaboration Logic
-  const { ydoc, provider } = useNotebookCollaboration(notebookId);
+  const { ydoc, awareness } = useNotebookCollaboration({
+    notebookId,
+    uid: userId,
+    user: { name: userName, color: userColor, uid: userId },
+  });
 
   // 2. Session Logic (Neon/Tracking)
   const getEditorContent = useCallback(() => editorRef.current?.getHTML(), []);
@@ -158,14 +159,14 @@ export function NotebookEditor({
         upload: handleNotebookImageUpload,
       }),
       ...(ydoc ? [Collaboration.configure({ document: ydoc, field: "content" })] : []),
-      ...(provider ? [
+      ...(awareness ? [
         CollaborationCaret.configure({
-          provider,
+          provider: { awareness },
           user: { name: userName, color: userColor },
         }),
       ] : []),
     ],
-  }, [ydoc, provider]);
+  }, [ydoc, awareness]);
 
   // 6. UI Helpers
   const toolbarRect = useRefRect(toolbarRef);
@@ -175,8 +176,8 @@ export function NotebookEditor({
   });
 
   const backHref = userRole === "teacher"
-    ? `/${locale}/hub/teacher/students/${studentId}`
-    : `/${locale}/hub/student/notebook`;
+    ? `/hub/teacher/students/${studentId}`
+    : `/hub/student/notebook`;
 
   return (
     <div className="simple-editor-wrapper">
@@ -188,6 +189,7 @@ export function NotebookEditor({
         />
 
         <EditorContent
+          key={ydoc ? "collab" : "solo"}
           editor={editor}
           role="presentation"
           className="simple-editor-content"

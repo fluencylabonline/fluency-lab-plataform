@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 import { getFirestore } from "firebase/firestore";
+import { getDatabase } from "firebase/database";
 import { env } from "@/env";
 
 const firebaseConfig = {
@@ -11,11 +12,14 @@ const firebaseConfig = {
   storageBucket: env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  databaseURL: env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
 };
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const storage = getStorage(app);
 const db = getFirestore(app);
+const rtdb = getDatabase(app);
 
-export { app, auth, storage, db };
+export { app, auth, storage, db, rtdb };
+
