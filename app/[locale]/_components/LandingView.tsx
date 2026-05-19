@@ -49,7 +49,7 @@ export function LandingView({ user }: { user: User | null }) {
                 loop
                 muted
                 playsInline
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full object-cover transition-opacity duration-1000"
+                className="absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-400"
                 style={{ opacity: isVideoPlaying ? 1 : 0 }}
                 onPlay={() => setIsVideoPlaying(true)}
               />
@@ -57,7 +57,7 @@ export function LandingView({ user }: { user: User | null }) {
 
             <div className="absolute inset-0 bg-black/5 z-1 pointer-events-none" />
 
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-linear-to-b from-black/60 to-transparent z-2" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-linear-to-b from-black/60 to-transparent z-1" />
 
             <div className="relative z-3 flex flex-col flex-1">
               <LandingNavbar user={user} />

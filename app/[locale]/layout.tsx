@@ -41,11 +41,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   interactiveWidget: "resizes-content",
-  // themeColor: [
-  //   { media: "(prefers-color-scheme: light)", color: "oklch(70.9% 0.00008 271.152)" }, //header-base
-  //   { media: "(prefers-color-scheme: dark)", color: "oklch(12.048% 0.02283 254.114)" }, //header-base
-  // ],
-  themeColor: "#212121",
+  themeColor: "#121520",
 };
 
 export default async function RootLayout({
