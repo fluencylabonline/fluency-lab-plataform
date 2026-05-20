@@ -14,9 +14,12 @@ import {
   QrCode,
   Wallet,
   Wallet2,
+  RotateCw,
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { syncInstallmentPaymentAction } from "@/modules/billing/billing.actions";
 
 interface StudentPaymentStatusCardProps {
   subscription: {
@@ -40,6 +43,34 @@ interface StudentPaymentStatusCardProps {
 export function StudentPaymentStatusCard({ subscription }: StudentPaymentStatusCardProps) {
   const t = useTranslations("Hub.StudentProfile.Payment");
   const locale = useLocale();
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  const handleVerifyPayment = async () => {
+    if (!subscription?.currentInstallment?.id) return;
+
+    setIsVerifying(true);
+    try {
+      const result = await syncInstallmentPaymentAction({
+        installmentId: subscription.currentInstallment.id,
+      });
+
+      if (result?.data?.success) {
+        const status = result.data.status;
+        if (status === "paid") {
+          notify.success(t("paymentConfirmed") || "Pagamento confirmado com sucesso!");
+        } else {
+          notify.info(t("paymentPending") || "Seu pagamento ainda consta como pendente no intermediador. Caso já tenha pago, aguarde alguns instantes e tente novamente.");
+        }
+      } else {
+        notify.error(result?.data?.error || t("verifyError") || "Erro ao verificar status do pagamento.");
+      }
+    } catch (error) {
+      console.error("Error verifying payment:", error);
+      notify.error(t("verifyError") || "Erro ao verificar status do pagamento.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   const copyPixCode = async () => {
     if (subscription?.currentInstallment?.pixCode) {
@@ -218,6 +249,17 @@ export function StudentPaymentStatusCard({ subscription }: StudentPaymentStatusC
                         </Button>
                       </div>
                     </div>
+
+                    <Button
+                      size="default"
+                      variant="outline"
+                      className="w-full gap-2 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm"
+                      onClick={handleVerifyPayment}
+                      disabled={isVerifying}
+                    >
+                      <RotateCw className={cn("w-4 h-4 mr-2 text-zinc-500 dark:text-zinc-400", isVerifying && "animate-spin")} />
+                      {isVerifying ? t("verifying") || "Verificando..." : t("verifyPayment") || "Já paguei, verificar pagamento"}
+                    </Button>
                   </div>
                 </div>
               ) : (

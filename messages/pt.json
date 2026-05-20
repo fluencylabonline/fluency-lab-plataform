@@ -796,7 +796,9 @@
         "title": "Pagamento",
         "undefinedDesc": "Não conseguimos localizar seu plano atual ou histórico de faturamento.",
         "value": "Valor",
-        "view_plans": "Ver Planos"
+        "view_plans": "Ver Planos",
+        "verifyPayment": "Verificar pagamento",
+        "verifying": "Verificando..."
       },
       "ProgressHero": {
         "classes": "Aulas",

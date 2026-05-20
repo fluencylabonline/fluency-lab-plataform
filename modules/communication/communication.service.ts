@@ -74,8 +74,6 @@ export class CommunicationService {
     }
   }
 
-  //TODO: Implement Resend webhook api to update email status 
-
   /**
    * MÉTODOS DE NEGÓCIO
    * Dados específicos e chamar o sendEmail.

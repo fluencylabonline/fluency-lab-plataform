@@ -183,3 +183,22 @@ export const getPaymentDetailsAction = protectedAction
 
     return { success: true, data: details };
   });
+
+export const syncInstallmentPaymentAction = protectedAction
+  .metadata({ name: "syncInstallmentPayment" })
+  .inputSchema(z.object({ installmentId: z.uuid() }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const result = await billingService.syncInstallmentStatus(parsedInput.installmentId, ctx.user.id);
+      
+      revalidatePath("/student/profile");
+      revalidatePath("/student/billing");
+      revalidatePath("/onboarding");
+      
+      return { success: true, status: result.status };
+    } catch (error) {
+      console.error("[syncInstallmentPaymentAction] Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro ao atualizar status de pagamento";
+      return { success: false, error: errorMessage };
+    }
+  });

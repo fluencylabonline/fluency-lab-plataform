@@ -115,7 +115,7 @@ export const getPendingContractAction = protectedAction
 
 export const getContractDownloadUrlAction = protectedAction
   .metadata({ name: "getContractDownloadUrl" })
-  .schema(z.object({ instanceId: z.string() }))
+  .inputSchema(z.object({ instanceId: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
       const instance = await contractRepository.findInstanceById(parsedInput.instanceId);
@@ -139,7 +139,7 @@ export const getContractDownloadUrlAction = protectedAction
 
 export const resendContractEmailAction = protectedAction
   .metadata({ name: "resendContractEmail" })
-  .schema(z.object({ instanceId: z.string() }))
+  .inputSchema(z.object({ instanceId: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
       const result = await contractService.resendContractEmail(ctx.user.id, parsedInput.instanceId);

@@ -447,6 +447,69 @@ export const billingService = {
     };
   },
 
+  async syncInstallmentStatus(installmentId: string, userId: string) {
+    const installment = await billingRepository.findInstallmentById(installmentId);
+    if (!installment) throw new Error("Parcela não encontrada");
+
+    // Validação de Propriedade (Prevenção de IDOR)
+    const subscription = await billingRepository.findSubscriptionById(installment.subscriptionId);
+    if (!subscription) throw new Error("Assinatura não encontrada");
+
+    if (subscription.studentId !== userId) {
+      throw new Error("Não autorizado");
+    }
+
+    // Se já estiver paga, não precisa fazer nada
+    if (installment.status === "paid") {
+      return { status: "paid" };
+    }
+
+    if (!installment.abacatePayBillingId) {
+      throw new Error("Esta parcela não possui uma cobrança ativa no intermediador de pagamentos.");
+    }
+
+    console.log(`[BillingService] Sincronizando parcela ${installmentId} (AbacatePay ID: ${installment.abacatePayBillingId})`);
+
+    const res = await fetch(`https://api.abacatepay.com/v2/transparents/check?id=${installment.abacatePayBillingId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${env.ABACATEPAY_API_KEY}`,
+      },
+    });
+
+    if (!res.ok) {
+      console.error(`[BillingService] Falha ao buscar status do AbacatePay para ${installment.abacatePayBillingId}. HTTP ${res.status}`);
+      throw new Error("Falha ao consultar o intermediador de pagamentos.");
+    }
+
+    const result = await res.json();
+    
+    if (!result.success || !result.data) {
+      console.error(`[BillingService] Retorno inválido do AbacatePay:`, result);
+      throw new Error("Erro retornado pelo intermediador de pagamentos.");
+    }
+
+    const abacateStatus = result.data.status; // "PENDING" | "PAID" | "EXPIRED" | "CANCELLED"
+    console.log(`[BillingService] Status do pagamento no AbacatePay: ${abacateStatus}`);
+
+    if (abacateStatus === "PAID") {
+      await this.markInstallmentAsPaid(installmentId, installment.abacatePayBillingId);
+      return { status: "paid" };
+    }
+
+    if (abacateStatus === "EXPIRED" || abacateStatus === "CANCELLED") {
+      const newStatus = "cancelled";
+      if (installment.status !== newStatus) {
+        await billingRepository.updateInstallment(installmentId, { status: newStatus });
+        revalidatePath("/student/billing");
+      }
+      return { status: newStatus };
+    }
+
+    return { status: installment.status };
+  },
+
   async markInstallmentAsPaid(
     installmentId: string,
     abacatePayBillingId?: string,

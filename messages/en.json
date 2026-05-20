@@ -796,7 +796,9 @@
         "title": "Payment",
         "undefinedDesc": "We couldn't find your current plan or billing history.",
         "value": "Value",
-        "view_plans": "View Plans"
+        "view_plans": "View Plans",
+        "verifyPayment": "Verify Payment",
+        "verifying": "Verifying..."
       },
       "ProgressHero": {
         "classes": "Classes",
