@@ -22,7 +22,7 @@ export const ContractSignedEmail: React.FC<ContractSignedEmailProps> = ({
   name,
   contractName,
 }) => {
-  const dashboardLink = `${env.NEXT_PUBLIC_APP_URL}/student`;
+  const dashboardLink = `${env.NEXT_PUBLIC_APP_URL}/hub`;
 
   return (
     <Html>
@@ -43,7 +43,7 @@ export const ContractSignedEmail: React.FC<ContractSignedEmailProps> = ({
             Olá, <strong>{name}</strong>!
           </Text>
           <Text style={emailStyles.paragraph}>
-            Confirmamos a assinatura do contrato: <strong>{contractName}</strong>. 
+            Confirmamos a assinatura do contrato: <strong>{contractName}</strong>.
             Uma cópia em PDF foi anexada a este e-mail para seus arquivos.
           </Text>
 

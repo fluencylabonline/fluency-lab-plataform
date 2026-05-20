@@ -49,7 +49,7 @@ interface SendEmailOptions {
 }
 
 export class CommunicationService {
-  private readonly defaultFrom = "Fluency Lab <contato@matheusfernandes.me>";
+  private readonly defaultFrom = "Fluency Lab <contato@fluencylab.me>";
 
   /**
    * Recebe o template pronto, renderiza e envia via Resend.
