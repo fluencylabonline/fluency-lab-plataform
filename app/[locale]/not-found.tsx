@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Compass } from "lucide-react";
 
 export default async function NotFound() {
@@ -31,12 +31,8 @@ export default async function NotFound() {
 
           <Link
             href="/"
-            className={buttonVariants({
-              size: "lg",
-              className: "w-full sm:w-auto font-semibold px-8",
-            })}
           >
-            {t("cta")}
+            <Button>{t("cta")}</Button>
           </Link>
         </div>
       </main>

@@ -32,7 +32,7 @@ export default async function ManagerSettingsPage() {
   return (
     <SettingsPageContent
       initialData={{
-        user,
+        user: userService.sanitizeUserForSettings(user),
         emailVerified,
         initialNotificationPrefs: prefs,
         hasPassword,

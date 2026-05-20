@@ -7,7 +7,7 @@ import { CreateUserVault } from "./CreateUserVault";
 import { Header } from "@/components/layout/header";
 import { hasPermission, Role, UserRoles } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
-import type { User } from "@/modules/user/user.schema";
+import type { User, AdminUserDTO } from "@/modules/user/user.schema";
 import {
   Select,
   SelectContent,
@@ -23,7 +23,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { RoleGuard } from "@/components/ui/role-guard";
 
 interface UsersPageClientProps {
-  initialData: User[];
+  initialData: AdminUserDTO[];
   currentUser: User;
   basePath: string;
 }

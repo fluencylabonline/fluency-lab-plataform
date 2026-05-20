@@ -1,6 +1,6 @@
 import { userRepository } from "./user.repository";
 import { adminAuth, adminStorage } from "@/lib/firebase-admin";
-import type { User, NewUser, NotificationPrefs } from "./user.schema";
+import type { User, NewUser, NotificationPrefs, SettingsUserDTO, AdminUserDTO } from "./user.schema";
 import { env } from "@/env";
 import { communicationService } from "@/modules/communication/communication.service";
 import { abacate } from "@/lib/abacate-pay";
@@ -353,5 +353,49 @@ export const userService = {
         }
       }
     }
+  },
+
+  maskCellphone(rawPhone: string | null): string | null {
+    if (!rawPhone) return null;
+    const digits = rawPhone.replace(/\D/g, "");
+    if (digits.length === 11) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 3)}****-${digits.slice(7)}`;
+    } else if (digits.length === 13 && digits.startsWith("55")) {
+      const local = digits.slice(2);
+      return `(${local.slice(0, 2)}) ${local.slice(2, 3)}****-${local.slice(7)}`;
+    } else if (digits.length >= 10) {
+      return `(${digits.slice(0, 2)}) ****-${digits.slice(-4)}`;
+    }
+    return `(••) •••••-${digits.slice(-4)}`;
+  },
+
+  sanitizeUserForSettings(user: User): SettingsUserDTO {
+    const decryptedCellphone = user.cellphone && user.cellphone.includes(":") 
+      ? decrypt(user.cellphone) 
+      : user.cellphone;
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role as "admin" | "teacher" | "student" | "manager",
+      photoUrl: user.photoUrl,
+      mfaEnabled: user.mfaEnabled,
+      cellphone: this.maskCellphone(decryptedCellphone),
+      locale: (user.locale || "pt") as "pt" | "en",
+    };
+  },
+
+  sanitizeUserForAdmin(user: User): AdminUserDTO {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role as "admin" | "teacher" | "student" | "manager",
+      photoUrl: user.photoUrl,
+      isActive: user.isActive,
+      createdAt: user.createdAt,
+      teacherHourlyRate: user.teacherHourlyRate || 4200,
+    };
   }
 };

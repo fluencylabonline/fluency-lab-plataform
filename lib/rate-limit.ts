@@ -31,7 +31,7 @@ export async function checkRateLimit(
         count: 1,
       })
       .onConflictDoUpdate({
-        target: rateLimits.id,
+        target: [rateLimits.serviceName, rateLimits.identifier],
         set: { windowStart: now, count: 1 }
       })
       .returning();

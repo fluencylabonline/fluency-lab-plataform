@@ -9,7 +9,8 @@ export default async function ManagerUsersPage() {
     redirect("/signin");
   }
 
-  const users = await userService.getAllUsers();
+  const rawUsers = await userService.getAllUsers();
+  const users = rawUsers.map((u) => userService.sanitizeUserForAdmin(u));
 
   return (
     <UsersPageClient initialData={users} currentUser={user} basePath="/hub/manager/users" />

@@ -11,7 +11,7 @@ import { CancelAccountVault } from "./CancelAccountVault";
 import { updateLocaleAction } from "../user.actions";
 import { notify } from "@/components/ui/toaster";
 import { useRouter, usePathname } from "@/i18n/navigation";
-import type { User } from "../user.schema";
+import type { SettingsUserDTO } from "../user.schema";
 import { PurgeAccountVault } from "./PurgeAccountVault";
 import { ExportDataVault } from "./ExportDataVault";
 
@@ -22,7 +22,7 @@ const LOCALES = [
 
 interface AccountSettingsProps {
   initialData: {
-    user: User;
+    user: SettingsUserDTO;
     emailVerified: boolean;
   };
 }

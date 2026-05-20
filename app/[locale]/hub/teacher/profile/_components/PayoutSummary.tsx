@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Locale } from "@/i18n/config";
 import { format } from "date-fns";
-import { 
-  TrendingUp, 
-  History, 
-  DollarSign, 
+import {
+  TrendingUp,
+  History,
+  DollarSign,
   Calendar,
   ChevronRight,
   Filter
@@ -60,8 +60,8 @@ export function PayoutSummary({ history, projections }: PayoutSummaryProps) {
 
   const months = monthKeys.map(key => tm(key));
 
-  const filteredHistory = history.filter(p => 
-    (filterMonth === -1 || p.month === filterMonth) && 
+  const filteredHistory = history.filter(p =>
+    (filterMonth === -1 || p.month === filterMonth) &&
     p.year === filterYear
   );
 
@@ -95,7 +95,7 @@ export function PayoutSummary({ history, projections }: PayoutSummaryProps) {
           </p>
         </div>
 
-        <div className="card p-4 border-l-4 border-l-green-500 bg-green-50/30">
+        <div className="card p-4 border-l-4 border-l-green-500">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-green-100 text-green-600 rounded-lg">
               <TrendingUp className="w-5 h-5" />
@@ -119,8 +119,8 @@ export function PayoutSummary({ history, projections }: PayoutSummaryProps) {
 
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-muted-foreground" />
-            <Select 
-              value={filterMonth.toString()} 
+            <Select
+              value={filterMonth.toString()}
               onValueChange={(v) => setFilterMonth(parseInt(v))}
             >
               <SelectTrigger className="w-[140px] h-8 border-none bg-transparent hover:bg-muted/50 transition-colors">
@@ -134,8 +134,8 @@ export function PayoutSummary({ history, projections }: PayoutSummaryProps) {
               </SelectContent>
             </Select>
 
-            <Select 
-              value={filterYear.toString()} 
+            <Select
+              value={filterYear.toString()}
               onValueChange={(v) => setFilterYear(parseInt(v))}
             >
               <SelectTrigger className="w-[100px] h-8 border-none bg-transparent hover:bg-muted/50 transition-colors">

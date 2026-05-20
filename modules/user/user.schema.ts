@@ -287,15 +287,27 @@ export const lgpdConsentSchema = z.object({
 
 export type LgpdConsentValues = z.input<typeof lgpdConsentSchema>;
 
-// Rate Limiting Table 
-export const rateLimitsTable = pgTable("rate_limits", {
-  key: text("key").primaryKey(),
-  points: integer("points").notNull().default(0),
-  resetAt: timestamp("reset_at").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
-});
+export interface SettingsUserDTO {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "teacher" | "student" | "manager";
+  photoUrl: string | null;
+  mfaEnabled: boolean;
+  cellphone: string | null;
+  locale: "pt" | "en";
+}
+
+export interface AdminUserDTO {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "teacher" | "student" | "manager";
+  photoUrl: string | null;
+  isActive: boolean;
+  createdAt: Date;
+  teacherHourlyRate: number;
+}
+
+
 

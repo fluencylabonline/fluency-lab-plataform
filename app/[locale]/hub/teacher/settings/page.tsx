@@ -32,7 +32,7 @@ export default async function TeacherSettingsPage() {
   return (
     <SettingsPageContent
       initialData={{
-        user,
+        user: userService.sanitizeUserForSettings(user),
         emailVerified,
         initialNotificationPrefs: prefs,
         hasPassword,

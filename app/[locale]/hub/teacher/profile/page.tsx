@@ -39,10 +39,9 @@ export default async function ProfilePage() {
 
                     {/* Right Column: Financial History */}
                     <div className="lg:col-span-2">
-                        <h2 className="text-xl font-bold mb-4 px-1">Financeiro</h2>
-                        <PayoutSummary 
-                            history={payoutHistory} 
-                            projections={projections} 
+                        <PayoutSummary
+                            history={payoutHistory}
+                            projections={projections}
                         />
                     </div>
                 </div>

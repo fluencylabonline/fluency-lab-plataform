@@ -8,12 +8,12 @@ import { AppearanceSettings } from "@/modules/appearance/_components/AppearanceS
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Palette, Bell, User, Shield, Smartphone } from "lucide-react";
 import { AppSettings } from "./AppSettings";
-import type { NotificationPrefs, User as UserType } from "@/modules/user/user.schema";
+import type { NotificationPrefs, SettingsUserDTO } from "@/modules/user/user.schema";
 import { useTranslations } from "next-intl";
 
 interface SettingsPageContentProps {
   initialData: {
-    user: UserType;
+    user: SettingsUserDTO;
     emailVerified: boolean;
     initialNotificationPrefs: NotificationPrefs;
     hasPassword: boolean;

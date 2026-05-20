@@ -5,6 +5,7 @@ import { ptBR, enUS } from "date-fns/locale";
 import { useLocale, useTranslations } from "next-intl";
 import { ShieldCheck, ShieldAlert, ShieldX, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface ContractBadgeProps {
   contract: {
@@ -58,20 +59,21 @@ export function ContractBadge({ contract }: ContractBadgeProps) {
 
   return (
     <div className="card p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className={cn("p-2 rounded-full bg-opacity-10", statusClass.replace("text-", "bg-"))}>
-            {statusIcon}
-          </div>
-          <div>
-            <h4 className="font-semibold">{statusText}</h4>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-              {t("status") || "Status do Contrato"}
-            </p>
+      <Link href="/hub/teacher/contract">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={cn("p-2 rounded-full bg-opacity-10", statusClass.replace("text-", "bg-"))}>
+              {statusIcon}
+            </div>
+            <div>
+              <h4 className="font-semibold">{statusText}</h4>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                {t("status") || "Status do Contrato"}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-
+      </Link>
       {contract.expiresAt && (
         <div className="item flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
           <Calendar className="w-4 h-4 text-muted-foreground" />

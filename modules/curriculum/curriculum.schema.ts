@@ -1,6 +1,6 @@
 import {
   pgTable, uuid, varchar, text, timestamp, integer, pgEnum, jsonb, vector,
-  boolean
+  boolean, uniqueIndex
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { usersTable } from "@/modules/user/user.schema";
@@ -130,7 +130,9 @@ export const rateLimits = pgTable("curriculum_rate_limits", {
   identifier: varchar("identifier", { length: 255 }).notNull(), // e.g., userId or "global"
   windowStart: timestamp("window_start").defaultNow().notNull(),
   count: integer("count").default(0).notNull(),
-});
+}, (t) => [{
+  uniqueRateLimit: uniqueIndex("idx_rate_limit_service_identifier").on(t.serviceName, t.identifier)
+}]);
 
 // 7. AI Cache
 export const aiCache = pgTable("ai_cache", {

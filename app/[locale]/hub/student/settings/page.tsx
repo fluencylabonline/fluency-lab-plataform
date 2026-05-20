@@ -28,7 +28,7 @@ export default async function SettingsPage() {
   return (
     <SettingsPageContent 
       initialData={{
-        user,
+        user: userService.sanitizeUserForSettings(user),
         emailVerified: firebaseUser.emailVerified,
         initialNotificationPrefs: prefs,
         hasPassword,

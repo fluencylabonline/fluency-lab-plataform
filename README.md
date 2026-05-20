@@ -43,11 +43,34 @@ modules/[domain]/
 - **Actions** validate input with Zod, get the user session, and call the Service.
 - **Cross-module communication:** A module (e.g., `finance`) must NEVER access the repository of another module (e.g., `user`). It must use the `userService`.
 
-## 🛡️ Security & Error Handling
+## 🛡️ Security & LGPD Compliance
 
-- **Error Masking:** Raw database errors are NEVER sent to the client. Server Actions return sanitized objects like `{ success: false, error: "Friendly message" }` using `safe-action`.
-- **Firebase Security Rules:** All storage access is governed by strict `storage.rules`.
-- **Zod Validation:** Every input boundary (Actions, APIs) is strictly typed and validated.
+FluencyLab implements top-tier security standards, keeping user privacy (LGPD/GDPR) and system stability at the core of its architecture:
+
+### 1. Data Isolation & RSC Leakage Prevention (DTOs)
+- **RSC Data Filtering:** We strictly prevent raw database entity serialization to React Server Components (RSC) and HTML payloads.
+- **Structured DTOs:** We utilize strictly-typed Data Transfer Objects (`SettingsUserDTO`, `AdminUserDTO`) in the server layer. Highly confidential database columns (e.g., `mfaSecret`, TOTP secrets, PIX keys, CPFs/CNPJs, and full addresses) never leave the server boundaries.
+- **Dynamic Masking:** Personally Identifiable Information (PII) like phone numbers (`cellphone`) are decrypted on the server and partially masked (e.g., `(11) 9****-1234`) before being rendered by client components.
+
+### 2. Cryptography & Sudo Mode
+- **PII Encryption:** Sensitive database fields (such as CPF/CNPJ, PIX keys, and physical addresses) are encrypted in the database using a server-side cipher (`iv:encrypted:tag`).
+- **Sudo Mode Protection:** High-risk actions (e.g., account deactivation, data export, or revealing raw encrypted details to administrators) require strict re-authentication (Sudo Session verification) and are limited to dynamic security vaults.
+
+### 3. LGPD & GDPR Compliance Workflows
+- **Right to Portability (Export Data):** Users can request a complete, structured export of their personal data. This process is protected under Sudo Mode to prevent identity theft.
+- **Right to be Forgotten (Data Purging):**
+  1. **Anonymization:** Personal database records are anonymized (severing identity, keeping raw relations for 5 years to comply with local tax/legal requirements).
+  2. **Auth Deletion:** Immediate deletion from Firebase Auth to block future logins.
+  3. **Storage Cleanup:** All user-uploaded assets (avatars, contract PDFs, certificates, and ID documents) are permanently deleted from Firebase Storage.
+  4. **Third-Party Cleanup:** Automated cancellation and customer deletion in external payment systems (AbacatePay).
+
+### 4. Rate Limiting & Abuse Prevention
+- **Atomic Operations:** All public-facing and expensive endpoints (e.g., authentication, dynamic searches, invitations, profile updates) are protected by a centralized, atomic rate-limiting helper.
+- **Neon Composite Indexing:** Limiting is tracked atomically in Neon serverless database utilizing composite unique indices (`[serviceName, identifier]`) to prevent race conditions and brute-force attacks.
+
+### 5. Error Masking & Input Boundaries
+- **Strict Zod Parsing:** Every network input boundary (Server Actions, Webhooks) strictly parses payloads using Zod prior to processing.
+- **Masked Internal Errors:** Raw database or code exception details are automatically masked using `next-safe-action` wrappers, returning only sanitized `{ success: false, error: string }` responses to client components.
 
 ## 🎨 UI/UX Guidelines
 
