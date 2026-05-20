@@ -2572,5 +2572,10 @@
     "notebook": {
       "description": "Notebook de {title}"
     }
+  },
+  "NotFound": {
+    "title": "404 — Página Não Encontrada",
+    "description": "Desculpe, a página que você está procurando não existe ou foi movida.",
+    "cta": "Voltar para o Início"
   }
 }

@@ -133,8 +133,8 @@ export async function generateReceiptPDF(data: ReceiptData) {
   let boldFont: PDFFont;
 
   try {
-    const regularFontUrl = "https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfedw.ttf";
-    const boldFontUrl = "https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z1xlFQ.ttf";
+    const regularFontUrl = "/fonts/Poppins-Regular.ttf";
+    const boldFontUrl = "/fonts/Poppins-Bold.ttf";
 
     const [regularBytes, boldBytes] = await Promise.all([
       fetch(regularFontUrl).then(res => res.arrayBuffer()),
@@ -327,8 +327,8 @@ export async function generateNotebookPDF(data: NotebookData) {
   let boldFont: PDFFont;
 
   try {
-    const regularFontUrl = "https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfedw.ttf";
-    const boldFontUrl = "https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z1xlFQ.ttf";
+    const regularFontUrl = "/fonts/Poppins-Regular.ttf";
+    const boldFontUrl = "/fonts/Poppins-Bold.ttf";
 
     const [regularBytes, boldBytes] = await Promise.all([
       fetch(regularFontUrl).then(res => res.arrayBuffer()),

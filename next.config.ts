@@ -16,6 +16,11 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = {
   transpilePackages: ["yjs", "lib0"],
+  // experimental: {
+  //   sri: {
+  //     algorithm: "sha256",
+  //   },
+  // },
   images: {
     remotePatterns: [
       {
@@ -73,6 +78,10 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value:
               "camera=(self), microphone=(self), geolocation=(), browsing-topics=()",
+          },
+          {
+            key: "Cross-Origin-Resource-Policy",
+            value: "same-origin",
           },
         ],
       },

@@ -79,7 +79,7 @@ export default function Footer() {
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-12 gap-x-4 gap-y-10 lg:gap-8 items-start">
                         <div className="col-span-2 lg:col-span-4 space-y-4 text-center lg:text-left flex flex-col items-center lg:items-start">
                             <div className="flex items-center gap-1.5 font-bold tracking-tighter text-xl text-slate-900 dark:text-white select-none">
-                                <Image src={Logo} alt="Logo" width={200} style={{ height: "auto" }} priority />
+                                <Image src={Logo} alt="Logo" width={200} style={{ height: "auto", width: "auto" }} priority />
                             </div>
                             <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto lg:mx-0">
                                 {t("brand.description") || "Transformando o aprendizado..."}
@@ -135,12 +135,13 @@ export default function Footer() {
                                 {t("sections.social.title") || "Social"}
                             </h4>
                             <div className="flex gap-2">
-                                <SocialButton href="#" color="bg-[#25D366]">
+                                <SocialButton href="#" color="bg-[#25D366]" ariaLabel="Conectar via WhatsApp">
                                     <MessageCircle className="w-4 h-4" />
                                 </SocialButton>
                                 <SocialButton
                                     href="#"
                                     color="bg-black dark:bg-white dark:text-black"
+                                    ariaLabel="Enviar e-mail de suporte"
                                 >
                                     <AtSign className="w-4 h-4" />
                                 </SocialButton>
@@ -171,14 +172,19 @@ function SocialButton({
     children,
     href,
     color,
+    ariaLabel,
 }: {
     children: React.ReactNode;
     href: string;
     color: string;
+    ariaLabel: string;
 }) {
     return (
         <a
             href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={ariaLabel}
             className={cn(
                 "w-9 h-9 rounded-full flex items-center justify-center text-white transition-all hover:scale-110",
                 color,

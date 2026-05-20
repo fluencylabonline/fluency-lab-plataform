@@ -16,7 +16,8 @@ export function LanguageSwitcher() {
   const toggleLocale = (newLocale: string) => {
     // With localePrefix:'never', we set the NEXT_LOCALE cookie directly 
     // and reload so the middleware picks up the new locale without path conflicts.
-    document.cookie = `NEXT_LOCALE=${newLocale};path=/;max-age=31536000;SameSite=Lax`;
+    const secureFlag = window.location.protocol === "https:" ? ";Secure" : "";
+    document.cookie = `NEXT_LOCALE=${newLocale};path=/;max-age=31536000;SameSite=Lax${secureFlag}`;
     window.location.reload();
   };
 

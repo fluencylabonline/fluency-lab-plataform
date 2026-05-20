@@ -3,6 +3,7 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { cookies, headers } from "next/headers";
 import { Providers } from "@/components/layout/providers";
 import { Quicksand } from "next/font/google";
+import { env } from "@/env";
 import "../globals.css";
 
 const quicksand = Quicksand({
@@ -16,11 +17,48 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Metadata.root" });
+  const baseUrl = env.NEXT_PUBLIC_APP_URL;
 
   return {
     title: t("title"),
     description: t("description"),
+    metadataBase: new URL(baseUrl),
     manifest: "/manifest.json",
+    alternates: {
+      canonical: "/",
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+    openGraph: {
+      title: t("title"),
+      description: t("description"),
+      url: baseUrl,
+      siteName: "Fluency Lab",
+      type: "website",
+      images: [
+        {
+          url: "/brand/logo.png",
+          width: 1200,
+          height: 630,
+          alt: "Fluency Lab",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("title"),
+      description: t("description"),
+      images: ["/brand/logo.png"],
+    },
     icons: {
       apple: "/icons/ios/180.png",
     },
@@ -96,6 +134,7 @@ export default async function RootLayout({
 
         <script
           nonce={nonce}
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `
               (function() {

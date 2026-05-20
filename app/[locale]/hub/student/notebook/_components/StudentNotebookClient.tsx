@@ -7,8 +7,8 @@ import { StudentLearningStats, LearningItemDetail, StudentRoadmap } from "@/modu
 import { LearningItem } from "@/modules/curriculum/curriculum.types";
 import {
   Sparkles,
-  BookOpen,
-  ChevronRight
+  ChevronRight,
+  BookMarkedIcon
 } from "lucide-react";
 import { StatsDashboard } from "./StatsDashboard";
 import { LearningPath } from "./LearningPath";
@@ -78,7 +78,7 @@ export function StudentNotebookClient({
         actions={[
           {
             label: t("notebooksLabel"),
-            icon: <BookOpen className="w-4 h-4" />,
+            icon: <BookMarkedIcon className="w-4 h-4" />,
             onClick: () => setNotebooksOpen(true),
             className: "lg:hidden"
           },

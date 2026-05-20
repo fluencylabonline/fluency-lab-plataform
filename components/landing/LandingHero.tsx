@@ -55,6 +55,7 @@ export function LandingHero({ user }: { user: User | null }) {
                 "Olá! Vi o site da Fluency Lab e gostaria de saber mais sobre as aulas personalizadas."
               )}`}
               target="_blank"
+              rel="noopener noreferrer"
               className="w-full sm:w-auto"
             >
               <motion.button
