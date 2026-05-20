@@ -60,6 +60,7 @@ export default function Footer() {
                                 <Input
                                     {...register("email")}
                                     type="email"
+                                    autoComplete="email"
                                     placeholder={t("newsletter.placeholder") || "seu@email.com"}
                                     className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 h-11 rounded-lg focus-visible:ring-primary/20 w-full"
                                 />

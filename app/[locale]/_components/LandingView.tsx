@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { useDevice } from "@/hooks/ui/use-device";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LandingHero } from "@/components/landing/LandingHero";
@@ -13,13 +12,12 @@ import { User } from "@/modules/user/user.schema";
 
 export function LandingView({ user }: { user: User | null }) {
   const { isStandalone } = useDevice();
-  const [loadVideo, setLoadVideo] = useState(false);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [videoSrc, setVideoSrc] = useState<string>("");
 
   useEffect(() => {
-    // Delay loading the video to prioritize LCP image rendering and initial bandwidth
+    // Delay loading the video source to prioritize initial bandwidth and LCP poster image
     const timer = setTimeout(() => {
-      setLoadVideo(true);
+      setVideoSrc("./videos/landing.webm");
     }, 1500);
     return () => clearTimeout(timer);
   }, []);
@@ -31,29 +29,16 @@ export function LandingView({ user }: { user: User | null }) {
           <div className="absolute inset-0 bg-[url('/textures/cubes.png')] opacity-[0.03] dark:opacity-[0.08] pointer-events-none" />
 
           <div className="relative max-h-[97vh] lg:min-h-[96vh] flex-1 rounded-3xl overflow-hidden flex flex-col">
-            {/* LCP Optimized Poster Image */}
-            <Image
-              src="/videos/landing-poster.png"
-              alt="FluencyLab Platform"
-              fill
-              priority
+            {/* Unified Video Element with Poster for LCP Optimization */}
+            <video
+              src={videoSrc || undefined}
+              poster="/videos/landing-poster.png"
+              autoPlay
+              loop
+              muted
+              playsInline
               className="absolute top-0 left-0 w-full h-full object-cover"
-              sizes="100vw"
             />
-
-            {/* Deferred high-fidelity video layer */}
-            {loadVideo && (
-              <video
-                src="./videos/landing.webm"
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-400"
-                style={{ opacity: isVideoPlaying ? 1 : 0 }}
-                onPlay={() => setIsVideoPlaying(true)}
-              />
-            )}
 
             <div className="absolute inset-0 bg-black/5 z-1 pointer-events-none" />
 
