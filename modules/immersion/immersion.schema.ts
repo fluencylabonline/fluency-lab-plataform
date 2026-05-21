@@ -19,9 +19,9 @@ export const immersionProgress = pgTable("immersion_progress", {
   state: jsonb("state").notNull(), // { guesses, target, finished, current }
   
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-}, (t) => [{
-  uniqueProgress: uniqueIndex("idx_immersion_progress_user_game").on(t.userId, t.gameId)
-}]);
+}, (t) => [
+  uniqueIndex("idx_immersion_progress_user_game").on(t.userId, t.gameId)
+]);
 
 /**
  * Stores completed game results.

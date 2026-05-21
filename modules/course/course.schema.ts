@@ -5,7 +5,8 @@ import {
   integer,
   boolean,
   jsonb,
-  uuid
+  uuid,
+  primaryKey
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
@@ -95,9 +96,9 @@ export const courseEnrollmentsTable = pgTable("course_enrollments", {
   completed: boolean("completed").default(false).notNull(),
   progress: jsonb("progress").$type<CourseProgress>().default({ lessons: {} }).notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-}, (t) => [{
-  pk: [t.userId, t.courseId]
-}]);
+}, (t) => [
+  primaryKey({ columns: [t.userId, t.courseId] })
+]);
 
 // ================= RELATIONS =================
 

@@ -1,6 +1,6 @@
 import {
   pgTable, uuid, varchar, text, timestamp, integer, pgEnum, jsonb, vector,
-  boolean, uniqueIndex
+  boolean, uniqueIndex, primaryKey
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { usersTable } from "@/modules/user/user.schema";
@@ -119,9 +119,9 @@ export const lessonLearningItems = pgTable("curriculum_lesson_learning_items", {
   lessonId: uuid("lesson_id").references(() => lessons.id, { onDelete: "cascade" }).notNull(),
   itemId: varchar("item_id", { length: 255 }).references(() => learningItems.id, { onDelete: "cascade" }).notNull(),
   priority: priorityEnum("priority").default("CORE").notNull(),
-}, (t) => [{
-  pk: [t.lessonId, t.itemId]
-}]);
+}, (t) => [
+  primaryKey({ columns: [t.lessonId, t.itemId] })
+]);
 
 // 6. Rate Limiting
 export const rateLimits = pgTable("curriculum_rate_limits", {
@@ -130,9 +130,9 @@ export const rateLimits = pgTable("curriculum_rate_limits", {
   identifier: varchar("identifier", { length: 255 }).notNull(), // e.g., userId or "global"
   windowStart: timestamp("window_start").defaultNow().notNull(),
   count: integer("count").default(0).notNull(),
-}, (t) => [{
-  uniqueRateLimit: uniqueIndex("idx_rate_limit_service_identifier").on(t.serviceName, t.identifier)
-}]);
+}, (t) => [
+  uniqueIndex("idx_rate_limit_service_identifier").on(t.serviceName, t.identifier)
+]);
 
 // 7. AI Cache
 export const aiCache = pgTable("ai_cache", {

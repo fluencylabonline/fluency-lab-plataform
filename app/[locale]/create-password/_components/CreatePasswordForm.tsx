@@ -116,7 +116,7 @@ export function CreatePasswordForm() {
   const handleGoogleSignIn = async () => {
     const result = await authClient.signInWithGoogle();
     if (result.success) {
-      router.push(`/hub/profile`);
+      router.push(`/hub`);
     } else {
       notify.error(result.error || t("Auth.errors.googleError"));
     }

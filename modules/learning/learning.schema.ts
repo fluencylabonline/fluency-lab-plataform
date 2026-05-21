@@ -1,5 +1,5 @@
 import {
-  pgTable, uuid, varchar, text, timestamp, integer, doublePrecision, pgEnum, jsonb, vector, boolean, uniqueIndex
+  pgTable, uuid, varchar, text, timestamp, integer, doublePrecision, pgEnum, jsonb, vector, boolean, uniqueIndex, primaryKey
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import { usersTable } from "@/modules/user/user.schema";
@@ -57,9 +57,9 @@ export const studentProfiles = pgTable("learning_student_profiles", {
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-}, (t) => [{
-  uniqueStudentId: uniqueIndex("idx_student_profiles_student_id").on(t.studentId).where(sql`student_id IS NOT NULL`)
-}]);
+}, (t) => [
+  uniqueIndex("idx_student_profiles_student_id").on(t.studentId).where(sql`student_id IS NOT NULL`)
+]);
 
 // 1.1 Student Profile History (Audit Trail)
 export const studentProfileHistory = pgTable("learning_student_profile_history", {
@@ -121,9 +121,9 @@ export const planLessons = pgTable("learning_plan_lessons", {
   completedPracticeDays: integer("completed_practice_days").default(0).notNull(),
   isCompleted: boolean("is_completed").default(false).notNull(),
   completedAt: timestamp("completed_at"),
-}, (t) => [{
-  pk: [t.planId, t.lessonId]
-}]);
+}, (t) => [
+  primaryKey({ columns: [t.planId, t.lessonId] })
+]);
 
 // 5. Practice Sessions (Persistence for resuming)
 export const learningPracticeSessions = pgTable("learning_practice_sessions", {
