@@ -491,7 +491,6 @@ export class CommunicationService {
   async sendWhatsAppTextMessage(to: string, text: string): Promise<WhatsAppResponse | null> {
     const formattedPhone = this.getCleanPhone(to);
 
-
     const response = await this.sendWhatsAppRequest({
       messaging_product: "whatsapp",
       to: formattedPhone,

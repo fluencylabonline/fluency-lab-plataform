@@ -19,6 +19,7 @@ import { notificationService } from "@/modules/notification/notification.service
 import { userRepository } from "@/modules/user/user.repository";
 import { isSameDay, differenceInDays } from "date-fns";
 import { StudentLearningStats, LearningItemDetail, StudentRoadmap } from "./learning.types";
+import { REMINDER_TEMPLATES } from "./reminder-templates";
 
 export const learningService = {
   // Profiles
@@ -1019,15 +1020,11 @@ export const learningService = {
       if (alreadyPracticed) continue;
 
       // 2. Determine Trigger
-      let title = "Hora de praticar! 🚀";
-      let body = "Garanta sua evolução diária com 5-10 minutos de prática.";
-      let triggerType = "daily";
+      let triggerType: "daily" | "streak" | "roadmap" = "daily";
       
       // Streak Trigger (High Urgency)
       if (student.streakCount > 0 && isLateDay) {
         if (!prefs.streak) continue; // User disabled streak reminders
-        title = "Sua ofensiva está em risco! 🔥";
-        body = `Não deixe sua sequência de ${student.streakCount} dias acabar. Pratique agora!`;
         triggerType = "streak";
       } 
       // Roadmap Trigger (Content accumulation)
@@ -1039,13 +1036,26 @@ export const learningService = {
         );
 
         if (hasPendingLessons) {
-          title = "Conteúdo novo esperando! 📚";
-          body = "Você tem lições pendentes no seu roteiro. Vamos colocar o inglês em dia?";
           triggerType = "roadmap";
+        } else {
+          triggerType = "daily";
         }
       }
 
-      // 3. Send via Notification Service with Click Tracker
+      // 3. Resolve Random Template
+      const templates = REMINDER_TEMPLATES[triggerType];
+      const template = templates[Math.floor(Math.random() * templates.length)];
+      
+      const firstName = student.name ? student.name.split(" ")[0] : "estudante";
+
+      const title = template.title
+        .replace(/{name}/g, firstName)
+        .replace(/{streak}/g, String(student.streakCount || 0));
+      const body = template.body
+        .replace(/{name}/g, firstName)
+        .replace(/{streak}/g, String(student.streakCount || 0));
+
+      // 4. Send via Notification Service with Click Tracker
       const baseUrl = "/hub/student/practice";
       const trackerUrl = `/api/notifications/click?url=${encodeURIComponent(baseUrl)}&type=${triggerType}&id=${now.getTime()}`;
 
@@ -1057,7 +1067,7 @@ export const learningService = {
         userIds: [student.id],
         channels: {
           push: student.pushNotificationsEnabled,
-          inApp: student.appNotificationsEnabled
+          inApp: false
         }
       });
 
