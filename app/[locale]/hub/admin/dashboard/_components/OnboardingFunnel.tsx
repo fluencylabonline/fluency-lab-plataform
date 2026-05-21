@@ -59,7 +59,8 @@ export function OnboardingFunnel({ data }: OnboardingFunnelProps) {
                       className="absolute left-0 top-0 h-full rounded-full transition-all duration-700"
                       style={{
                         width: `${pct}%`,
-                        background: `hsl(var(--primary) / ${1 - idx * 0.12})`,
+                        background: "var(--primary)",
+                        opacity: 1 - idx * 0.12,
                       }}
                     />
                   </div>

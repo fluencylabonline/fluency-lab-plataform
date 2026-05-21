@@ -225,13 +225,13 @@ export function UserDetailsClient({
                 {user.role === "student" ? t("payment") : t("earningsStatement")}
               </TabsTrigger>
             )}
-
+            {user.role === "teacher" ||  user.role === "student" && (
             <TabsTrigger
               value="contracts"
               className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
             >
               {t("contracts")}
-            </TabsTrigger>
+            </TabsTrigger>)}
 
             {user.role === "teacher" && (
               <TabsTrigger

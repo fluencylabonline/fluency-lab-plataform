@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsMounted } from "@/hooks/use-is-mounted";
 import { MonthlyFinance } from "@/modules/dashboard/dashboard.types";
 import {
   BarChart,
@@ -82,6 +83,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 
 export function FinanceCharts({ data, pendingIncome }: FinanceChartsProps) {
   const t = useTranslations("Dashboard.finance");
+  const isMounted = useIsMounted();
 
   const totalIncome = data.reduce((sum, d) => sum + d.income, 0);
   const totalExpense = data.reduce((sum, d) => sum + d.expense, 0);
@@ -193,56 +195,60 @@ export function FinanceCharts({ data, pendingIncome }: FinanceChartsProps) {
 
           {/* Bar chart */}
           <div className="flex-1 h-[260px] min-w-0">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-              <BarChart
-                data={data}
-                margin={{ top: 4, right: 4, left: -16, bottom: 0 }}
-                barGap={3}
-                barCategoryGap="30%"
-              >
-                <CartesianGrid
-                  vertical={false}
-                  stroke="hsl(var(--border))"
-                  strokeDasharray="3 3"
-                  strokeOpacity={0.4}
-                />
-                <XAxis
-                  dataKey="month"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                  dy={6}
-                  tick={{ fill: "hsl(var(--muted-foreground))" }}
-                />
-                <YAxis
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: "hsl(var(--muted-foreground))" }}
-                  tickFormatter={fmtCompact}
-                />
-                <Tooltip
-                  content={<CustomTooltip />}
-                  cursor={{ fill: "hsl(var(--muted) / 0.06)", radius: 6 }}
-                />
-                <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} />
-                <Bar
-                  name={t("income")}
-                  dataKey="income"
-                  fill="hsl(var(--primary))"
-                  radius={[5, 5, 0, 0]}
-                  maxBarSize={28}
-                />
-                <Bar
-                  name={t("expense")}
-                  dataKey="expense"
-                  fill="hsl(var(--destructive))"
-                  radius={[5, 5, 0, 0]}
-                  maxBarSize={28}
-                  opacity={0.7}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {isMounted ? (
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                <BarChart
+                  data={data}
+                  margin={{ top: 4, right: 4, left: -16, bottom: 0 }}
+                  barGap={3}
+                  barCategoryGap="30%"
+                >
+                  <CartesianGrid
+                    vertical={false}
+                    stroke="var(--border)"
+                    strokeDasharray="3 3"
+                    strokeOpacity={0.4}
+                  />
+                  <XAxis
+                    dataKey="month"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    dy={6}
+                    tick={{ fill: "var(--muted-foreground)" }}
+                  />
+                  <YAxis
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fill: "var(--muted-foreground)" }}
+                    tickFormatter={fmtCompact}
+                  />
+                  <Tooltip
+                    content={<CustomTooltip />}
+                    cursor={{ fill: "var(--muted)", opacity: 0.06, radius: 6 }}
+                  />
+                  <ReferenceLine y={0} stroke="var(--border)" strokeWidth={1} />
+                  <Bar
+                    name={t("income")}
+                    dataKey="income"
+                    fill="var(--primary)"
+                    radius={[5, 5, 0, 0]}
+                    maxBarSize={28}
+                  />
+                  <Bar
+                    name={t("expense")}
+                    dataKey="expense"
+                    fill="var(--destructive)"
+                    radius={[5, 5, 0, 0]}
+                    maxBarSize={28}
+                    opacity={0.7}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-full bg-slate-300/10 dark:bg-slate-950/20 rounded-md animate-pulse" />
+            )}
           </div>
         </div>
       </div>

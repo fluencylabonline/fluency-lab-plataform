@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, Mail, Shield, Circle, Sparkles } from "lucide-react";
+import { Plus, Mail, Shield, Sparkles } from "lucide-react";
 import { CreateUserVault } from "./CreateUserVault";
 import { Header } from "@/components/layout/header";
 import { hasPermission, Role, UserRoles } from "@/lib/rbac";
@@ -122,7 +122,7 @@ export function UsersPageClient({ initialData, currentUser, basePath }: UsersPag
                 className={`card p-5 flex flex-col gap-4 transition-all hover:ring-1 hover:ring-primary/20 ${!user.isActive ? "opacity-70 grayscale-[0.5]" : ""
                   }`}
               >
-                <div className="flex items-start justify-between">
+                <div className="flex flex-wrap items-start justify-between">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 border">
                       <AvatarImage src={user.photoUrl || ""} alt={user.name} />
@@ -136,7 +136,7 @@ export function UsersPageClient({ initialData, currentUser, basePath }: UsersPag
                       </span>
                       <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                         <Mail className="w-3 h-3" />
-                        {user.email}
+                        <span className="text-truncate max-w-60">{user.email}</span>
                       </span>
                     </div>
                   </div>
@@ -149,11 +149,6 @@ export function UsersPageClient({ initialData, currentUser, basePath }: UsersPag
                   <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                     <Shield className="w-3.5 h-3.5 text-primary/60" />
                     {tRoles(user.role as Role)}
-                  </div>
-
-                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                    <Circle className={`w-2 h-2 ${user.isActive ? "fill-green-500 text-green-500" : "fill-slate-400 text-slate-400"}`} />
-                    {user.id.substring(0, 8)}
                   </div>
                 </div>
               </Link>

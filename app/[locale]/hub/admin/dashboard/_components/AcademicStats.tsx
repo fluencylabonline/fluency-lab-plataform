@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsMounted } from "@/hooks/use-is-mounted";
 import { AttendanceStats, PopularCourse } from "@/modules/dashboard/dashboard.types";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { BookOpen } from "lucide-react";
@@ -39,10 +40,11 @@ const MEDAL_COLORS = ["text-amber-500", "text-zinc-400", "text-orange-700"];
 
 export function AcademicStats({ attendance, popularCourses }: AcademicStatsProps) {
   const t = useTranslations("Dashboard.academic");
+  const isMounted = useIsMounted();
 
   const ATTENDANCE_COLORS = [
-    { label: t("completed"), color: "hsl(var(--primary))", bg: "bg-primary/10", text: "text-primary" },
-    { label: t("noShow"), color: "hsl(var(--destructive))", bg: "bg-destructive/10", text: "text-destructive" },
+    { label: t("completed"), color: "var(--primary)", bg: "bg-primary/10", text: "text-primary" },
+    { label: t("noShow"), color: "var(--destructive)", bg: "bg-destructive/10", text: "text-destructive" },
     { label: t("canceledStudent"), color: "#f59e0b", bg: "bg-amber-100 dark:bg-amber-950/40", text: "text-amber-600 dark:text-amber-400" },
     { label: t("canceledTeacher"), color: "#6366f1", bg: "bg-indigo-100 dark:bg-indigo-950/40", text: "text-indigo-600 dark:text-indigo-400" },
   ];
@@ -68,25 +70,29 @@ export function AcademicStats({ attendance, popularCourses }: AcademicStatsProps
           {attendanceData.length > 0 ? (
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <div className="relative h-[180px] w-[180px] shrink-0">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                  <PieChart>
-                    <Pie
-                      data={attendanceData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={58}
-                      outerRadius={78}
-                      paddingAngle={3}
-                      dataKey="value"
-                      strokeWidth={0}
-                    >
-                      {attendanceData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
+                {isMounted ? (
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                    <PieChart>
+                      <Pie
+                        data={attendanceData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={58}
+                        outerRadius={78}
+                        paddingAngle={3}
+                        dataKey="value"
+                        strokeWidth={0}
+                      >
+                        {attendanceData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<CustomTooltip />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="w-full h-full bg-slate-300/10 dark:bg-slate-950/20 rounded-full animate-pulse" />
+                )}
                 {/* Center label */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span className="text-2xl font-bold tabular-nums">{total}</span>
