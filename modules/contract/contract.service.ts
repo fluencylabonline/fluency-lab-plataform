@@ -8,7 +8,7 @@ import { communicationService } from "../communication/communication.service";
 import { env } from "@/env";
 import { billingService } from "../billing/billing.service";
 import { addMonths } from "date-fns";
-import { ContractSignatureMetadata } from "./contract.schema";
+import { ContractSignatureMetadata, SchoolSettings } from "./contract.schema";
 import { schedulingService } from "../scheduling/scheduling.service";
 
 interface GuardianData {
@@ -534,6 +534,27 @@ export const contractService = {
     } catch (error) {
       console.error("[ContractService.resendContractEmail] Error:", error);
       throw new Error("Falha ao baixar PDF ou enviar e-mail. Tente novamente mais tarde.");
+    }
+  },
+
+  async getAllTemplates() {
+    return contractRepository.findAllTemplates();
+  },
+
+  async getAllInstances() {
+    return contractRepository.findAllInstances();
+  },
+
+  async getSchoolSettings() {
+    return contractRepository.getSchoolSettings();
+  },
+
+  async updateSchoolSettings(id: string | undefined | null, data: Omit<SchoolSettings, "id" | "updatedAt">) {
+    const existing = await contractRepository.getSchoolSettings();
+    if (existing) {
+      return contractRepository.updateSchoolSettings(existing.id, data);
+    } else {
+      return contractRepository.insertSchoolSettings(data);
     }
   },
 };

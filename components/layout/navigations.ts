@@ -11,6 +11,7 @@ import { ClapIcon } from "@/components/animated-icons/video";
 import { WavesLadderIcon } from "@/components/animated-icons/waves-ladder";
 import { MenuItemType } from "@/components/layout/types";
 import { UserRoles, hasPermission, type UserRoleInfo } from "@/lib/rbac";
+import { FileTextIcon } from "@/components/animated-icons/file-text";
 
 const adminItems: MenuItemType[] = [
     {
@@ -42,6 +43,14 @@ const adminItems: MenuItemType[] = [
         label: "Financeiro",
         labelKey: "finances",
         Icon: DollarSignIcon,
+        iconProps: { size: 20 },
+        permission: "payment.manage",
+    },
+    {
+        href: "/admin/contracts",
+        label: "Contratos",
+        labelKey: "contracts",
+        Icon: FileTextIcon,
         iconProps: { size: 20 },
         permission: "payment.manage",
     },

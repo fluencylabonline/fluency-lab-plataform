@@ -1472,6 +1472,7 @@
   "Navigation": {
     "calendar": "Calendar",
     "chat": "Chats",
+    "contracts": "Contracts",
     "courses": "Courses",
     "dashboard": "Dashboard",
     "finances": "Finances",
@@ -2580,5 +2581,87 @@
     "title": "404 — Page Not Found",
     "description": "Sorry, the page you are looking for does not exist or has been moved.",
     "cta": "Back to Home"
+  },
+  "Contracts": {
+    "title": "Contracts",
+    "dashboardTitle": "Contract Management Dashboard",
+    "dashboardDesc": "Create contract templates, view student/teacher signatures, and control auto-signature configurations.",
+    "createTemplate": "Create Template",
+    "createTemplateDesc": "Create a new base contract template. If a template with the same name and region already exists, the version will be incremented and older versions deactivated.",
+    "cancel": "Cancel",
+    "create": "Create Template",
+    "tabs": {
+      "templates": "Contract Templates",
+      "signatures": "Signatures & Status",
+      "schoolSettings": "School Details"
+    },
+    "templates": {
+      "listTitle": "Available Templates",
+      "empty": "No contract templates registered.",
+      "emptyDesc": "Create a new template to enable automatic signatures.",
+      "name": "Document Name",
+      "region": "Region",
+      "type": "Recipient",
+      "partyType": "Signature Type",
+      "version": "Version",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "instances": {
+      "title": "Generated & Signed Contracts",
+      "empty": "No contracts generated or signed.",
+      "emptyDesc": "User signatures will be listed here as they flow through the system.",
+      "user": "User",
+      "template": "Template",
+      "status": "Status",
+      "createdAt": "Generated At",
+      "signedAt": "Signed At",
+      "actions": "Actions"
+    },
+    "status": {
+      "signed": "Signed",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "expired": "Expired",
+      "awaiting": "Pending"
+    },
+    "actions": {
+      "download": "Download PDF",
+      "resendEmail": "Resend Contract",
+      "verify": "Verify Signature"
+    },
+    "school": {
+      "title": "School Settings",
+      "desc": "This data will be injected into contract templates to replace placeholders like '{{school.name}}', '{{school.taxId}}', etc.",
+      "name": "School Trade Name",
+      "namePlaceholder": "FluencyLab Languages",
+      "legalName": "Corporate Name",
+      "legalNamePlaceholder": "FluencyLab LTD",
+      "taxId": "Tax ID / CNPJ",
+      "representativeName": "Legal Representative",
+      "representativeTaxId": "Representative Tax ID (CPF)",
+      "repPlaceholder": "Manager's Name",
+      "address": "Institutional Address",
+      "save": "Save Settings"
+    },
+    "form": {
+      "name": "Template Name",
+      "type": "Recipient",
+      "region": "Region (Language)",
+      "partyType": "Individual/Business",
+      "content": "Contract Content (Monospace)"
+    },
+    "notifications": {
+      "templateCreated": "Contract template created successfully!",
+      "createTemplateError": "Failed to create template.",
+      "unexpectedError": "Unexpected error during operation.",
+      "schoolSettingsUpdated": "School settings saved successfully!",
+      "schoolSettingsUpdateError": "Failed to update settings.",
+      "downloadInitiated": "Download initiated.",
+      "downloadError": "Could not load the PDF file.",
+      "emailSent": "Contract email resent successfully.",
+      "emailError": "Failed to resend contract email."
+    }
   }
 }

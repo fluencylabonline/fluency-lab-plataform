@@ -1,6 +1,6 @@
 "use server";
 
-import { actionClient, protectedAction } from "@/lib/safe-action";
+import { actionClient, protectedAction, adminAction } from "@/lib/safe-action";
 import { signContractSchema, type ContractInstance } from "./contract.schema";
 import { contractService } from "./contract.service";
 import { contractRepository } from "./contract.repository";
@@ -148,5 +148,61 @@ export const resendContractEmailAction = protectedAction
       const err = error as Error;
       console.error("[resendContractEmailAction] Error:", err.message);
       return { success: false, error: err.message || "Falha ao reenviar e-mail do contrato." };
+    }
+  });
+
+export const createContractTemplateAction = adminAction
+  .metadata({ name: "createContractTemplate" })
+  .inputSchema(
+    z.object({
+      name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres."),
+      content: z.string().min(10, "O conteúdo do contrato é obrigatório."),
+      region: z.enum(["BR", "US"]),
+      type: z.enum(["student", "teacher"]),
+      partyType: z.enum(["individual", "business"]).optional().default("individual"),
+    })
+  )
+  .action(async ({ parsedInput }) => {
+    try {
+      const template = await contractService.createTemplate(parsedInput);
+      revalidatePath("/admin/contracts");
+      return { success: true, data: template };
+    } catch (error) {
+      const err = error as Error;
+      console.error("[createContractTemplateAction] Error:", err.message);
+      return { success: false, error: err.message || "Falha ao criar o template de contrato." };
+    }
+  });
+
+export const updateSchoolSettingsAction = adminAction
+  .metadata({ name: "updateSchoolSettings" })
+  .inputSchema(
+    z.object({
+      id: z.string().uuid().optional().nullable(),
+      name: z.string().min(2, "O nome fantasia é obrigatório."),
+      legalName: z.string().min(2, "A razão social é obrigatória."),
+      taxId: z.string().min(9, "CNPJ ou Tax ID inválido."),
+      representativeName: z.string().min(2, "O nome do representante é obrigatório."),
+      representativeTaxId: z.string().min(11, "O CPF ou Tax ID do representante é inválido."),
+      address: z.object({
+        street: z.string().min(1, "A rua é obrigatória."),
+        number: z.string().min(1, "O número é obrigatório."),
+        neighborhood: z.string().min(1, "O bairro é obrigatório."),
+        city: z.string().min(1, "A cidade é obrigatória."),
+        state: z.string().min(2, "O estado é obrigatório."),
+        zip: z.string().min(5, "O CEP ou ZIP é obrigatório."),
+      }),
+    })
+  )
+  .action(async ({ parsedInput }) => {
+    try {
+      const { id, ...data } = parsedInput;
+      const settings = await contractService.updateSchoolSettings(id, data);
+      revalidatePath("/admin/contracts");
+      return { success: true, data: settings };
+    } catch (error) {
+      const err = error as Error;
+      console.error("[updateSchoolSettingsAction] Error:", err.message);
+      return { success: false, error: err.message || "Falha ao salvar as configurações da escola." };
     }
   });

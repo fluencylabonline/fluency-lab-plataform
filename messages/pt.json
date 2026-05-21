@@ -1472,6 +1472,7 @@
   "Navigation": {
     "calendar": "Calendário",
     "chat": "Conversas",
+    "contracts": "Contratos",
     "courses": "Cursos",
     "dashboard": "Dashboard",
     "finances": "Financeiro",
@@ -2579,5 +2580,87 @@
     "title": "404 — Página Não Encontrada",
     "description": "Desculpe, a página que você está procurando não existe ou foi movida.",
     "cta": "Voltar para o Início"
+  },
+  "Contracts": {
+    "title": "Contratos",
+    "dashboardTitle": "Painel de Gestão Contratual",
+    "dashboardDesc": "Crie modelos de contratos, visualize assinaturas de alunos/professores e controle as configurações de auto-assinatura.",
+    "createTemplate": "Criar Template",
+    "createTemplateDesc": "Crie um novo molde base. Caso já exista um template com o mesmo nome e região, a versão será incrementada e as antigas desativadas.",
+    "cancel": "Cancelar",
+    "create": "Criar Template",
+    "tabs": {
+      "templates": "Modelos de Contrato",
+      "signatures": "Assinaturas & Status",
+      "schoolSettings": "Dados da Escola"
+    },
+    "templates": {
+      "listTitle": "Templates Disponíveis",
+      "empty": "Nenhum modelo de contrato cadastrado.",
+      "emptyDesc": "Crie um novo modelo para habilitar as assinaturas automáticas.",
+      "name": "Nome do Documento",
+      "region": "Região",
+      "type": "Destinatário",
+      "partyType": "Tipo de Assinatura",
+      "version": "Versão",
+      "status": "Status",
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "instances": {
+      "title": "Contratos Gerados & Assinados",
+      "empty": "Nenhum contrato gerado ou assinado.",
+      "emptyDesc": "As assinaturas dos usuários serão listadas aqui conforme o fluxo do sistema.",
+      "user": "Usuário",
+      "template": "Template",
+      "status": "Status",
+      "createdAt": "Gerado em",
+      "signedAt": "Assinado em",
+      "actions": "Ações"
+    },
+    "status": {
+      "signed": "Assinado",
+      "pending": "Pendente",
+      "cancelled": "Cancelado",
+      "expired": "Expirado",
+      "awaiting": "Pendente"
+    },
+    "actions": {
+      "download": "Baixar PDF",
+      "resendEmail": "Reenviar Contrato",
+      "verify": "Verificar Assinatura"
+    },
+    "school": {
+      "title": "Configurações da Escola",
+      "desc": "Estes dados serão injetados nos templates de contrato em substituição aos placeholders como '{{school.name}}', '{{school.taxId}}', etc.",
+      "name": "Nome Fantasia da Escola",
+      "namePlaceholder": "FluencyLab Idiomas",
+      "legalName": "Razão Social",
+      "legalNamePlaceholder": "FluencyLab S/A Limitada",
+      "taxId": "CNPJ ou Tax ID",
+      "representativeName": "Representante Legal",
+      "representativeTaxId": "CPF do Representante",
+      "repPlaceholder": "Nome do Gestor",
+      "address": "Endereço Institucional",
+      "save": "Salvar Configurações"
+    },
+    "form": {
+      "name": "Nome Fantasia do Modelo",
+      "type": "Destinatário",
+      "region": "Região (Idioma)",
+      "partyType": "Tipo de Pessoa",
+      "content": "Conteúdo do Contrato (Monospace)"
+    },
+    "notifications": {
+      "templateCreated": "Template de contrato criado com sucesso!",
+      "createTemplateError": "Falha ao criar o template.",
+      "unexpectedError": "Erro inesperado ao realizar operação.",
+      "schoolSettingsUpdated": "Configurações da escola salvas com sucesso!",
+      "schoolSettingsUpdateError": "Falha ao atualizar configurações.",
+      "downloadInitiated": "Download iniciado.",
+      "downloadError": "Não foi possível carregar o arquivo PDF.",
+      "emailSent": "E-mail com contrato enviado com sucesso.",
+      "emailError": "Erro ao reenviar e-mail de contrato."
+    }
   }
 }

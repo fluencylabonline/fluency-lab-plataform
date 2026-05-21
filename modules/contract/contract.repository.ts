@@ -140,6 +140,14 @@ export const contractRepository = {
     return updated;
   },
 
+  async insertSchoolSettings(data: typeof schoolSettingsTable.$inferInsert) {
+    const [inserted] = await db
+      .insert(schoolSettingsTable)
+      .values(data)
+      .returning();
+    return inserted;
+  },
+
   async findActiveContractByUserId(userId: string) {
     return db.query.contractInstancesTable.findFirst({
       where: and(
@@ -152,5 +160,22 @@ export const contractRepository = {
       },
     });
   },
+
+  async findAllTemplates() {
+    return db.query.contractTemplatesTable.findMany({
+      orderBy: [desc(contractTemplatesTable.createdAt)],
+    });
+  },
+
+  async findAllInstances() {
+    return db.query.contractInstancesTable.findMany({
+      orderBy: [desc(contractInstancesTable.createdAt)],
+      with: {
+        template: true,
+        user: true,
+      },
+    });
+  },
 };
+
 
