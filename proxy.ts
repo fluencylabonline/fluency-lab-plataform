@@ -59,7 +59,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
-  if (session && (isAuthPage || normalizedPath === "/")) {
+  if (session && isAuthPage) {
     // Redirect authenticated users to the hub
     return NextResponse.redirect(new URL("/hub", request.url));
   }
