@@ -176,6 +176,7 @@ Cada skill é um manual especializado. **Use a skill correspondente ao tipo de a
 | Lógica de UI, fetching, estado | **UI Hooks** | `.agents/skills/hook-writer.md` |
 | Webhooks, integrações externas | **External Boundaries** | `.agents/skills/route-writer.md` |
 | Testes unitários | **Testing** | `.agents/skills/test-writer.md` |
+| Realizar deploys ou gerenciar infra | **Infrastructure & Deploy** | `.agents/skills/deploy-manager.md` |
 
 ---
 
