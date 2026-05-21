@@ -2,7 +2,15 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Mail, Phone, Calendar, Edit2, Eye, CheckCircle2, Loader2 } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  Calendar,
+  Edit2,
+  Eye,
+  CheckCircle2,
+  Loader2,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -10,7 +18,10 @@ import { DataRow } from "./UserDetailsPrimitives";
 import {
   Vault,
   VaultContent,
+  VaultFooter,
   VaultHeader,
+  VaultInput,
+  VaultPrimaryButton,
   VaultTitle,
   VaultTrigger,
 } from "@/components/ui/vault";
@@ -20,7 +31,10 @@ import { UseFormReturn, FieldValues } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import type { User } from "../../user.schema";
 import { Badge } from "@/components/ui/badge";
-import { revealSensitiveDataAction, updateUserAction } from "../../user.actions";
+import {
+  revealSensitiveDataAction,
+  updateUserAction,
+} from "../../user.actions";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getLanguagesAction } from "@/modules/curriculum/curriculum.actions";
 import type { LanguageWithLessons } from "@/modules/curriculum/curriculum.types";
@@ -43,12 +57,18 @@ export function PersonalInfoTab({
   const t = useTranslations("UserManagement");
   const tRoles = useTranslations("UserRoles");
 
-  const [revealingField, setRevealingField] = React.useState<"cellphone" | "taxId" | "businessTaxId" | "pixKey" | null>(null);
+  const [revealingField, setRevealingField] = React.useState<
+    "cellphone" | "taxId" | "businessTaxId" | "pixKey" | null
+  >(null);
   const [adminPassword, setAdminPassword] = React.useState("");
   const [isRevealing, setIsRevealing] = React.useState(false);
-  const [revealedValues, setRevealedValues] = React.useState<Record<string, string>>({});
+  const [revealedValues, setRevealedValues] = React.useState<
+    Record<string, string>
+  >({});
   const [isVaultOpen, setIsVaultOpen] = React.useState(false);
-  const [availableLanguages, setAvailableLanguages] = React.useState<LanguageWithLessons[]>([]);
+  const [availableLanguages, setAvailableLanguages] = React.useState<
+    LanguageWithLessons[]
+  >([]);
   const [isTogglingLanguage, setIsTogglingLanguage] = React.useState(false);
 
   React.useEffect(() => {
@@ -68,12 +88,12 @@ export function PersonalInfoTab({
     try {
       const currentLanguages = user.languages || [];
       const newLanguages = currentLanguages.includes(langId)
-        ? currentLanguages.filter(id => id !== langId)
+        ? currentLanguages.filter((id) => id !== langId)
         : [...currentLanguages, langId];
 
       const result = await updateUserAction({
         id: user.id,
-        languages: newLanguages
+        languages: newLanguages,
       });
 
       if (result?.data?.success) {
@@ -100,15 +120,17 @@ export function PersonalInfoTab({
       });
 
       if (result?.data?.success) {
-        setRevealedValues(prev => ({
+        setRevealedValues((prev) => ({
           ...prev,
-          [revealingField]: result.data!.data as string
+          [revealingField]: result.data!.data as string,
         }));
         setIsVaultOpen(false);
         setAdminPassword("");
         notify.success(t("success"));
       } else {
-        notify.error(result?.data?.error === "authError" ? t("authError") : t("error"));
+        notify.error(
+          result?.data?.error === "authError" ? t("authError") : t("error"),
+        );
       }
     } catch {
       notify.error(t("error"));
@@ -117,7 +139,9 @@ export function PersonalInfoTab({
     }
   };
 
-  const openRevealVault = (field: "cellphone" | "taxId" | "businessTaxId" | "pixKey") => {
+  const openRevealVault = (
+    field: "cellphone" | "taxId" | "businessTaxId" | "pixKey",
+  ) => {
     if (revealedValues[field]) return; // Already revealed
     setRevealingField(field);
     setIsVaultOpen(true);
@@ -136,11 +160,16 @@ export function PersonalInfoTab({
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="font-black text-sm tracking-tight truncate">{user.name}</p>
+            <p className="font-black text-sm tracking-tight truncate">
+              {user.name}
+            </p>
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">
               {tRoles(user.role as "admin" | "teacher" | "student" | "manager")}
             </p>
-            <Badge variant={user.isActive ? "default" : "secondary"} className="mt-2 text-[9px] h-4 font-black">
+            <Badge
+              variant={user.isActive ? "default" : "secondary"}
+              className="mt-2 text-[9px] h-4 font-black"
+            >
               {user.isActive ? t("active") : t("inactive")}
             </Badge>
           </div>
@@ -164,7 +193,9 @@ export function PersonalInfoTab({
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-semibold text-foreground/80">
-                  {revealedValues.cellphone ? revealedValues.cellphone : `(••) •••••-${user.cellphone?.slice(-4)}`}
+                  {revealedValues.cellphone
+                    ? revealedValues.cellphone
+                    : `(••) •••••-${user.cellphone?.slice(-4)}`}
                 </span>
                 {isAdmin && !revealedValues.cellphone && (
                   <span className="text-[9px] text-primary font-bold uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">
@@ -205,10 +236,16 @@ export function PersonalInfoTab({
                 className={`flex items-center gap-2 group ${isAdmin && !revealedValues.taxId ? "cursor-pointer" : ""}`}
                 onClick={() => isAdmin && openRevealVault("taxId")}
               >
-                <span className={revealedValues.taxId ? "font-mono text-xs" : ""}>
-                  {revealedValues.taxId ? revealedValues.taxId : `•••.•••.${user.taxId?.slice(-4, -2)}-${user.taxId?.slice(-2)}`}
+                <span
+                  className={revealedValues.taxId ? "font-mono text-xs" : ""}
+                >
+                  {revealedValues.taxId
+                    ? revealedValues.taxId
+                    : `•••.•••.${user.taxId?.slice(-4, -2)}-${user.taxId?.slice(-2)}`}
                 </span>
-                {isAdmin && !revealedValues.taxId && <Eye className="w-3 h-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />}
+                {isAdmin && !revealedValues.taxId && (
+                  <Eye className="w-3 h-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                )}
               </div>
             </DataRow>
           )}
@@ -221,10 +258,18 @@ export function PersonalInfoTab({
                     className={`flex items-center gap-2 group ${isAdmin && !revealedValues.businessTaxId ? "cursor-pointer" : ""}`}
                     onClick={() => isAdmin && openRevealVault("businessTaxId")}
                   >
-                    <span className={revealedValues.businessTaxId ? "font-mono text-xs" : ""}>
-                      {revealedValues.businessTaxId ? revealedValues.businessTaxId : `••.•••.•••/••••-${user.businessTaxId?.slice(-2)}`}
+                    <span
+                      className={
+                        revealedValues.businessTaxId ? "font-mono text-xs" : ""
+                      }
+                    >
+                      {revealedValues.businessTaxId
+                        ? revealedValues.businessTaxId
+                        : `••.•••.•••/••••-${user.businessTaxId?.slice(-2)}`}
                     </span>
-                    {isAdmin && !revealedValues.businessTaxId && <Eye className="w-3 h-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />}
+                    {isAdmin && !revealedValues.businessTaxId && (
+                      <Eye className="w-3 h-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                    )}
                   </div>
                 </DataRow>
               )}
@@ -234,16 +279,27 @@ export function PersonalInfoTab({
                     className={`flex items-center gap-2 group ${isAdmin && !revealedValues.pixKey ? "cursor-pointer" : ""}`}
                     onClick={() => isAdmin && openRevealVault("pixKey")}
                   >
-                    <span className={revealedValues.pixKey ? "font-mono text-xs" : ""}>
-                      {revealedValues.pixKey ? revealedValues.pixKey : `••••••••${user.pixKey?.slice(-4)}`}
+                    <span
+                      className={
+                        revealedValues.pixKey ? "font-mono text-xs" : ""
+                      }
+                    >
+                      {revealedValues.pixKey
+                        ? revealedValues.pixKey
+                        : `••••••••${user.pixKey?.slice(-4)}`}
                     </span>
-                    {isAdmin && !revealedValues.pixKey && <Eye className="w-3 h-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />}
+                    {isAdmin && !revealedValues.pixKey && (
+                      <Eye className="w-3 h-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                    )}
                   </div>
                 </DataRow>
               )}
               {user.pixType && (
                 <DataRow label={t("pixType")}>
-                  <Badge variant="outline" className="text-[10px] uppercase font-black tracking-tighter">
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] uppercase font-black tracking-tighter"
+                  >
                     {user.pixType}
                   </Badge>
                 </DataRow>
@@ -262,7 +318,11 @@ export function PersonalInfoTab({
                 {isAdmin && (
                   <Vault>
                     <VaultTrigger asChild>
-                      <Button variant="outline" size="icon" className="h-7 w-7 rounded-md border-border/50 hover:bg-primary/5 hover:text-primary transition-all">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7 rounded-md border-border/50 hover:bg-primary/5 hover:text-primary transition-all"
+                      >
                         <Edit2 className="h-3 w-3" />
                       </Button>
                     </VaultTrigger>
@@ -282,10 +342,16 @@ export function PersonalInfoTab({
                             type="number"
                             step="0.01"
                             className="input"
-                            {...rateForm.register("rate", { valueAsNumber: true })}
+                            {...rateForm.register("rate", {
+                              valueAsNumber: true,
+                            })}
                           />
                         </div>
-                        <Button type="submit" className="w-full font-bold" disabled={isUpdating}>
+                        <Button
+                          type="submit"
+                          className="w-full font-bold"
+                          disabled={isUpdating}
+                        >
                           {t("saveChanges")}
                         </Button>
                       </form>
@@ -303,11 +369,16 @@ export function PersonalInfoTab({
                   {isAdmin ? (
                     availableLanguages.length > 0 ? (
                       availableLanguages.map((lang) => (
-                        <div key={lang.id} className="flex items-center space-x-2 bg-muted/30 px-2 py-1 rounded-md border border-border/50 hover:bg-primary/5 transition-colors">
+                        <div
+                          key={lang.id}
+                          className="flex items-center space-x-2 px-2 py-1 hover:bg-primary/5 transition-colors"
+                        >
                           <Checkbox
                             id={`lang-${lang.id}`}
                             checked={user.languages?.includes(lang.code)}
-                            onCheckedChange={() => handleLanguageToggle(lang.code)}
+                            onCheckedChange={() =>
+                              handleLanguageToggle(lang.code)
+                            }
                             disabled={isTogglingLanguage}
                             className="h-3.5 w-3.5"
                           />
@@ -320,18 +391,24 @@ export function PersonalInfoTab({
                         </div>
                       ))
                     ) : (
-                      <span className="text-[10px] text-muted-foreground animate-pulse">{t("loadingLanguages")}</span>
+                      <span className="text-[10px] text-muted-foreground animate-pulse">
+                        {t("loadingLanguages")}
+                      </span>
                     )
+                  ) : user.languages && user.languages.length > 0 ? (
+                    user.languages.map((langId) => (
+                      <Badge
+                        key={langId}
+                        variant="secondary"
+                        className="text-[9px] font-black uppercase py-0 px-1.5 h-4"
+                      >
+                        {langId}
+                      </Badge>
+                    ))
                   ) : (
-                    (user.languages && user.languages.length > 0) ? (
-                      user.languages.map((langId) => (
-                        <Badge key={langId} variant="secondary" className="text-[9px] font-black uppercase py-0 px-1.5 h-4">
-                          {langId}
-                        </Badge>
-                      ))
-                    ) : (
-                      <span className="text-[10px] text-muted-foreground font-bold italic">{t("noLanguagesSelected")}</span>
-                    )
+                    <span className="text-[10px] text-muted-foreground font-bold italic">
+                      {t("noLanguagesSelected")}
+                    </span>
                   )}
                 </div>
               </div>
@@ -351,9 +428,8 @@ export function PersonalInfoTab({
               <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                 {t("adminPasswordPlaceholder")}
               </Label>
-              <Input
+              <VaultInput
                 type="password"
-                className="input"
                 placeholder="••••••••"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
@@ -361,15 +437,20 @@ export function PersonalInfoTab({
                 onKeyDown={(e) => e.key === "Enter" && handleReveal()}
               />
             </div>
-            <Button
-              className="w-full gap-2 bg-green-600 hover:bg-green-700 font-black text-xs uppercase tracking-widest py-6"
+          </div>
+          <VaultFooter>
+            <VaultPrimaryButton
               onClick={handleReveal}
               disabled={isRevealing || !adminPassword}
             >
-              {isRevealing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+              {isRevealing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+              )}
               {t("confirm")}
-            </Button>
-          </div>
+            </VaultPrimaryButton>
+          </VaultFooter>
         </VaultContent>
       </Vault>
     </div>
