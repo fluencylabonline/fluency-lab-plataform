@@ -20,8 +20,10 @@ import * as certificateSchema from "@/modules/certificate/certificate.schema";
 import * as taskSchema from "@/modules/task/task.schema";
 import * as immersionSchema from "@/modules/immersion/immersion.schema";
 
-//We did differently for a reason I think, but I don't remember it now
-neonConfig.webSocketConstructor = ws;
+// Only inject external ws if global WebSocket is not available (e.g. older local Node environments)
+if (typeof globalThis.WebSocket === "undefined") {
+  neonConfig.webSocketConstructor = ws;
+}
 
 const pool = new Pool({ connectionString: env.DATABASE_URL });
 
