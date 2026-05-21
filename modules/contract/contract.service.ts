@@ -439,7 +439,7 @@ export const contractService = {
     return contractRepository.findUserInstances(userId);
   },
 
-  async prepareOnboardingContract(userId: string, region: "BR" | "US" = "BR") {
+  async prepareOnboardingContract(userId: string, region?: "BR" | "US") {
     // 1. Check if already has a pending one
     const instance = await contractRepository.findPendingOnboardingInstance(userId);
     
@@ -458,9 +458,11 @@ export const contractService = {
     const user = await userService.getUser(userId);
     if (!user) throw new Error("Usuário não encontrado.");
 
+    const inferredRegion = region || (user.nationality === "foreign" ? "US" : "BR");
+
     const contractType = user.role === "teacher" ? "teacher" : "student";
-    const template = await contractRepository.findActiveTemplateByType(contractType, region);
-    if (!template) throw new Error(`Template de contrato (${contractType}) não encontrado.`);
+    const template = await contractRepository.findActiveTemplateByType(contractType, inferredRegion);
+    if (!template) throw new Error(`Template de contrato (${contractType}) de região ${inferredRegion} não encontrado.`);
 
     // 3. Create instance with the subscription link
     return contractRepository.insertInstance({
