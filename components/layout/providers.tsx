@@ -10,6 +10,7 @@ import { PwaVault } from "@/modules/pwa/_components/PwaVault";
 import { ThemeColorUpdater } from "./theme-color-updater";
 import { PwaSplash } from "./pwa-splash";
 import { SWRConfig } from "swr";
+import CookieConsent from "@/components/ui/cookie-consent";
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -47,6 +48,7 @@ export function Providers({ children, locale, messages, themeMode, nonce }: Prov
         <PwaSplash />
         <NotificationPermissionVault />
         <PwaVault />
+        <CookieConsent />
       </NextIntlClientProvider>
     </ThemeProvider>
   );

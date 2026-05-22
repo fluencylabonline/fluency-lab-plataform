@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { CookieIcon } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import {
     Vault,
     VaultContent,
@@ -44,9 +45,28 @@ export default function CookieConsent() {
                         <CookieIcon className="h-7 w-7 text-primary" />
                     </div>
 
-                    <VaultTitle>Privacidade e Cookies</VaultTitle>
+                    <VaultTitle>{t("title")}</VaultTitle>
                     <VaultDescription className="mt-2 text-base max-w-sm mx-auto">
-                        {t("message")}
+                        {t.rich("message", {
+                            privacyLink: (chunks) => (
+                                <Link
+                                    href="/privacy"
+                                    onClick={() => setIsVisible(false)}
+                                    className="underline hover:text-primary transition-colors font-medium"
+                                >
+                                    {chunks}
+                                </Link>
+                            ),
+                            termsLink: (chunks) => (
+                                <Link
+                                    href="/terms"
+                                    onClick={() => setIsVisible(false)}
+                                    className="underline hover:text-primary transition-colors font-medium"
+                                >
+                                    {chunks}
+                                </Link>
+                            ),
+                        })}
                     </VaultDescription>
                 </VaultHeader>
 

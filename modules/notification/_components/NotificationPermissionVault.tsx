@@ -38,8 +38,11 @@ export function NotificationPermissionVault() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Show vault only if permission is default and not dismissed in this session
-    const shouldBeOpen = permission === "default" && !isDismissed;
+    const dismissedUntil = localStorage.getItem("notification_dismissed_until");
+    const isDismissedFor30Days = dismissedUntil ? Date.now() < parseInt(dismissedUntil, 10) : false;
+
+    // Show vault only if permission is default and not dismissed in this session or for 30 days
+    const shouldBeOpen = permission === "default" && !isDismissed && !isDismissedFor30Days;
     if (isOpen !== shouldBeOpen) {
       const timer = setTimeout(() => setIsOpen(shouldBeOpen), 0);
       return () => clearTimeout(timer);
@@ -68,6 +71,8 @@ export function NotificationPermissionVault() {
 
   const handleDismiss = () => {
     dismiss();
+    // Persist rejection for 30 days (30 * 24 * 60 * 60 * 1000 ms)
+    localStorage.setItem("notification_dismissed_until", (Date.now() + 30 * 24 * 60 * 60 * 1000).toString());
     setIsOpen(false);
   };
 

@@ -11,6 +11,12 @@
     "version": "Versão",
     "effectiveDate": "Vigência"
   },
+  "CookieConsent": {
+    "title": "Privacidade e Cookies",
+    "message": "Nós usamos cookies e outras tecnologias de rastreamento para melhorar a sua experiência de navegação em nosso site, mostrar conteúdo personalizado e analisar o tráfego do nosso site. Ao clicar em \"Aceitar\", você concorda com o uso de cookies de acordo com a nossa <privacyLink>Política de Privacidade</privacyLink> e nossos <termsLink>Termos de Uso</termsLink>.",
+    "accept": "Aceitar",
+    "decline": "Recusar"
+  },
   "AdminFinances": {
     "allMonths": "Todos os meses",
     "capacity": {
