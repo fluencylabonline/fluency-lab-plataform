@@ -19,7 +19,6 @@ export function LandingView({ user }: { user: User | null }) {
   const y = useTransform(scrollY, [0, 1000], ["0%", "20%"]);
 
   useEffect(() => {
-    // Delay loading the video source to prioritize initial bandwidth and LCP poster image
     const timer = setTimeout(() => {
       setVideoSrc("./videos/landing.webm");
     }, 1500);
@@ -33,7 +32,6 @@ export function LandingView({ user }: { user: User | null }) {
           <div className="absolute inset-0 bg-[url('/textures/cubes.png')] opacity-[0.03] dark:opacity-[0.08] pointer-events-none" />
 
           <div className="relative max-h-[97vh] lg:min-h-[96vh] flex-1 rounded-3xl overflow-hidden flex flex-col">
-            {/* Unified Video Element with Poster for LCP Optimization */}
             <motion.video
               src={videoSrc || undefined}
               poster="/videos/landing-poster.png"
@@ -45,7 +43,7 @@ export function LandingView({ user }: { user: User | null }) {
               className="absolute top-0 left-0 w-full h-full object-cover"
             />
 
-            <div className="absolute inset-0 bg-black/5 z-1 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10 lg:bg-gradient-to-r lg:from-black/85 lg:via-black/35 lg:to-transparent z-1 pointer-events-none" />
 
             <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-linear-to-b from-black/60 to-transparent z-1" />
 
@@ -56,15 +54,15 @@ export function LandingView({ user }: { user: User | null }) {
             </div>
           </div>
 
-          <div id="plans" className="relative">
+          <div id="plans" className="relative mb-12">
             <ComparisonSection />
           </div>
 
-          <div id="team" className="relative">
+          <div id="team" className="relative mb-12">
             <TeamSection />
           </div>
 
-          <div id="faq" className="relative">
+          <div id="faq" className="relative mb-12">
             <HowItWorks />
           </div>
 

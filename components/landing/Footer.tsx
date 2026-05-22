@@ -41,7 +41,7 @@ export default function Footer() {
             <div className="relative rounded-3xl md:rounded-4xl overflow-hidden transition-all">
                 <div className="absolute top-0 left-0 w-full h-full bg-[url('/textures/cubes.png')] opacity-[0.03] dark:opacity-[0.05] pointer-events-none" />
 
-                <div className="mx-auto px-4 sm::px-22 py-8 md:py-16 relative z-10 bg-background">
+                <div className="px-4 lg:px-22 py-8 md:py-16 relative z-10 bg-background">
                     <div className="flex flex-col lg:flex-row items-center justify-between gap-3 mb-12 md:mb-16 md:px-4">
                         <div className="space-y-3 text-center lg:text-left">
                             <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
@@ -62,7 +62,6 @@ export default function Footer() {
                                     type="email"
                                     autoComplete="email"
                                     placeholder={t("newsletter.placeholder") || "seu@email.com"}
-                                    className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 h-11 rounded-lg focus-visible:ring-primary/20 w-full"
                                 />
                             </div>
                             <Button
@@ -77,7 +76,7 @@ export default function Footer() {
 
                     <hr className="border-slate-100 dark:border-slate-800 mb-8 md:mb-12" />
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-12 gap-x-4 gap-y-10 lg:gap-8 items-start">
+                    <div className="grid justify-items-center lg:justify-items-center grid-cols-2 md:grid-cols-4 lg:grid-cols-12 gap-x-4 gap-y-10 lg:gap-8 items-start">
                         <div className="col-span-2 lg:col-span-4 space-y-4 text-center lg:text-left flex flex-col items-center lg:items-start">
                             <div className="flex items-center gap-1.5 font-bold tracking-tighter text-xl text-slate-900 dark:text-white select-none">
                                 <Image src={Logo} alt="Logo" width={200} style={{ height: "auto", width: "auto" }} priority />

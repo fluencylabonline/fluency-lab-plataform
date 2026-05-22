@@ -895,7 +895,7 @@
       "copyright": "© 2026 FluencyLab. All rights reserved.",
       "newsletter": {
         "button": "Subscribe",
-        "description": "Receive exclusive content and news about the natural method.",
+        "description": "Get 1 English tip per week.",
         "placeholder": "your@email.com",
         "title": "Ready for fluency?"
       },
@@ -992,7 +992,7 @@
       "switchAccount": "Sign in with another account",
       "team": "Our Team"
     },
-    "primaryCta": "Book your class",
+    "primaryCta": "Get my free trial lesson",
     "secondaryCta": "Methodology",
     "subtitle": "Personalized classes with dedicated tutors, natural method without rote memorization.",
     "Team": {
@@ -1003,22 +1003,26 @@
         "ana": {
           "bio": "Neuro-linguistics specialist with 10 years of experience in adaptive teaching.",
           "name": "Ana Silva",
-          "role": "Head of Methodology"
+          "role": "Head of Methodology",
+          "rating": "4.9 · 140 students"
         },
         "lucas": {
           "bio": "Ensures your study plan is always aligned with your routine.",
           "name": "Lucas Oliveira",
-          "role": "Student Coordinator"
+          "role": "Student Coordinator",
+          "rating": "4.9 · 210 students"
         },
         "mark": {
           "bio": "London native, focused on Business English and corporate communication.",
           "name": "Mark Miller",
-          "role": "English Lead"
+          "role": "English Lead",
+          "rating": "5.0 · 180 students"
         },
         "sofia": {
           "bio": "Argentine journalist who teaches through culture and current events.",
           "name": "Sofia Martinez",
-          "role": "Spanish Tutor"
+          "role": "Spanish Tutor",
+          "rating": "4.9 · 95 students"
         }
       },
       "mobileSwipe": "Swipe to see →",

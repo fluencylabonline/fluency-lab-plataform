@@ -895,7 +895,7 @@
       "copyright": "© 2026 FluencyLab. Todos os direitos reservados.",
       "newsletter": {
         "button": "Assinar",
-        "description": "Receba conteúdos exclusivos e novidades sobre o método natural.",
+        "description": "Receba 1 dica de inglês por semana.",
         "placeholder": "seu@email.com",
         "title": "Pronto para fluência?"
       },
@@ -992,7 +992,7 @@
       "switchAccount": "Entrar com outra conta",
       "team": "Nosso Time"
     },
-    "primaryCta": "Agende sua aula",
+    "primaryCta": "Quero minha aula gratuita",
     "secondaryCta": "Metodologia",
     "subtitle": "Aulas personalizadas com tutores dedicados, método natural sem decoreba.",
     "Team": {
@@ -1003,22 +1003,26 @@
         "ana": {
           "bio": "Especialista em neurolinguística com 10 anos de experiência em ensino adaptativo.",
           "name": "Ana Silva",
-          "role": "Head de Metodologia"
+          "role": "Head de Metodologia",
+          "rating": "4.9 · 140 alunos"
         },
         "lucas": {
           "bio": "Garante que seu plano de estudos esteja sempre alinhado com sua rotina.",
           "name": "Lucas Oliveira",
-          "role": "Coordenador de Alunos"
+          "role": "Coordenador de Alunos",
+          "rating": "4.9 · 210 alunos"
         },
         "mark": {
           "bio": "Nativo de Londres, focado em Business English e comunicação corporativa.",
           "name": "Mark Miller",
-          "role": "English Lead"
+          "role": "English Lead",
+          "rating": "5.0 · 180 alunos"
         },
         "sofia": {
           "bio": "Jornalista argentina que ensina através da cultura e atualidades.",
           "name": "Sofia Martinez",
-          "role": "Tutora de Espanhol"
+          "role": "Tutora de Espanhol",
+          "rating": "4.9 · 95 alunos"
         }
       },
       "mobileSwipe": "Deslize para ver →",

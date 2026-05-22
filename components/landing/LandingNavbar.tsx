@@ -95,7 +95,7 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
   return (
     <>
       <motion.header
-        className="hidden md:flex fixed top-0 left-0 w-full z-50 pointer-events-none flex-col items-center"
+        className="hidden md:flex fixed top-0 left-0 w-full z-99 pointer-events-none flex-col items-center"
         animate={{
           paddingTop: isScrolled ? "1rem" : "2rem",
           paddingLeft: isScrolled ? "1rem" : "2rem",

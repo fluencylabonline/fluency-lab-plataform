@@ -59,13 +59,13 @@ export function LandingHero({ user }: { user: User | null }) {
               className="w-full sm:w-auto"
             >
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex flex-row items-center justify-center gap-2 bg-primary/90 hover:bg-primary/95 text-white px-8 py-4 rounded-full font-bold duration-300 ease-in-out transform-all"
+                className="flex flex-row items-center justify-center gap-2 bg-primary text-white px-8 py-4 rounded-full font-bold duration-300 ease-in-out transform-all"
               >
               <CalendarDaysIcon size={24} />
-              {t("primaryCta") || "Start now"}
-            </motion.button>
+                {t("primaryCta") || "Start now"}
+              </motion.button>
             </Link>
           </div>
         </div>
@@ -76,9 +76,18 @@ export function LandingHero({ user }: { user: User | null }) {
           className="
             relative w-full h-full flex items-end justify-center lg:block
             lg:absolute lg:top-32 lg:right-40 lg:w-auto lg:h-auto
+            pointer-events-auto
           "
         >
-          <PhoneMockup>
+          <PhoneMockup
+            onClick={() => {
+              setCurrentScreen((prev) => {
+                if (prev === "home") return "path";
+                if (prev === "path") return "editor";
+                return "home";
+              });
+            }}
+          >
             <AnimatePresence mode="wait">
               {currentScreen === "home" ? (
                 <motion.div

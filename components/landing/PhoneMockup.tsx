@@ -5,9 +5,10 @@ import { motion } from "framer-motion";
 
 interface PhoneMockupProps {
     children?: React.ReactNode;
+    onClick?: () => void;
 }
 
-export function PhoneMockup({ children }: PhoneMockupProps) {
+export function PhoneMockup({ children, onClick }: PhoneMockupProps) {
     const [currentTime, setCurrentTime] = useState<string>("");
 
     useEffect(() => {
@@ -37,7 +38,8 @@ export function PhoneMockup({ children }: PhoneMockupProps) {
                 mass: 1,
                 delay: 0.2,
             }}
-            className="relative z-10 w-[410px] md:w-[620px] lg:w-[530px] -translate-y-22 translate-x-5 lg:translate-y-0 lg:mt-0 cursor-pointer"
+            onClick={onClick}
+            className="relative z-10 w-[410px] md:w-[620px] lg:w-[530px] -translate-y-22 translate-x-5 lg:translate-y-0 lg:mt-0 cursor-pointer pointer-events-auto select-none"
         >
             <div className="w-full h-[100vh] bg-gray-100 dark:bg-gray-900 rounded-[3rem] border-[6px] border-gray-100 dark:border-gray-800 ring-1 ring-gray-900/5 flex flex-col overflow-hidden relative">
                 <div className="absolute top-0 w-full h-6 z-99 flex justify-between px-6 p-6 items-center mt-3">
