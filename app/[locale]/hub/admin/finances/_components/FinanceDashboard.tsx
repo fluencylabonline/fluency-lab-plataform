@@ -18,6 +18,8 @@ import { TransactionsTable } from "./TransactionsTable";
 import { Transaction, FiscalConfig } from "@/modules/finance/finance.schema";
 import { FinanceMetrics, FinanceForecast, MonthlyBreakdownItem, MEICapacity } from "@/modules/finance/finance.types";
 import { MEICapacityCard } from "./MEICapacityCard";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface FinanceDashboardProps {
   initialMetrics: FinanceMetrics;
@@ -116,6 +118,16 @@ export function FinanceDashboard({
         </div>
 
         <div className="flex items-center gap-2 w-full md:w-auto">
+          <Link href={"/hub/admin/finances/forecast"}>
+            <Button>
+              Previsões
+            </Button>
+          </Link>
+          <Link href={"/hub/admin/finances/plans"}>
+            <Button>
+              Pacotes
+            </Button>
+          </Link>
           <FiscalConfigVault initialConfig={initialFiscalConfig} year={currentYear} />
           <NewTransactionVault />
         </div>

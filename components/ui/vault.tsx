@@ -128,7 +128,7 @@ const VaultContent = React.forwardRef<
                         ? "bottom-2 inset-x-2 w-auto rounded-2xl after:hidden! mt-24"
                         : "bottom-0 inset-x-0 w-full rounded-t-[20px] mt-24",
 
-                    "sm:bottom-6 sm:inset-x-0 sm:mx-auto sm:w-full sm:max-w-lg sm:rounded-2xl sm:after:hidden! sm:mt-0 max-h-[97vh]",
+                    "sm:bottom-6 sm:inset-x-0 sm:mx-auto sm:w-full sm:max-w-lg sm:rounded-2xl sm:after:hidden! sm:mt-0 max-h-[90vh]",
 
                     className,
                 )}

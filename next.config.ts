@@ -48,6 +48,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "i.pravatar.cc",
       },
+      {
+        protocol: "https",
+        hostname: "user-images.githubusercontent.com",
+      },
     ],
   },
   headers: () => {

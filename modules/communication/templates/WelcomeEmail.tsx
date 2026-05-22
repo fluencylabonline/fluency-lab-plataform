@@ -11,18 +11,23 @@ import {
 } from "@react-email/components";
 import { EmailButton } from "./components/EmailButton";
 import { emailStyles } from "./email-styles";
+import { emailTranslations } from "./translations";
 
 interface WelcomeEmailProps {
   name: string;
   actionLink: string;
   studentInfo?: string;
+  locale?: "pt" | "en";
 }
 
 export const WelcomeEmail: React.FC<WelcomeEmailProps> = ({
   name,
   actionLink,
   studentInfo,
+  locale = "pt",
 }) => {
+  const t = emailTranslations.welcome[locale] || emailTranslations.welcome.pt;
+
   return (
     <Html>
       <Head />
@@ -38,26 +43,27 @@ export const WelcomeEmail: React.FC<WelcomeEmailProps> = ({
             />
           </Section>
 
-          <Heading style={emailStyles.heading}>Bem-vindo(a) à Fluency Lab! 🎉</Heading>
+          <Heading style={emailStyles.heading}>{t.heading}</Heading>
 
           <Text style={emailStyles.paragraph}>
-            Olá, <strong>{name}</strong>!
+            {locale === "pt" ? "Olá" : "Hello"}, <strong>{name}</strong>!
           </Text>
           <Text style={emailStyles.paragraph}>
             {studentInfo
-              ? `Uma conta foi criada para o aluno(a) ${name}. Você já pode acessar a plataforma para gerenciar as aulas.`
-              : `Sua conta foi criada com sucesso! Estamos muito felizes em ter você conosco.`}
+              ? t.studentInfo(name)
+              : t.success}
           </Text>
 
           <Text style={emailStyles.paragraph}>
-            Para começar, defina sua senha segura clicando abaixo:
+            {t.instruction}
           </Text>
 
           <Section style={emailStyles.buttonSection}>
-            <EmailButton href={actionLink}>Definir Minha Senha</EmailButton>
+            <EmailButton href={actionLink}>{t.button}</EmailButton>
           </Section>
         </Container>
       </Body>
     </Html>
   );
 };
+

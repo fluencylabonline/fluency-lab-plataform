@@ -61,7 +61,7 @@ describe('UserService LGPD Compliance', () => {
       await userService.purgeUserData(mockUserId);
 
       // 1. Communication
-      expect(communicationService.sendFarewellEmail).toHaveBeenCalledWith(mockUser.email, mockUser.name);
+      expect(communicationService.sendFarewellEmail).toHaveBeenCalledWith(mockUser.email, mockUser.name, mockUser.locale);
 
       // 2. Repository Anonymization
       expect(userRepository.anonymize).toHaveBeenCalledWith(mockUserId);

@@ -10,12 +10,19 @@ import {
   Img,
 } from "@react-email/components";
 import { emailStyles } from "./email-styles";
+import { emailTranslations } from "./translations";
 
 interface FarewellEmailProps {
   name: string;
+  locale?: "pt" | "en";
 }
 
-export const FarewellEmail: React.FC<FarewellEmailProps> = ({ name }) => {
+export const FarewellEmail: React.FC<FarewellEmailProps> = ({
+  name,
+  locale = "pt",
+}) => {
+  const t = emailTranslations.farewell[locale] || emailTranslations.farewell.pt;
+
   return (
     <Html>
       <Head />
@@ -29,27 +36,32 @@ export const FarewellEmail: React.FC<FarewellEmailProps> = ({ name }) => {
             />
           </Section>
 
-          <Heading style={emailStyles.heading}>Sentiremos sua falta! 👋</Heading>
+          <Heading style={emailStyles.heading}>{t.heading}</Heading>
 
           <Text style={emailStyles.paragraph}>
-            Olá, <strong>{name}</strong>!
+            {locale === "pt" ? "Olá" : "Hello"}, <strong>{name}</strong>!
           </Text>
           <Text style={emailStyles.paragraph}>
-            Confirmamos o cancelamento da sua conta na Fluency Lab conforme solicitado.
+            {t.body1}
           </Text>
           <Text style={emailStyles.paragraph}>
-            Foi um prazer ter você conosco durante essa jornada. Lembre-se que as portas estarão sempre abertas caso decida voltar a estudar conosco no futuro.
+            {t.body2}
           </Text>
           <Text style={emailStyles.paragraph}>
-            Desejamos muito sucesso em seus próximos passos!
+            {t.body3}
           </Text>
 
           <Text style={emailStyles.footer}>
-            Abraços,<br />
-            Equipe Fluency Lab
+            {t.footer.split("\n").map((line, idx) => (
+              <React.Fragment key={idx}>
+                {line}
+                {idx < t.footer.split("\n").length - 1 && <br />}
+              </React.Fragment>
+            ))}
           </Text>
         </Container>
       </Body>
     </Html>
   );
 };
+

@@ -11,16 +11,21 @@ import {
 } from "@react-email/components";
 import { EmailButton } from "./components/EmailButton";
 import { emailStyles } from "./email-styles";
+import { emailTranslations } from "./translations";
 
 interface ResendInviteEmailProps {
   name: string;
   actionLink: string;
+  locale?: "pt" | "en";
 }
 
 export const ResendInviteEmail: React.FC<ResendInviteEmailProps> = ({
   name,
   actionLink,
+  locale = "pt",
 }) => {
+  const t = emailTranslations.resendInvite[locale] || emailTranslations.resendInvite.pt;
+
   return (
     <Html>
       <Head />
@@ -36,28 +41,29 @@ export const ResendInviteEmail: React.FC<ResendInviteEmailProps> = ({
             />
           </Section>
 
-          <Heading style={emailStyles.heading}>Novo link de acesso disponível! 🚀</Heading>
+          <Heading style={emailStyles.heading}>{t.heading}</Heading>
 
           <Text style={emailStyles.paragraph}>
-            Olá, <strong>{name}</strong>!
+            {locale === "pt" ? "Olá" : "Hello"}, <strong>{name}</strong>!
           </Text>
           <Text style={emailStyles.paragraph}>
-            Conforme solicitado, estamos enviando um novo link para você definir sua senha e acessar sua conta na Fluency Lab.
+            {t.body}
           </Text>
 
           <Text style={emailStyles.paragraph}>
-            Este link é temporário. Clique no botão abaixo para criar sua senha:
+            {t.instruction}
           </Text>
 
           <Section style={emailStyles.buttonSection}>
-            <EmailButton href={actionLink}>Definir Minha Senha</EmailButton>
+            <EmailButton href={actionLink}>{t.button}</EmailButton>
           </Section>
 
           <Text style={emailStyles.footerParagraph}>
-            Se você não solicitou este link, pode ignorar este e-mail com segurança.
+            {t.footerParagraph}
           </Text>
         </Container>
       </Body>
     </Html>
   );
 };
+

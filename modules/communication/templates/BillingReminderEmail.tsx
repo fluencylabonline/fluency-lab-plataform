@@ -11,13 +11,15 @@ import {
 } from "@react-email/components";
 import { emailStyles } from "./email-styles";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { ptBR, enUS } from "date-fns/locale";
+import { emailTranslations } from "./translations";
 
 interface BillingReminderEmailProps {
   studentName: string;
   amount: number;
   dueDate: Date;
   checkoutUrl: string;
+  locale?: "pt" | "en";
 }
 
 export const BillingReminderEmail = ({
@@ -25,39 +27,44 @@ export const BillingReminderEmail = ({
   amount,
   dueDate,
   checkoutUrl,
+  locale = "pt",
 }: BillingReminderEmailProps) => {
-  const formattedAmount = new Intl.NumberFormat("pt-BR", {
+  const t = emailTranslations.billingReminder[locale] || emailTranslations.billingReminder.pt;
+
+  const formattedAmount = new Intl.NumberFormat(locale === "pt" ? "pt-BR" : "en-US", {
     style: "currency",
-    currency: "BRL",
+    currency: locale === "pt" ? "BRL" : "USD",
   }).format(amount / 100);
 
-  const formattedDueDate = format(dueDate, "dd 'de' MMMM", { locale: ptBR });
+  const dateLocale = locale === "pt" ? ptBR : enUS;
+  const dateFormat = locale === "pt" ? "dd 'de' MMMM" : "MMMM dd";
+  const formattedDueDate = format(dueDate, dateFormat, { locale: dateLocale });
 
   return (
     <Html>
       <Head />
-      <Preview>Lembrete: Sua mensalidade vence em 2 dias! ⏳</Preview>
+      <Preview>{t.preview}</Preview>
       <Body style={emailStyles.main}>
         <Container style={emailStyles.container}>
-          <Heading style={emailStyles.h1}>Falta pouco, {studentName}!</Heading>
+          <Heading style={emailStyles.h1}>{t.heading}, {studentName}!</Heading>
           <Section style={emailStyles.section}>
             <Text style={emailStyles.text}>
-              Passando para lembrar que sua mensalidade no valor de <strong>{formattedAmount}</strong> vence daqui a 2 dias (<strong>{formattedDueDate}</strong>).
+              {t.body(formattedAmount, formattedDueDate)}
             </Text>
             <Text style={emailStyles.text}>
-              Para evitar qualquer interrupção ou cobrança de multa, você já pode realizar o pagamento clicando no botão abaixo:
+              {t.body2}
             </Text>
             <Section style={emailStyles.buttonContainer}>
               <Button style={emailStyles.button} href={checkoutUrl}>
-                Pagar Agora
+                {t.button}
               </Button>
             </Section>
             <Text style={emailStyles.text}>
-              Se você já realizou o pagamento, por favor desconsidere este aviso.
+              {t.footerParagraph}
             </Text>
           </Section>
           <Text style={emailStyles.footer}>
-            Equipe Fluency Lab
+            {t.footer}
           </Text>
         </Container>
       </Body>
@@ -66,3 +73,4 @@ export const BillingReminderEmail = ({
 };
 
 export default BillingReminderEmail;
+

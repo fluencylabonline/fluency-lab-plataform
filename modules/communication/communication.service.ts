@@ -11,6 +11,7 @@ import type { ReactElement } from "react";
 //Templates
 import { WelcomeEmail } from "./templates/WelcomeEmail";
 import { ResendInviteEmail } from "./templates/ResendInviteEmail";
+import { emailTranslations } from "./templates/translations";
 import { PaymentConfirmedEmail } from "./templates/PaymentConfirmedEmail";
 import { NewInvoiceEmail } from "./templates/NewInvoiceEmail";
 import { BillingReminderEmail } from "./templates/BillingReminderEmail";
@@ -78,17 +79,34 @@ export class CommunicationService {
    * MÉTODOS DE NEGÓCIO
    * Dados específicos e chamar o sendEmail.
    */
+  private async getRecipientLocale(emailOrPhone: string): Promise<"pt" | "en"> {
+    try {
+      const user = emailOrPhone.includes("@")
+        ? await communicationRepository.findUserByEmail(emailOrPhone)
+        : await communicationRepository.findUserByPhone(emailOrPhone);
+      return (user?.locale || "pt") as "pt" | "en";
+    } catch (error) {
+      console.error("[CommunicationService.getRecipientLocale] Error:", error);
+      return "pt";
+    }
+  }
+
   async sendWelcomeAndSetPasswordEmail(
     email: string,
     name: string,
     actionLink: string,
     studentInfo?: string,
+    explicitLocale?: "pt" | "en",
   ) {
     try {
+      const locale = explicitLocale || await this.getRecipientLocale(email);
       const customActionLink = this.buildCustomLink(actionLink);
+      const t = emailTranslations.welcome[locale];
       const subject = studentInfo
-        ? "Bem-vindo(a) à Fluency Lab! Defina sua senha para acessar a conta do estudante."
-        : "Bem-vindo(a) à Fluency Lab! Defina sua senha.";
+        ? (locale === "pt"
+            ? "Bem-vindo(a) à Fluency Lab! Defina sua senha para acessar a conta do estudante."
+            : "Welcome to Fluency Lab! Set your password to access the student account.")
+        : t.subject;
 
       await this.sendEmail({
         to: email,
@@ -97,6 +115,7 @@ export class CommunicationService {
           name,
           actionLink: customActionLink,
           studentInfo,
+          locale,
         }),
       });
     } catch (error) {
@@ -105,15 +124,18 @@ export class CommunicationService {
     }
   }
 
-  async sendResendInviteEmail(email: string, name: string, actionLink: string) {
+  async sendResendInviteEmail(email: string, name: string, actionLink: string, explicitLocale?: "pt" | "en") {
     try {
+      const locale = explicitLocale || await this.getRecipientLocale(email);
       const customActionLink = this.buildCustomLink(actionLink);
+      const t = emailTranslations.resendInvite[locale];
       await this.sendEmail({
         to: email,
-        subject: "Novo link de acesso disponível! 🚀",
+        subject: t.subject,
         template: React.createElement(ResendInviteEmail, {
           name,
           actionLink: customActionLink,
+          locale,
         }),
       });
       return { success: true };
@@ -123,60 +145,97 @@ export class CommunicationService {
     }
   }
 
-  async sendPaymentConfirmedEmail(email: string, data: { studentName: string; amount: number }) {
+  async sendPaymentConfirmedEmail(
+    email: string,
+    data: { studentName: string; amount: number },
+    explicitLocale?: "pt" | "en"
+  ) {
     try {
+      const locale = explicitLocale || await this.getRecipientLocale(email);
+      const t = emailTranslations.paymentConfirmed[locale];
       await this.sendEmail({
         to: email,
-        subject: "\u2705 Pagamento confirmado! Boas aulas.",
-        template: React.createElement(PaymentConfirmedEmail, data),
+        subject: t.subject,
+        template: React.createElement(PaymentConfirmedEmail, { ...data, locale }),
       });
     } catch (error) {
       console.error("[CommunicationService.sendPaymentConfirmedEmail] Error:", error);
     }
   }
 
-  async sendNewInvoiceEmail(email: string, data: { studentName: string; amount: number; dueDate: Date; pixPayload: string; pixImage: string; description?: string }) {
+  async sendNewInvoiceEmail(
+    email: string,
+    data: {
+      studentName: string;
+      amount: number;
+      dueDate: Date;
+      pixPayload: string;
+      pixImage: string;
+      description?: string;
+    },
+    explicitLocale?: "pt" | "en"
+  ) {
     try {
+      const locale = explicitLocale || await this.getRecipientLocale(email);
+      const t = emailTranslations.newInvoice[locale];
       await this.sendEmail({
         to: email,
-        subject: "\uD83D\uDCC4 Sua fatura da Fluency Lab est\u00e1 dispon\u00edvel",
-        template: React.createElement(NewInvoiceEmail, data),
+        subject: t.subject,
+        template: React.createElement(NewInvoiceEmail, { ...data, locale }),
       });
     } catch (error) {
       console.error("[CommunicationService.sendNewInvoiceEmail] Error:", error);
     }
   }
 
-  async sendBillingReminderEmail(email: string, data: { studentName: string; amount: number; dueDate: Date; checkoutUrl: string }) {
+  async sendBillingReminderEmail(
+    email: string,
+    data: { studentName: string; amount: number; dueDate: Date; checkoutUrl: string },
+    explicitLocale?: "pt" | "en"
+  ) {
     try {
+      const locale = explicitLocale || await this.getRecipientLocale(email);
+      const t = emailTranslations.billingReminder[locale];
       await this.sendEmail({
         to: email,
-        subject: "\u23F3 Lembrete: Sua fatura vence em 2 dias",
-        template: React.createElement(BillingReminderEmail, data),
+        subject: t.subject,
+        template: React.createElement(BillingReminderEmail, { ...data, locale }),
       });
     } catch (error) {
       console.error("[CommunicationService.sendBillingReminderEmail] Error:", error);
     }
   }
 
-  async sendBillingDueDateEmail(email: string, data: { studentName: string; amount: number; checkoutUrl: string }) {
+  async sendBillingDueDateEmail(
+    email: string,
+    data: { studentName: string; amount: number; checkoutUrl: string },
+    explicitLocale?: "pt" | "en"
+  ) {
     try {
+      const locale = explicitLocale || await this.getRecipientLocale(email);
+      const t = emailTranslations.billingDueDate[locale];
       await this.sendEmail({
         to: email,
-        subject: "\u23F0 Aten\u00e7\u00e3o: Sua fatura vence hoje",
-        template: React.createElement(BillingDueDateEmail, data),
+        subject: t.subject,
+        template: React.createElement(BillingDueDateEmail, { ...data, locale }),
       });
     } catch (error) {
       console.error("[CommunicationService.sendBillingDueDateEmail] Error:", error);
     }
   }
 
-  async sendBillingOverdueEmail(email: string, data: { studentName: string; amount: number; checkoutUrl: string }) {
+  async sendBillingOverdueEmail(
+    email: string,
+    data: { studentName: string; amount: number; checkoutUrl: string },
+    explicitLocale?: "pt" | "en"
+  ) {
     try {
+      const locale = explicitLocale || await this.getRecipientLocale(email);
+      const t = emailTranslations.billingOverdue[locale];
       await this.sendEmail({
         to: email,
-        subject: "\u26A0\uFE0F Sua fatura est\u00e1 em atraso",
-        template: React.createElement(BillingOverdueEmail, data),
+        subject: t.subject,
+        template: React.createElement(BillingOverdueEmail, { ...data, locale }),
       });
     } catch (error) {
       console.error("[CommunicationService.sendBillingOverdueEmail] Error:", error);
@@ -302,12 +361,14 @@ export class CommunicationService {
     }
   }
 
-  async sendFarewellEmail(email: string, name: string) {
+  async sendFarewellEmail(email: string, name: string, explicitLocale?: "pt" | "en") {
     try {
+      const locale = explicitLocale || await this.getRecipientLocale(email);
+      const t = emailTranslations.farewell[locale];
       await this.sendEmail({
         to: email,
-        subject: "Sentiremos sua falta! 👋",
-        template: React.createElement(FarewellEmail, { name }),
+        subject: t.subject,
+        template: React.createElement(FarewellEmail, { name, locale }),
       });
     } catch (error) {
       console.error("[CommunicationService.sendFarewellEmail] Error:", error);
@@ -319,24 +380,33 @@ export class CommunicationService {
   /**
    * Envia um lembrete de pagamento via WhatsApp.
    */
-  async sendPaymentReminderWhatsApp(data: {
-    cellphone: string;
-    studentName: string;
-    amount: number;
-    dueDate: Date;
-    pixPayload: string;
-  }) {
+  async sendPaymentReminderWhatsApp(
+    data: {
+      cellphone: string;
+      studentName: string;
+      amount: number;
+      dueDate: Date;
+      pixPayload: string;
+    },
+    explicitLocale?: "pt" | "en"
+  ) {
     try {
-      const amountStr = new Intl.NumberFormat("pt-BR", {
+      const locale = explicitLocale || await this.getRecipientLocale(data.cellphone);
+      const languageCode = locale === "en" ? "en_US" : "pt_BR";
+
+      const amountStr = new Intl.NumberFormat(locale === "pt" ? "pt-BR" : "en-US", {
         style: "currency",
-        currency: "BRL"
+        currency: locale === "pt" ? "BRL" : "USD"
       }).format(data.amount / 100);
 
-      const dateStr = data.dueDate.toLocaleDateString("pt-BR");
+      const dateStr = locale === "pt"
+        ? data.dueDate.toLocaleDateString("pt-BR")
+        : data.dueDate.toLocaleDateString("en-US");
 
       return await this.sendWhatsAppTemplate({
         to: data.cellphone,
         templateName: "payment_reminder",
+        languageCode,
         components: [
           {
             type: "body",
@@ -358,20 +428,27 @@ export class CommunicationService {
    * Envia um alerta de fatura em atraso via WhatsApp.
    * TODO: preciso criar o template ainda
    */
-  async sendPaymentOverdueWhatsApp(data: {
-    cellphone: string;
-    studentName: string;
-    amount: number;
-  }) {
+  async sendPaymentOverdueWhatsApp(
+    data: {
+      cellphone: string;
+      studentName: string;
+      amount: number;
+    },
+    explicitLocale?: "pt" | "en"
+  ) {
     try {
-      const amountStr = new Intl.NumberFormat("pt-BR", {
+      const locale = explicitLocale || await this.getRecipientLocale(data.cellphone);
+      const languageCode = locale === "en" ? "en_US" : "pt_BR";
+
+      const amountStr = new Intl.NumberFormat(locale === "pt" ? "pt-BR" : "en-US", {
         style: "currency",
-        currency: "BRL"
+        currency: locale === "pt" ? "BRL" : "USD"
       }).format(data.amount / 100);
 
       return await this.sendWhatsAppTemplate({
         to: data.cellphone,
         templateName: "payment_overdue",
+        languageCode,
         components: [
           {
             type: "body",
@@ -391,12 +468,18 @@ export class CommunicationService {
    * Envia mensagem de boas-vindas e definição de senha via WhatsApp.
    * Template: "Hi {{texto}}, Your new account has been created successfully. Please verify {{texto}}..."
    */
-  async sendWelcomeWhatsApp(data: {
-    cellphone: string;
-    name: string;
-    actionLink: string;
-  }) {
+  async sendWelcomeWhatsApp(
+    data: {
+      cellphone: string;
+      name: string;
+      actionLink: string;
+    },
+    explicitLocale?: "pt" | "en"
+  ) {
     try {
+      const locale = explicitLocale || await this.getRecipientLocale(data.cellphone);
+      const languageCode = locale === "en" ? "en_US" : "pt_BR";
+
       // Extrai o código de ação do link do Firebase
       const u = new URL(data.actionLink);
       const oobCode = u.searchParams.get("oobCode");
@@ -409,13 +492,13 @@ export class CommunicationService {
       return await this.sendWhatsAppTemplate({
         to: data.cellphone,
         templateName: "welcome", // Nome do modelo pronto da Meta
-        languageCode: "en_US",
+        languageCode,
         components: [
           {
             type: "body",
             parameters: [
               { type: "text", text: data.name },
-              { type: "text", text: "your account" },
+              { type: "text", text: locale === "en" ? "your account" : "sua conta" },
             ]
           },
           {

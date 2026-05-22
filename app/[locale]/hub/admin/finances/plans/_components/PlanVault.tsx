@@ -28,17 +28,25 @@ import {
 import { notify } from "@/components/ui/toaster";
 import { useEffect } from "react";
 import { z } from "zod";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 
 interface PlanVaultProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   plan?: Plan;
   onSuccess?: (plan: Plan) => void;
+  languages: { id: string; name: string }[];
 }
 
 type PlanFormValues = z.input<typeof createPlanSchema>;
 
-export function PlanVault({ open, onOpenChange, plan, onSuccess }: PlanVaultProps) {
+export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: PlanVaultProps) {
   const t = useTranslations("Billing");
   const isEditing = !!plan;
 
@@ -54,7 +62,7 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess }: PlanVaultProp
     },
   });
 
-  const { formState: { errors, isSubmitting }, handleSubmit, reset, register } = form;
+  const { formState: { errors, isSubmitting }, handleSubmit, reset, register, setValue, getValues } = form;
 
   useEffect(() => {
     if (plan && open) {
@@ -135,10 +143,22 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess }: PlanVaultProp
                 required
                 error={errors.language?.message}
               >
-                <VaultInput
-                  {...register("language")}
-                  placeholder={t("languagePlaceholder") || "Ex: Inglês"}
-                />
+                <Select
+                  key={plan?.id || "new"}
+                  onValueChange={(value) => setValue("language", value, { shouldValidate: true })}
+                  defaultValue={getValues("language")}
+                >
+                  <SelectTrigger className="h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-md">
+                    <SelectValue placeholder={t("languagePlaceholder") || "Ex: Inglês"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(languages || []).map((lang) => (
+                      <SelectItem key={lang.id} value={lang.name}>
+                        {lang.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </VaultField>
               <VaultField
                 label={t("classesPerWeek") || "Aulas por Semana"}

@@ -16,13 +16,13 @@ import { decrypt } from "@/lib/cryptography";
 import { verifySudoMode, getCurrentUser } from "@/lib/auth-server";
 
 // --- Funções Auxiliares Privadas ---
-const generateInviteLink = async (email: string, locale: string = "pt") => {
+const generateInviteLink = async (email: string) => {
   const baseUrl = env.NEXT_PUBLIC_APP_URL.endsWith("/")
     ? env.NEXT_PUBLIC_APP_URL.slice(0, -1)
     : env.NEXT_PUBLIC_APP_URL;
 
   return adminAuth.generatePasswordResetLink(email, {
-    url: `${baseUrl}/${locale}/signin`,
+    url: `${baseUrl}/signin`,
   });
 };
 // -----------------------------------
@@ -217,8 +217,14 @@ export const resendInviteAction = permissionAction("user.create")
       const user = await userService.getUserByEmail(parsedInput.email);
       if (!user) return { success: false, error: "userNotFound" };
 
-      const actionLink = await generateInviteLink(user.email, parsedInput.locale);
-      await communicationService.sendWelcomeAndSetPasswordEmail(user.email, user.name, actionLink);
+      const actionLink = await generateInviteLink(user.email);
+      await communicationService.sendWelcomeAndSetPasswordEmail(
+        user.email,
+        user.name,
+        actionLink,
+        undefined,
+        parsedInput.locale as "pt" | "en"
+      );
 
       return { success: true };
     } catch (error) {
@@ -238,8 +244,13 @@ export const requestNewInviteAction = actionClient
       const user = await userService.getUserByEmail(parsedInput.email);
       if (!user) return { success: false, error: "userNotFound" };
 
-      const actionLink = await generateInviteLink(user.email, parsedInput.locale);
-      await communicationService.sendResendInviteEmail(user.email, user.name, actionLink);
+      const actionLink = await generateInviteLink(user.email);
+      await communicationService.sendResendInviteEmail(
+        user.email,
+        user.name,
+        actionLink,
+        user.locale as "pt" | "en"
+      );
 
       return { success: true };
     } catch (error) {
@@ -515,7 +526,7 @@ export const requestSelfCancellationAction = protectedAction
         const { schedulingService } = await import("../scheduling/scheduling.service");
         await schedulingService.cancelFutureClassesForStudent(ctx.user.id);
         await userService.updateUser(ctx.user.id, { isActive: false });
-        await communicationService.sendFarewellEmail(ctx.user.email, ctx.user.name);
+        await communicationService.sendFarewellEmail(ctx.user.email, ctx.user.name, ctx.user.locale as "pt" | "en");
         return { success: true, feeRequired: false };
       }
 
@@ -532,7 +543,7 @@ export const requestSelfCancellationAction = protectedAction
         });
       } else {
         // Se não houve taxa (o finalizedCancellation já foi chamado no service), envia e-mail
-        await communicationService.sendFarewellEmail(ctx.user.email, ctx.user.name);
+        await communicationService.sendFarewellEmail(ctx.user.email, ctx.user.name, ctx.user.locale as "pt" | "en");
       }
 
       revalidatePath("/hub/student/settings");

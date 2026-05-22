@@ -10,48 +10,53 @@ import {
   Text,
 } from "@react-email/components";
 import { emailStyles } from "./email-styles";
+import { emailTranslations } from "./translations";
 
 interface BillingOverdueEmailProps {
   studentName: string;
   amount: number;
   checkoutUrl: string;
+  locale?: "pt" | "en";
 }
 
 export const BillingOverdueEmail = ({
   studentName,
   amount,
   checkoutUrl,
+  locale = "pt",
 }: BillingOverdueEmailProps) => {
-  const formattedAmount = new Intl.NumberFormat("pt-BR", {
+  const t = emailTranslations.billingOverdue[locale] || emailTranslations.billingOverdue.pt;
+
+  const formattedAmount = new Intl.NumberFormat(locale === "pt" ? "pt-BR" : "en-US", {
     style: "currency",
-    currency: "BRL",
+    currency: locale === "pt" ? "BRL" : "USD",
   }).format(amount / 100);
 
   return (
     <Html>
       <Head />
-      <Preview>⚠️ Sua mensalidade está atrasada</Preview>
+      <Preview>{t.preview}</Preview>
       <Body style={emailStyles.main}>
         <Container style={emailStyles.container}>
-          <Heading style={emailStyles.h1}>Fatura em atraso, {studentName}!</Heading>
+          <Heading style={emailStyles.h1}>{t.heading}, {studentName}!</Heading>
           <Section style={emailStyles.section}>
             <Text style={emailStyles.text}>
-              Notamos que o pagamento da sua mensalidade no valor de <strong>{formattedAmount}</strong> ainda não foi identificado.
+              {t.body(formattedAmount)}
             </Text>
             <Text style={emailStyles.text}>
-              A sua conta poderá ser suspensa em breve se o pagamento não for regularizado. Por favor, utilize o botão abaixo para quitar seu débito agora via PIX ou Cartão:
+              {t.body2}
             </Text>
             <Section style={emailStyles.buttonContainer}>
               <Button style={emailStyles.button} href={checkoutUrl}>
-                Regularizar Pagamento
+                {t.button}
               </Button>
             </Section>
             <Text style={emailStyles.text}>
-              Caso já tenha realizado o pagamento, favor ignorar este e-mail. A compensação do boleto ou cartão pode levar até 48h (PIX é instantâneo).
+              {t.footerParagraph}
             </Text>
           </Section>
           <Text style={emailStyles.footer}>
-            Equipe Fluency Lab
+            {t.footer}
           </Text>
         </Container>
       </Body>
@@ -60,3 +65,4 @@ export const BillingOverdueEmail = ({
 };
 
 export default BillingOverdueEmail;
+

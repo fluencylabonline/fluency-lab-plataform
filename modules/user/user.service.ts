@@ -107,16 +107,21 @@ export const userService = {
     await communicationService.sendWelcomeAndSetPasswordEmail(
       email,
       user.name,
-      actionLink
+      actionLink,
+      undefined,
+      user.locale as "pt" | "en"
     );
 
     // Enviar convite via WhatsApp (se houver telefone)
     if (user.cellphone) {
-      await communicationService.sendWelcomeWhatsApp({
-        cellphone: user.cellphone,
-        name: user.name,
-        actionLink
-      });
+      await communicationService.sendWelcomeWhatsApp(
+        {
+          cellphone: user.cellphone,
+          name: user.name,
+          actionLink
+        },
+        user.locale as "pt" | "en"
+      );
     }
 
     return user;
@@ -292,7 +297,7 @@ export const userService = {
 
     // 1. Send Farewell Email before deleting access
     try {
-      await communicationService.sendFarewellEmail(user.email, user.name);
+      await communicationService.sendFarewellEmail(user.email, user.name, user.locale as "pt" | "en");
     } catch (e) {
       console.error("[LGPD] Failed to send farewell email:", e);
       // We continue even if email fails

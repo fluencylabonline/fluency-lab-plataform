@@ -11,7 +11,8 @@ import {
 } from "@react-email/components";
 import { emailStyles } from "./email-styles";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { ptBR, enUS } from "date-fns/locale";
+import { emailTranslations } from "./translations";
 
 interface NewInvoiceEmailProps {
   studentName: string;
@@ -20,6 +21,7 @@ interface NewInvoiceEmailProps {
   pixPayload: string;
   pixImage: string;
   description?: string;
+  locale?: "pt" | "en";
 }
 
 export const NewInvoiceEmail = ({
@@ -29,31 +31,36 @@ export const NewInvoiceEmail = ({
   pixPayload,
   pixImage,
   description,
+  locale = "pt",
 }: NewInvoiceEmailProps) => {
-  const formattedAmount = new Intl.NumberFormat("pt-BR", {
+  const t = emailTranslations.newInvoice[locale] || emailTranslations.newInvoice.pt;
+
+  const formattedAmount = new Intl.NumberFormat(locale === "pt" ? "pt-BR" : "en-US", {
     style: "currency",
-    currency: "BRL",
+    currency: locale === "pt" ? "BRL" : "USD",
   }).format(amount / 100);
 
-  const formattedDueDate = format(dueDate, "dd 'de' MMMM", { locale: ptBR });
+  const dateLocale = locale === "pt" ? ptBR : enUS;
+  const dateFormat = locale === "pt" ? "dd 'de' MMMM" : "MMMM dd";
+  const formattedDueDate = format(dueDate, dateFormat, { locale: dateLocale });
 
   return (
     <Html>
       <Head />
-      <Preview>Sua fatura está disponível! 📄</Preview>
+      <Preview>{t.preview}</Preview>
       <Body style={emailStyles.main}>
         <Container style={emailStyles.container}>
-          <Heading style={emailStyles.h1}>Olá, {studentName}!</Heading>
+          <Heading style={emailStyles.h1}>{t.hello}, {studentName}!</Heading>
           <Section style={emailStyles.section}>
             <Text style={emailStyles.text}>
               {description ? (
-                <>Uma nova cobrança no valor de <strong>{formattedAmount}</strong> foi gerada referente a: <strong>{description}</strong>.</>
+                t.description(formattedAmount, description)
               ) : (
-                <>Sua próxima mensalidade no valor de <strong>{formattedAmount}</strong> já está disponível.</>
+                t.noDescription(formattedAmount)
               )}
             </Text>
             <Text style={emailStyles.text}>
-              O vencimento é dia <strong>{formattedDueDate}</strong>. Você pode realizar o pagamento via PIX utilizando o QR Code abaixo:
+              {t.dueDateText(formattedDueDate)}
             </Text>
 
             <Section style={{ textAlign: "center", margin: "24px 0" }}>
@@ -67,7 +74,7 @@ export const NewInvoiceEmail = ({
             </Section>
 
             <Text style={{ ...emailStyles.text, textAlign: "center", fontSize: "14px", color: "#666" }}>
-              Ou utilize o código Copia e Cola abaixo:
+              {t.copyPasteText}
             </Text>
 
             <Section style={{
@@ -85,11 +92,11 @@ export const NewInvoiceEmail = ({
             </Section>
 
             <Text style={emailStyles.text}>
-              Se tiver qualquer dúvida, estamos à disposição.
+              {t.questions}
             </Text>
           </Section>
           <Text style={emailStyles.footer}>
-            Equipe Fluency Lab
+            {t.footer}
           </Text>
         </Container>
       </Body>
@@ -98,3 +105,4 @@ export const NewInvoiceEmail = ({
 };
 
 export default NewInvoiceEmail;
+

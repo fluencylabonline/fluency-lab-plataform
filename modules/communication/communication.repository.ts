@@ -20,6 +20,12 @@ export const communicationRepository = {
     });
   },
 
+  async findUserByEmail(email: string) {
+    return db.query.usersTable.findFirst({
+      where: (table, { eq }) => eq(table.email, email),
+    });
+  },
+
   async createConversation(data: {
     waId: string;
     studentId?: string | null;

@@ -16,6 +16,7 @@ import { Loader2 } from "lucide-react";
 
 interface PlansPageClientProps {
   initialPlans: Plan[];
+  languages: { id: string; name: string }[];
   user: {
     name: string | null;
     email: string | null;
@@ -24,7 +25,7 @@ interface PlansPageClientProps {
   };
 }
 
-export function PlansPageClient({ initialPlans, user }: PlansPageClientProps) {
+export function PlansPageClient({ initialPlans, languages, user }: PlansPageClientProps) {
   const [plans, setPlans] = useState<Plan[]>(initialPlans);
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<Plan | undefined>(undefined);
@@ -150,7 +151,7 @@ export function PlansPageClient({ initialPlans, user }: PlansPageClientProps) {
                       </div>
                       <div className="flex flex-col">
                         <span className="text-[9px] uppercase font-bold text-muted-foreground leading-none">{t("frequency") || "Frequência"}</span>
-                        <span className="text-xs font-black text-foreground">{t("classesPerWeek", { count: plan.classesPerWeek || 0 }) || `${plan.classesPerWeek}x / sem`}</span>
+                        <span className="text-xs font-black text-foreground">{t("classesPerWeekLabel", { count: plan.classesPerWeek || 0 }) || `${plan.classesPerWeek}x / sem`}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2.5 p-2 bg-muted/30 rounded-md border border-border/50">
@@ -192,6 +193,7 @@ export function PlansPageClient({ initialPlans, user }: PlansPageClientProps) {
         onOpenChange={setIsVaultOpen}
         plan={selectedPlan}
         onSuccess={handleSuccess}
+        languages={languages}
       />
     </div>
   );
