@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useDevice } from "@/hooks/ui/use-device";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LandingHero } from "@/components/landing/LandingHero";
@@ -13,6 +14,9 @@ import { User } from "@/modules/user/user.schema";
 export function LandingView({ user }: { user: User | null }) {
   const { isStandalone } = useDevice();
   const [videoSrc, setVideoSrc] = useState<string>("");
+
+  const { scrollY } = useScroll();
+  const y = useTransform(scrollY, [0, 1000], ["0%", "20%"]);
 
   useEffect(() => {
     // Delay loading the video source to prioritize initial bandwidth and LCP poster image
@@ -30,13 +34,14 @@ export function LandingView({ user }: { user: User | null }) {
 
           <div className="relative max-h-[97vh] lg:min-h-[96vh] flex-1 rounded-3xl overflow-hidden flex flex-col">
             {/* Unified Video Element with Poster for LCP Optimization */}
-            <video
+            <motion.video
               src={videoSrc || undefined}
               poster="/videos/landing-poster.png"
               autoPlay
               loop
               muted
               playsInline
+              style={{ y, scale: 1.15 }}
               className="absolute top-0 left-0 w-full h-full object-cover"
             />
 
