@@ -5,7 +5,6 @@ import { WhatsAppMessage } from "../communication.types";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { MessageCircle, Check, CheckCheck, FileText, Download, X, Film } from "lucide-react";
-import Image from "next/image";
 
 interface MediaMetadata {
   mediaId?: string;
@@ -38,16 +37,16 @@ export function MessageBubble({ msg }: MessageBubbleProps) {
       case "image":
         return (
           <div className="space-y-2">
-            <div 
+            <div
               className="relative rounded-xl overflow-hidden border border-border/10 cursor-zoom-in max-w-full bg-muted/20"
               onClick={() => setIsLightboxOpen(true)}
             >
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={`/api/communication/media/${mediaId}`}
                 alt={caption || "Imagem do WhatsApp"}
                 className="w-full h-auto max-h-[260px] object-cover transition-all hover:scale-[1.02] duration-300"
-                width={500}
-                height={500}
+                loading="lazy"
               />
             </div>
             {caption && <p className="whitespace-pre-line mt-1 text-[13.5px] leading-relaxed">{caption}</p>}
@@ -64,7 +63,8 @@ export function MessageBubble({ msg }: MessageBubbleProps) {
                 >
                   <X className="w-5 h-5" />
                 </button>
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={`/api/communication/media/${mediaId}`}
                   alt={caption || "Imagem ampliada"}
                   className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-200"
