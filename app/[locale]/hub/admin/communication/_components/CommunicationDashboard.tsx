@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Plus, Bell, MessageSquare, History, CheckCircle2, Clock, XCircle, RotateCcw, Trash2, MessageCircle } from "lucide-react";
+import { Plus, Bell, MessageSquare, History, CheckCircle2, Clock, XCircle, RotateCcw, Trash2 } from "lucide-react";
 import { Header, HeaderAction } from "@/components/layout/header";
 import { useIsMobile } from "@/hooks/ui/use-device";
 import {
@@ -24,7 +24,6 @@ import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { getWhatsAppTemplatesAction, deleteWhatsAppTemplateAction } from "@/modules/communication/communication.actions";
 import { notify } from "@/components/ui/toaster";
-import { WhatsAppChat } from "@/modules/communication/_components/WhatsAppChat";
 import { SendWhatsAppMessageVault } from "@/app/[locale]/hub/admin/communication/_components/SendWhatsAppMessageVault";
 import { 
   Vault, 
@@ -198,10 +197,6 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, user 
                 <MessageSquare className="w-4 h-4" />
                 WhatsApp Business
               </TabsTrigger>
-              <TabsTrigger value="chat" className="flex items-center gap-2">
-                <MessageCircle className="w-4 h-4" />
-                Conversas
-              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -326,10 +321,6 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, user 
               ))
             )}
           </div>
-        </TabsContent>
-
-        <TabsContent value="chat" className="space-y-4">
-          <WhatsAppChat />
         </TabsContent>
         </Tabs>
       </main>
