@@ -80,16 +80,58 @@ export async function POST(req: NextRequest) {
         
         let content = "";
         const type = msg.type;
+        let metadata: {
+          mediaId: string;
+          mimeType: string;
+          caption?: string;
+          filename?: string;
+          voice?: boolean;
+        } | null = null;
 
         if (msg.type === "text") {
           content = msg.text.body;
         } else if (msg.type === "button") {
           content = msg.button.text;
         } else if (msg.type === "interactive") {
-           // Handle interactive messages if needed
-           content = "[Mensagem Interativa]";
+          content = "[Mensagem Interativa]";
+        } else if (msg.type === "image") {
+          content = msg.image.caption ? `📷 ${msg.image.caption}` : "📷 Foto";
+          metadata = {
+            mediaId: msg.image.id,
+            mimeType: msg.image.mime_type,
+            caption: msg.image.caption,
+          };
+        } else if (msg.type === "audio") {
+          content = msg.audio.voice ? "🎙️ Mensagem de Voz" : "🎵 Áudio";
+          metadata = {
+            mediaId: msg.audio.id,
+            mimeType: msg.audio.mime_type,
+            voice: msg.audio.voice,
+          };
+        } else if (msg.type === "document") {
+          content = msg.document.filename ? `📄 ${msg.document.filename}` : "📄 Documento";
+          metadata = {
+            mediaId: msg.document.id,
+            mimeType: msg.document.mime_type,
+            filename: msg.document.filename,
+            caption: msg.document.caption,
+          };
+        } else if (msg.type === "video") {
+          content = msg.video.caption ? `🎥 ${msg.video.caption}` : "🎥 Vídeo";
+          metadata = {
+            mediaId: msg.video.id,
+            mimeType: msg.video.mime_type,
+            caption: msg.video.caption,
+          };
         } else {
           content = `[Mídia: ${msg.type}]`;
+          const genericMedia = msg[msg.type];
+          if (genericMedia && genericMedia.id) {
+            metadata = {
+              mediaId: genericMedia.id,
+              mimeType: genericMedia.mime_type,
+            };
+          }
         }
 
         // Encontrar ou criar conversa
@@ -119,6 +161,7 @@ export async function POST(req: NextRequest) {
           type,
           direction: "inbound",
           status: "delivered",
+          metadata,
           createdAt: timestamp,
         });
 

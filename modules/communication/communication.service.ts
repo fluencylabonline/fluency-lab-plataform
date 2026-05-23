@@ -766,6 +766,57 @@ export class CommunicationService {
     // 2. Remove tudo que não for número
     return decrypted.replace(/\D/g, "");
   }
+
+  /**
+   * Busca os metadados de uma mídia e seu stream binário na Graph API da Meta.
+   */
+  async getWhatsAppMedia(mediaId: string): Promise<{ buffer: Buffer; mimeType: string } | null> {
+    try {
+      // 1. Buscar a URL temporária de download da mídia
+      const response = await fetch(
+        `https://graph.facebook.com/v20.0/${mediaId}`,
+        {
+          headers: {
+            "Authorization": `Bearer ${env.WHATSAPP_ACCESS_TOKEN}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.error(`[CommunicationService.getWhatsAppMedia] Error fetching media metadata for ID ${mediaId}:`, await response.json());
+        return null;
+      }
+
+      const metadata = await response.json() as { url: string; mime_type: string };
+      if (!metadata.url) {
+        console.error(`[CommunicationService.getWhatsAppMedia] No download URL returned for media ID ${mediaId}`);
+        return null;
+      }
+
+      // 2. Baixar o arquivo binário usando a URL temporária com a autorização da Meta
+      const mediaResponse = await fetch(metadata.url, {
+        headers: {
+          "Authorization": `Bearer ${env.WHATSAPP_ACCESS_TOKEN}`,
+        },
+      });
+
+      if (!mediaResponse.ok) {
+        console.error(`[CommunicationService.getWhatsAppMedia] Error downloading binary media from URL:`, mediaResponse.statusText);
+        return null;
+      }
+
+      const arrayBuffer = await mediaResponse.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      return {
+        buffer,
+        mimeType: metadata.mime_type,
+      };
+    } catch (error) {
+      console.error("[CommunicationService.getWhatsAppMedia] Error:", error);
+      return null;
+    }
+  }
 }
 
 
