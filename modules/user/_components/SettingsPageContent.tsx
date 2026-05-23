@@ -88,7 +88,10 @@ export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
           </TabsContent>
 
           <TabsContent value="notifications" className="mt-0">
-            <NotificationSettings initialPrefs={initialData.initialNotificationPrefs} />
+            <NotificationSettings 
+              initialPrefs={initialData.initialNotificationPrefs} 
+              role={initialData.user.role}
+            />
           </TabsContent>
 
           <TabsContent value="security" className="mt-0">

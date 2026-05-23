@@ -75,6 +75,7 @@ export const usersTable = pgTable("users", {
     roadmap: true,
     classes: true,
     marketing: false,
+    whatsapp: true,
   }),
 
   // Payment
@@ -161,6 +162,7 @@ export const notificationPrefsSchema = z.object({
   roadmap: z.boolean().default(true),
   classes: z.boolean().default(true),
   marketing: z.boolean().default(false),
+  whatsapp: z.boolean().default(true),
 });
 
 // Form Schemas

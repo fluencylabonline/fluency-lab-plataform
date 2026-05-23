@@ -58,6 +58,22 @@ export const markWhatsAppConversationAsReadAction = adminAction
     return { success: true };
   });
 
+export const updateWhatsAppContactNameAction = adminAction
+  .metadata({ name: "updateWhatsAppContactName" })
+  .schema(z.object({ conversationId: z.string(), name: z.string().min(1, "Nome não pode ser vazio") }))
+  .action(async ({ parsedInput }) => {
+    await communicationService.updateContactName(parsedInput.conversationId, parsedInput.name);
+    return { success: true };
+  });
+
+export const updateWhatsAppConversationLabelsAction = adminAction
+  .metadata({ name: "updateWhatsAppConversationLabels" })
+  .schema(z.object({ conversationId: z.string(), labels: z.array(z.any()) }))
+  .action(async ({ parsedInput }) => {
+    await communicationService.updateLabels(parsedInput.conversationId, parsedInput.labels);
+    return { success: true };
+  });
+
 export const sendWhatsAppTemplateAction = adminAction
   .metadata({ name: "sendWhatsAppTemplate" })
   .schema(z.object({

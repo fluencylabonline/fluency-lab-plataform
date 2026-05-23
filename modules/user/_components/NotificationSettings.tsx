@@ -4,15 +4,16 @@ import { useTransition } from "react";
 import { updateNotificationPrefsAction } from "@/modules/user/user.actions";
 import { notify } from "@/components/ui/toaster";
 import { Switch } from "@/components/ui/switch";
-import { Bell, Zap, Map as MapIcon, Calendar, Megaphone } from "lucide-react";
+import { Bell, Zap, Map as MapIcon, Calendar, Megaphone, MessageCircle } from "lucide-react";
 import type { NotificationPrefs } from "@/modules/user/user.schema";
 import { useTranslations } from "next-intl";
 
 interface NotificationSettingsProps {
   initialPrefs: NotificationPrefs;
+  role?: "admin" | "teacher" | "student" | "manager";
 }
 
-export function NotificationSettings({ initialPrefs }: NotificationSettingsProps) {
+export function NotificationSettings({ initialPrefs, role }: NotificationSettingsProps) {
   const t = useTranslations("Settings");
   const tc = useTranslations("Common");
   const [isPending, startTransition] = useTransition();
@@ -112,6 +113,25 @@ export function NotificationSettings({ initialPrefs }: NotificationSettingsProps
             disabled={isPending}
           />
         </div>
+
+        {(role === "admin" || role === "manager") && (
+          <div className="flex items-center justify-between space-x-2">
+            <div className="flex flex-col space-y-1">
+              <div className="flex items-center gap-2 font-bold">
+                <MessageCircle className="w-4 h-4 text-green-500" />
+                {t("notifications.whatsapp")}
+              </div>
+              <span className="text-sm text-muted-foreground">
+                {t("notifications.whatsappDesc")}
+              </span>
+            </div>
+            <Switch
+              checked={initialPrefs.whatsapp ?? true}
+              onCheckedChange={(val) => handleToggle("whatsapp", val)}
+              disabled={isPending}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

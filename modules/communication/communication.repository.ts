@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { whatsappConversationsTable, whatsappMessagesTable } from "./communication.schema";
+import { usersTable } from "../user/user.schema";
 import { eq, desc } from "drizzle-orm";
 
 export const communicationRepository = {
@@ -58,12 +59,23 @@ export const communicationRepository = {
   },
 
   async getConversations() {
-    return db.query.whatsappConversationsTable.findMany({
-      orderBy: [desc(whatsappConversationsTable.lastMessageAt)],
-      with: {
-        // Se houver relação definida no schema (precisaria adicionar relations)
-      }
-    });
+    return db
+      .select({
+        id: whatsappConversationsTable.id,
+        waId: whatsappConversationsTable.waId,
+        studentId: whatsappConversationsTable.studentId,
+        contactName: whatsappConversationsTable.contactName,
+        labels: whatsappConversationsTable.labels,
+        lastMessageContent: whatsappConversationsTable.lastMessageContent,
+        lastMessageAt: whatsappConversationsTable.lastMessageAt,
+        unreadCount: whatsappConversationsTable.unreadCount,
+        createdAt: whatsappConversationsTable.createdAt,
+        updatedAt: whatsappConversationsTable.updatedAt,
+        studentName: usersTable.name,
+      })
+      .from(whatsappConversationsTable)
+      .leftJoin(usersTable, eq(whatsappConversationsTable.studentId, usersTable.id))
+      .orderBy(desc(whatsappConversationsTable.lastMessageAt));
   },
 
   async getMessages(conversationId: string, limit = 50) {

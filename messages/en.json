@@ -2064,7 +2064,9 @@
       "roadmap": "Roadmap Alerts",
       "roadmapDesc": "Notify when there are new or overdue lessons.",
       "streak": "Streak Reminders",
-      "streakDesc": "Notify when your streak is at risk (after 8 PM)."
+      "streakDesc": "Notify when your streak is at risk (after 8 PM).",
+      "whatsapp": "Chat Notifications",
+      "whatsappDesc": "Receive push alerts when new chat messages are received."
     },
     "notificationsDesc": "Choose which reminders and alerts you want to receive.",
     "profilePlaceholderDesc": "Soon you'll be able to edit your bio, links, and profile picture here.",

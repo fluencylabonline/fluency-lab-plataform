@@ -9,6 +9,8 @@ export const whatsappConversationsTable = pgTable("whatsapp_conversations", {
   id: uuid("id").primaryKey().defaultRandom(),
   waId: text("wa_id").notNull().unique(), // O ID do WhatsApp (ex: 55119...)
   studentId: text("student_id").references(() => usersTable.id),
+  contactName: text("contact_name"),
+  labels: jsonb("labels").default([]),
   lastMessageContent: text("last_message_content"),
   lastMessageAt: timestamp("last_message_at"),
   unreadCount: integer("unread_count").notNull().default(0),

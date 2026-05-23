@@ -20,6 +20,7 @@ export default async function TeacherSettingsPage() {
     roadmap: true,
     classes: true,
     marketing: false,
+    whatsapp: true,
   };
 
   const [hasPassword, firebaseUser] = await Promise.all([

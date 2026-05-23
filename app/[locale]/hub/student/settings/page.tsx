@@ -20,6 +20,7 @@ export default async function SettingsPage() {
     roadmap: true,
     classes: true,
     marketing: false,
+    whatsapp: true,
   };
 
   const hasPassword = await checkUserHasPassword(sessionUser.id);

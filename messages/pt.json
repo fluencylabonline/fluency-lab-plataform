@@ -2064,7 +2064,9 @@
       "roadmap": "Alertas de Roadmap",
       "roadmapDesc": "Avisar quando houver novas lições disponíveis ou atrasadas.",
       "streak": "Lembretes de Streak",
-      "streakDesc": "Avisar quando sua ofensiva estiver em risco (após as 20h)."
+      "streakDesc": "Avisar quando sua ofensiva estiver em risco (após as 20h).",
+      "whatsapp": "Notificações do Chat",
+      "whatsappDesc": "Receber alertas push quando novas mensagens forem recebidas."
     },
     "notificationsDesc": "Escolha quais lembretes e alertas você deseja receber.",
     "profilePlaceholderDesc": "Em breve você poderá editar sua bio, links e foto de perfil aqui.",

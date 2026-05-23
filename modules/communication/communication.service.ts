@@ -623,6 +623,14 @@ export class CommunicationService {
     return communicationRepository.markAsRead(conversationId);
   }
 
+  async updateContactName(conversationId: string, name: string) {
+    return communicationRepository.updateConversation(conversationId, { contactName: name });
+  }
+
+  async updateLabels(conversationId: string, labels: unknown[]) {
+    return communicationRepository.updateConversation(conversationId, { labels });
+  }
+
   /**
    * Busca templates na Graph API da Meta.
    */

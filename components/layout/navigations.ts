@@ -12,6 +12,7 @@ import { WavesLadderIcon } from "@/components/animated-icons/waves-ladder";
 import { MenuItemType } from "@/components/layout/types";
 import { UserRoles, hasPermission, type UserRoleInfo } from "@/lib/rbac";
 import { FileTextIcon } from "@/components/animated-icons/file-text";
+import { MessageSquareIcon } from "@/components/animated-icons/message-square";
 
 const adminItems: MenuItemType[] = [
     {
@@ -46,6 +47,7 @@ const adminItems: MenuItemType[] = [
         iconProps: { size: 20 },
         permission: "payment.manage",
     },
+    
     {
         href: "/admin/contracts",
         label: "Contratos",
@@ -61,6 +63,13 @@ const adminItems: MenuItemType[] = [
         Icon: ClapIcon,
         iconProps: { size: 20 },
         permission: "material.view",
+    },
+    {
+        href: "/admin/conversas",
+        label: "Conversas",
+        labelKey: "chat",
+        Icon: MessageSquareIcon,
+        iconProps: { size: 20 },
     },
     {
         href: "/admin/communication",
@@ -186,6 +195,14 @@ const managerItems: MenuItemType[] = [
         label: "Usuários",
         labelKey: "users",
         Icon: PeopleIcon,
+        iconProps: { size: 20 },
+        permission: "student.support",
+    },
+    {
+        href: "/manager/conversas",
+        label: "Conversas",
+        labelKey: "chat",
+        Icon: MessageSquareIcon,
         iconProps: { size: 20 },
         permission: "student.support",
     },

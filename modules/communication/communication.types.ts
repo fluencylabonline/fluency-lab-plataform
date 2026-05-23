@@ -68,10 +68,19 @@ export interface WhatsAppTemplateListResponse {
   };
 }
 
+export interface WhatsAppLabel {
+  id: string;
+  name: string;
+  color: string;
+}
+
 export interface WhatsAppConversation {
   id: string;
   waId: string;
   studentId: string | null;
+  studentName?: string | null;
+  contactName?: string | null;
+  labels?: WhatsAppLabel[] | null;
   lastMessageContent: string | null;
   lastMessageAt: Date | string | null;
   unreadCount: number;

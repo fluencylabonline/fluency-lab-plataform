@@ -24,7 +24,7 @@ import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { getWhatsAppTemplatesAction, deleteWhatsAppTemplateAction } from "@/modules/communication/communication.actions";
 import { notify } from "@/components/ui/toaster";
-import { WhatsAppChat } from "@/app/[locale]/hub/admin/communication/_components/WhatsAppChat";
+import { WhatsAppChat } from "@/modules/communication/_components/WhatsAppChat";
 import { SendWhatsAppMessageVault } from "@/app/[locale]/hub/admin/communication/_components/SendWhatsAppMessageVault";
 import { 
   Vault, 
