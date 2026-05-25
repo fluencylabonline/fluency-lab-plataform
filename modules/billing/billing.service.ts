@@ -756,11 +756,12 @@ export const billingService = {
       });
 
       // WhatsApp
-      if (student.cellphone) {
+      if (student.cellphone && inst.pixPayload) {
         await communicationService.sendPaymentOverdueWhatsApp({
           cellphone: student.cellphone,
           studentName: student.name,
           amount: inst.amount,
+          pixPayload: inst.pixPayload,
         });
       }
     }

@@ -405,16 +405,16 @@ export class CommunicationService {
 
       return await this.sendWhatsAppTemplate({
         to: data.cellphone,
-        templateName: "payment_reminder",
+        templateName: "payment_reminder_v2",
         languageCode,
         components: [
           {
             type: "body",
             parameters: [
-              { type: "text", parameter_name: "student_name", text: data.studentName },
-              { type: "text", parameter_name: "amount", text: amountStr },
-              { type: "text", parameter_name: "due_date", text: dateStr },
-              { type: "text", parameter_name: "pix_payload", text: data.pixPayload },
+              { type: "text", text: data.studentName },
+              { type: "text", text: amountStr },
+              { type: "text", text: dateStr },
+              { type: "text", text: data.pixPayload },
             ]
           }
         ]
@@ -426,13 +426,13 @@ export class CommunicationService {
 
   /**
    * Envia um alerta de fatura em atraso via WhatsApp.
-   * TODO: preciso criar o template ainda
    */
   async sendPaymentOverdueWhatsApp(
     data: {
       cellphone: string;
       studentName: string;
       amount: number;
+      pixPayload: string;
     },
     explicitLocale?: "pt" | "en"
   ) {
@@ -447,14 +447,15 @@ export class CommunicationService {
 
       return await this.sendWhatsAppTemplate({
         to: data.cellphone,
-        templateName: "payment_overdue",
+        templateName: "payment_overdue_v2",
         languageCode,
         components: [
           {
             type: "body",
             parameters: [
-              { type: "text", parameter_name: "student_name", text: data.studentName },
-              { type: "text", parameter_name: "amount", text: amountStr },
+              { type: "text", text: data.studentName },
+              { type: "text", text: amountStr },
+              { type: "text", text: data.pixPayload },
             ]
           }
         ]
@@ -466,7 +467,6 @@ export class CommunicationService {
 
   /**
    * Envia mensagem de boas-vindas e definição de senha via WhatsApp.
-   * Template: "Hi {{texto}}, Your new account has been created successfully. Please verify {{texto}}..."
    */
   async sendWelcomeWhatsApp(
     data: {
@@ -486,19 +486,18 @@ export class CommunicationService {
 
       // O link final que o botão do WhatsApp vai abrir
       // Nota: No dashboard da Meta, o botão deve estar configurado como URL dinâmica.
-      // Ex: https://seu-app.com/create-password?oobCode={{1}}
-      const dynamicUrlSuffix = `?oobCode=${oobCode}`;
+      // Ex: https://fluency-lab-plataform.vercel.app/{{1}}
+      const dynamicUrlSuffix = `create-password?oobCode=${oobCode}`;
 
       return await this.sendWhatsAppTemplate({
         to: data.cellphone,
-        templateName: "welcome", // Nome do modelo pronto da Meta
+        templateName: "welcome_first", // Nome do modelo pronto da Meta
         languageCode,
         components: [
           {
             type: "body",
             parameters: [
-              { type: "text", text: data.name },
-              { type: "text", text: locale === "en" ? "your account" : "sua conta" },
+              { type: "text", parameter_name: "name", text: data.name },
             ]
           },
           {
