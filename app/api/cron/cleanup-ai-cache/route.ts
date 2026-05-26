@@ -6,11 +6,11 @@ import { NextResponse } from "next/server";
  * Removes entries where expires_at < now.
  */
 export async function POST(req: Request) {
-  // Simple check for authorization if CRON_SECRET is set
   const authHeader = req.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
+  const cronSecret = (process.env.CRON_SECRET ?? "").trim();
+  const provided = (authHeader ?? "").trim();
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (cronSecret && provided !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
