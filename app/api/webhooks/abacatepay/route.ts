@@ -15,20 +15,41 @@ export async function POST(req: Request) {
   const rawBody = await req.text();
   const webhookSecret = env.ABACATEPAY_WEBHOOK_SECRET;
 
-  // Calculate expected signatures
-  const hmacBase64 = crypto.createHmac("sha256", webhookSecret).update(rawBody).digest("base64");
-  const hmacHex = crypto.createHmac("sha256", webhookSecret).update(rawBody).digest("hex");
+  // Calculate expected raw Buffer directly
+  const expectedBuffer = crypto.createHmac("sha256", webhookSecret).update(rawBody).digest();
+  
+  let sigBuffer: Buffer;
+  try {
+    // Attempt to parse based on length and hexadecimal characters
+    if (signature.length === 64 && /^[0-9a-fA-F]+$/.test(signature)) {
+      sigBuffer = Buffer.from(signature, "hex");
+    } else {
+      sigBuffer = Buffer.from(signature, "base64");
+    }
+  } catch (e) {
+    console.error("[AbacatePay Webhook] Failed to parse signature from header:", e);
+    return NextResponse.json({ error: "Invalid signature format" }, { status: 401 });
+  }
 
-  const sigBuffer = Buffer.from(signature);
-  const isBase64Valid =
-    sigBuffer.length === Buffer.from(hmacBase64).length &&
-    crypto.timingSafeEqual(sigBuffer, Buffer.from(hmacBase64));
-  const isHexValid =
-    sigBuffer.length === Buffer.from(hmacHex).length &&
-    crypto.timingSafeEqual(sigBuffer, Buffer.from(hmacHex));
+  const isValid =
+    sigBuffer.length === expectedBuffer.length &&
+    crypto.timingSafeEqual(sigBuffer, expectedBuffer);
 
-  if (!isBase64Valid && !isHexValid) {
-    console.error("[AbacatePay Webhook] Unauthorized: Invalid signature.");
+  if (!isValid) {
+    const maskedSecret = webhookSecret 
+      ? `${webhookSecret.substring(0, 4)}...${webhookSecret.substring(webhookSecret.length - 4)}` 
+      : "MISSING";
+    const expectedHex = expectedBuffer.toString("hex");
+    const expectedBase64 = expectedBuffer.toString("base64");
+
+    console.error(
+      `[AbacatePay Webhook] Unauthorized: Invalid signature.\n` +
+      `- Secret Mask: ${maskedSecret} (len: ${webhookSecret?.length})\n` +
+      `- Received Signature: ${signature} (len: ${signature.length})\n` +
+      `- Expected Hex: ${expectedHex}\n` +
+      `- Expected Base64: ${expectedBase64}\n` +
+      `- Raw Body Len: ${rawBody.length}`
+    );
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
