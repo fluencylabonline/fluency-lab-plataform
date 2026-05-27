@@ -216,7 +216,23 @@
     "labels": {
       "confirmPassword": "Confirm password",
       "newPassword": "New password",
-      "currentPassword": "Current password"
+      "currentPassword": "Current password",
+      "strength": "Password strength:"
+    },
+    "requirements": {
+      "minLength": "Minimum of 8 characters",
+      "uppercase": "One uppercase letter (A-Z)",
+      "lowercase": "One lowercase letter (a-z)",
+      "number": "At least one number (0-9)",
+      "special": "One special character (e.g. @, #, $)"
+    },
+    "strength": {
+      "empty": "Empty password",
+      "veryWeak": "Very Weak",
+      "weak": "Weak",
+      "medium": "Medium",
+      "strong": "Strong",
+      "veryStrong": "Very Strong"
     },
     "loading": "Loading...",
     "logoutSuccess": "You have been signed out.",

@@ -216,7 +216,23 @@
     "labels": {
       "confirmPassword": "Confirmar senha",
       "newPassword": "Nova senha",
-      "currentPassword": "Senha atual"
+      "currentPassword": "Senha atual",
+      "strength": "Força da senha:"
+    },
+    "requirements": {
+      "minLength": "Mínimo de 8 caracteres",
+      "uppercase": "Uma letra maiúscula (A-Z)",
+      "lowercase": "Uma letra minúscula (a-z)",
+      "number": "Pelo menos um número (0-9)",
+      "special": "Um caractere especial (ex: @, #, $)"
+    },
+    "strength": {
+      "empty": "Senha vazia",
+      "veryWeak": "Muito Fraca",
+      "weak": "Fraca",
+      "medium": "Média",
+      "strong": "Forte",
+      "veryStrong": "Muito Forte"
     },
     "loading": "Carregando...",
     "logoutSuccess": "Você saiu da plataforma.",
