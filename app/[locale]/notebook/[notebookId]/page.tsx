@@ -66,6 +66,7 @@ export default async function NotebookPage({ params }: NotebookPageProps) {
       userRole={user.role}
       userColor={colorFromString(user.id)}
       userPhotoUrl={user.photoUrl}
+      user={user}
     />
   );
 }

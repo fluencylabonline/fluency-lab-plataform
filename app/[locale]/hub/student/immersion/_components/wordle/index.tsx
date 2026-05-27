@@ -12,11 +12,11 @@ import { WordleBoard } from "./WordleBoard";
 import { WordDetailsModal } from "../WordDetailsModal";
 import { WordleHistoryModal } from "./WordleHistoryModal";
 import { useWordleGame, WordleGameProps } from "./useWordleGame";
-import { Spinner } from "@/components/ui/spinner";
 import { ImmersionButton } from "../ImmersionButton";
 import { Header } from "@/components/layout/header";
 import { History } from "lucide-react";
 import { LanguageSelect } from "../LanguageSelect";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function WordleGame(props: WordleGameProps) {
   const {
@@ -44,11 +44,8 @@ export default function WordleGame(props: WordleGameProps) {
     openDetails,
   } = useWordleGame(props);
 
-  if (loading) return (
-    <div className="flex-1 flex items-center justify-center">
-      <Spinner />
-    </div>
-  );
+  if (loading) return <LoadingSpinner />;
+
 
   const headerActions = [
     {
@@ -81,6 +78,7 @@ export default function WordleGame(props: WordleGameProps) {
           title="Wordle" 
           backHref="/hub/student/immersion"
           actions={headerActions}
+          className="contents"
         />
         <div className="container flex-1 flex flex-col items-center justify-center gap-4 p-4 text-center">
           <div className="text-3xl">🧩</div>

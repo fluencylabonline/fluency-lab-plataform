@@ -11,12 +11,12 @@ import {
 import { Keyboard } from "../Keyboard";
 import { WordLadderBoard } from "./WordLadderBoard";
 import { WordLadderOptionsModal } from "./WordLadderOptionsModal";
-import { Spinner } from "@/components/ui/spinner";
 import { ImmersionButton } from "../ImmersionButton";
 import { Header } from "@/components/layout/header";
 import { LanguageSelect } from "../LanguageSelect";
 import { useWordLadderGame, WordLadderGameProps } from "./useWordLadderGame";
 import { WordDetailsModal } from "../WordDetailsModal";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function WordLadderGame(props: WordLadderGameProps) {
   const {
@@ -52,11 +52,7 @@ export default function WordLadderGame(props: WordLadderGameProps) {
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  if (loading) return (
-    <div className="flex-1 flex items-center justify-center">
-      <Spinner />
-    </div>
-  );
+  if (loading) return <LoadingSpinner />;
 
   const headerActions = [
     {
@@ -89,6 +85,8 @@ export default function WordLadderGame(props: WordLadderGameProps) {
           title="Word Ladder" 
           backHref="/hub/student/immersion"
           actions={headerActions}
+          className="contents"
+          
         />
         <div className="container flex-1 flex flex-col items-center justify-center gap-4 p-4 text-center">
           <div className="text-3xl">🧩</div>

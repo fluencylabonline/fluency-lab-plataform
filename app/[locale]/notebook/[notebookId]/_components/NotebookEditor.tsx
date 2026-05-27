@@ -54,6 +54,12 @@ interface NotebookEditorProps {
   userColor: string;
   /** Optional: used by Stream SDK for avatar rendering */
   userPhotoUrl?: string | null;
+  user: {
+    name: string | null;
+    email: string | null;
+    photoUrl?: string | null;
+    role?: string;
+  };
 }
 
 export function NotebookEditor({
@@ -64,6 +70,7 @@ export function NotebookEditor({
   userRole,
   userColor,
   userPhotoUrl,
+  user,
 }: NotebookEditorProps) {
   const toolbarRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<Editor | null>(null);
@@ -186,6 +193,7 @@ export function NotebookEditor({
           toolbarRef={toolbarRef}
           backHref={backHref}
           cursorY={rect.y}
+          user={user}
         />
 
         <EditorContent

@@ -27,14 +27,24 @@ import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon";
 import { LinkIcon } from "@/components/tiptap-icons/link-icon";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { useWindowSize } from "@/hooks/use-window-size";
+import { RoleGuard } from "@/components/ui/role-guard";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
+
+import { UserMenu } from "@/components/layout/user-menu";
 
 interface NotebookToolbarProps {
   toolbarRef: RefObject<HTMLDivElement | null>;
   backHref: string;
   cursorY: number;
+  user: {
+    name: string | null;
+    email: string | null;
+    photoUrl?: string | null;
+    role?: string;
+  };
 }
 
-export function NotebookToolbar({ toolbarRef, backHref, cursorY }: NotebookToolbarProps) {
+export function NotebookToolbar({ toolbarRef, backHref, cursorY, user }: NotebookToolbarProps) {
   const isMobile = useIsBreakpoint();
   const { height } = useWindowSize();
   const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">("main");
@@ -83,11 +93,15 @@ export function NotebookToolbar({ toolbarRef, backHref, cursorY }: NotebookToolb
           <ToolbarGroup>
             <TextAlignDropdownMenu modal={false} />
           </ToolbarGroup>
+          <RoleGuard roles={"teacher"}>
           <ToolbarSeparator />
-          <ToolbarGroup>
-            <ImageUploadButton text="Add" />
-          </ToolbarGroup>
+            <ToolbarGroup>
+              <ImageUploadButton text="Add" />
+            </ToolbarGroup>
+          </RoleGuard>
           <Spacer />
+          <ThemeSwitcher />
+          <UserMenu user={user} />
         </>
       ) : (
         <>
