@@ -1,7 +1,7 @@
 "use server";
 
-import { adminAction, protectedAction } from "@/lib/safe-action";
-import { createPlanSchema, createSubscriptionSchema, updatePlanSchema, updateInstallmentSchema } from "./billing.schema";
+import { adminAction, protectedAction, managerAction } from "@/lib/safe-action";
+import { createPlanSchema, createSubscriptionSchema, updatePlanSchema, updateInstallmentSchema, changeStudentPlanSchema } from "./billing.schema";
 import { billingService } from "./billing.service";
 import { billingRepository } from "./billing.repository";
 import { z } from "zod";
@@ -199,6 +199,22 @@ export const syncInstallmentPaymentAction = protectedAction
     } catch (error) {
       console.error("[syncInstallmentPaymentAction] Error:", error);
       const errorMessage = error instanceof Error ? error.message : "Erro ao atualizar status de pagamento";
+      return { success: false, error: errorMessage };
+    }
+  });
+
+export const changeStudentPlanAction = managerAction
+  .metadata({ name: "changeStudentPlan" })
+  .inputSchema(changeStudentPlanSchema)
+  .action(async ({ parsedInput }) => {
+    try {
+      await billingService.changeStudentPlan(parsedInput.studentId, parsedInput.planId);
+      revalidatePath("/hub/admin/users");
+      revalidatePath("/hub/manager/users");
+      return { success: true };
+    } catch (error) {
+      console.error("[changeStudentPlanAction] Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro ao alterar plano do estudante";
       return { success: false, error: errorMessage };
     }
   });

@@ -46,6 +46,7 @@ interface PlanVaultProps {
 
 const clientPlanSchema = createPlanSchema.extend({
   price: z.number().positive({ message: "O preço deve ser maior que zero" }),
+  effectiveDate: z.string().optional().nullable(),
 });
 
 type PlanFormValues = z.infer<typeof clientPlanSchema>;
@@ -63,6 +64,7 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
       language: "",
       classesPerWeek: 2,
       description: "",
+      effectiveDate: "",
     },
   });
 
@@ -77,6 +79,7 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
         language: plan.language || "",
         classesPerWeek: plan.classesPerWeek || 2,
         description: plan.description || "",
+        effectiveDate: "",
       });
     } else if (!plan && open) {
       reset({
@@ -86,6 +89,7 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
         language: "",
         classesPerWeek: 2,
         description: "",
+        effectiveDate: "",
       });
     }
   }, [plan, reset, open]);
@@ -217,6 +221,30 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
             >
               <VaultInput {...register("description")} />
             </VaultField>
+
+            {isEditing && (
+              <div className="flex flex-col gap-4 mt-2">
+                <div className="card p-4 border border-amber-200 dark:border-amber-900/30 bg-amber-50/50 dark:bg-amber-950/10 text-amber-800 dark:text-amber-300 text-xs rounded-md leading-relaxed flex flex-col gap-2">
+                  <p className="font-semibold flex items-center gap-1.5 text-sm text-amber-900 dark:text-amber-200">
+                    ⚠️ Aviso de Faturamento Global
+                  </p>
+                  <p>
+                    Alterar o preço mensal deste plano irá reajustar automaticamente todas as parcelas futuras pendentes de todos os alunos associados a ele. As parcelas passadas que já foram pagas continuarão intactas para fins contábeis e de auditoria. Um e-mail de aviso previsto em contrato será enviado aos alunos afetados.
+                  </p>
+                </div>
+
+                <VaultField
+                  label="A partir de quando o novo valor deve começar a valer?"
+                  error={errors.effectiveDate?.message}
+                >
+                  <VaultInput
+                    type="date"
+                    {...register("effectiveDate")}
+                    placeholder="Selecione a data de vigência do novo valor"
+                  />
+                </VaultField>
+              </div>
+            )}
           </VaultBody>
 
           <VaultFooter>

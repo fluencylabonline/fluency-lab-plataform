@@ -26,6 +26,8 @@ import {
   ContractCancelledEmail,
   ContractExpiringEmail,
   ContractRenewedEmail,
+  PlanPriceAdjustmentEmail,
+  PlanChangedEmail,
 } from "./templates/ContractStatusEmails";
 import { ScheduleAlertEmail } from "./templates/ScheduleAlertEmail";
 import { CertificateEmail } from "./templates/CertificateEmail";
@@ -338,6 +340,34 @@ export class CommunicationService {
       });
     } catch (error) {
       console.error("[CommunicationService.sendContractRenewedEmail] Error:", error);
+    }
+  }
+
+  async sendPlanPriceAdjustmentEmail(email: string, name: string, planName: string, newAmount: number) {
+    try {
+      await this.sendEmail({
+        to: email,
+        subject: "🖋️ Aviso de Reajuste de Mensalidade - Fluency Lab",
+        template: React.createElement(PlanPriceAdjustmentEmail, { name, planName, newAmount }),
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendPlanPriceAdjustmentEmail] Error:", error);
+    }
+  }
+
+  async sendPlanChangedEmail(
+    email: string,
+    name: string,
+    data: { oldPlanName: string; newPlanName: string; newAmount: number; classesPerWeek: number }
+  ) {
+    try {
+      await this.sendEmail({
+        to: email,
+        subject: "🚀 Seu Plano de Estudos foi Atualizado! - Fluency Lab",
+        template: React.createElement(PlanChangedEmail, { name, ...data }),
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendPlanChangedEmail] Error:", error);
     }
   }
 

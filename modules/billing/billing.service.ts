@@ -7,7 +7,7 @@ import { addMonths, startOfDay, setDate, addDays, endOfDay, endOfMonth, getDate,
 import { env } from "@/env";
 import { db } from "@/lib/db";
 import { Installment, installmentsTable, Subscription, abacatePayWebhookSchema, abacatePayMetadataSchema, subscriptionsTable } from "./billing.schema";
-import { eq, asc, and } from "drizzle-orm";
+import { eq, asc, and, ne, gte } from "drizzle-orm";
 import { decrypt } from "@/lib/cryptography";
 import { revalidatePath } from "next/cache";
 
@@ -33,24 +33,93 @@ export const billingService = {
     });
   },
 
-  async updatePlan(id: string, data: Partial<{ name: string; price: number; durationMonths: number; language: string; classesPerWeek: number; description: string; isActive: boolean }>) {
+  async updatePlan(
+    id: string,
+    data: Partial<{
+      name: string;
+      price: number;
+      durationMonths: number;
+      language: string;
+      classesPerWeek: number;
+      description: string;
+      isActive: boolean;
+      effectiveDate?: string | null;
+    }>
+  ) {
     const plan = await billingRepository.findPlanById(id);
     if (!plan) throw new Error("Plano não encontrado");
 
+    const { effectiveDate, ...fieldsToUpdate } = data;
+
     // Sync with AbacatePay if relevant fields changed
-    if (plan.abacatePayProductId && (data.name || data.price)) {
+    if (plan.abacatePayProductId && (fieldsToUpdate.name || fieldsToUpdate.price)) {
       try {
         // @ts-expect-error - Assuming update exists in SDK or will be handled
         await abacate.products.update(plan.abacatePayProductId, {
-          name: data.name || plan.name,
-          price: data.price || plan.price,
+          name: fieldsToUpdate.name || plan.name,
+          price: fieldsToUpdate.price || plan.price,
         });
       } catch (error) {
         console.error("Failed to update AbacatePay product:", error);
       }
     }
 
-    return billingRepository.updatePlan(id, data);
+    // Se o preço foi alterado, faz o reajuste global das parcelas futuras
+    if (fieldsToUpdate.price && fieldsToUpdate.price !== plan.price) {
+      const newPrice = fieldsToUpdate.price;
+      
+      // Data a partir da qual o reajuste deve começar
+      const limitDate = effectiveDate 
+        ? startOfDay(new Date(effectiveDate)) 
+        : startOfDay(new Date());
+
+      // Busca todas as assinaturas ativas associadas a esse plano
+      const activeSubs = await db.query.subscriptionsTable.findMany({
+        where: and(
+          eq(subscriptionsTable.planId, id),
+          eq(subscriptionsTable.status, "active")
+        ),
+        with: { student: true }
+      });
+
+      for (const sub of activeSubs) {
+        // Buscar parcelas pendentes da assinatura que vencem no dia ou após a data limite
+        const futureInstallments = await db.query.installmentsTable.findMany({
+          where: and(
+            eq(installmentsTable.subscriptionId, sub.id),
+            ne(installmentsTable.status, "paid"),
+            gte(installmentsTable.dueDate, limitDate)
+          )
+        });
+
+        for (const inst of futureInstallments) {
+          await db.update(installmentsTable)
+            .set({
+              amount: newPrice,
+              abacatePayBillingId: null,
+              pixPayload: null,
+              pixImage: null,
+            })
+            .where(eq(installmentsTable.id, inst.id));
+        }
+
+        // Enviar email apenas avisando do ajuste previsto em contrato
+        if (sub.student?.email) {
+          try {
+            await communicationService.sendPlanPriceAdjustmentEmail(
+              sub.student.email,
+              sub.student.name,
+              plan.name,
+              newPrice
+            );
+          } catch (err) {
+            console.error(`Failed to send price adjustment email to student ${sub.studentId}:`, err);
+          }
+        }
+      }
+    }
+
+    return billingRepository.updatePlan(id, fieldsToUpdate);
   },
 
   // 2. Create Student Subscription
@@ -240,6 +309,62 @@ export const billingService = {
 
   async updateSubscription(id: string, data: Partial<Subscription>) {
     return billingRepository.updateSubscription(id, data);
+  },
+
+  async changeStudentPlan(studentId: string, newPlanId: string) {
+    const activeSub = await billingRepository.findActiveSubscriptionByStudent(studentId);
+    if (!activeSub) throw new Error("O estudante não possui uma assinatura ativa");
+
+    const newPlan = await billingRepository.findPlanById(newPlanId);
+    if (!newPlan) throw new Error("O novo plano selecionado não existe");
+
+    const oldPlanName = activeSub.plan?.name || "Plano Anterior";
+    const newPrice = newPlan.price;
+
+    await db.transaction(async (tx) => {
+      // 1. Update active subscription
+      await tx.update(subscriptionsTable)
+        .set({ planId: newPlanId })
+        .where(eq(subscriptionsTable.id, activeSub.id));
+
+      // 2. Get all unpaid future installments of the subscription
+      const futureInstallments = await tx.query.installmentsTable.findMany({
+        where: and(
+          eq(installmentsTable.subscriptionId, activeSub.id),
+          ne(installmentsTable.status, "paid")
+        )
+      });
+
+      // 3. Update future installments to the new price and clear AbacatePay billing ID
+      for (const inst of futureInstallments) {
+        await tx.update(installmentsTable)
+          .set({
+            amount: newPrice,
+            abacatePayBillingId: null,
+            pixPayload: null,
+            pixImage: null,
+          })
+          .where(eq(installmentsTable.id, inst.id));
+      }
+    });
+
+    // 4. Update user's assignedPlanId
+    await userService.updateUser(studentId, { assignedPlanId: newPlanId });
+
+    // 5. Send notification to student via email only
+    const student = await userService.getUser(studentId);
+    if (student?.email) {
+      try {
+        await communicationService.sendPlanChangedEmail(student.email, student.name, {
+          oldPlanName,
+          newPlanName: newPlan.name,
+          newAmount: newPrice,
+          classesPerWeek: newPlan.classesPerWeek || 1,
+        });
+      } catch (error) {
+        console.error("[changeStudentPlan] Failed to send email:", error);
+      }
+    }
   },
 
   // Helper to generate the actual AbacatePay billing for an installment

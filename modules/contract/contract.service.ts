@@ -294,19 +294,35 @@ export const contractService = {
     const oldInstance = await contractRepository.findInstanceById(instanceId);
     if (!oldInstance) throw new Error("Contrato original não encontrado.");
 
-    // Busca versão mais recente do template do mesmo tipo/região
+    const studentId = oldInstance.userId;
+    const oldSubscription = await billingService.getActiveSubscription(studentId);
+    if (!oldSubscription) {
+      throw new Error("Nenhuma assinatura ativa encontrada para renovação.");
+    }
+
+    // 1. Marca a assinatura antiga como concluída ("finished")
+    await billingService.updateSubscription(oldSubscription.id, { status: "finished" });
+
+    // 2. Cria uma NOVA assinatura idêntica para o novo ciclo de vigência
+    // Usando o mesmo planId (que pode ser o plano reajustado ou migrado do estudante) e o mesmo dia de vencimento
+    const newSubscription = await billingService.createSubscription(
+      studentId,
+      oldSubscription.planId,
+      oldSubscription.dueDay
+    );
+
+    // 3. Busca a versão mais recente do template do contrato
     const template = await contractRepository.findActiveTemplateByType(
       oldInstance.template.type, 
       oldInstance.template.region
     );
     if (!template) throw new Error("Nenhum template ativo encontrado para renovação.");
 
-    // Cria nova instância
-    // Se for auto, já nasce assinada com os dados do snapshot anterior
+    // 4. Cria a nova instância de contrato vinculada ao ID da nova assinatura gerada
     const newInstance = await contractRepository.insertInstance({
       templateId: template.id,
-      userId: oldInstance.userId,
-      subscriptionId: oldInstance.subscriptionId,
+      userId: studentId,
+      subscriptionId: newSubscription.id, // Vínculo correto com o novo ciclo!
       parentInstanceId: oldInstance.id,
       status: isAuto ? "signed" : "pending",
       autoRenew: oldInstance.autoRenew,

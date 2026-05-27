@@ -27,6 +27,7 @@ import { StudentCurriculumTab } from "./userDetails/StudentCurriculumTab";
 import { VideoCallsTab } from "./userDetails/VideoCallsTab";
 import { ActionsTab } from "./userDetails/ActionsTab";
 import { CertificateTab } from "./userDetails/CertificateTab";
+import { StudentPlanTab } from "./userDetails/StudentPlanTab";
 import { Header } from "@/components/layout/header";
 import type { CallSession } from "../../call/call.schema";
 
@@ -277,6 +278,15 @@ export function UserDetailsClient({
                 Certificado
               </TabsTrigger>
             )}
+
+            {user.role === "student" && (isAdmin || currentUser.role === "manager") && (
+              <TabsTrigger
+                value="plan"
+                className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
+              >
+                Plano
+              </TabsTrigger>
+            )}
           </TabsList>
         </div>
 
@@ -358,6 +368,16 @@ export function UserDetailsClient({
         {user.role === "student" && (isAdmin || currentUser.role === "manager") && (
           <TabsContent value="certificate" className="mt-4">
             <CertificateTab user={user} />
+          </TabsContent>
+        )}
+
+        {user.role === "student" && (isAdmin || currentUser.role === "manager") && (
+          <TabsContent value="plan" className="mt-4">
+            <StudentPlanTab
+              user={user}
+              activeSubscription={activeSubscription}
+              isAdmin={isAdmin || currentUser.role === "manager"}
+            />
           </TabsContent>
         )}
       </Tabs>

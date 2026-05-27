@@ -126,6 +126,12 @@ export const createPlanSchema = z.object({
 
 export const updatePlanSchema = createPlanSchema.partial().extend({
   id: z.uuid(),
+  effectiveDate: z.string().optional().nullable(),
+});
+
+export const changeStudentPlanSchema = z.object({
+  studentId: z.string(),
+  planId: z.string().uuid("ID de plano inválido"),
 });
 
 export const createSubscriptionSchema = z.object({
