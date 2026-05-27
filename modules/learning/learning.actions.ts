@@ -2,7 +2,6 @@
 
 import { protectedAction, permissionAction } from "@/lib/safe-action";
 import { learningService } from "./learning.service";
-import { learningRepository } from "./learning.repository";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { studentProfileSurveySchema } from "./learning.schema";
@@ -114,7 +113,7 @@ export const generatePlanAction = protectedAction
   .schema(generatePlanSchema)
   .action(async ({ ctx }) => {
     // Find the active profile for this student
-    const profile = await learningRepository.findProfileByStudentId(ctx.user.id);
+    const profile = await learningService.findProfileByStudentId(ctx.user.id);
     if (!profile) throw new Error("Student profile not found. Please complete assessment.");
 
     const plan = await learningService.generatePersonalizedPlan(

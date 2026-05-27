@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { env } from "@/env";
 import { communicationRepository } from "@/modules/communication/communication.repository";
 import crypto from "node:crypto";
-import { db } from "@/lib/db";
-import { usersTable, type NotificationPrefs } from "@/modules/user/user.schema";
-import { or, eq, and } from "drizzle-orm";
+import { type NotificationPrefs } from "@/modules/user/user.schema";
+import { userService } from "@/modules/user/user.service";
 import { notificationService } from "@/modules/notification/notification.service";
 
 export async function GET(req: NextRequest) {
@@ -167,12 +166,7 @@ export async function POST(req: NextRequest) {
 
         // Enviar notificações push e in-app para admins e managers
         try {
-          const adminsAndManagers = await db.query.usersTable.findMany({
-            where: and(
-              eq(usersTable.isActive, true),
-              or(eq(usersTable.role, "admin"), eq(usersTable.role, "manager"))
-            )
-          });
+          const adminsAndManagers = await userService.getActiveAdminsAndManagers();
 
           const notifiedAdmins: string[] = [];
           const notifiedManagers: string[] = [];
@@ -205,7 +199,7 @@ export async function POST(req: NextRequest) {
               userIds: notifiedAdmins,
               channels: {
                 push: true,
-                inApp: true,
+                inApp: false,
               },
             });
           }

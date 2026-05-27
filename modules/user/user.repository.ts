@@ -193,6 +193,15 @@ export const userRepository = {
     return updated;
   },
 
+  async findActiveAdminsAndManagers(): Promise<User[]> {
+    return db.query.usersTable.findMany({
+      where: (table, { eq, or, and }) => and(
+        eq(table.isActive, true),
+        or(eq(table.role, "admin"), eq(table.role, "manager"))
+      )
+    });
+  },
+
   async getComprehensiveUserData(id: string) {
     return db.query.usersTable.findFirst({
       where: eq(usersTable.id, id),

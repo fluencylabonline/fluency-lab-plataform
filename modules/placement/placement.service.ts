@@ -1,9 +1,8 @@
 import { placementRepository } from "./placement.repository";
-import { userRepository } from "../user/user.repository";
+import { userService } from "../user/user.service";
 import { calculateElo, mapEloToCEFR } from "@/lib/adaptive-scoring";
 import { Question, PlacementTest } from "./placement.schema";
 import { curriculumService } from "../curriculum/curriculum.service";
-import { curriculumRepository } from "../curriculum/curriculum.repository";
 import { aiService } from "../ai/ai.service";
 import { learningService } from "../learning/learning.service";
 import { CEFRLevel, LearningItemMetadata } from "../curriculum/curriculum.types";
@@ -17,7 +16,7 @@ export const placementService = {
    * A user can only take the test once every 6 months and cannot have another active test.
    */
   async checkEligibility(userId: string): Promise<{ isEligible: boolean; reason?: 'cooldown' | 'active_test' }> {
-    const user = await userRepository.findById(userId);
+    const user = await userService.getUserById(userId);
     if (!user) throw new Error("User not found");
 
     // 1. Check for active tests first
@@ -40,7 +39,7 @@ export const placementService = {
    * Starts a new placement test or resumes an existing one.
    */
   async startOrResumeTest(userId: string, languageId: string): Promise<{ test: PlacementTest; answeredCount: number; currentElo: number }> {
-    const user = await userRepository.findById(userId);
+    const user = await userService.getUserById(userId);
     if (!user) throw new Error("User not found");
 
     // 1. Check if there is an active test for this specific language
@@ -186,7 +185,7 @@ export const placementService = {
       await placementRepository.completeTest(test.id, newStudentScore);
 
       // Update User profile
-      await userRepository.update(userId, {
+      await userService.updateUser(userId, {
         currentEloScore: newStudentScore,
         lastPlacementTestDate: new Date(),
       });
@@ -224,7 +223,7 @@ export const placementService = {
   ) {
     if (count < 4) throw new Error("Bulk generation requires at least 4 questions to cover all skills.");
 
-    const language = await curriculumRepository.findLanguageById(languageId);
+    const language = await curriculumService.findLanguageById(languageId);
     if (!language) throw new Error("Language not found");
 
     const skills: Array<"grammar" | "vocabulary" | "reading" | "listening"> = ["grammar", "vocabulary", "reading", "listening"];
@@ -345,8 +344,8 @@ export const placementService = {
     const questions: (typeof questionsTable.$inferInsert)[] = [];
 
     // 1. Fetch Items and Media
-    const items = await Promise.all(itemIds.map(id => curriculumRepository.findItemById(id)));
-    const medias = await Promise.all(mediaIds.map(id => curriculumRepository.findMediaById(id)));
+    const items = await Promise.all(itemIds.map(id => curriculumService.findItemById(id)));
+    const medias = await Promise.all(mediaIds.map(id => curriculumService.findMediaById(id)));
 
     const validItems = items.filter((i): i is NonNullable<typeof i> => !!i);
     const validMedias = medias.filter((m): m is NonNullable<typeof m> => !!m);
@@ -451,7 +450,7 @@ export const placementService = {
         for (let i = 0; i < validItems.length; i += batchSize) {
           const itemBatch = validItems.slice(i, i + batchSize);
           try {
-            const language = await curriculumRepository.findLanguageById(languageId);
+            const language = await curriculumService.findLanguageById(languageId);
             const targetLangName = language?.name || "English";
             
             const { questions: aiQuestions } = await aiService.generatePlacementQuestionsBatch(
@@ -515,7 +514,7 @@ export const placementService = {
       };
     }));
 
-    const user = await userRepository.findById(userId);
+    const user = await userService.getUserById(userId);
     const lastDate = user?.lastPlacementTestDate;
     
     // Check eligibility using the internal method for consistency
@@ -539,6 +538,19 @@ export const placementService = {
         lastTestDate: lastDate
       }
     };
+  },
+
+  async getLastCompletedTestForStudent(studentId: string) {
+    return placementRepository.getLastCompletedTest(studentId);
+  },
+
+  async commitBatchQuestions(questions: Array<typeof questionsTable.$inferInsert>) {
+    const results = [];
+    for (const q of questions) {
+      const [created] = await placementRepository.createQuestion(q);
+      results.push(created);
+    }
+    return { count: results.length };
   },
 
   /**

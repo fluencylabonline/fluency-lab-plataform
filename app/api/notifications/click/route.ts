@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { learningEngagementLogs } from "@/modules/learning/learning.schema";
+import { learningService } from "@/modules/learning/learning.service";
 import { getCurrentUser } from "@/lib/auth-server";
 
 export async function GET(req: NextRequest) {
@@ -13,15 +12,11 @@ export async function GET(req: NextRequest) {
 
   if (user) {
     try {
-      await db.insert(learningEngagementLogs).values({
-        studentId: user.id,
-        eventType: "notification_click",
-        metadata: {
-          notificationId,
-          targetUrl,
-          type,
-          userAgent: req.headers.get("user-agent"),
-        },
+      await learningService.logEngagement(user.id, "notification_click", {
+        notificationId,
+        targetUrl,
+        type,
+        userAgent: req.headers.get("user-agent"),
       });
     } catch (error) {
       console.error("[ClickTracker] Error logging engagement:", error);

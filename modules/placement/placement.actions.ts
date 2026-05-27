@@ -3,8 +3,6 @@
 import { protectedAction, managerAction } from "@/lib/safe-action";
 import { placementService } from "./placement.service";
 import { insertQuestionSchema, submitAnswerSchema } from "./placement.schema";
-import { db } from "@/lib/db";
-import { questionsTable } from "./placement.schema";
 import { mapEloToCEFR } from "@/lib/adaptive-scoring";
 
 import { z } from "zod";
@@ -76,12 +74,7 @@ export const commitBatchPlacementQuestionsAction = managerAction
   .schema(z.array(insertQuestionSchema))
   .metadata({ name: "commitBatchPlacementQuestionsAction" })
   .action(async ({ parsedInput }) => {
-    const results = [];
-    for (const q of parsedInput) {
-      const [created] = await db.insert(questionsTable).values(q).returning();
-      results.push(created);
-    }
-    return { count: results.length };
+    return await placementService.commitBatchQuestions(parsedInput);
   });
 
 export const getPlacementQuestionsAction = managerAction

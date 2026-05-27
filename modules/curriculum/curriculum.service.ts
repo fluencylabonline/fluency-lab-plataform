@@ -589,6 +589,14 @@ export const curriculumService = {
     return await curriculumRepository.findLanguageById(id);
   },
 
+  async findItemById(id: string) {
+    return await curriculumRepository.findItemById(id);
+  },
+
+  async findMediaById(id: string) {
+    return await curriculumRepository.findMediaById(id);
+  },
+
   // Media Library Management
   async getAllMedia() {
     return await curriculumRepository.findAllMedia();

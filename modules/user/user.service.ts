@@ -177,6 +177,14 @@ export const userService = {
     return userRepository.findAllByRole("teacher");
   },
 
+  async getUsersByRole(role: "admin" | "teacher" | "student" | "manager"): Promise<User[]> {
+    return userRepository.findAllByRole(role);
+  },
+
+  async getActiveAdminsAndManagers(): Promise<User[]> {
+    return userRepository.findActiveAdminsAndManagers();
+  },
+
   async toggleNotification(userId: string, type: "push" | "app", enabled: boolean): Promise<User | undefined> {
     return userRepository.updateNotificationSettings(userId, {
       [type === "push" ? "pushNotificationsEnabled" : "appNotificationsEnabled"]: enabled,

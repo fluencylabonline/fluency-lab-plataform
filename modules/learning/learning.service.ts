@@ -1075,5 +1075,13 @@ export const learningService = {
     }
 
     return processedCount;
+  },
+
+  async logEngagement(studentId: string, eventType: string, metadata?: Record<string, unknown>) {
+    return learningRepository.createEngagementLog({
+      studentId,
+      eventType,
+      metadata,
+    });
   }
 };

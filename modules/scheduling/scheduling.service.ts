@@ -31,7 +31,6 @@ import {
   differenceInCalendarDays
 } from "date-fns";
 import { notificationService } from "@/modules/notification/notification.service";
-import { userRepository } from "@/modules/user/user.repository";
 import { NewSlotInstance } from "./scheduling.types";
 
 export const schedulingService = {
@@ -117,7 +116,7 @@ export const schedulingService = {
       await this.materializeSlotsUntilDate(ruleId, horizon, tx, studentId);
 
       // Notification
-      const student = await userRepository.findById(studentId);
+      const student = await userService.getUserById(studentId);
       if (student) {
         await notificationService.sendNotification({
           title: "Novo Horário Agendado",
@@ -498,8 +497,8 @@ export const schedulingService = {
           // Special notification for teacher with conversion link if student canceled
           if (reason === "canceled-student") {
             const [teacher, student] = await Promise.all([
-              userRepository.findById(slot.teacherId),
-              userRepository.findById(slot.studentId!),
+              userService.getUserById(slot.teacherId),
+              userService.getUserById(slot.studentId!),
             ]);
 
             if (teacher && student) {
@@ -894,7 +893,7 @@ export const schedulingService = {
       });
 
       // 2. Notify Teacher (InApp/Push/Email)
-      const teacher = await userRepository.findById(slot.teacherId);
+      const teacher = await userService.getUserById(slot.teacherId);
       if (teacher) {
         await notificationService.sendNotification({
           title: "⚠️ Aula pendente de atualização",
@@ -1421,6 +1420,10 @@ export const schedulingService = {
 
       return { success: true };
     });
+  },
+
+  async getCompletedClassesForStudent(studentId: string) {
+    return schedulingRepository.findCompletedByStudent(studentId);
   },
 
   async findNextClassForStudent(studentId: string) {

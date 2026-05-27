@@ -79,6 +79,8 @@ export function PlansPageClient({ initialPlans, languages, user }: PlansPageClie
           icon: <Plus className="w-4 h-4" />,
           onClick: handleCreate
         }]}
+        backHref="/hub/admin/finances"
+        className="contents"
       />
 
       <div className="container">

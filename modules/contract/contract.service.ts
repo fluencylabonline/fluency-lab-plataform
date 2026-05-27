@@ -539,6 +539,14 @@ export const contractService = {
     }
   },
 
+  async getContractBySubscriptionId(subscriptionId: string) {
+    return contractRepository.findInstanceBySubscriptionId(subscriptionId);
+  },
+
+  async getUserContracts(userId: string) {
+    return contractRepository.findUserInstances(userId);
+  },
+
   async getAllTemplates() {
     return contractRepository.findAllTemplates();
   },

@@ -1,5 +1,5 @@
 import { taskRepository } from "./task.repository";
-import { userRepository } from "../user/user.repository";
+import { userService } from "../user/user.service";
 import { CreateTaskValues, UpdateTaskValues, CreateProjectValues, CreateStatusValues, MoveTaskValues, ReorderStatusesValues } from "./task.schema";
 import { notificationService } from "../notification/notification.service";
 import { addDays, addWeeks, addMonths } from "date-fns";
@@ -145,7 +145,7 @@ export const taskService = {
     if (!task) throw new Error("Task not found");
 
     // Authorization Check
-    const user = await userRepository.findById(userId);
+    const user = await userService.getUserById(userId);
     if (!user) throw new Error("User not found");
 
     const isManager = user.role === "admin" || user.role === "manager";
@@ -221,8 +221,8 @@ export const taskService = {
   },
 
   async getAssignableUsers() {
-    const admins = await userRepository.findAllByRole("admin");
-    const managers = await userRepository.findAllByRole("manager");
+    const admins = await userService.getUsersByRole("admin");
+    const managers = await userService.getUsersByRole("manager");
     return [...admins, ...managers];
   }
 };

@@ -37,6 +37,7 @@ vi.mock("../../contract/contract.repository", () => ({
 vi.mock("../../contract/contract.service", () => ({
   contractService: {
     requestCancellation: vi.fn().mockResolvedValue({ success: true }),
+    getUserContracts: vi.fn().mockResolvedValue([]),
   },
 }));
 

@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import {
   studentProfiles, studentItemProgress, learningPlans, planLessons, studentProfileHistory,
-  learningPracticeSessions, learningXpTransactions
+  learningPracticeSessions, learningXpTransactions, learningEngagementLogs
 } from "./learning.schema";
 import { eq, and, asc, sql, isNull, desc } from "drizzle-orm";
 
@@ -307,6 +307,11 @@ export const learningRepository = {
   // XP
   async createXpTransaction(data: typeof learningXpTransactions.$inferInsert) {
     const [result] = await db.insert(learningXpTransactions).values(data).returning();
+    return result;
+  },
+
+  async createEngagementLog(data: typeof learningEngagementLogs.$inferInsert) {
+    const [result] = await db.insert(learningEngagementLogs).values(data).returning();
     return result;
   }
 };

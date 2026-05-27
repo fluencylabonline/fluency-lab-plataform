@@ -8,7 +8,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
 import { FiscalConfigVault } from "./FiscalConfigVault";
 import { ForecastCards } from "./ForecastCards";
@@ -16,7 +16,12 @@ import { MetricsCards } from "./MetricsCards";
 import { NewTransactionVault } from "./NewTransactionVault";
 import { TransactionsTable } from "./TransactionsTable";
 import { Transaction, FiscalConfig } from "@/modules/finance/finance.schema";
-import { FinanceMetrics, FinanceForecast, MonthlyBreakdownItem, MEICapacity } from "@/modules/finance/finance.types";
+import {
+  FinanceMetrics,
+  FinanceForecast,
+  MonthlyBreakdownItem,
+  MEICapacity,
+} from "@/modules/finance/finance.types";
 import { MEICapacityCard } from "./MEICapacityCard";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -49,12 +54,23 @@ export function FinanceDashboard({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const monthLabels = useMemo(() => [
-    t("months.january"), t("months.february"), t("months.march"),
-    t("months.april"), t("months.may"), t("months.june"),
-    t("months.july"), t("months.august"), t("months.september"),
-    t("months.october"), t("months.november"), t("months.december"),
-  ], [t]);
+  const monthLabels = useMemo(
+    () => [
+      t("months.january"),
+      t("months.february"),
+      t("months.march"),
+      t("months.april"),
+      t("months.may"),
+      t("months.june"),
+      t("months.july"),
+      t("months.august"),
+      t("months.september"),
+      t("months.october"),
+      t("months.november"),
+      t("months.december"),
+    ],
+    [t],
+  );
 
   const yearOptions = useMemo(() => {
     const now = new Date().getFullYear();
@@ -82,7 +98,9 @@ export function FinanceDashboard({
             <SelectContent>
               <SelectItem value="all">{t("allMonths")}</SelectItem>
               {monthLabels.map((label, i) => (
-                <SelectItem key={i} value={i.toString()}>{label}</SelectItem>
+                <SelectItem key={i} value={i.toString()}>
+                  {label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -96,7 +114,9 @@ export function FinanceDashboard({
             </SelectTrigger>
             <SelectContent>
               {yearOptions.map((y) => (
-                <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                <SelectItem key={y} value={y.toString()}>
+                  {y}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -118,17 +138,17 @@ export function FinanceDashboard({
         </div>
 
         <div className="flex items-center gap-2 w-full md:w-auto">
+          <FiscalConfigVault
+            initialConfig={initialFiscalConfig}
+            year={currentYear}
+          />
+
           <Link href={"/hub/admin/finances/forecast"}>
-            <Button>
-              Previsões
-            </Button>
+            <Button>Previsões</Button>
           </Link>
           <Link href={"/hub/admin/finances/plans"}>
-            <Button>
-              Pacotes
-            </Button>
+            <Button>Pacotes</Button>
           </Link>
-          <FiscalConfigVault initialConfig={initialFiscalConfig} year={currentYear} />
           <NewTransactionVault />
         </div>
       </div>

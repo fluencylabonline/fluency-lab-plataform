@@ -642,8 +642,7 @@ export const billingService = {
       // Handle Cancellation Fee
       if (type === "cancellation_fee" && subscriptionId) {
         const { contractService } = await import("../contract/contract.service");
-        const { contractRepository } = await import("../contract/contract.repository");
-        const contract = await contractRepository.findInstanceBySubscriptionId(subscriptionId);
+        const contract = await contractService.getContractBySubscriptionId(subscriptionId);
         if (contract) {
           await contractService.finalizeCancellation(contract.id);
         }

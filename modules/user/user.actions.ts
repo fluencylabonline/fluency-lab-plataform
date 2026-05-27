@@ -411,12 +411,11 @@ export const requestStudentDeactivationAction = adminAction
       const isValid = await verifySudoMode(ctx.user.id, ctx.user.email!, password);
       if (!isValid) return { success: false, error: "authError" };
 
-      // 2. Resolve Services and Repositories (Dynamic imports)
+      // 2. Resolve Services (Dynamic imports)
       const { contractService } = await import("../contract/contract.service");
-      const { contractRepository } = await import("../contract/contract.repository");
 
       // 3. Find active (signed) contract for the student
-      const contracts = await contractRepository.findUserInstances(userId);
+      const contracts = await contractService.getUserContracts(userId);
       const activeContract = contracts.find((c) => c.status === "signed");
 
       if (!activeContract) {
@@ -513,12 +512,11 @@ export const requestSelfCancellationAction = protectedAction
   .metadata({ name: "requestSelfCancellation" })
   .action(async ({ ctx }) => {
     try {
-      const { contractRepository } = await import("../contract/contract.repository");
       const { contractService } = await import("../contract/contract.service");
       const { communicationService } = await import("../communication/communication.service");
 
       // 1. Encontra contrato assinado (ativo)
-      const contracts = await contractRepository.findUserInstances(ctx.user.id);
+      const contracts = await contractService.getUserContracts(ctx.user.id);
       const activeContract = contracts.find((c) => c.status === "signed");
 
       if (!activeContract) {

@@ -1,24 +1,24 @@
 import { certificateRepository } from "./certificate.repository";
-import { schedulingRepository } from "../scheduling/scheduling.repository";
-import { placementRepository } from "../placement/placement.repository";
-import { userRepository } from "../user/user.repository";
+import { userService } from "../user/user.service";
+import { schedulingService } from "../scheduling/scheduling.service";
+import { placementService } from "../placement/placement.service";
 import { BADGES_CONFIG } from "@/lib/badges-config";
 import { CertificateData, IssueCertificateValues } from "./certificate.types";
 
 export const certificateService = {
   async generateCertificateData(studentId: string, language: string): Promise<CertificateData> {
-    const student = await userRepository.findById(studentId);
+    const student = await userService.getUserById(studentId);
     if (!student) throw new Error("Student not found");
 
     // 1. Calculate hours from completed classes
-    const completedClasses = await schedulingRepository.findCompletedByStudent(studentId);
+    const completedClasses = await schedulingService.getCompletedClassesForStudent(studentId);
     const totalHours = completedClasses.length; // 1 hour per class
     const lastClassDate = completedClasses.length > 0 ? completedClasses[0].startAt : null;
 
     // 2. Get current level from placement tests
     // We might need to map language string to languageId if needed, 
     // but typically we can search for the last completed test.
-    const lastTest = await placementRepository.getLastCompletedTest(studentId);
+    const lastTest = await placementService.getLastCompletedTestForStudent(studentId);
     
     let levelCode = "A1";
     let levelLabel = "Beginner";
