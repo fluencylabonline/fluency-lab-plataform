@@ -17,7 +17,7 @@ export default async function CertificatePage() {
           </div>
         </div>
       </header>
-      <main className="container py-12">
+      <main className="container py-12 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-black tracking-tight mb-4">

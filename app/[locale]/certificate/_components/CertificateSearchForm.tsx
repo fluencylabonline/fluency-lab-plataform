@@ -25,7 +25,7 @@ export function CertificateSearchForm() {
   };
 
   return (
-    <div className="card p-8 bg-card border-border max-w-md mx-auto">
+    <div className="bg-slate-300/50 dark:bg-gray-900 rounded-md p-8 bg-card border-border max-w-md mx-auto">
       <div className="flex flex-col items-center text-center mb-8">
         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4">
           <Award className="w-8 h-8" />
