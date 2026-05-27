@@ -19,10 +19,17 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "Metadata.root" });
   const baseUrl = env.NEXT_PUBLIC_APP_URL;
 
+  let metadataBase: URL;
+  try {
+    metadataBase = new URL(baseUrl);
+  } catch {
+    metadataBase = new URL("https://fluency-lab-plataform.vercel.app");
+  }
+
   return {
     title: t("title"),
     description: t("description"),
-    metadataBase: new URL(baseUrl),
+    metadataBase,
     manifest: "/manifest.json",
     alternates: {
       canonical: "/",
