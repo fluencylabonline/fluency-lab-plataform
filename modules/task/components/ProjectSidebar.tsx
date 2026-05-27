@@ -41,7 +41,8 @@ export function ProjectSidebar({ projects, selectedId, onSelect, className, hide
               ? "bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20" 
               : "hover:bg-accent text-muted-foreground hover:text-accent-foreground"
           )}
-        >
+        >     
+
           <Inbox className="w-4 h-4 shrink-0" />
           <span className="flex-1 text-left">{t("inbox")}</span>
         </button>

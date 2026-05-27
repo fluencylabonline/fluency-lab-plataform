@@ -548,7 +548,7 @@ export function ContractsDashboard({
 
           {/* School Settings Tab */}
           <TabsContent value="school" className="space-y-4">
-            <div className="card p-6 max-w-4xl">
+            <div className="card p-6 w-full">
               <div className="flex items-center gap-3 border-b border-gray-200/50 dark:border-gray-800 pb-4 mb-6">
                 <Building className="w-6 h-6 text-primary" />
                 <div>

@@ -27,6 +27,7 @@ import { format } from "date-fns";
 import { notify } from "@/components/ui/toaster";
 import { useIsMobile } from "@/hooks/ui/use-device";
 import { cn } from "@/lib/utils";
+import { UserMenu } from "@/components/layout/user-menu";
 
 // ─── Colors mapping for Header tags ───────────────────────────────────────────
 
@@ -89,9 +90,15 @@ function EmptyChatState() {
   );
 }
 
+import { SettingsUserDTO } from "@/modules/user/user.schema";
+
+interface WhatsAppChatProps {
+  currentUser: SettingsUserDTO;
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function WhatsAppChat() {
+export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
   const [selectedConv, setSelectedConv] = useState<WhatsAppConversation | null>(null);
   const [messageText, setMessageText] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -215,7 +222,7 @@ export function WhatsAppChat() {
       {/* ── Sidebar ──────────────────────────────────────────────────── */}
       <aside
         className={cn(
-          "flex flex-col border-r border-border/50 bg-background/80 backdrop-blur-sm",
+          "flex flex-col border-r border-border/50 bg-background/30 backdrop-blur-sm",
           "w-full md:w-[320px] lg:w-[360px] shrink-0",
           !showSidebar && "hidden md:flex",
           showSidebar && "flex"
@@ -228,6 +235,7 @@ export function WhatsAppChat() {
               <MessageCircle className="w-4.5 h-4.5 text-primary" />
               Conversas
             </h2>
+            <UserMenu user={currentUser} />
           </div>
 
           {/* Search */}

@@ -14,14 +14,17 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslations } from "next-intl";
 import { Vault, VaultContent, VaultHeader, VaultTitle } from "@/components/ui/vault";
 import { cn } from "@/lib/utils";
+import { SettingsUserDTO } from "@/modules/user/user.schema";
+import { UserMenu } from "@/components/layout/user-menu";
 
 interface TasksPageClientProps {
   initialProjects: TaskProjectWithStatuses[];
   initialTasks: TaskWithAssignees[];
   initialInboxStatuses: TaskStatus[];
+  currentUser: SettingsUserDTO;
 }
 
-export function TasksPageClient({ initialProjects, initialTasks, initialInboxStatuses }: TasksPageClientProps) {
+export function TasksPageClient({ initialProjects, initialTasks, initialInboxStatuses, currentUser }: TasksPageClientProps) {
   const t = useTranslations("Tasks");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [view, setView] = useState<"list" | "kanban">("list");
@@ -109,6 +112,7 @@ export function TasksPageClient({ initialProjects, initialTasks, initialInboxSta
               >
                 <Plus className="w-5 h-5 text-primary" />
               </Button>
+              <UserMenu user={currentUser}/>
             </div>
           </div>
 

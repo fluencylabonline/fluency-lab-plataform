@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, Mail, Shield, Sparkles } from "lucide-react";
+import { Plus, Mail, Shield, Sparkles, Skull } from "lucide-react";
 import { CreateUserVault } from "./CreateUserVault";
 import { Header } from "@/components/layout/header";
 import { hasPermission, Role, UserRoles } from "@/lib/rbac";
@@ -31,8 +31,8 @@ interface UsersPageClientProps {
 export function UsersPageClient({ initialData, currentUser, basePath }: UsersPageClientProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [roleFilter, setRoleFilter] = useState<string>("student");
+  const [statusFilter, setStatusFilter] = useState<string>("active");
 
   const t = useTranslations("UserManagement");
   const tNav = useTranslations("Navigation");
@@ -135,14 +135,19 @@ export function UsersPageClient({ initialData, currentUser, basePath }: UsersPag
                         {user.name}
                       </span>
                       <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                        <Mail className="w-3 h-3" />
-                        <span className="text-truncate max-w-60">{user.email}</span>
+                        {user.isActive ? (<>
+                          <Mail className="w-3 h-3" />
+                          <span className="text-truncate max-w-60">{user.email}</span>
+                        </>) : (
+                          <>
+                            <Skull className="w-3 h-3" />
+                            <span className="text-truncate max-w-60">{user.id}</span>
+                          </>
+                        )}
                       </span>
                     </div>
                   </div>
-                  <Badge variant={user.isActive ? "default" : "secondary"} className="text-[10px] uppercase tracking-wider font-bold">
-                    {user.isActive ? "Ativo" : "Inativo"}
-                  </Badge>
+                  
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t mt-auto">
@@ -150,6 +155,9 @@ export function UsersPageClient({ initialData, currentUser, basePath }: UsersPag
                     <Shield className="w-3.5 h-3.5 text-primary/60" />
                     {tRoles(user.role as Role)}
                   </div>
+                  <Badge variant={user.isActive ? "default" : "secondary"} className="text-[10px] uppercase tracking-wider font-bold">
+                    {user.isActive ? "Ativo" : "Inativo"}
+                  </Badge>
                 </div>
               </Link>
             ))}

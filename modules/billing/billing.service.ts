@@ -897,6 +897,17 @@ export const billingService = {
     let guardianTaxId = student.guardianTaxId;
     if (guardianTaxId?.includes(":")) guardianTaxId = decrypt(guardianTaxId);
 
+    // Recupera dados da escola de forma dinâmica via contractService, respeitando o isolamento do módulo
+    const { contractService } = await import("../contract/contract.service");
+    const schoolSettings = await contractService.getSchoolSettings();
+
+    let receiverDocument = "00.000.000/0000-00"; // CNPJ padrão de fallback caso não esteja configurado
+    if (schoolSettings?.taxId) {
+      receiverDocument = schoolSettings.taxId.includes(":") 
+        ? decrypt(schoolSettings.taxId) 
+        : schoolSettings.taxId;
+    }
+
     return {
       id: installment.id,
       studentId: student.id,
@@ -909,7 +920,7 @@ export const billingService = {
       guardianName: student.guardianName || "",
       birthDate: student.birthDate ? student.birthDate.toISOString().split("T")[0] : "",
       payerDocument: guardianTaxId || taxId || "",
-      receiverDocument: "56.096.388/0001-34", // Exemplo de CNPJ da escola, pode ser dinâmico depois
+      receiverDocument,
     };
   }
 };

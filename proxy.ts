@@ -29,6 +29,20 @@ function normalizePathname(pathname: string): string {
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // 0. Bugfix: Corrige caminhos bugados vindos de templates do WhatsApp que contêm placeholders da Meta
+  if (pathname.includes("%7B%7B1%7D%7D") || pathname.includes("{{1}}")) {
+    const cleanedPath = pathname
+      .replaceAll("%7B%7B1%7D%7D", "")
+      .replaceAll("{{1}}", "");
+
+    const url = new URL(request.url);
+    url.pathname = cleanedPath;
+
+    console.log(`[Proxy] Redirecting buggy WhatsApp path "${pathname}" to "${cleanedPath}"`);
+    return NextResponse.redirect(url, { status: 307 });
+  }
+
   const session = request.cookies.get("session")?.value;
 
   // 1. Static and public assets exclusion

@@ -79,8 +79,8 @@ export function UserMenu({ user }: UserMenuProps) {
     ] as const;
 
     const menuItems = [
-        { label: tCommon("profile"), icon: <User className="h-4 w-4" />, href: "#profile" },
-        { label: tCommon("settings"), icon: <Settings className="h-4 w-4" />, href: "#settings" },
+        { label: tCommon("profile"), icon: <User className="h-4 w-4" />, href: `/hub/${user.role}/profile` },
+        { label: tCommon("settings"), icon: <Settings className="h-4 w-4" />, href: `/hub/${user.role}/settings` },
     ];
 
     const AvatarEl = (
