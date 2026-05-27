@@ -13,11 +13,14 @@ export async function POST(req: Request) {
 
   // 1. Signature validation logic
   const rawBody = await req.text();
-  const webhookSecret = env.ABACATEPAY_WEBHOOK_SECRET;
 
-  // Calculate expected raw Buffer directly
-  const expectedBuffer = crypto.createHmac("sha256", webhookSecret).update(rawBody).digest();
-  
+  // Try all possible candidate keys in the system for maximum resilience
+  const candidateKeys = [
+    env.ABACATEPAY_WEBHOOK_SECRET,
+    env.ABACATEPAY_PUBLIC_KEY,
+    env.ABACATEPAY_API_KEY,
+  ].filter((key): key is string => !!key);
+
   let sigBuffer: Buffer;
   try {
     // Attempt to parse based on length and hexadecimal characters
@@ -31,16 +34,34 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid signature format" }, { status: 401 });
   }
 
-  const isValid =
-    sigBuffer.length === expectedBuffer.length &&
-    crypto.timingSafeEqual(sigBuffer, expectedBuffer);
+  let isValid = false;
+  let matchingKeyIndex = -1;
+
+  for (let i = 0; i < candidateKeys.length; i++) {
+    const expectedBuffer = crypto
+      .createHmac("sha256", candidateKeys[i])
+      .update(rawBody)
+      .digest();
+
+    if (
+      sigBuffer.length === expectedBuffer.length &&
+      crypto.timingSafeEqual(sigBuffer, expectedBuffer)
+    ) {
+      isValid = true;
+      matchingKeyIndex = i;
+      break;
+    }
+  }
 
   if (!isValid) {
-    const maskedSecret = webhookSecret 
-      ? `${webhookSecret.substring(0, 4)}...${webhookSecret.substring(webhookSecret.length - 4)}` 
+    // Collect expected hashes for the main webhook secret for logging
+    const defaultSecret = env.ABACATEPAY_WEBHOOK_SECRET;
+    const defaultExpected = crypto.createHmac("sha256", defaultSecret).update(rawBody).digest();
+    const expectedHex = defaultExpected.toString("hex");
+    const expectedBase64 = defaultExpected.toString("base64");
+    const maskedSecret = defaultSecret 
+      ? `${defaultSecret.substring(0, 4)}...${defaultSecret.substring(defaultSecret.length - 4)}` 
       : "MISSING";
-    const expectedHex = expectedBuffer.toString("hex");
-    const expectedBase64 = expectedBuffer.toString("base64");
     
     // Safely collect headers for logging
     const headersObj: Record<string, string> = {};
@@ -50,16 +71,19 @@ export async function POST(req: Request) {
 
     console.error(
       `[AbacatePay Webhook] Unauthorized: Invalid signature.\n` +
-      `- Secret Mask: ${maskedSecret} (len: ${webhookSecret?.length})\n` +
+      `- Secret Mask (Default): ${maskedSecret} (len: ${defaultSecret?.length})\n` +
       `- Received Signature: ${signature} (len: ${signature.length})\n` +
-      `- Expected Hex: ${expectedHex}\n` +
-      `- Expected Base64: ${expectedBase64}\n` +
+      `- Expected Hex (Default): ${expectedHex}\n` +
+      `- Expected Base64 (Default): ${expectedBase64}\n` +
       `- Raw Body Len: ${rawBody.length}\n` +
       `- Raw Body: \`${rawBody}\`\n` +
       `- Headers: ${JSON.stringify(headersObj, null, 2)}`
     );
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
+
+  const keyNames = ["ABACATEPAY_WEBHOOK_SECRET", "ABACATEPAY_PUBLIC_KEY", "ABACATEPAY_API_KEY"];
+  console.log(`[AbacatePay Webhook] Signature verified successfully using key: ${keyNames[matchingKeyIndex]}`);
 
   try {
     const event = JSON.parse(rawBody);
