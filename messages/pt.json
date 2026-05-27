@@ -2527,7 +2527,9 @@
       "errorTitle": "Falha na criação",
       "processing": "Processando convite e enviando e-mail.",
       "successDescription": "O convite foi enviado para {email}.",
-      "successTitle": "Usuário criado!"
+      "successTitle": "Usuário criado!",
+      "userAlreadyExists": "E-mail já cadastrado",
+      "userAlreadyExistsDescription": "O e-mail informado já está em uso por outro usuário."
     },
     "totalToPay": "Total a Pagar",
     "totalToReceive": "Total a Receber",

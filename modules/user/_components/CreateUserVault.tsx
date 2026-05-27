@@ -31,7 +31,8 @@ import {
 import { createUserSchema, type CreateUserValues } from "@/modules/user/user.schema";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
-import { Check, Plus, X } from "lucide-react";
+import { Check, Plus, X, Loader2 } from "lucide-react";
+import { CalendarVault } from "@/components/ui/calendar";
 import { getPlansAction } from "@/modules/billing/billing.actions";
 import { getLanguagesAction } from "@/modules/curriculum/curriculum.actions";
 import { useEffect, useState } from "react";
@@ -61,7 +62,7 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
     },
   });
 
-  const [plans, setPlans] = useState<{ id: string, name: string }[]>([]);
+  const [plans, setPlans] = useState<{ id: string, name: string, language?: string | null }[]>([]);
   const [availableLanguages, setAvailableLanguages] = useState<{ code: string, name: string }[]>([]);
 
   useEffect(() => {
@@ -82,27 +83,50 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
   const { formState: { errors, isSubmitting }, handleSubmit, reset, setValue, control } = form;
 
   const role = useWatch({ control, name: "role" });
-  const selectedLanguages = useWatch({ control, name: "languages" }) || [];
   const assignedPlanId = useWatch({ control, name: "assignedPlanId" });
   const localeValue = useWatch({ control, name: "locale" });
+  const classesStartDate = useWatch({ control, name: "classesStartDate" });
 
   const onSubmit: SubmitHandler<CreateUserValues> = async (data) => {
-    const promise = createUserAction(data);
+    console.log("[CreateUserVault] onSubmit:", data);
+    const toastId = "create-user-toast";
+    notify.loading(t("toasts.creatingUser"), undefined, toastId);
 
-    notify.promise(promise, {
-      loading: t("toasts.creatingUser"),
-      success: (result) => {
-        if (result?.data?.success) {
-          onOpenChange(false);
-          reset();
-          return t("toasts.successTitle");
+    try {
+      const result = await createUserAction(data);
+
+      if (result?.data?.success) {
+        notify.success(
+          t("toasts.successTitle"),
+          t("toasts.successDescription", { email: data.email }),
+          toastId
+        );
+        onOpenChange(false);
+        reset();
+      } else {
+        const errorKey = result?.data?.error;
+        if (errorKey === "userAlreadyExists") {
+          notify.error(
+            t("toasts.userAlreadyExists"),
+            t("toasts.userAlreadyExistsDescription"),
+            toastId
+          );
+        } else {
+          notify.error(
+            t("toasts.errorTitle"),
+            t("toasts.errorDescription"),
+            toastId
+          );
         }
-        throw new Error(result?.data?.error || "error");
-      },
-      error: () => {
-        return t("toasts.errorTitle");
-      },
-    });
+      }
+    } catch (error) {
+      console.error("[CreateUserVault] error:", error);
+      notify.error(
+        t("toasts.errorTitle"),
+        t("toasts.errorDescription"),
+        toastId
+      );
+    }
   };
 
   return (
@@ -152,81 +176,101 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
               />
             </VaultField>
 
-            <VaultField
-              label={t("displayLanguage") || "Idioma de exibição"}
-              required
-              error={errors.locale?.message}
-            >
-              <Select
-                value={localeValue}
-                onValueChange={(val) => setValue("locale", val as "pt" | "en", { shouldValidate: true })}
+            <div className="grid grid-cols-2 gap-4">
+              <VaultField
+                label={t("displayLanguage") || "Idioma de exibição"}
+                required
+                error={errors.locale?.message}
               >
-                <SelectTrigger className="h-10 rounded-md bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 font-medium">
-                  <SelectValue placeholder={t("displayLanguagePlaceholder") || "Selecione o idioma de exibição"} />
-                </SelectTrigger>
-                <SelectContent className="rounded-md">
-                  <SelectItem value="pt" className="rounded-lg">
-                    Português (Brasil)
-                  </SelectItem>
-                  <SelectItem value="en" className="rounded-lg">
-                    English (US)
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </VaultField>
-
-            <VaultField
-              label={t("type")}
-              required
-              error={errors.role?.message ? t(errors.role.message as Parameters<typeof t>[0]) : undefined}
-            >
-              <Select
-                value={role}
-                onValueChange={(val) => setValue("role", val as UserRoles)}
-              >
-                <SelectTrigger className="h-10 rounded-md bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 font-medium">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-md">
-                  {Object.entries(UserRoles).map(([, value]) => (
-                    <SelectItem key={value} value={value} className="rounded-lg">
-                      {tRoles(value as Parameters<typeof tRoles>[0]) || value}
+                <Select
+                  value={localeValue}
+                  onValueChange={(val) => setValue("locale", val as "pt" | "en", { shouldValidate: true })}
+                >
+                  <SelectTrigger className="h-10 rounded-md bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 font-medium">
+                    <SelectValue placeholder={t("displayLanguagePlaceholder") || "Selecione o idioma de exibição"} />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-md">
+                    <SelectItem value="pt" className="rounded-lg">
+                      Português (Brasil)
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </VaultField>
+                    <SelectItem value="en" className="rounded-lg">
+                      English (US)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </VaultField>
+
+              <VaultField
+                label={t("type")}
+                required
+                error={errors.role?.message ? t(errors.role.message as Parameters<typeof t>[0]) : undefined}
+              >
+                <Select
+                  value={role}
+                  onValueChange={(val) => setValue("role", val as UserRoles)}
+                >
+                  <SelectTrigger className="h-10 rounded-md bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 font-medium">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-md">
+                    {Object.entries(UserRoles).map(([, value]) => (
+                      <SelectItem key={value} value={value} className="rounded-lg">
+                        {tRoles(value as Parameters<typeof tRoles>[0]) || value}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </VaultField>
+            </div>
 
             {role === UserRoles.STUDENT && (
               <>
                 <VaultField label={t("classesStartDate")}>
-                  <VaultInput
-                    type="date"
-                    {...form.register("classesStartDate")}
-                    className="h-10"
+                  <input type="hidden" {...form.register("classesStartDate")} value={classesStartDate || ""} />
+                  <CalendarVault
+                    date={classesStartDate ? new Date(classesStartDate + "T12:00:00") : undefined}
+                    onSelect={(date) => {
+                      const formatted = date 
+                        ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}` 
+                        : "";
+                      setValue("classesStartDate", formatted, { shouldValidate: true });
+                    }}
+                    placeholder={t("classesStartDatePlaceholder") || "Selecione a data"}
+                    label={t("classesStartDate")}
+                    className="h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-md font-medium"
                   />
                 </VaultField>
 
                 <VaultField label={t("assignedPlan")} error={errors.assignedPlanId?.message}>
                   <div className="space-y-2">
                     {assignedPlanId ? (
-                      <div className="flex items-center justify-between p-3 rounded-md bg-primary/5 border border-primary/20">
-                        <div className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-primary" />
-                          <span className="text-sm font-medium">
-                            {plans.find((p) => p.id === assignedPlanId)?.name}
-                          </span>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setValue("assignedPlanId", null)}
-                          className="h-8 w-8 p-0 hover:bg-primary/10 text-primary"
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
+                      (() => {
+                        const selectedPlan = plans.find((p) => p.id === assignedPlanId);
+                        return (
+                          <div className="flex items-center justify-between p-3 rounded-md bg-primary/5 border border-primary/20">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <Check className="w-4 h-4 text-primary shrink-0" />
+                              <span className="text-sm font-medium truncate">
+                                {selectedPlan?.name}
+                              </span>
+                              {selectedPlan?.language && (
+                                <span className="text-[10px] font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full shrink-0 dark:bg-primary/20 dark:text-primary-foreground">
+                                  {selectedPlan.language}
+                                </span>
+                              )}
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setValue("assignedPlanId", null)}
+                              className="h-8 w-8 p-0 hover:bg-primary/10 text-primary ml-2 shrink-0"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        );
+                      })()
                     ) : (
                       <Command className="rounded-md border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
                         <CommandInput placeholder={t("search")} />
@@ -239,10 +283,24 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
                                 value={plan.name}
                                 onSelect={() => {
                                   setValue("assignedPlanId", plan.id);
+                                  // Auto-fill studying language if it matches the plan's language
+                                  if (plan.language) {
+                                    const matchedLang = availableLanguages.find(
+                                      (l) => l.name.toLowerCase() === plan.language?.toLowerCase()
+                                    );
+                                    if (matchedLang) {
+                                      setValue("languages", [matchedLang.code], { shouldValidate: true });
+                                    }
+                                  }
                                 }}
-                                className="rounded-lg"
+                                className="rounded-lg flex justify-between items-center"
                               >
-                                {plan.name}
+                                <span>{plan.name}</span>
+                                {plan.language && (
+                                  <span className="text-[10px] font-medium bg-primary/10 text-primary px-2.5 py-0.5 rounded-full dark:bg-primary/20 dark:text-primary-foreground">
+                                    {plan.language}
+                                  </span>
+                                )}
                               </CommandItem>
                             ))}
                           </CommandGroup>
@@ -250,27 +308,6 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
                       </Command>
                     )}
                   </div>
-                </VaultField>
-
-                <VaultField
-                  label={t("studyingLanguage") || "Idioma de estudo"}
-                  error={errors.languages?.message}
-                >
-                  <Select
-                    value={selectedLanguages[0] || ""}
-                    onValueChange={(value) => setValue("languages", value ? [value] : [], { shouldValidate: true })}
-                  >
-                    <SelectTrigger className="h-10 rounded-md bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 font-medium">
-                      <SelectValue placeholder={t("studyingLanguagePlaceholder") || "Selecione o idioma de estudo"} />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-md">
-                      {availableLanguages.map((lang) => (
-                        <SelectItem key={lang.code} value={lang.code} className="rounded-lg">
-                          {lang.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </VaultField>
               </>
             )}
@@ -287,8 +324,16 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
               type="submit"
               disabled={isSubmitting}
             >
-              {t("createUser")}
-              <Plus className="w-5 h-5 ml-1" />
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 ml-1 animate-spin" />
+                </>
+              ) : (
+                <>
+                  {t("createUser")}
+                  <Plus className="w-5 h-5 ml-1" />
+                </>
+              )}
             </VaultPrimaryButton>
           </VaultFooter>
         </VaultForm>

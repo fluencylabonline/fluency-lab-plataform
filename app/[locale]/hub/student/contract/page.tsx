@@ -11,7 +11,16 @@ export default async function ContractPage() {
     redirect("/signin");
   }
 
-  const latestContract = await contractService.getLatestContract(user.id);
+  let latestContract = await contractService.getLatestContract(user.id);
+
+  if (!latestContract) {
+    try {
+      await contractService.prepareOnboardingContract(user.id);
+      latestContract = await contractService.getLatestContract(user.id);
+    } catch (error) {
+      console.error("[ContractPage] Error preparing onboarding contract:", error);
+    }
+  }
 
   return <ContractDetails contract={latestContract as ContractWithTemplate} user={user} />;
 }

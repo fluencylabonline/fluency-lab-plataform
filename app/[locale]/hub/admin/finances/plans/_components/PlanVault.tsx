@@ -44,17 +44,21 @@ interface PlanVaultProps {
   languages: { id: string; name: string }[];
 }
 
-type PlanFormValues = z.input<typeof createPlanSchema>;
+const clientPlanSchema = createPlanSchema.extend({
+  price: z.number().positive({ message: "O preço deve ser maior que zero" }),
+});
+
+type PlanFormValues = z.infer<typeof clientPlanSchema>;
 
 export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: PlanVaultProps) {
   const t = useTranslations("Billing");
   const isEditing = !!plan;
 
   const form = useForm<PlanFormValues>({
-    resolver: zodResolver(createPlanSchema),
+    resolver: zodResolver(clientPlanSchema),
     defaultValues: {
       name: "",
-      price: 0,
+      price: undefined,
       durationMonths: 12,
       language: "",
       classesPerWeek: 2,
@@ -68,7 +72,7 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
     if (plan && open) {
       reset({
         name: plan.name,
-        price: plan.price,
+        price: plan.price / 100, // Convert from cents to Reais
         durationMonths: plan.durationMonths,
         language: plan.language || "",
         classesPerWeek: plan.classesPerWeek || 2,
@@ -77,7 +81,7 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
     } else if (!plan && open) {
       reset({
         name: "",
-        price: 0,
+        price: undefined,
         durationMonths: 12,
         language: "",
         classesPerWeek: 2,
@@ -89,13 +93,19 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
   const onSubmit: SubmitHandler<PlanFormValues> = async (values) => {
     let result;
 
+    // Convert from Reais back to cents
+    const apiValues = {
+      ...values,
+      price: Math.round(values.price * 100),
+    };
+
     if (isEditing && plan) {
       result = await updatePlanAction({
         id: plan.id,
-        ...values,
+        ...apiValues,
       });
     } else {
-      result = await createPlanAction(values);
+      result = await createPlanAction(apiValues);
     }
 
     if (result?.data?.success && result.data.plan) {
@@ -184,15 +194,20 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
                 />
               </VaultField>
               <VaultField
-                label={t("monthlyPrice") || "Mensalidade (em centavos)"}
+                label={t("monthlyPrice") || "Mensalidade"}
                 required
                 error={errors.price?.message}
               >
-                <VaultInput
-                  type="number"
-                  placeholder={t("pricePlaceholder") || "Ex: 33000"}
-                  {...register("price", { valueAsNumber: true })}
-                />
+                <div className="relative flex items-center">
+                  <span className="absolute left-3 text-slate-400 text-sm pointer-events-none">R$</span>
+                  <VaultInput
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    className="pl-9 h-10"
+                    {...register("price", { valueAsNumber: true })}
+                  />
+                </div>
               </VaultField>
             </div>
 

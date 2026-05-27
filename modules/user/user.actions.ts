@@ -182,7 +182,7 @@ export const createUserAction = permissionAction("user.create")
     try {
       const data = {
         ...parsedInput,
-        classesStartDate: parsedInput.classesStartDate ? new Date(parsedInput.classesStartDate) : null,
+        classesStartDate: parsedInput.classesStartDate ? new Date(parsedInput.classesStartDate + "T12:00:00Z") : null,
       };
 
       await userService.createUserAndSendInvite(data);

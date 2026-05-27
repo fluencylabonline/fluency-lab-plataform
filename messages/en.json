@@ -2528,7 +2528,9 @@
       "errorTitle": "Creation failed",
       "processing": "Processing invitation and sending email.",
       "successDescription": "The invitation has been sent to {email}.",
-      "successTitle": "User created!"
+      "successTitle": "User created!",
+      "userAlreadyExists": "Email already registered",
+      "userAlreadyExistsDescription": "The email provided is already associated with an existing account."
     },
     "totalToPay": "Total a Pagar",
     "totalToReceive": "Total to Receive",

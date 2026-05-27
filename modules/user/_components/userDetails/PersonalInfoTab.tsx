@@ -213,6 +213,22 @@ export function PersonalInfoTab({
               {t("since")} {format(new Date(user.createdAt), "dd/MM/yyyy")}
             </span>
           </div>
+
+          {user.role === "student" && user.classesStartDate && (
+            <div className="flex items-center gap-3 px-6 py-4 group">
+              <div className="p-1.5 rounded-sm bg-muted/50 text-muted-foreground group-hover:text-primary transition-colors">
+                <Calendar className="w-3.5 h-3.5 shrink-0" />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider leading-none">
+                  {t("classesStartDate")}
+                </span>
+                <span className="text-xs font-bold text-foreground/80 mt-1 leading-none">
+                  {format(new Date(user.classesStartDate), "dd/MM/yyyy")}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
