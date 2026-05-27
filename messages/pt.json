@@ -830,7 +830,10 @@
         "value": "Valor",
         "view_plans": "Ver Planos",
         "verifyPayment": "Verificar pagamento",
-        "verifying": "Verificando..."
+        "verifying": "Verificando...",
+        "paymentConfirmed": "Pagamento confirmado com sucesso!",
+        "paymentPending": "Seu pagamento ainda consta como pendente no intermediador. Caso já tenha pago, aguarde alguns instantes e tente novamente.",
+        "verifyError": "Erro ao verificar status do pagamento."
       },
       "ProgressHero": {
         "classes": "Aulas",
@@ -1638,7 +1641,11 @@
       "subtitle": "Confirme seu plano e escolha o melhor dia para vencimento.",
       "successTitle": "Pagamento Confirmado!",
       "title": "Escolha como quer evoluir.",
-      "totalValue": "Valor Mensal"
+      "totalValue": "Valor Mensal",
+      "payLaterBtn": "Pagar depois / Próximo",
+      "checkPaymentBtn": "Verificar Pagamento",
+      "pendingCheck": "Pagamento ainda pendente de confirmação. Se você já pagou, aguarde alguns instantes e tente novamente.",
+      "errorChecking": "Erro ao verificar status do pagamento."
     },
     "steps": {
       "back": "Voltar",

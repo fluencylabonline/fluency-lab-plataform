@@ -67,12 +67,9 @@ export const billingService = {
     // Check if student already has an active subscription for this plan (Idempotency)
     const existingSub = await billingRepository.findActiveSubscriptionByStudent(studentId);
     if (existingSub && existingSub.planId === planId) {
-      // Update dueDay if it changed
-      if (existingSub.dueDay !== dueDay) {
-        await billingRepository.updateSubscription(existingSub.id, { dueDay });
-      }
+      const dueDayChanged = existingSub.dueDay !== dueDay;
 
-      // Ensure the first installment has an invoice if it doesn't already
+      // Ensure the first installment is retrieved
       const firstInstallment = await db.query.installmentsTable.findFirst({
         where: and(
           eq(installmentsTable.subscriptionId, existingSub.id),
@@ -80,9 +77,76 @@ export const billingService = {
         ),
       });
 
-      if (firstInstallment && !firstInstallment.abacatePayBillingId) {
+      if (dueDayChanged) {
+        await db.transaction(async (tx) => {
+          // 1. Update the subscription due day
+          await tx.update(subscriptionsTable)
+            .set({ dueDay })
+            .where(eq(subscriptionsTable.id, existingSub.id));
+
+          // 2. Recalculate first installment if it's pending
+          if (firstInstallment && firstInstallment.status !== "paid") {
+            const now = new Date();
+            const billingBaseDate = student.classesStartDate && student.classesStartDate > now
+              ? student.classesStartDate
+              : now;
+
+            const currentDay = getDate(billingBaseDate);
+            const totalDaysInMonth = getDaysInMonth(billingBaseDate);
+
+            let firstInstallmentAmount: number;
+            let firstInstallmentDueDate: Date;
+
+            if (currentDay > dueDay) {
+              const daysRemaining = totalDaysInMonth - currentDay + 1;
+              firstInstallmentAmount = Math.round((plan.price / totalDaysInMonth) * daysRemaining);
+              firstInstallmentDueDate = endOfMonth(billingBaseDate);
+            } else {
+              firstInstallmentAmount = plan.price;
+              firstInstallmentDueDate = addDays(now, 7);
+            }
+
+            await tx.update(installmentsTable)
+              .set({
+                amount: firstInstallmentAmount,
+                dueDate: startOfDay(firstInstallmentDueDate),
+                abacatePayBillingId: null,
+                pixPayload: null,
+                pixImage: null,
+                status: "pending",
+              })
+              .where(eq(installmentsTable.id, firstInstallment.id));
+          }
+
+          // 3. Update subsequent pending installments
+          const allInstallments = await tx.query.installmentsTable.findMany({
+            where: eq(installmentsTable.subscriptionId, existingSub.id),
+          });
+
+          for (const inst of allInstallments) {
+            if (inst.orderIndex > 1 && inst.status !== "paid") {
+              const nextDueDate = setDate(addMonths(existingSub.startDate, inst.orderIndex - 1), dueDay);
+              await tx.update(installmentsTable)
+                .set({
+                  dueDate: startOfDay(nextDueDate),
+                })
+                .where(eq(installmentsTable.id, inst.id));
+            }
+          }
+        });
+      }
+
+      // Ensure the first installment has an invoice if it doesn't already
+      const updatedFirstInstallment = await db.query.installmentsTable.findFirst({
+        where: and(
+          eq(installmentsTable.subscriptionId, existingSub.id),
+          eq(installmentsTable.orderIndex, 1)
+        ),
+      });
+
+      if (updatedFirstInstallment && !updatedFirstInstallment.abacatePayBillingId) {
         try {
-          await this.generateInvoiceForInstallment(firstInstallment.id);
+          await this.generateInvoiceForInstallment(updatedFirstInstallment.id);
         } catch (error) {
           console.error("Failed to generate AbacatePay invoice for existing sub:", error);
         }

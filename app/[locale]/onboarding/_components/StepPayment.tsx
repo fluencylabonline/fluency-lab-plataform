@@ -44,6 +44,7 @@ export function StepPayment({
         installmentId: string;
         status: string;
     } | null>(null);
+    const [checkingPayment, setCheckingPayment] = useState(false);
 
     useEffect(() => {
         const fetchInitialData = async () => {
@@ -98,19 +99,27 @@ export function StepPayment({
 
     const calculateProRata = (dueDay: number, price: number) => {
         const today = new Date();
+        const classesStart = user.classesStartDate ? new Date(user.classesStartDate) : null;
+
+        // Use classesStartDate for pro-rata calculation if it's in the future
+        const billingBaseDate = classesStart && classesStart > today
+            ? classesStart
+            : today;
+
+        const currentDay = billingBaseDate.getDate();
         const totalDaysInMonth = new Date(
-            today.getFullYear(),
-            today.getMonth() + 1,
+            billingBaseDate.getFullYear(),
+            billingBaseDate.getMonth() + 1,
             0
         ).getDate();
 
-        if (dueDay > today.getDate()) {
-            return { amount: price, isProRata: false };
+        if (currentDay > dueDay) {
+            const daysRemaining = totalDaysInMonth - currentDay + 1;
+            const proRataAmount = Math.round((price / totalDaysInMonth) * daysRemaining);
+            return { amount: proRataAmount, isProRata: true };
         }
 
-        const daysRemaining = totalDaysInMonth - today.getDate() + 1;
-        const proRataAmount = Math.round((price / totalDaysInMonth) * daysRemaining);
-        return { amount: proRataAmount, isProRata: true };
+        return { amount: price, isProRata: false };
     };
 
     const handleConfirmDate = async () => {
@@ -133,6 +142,29 @@ export function StepPayment({
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
         notify.success(t("payment.copied") || "Código copiado!");
+    };
+
+    const handleCheckPayment = async () => {
+        if (!pixData) return;
+        setCheckingPayment(true);
+        const result = await getInstallmentStatusAction({
+            installmentId: pixData.installmentId,
+        });
+        setCheckingPayment(false);
+
+        if (result?.data?.success) {
+            const status = result.data.data?.status;
+            if (status === "paid") {
+                setPixData((prev) =>
+                    prev ? { ...prev, status: "paid" } : null
+                );
+                notify.success(t("payment.successTitle") || "Pagamento confirmado!");
+            } else {
+                notify.info(t("payment.pendingCheck") || "Pagamento ainda pendente de confirmação. Se você já pagou, aguarde alguns instantes e tente novamente.");
+            }
+        } else {
+            notify.error(t("payment.errorChecking") || "Erro ao verificar status do pagamento.");
+        }
     };
 
     if (plansLoading) {
@@ -335,13 +367,26 @@ export function StepPayment({
                         </div>
 
                         {/* Navigation */}
-                        <button
-                            onClick={() => onNext({ dueDay: parseInt(selectedDueDay) })}
-                            className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500"
-                        >
-                            {t("steps.next") || "Próximo"}
-                            <ArrowRight className="h-4 w-4" />
-                        </button>
+                        <div className="flex flex-col gap-2.5">
+                            <Button
+                                onClick={handleCheckPayment}
+                                disabled={checkingPayment}
+                                className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-emerald-600 text-sm font-medium text-white transition-all hover:bg-emerald-500 disabled:opacity-40 hover:scale-[1.01]"
+                            >
+                                {checkingPayment ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    t("payment.checkPaymentBtn") || "Verificar Pagamento"
+                                )}
+                            </Button>
+                            <button
+                                onClick={() => onNext({ dueDay: parseInt(selectedDueDay) })}
+                                className="flex h-11 w-full items-center justify-center gap-2 rounded-md border border-white/8 text-sm font-medium text-slate-400 transition-all hover:border-white/12 hover:text-slate-300 hover:scale-[1.01]"
+                            >
+                                {t("payment.payLaterBtn") || "Pagar depois / Próximo"}
+                                <ArrowRight className="h-4 w-4" />
+                            </button>
+                        </div>
                     </motion.div>
                 )}
 

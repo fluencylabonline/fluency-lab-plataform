@@ -40,7 +40,9 @@ interface StudentPaymentStatusCardProps {
   } | null;
 }
 
-export function StudentPaymentStatusCard({ subscription }: StudentPaymentStatusCardProps) {
+export function StudentPaymentStatusCard({
+  subscription,
+}: StudentPaymentStatusCardProps) {
   const t = useTranslations("Hub.StudentProfile.Payment");
   const locale = useLocale();
   const [isVerifying, setIsVerifying] = useState(false);
@@ -57,16 +59,27 @@ export function StudentPaymentStatusCard({ subscription }: StudentPaymentStatusC
       if (result?.data?.success) {
         const status = result.data.status;
         if (status === "paid") {
-          notify.success(t("paymentConfirmed") || "Pagamento confirmado com sucesso!");
+          notify.success(
+            t("paymentConfirmed") || "Pagamento confirmado com sucesso!",
+          );
         } else {
-          notify.info(t("paymentPending") || "Seu pagamento ainda consta como pendente no intermediador. Caso já tenha pago, aguarde alguns instantes e tente novamente.");
+          notify.info(
+            t("paymentPending") ||
+              "Seu pagamento ainda consta como pendente no intermediador. Caso já tenha pago, aguarde alguns instantes e tente novamente.",
+          );
         }
       } else {
-        notify.error(result?.data?.error || t("verifyError") || "Erro ao verificar status do pagamento.");
+        notify.error(
+          result?.data?.error ||
+            t("verifyError") ||
+            "Erro ao verificar status do pagamento.",
+        );
       }
     } catch (error) {
       console.error("Error verifying payment:", error);
-      notify.error(t("verifyError") || "Erro ao verificar status do pagamento.");
+      notify.error(
+        t("verifyError") || "Erro ao verificar status do pagamento.",
+      );
     } finally {
       setIsVerifying(false);
     }
@@ -75,7 +88,9 @@ export function StudentPaymentStatusCard({ subscription }: StudentPaymentStatusC
   const copyPixCode = async () => {
     if (subscription?.currentInstallment?.pixCode) {
       try {
-        await navigator.clipboard.writeText(subscription.currentInstallment.pixCode);
+        await navigator.clipboard.writeText(
+          subscription.currentInstallment.pixCode,
+        );
         notify.success(t("copySuccess"));
       } catch {
         notify.error(t("copyError"));
@@ -142,11 +157,8 @@ export function StudentPaymentStatusCard({ subscription }: StudentPaymentStatusC
         <p className="text-sm text-zinc-500 mb-6 text-center max-w-[250px]">
           {t("no_plan_desc")}
         </p>
-        <Button
-          variant="outline"
-          className="gap-2"
-        >
-          <a href={`/${locale}/hub/student/billing`}>
+        <Button variant="outline" className="gap-2">
+          <a href={`/${locale}/hub/student/payments`}>
             <QrCode className="w-4 h-4 mr-1" />
             {t("managePayments")}
           </a>
@@ -155,7 +167,8 @@ export function StudentPaymentStatusCard({ subscription }: StudentPaymentStatusC
     );
   }
 
-  const currentStatus = subscription.currentInstallment?.status || subscription.subscriptionStatus;
+  const currentStatus =
+    subscription.currentInstallment?.status || subscription.subscriptionStatus;
   const statusConfig = getStatusConfig(currentStatus);
   const StatusIcon = statusConfig.icon;
   const daysUntilDue = getDaysUntilDue();
@@ -203,14 +216,15 @@ export function StudentPaymentStatusCard({ subscription }: StudentPaymentStatusC
 
       <div className="flex-1 p-5 flex flex-col justify-center">
         <div className="w-full">
-          {subscription.currentInstallment && ((daysUntilDue !== null && daysUntilDue <= 7) || isOverdue) ? (
+          {subscription.currentInstallment &&
+          ((daysUntilDue !== null && daysUntilDue <= 7) || isOverdue) ? (
             <div className="space-y-5 animate-in fade-in zoom-in-95 duration-300">
               {subscription.currentInstallment.pixCode ? (
                 <div className="flex flex-col lg:flex-row gap-5 items-center lg:items-start">
                   <div className="relative shrink-0 group bg-white p-2 rounded-md border-2 border-dashed border-zinc-200 dark:border-zinc-700 shadow-sm">
                     {subscription.currentInstallment.pixQrCode && (
                       <Image
-                        src={`data:image/png;base64,${subscription.currentInstallment.pixQrCode}`}
+                        src={subscription.currentInstallment.pixQrCode}
                         alt="QR Code PIX"
                         width={120}
                         height={120}
@@ -219,7 +233,8 @@ export function StudentPaymentStatusCard({ subscription }: StudentPaymentStatusC
                     )}
                     <div className="absolute inset-x-0 -bottom-3 flex justify-center">
                       <span className="bg-zinc-900 text-white text-[10px] px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> {isOverdue ? t("overdue_badge") : t("pending_badge")}
+                        <Clock className="w-3 h-3" />{" "}
+                        {isOverdue ? t("overdue_badge") : t("pending_badge")}
                       </span>
                     </div>
                   </div>
@@ -250,43 +265,90 @@ export function StudentPaymentStatusCard({ subscription }: StudentPaymentStatusC
                       </div>
                     </div>
 
-                    <Button
-                      size="default"
-                      variant="outline"
-                      className="w-full gap-2 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm"
-                      onClick={handleVerifyPayment}
-                      disabled={isVerifying}
-                    >
-                      <RotateCw className={cn("w-4 h-4 mr-2 text-zinc-500 dark:text-zinc-400", isVerifying && "animate-spin")} />
-                      {isVerifying ? t("verifying") || "Verificando..." : t("verifyPayment") || "Já paguei, verificar pagamento"}
-                    </Button>
+                    <div className="flex flex-col gap-2 w-full">
+                      <Button
+                        size="default"
+                        variant="outline"
+                        className="w-full gap-2 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm"
+                        onClick={handleVerifyPayment}
+                        disabled={isVerifying}
+                      >
+                        <RotateCw
+                          className={cn(
+                            "w-4 h-4 mr-2 text-zinc-500 dark:text-zinc-400",
+                            isVerifying && "animate-spin",
+                          )}
+                        />
+                        {isVerifying
+                          ? t("verifying") || "Verificando..."
+                          : t("verifyPayment") ||
+                            "Já paguei, verificar pagamento"}
+                      </Button>
+
+                      <Button
+                        size="default"
+                        variant="ghost"
+                        className="w-full gap-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200/50 dark:border-zinc-800/50"
+                      >
+                        <a href={`/${locale}/hub/student/payments`}>
+                          <Wallet2 className="w-4 h-4 mr-2 text-zinc-500" />
+                          {t("managePayments") || "Gerenciar pagamentos"}
+                        </a>
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-10 text-zinc-400 text-center">
-                  <div className="w-12 h-12 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center mb-4">
-                    <Wallet2 className="w-6 h-6 text-emerald-500" />
+                <div className="flex flex-col items-center justify-center py-10 text-zinc-400 text-center space-y-4">
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                      <Wallet2 className="w-6 h-6 text-emerald-500" />
+                    </div>
+                    <h4 className="font-medium text-zinc-900 dark:text-zinc-100 mb-1">
+                      {t("pixAvailability")}
+                    </h4>
+                    <p className="text-xs text-zinc-500 max-w-[200px]">
+                      {t("pix_processing_desc")}
+                    </p>
                   </div>
-                  <h4 className="font-medium text-zinc-900 dark:text-zinc-100 mb-1">
-                    {t("pixAvailability")}
-                  </h4>
-                  <p className="text-xs text-zinc-500 max-w-[200px]">
-                    {t("pix_processing_desc")}
-                  </p>
+
+                  <Button
+                    size="default"
+                    variant="outline"
+                    className="gap-2 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm"
+                  >
+                    <a href={`/${locale}/hub/student/payments`}>
+                      <Wallet2 className="w-4 h-4 mr-2 text-zinc-500" />
+                      {t("managePayments") || "Gerenciar pagamentos"}
+                    </a>
+                  </Button>
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-6 text-zinc-400 text-center">
-              <div className="w-12 h-12 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center mb-3">
-                <Clock className="w-6 h-6 opacity-40" />
+            <div className="flex flex-col items-center justify-center py-6 text-zinc-400 text-center space-y-4">
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center mb-3">
+                  <Clock className="w-6 h-6 opacity-40" />
+                </div>
+                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                  {t("pixAvailability")}
+                </p>
+                <p className="text-xs text-zinc-400 mt-1">
+                  {t("pixRelease", { days: daysUntilDue ?? 0 })}
+                </p>
               </div>
-              <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                {t("pixAvailability")}
-              </p>
-              <p className="text-xs text-zinc-400 mt-1">
-                {t("pixRelease", { days: daysUntilDue ?? 0 })}
-              </p>
+
+              <Button
+                size="default"
+                variant="outline"
+                className="gap-2 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm"
+              >
+                <a href={`/${locale}/hub/student/payments`}>
+                  <Wallet2 className="w-4 h-4 mr-2 text-zinc-500" />
+                  {t("managePayments") || "Gerenciar pagamentos"}
+                </a>
+              </Button>
             </div>
           )}
         </div>
@@ -299,7 +361,9 @@ export function StudentPaymentStatusCard({ subscription }: StudentPaymentStatusC
               {t("value")}
             </span>
             <span className="text-base lg:text-lg font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
-              {subscription.currentInstallment?.amount ? formatCurrency(subscription.currentInstallment.amount) : "-"}
+              {subscription.currentInstallment?.amount
+                ? formatCurrency(subscription.currentInstallment.amount)
+                : "-"}
             </span>
           </div>
 
@@ -319,11 +383,11 @@ export function StudentPaymentStatusCard({ subscription }: StudentPaymentStatusC
                   <span className="text-sm font-medium">
                     {subscription.currentInstallment?.dueDate
                       ? new Date(
-                        subscription.currentInstallment.dueDate,
-                      ).toLocaleDateString(locale, {
-                        day: "2-digit",
-                        month: "short",
-                      })
+                          subscription.currentInstallment.dueDate,
+                        ).toLocaleDateString(locale, {
+                          day: "2-digit",
+                          month: "short",
+                        })
                       : "-"}
                   </span>
                 </>
@@ -338,9 +402,9 @@ export function StudentPaymentStatusCard({ subscription }: StudentPaymentStatusC
             <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
               {subscription.lastPaymentDate
                 ? new Date(subscription.lastPaymentDate).toLocaleDateString(
-                  locale,
-                  { day: "2-digit", month: "short", year: "2-digit" },
-                )
+                    locale,
+                    { day: "2-digit", month: "short", year: "2-digit" },
+                  )
                 : "-"}
             </span>
           </div>
