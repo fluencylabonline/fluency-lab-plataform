@@ -41,6 +41,12 @@ export async function POST(req: Request) {
       : "MISSING";
     const expectedHex = expectedBuffer.toString("hex");
     const expectedBase64 = expectedBuffer.toString("base64");
+    
+    // Safely collect headers for logging
+    const headersObj: Record<string, string> = {};
+    req.headers.forEach((value, key) => {
+      headersObj[key] = value;
+    });
 
     console.error(
       `[AbacatePay Webhook] Unauthorized: Invalid signature.\n` +
@@ -48,7 +54,10 @@ export async function POST(req: Request) {
       `- Received Signature: ${signature} (len: ${signature.length})\n` +
       `- Expected Hex: ${expectedHex}\n` +
       `- Expected Base64: ${expectedBase64}\n` +
-      `- Raw Body Len: ${rawBody.length}`
+      `- Raw Body Len: ${rawBody.length}\n` +
+      `- Body Preview (First 100): "${rawBody.substring(0, 100)}"\n` +
+      `- Body Preview (Last 100): "${rawBody.substring(Math.max(0, rawBody.length - 100))}"\n` +
+      `- Headers: ${JSON.stringify(headersObj, null, 2)}`
     );
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
