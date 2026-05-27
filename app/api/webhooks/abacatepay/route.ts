@@ -54,31 +54,7 @@ export async function POST(req: Request) {
   }
 
   if (!isValid) {
-    // Collect expected hashes for the main webhook secret for logging
-    const defaultSecret = env.ABACATEPAY_WEBHOOK_SECRET;
-    const defaultExpected = crypto.createHmac("sha256", defaultSecret).update(rawBody).digest();
-    const expectedHex = defaultExpected.toString("hex");
-    const expectedBase64 = defaultExpected.toString("base64");
-    const maskedSecret = defaultSecret 
-      ? `${defaultSecret.substring(0, 4)}...${defaultSecret.substring(defaultSecret.length - 4)}` 
-      : "MISSING";
-    
-    // Safely collect headers for logging
-    const headersObj: Record<string, string> = {};
-    req.headers.forEach((value, key) => {
-      headersObj[key] = value;
-    });
-
-    console.error(
-      `[AbacatePay Webhook] Unauthorized: Invalid signature.\n` +
-      `- Secret Mask (Default): ${maskedSecret} (len: ${defaultSecret?.length})\n` +
-      `- Received Signature: ${signature} (len: ${signature.length})\n` +
-      `- Expected Hex (Default): ${expectedHex}\n` +
-      `- Expected Base64 (Default): ${expectedBase64}\n` +
-      `- Raw Body Len: ${rawBody.length}\n` +
-      `- Raw Body: \`${rawBody}\`\n` +
-      `- Headers: ${JSON.stringify(headersObj, null, 2)}`
-    );
+    console.error("[AbacatePay Webhook] Unauthorized: Invalid signature.");
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
