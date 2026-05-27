@@ -371,7 +371,7 @@ export function StepPayment({
                             <Button
                                 onClick={handleCheckPayment}
                                 disabled={checkingPayment}
-                                className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-emerald-600 text-sm font-medium text-white transition-all hover:bg-emerald-500 disabled:opacity-40 hover:scale-[1.01]"
+                                className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-emerald-500 text-sm font-medium text-white transition-all hover:bg-emerald-400 disabled:opacity-40 hover:scale-[1.01]"
                             >
                                 {checkingPayment ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />

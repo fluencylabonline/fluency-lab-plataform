@@ -416,6 +416,14 @@ export class CommunicationService {
               { type: "text", text: dateStr },
               { type: "text", text: data.pixPayload },
             ]
+          },
+          {
+            type: "button",
+            sub_type: "copy_code",
+            index: "0",
+            parameters: [
+              { type: "text", text: data.pixPayload }
+            ]
           }
         ]
       });
@@ -456,6 +464,14 @@ export class CommunicationService {
               { type: "text", text: data.studentName },
               { type: "text", text: amountStr },
               { type: "text", text: data.pixPayload },
+            ]
+          },
+          {
+            type: "button",
+            sub_type: "copy_code",
+            index: "0",
+            parameters: [
+              { type: "text", text: data.pixPayload }
             ]
           }
         ]
