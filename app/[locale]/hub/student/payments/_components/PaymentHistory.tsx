@@ -108,7 +108,7 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
                   onClick={() => handleViewReceipt(payment.id)}
                   className="h-9 gap-2"
                 >
-                  <Receipt className="w-4 h-4" />
+                  <Receipt className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">{t("viewReceipt")}</span>
                 </Button>
               )}
@@ -118,7 +118,7 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
                 onClick={handleGetInvoice}
                 className="h-9 gap-2"
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">{t("getInvoice")}</span>
               </Button>
             </div>

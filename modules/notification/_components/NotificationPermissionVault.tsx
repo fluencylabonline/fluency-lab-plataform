@@ -18,6 +18,8 @@ import { useNotificationStore } from "@/hooks/notification/use-notification-stor
 import { saveSubscriptionAction } from "@/modules/notification/notification.actions";
 import { env } from "@/env";
 
+import { useUserStore } from "@/modules/user/user.store";
+
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
@@ -36,18 +38,19 @@ export function NotificationPermissionVault() {
   const { permission, requestPermission } = useNotificationPermission();
   const { isDismissed, dismiss } = useNotificationStore();
   const [isOpen, setIsOpen] = useState(false);
+  const user = useUserStore((state) => state.user);
 
   useEffect(() => {
     const dismissedUntil = localStorage.getItem("notification_dismissed_until");
     const isDismissedFor30Days = dismissedUntil ? Date.now() < parseInt(dismissedUntil, 10) : false;
 
-    // Show vault only if permission is default and not dismissed in this session or for 30 days
-    const shouldBeOpen = permission === "default" && !isDismissed && !isDismissedFor30Days;
+    // Show vault only if user is logged in, permission is default, and not dismissed in this session or for 30 days
+    const shouldBeOpen = !!user && permission === "default" && !isDismissed && !isDismissedFor30Days;
     if (isOpen !== shouldBeOpen) {
       const timer = setTimeout(() => setIsOpen(shouldBeOpen), 0);
       return () => clearTimeout(timer);
     }
-  }, [permission, isDismissed, isOpen]);
+  }, [permission, isDismissed, isOpen, user]);
 
   const handleAllow = async () => {
     const result = await requestPermission();

@@ -18,11 +18,13 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 import { useDeviceStore, type BeforeInstallPromptEvent } from "@/hooks/ui/use-device";
+import { useUserStore } from "@/modules/user/user.store";
 
 const MOBILE_BREAKPOINT = 768;
 
 export function PwaHandler() {
-  const { setDeferredPrompt, setUpdateAvailable, setRegistration, setStandalone, setIsMobile } = useDeviceStore();
+  const { registration, setDeferredPrompt, setUpdateAvailable, setRegistration, setStandalone, setIsMobile } = useDeviceStore();
+  const user = useUserStore((state) => state.user);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -67,19 +69,19 @@ export function PwaHandler() {
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       const initPwaSupport = async () => {
         try {
-          const registration = await navigator.serviceWorker.ready;
-          setRegistration(registration);
+          const reg = await navigator.serviceWorker.ready;
+          setRegistration(reg);
 
           const onUpdate = () => {
             setUpdateAvailable(true);
           };
 
-          if (registration.waiting) {
+          if (reg.waiting) {
             onUpdate();
           }
 
-          registration.addEventListener("updatefound", () => {
-            const newWorker = registration.installing;
+          reg.addEventListener("updatefound", () => {
+            const newWorker = reg.installing;
             if (newWorker) {
               newWorker.addEventListener("statechange", () => {
                 if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
@@ -88,22 +90,6 @@ export function PwaHandler() {
               });
             }
           });
-
-          let subscription = await registration.pushManager.getSubscription();
-
-          if (!subscription && Notification.permission === "granted") {
-            const vapidPublicKey = env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-            const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
-
-            subscription = await registration.pushManager.subscribe({
-              userVisibleOnly: true,
-              applicationServerKey: convertedVapidKey,
-            });
-          }
-
-          if (subscription) {
-            await saveSubscriptionAction({ subscription: subscription.toJSON() });
-          }
         } catch {
           //console.error("PWA Handler error:", error);
         }
@@ -116,6 +102,35 @@ export function PwaHandler() {
       window.removeEventListener("beforeinstallprompt" as unknown as keyof WindowEventMap, handleBeforeInstallPrompt as EventListener);
     };
   }, [setDeferredPrompt, setRegistration, setUpdateAvailable]);
+
+  // Sync Push Notification Subscription with backend only when user is authenticated
+  useEffect(() => {
+    if (!registration || !user) return;
+
+    const syncSubscription = async () => {
+      try {
+        let subscription = await registration.pushManager.getSubscription();
+
+        if (!subscription && Notification.permission === "granted") {
+          const vapidPublicKey = env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+          const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: convertedVapidKey,
+          });
+        }
+
+        if (subscription) {
+          await saveSubscriptionAction({ subscription: subscription.toJSON() });
+        }
+      } catch (error) {
+        console.error("[PWA] Push subscription sync error:", error);
+      }
+    };
+
+    syncSubscription();
+  }, [registration, user]);
 
   return null;
 }

@@ -170,6 +170,11 @@ export const contractService = {
       guardianData: encryptedGuardianData as unknown as Record<string, unknown>,
     });
 
+    // Advance onboarding step if user is in onboarding and role is student/teacher
+    if (!user.onboarded && user.onboardingStep === 4) {
+      await userService.updateUser(userId, { onboardingStep: 5 });
+    }
+
     // 7.1 Auditoria: Registro forense (IP/UA)
     if (auditMetadata) {
       await contractRepository.saveSignatureMetadata({

@@ -13,5 +13,5 @@ export default async function ContractPage() {
 
   const latestContract = await contractService.getLatestContract(user.id);
 
-  return <ContractDetails contract={latestContract as ContractWithTemplate} />;
+  return <ContractDetails contract={latestContract as ContractWithTemplate} user={user} />;
 }

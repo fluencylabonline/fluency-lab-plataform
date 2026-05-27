@@ -48,20 +48,24 @@ export async function proxy(request: NextRequest) {
   const normalizedPath = normalizePathname(pathname);
 
   // 3. Route Protection Logic
-  const isAuthPage = AUTH_PAGES.some((page) => normalizedPath.startsWith(page));
-  const isPublicPage = ["/", "/privacy", "/terms", "/certificate", "/create-password"].includes(normalizedPath);
+  const isServerAction = request.method === "POST" && request.headers.has("next-action");
 
-  if (!session && !isAuthPage && !isPublicPage) {
-    // Redirect unauthenticated users to signin
-    const signInUrl = new URL("/signin", request.url);
-    // Store original URL to redirect back after login
-    signInUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(signInUrl);
-  }
+  if (!isServerAction) {
+    const isAuthPage = AUTH_PAGES.some((page) => normalizedPath.startsWith(page));
+    const isPublicPage = ["/", "/privacy", "/terms", "/certificate", "/create-password"].includes(normalizedPath);
 
-  if (session && isAuthPage) {
-    // Redirect authenticated users to the hub
-    return NextResponse.redirect(new URL("/hub", request.url));
+    if (!session && !isAuthPage && !isPublicPage) {
+      // Redirect unauthenticated users to signin
+      const signInUrl = new URL("/signin", request.url);
+      // Store original URL to redirect back after login
+      signInUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(signInUrl);
+    }
+
+    if (session && isAuthPage) {
+      // Redirect authenticated users to the hub
+      return NextResponse.redirect(new URL("/hub", request.url));
+    }
   }
 
   // 4. Continue with i18n handling

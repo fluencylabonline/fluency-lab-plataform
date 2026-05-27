@@ -16,6 +16,7 @@ import { userService } from "../user/user.service";
 import { encrypt } from "@/lib/cryptography";
 import { billingService } from "../billing/billing.service";
 import { revalidatePath } from "next/cache";
+import { contractService } from "../contract/contract.service";
 
 export const onboardingWelcomeAction = protectedAction
   .inputSchema(onboardingWelcomeSchema)
@@ -130,6 +131,26 @@ export const onboardingPaymentAction = protectedAction
 export const completeOnboardingAction = protectedAction
   .metadata({ name: "completeOnboardingAction" })
   .action(async ({ ctx }) => {
+    const user = await userService.getUser(ctx.user.id);
+    if (!user) throw new Error("Usuário não encontrado.");
+
+    if (user.role === "student") {
+      // 1. Check if address is filled
+      if (!user.address) {
+        throw new Error("Endereço obrigatório não preenchido.");
+      }
+      // 2. Check if contract is signed
+      const latestContract = await contractService.getLatestContract(ctx.user.id);
+      if (!latestContract || latestContract.status !== "signed") {
+        throw new Error("Contrato obrigatório não assinado.");
+      }
+    } else if (user.role === "teacher") {
+      // 1. Check if all teacher steps are completed (needs to be at step 6)
+      if (user.onboardingStep < 6) {
+        throw new Error("Onboarding de professor incompleto.");
+      }
+    }
+
     await userService.updateUser(ctx.user.id, {
       onboarded: true
     });

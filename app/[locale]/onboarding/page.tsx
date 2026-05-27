@@ -10,7 +10,6 @@ export default async function OnboardingPage() {
         redirect("/signin");
     }
 
-    // Permitir apenas alunos e professores no onboarding
     if (user.role !== "student" && user.role !== "teacher") {
         redirect("/hub");
     }
