@@ -123,7 +123,7 @@ export function CheckRecessVault({ teacherId }: CheckRecessVaultProps) {
     <Vault open={isOpen} onOpenChange={setIsOpen}>
       <VaultTrigger asChild>
         <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5">
-          <Calendar className="w-4 h-4 text-primary" />
+          <Calendar className="w-4 h-4 mr-2 text-primary" />
           {t('checkRecesses') || "Conferir Recessos"}
         </Button>
       </VaultTrigger>

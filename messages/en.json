@@ -2657,7 +2657,8 @@
       "version": "Version",
       "status": "Status",
       "active": "Active",
-      "inactive": "Inactive"
+      "inactive": "Inactive",
+      "actions": "Actions"
     },
     "instances": {
       "title": "Generated & Signed Contracts",
@@ -2680,7 +2681,24 @@
     "actions": {
       "download": "Download PDF",
       "resendEmail": "Resend Contract",
-      "verify": "Verify Signature"
+      "verify": "Verify Signature",
+      "view": "View Model"
+    },
+    "verify": {
+      "title": "Signature Validation",
+      "subtitle": "Authenticity and cryptographic integrity of Fluency Lab contracts",
+      "validBadge": "VALID SIGNATURE",
+      "signedBy": "Signed By",
+      "document": "Document",
+      "region": "Region",
+      "signedAt": "Signature Date",
+      "auditTitle": "Forensic Digital Audit",
+      "ipLabel": "Registration IP",
+      "hashLabel": "Hash",
+      "invalidTitle": "Invalid or Modified Signature",
+      "invalidDesc": "Could not find any active signature record associated with the hash \"{hash}\".",
+      "invalidDetail": "This indicates that the contract may have undergone unauthorized modifications after signing or the verification code is incorrect.",
+      "backToHome": "Go to Fluency Lab"
     },
     "school": {
       "title": "School Settings",

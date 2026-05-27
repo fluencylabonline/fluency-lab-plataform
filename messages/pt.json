@@ -2656,7 +2656,8 @@
       "version": "Versão",
       "status": "Status",
       "active": "Ativo",
-      "inactive": "Inativo"
+      "inactive": "Inativo",
+      "actions": "Ações"
     },
     "instances": {
       "title": "Contratos Gerados & Assinados",
@@ -2679,7 +2680,24 @@
     "actions": {
       "download": "Baixar PDF",
       "resendEmail": "Reenviar Contrato",
-      "verify": "Verificar Assinatura"
+      "verify": "Verificar Assinatura",
+      "view": "Visualizar Modelo"
+    },
+    "verify": {
+      "title": "Validação de Assinatura",
+      "subtitle": "Autenticidade e integridade criptográfica de contratos Fluency Lab",
+      "validBadge": "ASSINATURA VÁLIDA",
+      "signedBy": "Assinado Por",
+      "document": "Documento",
+      "region": "Região",
+      "signedAt": "Data da Assinatura",
+      "auditTitle": "Auditoria Digital Forense",
+      "ipLabel": "IP de Registro",
+      "hashLabel": "Hash",
+      "invalidTitle": "Assinatura Inválida ou Modificada",
+      "invalidDesc": "Não foi possível encontrar nenhum registro de assinatura ativo associado ao hash \"{hash}\".",
+      "invalidDetail": "Isso indica que o contrato pode ter sofrido modificações não autorizadas após a assinatura ou o código de verificação está incorreto.",
+      "backToHome": "Ir para a Fluency Lab"
     },
     "school": {
       "title": "Configurações da Escola",

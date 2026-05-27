@@ -46,7 +46,6 @@ export function TeacherScheduleClient({
               onClick={() => setIsCreateOpen(true)}
               variant="default"
               size="sm"
-              className="h-8 rounded-full px-4 text-[10px] font-black uppercase tracking-wider shadow-lg shadow-primary/20"
             >
               <Plus className="w-3 h-3 mr-2 stroke-[3]" />
               {t("createSlot") || "Criar Horário"}

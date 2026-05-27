@@ -196,7 +196,7 @@ export function CommunicateRecessVault({ teacherId }: CommunicateRecessVaultProp
     <Vault open={isOpen} onOpenChange={setIsOpen}>
       <VaultTrigger asChild>
         <Button variant="default" className="gap-2 font-bold shadow-lg shadow-primary/20">
-          <CalendarIcon className="w-4 h-4" />
+          <CalendarIcon className="w-4 h-4 mr-2" />
           {t('communicateRecess') || "Comunicar Recesso"}
         </Button>
       </VaultTrigger>

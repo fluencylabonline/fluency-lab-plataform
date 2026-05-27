@@ -8,7 +8,12 @@ const handleIntl = createIntlMiddleware(routing);
 /**
  * List of paths that should be considered as auth pages.
  */
-const AUTH_PAGES = ["/signin", "/signup", "/forgot-password", "/reset-password"];
+const AUTH_PAGES = [
+  "/signin",
+  "/signup",
+  "/forgot-password",
+  "/reset-password",
+];
 
 /**
  * Normalizes the pathname by removing the locale prefix.
@@ -39,7 +44,9 @@ export async function proxy(request: NextRequest) {
     const url = new URL(request.url);
     url.pathname = cleanedPath;
 
-    console.log(`[Proxy] Redirecting buggy WhatsApp path "${pathname}" to "${cleanedPath}"`);
+    console.log(
+      `[Proxy] Redirecting buggy WhatsApp path "${pathname}" to "${cleanedPath}"`,
+    );
     return NextResponse.redirect(url, { status: 307 });
   }
 
@@ -62,17 +69,23 @@ export async function proxy(request: NextRequest) {
   const normalizedPath = normalizePathname(pathname);
 
   // 3. Route Protection Logic
-  const isServerAction = request.method === "POST" && request.headers.has("next-action");
+  const isServerAction =
+    request.method === "POST" && request.headers.has("next-action");
 
   if (!isServerAction) {
-    const isAuthPage = AUTH_PAGES.some((page) => normalizedPath.startsWith(page));
-    const isPublicPage = ["/", "/privacy", "/terms", "/certificate", "/create-password"].includes(normalizedPath);
+    const isAuthPage = AUTH_PAGES.some((page) =>
+      normalizedPath.startsWith(page),
+    );
+    const isPublicPage =
+      ["/", "/privacy", "/terms", "/certificate", "/create-password"].includes(
+        normalizedPath,
+      ) || normalizedPath.startsWith("/verify");
 
     if (!session && !isAuthPage && !isPublicPage) {
       // Redirect unauthenticated users to signin
       const signInUrl = new URL("/signin", request.url);
       // Store original URL to redirect back after login
-      signInUrl.searchParams.set("callbackUrl", pathname);
+      signInUrl.searchParams.set("redirectTo", pathname);
       return NextResponse.redirect(signInUrl);
     }
 
@@ -102,7 +115,9 @@ export async function proxy(request: NextRequest) {
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'self';
-  `.replace(/\s{2,}/g, " ").trim();
+  `
+    .replace(/\s{2,}/g, " ")
+    .trim();
 
   // Injetar nos cabeçalhos da requisição para os Server Components lerem via headers()
   request.headers.set("x-nonce", nonce);

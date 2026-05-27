@@ -446,6 +446,7 @@ export const contractService = {
       signedBy: instance.user?.name,
       signedAt: instance.signedAt,
       region: instance.template.region,
+      status: instance.status,
       audit: instance.signaturesMetadata.map((m: ContractSignatureMetadata) => ({
         timestamp: m.createdAt,
         ip: m.ipAddress,
