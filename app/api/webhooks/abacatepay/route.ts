@@ -55,8 +55,7 @@ export async function POST(req: Request) {
       `- Expected Hex: ${expectedHex}\n` +
       `- Expected Base64: ${expectedBase64}\n` +
       `- Raw Body Len: ${rawBody.length}\n` +
-      `- Body Preview (First 100): "${rawBody.substring(0, 100)}"\n` +
-      `- Body Preview (Last 100): "${rawBody.substring(Math.max(0, rawBody.length - 100))}"\n` +
+      `- Raw Body: \`${rawBody}\`\n` +
       `- Headers: ${JSON.stringify(headersObj, null, 2)}`
     );
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
