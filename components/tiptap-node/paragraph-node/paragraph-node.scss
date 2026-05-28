@@ -36,9 +36,9 @@
   // Paragraph spacing
   p:not(:first-child):not(td p):not(th p) {
     font-size: 1rem;
-    line-height: 1.6;
+    line-height: 1;
     font-weight: normal;
-    margin-top: 20px;
+    margin-top: 5px;
   }
 
   // Selection styles
@@ -99,6 +99,19 @@
 /* =====================
      COLLABORATION
      ===================== */
+@keyframes fadeOutCaretLabel {
+  0% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
 .tiptap.ProseMirror {
   .collaboration-carets {
     &__caret {
@@ -124,6 +137,7 @@
       top: -1.3em;
       user-select: none;
       white-space: nowrap;
+      animation: fadeOutCaretLabel 2s forwards;
     }
   }
 }

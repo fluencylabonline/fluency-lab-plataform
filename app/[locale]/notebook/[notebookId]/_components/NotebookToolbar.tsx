@@ -31,6 +31,18 @@ import { RoleGuard } from "@/components/ui/role-guard";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 
 import { UserMenu } from "@/components/layout/user-menu";
+// import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
+import { NotebookSettingsVault } from "./NotebookSettingsVault";
+import {
+  Vault,
+  VaultContent,
+  VaultHeader,
+  VaultTitle,
+  VaultDescription,
+  VaultBody
+} from "@/components/ui/vault";
+// import { MusicToolVault } from "@/components/tiptap-extension/lyrics-training/MusicToolVault";
+import { Music, Sparkles, Settings } from "lucide-react";
 
 interface NotebookToolbarProps {
   toolbarRef: RefObject<HTMLDivElement | null>;
@@ -45,6 +57,11 @@ interface NotebookToolbarProps {
 }
 
 export function NotebookToolbar({ toolbarRef, backHref, cursorY, user }: NotebookToolbarProps) {
+  // const { editor } = useTiptapEditor();
+  const [isToolsVaultOpen, setIsToolsVaultOpen] = useState(false);
+  // const [isMusicVaultOpen, setIsMusicVaultOpen] = useState(false);
+  const [isSettingsVaultOpen, setIsSettingsVaultOpen] = useState(false);
+
   const isMobile = useIsBreakpoint();
   const { height } = useWindowSize();
   const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">("main");
@@ -62,7 +79,8 @@ export function NotebookToolbar({ toolbarRef, backHref, cursorY, user }: Noteboo
   const toolbarStyle = isMobile ? { bottom: `calc(100% - ${height - cursorY}px)` } : {};
 
   return (
-    <Toolbar ref={toolbarRef} style={toolbarStyle}>
+    <>
+      <Toolbar ref={toolbarRef} style={toolbarStyle}>
       <BackButton href={backHref} />
 
       {mobileView === "main" ? (
@@ -97,10 +115,27 @@ export function NotebookToolbar({ toolbarRef, backHref, cursorY, user }: Noteboo
           <ToolbarSeparator />
             <ToolbarGroup>
               <ImageUploadButton text="Add" />
+              <Button
+                type="button"
+                variant="ghost"
+                tooltip="Adicionar Atividade Interativa"
+                onClick={() => setIsToolsVaultOpen(true)}
+              >
+                <Sparkles className="tiptap-button-icon text-amber-500 w-4 h-4" />
+              </Button>
             </ToolbarGroup>
           </RoleGuard>
           <Spacer />
           <ThemeSwitcher />
+          <Button
+            type="button"
+            variant="ghost"
+            tooltip="Configurações do Leitor"
+            onClick={() => setIsSettingsVaultOpen(true)}
+            className="tiptap-button shrink-0"
+          >
+            <Settings className="tiptap-button-icon w-4 h-4" />
+          </Button>
           <UserMenu user={user} />
         </>
       ) : (
@@ -119,6 +154,57 @@ export function NotebookToolbar({ toolbarRef, backHref, cursorY, user }: Noteboo
           {mobileView === "highlighter" ? <ColorHighlightPopoverContent /> : <LinkContent />}
         </>
       )}
-    </Toolbar>
-  );
+      </Toolbar>
+
+      {/* Vault de Seleção de Atividades Interativas */}
+      <Vault open={isToolsVaultOpen} onOpenChange={setIsToolsVaultOpen}>
+        <VaultContent className="sm:max-w-xl">
+          <VaultHeader className="p-6 pb-4 border-b">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-amber-500" />
+              <VaultTitle className="text-left font-bold">Atividades Interativas</VaultTitle>
+            </div>
+            <VaultDescription className="text-left">
+              Selecione uma atividade para adicionar ao notebook dos alunos.
+            </VaultDescription>
+          </VaultHeader>
+          <VaultBody className="p-6">
+            <div className="grid grid-cols-1 gap-4">
+              <button
+                onClick={() => {
+                  setIsToolsVaultOpen(false);
+                  // setIsMusicVaultOpen(true);
+                }}
+                className="card flex items-start gap-4 p-4 text-left border border-muted hover:border-primary/50 bg-background rounded-xl transition-all duration-200"
+              >
+                <div className="bg-primary/10 p-3 rounded-full text-primary shrink-0">
+                  <Music className="w-6 h-6" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-bold text-base text-foreground">Lyrics Training (Treino de Música)</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Crie um exercício de completar lacunas em tempo real baseado em um clipe do YouTube e letra sincronizada.
+                  </p>
+                </div>
+              </button>
+            </div>
+          </VaultBody>
+        </VaultContent>
+      </Vault>
+
+      {/* Vault de Configuração do Lyrics Training */}
+      {/* {editor && (
+        <MusicToolVault
+          isOpen={isMusicVaultOpen}
+          onClose={() => setIsMusicVaultOpen(false)}
+          editor={editor}
+        />
+      )} */}
+
+      {/* Vault de Configurações de Leitura */}
+      <NotebookSettingsVault
+        open={isSettingsVaultOpen}
+        onOpenChange={setIsSettingsVaultOpen}
+      />
+    </>);
 }

@@ -1,7 +1,12 @@
 "use client";
 
 import { useCallback, useRef } from "react";
-import { EditorContent, EditorContext, useEditor, type Editor } from "@tiptap/react";
+import {
+  EditorContent,
+  EditorContext,
+  useEditor,
+  type Editor,
+} from "@tiptap/react";
 
 // --- Tiptap Extensions ---
 import { StarterKit } from "@tiptap/starter-kit";
@@ -10,8 +15,6 @@ import { TaskItem, TaskList } from "@tiptap/extension-list";
 import { TextAlign } from "@tiptap/extension-text-align";
 import { Typography } from "@tiptap/extension-typography";
 import { Highlight } from "@tiptap/extension-highlight";
-import { Subscript } from "@tiptap/extension-subscript";
-import { Superscript } from "@tiptap/extension-superscript";
 import { Selection } from "@tiptap/extensions";
 import { Collaboration } from "@tiptap/extension-collaboration";
 import { CollaborationCaret } from "@tiptap/extension-collaboration-caret";
@@ -28,6 +31,7 @@ import { useStudentCallListener } from "@/hooks/data/use-student-call-listener";
 import { useNotebookSession } from "../_hooks/use-notebook-session";
 import { useNotebookCollaboration } from "../_hooks/use-notebook-collaboration";
 import { NotebookToolbar } from "./NotebookToolbar";
+import { NotebookBubbleMenu } from "./NotebookBubbleMenu";
 import { useCursorVisibility } from "@/hooks/use-cursor-visibility";
 import { useRefRect } from "@/hooks/use-element-rect";
 import { MAX_FILE_SIZE } from "@/lib/tiptap-utils";
@@ -52,7 +56,6 @@ interface NotebookEditorProps {
   userName: string;
   userRole: string;
   userColor: string;
-  /** Optional: used by Stream SDK for avatar rendering */
   userPhotoUrl?: string | null;
   user: {
     name: string | null;
@@ -93,87 +96,98 @@ export function NotebookEditor({
   const { callState } = useCallStore();
 
   // 4. Image Upload Handler
-  const handleNotebookImageUpload = useCallback(async (
-    file: File,
-    onProgress?: (event: { progress: number }) => void
-  ) => {
-    const fileName = `${Date.now()}-${file.name}`;
-    const filePath = `notebooks/${notebookId}/${userId}/${fileName}`;
-    const storageRef = ref(storage, filePath);
+  const handleNotebookImageUpload = useCallback(
+    async (file: File, onProgress?: (event: { progress: number }) => void) => {
+      const fileName = `${Date.now()}-${file.name}`;
+      const filePath = `notebooks/${notebookId}/${userId}/${fileName}`;
+      const storageRef = ref(storage, filePath);
 
-    const uploadTask = uploadBytesResumable(storageRef, file);
+      const uploadTask = uploadBytesResumable(storageRef, file);
 
-    return new Promise<string>((resolve, reject) => {
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          onProgress?.({ progress });
-        },
-        (error) => reject(error),
-        async () => {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+      return new Promise<string>((resolve, reject) => {
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            onProgress?.({ progress });
+          },
+          (error) => reject(error),
+          async () => {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
 
-          // Register in Neon for cleanup tracking
-          await registerNotebookAssetAction({
-            notebookId,
-            filePath,
-            fileName,
-            contentType: file.type,
-            sizeBytes: file.size,
-          });
+            // Register in Neon for cleanup tracking
+            await registerNotebookAssetAction({
+              notebookId,
+              filePath,
+              fileName,
+              contentType: file.type,
+              sizeBytes: file.size,
+            });
 
-          resolve(downloadURL);
-        }
-      );
-    });
-  }, [notebookId, userId]);
+            resolve(downloadURL);
+          },
+        );
+      });
+    },
+    [notebookId, userId],
+  );
 
   // 5. Editor Instance
-  const editor = useEditor({
-    immediatelyRender: false,
-    shouldRerenderOnTransaction: false,
-    editorProps: {
-      attributes: {
-        autocomplete: "off",
-        autocorrect: "off",
-        autocapitalize: "off",
-        class: "simple-editor",
+  const editor = useEditor(
+    {
+      immediatelyRender: false,
+      shouldRerenderOnTransaction: false,
+      editorProps: {
+        attributes: {
+          autocomplete: "off",
+          autocorrect: "off",
+          autocapitalize: "off",
+          class: "simple-editor",
+        },
       },
-    },
-    onUpdate: ({ editor }) => { editorRef.current = editor; },
-    onCreate: ({ editor }) => { editorRef.current = editor; },
-    extensions: [
-      StarterKit.configure({
-        undoRedo: false, // Conflict with Collaboration
-        horizontalRule: false,
-        link: { openOnClick: false, enableClickSelection: true },
-      }),
-      HorizontalRule,
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-      TaskList,
-      TaskItem.configure({ nested: true }),
-      Highlight.configure({ multicolor: true }),
-      Image,
-      Typography,
-      Superscript,
-      Subscript,
-      Selection,
-      ImageUploadNode.configure({
-        accept: "image/*",
-        maxSize: MAX_FILE_SIZE,
-        limit: 10,
-        upload: handleNotebookImageUpload,
-      }),
-      ...(ydoc ? [Collaboration.configure({ document: ydoc, field: "content" })] : []),
-      ...(awareness ? [
-        CollaborationCaret.configure({
-          provider: { awareness },
-          user: { name: userName, color: userColor },
+      onUpdate: ({ editor }) => {
+        editorRef.current = editor;
+      },
+      onCreate: ({ editor }) => {
+        editorRef.current = editor;
+      },
+
+      extensions: [
+        StarterKit.configure({
+          undoRedo: false, // Conflict with Collaboration
+          horizontalRule: false,
+          link: { openOnClick: false, enableClickSelection: true },
         }),
-      ] : []),
-    ],
-  }, [ydoc, awareness]);
+        HorizontalRule,
+        TextAlign.configure({ types: ["heading", "paragraph"] }),
+        TaskList,
+        TaskItem.configure({ nested: true }),
+        Highlight.configure({ multicolor: true }),
+        Image,
+        Typography,
+        Selection,
+        ImageUploadNode.configure({
+          accept: "image/*",
+          maxSize: MAX_FILE_SIZE,
+          limit: 10,
+          upload: handleNotebookImageUpload,
+        }),
+        ...(ydoc
+          ? [Collaboration.configure({ document: ydoc, field: "content" })]
+          : []),
+        ...(awareness
+          ? [
+              CollaborationCaret.configure({
+                provider: { awareness },
+                user: { name: userName, color: userColor },
+              }),
+            ]
+          : []),
+      ],
+    },
+    [ydoc, awareness],
+  );
 
   // 6. UI Helpers
   const toolbarRect = useRefRect(toolbarRef);
@@ -182,9 +196,10 @@ export function NotebookEditor({
     overlayHeight: toolbarRect.height,
   });
 
-  const backHref = userRole === "teacher"
-    ? `/hub/teacher/students/${studentId}`
-    : `/hub/student/notebook`;
+  const backHref =
+    userRole === "teacher"
+      ? `/hub/teacher/students/${studentId}`
+      : `/hub/student/notebook`;
 
   return (
     <div className="simple-editor-wrapper">
@@ -195,6 +210,8 @@ export function NotebookEditor({
           cursorY={rect.y}
           user={user}
         />
+
+        <NotebookBubbleMenu editor={editor} />
 
         <EditorContent
           key={ydoc ? "collab" : "solo"}
