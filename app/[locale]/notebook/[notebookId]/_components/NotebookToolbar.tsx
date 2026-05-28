@@ -31,7 +31,7 @@ import { RoleGuard } from "@/components/ui/role-guard";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 
 import { UserMenu } from "@/components/layout/user-menu";
-// import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
+import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 import { NotebookSettingsVault } from "./NotebookSettingsVault";
 import {
   Vault,
@@ -41,7 +41,6 @@ import {
   VaultDescription,
   VaultBody
 } from "@/components/ui/vault";
-// import { MusicToolVault } from "@/components/tiptap-extension/lyrics-training/MusicToolVault";
 import { Music, Sparkles, Settings } from "lucide-react";
 
 interface NotebookToolbarProps {
@@ -57,9 +56,8 @@ interface NotebookToolbarProps {
 }
 
 export function NotebookToolbar({ toolbarRef, backHref, cursorY, user }: NotebookToolbarProps) {
-  // const { editor } = useTiptapEditor();
+  const { } = useTiptapEditor();
   const [isToolsVaultOpen, setIsToolsVaultOpen] = useState(false);
-  // const [isMusicVaultOpen, setIsMusicVaultOpen] = useState(false);
   const [isSettingsVaultOpen, setIsSettingsVaultOpen] = useState(false);
 
   const isMobile = useIsBreakpoint();
@@ -173,7 +171,6 @@ export function NotebookToolbar({ toolbarRef, backHref, cursorY, user }: Noteboo
               <button
                 onClick={() => {
                   setIsToolsVaultOpen(false);
-                  // setIsMusicVaultOpen(true);
                 }}
                 className="card flex items-start gap-4 p-4 text-left border border-muted hover:border-primary/50 bg-background rounded-xl transition-all duration-200"
               >
@@ -192,16 +189,6 @@ export function NotebookToolbar({ toolbarRef, backHref, cursorY, user }: Noteboo
         </VaultContent>
       </Vault>
 
-      {/* Vault de Configuração do Lyrics Training */}
-      {/* {editor && (
-        <MusicToolVault
-          isOpen={isMusicVaultOpen}
-          onClose={() => setIsMusicVaultOpen(false)}
-          editor={editor}
-        />
-      )} */}
-
-      {/* Vault de Configurações de Leitura */}
       <NotebookSettingsVault
         open={isSettingsVaultOpen}
         onOpenChange={setIsSettingsVaultOpen}

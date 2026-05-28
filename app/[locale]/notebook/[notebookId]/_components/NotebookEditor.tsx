@@ -56,6 +56,7 @@ interface NotebookEditorProps {
   userName: string;
   userRole: string;
   userColor: string;
+  /** Optional: used by Stream SDK for avatar rendering */
   userPhotoUrl?: string | null;
   user: {
     name: string | null;
@@ -115,8 +116,6 @@ export function NotebookEditor({
           (error) => reject(error),
           async () => {
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-
-            // Register in Neon for cleanup tracking
             await registerNotebookAssetAction({
               notebookId,
               filePath,
@@ -155,7 +154,7 @@ export function NotebookEditor({
 
       extensions: [
         StarterKit.configure({
-          undoRedo: false, // Conflict with Collaboration
+          undoRedo: false, 
           horizontalRule: false,
           link: { openOnClick: false, enableClickSelection: true },
         }),
@@ -221,14 +220,6 @@ export function NotebookEditor({
         />
       </EditorContext.Provider>
 
-      {/*
-        Video Call Integration:
-        - FloatCallButton: visible only to teacher when no call is active.
-          Clicking → startCallAction → populates useCallStore.
-        - useStudentCallListener (above): when student's Firestore doc gets callId,
-          generateStreamTokenAction fires → populates useCallStore.
-        - VideoCall: renders whenever callState is set (for both roles).
-      */}
       <FloatCallButton
         studentId={studentId}
         notebookId={notebookId}
