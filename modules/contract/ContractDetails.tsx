@@ -21,7 +21,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { ContractWithTemplate } from "@/modules/contract/contract.types";
 import { Header } from "@/components/layout/header";
-import DOMPurify from "isomorphic-dompurify";
+import DOMPurify from "dompurify";
 import { injectTemplateData } from "@/modules/contract/contract.service.utils";
 import type { User } from "@/modules/user/user.schema";
 

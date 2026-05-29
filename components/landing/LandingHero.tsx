@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
-import DOMPurify from "isomorphic-dompurify";
+
 import { HomeScreen } from "@/components/landing/screens/HomeScreen";
 import { PathScreen } from "@/components/landing/screens/PathScreen";
 import { EditorScreen } from "./screens/EditScreen";
@@ -31,7 +31,7 @@ export function LandingHero({ user }: { user: User | null }) {
     return () => clearInterval(interval);
   }, []);
 
-  const sanitizedSubtitle = DOMPurify.sanitize(t.raw("heroSubtitle") || "");
+  const sanitizedSubtitle = t.raw("heroSubtitle") || "";
 
   return (
     <main className="w-full h-full relative grid grid-cols-1 lg:grid-cols-2 flex-1">

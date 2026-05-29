@@ -1,6 +1,6 @@
 "use client";
 
-import DOMPurify from "isomorphic-dompurify";
+import DOMPurify from "dompurify";
 import { useTranslations } from "next-intl";
 import { signContractAction, getPendingContractAction } from "@/modules/contract/contract.actions";
 import { notify } from "@/components/ui/toaster";
