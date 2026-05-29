@@ -15,8 +15,7 @@ import {
   VaultForm,
   VaultField,
   VaultFooter,
-  VaultPrimaryButton,
-  VaultSecondaryButton,
+  VaultPrimaryButton
 } from "@/components/ui/vault";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -441,9 +440,6 @@ export function ContractsDashboard({
           </div>
 
           <VaultFooter className="mt-4 border-t pt-4">
-            <VaultSecondaryButton type="button" onClick={() => setIsViewTemplateOpen(false)}>
-              Fechar
-            </VaultSecondaryButton>
             <Button
               onClick={() => selectedTemplate && handleStartUpdateTemplate(selectedTemplate)}
               leftIcon={<Plus className="w-4 h-4" />}

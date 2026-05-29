@@ -31,8 +31,8 @@ jobs:
           # Remove trailing slash from APP_URL if exists
           CLEAN_URL=$(echo $APP_URL | sed 's:/*$::')
           
-          # Clean and trim CRON_SECRET to remove any accidental newlines or trailing whitespaces
-          CLEAN_SECRET=$(echo -n "$CRON_SECRET" | tr -d '\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          # Clean and trim CRON_SECRET safely using printf to avoid shell expansion/option issues
+          CLEAN_SECRET=$(printf "%s" "$CRON_SECRET" | tr -d '\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
           
           curl -f -X POST "$CLEAN_URL/api/cron/learning" \
           -H "Authorization: Bearer $CLEAN_SECRET" \
