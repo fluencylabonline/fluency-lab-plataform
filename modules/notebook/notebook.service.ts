@@ -1,6 +1,7 @@
 import { notebookRepository } from "./notebook.repository";
 import type { Notebook } from "./notebook.schema";
 import { adminStorage } from "@/lib/firebase-admin";
+import { aiService } from "@/modules/ai/ai.service";
 
 export const notebookService = {
   /**
@@ -226,6 +227,47 @@ export const notebookService = {
     }
 
     return results;
+  },
+
+  async getQuizLimitCount(teacherId: string, studentId: string): Promise<number> {
+    return notebookRepository.getQuizLimitCount(teacherId, studentId);
+  },
+
+  async generateQuiz(
+    teacherId: string,
+    studentId: string,
+    notebookId: string,
+    content: string,
+    nativeLanguage: string,
+    targetLanguage: string,
+    level: string
+  ) {
+    // 1. Verify access to the notebook
+    const notebook = await notebookRepository.findById(notebookId);
+    if (!notebook) throw new Error("Notebook not found");
+
+    // 2. Check the generation limit (Max 3 quizzes per student by this teacher)
+    const currentCount = await notebookRepository.getQuizLimitCount(teacherId, studentId);
+    if (currentCount >= 3) {
+      throw new Error("Você atingiu o limite de 3 quizes gerados para este aluno.");
+    }
+
+    // 3. Call AI Service to generate the quiz questions
+    const quizData = await aiService.generateNotebookQuizFromContent(
+      content,
+      nativeLanguage,
+      targetLanguage,
+      level,
+      teacherId
+    );
+
+    // 4. Increment the generation limit counter
+    const newCount = await notebookRepository.incrementQuizLimitCount(teacherId, studentId);
+
+    return {
+      quizData,
+      usageCount: newCount
+    };
   },
 };
 

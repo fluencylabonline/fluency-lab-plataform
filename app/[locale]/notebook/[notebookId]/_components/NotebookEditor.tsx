@@ -22,6 +22,7 @@ import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/imag
 import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
 import { YouTubeSyncNode } from "@/components/tiptap-extension/youtube-sync/YoutubeSyncNode";
 import { LyricsSyncNode } from "@/components/tiptap-extension/lyrics-sync/LyricsSyncNode";
+import { QuizNode } from "@/components/tiptap-extension/quiz/QuizNode";
 
 // --- Call Feature ---
 import { FloatCallButton } from "./call/FloatCallButton";
@@ -97,7 +98,8 @@ export function NotebookEditor({
   useEffect(() => {
     (globalThis as Record<string, unknown>).__userId = userId;
     (globalThis as Record<string, unknown>).__userRole = userRole;
-  }, [userId, userRole]);
+    (globalThis as Record<string, unknown>).__studentId = studentId;
+  }, [userId, userRole, studentId]);
 
   // 3. Video Call Logic
   // Students: listen for incoming calls via Firestore onSnapshot (scoped to this page only)
@@ -194,6 +196,7 @@ export function NotebookEditor({
           : []),
         YouTubeSyncNode,
         LyricsSyncNode,
+        QuizNode,
       ],
     },
     [ydoc, awareness],

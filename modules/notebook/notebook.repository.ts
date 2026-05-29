@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { notebooksTable, notebookSessionsTable, notebookAssetsTable } from "./notebook.schema";
+import { notebooksTable, notebookSessionsTable, notebookAssetsTable, notebookQuizLimitsTable } from "./notebook.schema";
 import { eq, and, lte } from "drizzle-orm";
 
 export const notebookRepository = {
@@ -154,4 +154,45 @@ export const notebookRepository = {
   async deleteAssetRecord(filePath: string) {
     await db.delete(notebookAssetsTable).where(eq(notebookAssetsTable.filePath, filePath));
   },
+
+  // --- Quiz Limits ---
+
+  async getQuizLimitCount(teacherId: string, studentId: string): Promise<number> {
+    const record = await db.query.notebookQuizLimitsTable.findFirst({
+      where: and(
+        eq(notebookQuizLimitsTable.teacherId, teacherId),
+        eq(notebookQuizLimitsTable.studentId, studentId)
+      ),
+    });
+    return record?.count ?? 0;
+  },
+
+  async incrementQuizLimitCount(teacherId: string, studentId: string): Promise<number> {
+    const existing = await db.query.notebookQuizLimitsTable.findFirst({
+      where: and(
+        eq(notebookQuizLimitsTable.teacherId, teacherId),
+        eq(notebookQuizLimitsTable.studentId, studentId)
+      ),
+    });
+
+    if (existing) {
+      const [updated] = await db
+        .update(notebookQuizLimitsTable)
+        .set({ count: existing.count + 1 })
+        .where(eq(notebookQuizLimitsTable.id, existing.id))
+        .returning();
+      return updated.count;
+    } else {
+      const [inserted] = await db
+        .insert(notebookQuizLimitsTable)
+        .values({
+          teacherId,
+          studentId,
+          count: 1,
+        })
+        .returning();
+      return inserted.count;
+    }
+  },
 };
+

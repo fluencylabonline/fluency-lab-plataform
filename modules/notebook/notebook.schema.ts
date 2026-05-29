@@ -60,6 +60,23 @@ export const notebookAssetsTable = pgTable("notebook_assets", {
   deletedAt: timestamp("deleted_at"), // If set, it's marked for cleanup
 });
 
+export const notebookQuizLimitsTable = pgTable("notebook_quiz_limits", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  teacherId: text("teacher_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  studentId: text("student_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  count: integer("count").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+
 // --- Drizzle-Zod base schemas ---
 export const selectNotebookSchema = createSelectSchema(notebooksTable);
 export const insertNotebookSchema = createInsertSchema(notebooksTable);
@@ -78,3 +95,7 @@ export type CreateNotebookValues = z.input<typeof createNotebookSchema>;
 
 export type NotebookSession = typeof notebookSessionsTable.$inferSelect;
 export type NewNotebookSession = typeof notebookSessionsTable.$inferInsert;
+
+export type NotebookQuizLimit = typeof notebookQuizLimitsTable.$inferSelect;
+export type NewNotebookQuizLimit = typeof notebookQuizLimitsTable.$inferInsert;
+

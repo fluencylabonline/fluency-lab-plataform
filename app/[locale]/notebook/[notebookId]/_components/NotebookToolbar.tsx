@@ -39,17 +39,9 @@ import { RoleGuard } from "@/components/ui/role-guard";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { CollaboratorsAvatarGroup } from "./CollaboratorsAvatarGroup";
 import { Awareness } from "y-protocols/awareness";
-import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 import { NotebookSettingsVault } from "./NotebookSettingsVault";
-import {
-  Vault,
-  VaultContent,
-  VaultHeader,
-  VaultTitle,
-  VaultDescription,
-  VaultBody,
-} from "@/components/ui/vault";
-import { Music, Sparkles, Settings, Play, Music2, FileQuestionMark } from "lucide-react";
+import { NotebookActivitiesVault } from "./NotebookActivitiesVault";
+import { Sparkles, Settings } from "lucide-react";
 
 interface NotebookToolbarProps {
   toolbarRef: RefObject<HTMLDivElement | null>;
@@ -72,7 +64,6 @@ export function NotebookToolbar({
   user,
   awareness,
 }: NotebookToolbarProps) {
-  const { editor } = useTiptapEditor();
   const [isToolsVaultOpen, setIsToolsVaultOpen] = useState(false);
   const [isSettingsVaultOpen, setIsSettingsVaultOpen] = useState(false);
 
@@ -187,105 +178,10 @@ export function NotebookToolbar({
         )}
       </Toolbar>
 
-      {/* Vault de Seleção de Atividades Interativas */}
-      <Vault open={isToolsVaultOpen} onOpenChange={setIsToolsVaultOpen}>
-        <VaultContent className="sm:max-w-xl">
-          <VaultHeader className="p-6 pb-4 border-b">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber-500" />
-              <VaultTitle className="text-left font-bold">
-                Atividades Interativas
-              </VaultTitle>
-            </div>
-            <VaultDescription className="text-left">
-              Selecione uma atividade para adicionar ao notebook dos alunos.
-            </VaultDescription>
-          </VaultHeader>
-          <VaultBody className="p-6">
-            <div className="grid grid-cols-1 gap-4">
-              <button
-                onClick={() => {
-                  editor?.chain().focus().insertLyricsSync().run();
-                  setIsToolsVaultOpen(false);
-                }}
-                className="card flex items-start gap-4 p-4 text-left border border-muted hover:border-primary/50 bg-background rounded-xl transition-all duration-200"
-              >
-                <div className="bg-primary/10 p-3 rounded-full text-primary shrink-0">
-                  <Music className="w-6 h-6" />
-                </div>
-                <div className="space-y-1">
-                  <h4 className="font-bold text-base text-foreground">
-                    Lyrics Training (Treino de Música)
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Crie um exercício de completar lacunas em tempo real baseado
-                    em um clipe do YouTube e letra sincronizada.
-                  </p>
-                </div>
-              </button>
-
-              {/* YouTube Sync */}
-              <button
-                onClick={() => {
-                  editor?.chain().focus().insertYouTubeSync().run();
-                  setIsToolsVaultOpen(false);
-                }}
-                className="card flex items-start gap-4 p-4 text-left border border-muted hover:border-primary/50 bg-background rounded-xl transition-all duration-200"
-              >
-                <div className="bg-red-500/10 p-3 rounded-full text-red-500 shrink-0">
-                  <Play className="w-6 h-6" />
-                </div>
-                <div className="space-y-1">
-                  <h4 className="font-bold text-base text-foreground">
-                    YouTube Sincronizado
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Incorpore um vídeo do YouTube sincronizado em tempo real
-                    entre professor e aluno.
-                  </p>
-                </div>
-              </button>
-
-              {/* Audio Sync */}
-              <button
-                // onClick={() => {}
-                className="card flex items-start gap-4 p-4 text-left border border-muted hover:border-primary/50 bg-background rounded-xl transition-all duration-200"
-              >
-                <div className="bg-amber-500/10 p-3 rounded-full text-amber-500 shrink-0">
-                  <Music2 className="w-6 h-6" />
-                </div>
-                <div className="space-y-1">
-                  <h4 className="font-bold text-base text-foreground">
-                    Áudio Sincronizado
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Incorpore um áudio sincronizado em tempo real entre
-                    professor e aluno.
-                  </p>
-                </div>
-              </button>
-
-              {/* Multiple Question Extension */}
-              <button
-                // onClick={() => {}
-                className="card flex items-start gap-4 p-4 text-left border border-muted hover:border-primary/50 bg-background rounded-xl transition-all duration-200"
-              >
-                <div className="bg-indigo-500/10 p-3 rounded-full text-indigo-500 shrink-0">
-                  <FileQuestionMark className="w-6 h-6" />
-                </div>
-                <div className="space-y-1">
-                  <h4 className="font-bold text-base text-foreground">
-                    Múltipla Escolha
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Incorpore questões de múltipla escolha sincronizadas em tempo real entre professor e aluno.
-                  </p>
-                </div>
-              </button>
-            </div>
-          </VaultBody>
-        </VaultContent>
-      </Vault>
+      <NotebookActivitiesVault
+        open={isToolsVaultOpen}
+        onOpenChange={setIsToolsVaultOpen}
+      />
 
       <NotebookSettingsVault
         open={isSettingsVaultOpen}

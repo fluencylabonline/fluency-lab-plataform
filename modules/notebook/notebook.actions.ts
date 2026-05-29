@@ -157,3 +157,51 @@ export const getNotebookAction = protectedAction
     );
     return { notebook };
   });
+
+/**
+ * Generates an AI quiz of 10 questions for a notebook.
+ * Only teachers and admins can call this.
+ */
+export const generateNotebookQuizAction = protectedAction
+  .schema(z.object({
+    notebookId: z.string().uuid(),
+    studentId: z.string(),
+    content: z.string().min(1),
+    nativeLanguage: z.string().min(1),
+    targetLanguage: z.string().min(1),
+    level: z.string().min(1)
+  }))
+  .metadata({ name: "generateNotebookQuizAction" })
+  .action(async ({ parsedInput, ctx }) => {
+    const { user } = ctx;
+
+    if (user.role !== "teacher" && user.role !== "admin") {
+      throw new Error("Only teachers can generate quizzes");
+    }
+
+    const { quizData, usageCount } = await notebookService.generateQuiz(
+      user.id,
+      parsedInput.studentId,
+      parsedInput.notebookId,
+      parsedInput.content,
+      parsedInput.nativeLanguage,
+      parsedInput.targetLanguage,
+      parsedInput.level
+    );
+
+    revalidatePath(`/notebook/${parsedInput.notebookId}`);
+
+    return { quizData, usageCount };
+  });
+
+/**
+ * Gets the current quiz generation count for a student-teacher pair.
+ */
+export const getQuizLimitCountAction = protectedAction
+  .schema(z.object({ studentId: z.string() }))
+  .metadata({ name: "getQuizLimitCountAction" })
+  .action(async ({ parsedInput, ctx }) => {
+    const count = await notebookService.getQuizLimitCount(ctx.user.id, parsedInput.studentId);
+    return { count };
+  });
+

@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI, SchemaType, Schema } from "@google/generative-ai";
 import { env } from "@/env";
 import { QuizData, CEFRLevel, QuizItem, AnalysisResult, LearningItemMetadata } from "@/modules/curriculum/curriculum.types";
+import type { QuizData as NotebookQuizData } from "@/components/tiptap-extension/quiz/quiz.types";
 import { checkRateLimit, checkDailyBudget } from "@/lib/rate-limit";
 import { aiRepository } from "./ai.repository";
 import { generateHash, approximateTokens, truncateByTokens } from "./ai.utils";
@@ -1048,5 +1049,107 @@ ${safeContent}
 
     await aiRepository.setCache(hash, "gemini_quiz_gen", finalResult, 60);
     return finalResult;
+  },
+
+  async generateNotebookQuizFromContent(
+    content: string,
+    nativeLanguage: string,
+    targetLanguage: string,
+    level: string,
+    userId?: string
+  ): Promise<NotebookQuizData> {
+    const hash = generateHash({ content, nativeLanguage, targetLanguage, level });
+    const cached = await aiRepository.getCache(hash, "gemini_notebook_quiz_gen");
+    if (cached) return cached as NotebookQuizData;
+
+    if (userId) {
+      const limit = await checkRateLimit("gemini_notebook_quiz_gen", userId, 10);
+      if (!limit.success) throw new Error("Rate limit exceeded for AI Quiz generation");
+    }
+
+    const model = genAI.getGenerativeModel({
+      model: "models/gemini-2.0-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            questions: {
+              type: SchemaType.ARRAY,
+              items: {
+                type: SchemaType.OBJECT,
+                properties: {
+                  id: { type: SchemaType.STRING },
+                  type: { type: SchemaType.STRING, format: "enum", enum: ["multiple-choice", "written"] },
+                  category: { type: SchemaType.STRING, format: "enum", enum: ["comprehension", "grammar", "vocabulary", "review"] },
+                  questionText: { type: SchemaType.STRING },
+                  options: {
+                    type: SchemaType.ARRAY,
+                    items: {
+                      type: SchemaType.OBJECT,
+                      properties: {
+                        id: { type: SchemaType.STRING },
+                        text: { type: SchemaType.STRING }
+                      },
+                      required: ["id", "text"]
+                    }
+                  },
+                  correctOptionId: { type: SchemaType.STRING },
+                  correctWrittenAnswer: { type: SchemaType.STRING },
+                  explanations: {
+                    type: SchemaType.OBJECT,
+                    description: "Explanations for options (A, B, C, D) or general written feedback.",
+                    properties: {
+                      A: { type: SchemaType.STRING },
+                      B: { type: SchemaType.STRING },
+                      C: { type: SchemaType.STRING },
+                      D: { type: SchemaType.STRING },
+                      general: { type: SchemaType.STRING }
+                    }
+                  }
+                },
+                required: ["id", "type", "category", "questionText", "explanations"]
+              }
+            }
+          },
+          required: ["questions"]
+        }
+      }
+    });
+
+    const prompt = `Act as an expert language teacher and pedagogical designer.
+    Your task is to generate a comprehensive 10-QUESTION quiz based strictly on the provided lesson/notebook content.
+    
+    CONTENT:
+    "${content}"
+    
+    The student's native language is: ${nativeLanguage}
+    The target language they are learning is: ${targetLanguage}
+    The CEFR target level of this quiz is: ${level}
+    
+    The quiz must satisfy these strictly enforced pedagogical rules:
+    1. Exactly 10 questions.
+    2. Vary the types of questions: 5 must be multiple-choice ("multiple-choice") and 5 must be written fill-in-the-blanks ("written").
+    3. Vary the categories: include a balanced mix of "comprehension", "grammar", "vocabulary", and "review".
+    4. For multiple-choice questions, provide exactly 4 options (options array must contain 4 items with IDs like "A", "B", "C", "D").
+    5. For written questions, the student will type their answer. Provide a single correct answer in "correctWrittenAnswer" (keep it simple, 1-3 words maximum, usually just the correct word or phrase to fill the gap).
+    6. Extremely important: You must provide a clear and didactic explanation for each option in multiple-choice questions (explaining why a specific option is correct, and why each incorrect option is wrong/misleading). For written questions, provide a "general" key inside explanations detailing the grammatical or vocabulary rule and why that answer is correct.
+    7. The explanations and instruction text must be written in the student's native language (${nativeLanguage}) to facilitate student comprehension.
+    8. The questions themselves and options must be primarily in the target language (${targetLanguage}), tailored to the ${level} CEFR level.
+    
+    Return a JSON containing a "questions" array matching the defined structure.`;
+
+    const result = await model.generateContent(prompt);
+    let finalResult: NotebookQuizData;
+    try {
+      finalResult = JSON.parse(result.response.text());
+    } catch {
+      const cleaned = cleanJsonString(result.response.text());
+      finalResult = JSON.parse(cleaned);
+    }
+
+    await aiRepository.setCache(hash, "gemini_notebook_quiz_gen", finalResult, 30);
+    return finalResult;
   }
 };
+

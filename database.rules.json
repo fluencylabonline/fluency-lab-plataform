@@ -29,6 +29,12 @@
         ".read": "auth != null",
         ".write": "auth != null && (!data.exists() || data.child('lastUpdatedBy').val() == auth.uid || newData.child('lastUpdatedBy').val() == auth.uid)"
       }
+    },
+    "interactive-quiz": {
+      "$nodeId": {
+        ".read": "auth != null",
+        ".write": "auth != null && (!data.exists() || data.child('lastUpdatedBy').val() == auth.uid || newData.child('lastUpdatedBy').val() == auth.uid)"
+      }
     }
   }
 }
