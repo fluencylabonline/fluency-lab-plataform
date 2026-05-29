@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import {
   EditorContent,
   EditorContext,
@@ -20,6 +20,7 @@ import { Collaboration } from "@tiptap/extension-collaboration";
 import { CollaborationCaret } from "@tiptap/extension-collaboration-caret";
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
 import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
+import { YouTubeSyncNode } from "@/components/tiptap-extension/youtube-sync/YoutubeSyncNode";
 
 // --- Call Feature ---
 import { FloatCallButton } from "./call/FloatCallButton";
@@ -83,12 +84,18 @@ export function NotebookEditor({
   const { ydoc, awareness } = useNotebookCollaboration({
     notebookId,
     uid: userId,
-    user: { name: userName, color: userColor, uid: userId },
+    user: { name: userName, color: userColor, uid: userId, photoUrl: user.photoUrl },
   });
 
   // 2. Session Logic (Neon/Tracking)
   const getEditorContent = useCallback(() => editorRef.current?.getHTML(), []);
   useNotebookSession({ notebookId, getEditorContent });
+
+  // Expose userId for YouTube sync attribution (identifies which client sent state updates)
+  // Must be in useEffect to avoid mutating external state during render (React Compiler rule)
+  useEffect(() => {
+    (globalThis as Record<string, unknown>).__userId = userId;
+  }, [userId]);
 
   // 3. Video Call Logic
   // Students: listen for incoming calls via Firestore onSnapshot (scoped to this page only)
@@ -179,10 +186,11 @@ export function NotebookEditor({
           ? [
               CollaborationCaret.configure({
                 provider: { awareness },
-                user: { name: userName, color: userColor },
+                user: { name: userName, color: userColor, uid: userId, photoUrl: user.photoUrl },
               }),
             ]
           : []),
+        YouTubeSyncNode,
       ],
     },
     [ydoc, awareness],
@@ -208,6 +216,7 @@ export function NotebookEditor({
           backHref={backHref}
           cursorY={rect.y}
           user={user}
+          awareness={awareness}
         />
 
         <NotebookBubbleMenu editor={editor} />

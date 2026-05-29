@@ -52,11 +52,11 @@ const AvatarFallback = React.forwardRef<
         async function loadImages() {
             const images = await getFallbackImages();
             if (images.length > 0) {
-                setSrc(getOrSetFallbackImage(images));
+                setSrc(getOrSetFallbackImage(images, name));
             }
         }
         loadImages();
-    }, []);
+    }, [name]);
 
     return (
         <AvatarPrimitive.Fallback
@@ -76,4 +76,47 @@ const AvatarFallback = React.forwardRef<
 });
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
 
-export { Avatar, AvatarImage, AvatarFallback };
+const AvatarGroup = React.forwardRef<
+    HTMLDivElement,
+    React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+    <div
+        ref={ref}
+        className={twMerge("flex -space-x-2 items-center justify-center", className)}
+        {...props}
+    />
+));
+AvatarGroup.displayName = "AvatarGroup";
+
+const AvatarGroupCount = React.forwardRef<
+    HTMLSpanElement,
+    React.HTMLAttributes<HTMLSpanElement> & { size?: keyof typeof sizeClasses }
+>(({ className, size = "md", ...props }, ref) => (
+    <span
+        ref={ref}
+        className={twMerge(
+            "flex items-center justify-center rounded-2xl bg-muted text-xs font-semibold ring-1 ring-background shrink-0",
+            sizeClasses[size],
+            className
+        )}
+        {...props}
+    />
+));
+AvatarGroupCount.displayName = "AvatarGroupCount";
+
+const AvatarBadge = React.forwardRef<
+    HTMLSpanElement,
+    React.HTMLAttributes<HTMLSpanElement>
+>(({ className, ...props }, ref) => (
+    <span
+        ref={ref}
+        className={twMerge(
+            "absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full ring-1 ring-background",
+            className
+        )}
+        {...props}
+    />
+));
+AvatarBadge.displayName = "AvatarBadge";
+
+export { Avatar, AvatarImage, AvatarFallback, AvatarGroup, AvatarGroupCount, AvatarBadge };

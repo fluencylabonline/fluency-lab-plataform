@@ -41,6 +41,7 @@ export interface AwarenessUser {
   name: string;
   color: string;
   uid: string;
+  photoUrl?: string | null;
 }
 
 // ────────────────────────────────────────────────────────────────────────────

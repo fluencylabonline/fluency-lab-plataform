@@ -1,10 +1,19 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper to check if user is student or teacher of the notebook
+    // Helper to check if user has admin or manager role
+    function isStaff() {
+      return request.auth != null && (
+        request.auth.token.role == 'admin' || 
+        request.auth.token.role == 'manager'
+      );
+    }
+
+    // Helper to check if user is student or teacher of the notebook, or is staff
     function canAccessNotebook(notebookId) {
       let notebook = get(/databases/$(database)/documents/Notebooks/$(notebookId)).data;
       return request.auth != null && (
+        isStaff() ||
         notebook.studentId == request.auth.uid || 
         notebook.teacherId == request.auth.uid
       );
@@ -17,6 +26,7 @@ service cloud.firestore {
     match /Notebooks/{notebookId} {
       // Allow read/write for the notebook document itself
       allow read, write: if request.auth != null && (
+        isStaff() ||
         (resource == null && request.resource.data.teacherId == request.auth.uid) || // Allow creation by teacher
         (resource != null && (resource.data.studentId == request.auth.uid || resource.data.teacherId == request.auth.uid))
       );

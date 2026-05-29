@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { SlotInstanceWithDetails } from "@/modules/scheduling/scheduling.types";
-import type { Notebook } from "@/modules/notebook/notebook.schema";
 import { StudentRoadmap } from "@/modules/learning/learning.types";
 import {
-  BookOpen,
-  Target,
+  Goal,
+  Notebook as NotebookIcon,
 } from "lucide-react";
 import {
   Vault,
@@ -21,6 +20,7 @@ import { StudentNotebooksCard } from "./StudentNotebooksCard";
 import { StudentPlanCard } from "./StudentPlanCard";
 import { StudentClassesCard } from "./StudentClassesCard";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
+import { Notebook } from "@/modules/notebook/notebook.schema";
 
 interface StudentDetailsClientProps {
   studentId: string;
@@ -45,13 +45,13 @@ export function StudentDetailsClient({
   const headerActions = [
     {
       id: "notebooks",
-      icon: <BookOpen className="h-5 w-5" />,
+      icon: <NotebookIcon className="h-5 w-5" />,
       onClick: () => setIsNotebooksOpen(true),
       className: "lg:hidden" // Esconde no desktop e mostra no tablet
     },
     {
       id: "plan",
-      icon: <Target className="h-5 w-5" />,
+      icon: <Goal className="h-5 w-5" />,
       onClick: () => setIsPlanOpen(true),
       className: "lg:hidden" // Esconde no desktop e mostra no tablet
     }
@@ -105,7 +105,7 @@ export function StudentDetailsClient({
         <VaultContent className="max-w-4xl h-[90vh]">
           <VaultHeader>
             <VaultTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-primary" />
+              <NotebookIcon className="h-5 w-5 text-primary" />
               Notebooks
             </VaultTitle>
           </VaultHeader>
@@ -124,7 +124,7 @@ export function StudentDetailsClient({
         <VaultContent className="max-w-4xl h-[90vh]">
           <VaultHeader>
             <VaultTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-primary" />
+              <Goal className="h-5 w-5 text-primary" />
               Plano de Estudos
             </VaultTitle>
             <VaultDescription>

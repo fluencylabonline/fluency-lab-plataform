@@ -2,20 +2,28 @@
   "rules": {
     "notebooks": {
       "$notebookId": {
-        ".read": "auth != null && (data.child('metadata/studentId').val() === auth.uid || data.child('metadata/teacherId').val() === auth.uid)",
+        ".read": "auth != null && (auth.token.role == 'admin' || auth.token.role == 'manager' || data.child('metadata/studentId').val() == auth.uid || data.child('metadata/teacherId').val() == auth.uid)",
 
         "metadata": {
-          ".write": "auth != null && (!data.exists() || data.parent().child('metadata/studentId').val() === auth.uid || data.parent().child('metadata/teacherId').val() === auth.uid)"
+          ".write": "auth != null && (!data.exists() || auth.token.role == 'admin' || auth.token.role == 'manager' || data.parent().child('metadata/studentId').val() == auth.uid || data.parent().child('metadata/teacherId').val() == auth.uid)"
         },
         "content": {
-          ".write": "auth != null && (data.parent().child('metadata/studentId').val() === auth.uid || data.parent().child('metadata/teacherId').val() === auth.uid)"
+          ".write": "auth != null && (auth.token.role == 'admin' || auth.token.role == 'manager' || data.parent().child('metadata/studentId').val() == auth.uid || data.parent().child('metadata/teacherId').val() == auth.uid)"
         },
         "awareness": {
           "$userId": {
-            ".write": "auth != null && auth.uid === $userId && (root.child('notebooks').child($notebookId).child('metadata/studentId').val() === auth.uid || root.child('notebooks').child($notebookId).child('metadata/teacherId').val() === auth.uid)"
+            ".write": "auth != null && auth.uid == $userId && (auth.token.role == 'admin' || auth.token.role == 'manager' || root.child('notebooks').child($notebookId).child('metadata/studentId').val() == auth.uid || root.child('notebooks').child($notebookId).child('metadata/teacherId').val() == auth.uid)"
           }
         }
       }
+    },
+
+    "youtube-sync": {
+      "$nodeId": {
+        ".read": "auth != null",
+        ".write": "auth != null && (!data.exists() || data.child('lastUpdatedBy').val() == auth.uid || newData.child('lastUpdatedBy').val() == auth.uid)"
+      }
     }
   }
-}
+}
+
