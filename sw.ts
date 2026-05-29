@@ -246,7 +246,7 @@ const customCache: RuntimeCaching[] = [
   // 17. HTML Document Requests (NetworkFirst)
   {
     matcher: ({ request, url: { pathname }, sameOrigin }: RouteMatchCallbackOptions) =>
-      request.headers.get("Content-Type")?.includes("text/html") && sameOrigin && !pathname.startsWith("/api/"),
+      request.mode === "navigate" && sameOrigin && !pathname.startsWith("/api/"),
     handler: new NetworkFirst({
       cacheName: PAGES_CACHE_NAME.html,
       plugins: [
@@ -296,7 +296,7 @@ const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: true,
   clientsClaim: true,
-  navigationPreload: true,
+  navigationPreload: false,
   runtimeCaching: customCache,
   fallbacks: {
     entries: [
