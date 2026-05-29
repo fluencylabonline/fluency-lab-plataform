@@ -21,6 +21,7 @@ import { CollaborationCaret } from "@tiptap/extension-collaboration-caret";
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
 import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
 import { YouTubeSyncNode } from "@/components/tiptap-extension/youtube-sync/YoutubeSyncNode";
+import { LyricsSyncNode } from "@/components/tiptap-extension/lyrics-sync/LyricsSyncNode";
 
 // --- Call Feature ---
 import { FloatCallButton } from "./call/FloatCallButton";
@@ -91,11 +92,12 @@ export function NotebookEditor({
   const getEditorContent = useCallback(() => editorRef.current?.getHTML(), []);
   useNotebookSession({ notebookId, getEditorContent });
 
-  // Expose userId for YouTube sync attribution (identifies which client sent state updates)
+  // Expose userId and userRole for synchronization attribution (identifies client state and role)
   // Must be in useEffect to avoid mutating external state during render (React Compiler rule)
   useEffect(() => {
     (globalThis as Record<string, unknown>).__userId = userId;
-  }, [userId]);
+    (globalThis as Record<string, unknown>).__userRole = userRole;
+  }, [userId, userRole]);
 
   // 3. Video Call Logic
   // Students: listen for incoming calls via Firestore onSnapshot (scoped to this page only)
@@ -191,6 +193,7 @@ export function NotebookEditor({
             ]
           : []),
         YouTubeSyncNode,
+        LyricsSyncNode,
       ],
     },
     [ydoc, awareness],

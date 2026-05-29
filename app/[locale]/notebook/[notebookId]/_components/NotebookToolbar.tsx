@@ -205,6 +205,7 @@ export function NotebookToolbar({
             <div className="grid grid-cols-1 gap-4">
               <button
                 onClick={() => {
+                  editor?.chain().focus().insertLyricsSync().run();
                   setIsToolsVaultOpen(false);
                 }}
                 className="card flex items-start gap-4 p-4 text-left border border-muted hover:border-primary/50 bg-background rounded-xl transition-all duration-200"
