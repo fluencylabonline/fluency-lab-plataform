@@ -13,6 +13,7 @@ import {
   Music, 
   Globe2 
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { TeacherLyricsView } from "./TeacherLyricsView";
 import { StudentLyricsView } from "./StudentLyricsView";
@@ -20,7 +21,6 @@ import type { LyricsSyncNodeAttributes } from "./LyricsSyncNode";
 import type { YouTubeVideo } from "@/modules/media/media.service";
 import type { CellState } from "@/modules/immersion/immersion.types";
 import { evaluateGuess } from "@/app/[locale]/hub/student/immersion/_components/evaluateGuess";
-import "./lyrics-sync.css";
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
@@ -103,6 +103,7 @@ function normalizeWord(s: string): string {
     .toLowerCase();
 }
 
+// Selects the longest word (> 2 letters) in the sentence to hide.
 function chooseAutoGapIndex(text: string): number {
   const words = text.split(" ");
   if (words.length === 0) return -1;
@@ -182,6 +183,7 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
 
   const userRole = (globalThis as Record<string, unknown>).__userRole as string ?? "student";
   const myUserId = (globalThis as Record<string, unknown>).__userId as string ?? "anonymous";
+  const t = useTranslations("LyricsSync");
 
   const playerRef = useRef<YouTubePlayerInstance | null>(null);
   
@@ -310,7 +312,6 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
 
       set(ref(rtdb, `lyrics-sync/${attrs.nodeId}`), fullState).catch(console.error);
     },
-     
     [] // Intentionally empty — reads live data from refs only
   );
 
@@ -395,7 +396,7 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
             }
           },
           onError: () => {
-            if (!destroyed) setError("Não foi possível carregar o vídeo.");
+            if (!destroyed) setError(t("setup.videoLoadError") || "Não foi possível carregar o vídeo.");
           },
         },
       });
@@ -666,7 +667,7 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
 
   const hint = () => {
     if (!blankWord) return;
-    toast.info(`Dica: A palavra tem ${blankWord.length} letras e começa com "${blankWord[0].toUpperCase()}"`);
+    toast.info(t("hints.text", { length: blankWord.length, letter: blankWord[0].toUpperCase() }) || `Dica: A palavra tem ${blankWord.length} letras e começa com "${blankWord[0].toUpperCase()}"`);
   };
 
   // ── Answer Submission Logic (Student View) ──────────────────────────────────
@@ -714,7 +715,6 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
       setTimeout(() => setFeedback(null), 900);
     }
   };
-
 
   const continueAfterCorrect = () => {
     if (!awaitingNext) return;
@@ -812,7 +812,7 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
       const data = (await r.json()) as { items: YouTubeVideo[] };
       setSearchResults(data.items || []);
     } catch {
-      setError("Erro ao buscar vídeos.");
+      setError(t("setup.searchError") || "Erro ao buscar vídeos.");
     } finally {
       setIsSearching(false);
     }
@@ -832,14 +832,14 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
 
   const handleLoadLyrics = async () => {
     if (!setupVideoUrl || !trackInput || !artistInput) {
-      toast.error("Por favor, preencha todos os campos do vídeo.");
+      toast.error(t("setup.fillFieldsWarning") || "Por favor, preencha todos os campos do vídeo.");
       return;
     }
     setLoadingLyrics(true);
     try {
       const lyrics = await fetchLrcData(trackInput, artistInput);
       if (!lyrics) {
-        toast.error("Não conseguimos encontrar a letra sincronizada para essa música.");
+        toast.error(t("setup.lyricsNotFoundError") || "Não conseguimos encontrar a letra sincronizada para essa música.");
         return;
       }
       setLrcInput(lyrics);
@@ -853,9 +853,9 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
         pauseEvery: pauseEveryInput,
       });
 
-      toast.success("Letra sincronizada carregada com sucesso!");
+      toast.success(t("setup.lyricsLoadSuccess") || "Letra sincronizada carregada com sucesso!");
     } catch {
-      toast.error("Erro ao carregar letra.");
+      toast.error(t("setup.lyricsLoadError") || "Erro ao carregar letra.");
     } finally {
       setLoadingLyrics(false);
     }
@@ -867,10 +867,10 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
     if (userRole === "student") {
       return (
         <NodeViewWrapper>
-          <div className="lyrics-sync-wrapper p-8 text-center text-muted-foreground/60 border-2 border-dashed border-border/50 rounded-2xl">
+          <div className="my-4 p-8 text-center text-zinc-500/60 dark:text-zinc-400/50 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/10">
             <Globe2 className="w-8 h-8 text-primary/40 mx-auto mb-2" />
-            <h3 className="font-bold text-sm text-foreground">Aguardando Professor</h3>
-            <p className="text-xs mt-1">O professor está preparando a atividade Lyrics Training para esta aula.</p>
+            <h3 className="font-bold text-sm text-foreground">{t("setup.waitingTitle") || "Aguardando Professor"}</h3>
+            <p className="text-xs mt-1">{t("setup.waitingDesc") || "O professor está preparando a atividade Lyrics Training para esta aula."}</p>
           </div>
         </NodeViewWrapper>
       );
@@ -878,14 +878,18 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
 
     return (
       <NodeViewWrapper>
-        <div className="lyrics-sync-wrapper" data-selected={selected}>
-          <div className="lyrics-sync-setup-header">
-            <div className="lyrics-sync-icon-box">
+        <div 
+          className={`my-4 p-6 border rounded-2xl bg-white dark:bg-zinc-900 transition-colors duration-200 flex flex-col gap-5 ${
+            selected ? "border-solid border-primary" : "border-dashed border-zinc-200 dark:border-zinc-800"
+          }`}
+        >
+          <div className="text-center flex flex-col items-center gap-2">
+            <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-transform duration-200 hover:scale-105 shrink-0">
               <Music size={20} />
             </div>
-            <h3 className="lyrics-sync-title">Lyrics Training (Completar Letras)</h3>
-            <p className="lyrics-sync-subtitle">
-              Pesquise uma música no YouTube e preencha os dados do artista para carregar a letra sincronizada automaticamente.
+            <h3 className="text-base font-bold text-foreground m-0">{t("setup.title") || "Lyrics Training (Completar Letras)"}</h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-lg mx-auto leading-relaxed">
+              {t("setup.subtitle") || "Pesquise uma música no YouTube e preencha os dados do artista para carregar a letra sincronizada automaticamente."}
             </p>
           </div>
 
@@ -895,17 +899,18 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Pesquise o nome da música ou cantor..."
-              className="flex-1 h-10 px-3.5 border border-border rounded-xl bg-background outline-none text-sm"
+              placeholder={t("setup.searchPlaceholder") || "Pesquise o nome da música ou cantor..."}
+              className="flex-1 h-10 px-3.5 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-background outline-none text-sm focus:border-primary"
               onKeyDown={(e) => e.key === "Enter" && searchYouTube()}
             />
             <button
+              type="button"
               onClick={searchYouTube}
               disabled={isSearching || !searchQuery.trim()}
               className="h-10 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl text-sm flex items-center gap-1.5 shrink-0 transition-colors"
             >
               {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-              Buscar
+              {t("setup.searchBtn") || "Buscar"}
             </button>
           </div>
 
@@ -918,96 +923,100 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
 
           {/* Search results */}
           {searchResults.length > 0 ? (
-            <div className="lyrics-search-grid custom-scrollbar">
+            <div className="flex flex-col gap-2 max-h-[240px] overflow-y-auto pr-1.5 custom-scrollbar">
               {searchResults.map((item) => (
                 <button
                   key={String(item.videoId)}
-                  className="lyrics-search-item"
+                  type="button"
+                  className="w-full flex items-center gap-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-card hover:bg-zinc-50 dark:hover:bg-zinc-850 p-2 text-left transition-all duration-200 cursor-pointer"
                   onClick={() => chooseVideo(item)}
                 >
-                  <div className="lyrics-search-item-thumb">
+                  <div className="relative w-20 h-12 rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800 shrink-0">
                     {item.thumbnail && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={item.thumbnail} alt={String(item.title)} />
+                      <img src={item.thumbnail} alt={String(item.title)} className="object-cover w-full h-full" />
                     )}
                   </div>
-                  <div className="lyrics-search-item-info">
-                    <div className="lyrics-search-item-title">{String(item.title)}</div>
-                    <div className="lyrics-search-item-channel">{String(item.channelTitle)}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-foreground truncate mb-0.5">{String(item.title)}</div>
+                    <div className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate">{String(item.channelTitle)}</div>
                   </div>
                 </button>
               ))}
             </div>
           ) : (
             searchQuery.trim() && (
-              <div className="text-center py-6 text-xs text-muted-foreground/60 border border-dashed rounded-xl">
-                Nenhum vídeo pesquisado ainda.
+              <div className="text-center py-6 text-xs text-zinc-500/60 dark:text-zinc-400/50 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl">
+                {t("setup.emptySearch") || "Nenhum vídeo pesquisado ainda."}
               </div>
             )
           )}
 
           {setupVideoUrl && (
-            <div className="flex flex-col gap-4 border-t border-border/50 pt-4 animate-in fade-in duration-200">
+            <div className="flex flex-col gap-4 border-t border-zinc-150 dark:border-zinc-800/50 pt-4 animate-in fade-in duration-200">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground pl-1">Nome da Música</label>
+                  <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 pl-1">{t("setup.trackLabel") || "Nome da Música"}</label>
                   <input
                     type="text"
                     value={trackInput}
                     onChange={(e) => setTrackInput(e.target.value)}
                     placeholder="Shape of You"
-                    className="h-10 px-3.5 border border-border rounded-xl bg-background outline-none text-sm"
+                    className="h-10 px-3.5 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-background outline-none text-sm focus:border-primary"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground pl-1">Cantor / Artista</label>
+                  <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 pl-1">{t("setup.artistLabel") || "Cantor / Artista"}</label>
                   <input
                     type="text"
                     value={artistInput}
                     onChange={(e) => setArtistInput(e.target.value)}
                     placeholder="Ed Sheeran"
-                    className="h-10 px-3.5 border border-border rounded-xl bg-background outline-none text-sm"
+                    className="h-10 px-3.5 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-background outline-none text-sm focus:border-primary"
                   />
                 </div>
               </div>
 
               {/* Pause configuration option */}
-              <div className="flex items-center justify-between gap-4 bg-muted/20 p-3 rounded-xl border border-border/40">
-                <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                  <Video size={14} className="text-primary" /> Pausar automaticamente a cada:
+              <div className="flex items-center justify-between gap-4 bg-zinc-55/50 dark:bg-zinc-900/10 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+                  <Video size={14} className="text-primary" /> {t("setup.pauseEveryLabel") || "Pausar automaticamente a cada:"}
                 </span>
-                <div className="flex gap-1.5 p-0.5 bg-muted rounded-full">
+                <div className="flex gap-1.5 p-0.5 bg-zinc-150 dark:bg-zinc-800 rounded-full">
                   <button
-                    className={`text-xs font-bold px-3 py-1.5 rounded-full transition-all ${
-                      pauseEveryInput === 1 ? "bg-background text-foreground" : "text-muted-foreground"
+                    type="button"
+                    className={`text-[10px] font-bold px-3 py-1.5 rounded-full transition-all duration-150 ${
+                      pauseEveryInput === 1 ? "bg-white dark:bg-zinc-950 text-foreground shadow-sm" : "text-zinc-500 dark:text-zinc-450 hover:text-foreground"
                     }`}
                     onClick={() => setPauseEveryInput(1)}
                   >
-                    1 linha
+                    {t("setup.oneLine") || "1 linha"}
                   </button>
                   <button
-                    className={`text-xs font-bold px-3 py-1.5 rounded-full transition-all ${
-                      pauseEveryInput === 2 ? "bg-background text-foreground" : "text-muted-foreground"
+                    type="button"
+                    className={`text-[10px] font-bold px-3 py-1.5 rounded-full transition-all duration-150 ${
+                      pauseEveryInput === 2 ? "bg-white dark:bg-zinc-950 text-foreground shadow-sm" : "text-zinc-500 dark:text-zinc-455 hover:text-foreground"
                     }`}
                     onClick={() => setPauseEveryInput(2)}
                   >
-                    2 linhas
+                    {t("setup.twoLines") || "2 linhas"}
                   </button>
                 </div>
               </div>
 
               <button
+                type="button"
                 onClick={handleLoadLyrics}
                 disabled={loadingLyrics || !trackInput.trim() || !artistInput.trim()}
-                className="h-11 w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all"
+                className="h-11 w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loadingLyrics ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Carregando Letra Sincronizada...
+                    {t("setup.loadingLyrics") || "Carregando Letra Sincronizada..."}
                   </>
                 ) : (
-                  "Salvar e Carregar Letra"
+                  t("setup.saveBtn") || "Salvar e Carregar Letra"
                 )}
               </button>
             </div>
@@ -1020,7 +1029,11 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
   // Active sync views based on the session role
   return (
     <NodeViewWrapper>
-      <div className="lyrics-sync-wrapper" data-selected={selected}>
+      <div 
+        className={`my-4 p-6 border rounded-2xl bg-white dark:bg-zinc-900 transition-colors duration-200 flex flex-col gap-4 ${
+          selected ? "border-solid border-primary" : "border-dashed border-zinc-200 dark:border-zinc-800"
+        }`}
+      >
         {userRole === "teacher" ? (
           <TeacherLyricsView
             playerContainerRef={playerContainerRef}

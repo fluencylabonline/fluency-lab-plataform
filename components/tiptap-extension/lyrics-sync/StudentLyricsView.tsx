@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Keyboard } from "@/app/[locale]/hub/student/immersion/_components/Keyboard";
 import { LetterTile } from "@/app/[locale]/hub/student/immersion/_components/LetterTile";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import type { CellState } from "@/modules/immersion/immersion.types";
 
 interface StudentLyricsViewProps {
@@ -62,6 +63,7 @@ export function StudentLyricsView({
   maskedLine,
   normalizeWord,
 }: StudentLyricsViewProps) {
+  const t = useTranslations("LyricsSync");
 
   const maxLetters = blankWord ? normalizeWord(blankWord).length : 0;
   const normalizedInput = normalizeWord(inputValue).slice(0, maxLetters);
@@ -122,7 +124,7 @@ export function StudentLyricsView({
   return (
     <div className="flex flex-col gap-4 animate-in fade-in duration-200">
       {/* Video Player Display */}
-      <div className="mx-auto aspect-video w-full max-w-xl overflow-hidden rounded-xl bg-black border border-border/40">
+      <div className="mx-auto aspect-video w-full max-w-xl overflow-hidden rounded-xl bg-black border border-zinc-200 dark:border-zinc-800">
         <div ref={playerContainerRef} className="w-full h-full" />
       </div>
 
@@ -130,7 +132,7 @@ export function StudentLyricsView({
       <div className="flex flex-row flex-wrap items-center justify-between gap-3 px-1">
         <div className="flex gap-2">
           <Badge variant="secondary" className="px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border-none">
-            Pontos: <span className="font-bold ml-1">{score}</span>
+            {t("student.pointsLabel") || "Pontos"}: <span className="font-bold ml-1">{score}</span>
           </Badge>
           <Badge variant="secondary" className="px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-500 border-none flex items-center gap-1">
             <Flame className={cn("w-3.5 h-3.5 fill-amber-500/20", streak > 2 && "animate-bounce")} />
@@ -138,14 +140,14 @@ export function StudentLyricsView({
           </Badge>
         </div>
 
-        <div className="flex items-center gap-1 bg-muted/40 rounded-full p-0.5 border border-border/40">
+        <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-full p-0.5 border border-zinc-200 dark:border-zinc-700">
           <Button
             variant="ghost"
             size="icon"
             className="rounded-full w-8 h-8 hover:bg-background"
             onClick={togglePlay}
             disabled={!isPlayerReady || awaitingNext}
-            title={isPlaying ? "Pausar" : "Tocar"}
+            title={isPlaying ? (t("controls.pause") || "Pausar") : (t("controls.play") || "Tocar")}
           >
             {isPlaying ? <Pause className="w-3.5 h-3.5 text-foreground" /> : <Play className="w-3.5 h-3.5 text-foreground ml-0.5" />}
           </Button>
@@ -156,7 +158,7 @@ export function StudentLyricsView({
             className="rounded-full w-8 h-8 hover:bg-background"
             onClick={replayLine}
             disabled={!isPlayerReady}
-            title="Repetir frase"
+            title={t("controls.replay") || "Repetir frase"}
           >
             <RotateCcw className="w-3.5 h-3.5 text-foreground" />
           </Button>
@@ -167,7 +169,7 @@ export function StudentLyricsView({
             className="rounded-full w-8 h-8 hover:bg-background"
             onClick={hint}
             disabled={!isPlayerReady || !waitingInput || !blankWord}
-            title="Dica"
+            title={t("controls.hint") || "Dica"}
           >
             <Lightbulb className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500/10" />
           </Button>
@@ -175,11 +177,11 @@ export function StudentLyricsView({
       </div>
 
       {/* Lyrics Exercise Board */}
-      <div className="lyrics-text-container">
-        <div className="lyrics-text-meta">
-          {track || "Música"} {artist ? `• ${artist}` : ""} (Linha {currentIndex + 1}/{syncedLines.length})
+      <div className="flex flex-col justify-center items-center text-center min-h-[120px] p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/20 transition-all duration-200">
+        <div className="text-[11px] font-bold tracking-widest uppercase text-primary mb-2 opacity-80">
+          {track || t("student.defaultMusicLabel") || "Música"} {artist ? `• ${artist}` : ""} ({t("student.lineTracker", { current: currentIndex + 1, total: syncedLines.length }) || `Linha ${currentIndex + 1} de ${syncedLines.length}`})
         </div>
-        <div className="lyrics-text-active-line text-lg md:text-xl font-bold px-4">
+        <div className="text-lg md:text-xl font-extrabold leading-relaxed text-foreground flex flex-wrap justify-center items-center gap-1.5 px-4">
           <span>{maskedLine.before ? `${maskedLine.before} ` : ""}</span>
 
           {maskedLine.blank ? (
@@ -213,11 +215,11 @@ export function StudentLyricsView({
       </div>
 
       {/* Inputs / Keyboards Footer Panel */}
-      <div className="lyrics-input-footer">
+      <div className="min-h-[140px] flex flex-col justify-center items-center w-full mt-2">
         {showNextButton ? (
           <div className="flex flex-col items-center gap-3 animate-in zoom-in-95 duration-200">
             <span className="text-xs font-bold text-emerald-500 flex items-center gap-1.5 bg-emerald-500/10 py-1 px-3.5 rounded-full">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Resposta correta!
+              <CheckCircle2 className="w-3.5 h-3.5" /> {t("student.correctAnswer") || "Resposta correta!"}
             </span>
             <Button
               variant="default"
@@ -226,7 +228,7 @@ export function StudentLyricsView({
               onClick={continueAfterCorrect}
               disabled={!isPlayerReady}
             >
-              Continuar para a Próxima Frase <Play className="w-3.5 h-3.5 ml-2" />
+              {t("student.continueBtn") || "Continuar para a Próxima Frase"} <Play className="w-3.5 h-3.5 ml-2" />
             </Button>
           </div>
         ) : waitingInput ? (
@@ -239,19 +241,19 @@ export function StudentLyricsView({
               letterStates={keyboardLetterStates}
               disabled={tilesDisabled}
             />
-            <span className="text-[10px] text-muted-foreground/60 font-semibold uppercase tracking-wider">
-              Teclado físico bloqueado nesta aula. Responda pelas teclas virtuais acima.
+            <span className="text-[10px] text-muted-foreground/60 font-semibold uppercase tracking-wider text-center">
+              {t("student.keyboardLockedDesc") || "Teclado físico bloqueado nesta aula. Responda pelas teclas virtuais acima."}
             </span>
           </div>
         ) : (
           <div className="flex items-center justify-center py-4">
-            <div className="lyrics-typing-indicator">
+            <div className="flex items-center gap-3 font-semibold text-zinc-500 dark:text-zinc-400 bg-zinc-100/50 dark:bg-zinc-800/30 border border-zinc-200 dark:border-zinc-850 py-2.5 px-5 rounded-full text-xs">
               <div className="flex gap-1 shrink-0">
-                <span className="w-1.5 h-1.5 bg-primary/70 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-1.5 h-1.5 bg-primary/70 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                <span className="w-1.5 h-1.5 bg-primary/70 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                <span className="w-1.5 h-1.5 bg-primary/70 rounded-full animate-bounce [animation-delay:0ms]" />
+                <span className="w-1.5 h-1.5 bg-primary/70 rounded-full animate-bounce [animation-delay:150ms]" />
+                <span className="w-1.5 h-1.5 bg-primary/70 rounded-full animate-bounce [animation-delay:300ms]" />
               </div>
-              <span>Ouvindo música... aguarde a lacuna aparecer</span>
+              <span>{t("student.listeningDesc") || "Ouvindo música... aguarde a lacuna aparecer"}</span>
             </div>
           </div>
         )}

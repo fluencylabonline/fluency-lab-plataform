@@ -23,6 +23,7 @@ import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/ho
 import { YouTubeSyncNode } from "@/components/tiptap-extension/youtube-sync/YoutubeSyncNode";
 import { LyricsSyncNode } from "@/components/tiptap-extension/lyrics-sync/LyricsSyncNode";
 import { QuizNode } from "@/components/tiptap-extension/quiz/QuizNode";
+import { AudioSyncNode } from "@/components/tiptap-extension/audio-sync/AudioSyncNode";
 
 // --- Call Feature ---
 import { FloatCallButton } from "./call/FloatCallButton";
@@ -197,6 +198,7 @@ export function NotebookEditor({
         YouTubeSyncNode,
         LyricsSyncNode,
         QuizNode,
+        AudioSyncNode,
       ],
     },
     [ydoc, awareness],

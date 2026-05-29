@@ -2731,5 +2731,146 @@
       "emailSent": "E-mail com contrato enviado com sucesso.",
       "emailError": "Erro ao reenviar e-mail de contrato."
     }
+  },
+  "AudioSync": {
+    "defaultTitle": "Áudio Sincronizado",
+    "synchronized": "Sincronizado",
+    "paused": "Pausado",
+    "loading": "Carregando",
+    "pause": "Pausar",
+    "play": "Tocar",
+    "unmute": "Ativar som",
+    "mute": "Desativar som",
+    "speedTooltip": "Velocidade de reprodução sincronizada",
+    "normal": "Normal",
+    "viewTranscription": "Visualizar Transcrição",
+    "hideTranscription": "Ocultar Transcrição"
+  },
+  "Quiz": {
+    "generator": {
+      "title": "Gerador de Quiz Pedagógico IA",
+      "description": "Crie 10 perguntas baseadas no conteúdo atual desta aula.",
+      "loadingTitle": "A Inteligência Artificial está trabalhando...",
+      "loadingDescription": "Lendo o conteúdo do notebook, projetando gramática, vocabulário e explicações interativas.",
+      "nativeLanguage": "Idioma Nativo do Aluno",
+      "select": "Selecione",
+      "targetLanguage": "Idioma Aprendido",
+      "targetLevel": "Nível Alvo (CEFR)",
+      "limitWarning": "Você utilizou {count} de 3 gerações de quiz IA gratuitas para este aluno.",
+      "submitBtn": "Gerar Quiz Inteligente (10 Perguntas)",
+      "levels": {
+        "A1": "A1 (Iniciante)",
+        "A2": "A2 (Básico)",
+        "B1": "B1 (Intermediário)",
+        "B2": "B2 (Intermediário Avançado)",
+        "C1": "C1 (Avançado)",
+        "C2": "C2 (Fluente)"
+      }
+    },
+    "status": {
+      "waitingTeacher": "Aguardando o Professor",
+      "waitingTeacherDescription": "O professor ainda não ativou o quiz interativo para este notebook. Peça para ele gerar o quiz!"
+    },
+    "gameplay": {
+      "inputPlaceholder": "Escreva a resposta correta aqui...",
+      "correctTitle": "Excelente! Resposta Correta",
+      "incorrectTitle": "Que pena! Resposta Incorreta",
+      "explanationNotAvailable": "Explicação não disponível.",
+      "correctAnswerLabel": "Resposta correta: {answer}",
+      "continueBtn": "Continuar",
+      "checkBtn": "Verificar",
+      "errors": {
+        "selectOption": "Selecione uma das opções!",
+        "writeInput": "Escreva a sua resposta!"
+      }
+    },
+    "end": {
+      "title": "Quiz Concluído!",
+      "description": "Parabéns! Você completou os exercícios gerados pela inteligência artificial.",
+      "scoreLabel": "Pontuação Final",
+      "hitsLabel": "{score} / {total} acertos",
+      "reviewTitle": "Revisão dos Exercícios",
+      "correctStatus": "Acertou",
+      "incorrectStatus": "Errou",
+      "yourAnswer": "Sua resposta: {answer}",
+      "correctAnswer": "Resposta correta: {answer}",
+      "explanationLabel": "Explicação:"
+    },
+    "teacher": {
+      "title": "Progresso do Aluno (Em Tempo Real)",
+      "description": "Acompanhe as respostas e o desempenho do aluno neste quiz.",
+      "statusLabel": "Status do Aluno",
+      "statusFinished": "Concluído",
+      "statusAnswering": "Respondendo...",
+      "partialScoreLabel": "Nota Parcial",
+      "progressLabel": "Progresso do Teste",
+      "progressDescription": "{count} de {total} respondidas",
+      "reportTitle": "Relatório de Questões",
+      "waitingAnswer": "Aguardando resposta...",
+      "explanationLabel": "Explicação didática fornecida:",
+      "resetBtn": "Reiniciar / Apagar Quiz",
+      "resetConfirm": "Isso apagará o progresso atual do aluno. Tem certeza que deseja reiniciar o quiz?",
+      "resetSuccess": "Quiz reiniciado com sucesso!",
+      "alertText": "O notebook precisa de mais conteúdo de aula para a IA criar o quiz!",
+      "successText": "Quiz gerado com sucesso pela IA!"
+    }
+  },
+  "LyricsSync": {
+    "controls": {
+      "pause": "Pausar",
+      "play": "Tocar",
+      "replay": "Repetir frase",
+      "hint": "Dica",
+      "speed": "Velocidade",
+      "skip": "Pular Frase"
+    },
+    "setup": {
+      "waitingTitle": "Aguardando Professor",
+      "waitingDesc": "O professor está preparando a atividade Lyrics Training para esta aula.",
+      "title": "Lyrics Training (Completar Letras)",
+      "subtitle": "Pesquise uma música no YouTube e preencha os dados do artista para carregar a letra sincronizada automaticamente.",
+      "searchPlaceholder": "Pesquise o nome da música ou cantor...",
+      "searchBtn": "Buscar",
+      "emptySearch": "Nenhum vídeo pesquisado ainda.",
+      "trackLabel": "Nome da Música",
+      "artistLabel": "Cantor / Artista",
+      "pauseEveryLabel": "Pausar automaticamente a cada:",
+      "oneLine": "1 linha",
+      "twoLines": "2 linhas",
+      "saveBtn": "Salvar e Carregar Letra",
+      "loadingLyrics": "Carregando Letra Sincronizada...",
+      "lyricsNotFoundError": "Não conseguimos encontrar a letra sincronizada para essa música.",
+      "lyricsLoadSuccess": "Letra sincronizada carregada com sucesso!",
+      "lyricsLoadError": "Erro ao carregar letra.",
+      "fillFieldsWarning": "Por favor, preencha todos os campos do vídeo.",
+      "videoLoadError": "Não foi possível carregar o vídeo.",
+      "searchError": "Erro ao buscar vídeos."
+    },
+    "student": {
+      "pointsLabel": "Pontos",
+      "defaultMusicLabel": "Música",
+      "lineTracker": "Linha {current} de {total}",
+      "correctAnswer": "Resposta correta!",
+      "continueBtn": "Continuar para a Próxima Frase",
+      "keyboardLockedDesc": "Teclado físico bloqueado nesta aula. Responda pelas teclas virtuais acima.",
+      "listeningDesc": "Ouvindo música... aguarde a lacuna aparecer"
+    },
+    "teacher": {
+      "monitorTitle": "Monitor do Aluno em Tempo Real",
+      "statusConnected": "Conectado",
+      "pointsLabel": "Pontos",
+      "streakLabel": "Streak (Acertos)",
+      "statusLabel": "Status",
+      "statusFinished": "Finalizado 🎉",
+      "statusWaiting": "Aguardando Digitação ⌨️",
+      "statusListening": "Escutando Vídeo 🎧",
+      "studentTypingLabel": "O que o Aluno está digitando:",
+      "correctAnswerLabel": "Resposta Correta: {word}",
+      "noInput": "Nenhuma letra digitada ainda...",
+      "waitingGap": "Aguardando a próxima lacuna..."
+    },
+    "hints": {
+      "text": "Dica: A palavra tem {length} letras e começa com \"{letter}\""
+    }
   }
 }

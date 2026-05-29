@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Sparkles, Music, Play, Music2, FileQuestionMark, LucideIcon } from "lucide-react";
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
+import { NotebookAudioSyncVault } from "./NotebookAudioSyncVault";
 import {
   Vault,
   VaultContent,
@@ -49,6 +51,7 @@ const ACTIVITIES_OPTIONS: ActivityOption[] = [
     icon: Music2,
     iconBgClass: "bg-amber-500/10",
     iconColorClass: "text-amber-500",
+    action: () => {}, // Habilita o botão, interceptado no onClick
   },
   {
     id: "quiz-generator",
@@ -68,58 +71,71 @@ interface NotebookActivitiesVaultProps {
 
 export function NotebookActivitiesVault({ open, onOpenChange }: NotebookActivitiesVaultProps) {
   const { editor } = useTiptapEditor();
+  const [isAudioSyncOpen, setIsAudioSyncOpen] = useState(false);
 
   return (
-    <Vault open={open} onOpenChange={onOpenChange}>
-      <VaultContent className="sm:max-w-xl">
-        <VaultHeader className="p-6 pb-4 border-b">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-500" />
-            <VaultTitle className="text-left font-bold">
-              Atividades Interativas
-            </VaultTitle>
-          </div>
-          <VaultDescription className="text-left">
-            Selecione uma atividade para adicionar ao notebook dos alunos.
-          </VaultDescription>
-        </VaultHeader>
-        <VaultBody className="p-6">
-          <div className="grid grid-cols-1 gap-4">
-            {ACTIVITIES_OPTIONS.map((option) => {
-              const Icon = option.icon;
-              return (
-                <button
-                  key={option.id}
-                  onClick={() => {
-                    if (option.action && editor) {
-                      option.action(editor);
-                      onOpenChange(false);
-                    }
-                  }}
-                  disabled={!option.action}
-                  className={`card flex items-start gap-4 p-4 text-left border border-muted bg-background rounded-xl transition-all duration-200 ${
-                    option.action
-                      ? "hover:border-primary/50 cursor-pointer"
-                      : "opacity-60 cursor-not-allowed"
-                  }`}
-                >
-                  <div className={`p-3 rounded-full shrink-0 ${option.iconBgClass} ${option.iconColorClass}`}>
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <div className="space-y-1">
-                    <h4 className="font-bold text-base text-foreground">
-                      {option.title}
-                    </h4>
-                    <p className="text-sm text-muted-foreground font-normal leading-normal">
-                      {option.description}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </VaultBody>
-      </VaultContent>
-    </Vault>
+    <>
+      <Vault open={open} onOpenChange={onOpenChange}>
+        <VaultContent className="sm:max-w-xl">
+          <VaultHeader className="p-6 pb-4 border-b">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-amber-500" />
+              <VaultTitle className="text-left font-bold">
+                Atividades Interativas
+              </VaultTitle>
+            </div>
+            <VaultDescription className="text-left">
+              Selecione uma atividade para adicionar ao notebook dos alunos.
+            </VaultDescription>
+          </VaultHeader>
+          <VaultBody className="p-6">
+            <div className="grid grid-cols-1 gap-4">
+              {ACTIVITIES_OPTIONS.map((option) => {
+                const Icon = option.icon;
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => {
+                      if (option.id === "audio-sync") {
+                        setIsAudioSyncOpen(true);
+                        onOpenChange(false);
+                        return;
+                      }
+                      if (option.action && editor) {
+                        option.action(editor);
+                        onOpenChange(false);
+                      }
+                    }}
+                    disabled={!option.action}
+                    className={`card flex items-start gap-4 p-4 text-left border border-muted bg-background rounded-xl transition-all duration-200 ${
+                      option.action
+                        ? "hover:border-primary/50 cursor-pointer"
+                        : "opacity-60 cursor-not-allowed"
+                    }`}
+                  >
+                    <div className={`p-3 rounded-full shrink-0 ${option.iconBgClass} ${option.iconColorClass}`}>
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-base text-foreground">
+                        {option.title}
+                      </h4>
+                      <p className="text-sm text-muted-foreground font-normal leading-normal">
+                        {option.description}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </VaultBody>
+        </VaultContent>
+      </Vault>
+
+      <NotebookAudioSyncVault
+        open={isAudioSyncOpen}
+        onOpenChange={setIsAudioSyncOpen}
+      />
+    </>
   );
 }
