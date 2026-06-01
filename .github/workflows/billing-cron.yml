@@ -3,7 +3,7 @@ name: Billing Cron
 on:
   schedule:
     # Run daily at 03:00 AM UTC
-    - cron: '0 3 * * *'
+    - cron: "0 3 * * *"
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -17,8 +17,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Trigger Billing API
         env:
@@ -33,12 +33,7 @@ jobs:
             echo "Error: CRON_SECRET secret is not set."
             exit 1
           fi
-          # Remove trailing slash from APP_URL if exists
-          CLEAN_URL=$(echo $APP_URL | sed 's:/*$::')
-          
-          # Clean and trim CRON_SECRET safely using printf to avoid shell expansion/option issues
-          CLEAN_SECRET=$(printf "%s" "$CRON_SECRET" | tr -d '\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-          
-          curl -f -X POST "$CLEAN_URL/api/cron/billing" \
-          -H "Authorization: Bearer $CLEAN_SECRET" \
+
+          curl -f -X POST "$APP_URL/api/cron/billing" \
+          -H "Authorization: Bearer $CRON_SECRET" \
           -H "Content-Type: application/json"
