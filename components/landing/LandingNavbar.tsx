@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/public/brand/logo.png";
@@ -35,6 +36,7 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -158,6 +160,7 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
                     isScrolled={isScrolled}
+                    isDark={resolvedTheme === "dark"}
                   />
                 ))}
               </nav>
@@ -194,6 +197,7 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
                     isScrolled={isScrolled}
+                    isDark={resolvedTheme === "dark"}
                   />
                 ))}
               </nav>
@@ -205,7 +209,11 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
                   whileTap={{ scale: 0.95 }}
                   onClick={handleLoginClick}
                   disabled={isLoggingOut}
-                  className="z-10 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-black dark:text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 min-h-[44px] whitespace-nowrap disabled:opacity-50"
+                  className={`z-10 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 min-h-[44px] whitespace-nowrap disabled:opacity-50 ${
+                    isScrolled
+                      ? "text-black dark:text-white"
+                      : "text-white"
+                  }`}
                 >
                   {isLoggingOut ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -239,7 +247,7 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={handleSignOut}
-                      className="bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center overflow-hidden min-h-[44px]"
+                      className="bg-rose-300/40 dark:bg-rose-900/20 hover:bg-rose-500/40 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-400 rounded-full flex items-center justify-center overflow-hidden min-h-[44px]"
                     >
                       <LogOut size={18} />
                     </motion.button>
@@ -336,7 +344,7 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
               {user && (
                 <button
                   onClick={handleSignOut}
-                  className="mt-4 w-full text-sm font-medium text-red-500 hover:text-red-600 transition-colors py-2"
+                  className="mt-4 w-full text-sm font-medium text-rose-500 hover:text-rose-600 transition-colors py-2"
                 >
                   {t("nav.signOut") || "Sair da conta"}
                 </button>
@@ -356,6 +364,7 @@ function NavItem({
   activeTab,
   setActiveTab,
   isScrolled,
+  isDark,
 }: {
   id: string;
   label: string;
@@ -363,6 +372,7 @@ function NavItem({
   activeTab: string;
   setActiveTab: (id: string) => void;
   isScrolled: boolean;
+  isDark: boolean;
 }) {
   return (
     <Link
@@ -383,12 +393,12 @@ function NavItem({
           animate={{
             color:
               activeTab === id
-                ? "#ffffff"
+                ? "#ffffff" // active: always white (pill is dark)
                 : isScrolled
-                  ? typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
-                    ? "#ffffff"
-                    : "#000000"
-                  : "#dfdfdf",
+                  ? isDark
+                    ? "#ffffff" // scrolled + dark mode
+                    : "#000000" // scrolled + light mode
+                  : "#dfdfdf", // not scrolled: over hero image, always light
           }}
           transition={{ duration: 0.2 }}
         >

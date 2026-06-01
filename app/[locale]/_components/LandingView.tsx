@@ -1,15 +1,30 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import dynamic from "next/dynamic";
 import { useDevice } from "@/hooks/ui/use-device";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { PwaWelcomeScreen } from "@/components/landing/PwaWelcomeScreen";
-import ComparisonSection from "@/components/landing/ComparisonSection";
-import HowItWorks from "@/components/landing/HowItWorks";
-import TeamSection from "@/components/landing/TeamSection";
-import Footer from "@/components/landing/Footer";
 import { User } from "@/modules/user/user.schema";
+
+// Seções below-the-fold: carregadas apenas após o hero ser exibido
+const ComparisonSection = dynamic(
+  () => import("@/components/landing/ComparisonSection"),
+  { ssr: false }
+);
+const HowItWorks = dynamic(
+  () => import("@/components/landing/HowItWorks"),
+  { ssr: false }
+);
+const TeamSection = dynamic(
+  () => import("@/components/landing/TeamSection"),
+  { ssr: false }
+);
+const Footer = dynamic(
+  () => import("@/components/landing/Footer"),
+  { ssr: false }
+);
 
 export function LandingView({ user }: { user: User | null }) {
   const { isStandalone } = useDevice();

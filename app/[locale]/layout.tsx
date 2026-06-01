@@ -116,11 +116,15 @@ export default async function RootLayout({
       data-scroll-behavior="smooth"
     >
       <head>
-        <link 
-          rel="preload" 
-          as="image" 
+        <link
+          rel="preload"
+          as="image"
           href="/icons/android/launchericon-transparent-512x512.png" 
         />
+        {/* Preconnect: estabelece TCP/TLS antecipadamente para origens críticas */}
+        <link rel="preconnect" href="https://i.pravatar.cc" />
+        {/* DNS-prefetch: resolve o DNS do Firebase Auth sem abrir conexão antecipada */}
+        <link rel="dns-prefetch" href="https://firebaseapp.com" />
       </head>
 
       <body className={`${quicksand.className} min-h-full flex flex-col`}>

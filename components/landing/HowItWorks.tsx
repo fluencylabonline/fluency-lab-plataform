@@ -210,7 +210,7 @@ export default function HowItWorks() {
               className={cn(
                 "group relative cursor-pointer py-8 md:py-10 px-4 md:px-8 transition-all duration-300 border-t",
                 isAnyActive ? "border-transparent" : "border-slate-200 dark:border-slate-800",
-                isActive ? "rounded-lg z-10" : "rounded-none"
+                isActive ? "rounded-lg z-1" : "rounded-none"
               )}
             >
               <motion.div
