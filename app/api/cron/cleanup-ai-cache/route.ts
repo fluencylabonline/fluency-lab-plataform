@@ -1,5 +1,7 @@
 import { aiRepository } from "@/modules/ai/ai.repository";
 import { NextResponse } from "next/server";
+import { env } from "@/env";
+import crypto from "node:crypto";
 
 /**
  * Daily cleanup job for the AI response cache.
@@ -7,10 +9,13 @@ import { NextResponse } from "next/server";
  */
 export async function POST(req: Request) {
   const authHeader = req.headers.get("authorization");
-  const cronSecret = (process.env.CRON_SECRET ?? "").trim();
-  const provided = (authHeader ?? "").trim();
+  const expected = `Bearer ${env.CRON_SECRET}`;
+  const provided = authHeader ?? "";
+  const isAuthorized =
+    provided.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
 
-  if (cronSecret && provided !== `Bearer ${cronSecret}`) {
+  if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -27,13 +27,6 @@ jobs:
             echo "Error: CRON_SECRET secret is not set."
             exit 1
           fi
-          
-          # Remove trailing slash from APP_URL if exists
-          CLEAN_URL=$(echo $APP_URL | sed 's:/*$::')
-          
-          # Clean and trim CRON_SECRET safely using printf to avoid shell expansion/option issues
-          CLEAN_SECRET=$(printf "%s" "$CRON_SECRET" | tr -d '\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-          
-          curl -f -X POST "$CLEAN_URL/api/cron/notebook-assets" \
-          -H "Authorization: Bearer $CLEAN_SECRET" \
+          curl -f -X POST "$APP_URL/api/cron/notebook-assets" \
+          -H "Authorization: Bearer $CRON_SECRET" \
           -H "Content-Type: application/json"

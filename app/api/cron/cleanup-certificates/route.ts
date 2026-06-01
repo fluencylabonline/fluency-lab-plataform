@@ -8,15 +8,11 @@ import crypto from "node:crypto";
 
 export async function POST(req: Request) {
   const authHeader = req.headers.get("authorization");
-  const provided = (authHeader ?? "").trim();
-  const expected = `Bearer ${env.CRON_SECRET.trim()}`;
-
-  const providedBuffer = Buffer.from(provided);
-  const expectedBuffer = Buffer.from(expected);
-
+  const expected = `Bearer ${env.CRON_SECRET}`;
+  const provided = authHeader ?? "";
   const isAuthorized =
-    providedBuffer.length === expectedBuffer.length &&
-    crypto.timingSafeEqual(providedBuffer, expectedBuffer);
+    provided.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
 
   if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
