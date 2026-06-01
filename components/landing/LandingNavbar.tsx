@@ -292,7 +292,7 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
       </header>
 
       <Vault open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-        <div className="md:hidden fixed bottom-6 right-6 z-50">
+        <div className="md:hidden fixed bottom-6 left-6 z-50">
           <VaultTrigger asChild>
             <button 
               aria-label="Abrir menu de navegação"
