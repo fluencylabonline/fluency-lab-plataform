@@ -31,9 +31,9 @@ export function PwaVault() {
       if (updateAvailable && isStandalone) {
         const lastDismiss = localStorage.getItem("pwa_update_dismissed_at");
         const lastDismissVal = lastDismiss ? parseInt(lastDismiss, 10) : 0;
-        const oneDay = 24 * 60 * 60 * 1000;
+        const oneWeek = 7 * 24 * 60 * 60 * 1000;
 
-        if (isNaN(lastDismissVal) || now - lastDismissVal > oneDay) {
+        if (isNaN(lastDismissVal) || now - lastDismissVal > oneWeek) {
           setType("update");
           setIsOpen(true);
           return;
@@ -67,6 +67,7 @@ export function PwaVault() {
     if (type === "install") {
       await install();
     } else if (type === "update") {
+      localStorage.setItem("pwa_update_dismissed_at", Date.now().toString());
       update();
     }
     setIsOpen(false);

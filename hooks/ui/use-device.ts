@@ -63,11 +63,16 @@ export const useDeviceStore = create<DeviceStore>((set, get) => ({
       return;
     }
 
-    registration.waiting.postMessage({ type: "SKIP_WAITING" });
-
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       window.location.reload();
     });
+
+    registration.waiting.postMessage({ type: "SKIP_WAITING" });
+
+    // Fallback: reload page if controllerchange doesn't fire within 2 seconds
+    setTimeout(() => {
+      window.location.reload();
+    }, 2000);
   },
 }));
 
