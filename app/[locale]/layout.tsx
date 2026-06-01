@@ -83,13 +83,9 @@ export async function generateMetadata({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
   interactiveWidget: "resizes-content",
-  // themeColor: [
-  //   { media: "(prefers-color-scheme: light)", color: "oklch(70.9% 0.00008 271.152)" }, //header-base
-  //   { media: "(prefers-color-scheme: dark)", color: "oklch(12.048% 0.02283 254.114)" }, //header-base
-  // ],
   themeColor: "#121520",
 };
 
@@ -157,16 +153,22 @@ export default async function RootLayout({
               (function() {
                 var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
                 var hasShown = sessionStorage.getItem('pwa-splash-shown');
-                if (isStandalone && !hasShown) {
-                  document.documentElement.classList.add('pwa-initializing');
-                  var staticSplash = document.getElementById('pwa-static-splash');
-                  if (staticSplash) staticSplash.style.display = 'flex';
+                if (isStandalone) {
+                  var viewportMeta = document.querySelector('meta[name="viewport"]');
+                  if (viewportMeta) {
+                    viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content');
+                  }
                   
-                  // Fail-safe: remove after 5 seconds if PwaSplash doesn't
-                  setTimeout(function() {
-                    document.documentElement.classList.remove('pwa-initializing');
-                    if (staticSplash) staticSplash.style.display = 'none';
-                  }, 5000);
+                  if (!hasShown) {
+                    document.documentElement.classList.add('pwa-initializing');
+                    var staticSplash = document.getElementById('pwa-static-splash');
+                    if (staticSplash) staticSplash.style.display = 'flex';
+                    
+                    setTimeout(function() {
+                      document.documentElement.classList.remove('pwa-initializing');
+                      if (staticSplash) staticSplash.style.display = 'none';
+                    }, 5000);
+                  }
                 }
               })();
             `,

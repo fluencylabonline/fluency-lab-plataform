@@ -106,7 +106,7 @@ export default function Footer() {
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
                 {t("newsletter.title") || "Pronto para fluência?"}
               </h2>
-              <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base max-w-md mx-auto lg:mx-0">
+              <p className="text-slate-600 dark:text-slate-400 text-sm md:text-base max-w-md mx-auto lg:mx-0">
                 {t("newsletter.description") ||
                   "Receba conteúdos exclusivos..."}
               </p>
@@ -147,7 +147,7 @@ export default function Footer() {
                   priority
                 />
               </div>
-              <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto lg:mx-0">
+              <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed max-w-xs mx-auto lg:mx-0">
                 {t("brand.description") || "Transformando o aprendizado..."}
               </p>
             </div>
@@ -193,7 +193,7 @@ export default function Footer() {
                 <h4 className="font-semibold text-slate-900 dark:text-slate-100 text-xs uppercase tracking-wider">
                   {section.title}
                 </h4>
-                <ul className="space-y-3 text-sm text-slate-500 dark:text-slate-400">
+                <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
                   {section.links.map((link, lIdx) => (
                     <li key={lIdx}>
                       <Link
@@ -232,7 +232,7 @@ export default function Footer() {
           </div>
 
           <div className="mt-12 md:mt-16 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col-reverse md:flex-row items-center justify-between gap-4">
-            <p className="text-slate-400 text-xs font-medium text-center md:text-left">
+            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium text-center md:text-left">
               {t("copyright") ||
                 "© 2026 FluencyLab. Todos os direitos reservados."}
             </p>
@@ -260,7 +260,7 @@ export default function Footer() {
                   <motion.button
                     layoutId="back-to-top"
                     onClick={() => scrollToTop("dock")}
-                    className="absolute inset-0 w-full h-full group flex items-center justify-center gap-2 text-xs font-semibold text-slate-400/80 dark:text-slate-500/80 hover:text-slate-700 dark:hover:text-slate-300 bg-white/40 dark:bg-slate-950/30 border border-slate-200/20 dark:border-slate-800/30 hover:border-slate-200/50 dark:hover:border-slate-800/50 shadow-none rounded-full cursor-pointer transition-colors duration-300 active:scale-95 overflow-hidden"
+                    className="absolute inset-0 w-full h-full group flex items-center justify-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 bg-white/40 dark:bg-slate-950/30 border border-slate-200/20 dark:border-slate-800/30 hover:border-slate-200/50 dark:hover:border-slate-800/50 shadow-none rounded-full cursor-pointer transition-colors duration-300 active:scale-95 overflow-hidden"
                     transition={{ type: "spring", stiffness: 85, damping: 16 }}
                   >
                     {t("backToTop") || "Voltar ao topo"}

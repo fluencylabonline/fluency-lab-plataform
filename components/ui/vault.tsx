@@ -101,6 +101,7 @@ const VaultContent = React.forwardRef<
             <Drawer.Content
                 ref={ref}
                 aria-describedby={undefined}
+                aria-label={props["aria-label"] ?? "Vault"}
                 tabIndex={-1}
                 onOpenAutoFocus={(e) => {
                     if (onOpenAutoFocus) {
@@ -137,10 +138,6 @@ const VaultContent = React.forwardRef<
                 {showHandle && (
                     <div className="mx-auto mt-4 mb-2 h-1.5 w-14 shrink-0 rounded-full bg-primary/50" />
                 )}
-
-                <VisuallyHidden>
-                    <Drawer.Title>Vault</Drawer.Title>
-                </VisuallyHidden>
 
                 <div className={cn(
                     "overflow-y-auto no-scrollbar",

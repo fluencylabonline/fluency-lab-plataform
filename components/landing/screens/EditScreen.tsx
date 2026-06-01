@@ -85,10 +85,10 @@ export function EditorScreen() {
                 <motion.span
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="absolute -top-5 left-0 bg-blue-500 text-[8px] text-white px-1 rounded flex items-center gap-1"
+                  className="absolute -top-6 left-0 bg-indigo-600 text-[10px] text-white py-0.5 px-1.5 rounded flex items-center gap-1"
                 >
                   <span className="font-bold">{t("document.teacherName") || "Teacher"}</span>
-                  <span className="absolute top-full left-1 w-0.5 h-4 bg-blue-500" />
+                  <span className="absolute top-full left-1 w-0.5 h-4 bg-indigo-600" />
                 </motion.span>
               </span>
               {" "}
