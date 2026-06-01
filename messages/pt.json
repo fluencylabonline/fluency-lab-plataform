@@ -1637,7 +1637,7 @@
       "payLaterWarning": "Você pode pagar agora ou depois. O acesso será liberado assim que o sistema identificar o pagamento.",
       "payNowTitle": "Pagar com PIX",
       "planSummary": "Resumo do Plano",
-      "prorataWarning": "Como o dia de vencimento escolhido já passou, sua primeira mensalidade será proporcional até o fim deste mês.",
+      "prorataWarning": "Sua primeira mensalidade foi calculada proporcionalmente com base na sua data de início ({classesStartDate}). Como você iniciará após o início regular do mês, pagará apenas pelas aulas restantes, com o primeiro vencimento em {dueDate}.",
       "subtitle": "Confirme seu plano e escolha o melhor dia para vencimento.",
       "successTitle": "Pagamento Confirmado!",
       "title": "Escolha como quer evoluir.",

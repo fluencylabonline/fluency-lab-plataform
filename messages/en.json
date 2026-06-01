@@ -1637,7 +1637,7 @@
       "payLaterWarning": "Você pode pagar agora ou depois. O acesso será liberado assim que o sistema identificar o pagamento.",
       "payNowTitle": "Pagar com PIX",
       "planSummary": "Plan Summary",
-      "prorataWarning": "Since the chosen due day has already passed, your first monthly fee will be pro-rated until the end of this month.",
+      "prorataWarning": "Your first monthly payment has been pro-rated based on your start date ({classesStartDate}). Since you are starting after the standard beginning of the month, you will only pay for the remaining classes, with the first payment due on {dueDate}.",
       "subtitle": "Confirm your plan and choose the best due day.",
       "successTitle": "Pagamento Confirmado!",
       "title": "Choose how you want to evolve.",

@@ -101,25 +101,31 @@ export function StepPayment({
         const today = new Date();
         const classesStart = user.classesStartDate ? new Date(user.classesStartDate) : null;
 
-        // Use classesStartDate for pro-rata calculation if it's in the future
-        const billingBaseDate = classesStart && classesStart > today
-            ? classesStart
-            : today;
+        // Always use classesStartDate for pro-rata calculation if available
+        const billingBaseDate = classesStart || today;
 
         const currentDay = billingBaseDate.getDate();
-        const totalDaysInMonth = new Date(
-            billingBaseDate.getFullYear(),
-            billingBaseDate.getMonth() + 1,
-            0
-        ).getDate();
 
-        if (currentDay > dueDay) {
-            const daysRemaining = totalDaysInMonth - currentDay + 1;
-            const proRataAmount = Math.round((price / totalDaysInMonth) * daysRemaining);
-            return { amount: proRataAmount, isProRata: true };
+        let remainingClasses = 4;
+        let isProRata = false;
+
+        if (currentDay >= 20) {
+            remainingClasses = 1;
+            isProRata = true;
+        } else if (currentDay >= 15) {
+            remainingClasses = 2;
+            isProRata = true;
+        } else if (currentDay >= 6) {
+            remainingClasses = 3;
+            isProRata = true;
+        } else {
+            remainingClasses = 4;
+            isProRata = false;
         }
 
-        return { amount: price, isProRata: false };
+        const proRataAmount = Math.round((price / 4) * remainingClasses);
+
+        return { amount: proRataAmount, isProRata };
     };
 
     const handleConfirmDate = async () => {
@@ -178,6 +184,25 @@ export function StepPayment({
     const { amount, isProRata } = plan
         ? calculateProRata(parseInt(selectedDueDay), plan.price)
         : { amount: 0, isProRata: false };
+
+    const today = new Date();
+    const classesStart = user.classesStartDate ? new Date(user.classesStartDate) : null;
+    const billingBaseDate = classesStart || today;
+    const currentDay = billingBaseDate.getDate();
+
+    let calculatedDueDate: Date;
+    if (currentDay >= 20) {
+        calculatedDueDate = new Date(billingBaseDate.getFullYear(), billingBaseDate.getMonth() + 1, 0);
+    } else {
+        calculatedDueDate = new Date(billingBaseDate);
+        calculatedDueDate.setDate(calculatedDueDate.getDate() + 10);
+    }
+
+    const formattedStartDate = classesStart 
+        ? format(classesStart, "dd/MM/yyyy") 
+        : format(today, "dd/MM/yyyy");
+
+    const formattedDueDate = format(calculatedDueDate, "dd/MM/yyyy");
 
     return (
         <div className="space-y-6">
@@ -261,7 +286,12 @@ export function StepPayment({
                                 className="flex gap-3 rounded-md border border-blue-500/20 bg-blue-500/[0.07] px-4 py-3 text-sm text-blue-400"
                             >
                                 <Info className="mt-0.5 h-4 w-4 shrink-0" />
-                                <span>{t("payment.prorataWarning")}</span>
+                                <span>
+                                    {t("payment.prorataWarning", {
+                                        classesStartDate: formattedStartDate,
+                                        dueDate: formattedDueDate,
+                                    })}
+                                </span>
                             </motion.div>
                         )}
 

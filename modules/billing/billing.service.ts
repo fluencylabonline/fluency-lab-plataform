@@ -3,7 +3,7 @@ import { abacate, createPixCharge } from "@/lib/abacate-pay";
 import { userService } from "../user/user.service";
 import { communicationService } from "../communication/communication.service";
 import { notificationService } from "../notification/notification.service";
-import { addMonths, startOfDay, setDate, addDays, endOfDay, endOfMonth, getDate, getDaysInMonth } from "date-fns";
+import { addMonths, startOfDay, setDate, addDays, endOfDay, endOfMonth, getDate } from "date-fns";
 import { env } from "@/env";
 import { db } from "@/lib/db";
 import { Installment, installmentsTable, Subscription, abacatePayWebhookSchema, abacatePayMetadataSchema, subscriptionsTable } from "./billing.schema";
@@ -156,23 +156,30 @@ export const billingService = {
           // 2. Recalculate first installment if it's pending
           if (firstInstallment && firstInstallment.status !== "paid") {
             const now = new Date();
-            const billingBaseDate = student.classesStartDate && student.classesStartDate > now
+            const billingBaseDate = student.classesStartDate
               ? student.classesStartDate
               : now;
 
             const currentDay = getDate(billingBaseDate);
-            const totalDaysInMonth = getDaysInMonth(billingBaseDate);
 
-            let firstInstallmentAmount: number;
+            let remainingClasses = 4;
+            if (currentDay >= 20) {
+              remainingClasses = 1;
+            } else if (currentDay >= 15) {
+              remainingClasses = 2;
+            } else if (currentDay >= 6) {
+              remainingClasses = 3;
+            } else {
+              remainingClasses = 4;
+            }
+
+            const firstInstallmentAmount = Math.round((plan.price / 4) * remainingClasses);
+
             let firstInstallmentDueDate: Date;
-
-            if (currentDay > dueDay) {
-              const daysRemaining = totalDaysInMonth - currentDay + 1;
-              firstInstallmentAmount = Math.round((plan.price / totalDaysInMonth) * daysRemaining);
+            if (currentDay >= 20) {
               firstInstallmentDueDate = endOfMonth(billingBaseDate);
             } else {
-              firstInstallmentAmount = plan.price;
-              firstInstallmentDueDate = addDays(now, 7);
+              firstInstallmentDueDate = addDays(billingBaseDate, 10);
             }
 
             await tx.update(installmentsTable)
@@ -241,26 +248,31 @@ export const billingService = {
       const installments = [];
       const now = new Date();
 
-      // Use classesStartDate for pro-rata calculation if it's in the future
-      const billingBaseDate = student.classesStartDate && student.classesStartDate > now
+      // Use classesStartDate for pro-rata calculation
+      const billingBaseDate = student.classesStartDate
         ? student.classesStartDate
         : now;
 
       const currentDay = getDate(billingBaseDate);
-      const totalDaysInMonth = getDaysInMonth(billingBaseDate);
 
-      let firstInstallmentAmount: number;
+      let remainingClasses = 4;
+      if (currentDay >= 20) {
+        remainingClasses = 1;
+      } else if (currentDay >= 15) {
+        remainingClasses = 2;
+      } else if (currentDay >= 6) {
+        remainingClasses = 3;
+      } else {
+        remainingClasses = 4;
+      }
+
+      const firstInstallmentAmount = Math.round((plan.price / 4) * remainingClasses);
+
       let firstInstallmentDueDate: Date;
-
-      if (currentDay > dueDay) {
-        // Pro-rata logic: charge for remaining days of the month
-        const daysRemaining = totalDaysInMonth - currentDay + 1; // Including today
-        firstInstallmentAmount = Math.round((plan.price / totalDaysInMonth) * daysRemaining);
+      if (currentDay >= 20) {
         firstInstallmentDueDate = endOfMonth(billingBaseDate);
       } else {
-        // Full charge logic: due in 7 days
-        firstInstallmentAmount = plan.price;
-        firstInstallmentDueDate = addDays(now, 7); // First payment always due in 7 days from now (onboarding)
+        firstInstallmentDueDate = addDays(billingBaseDate, 10);
       }
 
       // 1. Create first installment (can be pro-rata or full)
