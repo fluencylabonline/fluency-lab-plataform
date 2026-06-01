@@ -1599,7 +1599,10 @@
       "signButton": "Agree and Sign",
       "subtitle": "Read and sign the contract to finalize your enrollment.",
       "success": "Enrollment completed successfully!",
-      "title": "Let's formalize your journey."
+      "title": "Let's formalize your journey.",
+      "signedSuccessDesc": "Your signature was processed and registered successfully.",
+      "downloadPdf": "Download contract (PDF)",
+      "loadError": "Error loading contract. Please contact support."
     },
     "finish": {
       "appDesc": "Install our PWA to receive class notifications and practice anywhere.",
@@ -2711,6 +2714,7 @@
       "representativeName": "Legal Representative",
       "representativeTaxId": "Representative Tax ID (CPF)",
       "repPlaceholder": "Manager's Name",
+      "supportPhone": "Support WhatsApp / Phone",
       "address": "Institutional Address",
       "save": "Save Settings"
     },

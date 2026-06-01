@@ -1,5 +1,6 @@
 import { billingRepository } from "./billing.repository";
 import { abacate, createPixCharge } from "@/lib/abacate-pay";
+import { createStripePixPaymentIntent, stripe } from "@/lib/stripe";
 import { userService } from "../user/user.service";
 import { communicationService } from "../communication/communication.service";
 import { notificationService } from "../notification/notification.service";
@@ -127,11 +128,15 @@ export const billingService = {
     const plan = await billingRepository.findPlanById(planId);
     if (!plan) throw new Error("Plano não encontrado");
 
-    // Ensure student is synced with AbacatePay
+    // Ensure student is synced with AbacatePay if Brazilian
     const student = await userService.getUser(studentId);
     if (!student) throw new Error("Estudante não encontrado");
 
-    await userService.syncAbacatePayCustomer(studentId);
+    const isForeign = student.nationality === "foreign";
+
+    if (!isForeign) {
+      await userService.syncAbacatePayCustomer(studentId);
+    }
 
     // Check if student already has an active subscription for this plan (Idempotency)
     const existingSub = await billingRepository.findActiveSubscriptionByStudent(studentId);
@@ -220,11 +225,15 @@ export const billingService = {
         ),
       });
 
-      if (updatedFirstInstallment && !updatedFirstInstallment.abacatePayBillingId) {
+      const hasBilling = isForeign
+        ? !!updatedFirstInstallment?.stripePaymentIntentId
+        : !!updatedFirstInstallment?.abacatePayBillingId;
+
+      if (updatedFirstInstallment && !hasBilling) {
         try {
           await this.generateInvoiceForInstallment(updatedFirstInstallment.id);
         } catch (error) {
-          console.error("Failed to generate AbacatePay invoice for existing sub:", error);
+          console.error("Failed to generate invoice for existing sub:", error);
         }
       }
 
@@ -379,16 +388,85 @@ export const billingService = {
     }
   },
 
-  // Helper to generate the actual AbacatePay billing for an installment
+  // Helper to generate the actual AbacatePay or Stripe billing for an installment
   async generateInvoiceForInstallment(installmentId: string) {
     const installment = await this.getInstallmentById(installmentId);
-    if (!installment || installment.abacatePayBillingId) return;
+    if (!installment) return;
 
     const sub = await billingRepository.findSubscriptionById(installment.subscriptionId);
-    if (!sub || sub.status !== "active" || !sub.plan || !sub.plan.abacatePayProductId) return;
+    if (!sub || sub.status !== "active" || !sub.plan) return;
 
     const student = await userService.getUser(sub.studentId);
     if (!student) return;
+
+    const isForeign = student.nationality === "foreign";
+
+    if (isForeign) {
+      if (installment.stripePaymentIntentId) return;
+
+      console.log("[Stripe Pix] Generating PaymentIntent for student:", student.email);
+      try {
+        const intent = await createStripePixPaymentIntent({
+          amount: installment.amount,
+          email: student.email,
+          name: student.name,
+          description: `Mensalidade ${sub.plan.name} - ${installment.orderIndex}/${sub.plan.durationMonths}`,
+          metadata: {
+            installmentId: installment.id,
+            subscriptionId: sub.id,
+          },
+        });
+
+        const pixData = (intent.next_action as unknown as {
+          display_pix_qr_code?: { data: string; qr_code_image_base64: string };
+        })?.display_pix_qr_code;
+        if (!pixData) {
+          throw new Error("Stripe did not return Pix next_action details.");
+        }
+
+        const qrCodeBase64 = `data:image/png;base64,${pixData.qr_code_image_base64}`;
+
+        await billingRepository.updateInstallment(installment.id, {
+          stripePaymentIntentId: intent.id,
+          pixPayload: pixData.data,
+          pixImage: qrCodeBase64,
+          status: "pending",
+        });
+
+        // Send email with PIX
+        if (student?.email) {
+          await communicationService.sendNewInvoiceEmail(student.email, {
+            studentName: student.name || "Aluno",
+            amount: installment.amount,
+            dueDate: installment.dueDate,
+            pixPayload: pixData.data,
+            pixImage: qrCodeBase64,
+            description: `Mensalidade ${sub.plan.name} - ${installment.orderIndex}/${sub.plan.durationMonths}`,
+          });
+        }
+
+        // WhatsApp
+        let cellphone = student.cellphone;
+        if (cellphone?.includes(":")) cellphone = decrypt(cellphone);
+        if (cellphone && pixData.data) {
+          await communicationService.sendPaymentReminderWhatsApp({
+            cellphone: cellphone,
+            studentName: student.name || "Aluno",
+            amount: installment.amount,
+            dueDate: installment.dueDate,
+            pixPayload: pixData.data,
+          });
+        }
+
+        return intent;
+      } catch (error) {
+        console.error("Failed to generate Stripe Pix PaymentIntent:", error);
+        throw error;
+      }
+    }
+
+    // Brazilian Flow (AbacatePay)
+    if (installment.abacatePayBillingId || !sub.plan.abacatePayProductId) return;
 
     // Ensure student has required data for Transparent PIX and decrypt it
     let taxId = student.taxId;
@@ -605,7 +683,11 @@ export const billingService = {
       orderBy: [asc(installmentsTable.orderIndex)],
     });
 
-    if (!installment || !installment.abacatePayBillingId) return null;
+    const student = await userService.getUser(sub.studentId);
+    const isForeign = student?.nationality === "foreign";
+    const hasBilling = isForeign ? !!installment?.stripePaymentIntentId : !!installment?.abacatePayBillingId;
+
+    if (!installment || !hasBilling) return null;
 
     return {
       installmentId: installment.id,
@@ -663,6 +745,22 @@ export const billingService = {
     // Se já estiver paga, não precisa fazer nada
     if (installment.status === "paid") {
       return { status: "paid" };
+    }
+
+    const student = await userService.getUser(subscription.studentId);
+    const isForeign = student?.nationality === "foreign";
+
+    if (isForeign) {
+      if (!installment.stripePaymentIntentId) {
+        throw new Error("Esta parcela não possui uma cobrança ativa no Stripe.");
+      }
+      console.log(`[BillingService] Sincronizando parcela Stripe ${installmentId} (PaymentIntent ID: ${installment.stripePaymentIntentId})`);
+      const intent = await stripe.paymentIntents.retrieve(installment.stripePaymentIntentId);
+      if (intent.status === "succeeded") {
+        await this.markInstallmentAsPaid(installmentId, intent.id);
+        return { status: "paid" };
+      }
+      return { status: installment.status };
     }
 
     if (!installment.abacatePayBillingId) {

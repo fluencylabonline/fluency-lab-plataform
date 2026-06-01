@@ -27,6 +27,7 @@ const schoolSettingsFormSchema = z.object({
   taxId: z.string().min(9, "CNPJ ou Tax ID inválido."),
   representativeName: z.string().min(2, "O nome do representante é obrigatório."),
   representativeTaxId: z.string().min(11, "O CPF ou Tax ID do representante é inválido."),
+  supportPhone: z.string().optional().nullable(),
   address: z.object({
     street: z.string().min(1, "A rua é obrigatória."),
     number: z.string().min(1, "O número é obrigatório."),
@@ -63,6 +64,7 @@ export function SchoolSettingsTab({
       taxId: schoolSettings?.taxId || "",
       representativeName: schoolSettings?.representativeName || "",
       representativeTaxId: schoolSettings?.representativeTaxId || "",
+      supportPhone: schoolSettings?.supportPhone || "",
       address: {
         street: initialAddress?.street || "",
         number: initialAddress?.number || "",
@@ -85,6 +87,7 @@ export function SchoolSettingsTab({
         taxId: schoolSettings.taxId,
         representativeName: schoolSettings.representativeName,
         representativeTaxId: schoolSettings.representativeTaxId,
+        supportPhone: schoolSettings.supportPhone || "",
         address: {
           street: address.street || "",
           number: address.number || "",
@@ -167,6 +170,18 @@ export function SchoolSettingsTab({
             <Input
               placeholder="000.000.000-00"
               {...form.register("representativeTaxId")}
+            />
+          </VaultField>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <VaultField
+            label={t("school.supportPhone") || "WhatsApp / Telefone de Suporte"}
+            error={form.formState.errors.supportPhone?.message}
+          >
+            <Input
+              placeholder="+55 (11) 99999-9999"
+              {...form.register("supportPhone")}
             />
           </VaultField>
         </div>

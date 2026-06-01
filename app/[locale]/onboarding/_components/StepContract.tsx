@@ -104,7 +104,7 @@ export function StepContract({
                         {t("contract.success") || "Contrato assinado!"}
                     </p>
                     <p className="text-sm text-slate-500">
-                        Sua assinatura foi processada e registrada com sucesso.
+                        {t("contract.signedSuccessDesc") || "Sua assinatura foi processada e registrada com sucesso."}
                     </p>
                 </div>
 
@@ -117,7 +117,7 @@ export function StepContract({
                             className="flex h-11 w-full items-center justify-center gap-2 rounded-md border border-white/8 text-sm text-slate-400 transition-all hover:border-white/[0.14] hover:text-slate-200"
                         >
                             <Download className="h-4 w-4" />
-                            Baixar contrato (PDF)
+                            {t("contract.downloadPdf") || "Baixar contrato (PDF)"}
                         </a>
                     )}
                     <button
@@ -188,7 +188,7 @@ export function StepContract({
                 </div>
             ) : (
                 <p className="text-sm text-red-400/80">
-                    Erro ao carregar contrato. Entre em contato com o suporte.
+                    {t("contract.loadError") || "Erro ao carregar contrato. Entre em contato com o suporte."}
                 </p>
             )}
 

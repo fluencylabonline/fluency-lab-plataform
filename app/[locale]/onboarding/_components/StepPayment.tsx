@@ -61,7 +61,7 @@ export function StepPayment({
             const paymentResult = await getActivePaymentAction();
             if (paymentResult?.data?.success && paymentResult.data.data) {
                 const payment = paymentResult.data.data;
-                if (payment.orderIndex === 1) {
+                if (payment.orderIndex === 1 && payment.pixPayload) {
                     setPixData({
                         pixPayload: payment.pixPayload,
                         pixImage: payment.pixImage,
@@ -343,13 +343,19 @@ export function StepPayment({
                             <div className="flex flex-col items-center gap-5 px-6 py-6">
                                 {/* QR Code */}
                                 <div className="rounded-md border-4 border-white bg-white p-1 shadow-lg">
-                                    <Image
-                                        src={pixData.pixImage || ""}
-                                        alt="PIX QR Code"
-                                        width={180}
-                                        height={180}
-                                        className="rounded"
-                                    />
+                                    {pixData.pixImage ? (
+                                        <Image
+                                            src={pixData.pixImage}
+                                            alt="PIX QR Code"
+                                            width={180}
+                                            height={180}
+                                            className="rounded"
+                                        />
+                                    ) : (
+                                        <div className="flex h-[180px] w-[180px] items-center justify-center bg-slate-100 rounded">
+                                            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Expiry */}

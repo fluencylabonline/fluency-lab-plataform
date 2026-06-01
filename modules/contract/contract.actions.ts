@@ -184,6 +184,7 @@ export const updateSchoolSettingsAction = adminAction
       taxId: z.string().min(9, "CNPJ ou Tax ID inválido."),
       representativeName: z.string().min(2, "O nome do representante é obrigatório."),
       representativeTaxId: z.string().min(11, "O CPF ou Tax ID do representante é inválido."),
+      supportPhone: z.string().optional().nullable(),
       address: z.object({
         street: z.string().min(1, "A rua é obrigatória."),
         number: z.string().min(1, "O número é obrigatório."),
@@ -197,7 +198,10 @@ export const updateSchoolSettingsAction = adminAction
   .action(async ({ parsedInput }) => {
     try {
       const { id, ...data } = parsedInput;
-      const settings = await contractService.updateSchoolSettings(id, data);
+      const settings = await contractService.updateSchoolSettings(id, {
+        ...data,
+        supportPhone: data.supportPhone ?? null,
+      });
       revalidatePath("/admin/contracts");
       return { success: true, data: settings };
     } catch (error) {

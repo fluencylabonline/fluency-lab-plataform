@@ -84,6 +84,7 @@ export const schoolSettingsTable = pgTable("school_settings", {
   address: jsonb("address").notNull(), // Objeto estruturado { street, city, state, zip, etc }
   representativeName: text("representative_name").notNull(),
   representativeTaxId: text("representative_tax_id").notNull(),
+  supportPhone: text("support_phone"),
   updatedAt: timestamp("updated_at")
     .notNull()
     .defaultNow()

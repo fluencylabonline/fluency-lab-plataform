@@ -39,6 +39,7 @@ export const subscriptionsTable = pgTable("subscriptions", {
   dueDay: integer("due_day").notNull(), // 1, 5, 10, 15
   cancellationDate: timestamp("cancellation_date"),
   cancellationFeeInstallmentId: text("cancellation_fee_installment_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .notNull()
@@ -56,6 +57,7 @@ export const installmentsTable = pgTable("installments", {
   amount: integer("amount").notNull(), // in cents
   orderIndex: integer("order_index").notNull(), // 1 to 12
   abacatePayBillingId: text("abacate_pay_billing_id"), // Checkout/Billing ID from AbacatePay
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
   pixPayload: text("pix_payload"), // For transparent checkout
   pixImage: text("pix_image"),     // For transparent checkout
   paidAt: timestamp("paid_at"),

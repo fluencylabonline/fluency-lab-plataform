@@ -16,6 +16,8 @@ import { cn } from "@/lib/utils";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
+import type { SchoolSettings } from "@/modules/contract/contract.schema";
+
 export interface OnboardingData extends Partial<User> {
     zipCode?: string;
     street?: string;
@@ -32,6 +34,7 @@ export interface OnboardingData extends Partial<User> {
 
 interface OnboardingFlowProps {
     user: User;
+    schoolSettings: SchoolSettings | null;
 }
 
 const inputClass = cn(
@@ -43,7 +46,7 @@ const inputClass = cn(
     "[color-scheme:dark]"
 );
 
-export function OnboardingFlow({ user }: OnboardingFlowProps) {
+export function OnboardingFlow({ user, schoolSettings }: OnboardingFlowProps) {
     const t = useTranslations("Onboarding");
     const [currentStep, setCurrentStep] = useState(user.onboardingStep || 1);
     const [onboardingData, setOnboardingData] = useState<OnboardingData>(user);
@@ -55,6 +58,20 @@ export function OnboardingFlow({ user }: OnboardingFlowProps) {
         { id: 4, title: t("steps.contract") },
         { id: 5, title: t("steps.finish") || "Finalizar" },
     ];
+
+    const supportPhone = schoolSettings?.supportPhone;
+    let whatsappUrl = "";
+    if (supportPhone) {
+        let cleanPhone = supportPhone.replace(/\D/g, "");
+        if (cleanPhone.length === 10 || cleanPhone.length === 11) {
+            cleanPhone = `55${cleanPhone}`;
+        }
+        const studentName = user.name || "";
+        const studentEmail = user.email || "";
+        const currentStepName = steps[currentStep - 1]?.title || "Onboarding";
+        const text = `Olá! Sou o(a) aluno(a) ${studentName} (${studentEmail}) e estou com dificuldades/erro na etapa "${currentStepName}" do meu onboarding na FluencyLab. Preciso de suporte.`;
+        whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+    }
 
     const progress = (currentStep / steps.length) * 100;
 
@@ -248,7 +265,21 @@ export function OnboardingFlow({ user }: OnboardingFlowProps) {
 
                                 <div className="mt-8 flex justify-center">
                                     <p className="text-slate-500 text-sm">
-                                        {t("support.help") || "Precisa de ajuda?"} <button className="text-primary font-bold hover:underline">{t("support.contact") || "Fale conosco"}</button>
+                                        {t("support.help") || "Precisa de ajuda?"}{" "}
+                                        {whatsappUrl ? (
+                                            <a
+                                                href={whatsappUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-primary font-bold hover:underline"
+                                            >
+                                                {t("support.contact") || "Fale conosco"}
+                                            </a>
+                                        ) : (
+                                            <button className="text-primary font-bold hover:underline">
+                                                {t("support.contact") || "Fale conosco"}
+                                            </button>
+                                        )}
                                     </p>
                                 </div>
                             </motion.div>

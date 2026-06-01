@@ -1599,7 +1599,10 @@
       "signButton": "Concordar e Assinar",
       "subtitle": "Leia e assine o contrato para finalizar sua matrícula.",
       "success": "Matrícula finalizada com sucesso!",
-      "title": "Vamos oficializar sua jornada."
+      "title": "Vamos oficializar sua jornada.",
+      "signedSuccessDesc": "Sua assinatura foi processada e registrada com sucesso.",
+      "downloadPdf": "Baixar contrato (PDF)",
+      "loadError": "Erro ao carregar contrato. Entre em contato com o suporte."
     },
     "finish": {
       "appDesc": "Instale nosso PWA para receber notificações de aulas e praticar em qualquer lugar.",
@@ -2710,6 +2713,7 @@
       "representativeName": "Representante Legal",
       "representativeTaxId": "CPF do Representante",
       "repPlaceholder": "Nome do Gestor",
+      "supportPhone": "WhatsApp / Telefone de Suporte",
       "address": "Endereço Institucional",
       "save": "Salvar Configurações"
     },

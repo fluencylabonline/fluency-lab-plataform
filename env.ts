@@ -33,6 +33,10 @@ export const env = createEnv({
     ABACATEPAY_WEBHOOK_SECRET: z.string().min(1),
     ABACATEPAY_PUBLIC_KEY: z.string().optional(),
 
+    // Stripe
+    STRIPE_SECRET_KEY: z.string().optional(),
+    STRIPE_WEBHOOK_SECRET: z.string().optional(),
+
     // Automation
     CRON_SECRET: z.string().min(1),
 
@@ -92,6 +96,10 @@ export const env = createEnv({
     ABACATEPAY_API_KEY: process.env.ABACATEPAY_API_KEY,
     ABACATEPAY_WEBHOOK_SECRET: process.env.ABACATEPAY_WEBHOOK_SECRET,
     ABACATEPAY_PUBLIC_KEY: process.env.ABACATEPAY_PUBLIC_KEY,
+
+    // Stripe
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
 
     // Automation
     CRON_SECRET: process.env.CRON_SECRET,

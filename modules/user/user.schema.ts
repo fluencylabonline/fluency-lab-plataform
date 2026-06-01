@@ -38,6 +38,7 @@ export const usersTable = pgTable("users", {
   classesStartDate: timestamp("classes_start_date"),
   languages: text("languages").array().notNull().default(sql`'{}'`),
   abacatePayCustomerId: text("abacate_pay_customer_id"),
+  stripeCustomerId: text("stripe_customer_id"),
   assignedPlanId: uuid("assigned_plan_id"),
   dueDay: integer("preferred_due_day").default(10),
 
