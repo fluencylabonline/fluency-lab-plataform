@@ -232,7 +232,7 @@ export default function Footer() {
           </div>
 
           <div className="mt-12 md:mt-16 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col-reverse md:flex-row items-center justify-between gap-4">
-            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium text-center md:text-left">
+            <p className="text-slate-600 dark:text-slate-300 text-xs font-medium text-center md:text-left">
               {t("copyright") ||
                 "© 2026 FluencyLab. Todos os direitos reservados."}
             </p>
