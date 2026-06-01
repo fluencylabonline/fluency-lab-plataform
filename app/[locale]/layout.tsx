@@ -121,8 +121,14 @@ export default async function RootLayout({
           as="image"
           href="/icons/android/launchericon-transparent-512x512.png" 
         />
+        <link
+          rel="preload"
+          as="image"
+          href="/videos/landing-poster.webp"
+          fetchPriority="high"
+        />
         {/* Preconnect: estabelece TCP/TLS antecipadamente para origens críticas */}
-        <link rel="preconnect" href="https://i.pravatar.cc" />
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
         {/* DNS-prefetch: resolve o DNS do Firebase Auth sem abrir conexão antecipada */}
         <link rel="dns-prefetch" href="https://firebaseapp.com" />
       </head>

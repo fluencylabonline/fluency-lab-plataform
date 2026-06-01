@@ -25,17 +25,20 @@ export function EditorScreen() {
             </div>
           </div>
           <div className="flex -space-x-2">
-            {[1, 2, 3].map((i) => (
+            {[
+              "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80",
+              "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=100&h=100&q=80",
+              "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=100&h=100&q=80"
+            ].map((src, i) => (
               <div
                 key={i}
                 className="w-7 h-7 rounded-full border-2 border-white dark:border-gray-950 bg-gray-200 overflow-hidden"
               >
                 <Image
-                  src={`https://i.pravatar.cc/100?u=${i}`}
+                  src={src}
                   alt="Collaborator"
                   width={28}
                   height={28}
-                  unoptimized
                 />
               </div>
             ))}

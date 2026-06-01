@@ -145,7 +145,7 @@ export default function HowItWorks() {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <Image
-                  src="https://i.pravatar.cc/100?u=a042581f4e29026024d"
+                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80"
                   alt="Ana"
                   width={48}
                   height={48}

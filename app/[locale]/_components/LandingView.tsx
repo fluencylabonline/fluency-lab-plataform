@@ -49,7 +49,7 @@ export function LandingView({ user }: { user: User | null }) {
           <div className="relative max-h-[97vh] lg:min-h-[96vh] flex-1 rounded-3xl overflow-hidden flex flex-col">
             <motion.video
               src={videoSrc || undefined}
-              poster="/videos/landing-poster.png"
+              poster="/videos/landing-poster.webp"
               autoPlay
               loop
               muted

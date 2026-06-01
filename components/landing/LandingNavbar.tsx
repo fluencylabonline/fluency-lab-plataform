@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { BottomSheetIcon } from "@/components/animated-icons/bottom-sheet";
-import { authClient } from "@/lib/auth-client";
 import { User } from "@/modules/user/user.schema";
 import {
   Vault,
@@ -41,41 +40,52 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 30);
+    };
 
-      const sections = ["about", "plans", "team", "faq"];
-      const offset = 120;
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
 
-      let currentSection = "";
+    const sections = ["about", "plans", "team", "faq"];
+    const observerOptions = {
+      root: null,
+      rootMargin: "-40% 0px -50% 0px",
+      threshold: 0,
+    };
 
-      const isAtBottom =
-        window.innerHeight + window.scrollY >=
-        document.documentElement.scrollHeight - 10;
-
-      if (isAtBottom) {
-        currentSection = "faq";
-      } else {
-        for (const section of sections) {
-          const element = document.getElementById(section);
-          if (element) {
-            const rect = element.getBoundingClientRect();
-            if (rect.top <= offset) {
-              currentSection = section;
-            }
-          }
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveTab(entry.target.id);
         }
-      }
+      });
 
-      if (currentSection) {
-        setActiveTab(currentSection);
-      } else {
+      if (window.scrollY < 100) {
         setActiveTab("");
       }
     };
 
-    handleScroll();
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    sections.forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) observer.observe(element);
+    });
+
+    const handleScrollBottom = () => {
+      const isAtBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 50;
+      if (isAtBottom) {
+        setActiveTab("faq");
+      }
+    };
+    window.addEventListener("scroll", handleScrollBottom, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", handleScrollBottom);
+      observer.disconnect();
+    };
   }, []);
 
   const handleLoginClick = () => {
@@ -88,8 +98,13 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
 
   const handleSignOut = async () => {
     setIsLoggingOut(true);
-    await authClient.signOut();
-    // Redirect happens in authClient.signOut
+    try {
+      const { authClient } = await import("@/lib/auth-client");
+      await authClient.signOut();
+    } catch (err) {
+      console.error("Erro ao fazer logout:", err);
+      setIsLoggingOut(false);
+    }
   };
 
   const navLinksLeft = [
