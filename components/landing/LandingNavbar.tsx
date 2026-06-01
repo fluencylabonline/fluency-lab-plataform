@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/public/brand/logo.png";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { DoorOpenIcon, LogOut, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -43,16 +43,24 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
       setIsScrolled(window.scrollY > 30);
 
       const sections = ["about", "plans", "team", "faq"];
-      const offset = 100;
+      const offset = 120;
 
       let currentSection = "";
 
-      for (const section of sections) {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          if (rect.top <= offset && rect.bottom >= offset) {
-            currentSection = section;
+      const isAtBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 10;
+
+      if (isAtBottom) {
+        currentSection = "faq";
+      } else {
+        for (const section of sections) {
+          const element = document.getElementById(section);
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            if (rect.top <= offset) {
+              currentSection = section;
+            }
           }
         }
       }
@@ -63,6 +71,8 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
         setActiveTab("");
       }
     };
+
+    handleScroll();
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -96,7 +106,8 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
 
   return (
     <>
-      <motion.header
+      <LayoutGroup id="desktop-navbar">
+        <motion.header
         className="hidden md:flex fixed top-0 left-0 w-full z-99 pointer-events-none flex-col items-center"
         animate={{
           paddingTop: isScrolled ? "1rem" : "2rem",
@@ -258,6 +269,7 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
           </motion.div>
         </motion.div>
       </motion.header>
+      </LayoutGroup>
 
       <header className="md:hidden w-full p-4 flex justify-between items-center z-40 relative">
         <div className="w-36">

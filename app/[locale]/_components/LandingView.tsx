@@ -64,7 +64,7 @@ export function LandingView({ user }: { user: User | null }) {
 
             <div className="relative z-3 flex flex-col flex-1">
               <LandingNavbar user={user} />
-              <div id="hero" />
+              <div id="about" />
               <LandingHero user={user} />
             </div>
           </div>
