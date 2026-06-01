@@ -1,18 +1,18 @@
 "use server";
 
-import { adminAction } from "@/lib/safe-action";
+import { managerAction } from "@/lib/safe-action";
 import { z } from "zod";
 import { communicationService } from "./communication.service";
 import { createWhatsAppTemplateSchema } from "./communication.schema";
 import { revalidatePath } from "next/cache";
 
-export const getWhatsAppTemplatesAction = adminAction
+export const getWhatsAppTemplatesAction = managerAction
   .metadata({ name: "getWhatsAppTemplates" })
   .action(async () => {
     return await communicationService.getWhatsAppTemplates();
   });
 
-export const createWhatsAppTemplateAction = adminAction
+export const createWhatsAppTemplateAction = managerAction
   .metadata({ name: "createWhatsAppTemplate" })
   .schema(createWhatsAppTemplateSchema)
   .action(async ({ parsedInput }) => {
@@ -21,7 +21,7 @@ export const createWhatsAppTemplateAction = adminAction
     return { success: true };
   });
 
-export const deleteWhatsAppTemplateAction = adminAction
+export const deleteWhatsAppTemplateAction = managerAction
   .metadata({ name: "deleteWhatsAppTemplate" })
   .schema(z.object({ name: z.string() }))
   .action(async ({ parsedInput }) => {
@@ -30,27 +30,27 @@ export const deleteWhatsAppTemplateAction = adminAction
     return { success: true };
   });
 
-export const getWhatsAppConversationsAction = adminAction
+export const getWhatsAppConversationsAction = managerAction
   .metadata({ name: "getWhatsAppConversations" })
   .action(async () => {
     return await communicationService.getConversations();
   });
 
-export const getWhatsAppMessagesAction = adminAction
+export const getWhatsAppMessagesAction = managerAction
   .metadata({ name: "getWhatsAppMessages" })
   .schema(z.object({ conversationId: z.string() }))
   .action(async ({ parsedInput }) => {
     return await communicationService.getMessages(parsedInput.conversationId);
   });
 
-export const sendWhatsAppTextMessageAction = adminAction
+export const sendWhatsAppTextMessageAction = managerAction
   .metadata({ name: "sendWhatsAppTextMessage" })
   .schema(z.object({ to: z.string(), text: z.string() }))
   .action(async ({ parsedInput }) => {
     return await communicationService.sendWhatsAppTextMessage(parsedInput.to, parsedInput.text);
   });
 
-export const markWhatsAppConversationAsReadAction = adminAction
+export const markWhatsAppConversationAsReadAction = managerAction
   .metadata({ name: "markWhatsAppConversationAsRead" })
   .schema(z.object({ conversationId: z.string() }))
   .action(async ({ parsedInput }) => {
@@ -58,7 +58,7 @@ export const markWhatsAppConversationAsReadAction = adminAction
     return { success: true };
   });
 
-export const updateWhatsAppContactNameAction = adminAction
+export const updateWhatsAppContactNameAction = managerAction
   .metadata({ name: "updateWhatsAppContactName" })
   .schema(z.object({ conversationId: z.string(), name: z.string().min(1, "Nome não pode ser vazio") }))
   .action(async ({ parsedInput }) => {
@@ -66,7 +66,7 @@ export const updateWhatsAppContactNameAction = adminAction
     return { success: true };
   });
 
-export const updateWhatsAppConversationLabelsAction = adminAction
+export const updateWhatsAppConversationLabelsAction = managerAction
   .metadata({ name: "updateWhatsAppConversationLabels" })
   .schema(z.object({ conversationId: z.string(), labels: z.array(z.any()) }))
   .action(async ({ parsedInput }) => {
@@ -74,7 +74,7 @@ export const updateWhatsAppConversationLabelsAction = adminAction
     return { success: true };
   });
 
-export const sendWhatsAppTemplateAction = adminAction
+export const sendWhatsAppTemplateAction = managerAction
   .metadata({ name: "sendWhatsAppTemplate" })
   .schema(z.object({
     to: z.string(),

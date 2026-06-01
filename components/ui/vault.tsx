@@ -86,6 +86,27 @@ const VaultOverlay = React.forwardRef<
     );
 });
 VaultOverlay.displayName = "VaultOverlay";
+
+interface VisuallyHiddenProps extends React.HTMLAttributes<HTMLSpanElement> {
+    children: React.ReactNode;
+}
+
+const VisuallyHidden = React.forwardRef<HTMLSpanElement, VisuallyHiddenProps>(
+    ({ className, ...props }, ref) => {
+        return (
+            <span
+                ref={ref}
+                className={twMerge(
+                    "absolute left-[-10000px] top-auto w-px h-px overflow-hidden",
+                    className
+                )}
+                {...props}
+            />
+        );
+    }
+);
+VisuallyHidden.displayName = "VisuallyHidden";
+
 const VaultContent = React.forwardRef<
     React.ComponentRef<typeof Drawer.Content>,
     React.ComponentPropsWithoutRef<typeof Drawer.Content> & {
@@ -135,6 +156,9 @@ const VaultContent = React.forwardRef<
                 )}
                 {...props}
             >
+                <VisuallyHidden>
+                    <Drawer.Title>{props["aria-label"] ?? "Vault"}</Drawer.Title>
+                </VisuallyHidden>
                 {showHandle && (
                     <div className="mx-auto mt-4 mb-2 h-1.5 w-14 shrink-0 rounded-full bg-primary/50" />
                 )}
@@ -519,24 +543,4 @@ export {
     VaultPrimaryButton,
     VaultSecondaryButton,
 };
-
-interface VisuallyHiddenProps extends React.HTMLAttributes<HTMLSpanElement> {
-    children: React.ReactNode;
-}
-
-const VisuallyHidden = React.forwardRef<HTMLSpanElement, VisuallyHiddenProps>(
-    ({ className, ...props }, ref) => {
-        return (
-            <span
-                ref={ref}
-                className={twMerge(
-                    "absolute left-[-10000px] top-auto w-px h-px overflow-hidden",
-                    className
-                )}
-                {...props}
-            />
-        );
-    }
-);
-
-VisuallyHidden.displayName = "VisuallyHidden";
+
