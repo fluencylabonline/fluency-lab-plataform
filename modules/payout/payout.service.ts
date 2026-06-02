@@ -7,6 +7,7 @@ import TeacherPayoutEmail from "../communication/templates/TeacherPayoutEmail";
 import { db } from "@/lib/db";
 import { and, between, eq } from "drizzle-orm";
 import { slotInstances } from "../scheduling/scheduling.schema";
+import { payoutsTable } from "./payout.schema";
 
 export const payoutService = {
   async getTeacherUnpaidClasses(teacherId: string, month: number, year: number) {
@@ -69,7 +70,7 @@ export const payoutService = {
     // 4. Send Email Report
     try {
       await resend.emails.send({
-        from: "FluencyLab <financeiro@fluencylab.com.br>",
+        from: "FluencyLab <financeiro@fluencylab.me>",
         to: teacher.email,
         subject: `Seu pagamento de ${month + 1}/${year} foi processado!`,
         react: TeacherPayoutEmail({
@@ -105,29 +106,115 @@ export const payoutService = {
     return payoutRepository.findPayoutsByTeacher(teacherId);
   },
 
-  async getEarningsProjections(teacherId: string) {
-    const now = new Date();
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  async getEarningsProjections(teacherId: string, month?: number, year?: number) {
+    const today = new Date();
+    const targetMonth = month !== undefined ? month : today.getMonth();
+    const targetYear = year !== undefined ? year : today.getFullYear();
 
-    // 1. Pending (Completed but unpaid)
-    const pendingClasses = await payoutRepository.findUnpaidClassesByTeacher(teacherId, new Date(2000, 0, 1), now);
     const teacher = await userService.getUserById(teacherId);
-    const pendingAmount = pendingClasses.reduce((sum, cls) => sum + (cls.teacherHourlyRate ?? teacher?.teacherHourlyRate ?? 0), 0);
+    if (!teacher) throw new Error("Teacher not found");
 
-    // 2. Projected (Scheduled in the future for this month)
-    const futureClasses = await db.query.slotInstances.findMany({
-      where: and(
-        eq(slotInstances.teacherId, teacherId),
-        eq(slotInstances.status, "scheduled"),
-        between(slotInstances.startAt, now, end)
-      )
-    });
-    const projectedAmount = futureClasses.reduce((sum, cls) => sum + (cls.teacherHourlyRate ?? teacher?.teacherHourlyRate ?? 0), 0);
+    let start: Date;
+    let end: Date;
+
+    if (targetMonth === -1) {
+      // All months of the target year
+      start = new Date(targetYear, 0, 1);
+      end = new Date(targetYear, 11, 31, 23, 59, 59);
+    } else {
+      start = new Date(targetYear, targetMonth, 1);
+      end = new Date(targetYear, targetMonth + 1, 0, 23, 59, 59);
+    }
+
+    // 1. Pending (Completed but unpaid classes in the target range)
+    const unpaidStart = targetYear === today.getFullYear() ? new Date(2000, 0, 1) : start;
+    const unpaidClasses = await payoutRepository.findUnpaidClassesByTeacher(teacherId, unpaidStart, end);
+    const pendingAmount = unpaidClasses.reduce((sum, cls) => sum + (cls.teacherHourlyRate ?? teacher.teacherHourlyRate), 0);
+
+    // 2. Projected (Scheduled in the future for the target range)
+    let futureStart = start;
+    if (targetMonth === -1) {
+      if (targetYear === today.getFullYear()) {
+        futureStart = today;
+      } else if (targetYear < today.getFullYear()) {
+        futureStart = end;
+      }
+    } else {
+      if (targetYear === today.getFullYear() && targetMonth === today.getMonth()) {
+        futureStart = today;
+      } else if (new Date(targetYear, targetMonth, 1) < new Date(today.getFullYear(), today.getMonth(), 1)) {
+        futureStart = end;
+      }
+    }
+
+    let projectedAmount = 0;
+    if (futureStart < end) {
+      const futureClasses = await db.query.slotInstances.findMany({
+        where: and(
+          eq(slotInstances.teacherId, teacherId),
+          eq(slotInstances.status, "scheduled"),
+          between(slotInstances.startAt, futureStart, end)
+        )
+      });
+      projectedAmount = futureClasses.reduce((sum, cls) => sum + (cls.teacherHourlyRate ?? teacher.teacherHourlyRate), 0);
+    }
 
     return {
       pendingAmount,
       projectedAmount,
       totalMonth: pendingAmount + projectedAmount
     };
+  },
+
+  async resendPayoutEmail(payoutId: string) {
+    const payout = await db.query.payoutsTable.findFirst({
+      where: eq(payoutsTable.id, payoutId),
+      with: {
+        teacher: true,
+        classes: {
+          with: {
+            student: {
+              columns: {
+                name: true,
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!payout) {
+      throw new Error("Pagamento não encontrado.");
+    }
+
+    const { teacher, classes } = payout;
+    if (!teacher) {
+      throw new Error("Professor não encontrado para este pagamento.");
+    }
+
+    // Send Email Report
+    await resend.emails.send({
+      from: "FluencyLab <financeiro@fluencylab.me>",
+      to: teacher.email,
+      subject: `Seu pagamento de ${payout.month + 1}/${payout.year} foi processado! (Reenvio)`,
+      react: TeacherPayoutEmail({
+        teacherName: teacher.name,
+        month: payout.month + 1,
+        year: payout.year,
+        amount: payout.amount,
+        classes: classes.map(c => ({
+          date: c.startAt,
+          studentName: c.student?.name || "N/A",
+          rate: c.teacherHourlyRate ?? teacher.teacherHourlyRate,
+          status: c.status
+        }))
+      }),
+    });
+
+    await payoutRepository.updatePayout(payout.id, {
+      metadata: { ...payout.metadata!, emailSent: true }
+    });
+
+    return payout;
   }
 };

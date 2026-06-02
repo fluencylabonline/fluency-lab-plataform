@@ -42,6 +42,7 @@ export default async function ProfilePage() {
                         <PayoutSummary
                             history={payoutHistory}
                             projections={projections}
+                            teacherId={user.id}
                         />
                     </div>
                 </div>

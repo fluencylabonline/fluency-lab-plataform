@@ -1916,7 +1916,10 @@
       "pendingPayout": "A Receber",
       "projectedDescription": "Estimativa baseada em aulas agendadas",
       "projectedEarnings": "Projeção do Mês",
-      "totalExpected": "Total Esperado"
+      "totalExpected": "Total Esperado",
+      "sendReceipt": "Enviar Comprovante",
+      "receiptSentSuccess": "Comprovante enviado com sucesso!",
+      "receiptSentError": "Erro ao enviar comprovante."
     }
   },
   "PwaVault": {

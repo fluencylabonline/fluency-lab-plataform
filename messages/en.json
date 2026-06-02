@@ -1916,7 +1916,10 @@
       "pendingPayout": "To Receive",
       "projectedDescription": "Estimated based on scheduled classes",
       "projectedEarnings": "Month Projection",
-      "totalExpected": "Total Expected"
+      "totalExpected": "Total Expected",
+      "sendReceipt": "Send Receipt",
+      "receiptSentSuccess": "Receipt resent successfully!",
+      "receiptSentError": "Error sending receipt."
     }
   },
   "PwaVault": {
