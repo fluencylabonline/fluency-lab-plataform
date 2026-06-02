@@ -144,7 +144,7 @@ export function ActionsTab({
                     onClick={handleDeactivate}
                     disabled={isPending || !password}
                   >
-                    <UserMinus className="w-4 h-4" />
+                    <UserMinus className="w-4 h-4 mr-2" />
                     {isPending ? "..." : t("confirmDeactivation")}
                   </Button>
                 </div>

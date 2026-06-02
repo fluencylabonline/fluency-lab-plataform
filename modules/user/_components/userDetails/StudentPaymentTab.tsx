@@ -183,7 +183,7 @@ export function StudentPaymentTab({
                                   valueAsNumber: true,
                                 })}
                               />
-                              <Button type="submit" disabled={isUpdating} size="sm" className="font-bold">
+                              <Button type="submit" disabled={isUpdating || !adminPassword} className="font-bold">
                                 {t("update")}
                               </Button>
                             </div>
@@ -201,11 +201,11 @@ export function StudentPaymentTab({
                               onChange={(e) => setAdminPassword(e.target.value)}
                             />
                             <Button
-                              className="w-full gap-2 bg-green-600 hover:bg-green-700 font-black text-xs uppercase tracking-widest py-6"
+                              className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 font-black text-xs uppercase tracking-widest py-6"
                               onClick={() => onMarkAsPaid(inst.id)}
                               disabled={isUpdating || !adminPassword}
                             >
-                              <CheckCircle2 className="w-4 h-4" />
+                              <CheckCircle2 className="w-4 h-4 mr-2" />
                               {t("confirmAndMarkPaid")}
                             </Button>
                           </div>

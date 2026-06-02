@@ -15,6 +15,7 @@ import {
   NewSchedulingAuditLog
 } from "./scheduling.types";
 
+export type DbClient = typeof db | Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 export const schedulingRepository = {
   // --- Slot Instances ---
@@ -107,7 +108,7 @@ export const schedulingRepository = {
   },
 
   // --- Recurrence Rules ---
-  async findRuleById(id: string, dbClient?: typeof db) {
+  async findRuleById(id: string, dbClient?: DbClient) {
     const client = dbClient || db;
     return client.query.recurrenceRules.findFirst({
       where: eq(recurrenceRules.id, id),
@@ -118,7 +119,7 @@ export const schedulingRepository = {
     return db.query.recurrenceRules.findMany();
   },
 
-  async findSlotByRuleAndDate(ruleId: string, startAt: Date, dbClient?: typeof db) {
+  async findSlotByRuleAndDate(ruleId: string, startAt: Date, dbClient?: DbClient) {
     const client = dbClient || db;
     return client.query.slotInstances.findFirst({
       where: and(
@@ -164,7 +165,7 @@ export const schedulingRepository = {
     });
   },
 
-  async findOverlappingSlot(teacherId: string, startAt: Date, endAt: Date, excludeId?: string, dbClient?: typeof db) {
+  async findOverlappingSlot(teacherId: string, startAt: Date, endAt: Date, excludeId?: string, dbClient?: DbClient) {
     const client = dbClient || db;
     const filters = [
       eq(slotInstances.teacherId, teacherId),

@@ -528,7 +528,6 @@ export function CurriculumVaults({
             </div>
           </VaultBody>
           <VaultFooter className="px-6 pb-6 border-t pt-4">
-            <VaultSecondaryButton onClick={() => setShowManageSchedule(false)}>Fechar</VaultSecondaryButton>
             <VaultPrimaryButton
               disabled={!selectedId || isUpdating}
               onClick={() => {

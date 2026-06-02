@@ -114,16 +114,30 @@ describe("Billing Sudo Mode - updateInstallmentAction", () => {
     expect(data?.success).toBe(true);
   });
 
-  it("[SUDO] SHOULD allow changing amount WITHOUT password (not a sensitive 'paid' status change)", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(createMockUser({ id: "admin-id", role: "admin" }));
+  it("[SUDO] SHOULD block changing amount if password is missing", async () => {
+    vi.mocked(getCurrentUser).mockResolvedValue(createMockUser({ id: "admin-id", role: "admin", email: "a@test.com" }));
     
     const result = await updateInstallmentAction({ 
       id: INST_ID, 
-      amount: 5000 // Not changing status to paid
+      amount: 5000
+    });
+
+    const data = result.data as { success?: boolean; error?: string };
+    expect(data?.success).toBe(false);
+    expect(data?.error).toContain("confirmação de senha é obrigatória");
+  });
+
+  it("[SUDO] SHOULD allow changing amount with correct password", async () => {
+    vi.mocked(getCurrentUser).mockResolvedValue(createMockUser({ id: "admin-id", role: "admin", email: "a@test.com" }));
+    vi.mocked(verifySudoMode).mockResolvedValue(true);
+    
+    const result = await updateInstallmentAction({ 
+      id: INST_ID, 
+      amount: 5000,
+      password: "correct"
     });
 
     const data = result.data as { success?: boolean; error?: string };
     expect(data?.success).toBe(true);
-    expect(verifySudoMode).not.toHaveBeenCalled();
   });
 });

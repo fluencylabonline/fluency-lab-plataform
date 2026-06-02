@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { schedulingRepository } from "./scheduling.repository";
+import { schedulingRepository, DbClient } from "./scheduling.repository";
 import { hasPermission } from "@/lib/rbac";
 import { UserRoleInfo } from "@/lib/rbac";
 import {
@@ -67,6 +67,9 @@ export const schedulingService = {
     const rule = await schedulingRepository.findRuleById(ruleId);
     if (!rule) throw new Error("Recurrence Rule not found");
 
+    const student = await userService.getUserById(studentId);
+    if (!student) throw new Error("Student not found");
+
     // 1. Get student's active contract to find expiresAt
     const contract = await db.query.contractInstancesTable.findFirst({
       where: and(
@@ -89,13 +92,17 @@ export const schedulingService = {
     if (isAfter(horizon, maxHorizon)) horizon = maxHorizon;
     if (isBefore(horizon, minHorizon)) horizon = minHorizon;
 
+    const startAllocationFrom = student.classesStartDate && isAfter(new Date(student.classesStartDate), now)
+      ? new Date(student.classesStartDate)
+      : now;
+
     return await db.transaction(async (tx) => {
       // 2. Update the rule template
       await tx.update(recurrenceRules)
         .set({ studentId })
         .where(eq(recurrenceRules.id, ruleId));
 
-      // 3. Update existing available slots up to horizon
+      // 3. Update existing available slots up to horizon (only starting from classesStartDate/now)
       await tx.update(slotInstances)
         .set({
           studentId,
@@ -106,31 +113,28 @@ export const schedulingService = {
           and(
             eq(slotInstances.ruleId, ruleId),
             eq(slotInstances.status, "available"),
-            gte(slotInstances.startAt, now),
+            gte(slotInstances.startAt, startAllocationFrom),
             lt(slotInstances.startAt, horizon)
           )
         );
 
       // 4. Generate missing slots if teacher schedule doesn't reach horizon
       // We pass studentId to ensure newly created slots are correctly attributed
-      await this.materializeSlotsUntilDate(ruleId, horizon, tx, studentId);
+      await this.materializeSlotsUntilDate(ruleId, horizon, tx, studentId, startAllocationFrom);
 
       // Notification
-      const student = await userService.getUserById(studentId);
-      if (student) {
-        await notificationService.sendNotification({
-          title: "Novo Horário Agendado",
-          body: `Você foi alocado para um novo horário recorrente iniciando em ${format(rule.startDate, "dd/MM")}.`,
-          targetType: "specific",
-          userIds: [studentId],
-          channels: { inApp: true, push: true },
-        });
-      }
+      await notificationService.sendNotification({
+        title: "Novo Horário Agendado",
+        body: `Você foi alocado para um novo horário recorrente iniciando em ${format(startAllocationFrom, "dd/MM")}.`,
+        targetType: "specific",
+        userIds: [studentId],
+        channels: { inApp: true, push: true },
+      });
 
       // Notify Teacher about new student and possible extra slots
       await notificationService.sendNotification({
         title: "Novo Aluno Alocado",
-        body: `O aluno ${student?.name || ""} foi alocado no seu horário de ${rule.startTime}. Aulas geradas até ${format(horizon, "dd/MM/yyyy")}.`,
+        body: `O aluno ${student.name || ""} foi alocado no seu horário de ${rule.startTime}. Aulas geradas até ${format(horizon, "dd/MM/yyyy")}.`,
         targetType: "specific",
         userIds: [rule.teacherId],
         channels: { inApp: true, push: true },
@@ -175,8 +179,13 @@ export const schedulingService = {
     });
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async materializeSlotsUntilDate(ruleId: string, horizon: Date, tx?: any, overrideStudentId?: string) {
+  async materializeSlotsUntilDate(
+    ruleId: string,
+    horizon: Date,
+    tx?: DbClient,
+    overrideStudentId?: string,
+    startAllocationFrom?: Date
+  ) {
     const dbClient = tx || db;
     const rule = await schedulingRepository.findRuleById(ruleId, dbClient);
     if (!rule) throw new Error("Rule not found");
@@ -208,12 +217,14 @@ export const schedulingService = {
         const conflict = await schedulingRepository.findOverlappingSlot(rule.teacherId, startAt, endAt, undefined, dbClient);
 
         if (!exists && !conflict) {
+          const shouldAssignStudent = overrideStudentId && (!startAllocationFrom || !isBefore(startAt, startAllocationFrom));
+
           await schedulingRepository.createSlotInstance({
             ruleId: rule.id,
             teacherId: rule.teacherId,
-            studentId: overrideStudentId || rule.studentId,
+            studentId: shouldAssignStudent ? overrideStudentId : null,
             type: rule.type,
-            status: (overrideStudentId || rule.studentId) ? "scheduled" : "available",
+            status: shouldAssignStudent ? "scheduled" : "available",
             startAt,
             endAt,
           });

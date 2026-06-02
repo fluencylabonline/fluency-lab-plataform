@@ -109,10 +109,12 @@ export function UserDetailsClient({
       const result = await updateInstallmentAction({
         id: id,
         amount: data.amount ? Math.round(data.amount * 100) : undefined,
+        password: adminPassword,
       });
 
       if (result?.data?.success) {
         notify.success(t("installmentUpdated"));
+        setAdminPassword("");
         router.refresh();
       } else {
         notify.error(result?.data?.error || t("updateError"));

@@ -18,19 +18,19 @@ export function getRadianAngle(degreeValue: number) {
 }
 
 /**
- * Returns the cropped image URL (base64)
+ * Returns the cropped image Blob
  */
 export async function getCroppedImg(
   imageSrc: string,
   pixelCrop: { x: number; y: number; width: number; height: number },
   rotation = 0
-): Promise<string> {
+): Promise<Blob> {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
 
   if (!ctx) {
-    return "";
+    throw new Error("Failed to get canvas 2D context");
   }
 
   const rotRad = getRadianAngle(rotation);
@@ -63,7 +63,15 @@ export async function getCroppedImg(
 
   ctx.putImageData(data, 0, 0);
 
-  return canvas.toDataURL("image/jpeg");
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error("Failed to generate blob from canvas"));
+        return;
+      }
+      resolve(blob);
+    }, "image/jpeg");
+  });
 }
 
 function rotateSize(width: number, height: number, rotation: number) {

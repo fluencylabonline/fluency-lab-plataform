@@ -52,11 +52,8 @@ export function AvatarUploadVault({ userId, isOpen, onOpenChange }: AvatarUpload
     const promise = (async () => {
       setIsUploading(true);
       try {
-        const croppedImage = await getCroppedImg(image, croppedAreaPixels);
+        const blob = await getCroppedImg(image, croppedAreaPixels);
         const storageRef = ref(storage, `avatars/${userId}`);
-        
-        const response = await fetch(croppedImage);
-        const blob = await response.blob();
 
         await uploadBytes(storageRef, blob);
         const photoUrl = await getDownloadURL(storageRef);

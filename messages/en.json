@@ -2141,6 +2141,7 @@
     "cropAvatar": "Adjust Picture",
     "cropAndSave": "Save Picture",
     "uploadSuccess": "Profile picture updated!",
+    "processingImage": "Processing image...",
     "language": "Interface Language",
     "languageDescription": "Choose your preferred language for the platform.",
     "portuguese": "Português",

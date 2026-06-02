@@ -119,10 +119,13 @@ export const updateInstallmentAction = adminAction
     try {
       const { id, password, ...data } = parsedInput;
 
-      // Sensitive check: marking as paid manually requires password confirmation
-      if (data.status === "paid") {
+      // Sensitive check: marking as paid manually or updating the amount requires password confirmation
+      if (data.status === "paid" || data.amount !== undefined) {
         if (!password) {
-          return { success: false, error: "A confirmação de senha é obrigatória para marcar como paga." };
+          const errorMsg = data.status === "paid"
+            ? "A confirmação de senha é obrigatória para marcar como paga."
+            : "A confirmação de senha é obrigatória para alterar o valor da parcela.";
+          return { success: false, error: errorMsg };
         }
 
         const isValid = await verifySudoMode(ctx.user.id, ctx.user.email!, password);
@@ -130,20 +133,21 @@ export const updateInstallmentAction = adminAction
           return { success: false, error: "Senha incorreta. Ação não autorizada." };
         }
 
-        await billingService.markInstallmentAsPaid(id, undefined, {
-          id: ctx.user.id,
-          name: ctx.user.name,
-        });
+        if (data.status === "paid") {
+          await billingService.markInstallmentAsPaid(id, undefined, {
+            id: ctx.user.id,
+            name: ctx.user.name,
+          });
+        }
 
-        // If amount was also changed, we update it too
-        if (data.amount) {
+        if (data.amount !== undefined) {
           await billingService.updateInstallment(id, { amount: data.amount }, {
             id: ctx.user.id,
             name: ctx.user.name,
           });
         }
       } else {
-        // Other changes (status overdue, cancelled, or amount)
+        // Other changes (status overdue, cancelled)
         await billingService.updateInstallment(id, data, {
           id: ctx.user.id,
           name: ctx.user.name,
