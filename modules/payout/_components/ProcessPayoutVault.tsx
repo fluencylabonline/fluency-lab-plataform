@@ -28,6 +28,7 @@ export function ProcessPayoutVault({
   onSuccess,
 }: ProcessPayoutVaultProps) {
   const t = useTranslations("UserManagement");
+  const tCommon = useTranslations("Common");
   const [classes, setClasses] = useState<SlotInstanceWithDetails[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -208,7 +209,7 @@ export function ProcessPayoutVault({
             ) : (
               <CheckCircle2 className="w-4 h-4 mr-2" />
             )}
-            {isProcessing ? t("Common.loading") || "..." : t("confirmAndSendPix")}
+            {isProcessing ? tCommon("loading") || "..." : t("confirmAndSendPix")}
           </Button>
         </div>
       </VaultContent>

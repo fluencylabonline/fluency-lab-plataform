@@ -42,6 +42,11 @@ export default async function UserDetailsPage({ params }: UserDetailsPageProps) 
     ? await billingService.getInstallmentsBySubscriptionId(activeSub.id)
     : [];
 
+  const earningsSummary = {
+    count: teacherClasses.length,
+    total: teacherClasses.reduce((acc, cls) => acc + (cls.teacherHourlyRate ?? targetUser.teacherHourlyRate), 0),
+  };
+
   return (
     <UserDetailsClient
       user={targetUser}
@@ -51,6 +56,7 @@ export default async function UserDetailsPage({ params }: UserDetailsPageProps) 
       activeSubscription={activeSub}
       installments={installments}
       teacherClasses={teacherClasses}
+      earningsSummary={earningsSummary}
       callHistory={callHistory}
       basePath="/hub/admin/users"
       isAdmin={true}
