@@ -6,13 +6,14 @@ export interface WhatsAppTemplateComponent {
 }
 
 export interface WhatsAppParameter {
-  type: "text" | "image" | "document" | "video" | "currency" | "date_time" | "payload";
+  type: "text" | "image" | "document" | "video" | "currency" | "date_time" | "payload" | "coupon_code";
   parameter_name?: string; // Para templates que exigem nomes em vez de {{1}}
   text?: string;
   image?: { link: string };
   document?: { link: string; filename?: string };
   video?: { link: string };
   payload?: string;
+  coupon_code?: string;
 }
 
 export interface SendWhatsAppTemplateOptions {

@@ -452,7 +452,7 @@ export class CommunicationService {
             sub_type: "copy_code",
             index: "0",
             parameters: [
-              { type: "text", text: data.pixPayload }
+              { type: "coupon_code", coupon_code: data.pixPayload }
             ]
           }
         ]
@@ -501,7 +501,7 @@ export class CommunicationService {
             sub_type: "copy_code",
             index: "0",
             parameters: [
-              { type: "text", text: data.pixPayload }
+              { type: "coupon_code", coupon_code: data.pixPayload }
             ]
           }
         ]
@@ -809,7 +809,14 @@ export class CommunicationService {
     // 1. Descriptografa se necessário (formato crypto:iv:data)
     const decrypted = to.includes(":") ? decrypt(to) : to;
     // 2. Remove tudo que não for número
-    return decrypted.replace(/\D/g, "");
+    let clean = decrypted.replace(/\D/g, "");
+    
+    // Se for um número de 10 ou 11 dígitos, assume que é do Brasil (sem o 55) e adiciona
+    if (clean.length === 10 || clean.length === 11) {
+      clean = `55${clean}`;
+    }
+    
+    return clean;
   }
 
   /**

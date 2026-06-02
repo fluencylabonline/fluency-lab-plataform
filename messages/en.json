@@ -1925,7 +1925,10 @@
     "notNowButton": "Not now",
     "updateButton": "Update Now",
     "updateDescription": "A new version of the app is ready. Update now to receive the latest improvements.",
-    "updateTitle": "New Version Available"
+    "updateTitle": "New Version Available",
+    "appReadyTitle": "Your app is ready!",
+    "appReadyDescription": "You are already using the latest version and the app is configured correctly.",
+    "activeAppMode": "Active App Mode"
   },
   "PwaWelcome": {
     "description": "Your journey to fluency starts here.",

@@ -10,7 +10,8 @@ export function AppSettings() {
   const pwaT = useTranslations("PwaVault");
   const { isInstallable, updateAvailable, install, update, isStandalone } = useDevice();
 
-  const hasAction = isInstallable || updateAvailable;
+  const showInstall = isInstallable && !isStandalone;
+  const hasAction = showInstall || updateAvailable;
 
   return (
     <div className="space-y-6">
@@ -42,7 +43,7 @@ export function AppSettings() {
             </div>
           )}
 
-          {isInstallable && (
+          {showInstall && (
             <div className="item flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 border rounded-lg">
               <div className="flex items-start gap-3">
                 <div className="mt-1 p-2 bg-primary/10 rounded-full">
@@ -67,13 +68,13 @@ export function AppSettings() {
               <div className="p-4 bg-green-500/10 rounded-full mb-4">
                 <CheckCircle2 className="w-12 h-12 text-green-500" />
               </div>
-              <h4 className="font-semibold text-lg">Seu aplicativo está pronto!</h4>
+              <h4 className="font-semibold text-lg">{pwaT("appReadyTitle")}</h4>
               <p className="text-sm text-muted-foreground max-w-xs">
-                Você já está usando a versão mais recente e o aplicativo está configurado corretamente.
+                {pwaT("appReadyDescription")}
               </p>
               {isStandalone && (
                 <p className="mt-4 text-xs font-medium px-2 py-1 bg-muted rounded border uppercase tracking-wider">
-                  Modo Aplicativo Ativo
+                  {pwaT("activeAppMode")}
                 </p>
               )}
             </div>

@@ -211,6 +211,7 @@ export function ContractsDashboard({
           title={t("title") || "Contratos"}
           user={user}
           showSubHeader={false}
+          className="contents"
         />
       </header>
 

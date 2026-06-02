@@ -1,4 +1,4 @@
-import { useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { onboardingWelcomeAction } from "@/modules/onboarding/onboarding.actions";
@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Loader2, ArrowRight, ExternalLink } from "lucide-react";
 import { type OnboardingData } from "./OnboardingFlow";
 import Link from "next/link";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface FieldProps {
     label: string;
@@ -122,15 +123,20 @@ export function StepWelcome({
 
                 <div className="space-y-4 pt-2">
                     <div className="flex items-start gap-3">
-                        <div className="pt-1">
-                            <input
-                                type="checkbox"
-                                {...register("acceptedTerms")}
-                                id="acceptedTerms"
-                                className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-violet-600 focus:ring-violet-500"
+                        <div className="pt-0.5">
+                            <Controller
+                                name="acceptedTerms"
+                                control={control}
+                                render={({ field }) => (
+                                    <Checkbox
+                                        id="acceptedTerms"
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                    />
+                                )}
                             />
                         </div>
-                        <label htmlFor="acceptedTerms" className="text-sm leading-relaxed text-slate-400">
+                        <label htmlFor="acceptedTerms" className="text-sm leading-relaxed text-slate-400 cursor-pointer select-none">
                             {t.rich("stepWelcome.terms", {
                                 terms: (chunks) => (
                                     <Link href="/terms" target="_blank" className="text-violet-400 hover:underline inline-flex items-center gap-1">
@@ -152,15 +158,20 @@ export function StepWelcome({
                     {isMinor && (
                         <div className="flex flex-col gap-3 p-4 rounded-md border border-violet-500/30 bg-violet-500/5 animate-in fade-in slide-in-from-top-1 duration-300">
                             <div className="flex items-start gap-3">
-                                <div className="pt-1">
-                                    <input
-                                        type="checkbox"
-                                        {...register("guardianConsent")}
-                                        id="guardianConsent"
-                                        className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-violet-600 focus:ring-violet-500"
+                                <div className="pt-0.5">
+                                    <Controller
+                                        name="guardianConsent"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Checkbox
+                                                id="guardianConsent"
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                            />
+                                        )}
                                     />
                                 </div>
-                                <label htmlFor="guardianConsent" className="text-sm leading-relaxed text-slate-300 font-medium">
+                                <label htmlFor="guardianConsent" className="text-sm leading-relaxed text-slate-300 font-medium cursor-pointer select-none">
                                     {t("stepWelcome.guardianConsent")}
                                 </label>
                             </div>

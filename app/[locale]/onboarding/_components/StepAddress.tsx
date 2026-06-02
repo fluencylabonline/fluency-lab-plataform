@@ -221,6 +221,7 @@ export function StepAddress({
                         {...register("taxId")}
                         className={inputClass}
                         placeholder={nationality === "brazilian" ? "000.000.000-00" : ""}
+                        inputMode="numeric"
                     />
                 </Field>
             </div>
@@ -232,6 +233,7 @@ export function StepAddress({
                         {...register("cellphone")}
                         placeholder="+55 (11) 99999-9999"
                         className={inputClass}
+                        inputMode="tel"
                     />
                 </Field>
 
@@ -244,6 +246,7 @@ export function StepAddress({
                         onBlur={handleZipCodeBlur}
                         placeholder="00000-000"
                         className={inputClass}
+                        inputMode="numeric"
                     />
                 </Field>
             </div>
@@ -259,7 +262,7 @@ export function StepAddress({
                 </Field>
 
                 <Field label={t("address.number")} error={errors.number?.message}>
-                    <input {...register("number")} className={inputClass} />
+                    <input {...register("number")} className={inputClass} inputMode="numeric" />
                 </Field>
             </div>
 
@@ -310,7 +313,7 @@ export function StepAddress({
                         </Field>
 
                         <Field label={t("guardian.taxId")} error={errors.guardianTaxId?.message}>
-                            <input {...register("guardianTaxId")} className={inputClass} />
+                            <input {...register("guardianTaxId")} className={inputClass} inputMode="numeric" />
                         </Field>
                     </div>
 
