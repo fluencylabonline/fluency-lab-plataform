@@ -16,6 +16,9 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
+  logging: {
+    serverFunctions: false, //Deactivate custom logs with sensitive information
+  },
   transpilePackages: ["yjs", "lib0"],
   // experimental: {
   //   sri: {

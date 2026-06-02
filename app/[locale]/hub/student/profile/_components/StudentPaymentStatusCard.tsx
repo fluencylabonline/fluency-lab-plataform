@@ -220,7 +220,10 @@ export function StudentPaymentStatusCard({
       <div className="flex-1 p-5 flex flex-col justify-center">
         <div className="w-full">
           {subscription.currentInstallment &&
-          ((daysUntilDue !== null && daysUntilDue <= 7) || isOverdue) ? (
+          ((daysUntilDue !== null && daysUntilDue <= 7) ||
+            isOverdue ||
+            (currentStatus === "pending" &&
+              subscription.currentInstallment.pixCode)) ? (
             <div className="space-y-5 animate-in fade-in zoom-in-95 duration-300">
               {subscription.currentInstallment.pixCode ? (
                 <div className="flex flex-col lg:flex-row gap-5 items-center lg:items-start">

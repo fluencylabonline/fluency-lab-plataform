@@ -435,7 +435,7 @@ export class CommunicationService {
 
       return await this.sendWhatsAppTemplate({
         to: data.cellphone,
-        templateName: "payment_reminder_v2",
+        templateName: "payment_reminder_v3",
         languageCode,
         components: [
           {
@@ -485,7 +485,7 @@ export class CommunicationService {
 
       return await this.sendWhatsAppTemplate({
         to: data.cellphone,
-        templateName: "payment_overdue_v2",
+        templateName: "payment_overdue_v3",
         languageCode,
         components: [
           {
