@@ -15,15 +15,6 @@ export const payoutService = {
   },
 
   async processPayout(teacherId: string, month: number, year: number) {
-    // 1. Security Check: Only on the 15th
-    const today = new Date();
-    const is15th = today.getDate() === 15;
-
-    // For development, we might want to bypass this, but as per request:
-    if (!is15th) {
-      throw new Error("Pagamentos só podem ser processados no dia 15 de cada mês.");
-    }
-
     const teacher = await userService.getUserById(teacherId);
     if (!teacher || !teacher.pixKey || !teacher.pixType) {
       throw new Error("Professor não encontrado ou sem chave PIX configurada.");

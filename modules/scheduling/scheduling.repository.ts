@@ -290,12 +290,17 @@ export const schedulingRepository = {
   },
 
   async findUniqueStudentsByTeacher(teacherId: string) {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    thirtyDaysAgo.setHours(0, 0, 0, 0);
+
     const results = await db.selectDistinct({ studentId: slotInstances.studentId })
       .from(slotInstances)
       .where(
         and(
           eq(slotInstances.teacherId, teacherId),
-          isNotNull(slotInstances.studentId)
+          isNotNull(slotInstances.studentId),
+          gte(slotInstances.startAt, thirtyDaysAgo)
         )
       );
     

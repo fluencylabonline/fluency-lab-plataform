@@ -6,7 +6,7 @@ import { Vault, VaultContent, VaultHeader, VaultTitle, VaultTrigger } from "@/co
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Loader2, DollarSign, CheckCircle2, AlertCircle, Info, Lock } from "lucide-react";
+import { Loader2, DollarSign, CheckCircle2, Info, Lock } from "lucide-react";
 import { notify } from "@/components/ui/toaster";
 import { processTeacherPayoutAction, getTeacherUnpaidClassesAction, checkCurrentSudoRequirementAction } from "../payout.actions";
 import { format } from "date-fns";
@@ -36,8 +36,7 @@ export function ProcessPayoutVault({
   const [password, setPassword] = useState("");
   const [needsPassword, setNeedsPassword] = useState(true);
 
-  const today = new Date();
-  const is15th = today.getDate() === 15;
+
 
   const fetchUnpaid = useCallback(async () => {
     setIsLoading(true);
@@ -67,10 +66,7 @@ export function ProcessPayoutVault({
   const total = classes.reduce((sum, cls) => sum + (cls.teacherHourlyRate || 0), 0);
 
   const handleProcess = async () => {
-    if (!is15th) {
-      notify.error(t("securityLock"));
-      return;
-    }
+
 
     if (!password) {
       notify.error("Senha administrativa obrigatória");
@@ -163,28 +159,16 @@ export function ProcessPayoutVault({
             </div>
           </div>
 
-          {/* Security Warning */}
-          {!is15th ? (
-            <div className="p-4 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-orange-500">{t("securityLock")}</p>
-                <p className="text-xs text-orange-500/80 leading-relaxed">
-                  {t("securityLockDesc", { day: today.getDate() })}
-                </p>
-              </div>
+          {/* Confirmation Info */}
+          <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-start gap-3">
+            <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-sm font-bold text-blue-500">{t("payoutConfirmation")}</p>
+              <p className="text-xs text-blue-500/80 leading-relaxed">
+                {t("payoutConfirmationDesc")}
+              </p>
             </div>
-          ) : (
-            <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-start gap-3">
-              <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-blue-500">{t("payoutConfirmation")}</p>
-                <p className="text-xs text-blue-500/80 leading-relaxed">
-                  {t("payoutConfirmationDesc")}
-                </p>
-              </div>
-            </div>
-          )}
+          </div>
 
           {/* Sudo Mode Password */}
           {needsPassword ? (
@@ -201,7 +185,7 @@ export function ProcessPayoutVault({
                 className="h-10 bg-background"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={!is15th || isProcessing}
+                disabled={isProcessing}
               />
             </div>
           ) : (
@@ -216,7 +200,7 @@ export function ProcessPayoutVault({
           {/* Action Button */}
           <Button
             className="w-full h-12 font-black uppercase tracking-widest text-sm"
-            disabled={!is15th || isProcessing || classes.length === 0}
+            disabled={isProcessing || classes.length === 0}
             onClick={handleProcess}
           >
             {isProcessing ? (
