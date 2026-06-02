@@ -84,7 +84,7 @@ export async function sendPix(payload: {
       description: payload.description,
       pix: {
         key: payload.pixKey,
-        type: payload.pixKeyType,
+        type: payload.pixKeyType.toUpperCase(),
       },
     }),
   });
