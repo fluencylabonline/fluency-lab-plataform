@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "@/modules/user/user.schema";
 import { motion } from "framer-motion";
-import { Bell, BookOpen, Star, Trophy } from "lucide-react";
+import { Bell, BookOpen, Lock, Star, Trophy } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
@@ -24,28 +24,40 @@ export function PathScreen({ user }: { user: User | null }) {
   }, []);
 
   const levels = [
-    { id: 1, status: "completed", icon: Star, color: "bg-yellow-400" },
-    { id: 2, status: "completed", icon: BookOpen, color: "bg-green-500" },
-    { id: 3, status: "current", icon: Star, color: "bg-blue-500" },
-    {
-      id: 4,
-      status: "locked",
-      icon: Lock,
-      color: "bg-gray-200 dark:bg-gray-800",
-    },
-    {
-      id: 5,
-      status: "locked",
-      icon: Trophy,
-      color: "bg-gray-200 dark:bg-gray-800",
-    },
-    {
-      id: 6,
-      status: "locked",
-      icon: Trophy,
-      color: "bg-gray-200 dark:bg-gray-800",
-    },
+    { id: 1, status: "completed", icon: Star, type: "gold" },
+    { id: 2, status: "completed", icon: BookOpen, type: "green" },
+    { id: 3, status: "current", icon: Star, type: "blue" },
+    { id: 4, status: "locked", icon: Lock, type: "locked" },
+    { id: 5, status: "locked", icon: Trophy, type: "locked" },
+    { id: 6, status: "locked", icon: Trophy, type: "locked" },
   ];
+
+  const getButtonStyles = (status: string, type: string) => {
+    if (status === "locked") {
+      return "bg-[#e5e5e5] dark:bg-[#202f36] border-[#e5e5e5] dark:border-[#202f36] border-b-[#afafaf] dark:border-b-[#152025] text-[#afafaf] dark:text-[#526570] cursor-not-allowed";
+    }
+    switch (type) {
+      case "gold":
+        return "bg-[#ffc800] border-[#ffc800] border-b-[#e6b400] text-white hover:bg-[#ffd426]";
+      case "green":
+        return "bg-[#58cc02] border-[#58cc02] border-b-[#46a302] text-white hover:bg-[#61e002]";
+      case "blue":
+        return "bg-[#1899f8] border-[#1899f8] border-b-[#1878d8] text-white hover:bg-[#24bfff]";
+      default:
+        return "bg-[#58cc02] border-[#58cc02] border-b-[#46a302] text-white hover:bg-[#61e002]";
+    }
+  };
+
+  // Generate smooth zigzag pattern coordinates
+  // X is in percentage (0-100) of container width, Y is in pixels
+  const points = levels.map((_, index) => {
+    const xPattern = [50, 32, 18, 35, 68, 50];
+    const x = xPattern[index % xPattern.length];
+    const y = 40 + index * 90;
+    return { x, y };
+  });
+
+  const containerHeight = 80 + (levels.length - 1) * 90;
 
   return (
     <div className="flex flex-col h-full relative bg-gray-100 dark:bg-gray-950">
@@ -101,54 +113,101 @@ export function PathScreen({ user }: { user: User | null }) {
 
       {/* Trilha (Path) */}
       <div className="flex-1 overflow-y-auto scrollbar-hide py-10 px-4 relative">
-        {/* Linha de fundo do Path */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-5 dark:opacity-10">
-          <path
-            d="M 50 0 Q 80 150, 50 300 T 50 600"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="12"
-            className="text-gray-900 dark:text-white"
-          />
-        </svg>
+        <div 
+          className="relative w-full max-w-[280px] mx-auto"
+          style={{ height: `${containerHeight}px` }}
+        >
+          {/* Linha de fundo do Path (SVG) */}
+          <svg 
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            viewBox={`0 0 100 ${containerHeight}`}
+            preserveAspectRatio="none"
+          >
+            {levels.slice(0, -1).map((level, index) => {
+              const nextLevel = levels[index + 1];
+              const isCompletedSegment = 
+                level.status === "completed" && 
+                (nextLevel.status === "completed" || nextLevel.status === "current");
+                
+              const p0 = points[index];
+              const p1 = points[index + 1];
+              const dy = (p1.y - p0.y) / 2;
+              const pathD = `M ${p0.x} ${p0.y} C ${p0.x} ${p0.y + dy}, ${p1.x} ${p1.y - dy}, ${p1.x} ${p1.y}`;
+              
+              return (
+                <g key={index}>
+                  {/* 3D shadow line */}
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke={isCompletedSegment ? "#46a302" : "currentColor"}
+                    strokeWidth={8}
+                    strokeLinecap="round"
+                    transform="translate(0, 3)"
+                    className={isCompletedSegment ? "" : "text-gray-300 dark:text-gray-900 opacity-20 dark:opacity-40"}
+                  />
+                  {/* Foreground path line */}
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke={isCompletedSegment ? "#58cc02" : "currentColor"}
+                    strokeWidth={8}
+                    strokeLinecap="round"
+                    className={isCompletedSegment ? "" : "text-gray-200 dark:text-gray-800"}
+                  />
+                </g>
+              );
+            })}
+          </svg>
 
-        <div className="flex flex-col items-center gap-10 relative z-10">
+          {/* Níveis / Stepping Stones */}
           {levels.map((level, index) => {
-            const isLeft = index % 2 !== 0;
+            const p = points[index];
+            const Icon = level.icon;
+            const isCurrent = level.status === "current";
+            const isLocked = level.status === "locked";
+            const isCompleted = level.status === "completed";
+            
             return (
-              <motion.div
+              <div
                 key={level.id}
-                initial={{ scale: 0.8, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 1 }}
-                viewport={{ once: true }}
-                style={{ x: isLeft ? -45 : 45 }}
+                className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
+                style={{ left: `${p.x}%`, top: `${p.y}px` }}
               >
-                <div className="relative group">
-                  {level.status === "current" && (
-                    <div className="absolute -inset-4 rounded-full bg-blue-500/10 animate-ping" />
+                <div className="relative group flex flex-col items-center">
+                  {isCurrent && (
+                    <>
+                      {/* Pulsing ring */}
+                      <div className="absolute -inset-3 rounded-full bg-blue-500/20 animate-pulse" />
+                      <div className="absolute -inset-1.5 rounded-full bg-blue-500/10 animate-ping" />
+                    </>
                   )}
 
                   <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
+                    whileHover={!isLocked ? { scale: 1.05 } : {}}
+                    whileTap={!isLocked ? { scale: 0.95 } : {}}
+                    disabled={isLocked}
                     className={`
-                      w-22 h-22 rounded-[2rem] flex items-center justify-center
-                      shadow-[0_6px_0_0_rgba(0,0,0,0.1)] active:shadow-none active:translate-y-1
-                      transition-all border-4 border-white dark:border-gray-900
-                      ${level.color} ${level.status === "locked" ? "text-gray-400" : "text-white"}
+                      w-16 h-16 rounded-full flex items-center justify-center
+                      transition-all border-x-2 border-t-2 border-b-[8px]
+                      ${getButtonStyles(level.status, level.type)}
                     `}
                   >
-                    <svg className="w-7 h-7" strokeWidth={2.5} />
+                    <Icon 
+                      className={`w-6 h-6 stroke-[2.5px] ${
+                        (isCompleted || isCurrent) && level.type !== "locked" ? "fill-current" : ""
+                      }`} 
+                    />
                   </motion.button>
 
-                  {level.status === "current" && (
-                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[9px] font-black px-3 py-1 rounded-lg shadow-xl">
-                      {(t("heroCard.lessonLabel") || "Lesson").toUpperCase()}
-                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-blue-600 rotate-45" />
+                  {isCurrent && (
+                    <div className="absolute -top-12 bg-[#1899f8] text-white text-[9px] font-black px-3 py-1.5 rounded-xl whitespace-nowrap animate-bounce border border-[#1878d8]">
+                      {(t("heroCard.lessonLabel") || "START").toUpperCase()}
+                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#1899f8] rotate-45 border-r border-b border-[#1878d8]" />
                     </div>
                   )}
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>

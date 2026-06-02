@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { HomeScreen } from "@/components/landing/screens/HomeScreen";
 import { PathScreen } from "@/components/landing/screens/PathScreen";
 import { EditorScreen } from "./screens/EditScreen";
+import { PlacementScreen } from "./screens/PlacementScreen";
 
 import { User } from "@/modules/user/user.schema";
 import { CalendarDaysIcon } from "../animated-icons/calendar";
@@ -16,14 +17,15 @@ import Link from "next/link";
 export function LandingHero({ user }: { user: User | null }) {
   const t = useTranslations("LandingPage");
   const [currentScreen, setCurrentScreen] = useState<
-    "home" | "path" | "editor"
+    "home" | "path" | "editor" | "placement"
   >("editor");
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentScreen((prev) => {
         if (prev === "home") return "path";
-        if (prev === "path") return "editor";
+        if (prev === "path") return "placement";
+        if (prev === "placement") return "editor";
         return "home";
       });
     }, 10000);
@@ -83,7 +85,8 @@ export function LandingHero({ user }: { user: User | null }) {
             onClick={() => {
               setCurrentScreen((prev) => {
                 if (prev === "home") return "path";
-                if (prev === "path") return "editor";
+                if (prev === "path") return "placement";
+                if (prev === "placement") return "editor";
                 return "home";
               });
             }}
@@ -110,6 +113,17 @@ export function LandingHero({ user }: { user: User | null }) {
                   className="h-full"
                 >
                   <PathScreen user={user} />
+                </motion.div>
+              ) : currentScreen === "placement" ? (
+                <motion.div
+                  key="placement"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3 }}
+                  className="h-full"
+                >
+                  <PlacementScreen />
                 </motion.div>
               ) : (
                 <motion.div
