@@ -84,6 +84,8 @@ export function SignInForm() {
     if (!sessionResult.success) {
       const errorMsg = sessionResult.error === "notInvited"
         ? t("notInvited")
+        : sessionResult.error === "accountSuspended"
+        ? t("accountSuspended")
         : (t("error") || "Erro ao criar sessão");
 
       notify.error(errorMsg);
@@ -121,6 +123,8 @@ export function SignInForm() {
     if (!sessionResult.success) {
       const errorMsg = sessionResult.error === "notInvited"
         ? t("notInvited")
+        : sessionResult.error === "accountSuspended"
+        ? t("accountSuspended")
         : (t("error") || "Erro ao criar sessão");
 
       notify.error(errorMsg);

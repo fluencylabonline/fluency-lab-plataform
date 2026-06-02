@@ -57,6 +57,11 @@ export const loginAction = actionClient
 
       // Check if MFA is enabled for this user
       const user = await userService.getUserById(uid);
+
+      if (user && !user.isActive) {
+        return { success: false, error: "accountSuspended" };
+      }
+
       const sessionCookie = await userService.createSessionCookie(idToken, rememberMe);
       const cookieStore = await cookies();
       const maxAge = rememberMe ? 60 * 60 * 24 * 14 : 60 * 60 * 24 * 7; // 14 days or 1 week
@@ -106,6 +111,11 @@ export const verifyMfaLoginAction = actionClient
 
       const sessionCookie = mfaPendingCookie.value;
       const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+
+      const user = await userService.getUserById(decodedClaims.uid);
+      if (user && !user.isActive) {
+        return { success: false, error: "accountSuspended" };
+      }
       
       const isValid = await userService.verifyMfaToken(decodedClaims.uid, parsedInput.token);
       if (!isValid) return { success: false, error: "invalidToken" };

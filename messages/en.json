@@ -207,7 +207,8 @@
       "verificationError": "Error verifying the password creation link.",
       "weakPassword": "Password too weak. Please choose a stronger password.",
       "invalidToken": "Invalid or expired code.",
-      "sessionExpired": "Session expired. Please try signing in again."
+      "sessionExpired": "Session expired. Please try signing in again.",
+      "accountSuspended": "Your account has been suspended. Please contact your administrator."
     },
     "forgotPassword": "Forgot your password?",
     "forgotPasswordSubtitle": "Don't worry, we'll help you.",

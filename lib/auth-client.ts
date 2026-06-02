@@ -117,6 +117,11 @@ export const authClient = {
       });
 
       if (!result?.data?.success) {
+        try {
+          await firebaseSignOut(auth);
+        } catch (e) {
+          console.error("[createSession] Failed to sign out from Firebase after server rejection:", e);
+        }
         return {
           success: false,
           error: result?.data?.error || "error"

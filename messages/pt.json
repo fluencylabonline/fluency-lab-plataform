@@ -207,7 +207,8 @@
       "verificationError": "Erro ao verificar o link de criação de senha.",
       "weakPassword": "Senha muito fraca. Escolha uma senha mais forte.",
       "invalidToken": "Código inválido ou expirado.",
-      "sessionExpired": "Sessão expirada. Tente entrar novamente."
+      "sessionExpired": "Sessão expirada. Tente entrar novamente.",
+      "accountSuspended": "Sua conta foi suspensa. Entre em contato com o administrador."
     },
     "forgotPassword": "Esqueceu a senha?",
     "forgotPasswordSubtitle": "Não se preocupe, nós ajudamos você.",
