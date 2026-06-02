@@ -1,5 +1,6 @@
 import { payoutRepository } from "./payout.repository";
 import { userService } from "@/modules/user/user.service";
+import { decrypt } from "@/lib/cryptography";
 import { sendPix } from "@/lib/abacate-pay";
 import { resend } from "@/lib/resend";
 import TeacherPayoutEmail from "../communication/templates/TeacherPayoutEmail";
@@ -33,10 +34,12 @@ export const payoutService = {
 
     const externalId = `payout-${teacherId}-${month + 1}-${year}-${Date.now()}`;
 
+    const decryptedPixKey = teacher.pixKey.includes(":") ? decrypt(teacher.pixKey) : teacher.pixKey;
+
     // 2. Call AbacatePay
     const abacateResponse = await sendPix({
       amount: totalAmount,
-      pixKey: teacher.pixKey,
+      pixKey: decryptedPixKey,
       pixKeyType: teacher.pixType,
       externalId,
       description: `Pagamento FluencyLab - ${month + 1}/${year}`,
