@@ -1054,7 +1054,12 @@ export const schedulingService = {
           )
         );
 
-      // 3. Create new AVAILABLE slots for each canceled class
+      // 3. Clear student from recurrence rules to prevent cron job from generating new classes for them
+      await tx.update(recurrenceRules)
+        .set({ studentId: null, updatedAt: now })
+        .where(eq(recurrenceRules.studentId, studentId));
+
+      // 4. Create new AVAILABLE slots for each canceled class
       for (const cls of futureClasses) {
         await tx.insert(slotInstances).values({
           teacherId: cls.teacherId,

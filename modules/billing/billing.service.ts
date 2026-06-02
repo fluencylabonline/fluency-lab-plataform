@@ -961,7 +961,12 @@ export const billingService = {
     // --- CASE 1: 2 Days before due date ---
     const reminder2d = await billingRepository.findInstallmentsInDateRange(twoDaysFromNowStart, twoDaysFromNowEnd);
     for (const inst of reminder2d) {
-      if (inst.notified2dAt || !inst.subscription.student) continue;
+      if (
+        inst.notified2dAt || 
+        !inst.subscription.student || 
+        inst.subscription.status !== "active" || 
+        !inst.subscription.student.isActive
+      ) continue;
 
       const student = inst.subscription.student;
       const amountStr = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(inst.amount / 100);
@@ -1001,7 +1006,12 @@ export const billingService = {
     // --- CASE 2: Due Today ---
     const reminderDueToday = await billingRepository.findInstallmentsInDateRange(today, endOfDay(today));
     for (const inst of reminderDueToday) {
-      if (inst.notifiedDueAt || !inst.subscription.student) continue;
+      if (
+        inst.notifiedDueAt || 
+        !inst.subscription.student || 
+        inst.subscription.status !== "active" || 
+        !inst.subscription.student.isActive
+      ) continue;
 
       const student = inst.subscription.student;
       const amountStr = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(inst.amount / 100);
@@ -1027,7 +1037,12 @@ export const billingService = {
     // --- CASE 3: Overdue (1 day after) ---
     const reminderOverdue = await billingRepository.findInstallmentsInDateRange(yesterdayStart, yesterdayEnd);
     for (const inst of reminderOverdue) {
-      if (inst.notifiedOverdueAt || !inst.subscription.student) continue;
+      if (
+        inst.notifiedOverdueAt || 
+        !inst.subscription.student || 
+        inst.subscription.status !== "active" || 
+        !inst.subscription.student.isActive
+      ) continue;
 
       const student = inst.subscription.student;
       const amountStr = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(inst.amount / 100);
