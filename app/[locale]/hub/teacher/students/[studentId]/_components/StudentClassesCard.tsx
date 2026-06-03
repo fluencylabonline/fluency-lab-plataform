@@ -311,7 +311,12 @@ export function StudentClassesCard({
 
                   <div className="flex items-center gap-2">
                     {updatingClassId === cls.id ? (
-                      <div className="w-[140px] md:w-[180px] h-9 flex items-center justify-center bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed">
+                      <div className={cn(
+                        "h-9 flex items-center justify-center bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed",
+                        isMobileMode
+                          ? "w-[140px] sm:w-[180px]"
+                          : "w-[140px] md:w-[180px] lg:w-10 xl:w-[180px]"
+                      )}>
                         <Loader2 className="h-4 w-4 animate-spin text-primary" />
                       </div>
                     ) : (
@@ -320,11 +325,26 @@ export function StudentClassesCard({
                         onValueChange={(val) => handleStatusChange(cls.id, val)}
                         disabled={!!updatingClassId}
                       >
-                        <SelectTrigger className={cn("w-[140px] md:w-[180px] h-9 text-xs border overflow-hidden", config.color)}>
+                        <SelectTrigger
+                          className={cn(
+                            "h-9 text-xs border overflow-hidden",
+                            isMobileMode
+                              ? "w-[140px] sm:w-[180px]"
+                              : "w-[140px] md:w-[180px] lg:w-10 xl:w-[180px] lg:px-0 xl:px-3 lg:justify-center xl:justify-between lg:[&_svg]:hidden xl:[&_svg]:block",
+                            config.color
+                          )}
+                        >
                           <SelectValue>
                             <div className="flex items-center gap-2 text-left">
                               <span className="text-sm">{config.icon}</span>
-                              <span className="truncate font-medium">{config.label}</span>
+                              <span
+                                className={cn(
+                                  "truncate font-medium",
+                                  !isMobileMode && "lg:hidden xl:inline"
+                                )}
+                              >
+                                {config.label}
+                              </span>
                             </div>
                           </SelectValue>
                         </SelectTrigger>

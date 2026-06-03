@@ -55,11 +55,22 @@ export function StudentNotebooksCard({
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
   const [notebooks, setNotebooks] = useState<Notebook[]>(initialNotebooks);
 
+  const notebooksWithPlainText = useMemo(() => {
+    return notebooks.map((nb) => ({
+      ...nb,
+      plainText: nb.content ? stripHtml(nb.content).toLowerCase() : "",
+    }));
+  }, [notebooks]);
+
   const filteredNotebooks = useMemo(() => {
-    return notebooks.filter((nb) =>
-      nb.title.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-  }, [notebooks, searchQuery]);
+    if (!searchQuery.trim()) return notebooksWithPlainText;
+    const query = searchQuery.toLowerCase();
+    return notebooksWithPlainText.filter((nb) => {
+      const titleMatch = nb.title.toLowerCase().includes(query);
+      const contentMatch = nb.plainText.includes(query);
+      return titleMatch || contentMatch;
+    });
+  }, [notebooksWithPlainText, searchQuery]);
 
   const handleCreateNotebook = async () => {
     if (!newNotebookTitle.trim()) return;
@@ -193,9 +204,14 @@ export function StudentNotebooksCard({
                     className="flex-1 min-w-0"
                   >
                     <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
-                      {notebook.title}
+                      {highlightText(notebook.title, searchQuery)}
                     </h3>
-                    <p className="text-[10px] text-muted-foreground">
+                    {searchQuery.trim() && notebook.content && stripHtml(notebook.content).toLowerCase().includes(searchQuery.toLowerCase()) && (
+                      <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2 bg-muted/40 p-1.5 rounded border border-border/45 font-normal select-none">
+                        {highlightText(getContentSnippet(notebook.content, searchQuery), searchQuery)}
+                      </p>
+                    )}
+                    <p className="text-[10px] text-muted-foreground mt-1">
                       {new Date(notebook.createdAt).toLocaleDateString(
                         locale === "pt" ? "pt-BR" : "en-US",
                       )}
@@ -271,5 +287,59 @@ export function StudentNotebooksCard({
         </VaultContent>
       </Vault>
     </div>
+  );
+}
+
+function stripHtml(html: string) {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getContentSnippet(content: string, query: string) {
+  const stripped = stripHtml(content);
+  if (!query.trim()) return "";
+  
+  const index = stripped.toLowerCase().indexOf(query.toLowerCase());
+  if (index === -1) return "";
+
+  const start = Math.max(0, index - 40);
+  const end = Math.min(stripped.length, index + query.length + 60);
+  
+  let snippet = stripped.substring(start, end);
+  if (start > 0) snippet = "..." + snippet;
+  if (end < stripped.length) snippet = snippet + "...";
+  
+  return snippet;
+}
+
+function escapeRegExp(string: string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightText(text: string, query: string) {
+  if (!query.trim()) return text;
+  const regex = new RegExp(`(${escapeRegExp(query)})`, "gi");
+  const parts = text.split(regex);
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === query.toLowerCase() ? (
+          <mark key={i} className="bg-primary/20 text-primary px-0.5 rounded font-semibold">
+            {part}
+          </mark>
+        ) : (
+          part
+        )
+      )}
+    </>
   );
 }
