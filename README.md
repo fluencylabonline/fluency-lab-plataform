@@ -79,3 +79,17 @@ FluencyLab implements top-tier security standards, keeping user privacy (LGPD/GD
 - **Adaptive Components:** Usage of Vaults instead of simple Dialogs for mobile optimization.
 - **No Manual Shadows:** Clean, modern design following internal global theme guidelines.
 - **Optimistic Updates & Feedback:** Mutations are followed by instant toast notifications (`sonner`) and clear loading states.
+
+## 📱 PWA & Status Bar Optimization
+
+To ensure a seamless, native-like experience on mobile devices and inside the Progressive Web App (PWA), we implement specialized viewport and style synchronization rules:
+
+### 1. Viewport & Zoom Control in Standalone Mode
+- **Standard Browsers:** We keep pinch-to-zoom enabled (`userScalable: true`, `maximumScale: 5`) to adhere to Web Content Accessibility Guidelines (WCAG).
+- **Standalone PWA Mode:** In [PwaHandler](file:///c:/Users/Mathe/Documents/Projetos/fluency-lab-plataform/components/layout/pwa-handler.tsx), we dynamically intercept the client hydration and page transitions (`pathname` changes). If the app is running in standalone mode (`display-mode: standalone`), we rewrite the `<meta name="viewport">` attributes to block pinch-to-zoom (`user-scalable=no, maximum-scale=1`) so the platform behaves like a native mobile app.
+
+### 2. Status Bar Color Synchronization (Light/Dark Themes)
+We ensure the device's status bar background color perfectly matches the app header/background without flashes:
+- **Server-Side Render (SSR) Flash Prevention:** In [layout.tsx](file:///c:/Users/Mathe/Documents/Projetos/fluency-lab-plataform/app/[locale]/layout.tsx), the static `viewport` exports a media-query array using `prefers-color-scheme`. This renders native media-query-based meta tags (`#f0f0f0` for light mode, `#02060e` for dark mode), allowing the mobile browser to style the status bar immediately before JavaScript loads.
+- **Dynamic Theme Changes & Navigation:** The [ThemeColorUpdater](file:///c:/Users/Mathe/Documents/Projetos/fluency-lab-plataform/components/layout/theme-color-updater.tsx) client component reactively updates the status bar color when the user toggles the theme (monitored via `next-themes`' `resolvedTheme`) or navigates between pages (`pathname`).
+- **No-Crash Safe DOM Operations:** Mobile browsers (such as iOS Safari) do not support modern formats like OKLCH in `<meta name="theme-color">`. Therefore, we map themes to safe **HEX** colors. Additionally, we update the existing elements' attributes (`setAttribute` / `removeAttribute`) instead of removing and recreating DOM nodes (`.remove()`), avoiding crashes in React's virtual DOM unmounting cycle (`commitDeletion`).

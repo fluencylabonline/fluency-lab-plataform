@@ -11,8 +11,8 @@ export function ThemeColorUpdater() {
   useEffect(() => {
     // Define as cores reais que você quer na barra de status (HEX ou RGB)
     // OKLCH não é suportado na tag meta theme-color por navegadores móveis como o Safari do iOS
-    const lightColor = "#f8fafc"; // Cinza bem claro (background do tema claro)
-    const darkColor = "#02060e";  // Cor escura (background do tema escuro/layout default)
+    const lightColor = "#f0f0f0"; // Cinza bem claro (oklch(95.514% 0.00011 271.152))
+    const darkColor = "#02060e";  // Cor escura (oklch(12.048% 0.02283 254.114))
 
     const currentColor = resolvedTheme === "dark" ? darkColor : lightColor;
 
