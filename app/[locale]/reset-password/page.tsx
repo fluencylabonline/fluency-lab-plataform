@@ -19,7 +19,7 @@ export default async function ResetPasswordPage() {
         <LanguageSwitcher />
       </div>
 
-      <div className="w-full max-w-4xl bg-slate-300/50 dark:bg-gray-900 rounded-md shadow-2xl overflow-hidden mt-8">
+      <div className="w-full max-w-4xl bg-slate-300/50 dark:bg-gray-900 rounded-md overflow-hidden mt-8">
         <div className="flex flex-col lg:flex-row">
           <div className="hidden lg:flex flex-col items-center justify-center lg:w-1/2 bg-gray-100 dark:bg-gray-800 p-8 lg:p-12 relative min-h-[500px]">
             <BackgroundLogin />

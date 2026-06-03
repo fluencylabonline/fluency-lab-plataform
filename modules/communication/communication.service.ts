@@ -32,6 +32,8 @@ import {
 import { ScheduleAlertEmail } from "./templates/ScheduleAlertEmail";
 import { CertificateEmail } from "./templates/CertificateEmail";
 import { FarewellEmail } from "./templates/FarewellEmail";
+import { PasswordResetRequestEmail } from "./templates/PasswordResetRequestEmail";
+import { PasswordResetConfirmationEmail } from "./templates/PasswordResetConfirmationEmail";
 import type {
   SendWhatsAppTemplateOptions,
   WhatsAppResponse,
@@ -123,6 +125,55 @@ export class CommunicationService {
     } catch (error) {
       console.error("[CommunicationService.sendWelcome] Error:", error);
       throw new Error("Usuário criado, mas falha ao enviar o e-mail de boas-vindas.");
+    }
+  }
+
+  async sendPasswordResetRequestEmail(
+    email: string,
+    name: string,
+    actionLink: string,
+    explicitLocale?: "pt" | "en"
+  ) {
+    try {
+      const locale = explicitLocale || await this.getRecipientLocale(email);
+      const customActionLink = this.buildResetPasswordLink(actionLink);
+      const t = emailTranslations.passwordResetRequest[locale] || emailTranslations.passwordResetRequest.pt;
+
+      await this.sendEmail({
+        to: email,
+        subject: t.subject,
+        template: React.createElement(PasswordResetRequestEmail, {
+          name,
+          actionLink: customActionLink,
+          locale,
+        }),
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendPasswordResetRequestEmail] Error:", error);
+      throw new Error("Falha ao enviar o e-mail de recuperação de senha.");
+    }
+  }
+
+  async sendPasswordResetConfirmationEmail(
+    email: string,
+    name: string,
+    explicitLocale?: "pt" | "en"
+  ) {
+    try {
+      const locale = explicitLocale || await this.getRecipientLocale(email);
+      const t = emailTranslations.passwordResetConfirmation[locale] || emailTranslations.passwordResetConfirmation.pt;
+
+      await this.sendEmail({
+        to: email,
+        subject: t.subject,
+        template: React.createElement(PasswordResetConfirmationEmail, {
+          name,
+          locale,
+        }),
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendPasswordResetConfirmationEmail] Error:", error);
+      throw new Error("Falha ao enviar o e-mail de confirmação de alteração de senha.");
     }
   }
 
@@ -803,6 +854,21 @@ export class CommunicationService {
       return link;
     }
   }
+
+  private buildResetPasswordLink(link: string): string {
+    try {
+      const u = new URL(link);
+      const oobCode = u.searchParams.get("oobCode");
+      const base = env.NEXT_PUBLIC_APP_URL;
+      if (!oobCode) return link;
+      const baseUrl = base.endsWith("/") ? base.slice(0, -1) : base;
+
+      return `${baseUrl}/reset-password?oobCode=${oobCode}`;
+    } catch {
+      return link;
+    }
+  }
+
 
   private getCleanPhone(to: string): string {
     if (!to) return "";

@@ -160,5 +160,42 @@ export const emailTranslations = {
       body3: "We wish you great success in your next steps!",
       footer: "Best regards,\nFluency Lab Team",
     }
+  },
+  passwordResetRequest: {
+    pt: {
+      subject: "Recuperação de Senha - Fluency Lab 🔑",
+      heading: "Recuperação de Senha",
+      body: "Você está recebendo este e-mail porque solicitou a redefinição de senha para sua conta na Fluency Lab.",
+      instruction: "Para criar uma nova senha, clique no botão abaixo:",
+      button: "Redefinir Minha Senha",
+      footerParagraph: "Este link é temporário. Se você não solicitou a alteração, pode ignorar este e-mail com segurança.",
+    },
+    en: {
+      subject: "Password Reset - Fluency Lab 🔑",
+      heading: "Password Reset",
+      body: "You are receiving this email because you requested a password reset for your Fluency Lab account.",
+      instruction: "To create a new password, click the button below:",
+      button: "Reset My Password",
+      footerParagraph: "This link is temporary. If you did not request this change, you can safely ignore this email.",
+    }
+  },
+  passwordResetConfirmation: {
+    pt: {
+      subject: "Senha alterada com sucesso! 🎉",
+      heading: "Sua senha foi alterada",
+      body: "Passando para confirmar que a senha da sua conta na Fluency Lab foi redefinida com sucesso.",
+      instruction: "Se foi você quem fez essa alteração, nenhuma ação adicional é necessária. Você já pode fazer login na plataforma com a sua nova senha.",
+      warning: "Caso você NÃO tenha solicitado ou realizado essa alteração, por favor acesse a página de recuperar senha ou entre em contato com nosso suporte imediatamente para proteger sua conta.",
+      footer: "Abraços,\nEquipe Fluency Lab",
+    },
+    en: {
+      subject: "Password changed successfully! 🎉",
+      heading: "Your password was changed",
+      body: "This is a confirmation that your Fluency Lab account password has been successfully reset.",
+      instruction: "If you made this change, no further action is required. You can now log into the platform with your new password.",
+      warning: "If you DID NOT request or perform this change, please go to the forgot password page or contact our support team immediately to secure your account.",
+      footer: "Best regards,\nFluency Lab Team",
+    }
   }
 };
+

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { CheckCircle2, ArrowLeft, Mail } from "lucide-react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
+import { sendCustomPasswordResetAction } from "@/modules/user/user.actions";
 import { notify } from "@/components/ui/toaster";
 import { forgotPasswordSchema, type ForgotPasswordValues } from "@/modules/user/user.schema";
 
@@ -17,6 +17,8 @@ export function ForgotPasswordForm() {
   const t = useTranslations("Auth");
   const tv = useTranslations("Validation");
   const router = useRouter();
+  const params = useParams();
+  const locale = (params?.locale as "pt" | "en") || "pt";
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -36,18 +38,20 @@ export function ForgotPasswordForm() {
   const onSubmit: SubmitHandler<ForgotPasswordValues> = async (data) => {
     setIsLoading(true);
 
-    const result = await authClient.sendPasswordReset(data.email);
+    const result = await sendCustomPasswordResetAction({ email: data.email, locale });
 
-    if (result.success) {
+    if (result?.data?.success) {
       setSubmittedEmail(data.email);
       setIsSuccess(true);
       notify.success(t("passwordResetSent") || "Email de redefinição de senha enviado com sucesso!");
     } else {
-      notify.error(result.error ? t(`errors.${result.error}`) : t("error"));
+      const errorKey = result?.data?.error;
+      notify.error(errorKey ? t(`errors.${errorKey}`) : t("error"));
     }
 
     setIsLoading(false);
   };
+
 
   if (isSuccess) {
     return (

@@ -607,3 +607,80 @@ export const requestPermanentDeletionAction = protectedAction
 
     return { success: true };
   });
+
+export const sendCustomPasswordResetAction = actionClient
+  .metadata({ name: "sendCustomPasswordReset" })
+  .inputSchema(
+    z.object({
+      email: z.string().email(),
+      locale: z.enum(locales).optional().default("pt"),
+    })
+  )
+  .action(async ({ parsedInput }) => {
+    try {
+      // 1. Rate limiting: Max 3 requests per 5 minutes per email to prevent spamming
+      const limit = await checkRateLimit("password_reset_request", parsedInput.email, 3, 300 * 1000);
+      if (!limit.success) return { success: false, error: "rateLimitExceeded" };
+
+      // 2. Fetch user by email to verify if the account exists
+      const user = await userService.getUserByEmail(parsedInput.email);
+
+      // 3. Silent safety: if user does not exist, return success to prevent email discovery
+      if (!user) {
+        return { success: true };
+      }
+
+      // 4. Generate the standard Firebase reset link
+      const baseUrl = env.NEXT_PUBLIC_APP_URL.endsWith("/")
+        ? env.NEXT_PUBLIC_APP_URL.slice(0, -1)
+        : env.NEXT_PUBLIC_APP_URL;
+
+      const actionLink = await adminAuth.generatePasswordResetLink(parsedInput.email, {
+        url: `${baseUrl}/${parsedInput.locale}/reset-password`,
+      });
+
+      // 5. Send customized/branded email via Resend
+      await communicationService.sendPasswordResetRequestEmail(
+        user.email,
+        user.name,
+        actionLink,
+        parsedInput.locale as "pt" | "en"
+      );
+
+      return { success: true };
+    } catch (error) {
+      console.error("[sendCustomPasswordResetAction] Error:", error);
+      return { success: false, error: "error" };
+    }
+  });
+
+export const sendPasswordResetConfirmationAction = actionClient
+  .metadata({ name: "sendPasswordResetConfirmation" })
+  .inputSchema(
+    z.object({
+      email: z.string().email(),
+      locale: z.enum(locales).optional().default("pt"),
+    })
+  )
+  .action(async ({ parsedInput }) => {
+    try {
+      // 1. Rate limiting: Max 3 requests per 5 minutes per email to prevent spamming
+      const limit = await checkRateLimit("password_reset_confirm", parsedInput.email, 3, 300 * 1000);
+      if (!limit.success) return { success: false, error: "rateLimitExceeded" };
+
+      const user = await userService.getUserByEmail(parsedInput.email);
+      if (!user) return { success: false, error: "userNotFound" };
+
+      // 2. Send customized/branded confirmation email via Resend
+      await communicationService.sendPasswordResetConfirmationEmail(
+        user.email,
+        user.name,
+        parsedInput.locale as "pt" | "en"
+      );
+
+      return { success: true };
+    } catch (error) {
+      console.error("[sendPasswordResetConfirmationAction] Error:", error);
+      return { success: false, error: "error" };
+    }
+  });
