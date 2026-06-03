@@ -58,9 +58,9 @@ export function LandingView({ user }: { user: User | null }) {
               className="absolute top-0 left-0 w-full h-full object-cover"
             />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10 lg:bg-gradient-to-r lg:from-black/85 lg:via-black/35 lg:to-transparent z-1 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/20 to-transparent dark:from-black/65 dark:via-black/30 dark:to-black/5 lg:bg-gradient-to-r lg:from-black/45 lg:via-black/10 lg:to-transparent lg:dark:from-black/65 lg:dark:via-black/20 lg:dark:to-transparent z-1 pointer-events-none" />
 
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-linear-to-b from-black/60 to-transparent z-1" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-linear-to-b from-black/20 to-transparent dark:from-black/35 z-1" />
 
             <div className="relative z-3 flex flex-col flex-1">
               <LandingNavbar user={user} />

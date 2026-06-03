@@ -154,7 +154,7 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
             className="relative flex items-center gap-2 p-2 rounded-full transition-all duration-300"
           >
             <motion.div
-              className="absolute inset-0 rounded-full bg-white/20 dark:bg-white/5 shadow-xs -z-20"
+              className="absolute inset-0 rounded-full bg-black/60 dark:bg-white/5 shadow-xs -z-20"
               initial={{ opacity: 1 }}
               animate={{ opacity: isScrolled ? 0 : 1 }}
               transition={backgroundTransition}
@@ -200,7 +200,7 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
             className="relative flex items-center gap-2 p-2 rounded-full"
           >
             <motion.div
-              className="absolute inset-0 rounded-full bg-white/20 dark:bg-white/5 shadow-xs -z-20"
+              className="absolute inset-0 rounded-full bg-black/60 dark:bg-white/5 shadow-xs -z-20"
               initial={{ opacity: 1 }}
               animate={{ opacity: isScrolled ? 0 : 1 }}
               transition={backgroundTransition}
@@ -235,10 +235,10 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
                   whileTap={{ scale: 0.95 }}
                   onClick={handleLoginClick}
                   disabled={isLoggingOut}
-                  className={`z-10 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 min-h-[44px] whitespace-nowrap disabled:opacity-50 ${
+                  className={`z-10 px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 min-h-[44px] whitespace-nowrap disabled:opacity-50 transition-colors ${
                     isScrolled
-                      ? "text-black dark:text-white"
-                      : "text-white"
+                      ? "bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-black dark:text-white"
+                      : "bg-white/10 dark:bg-white/5 hover:bg-white/20 dark:hover:bg-white/10 text-white"
                   }`}
                 >
                   {isLoggingOut ? (
@@ -299,11 +299,11 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
 
         <button
           onClick={handleLoginClick}
-          className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-foreground px-4 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2"
+          className="bg-white/10 dark:bg-white/10 hover:bg-white/20 dark:hover:bg-white/20 text-white px-4 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 transition-colors"
         >
           {user ? (
             <>
-              <span>{t("nav.continue") || "Continuar"}</span>
+              <span className="text-white">{t("nav.continue") || "Continuar"}</span>
               <Avatar className="w-6 h-6">
                 <AvatarImage src={user.photoUrl || undefined} />
                 <AvatarFallback>{user.name[0]}</AvatarFallback>
@@ -311,8 +311,8 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
             </>
           ) : (
             <>
-              <span className="whitespace-nowrap text-white dark:text-white">{t("nav.login") || "Entrar"}</span>
-              <DoorOpenIcon className="w-4 h-4 text-white dark:text-white" />
+              <span className="whitespace-nowrap text-white">{t("nav.login") || "Entrar"}</span>
+              <DoorOpenIcon className="w-4 h-4 text-white" />
             </>
           )}
         </button>
