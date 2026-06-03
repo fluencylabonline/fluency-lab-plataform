@@ -19,12 +19,14 @@ function urlBase64ToUint8Array(base64String: string) {
 
 import { useDeviceStore, type BeforeInstallPromptEvent } from "@/hooks/ui/use-device";
 import { useUserStore } from "@/modules/user/user.store";
+import { usePathname } from "next/navigation";
 
 const MOBILE_BREAKPOINT = 768;
 
 export function PwaHandler() {
-  const { registration, setDeferredPrompt, setUpdateAvailable, setRegistration, setStandalone, setIsMobile } = useDeviceStore();
+  const { registration, setDeferredPrompt, setUpdateAvailable, setRegistration, setStandalone, setIsMobile, isStandalone } = useDeviceStore();
   const user = useUserStore((state) => state.user);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -131,6 +133,21 @@ export function PwaHandler() {
 
     syncSubscription();
   }, [registration, user]);
+
+  // Viewport zoom blocker for standalone mode
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (isStandalone) {
+      const viewportMeta = document.querySelector('meta[name="viewport"]');
+      if (viewportMeta) {
+        viewportMeta.setAttribute(
+          "content",
+          "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content"
+        );
+      }
+    }
+  }, [isStandalone, pathname]);
 
   return null;
 }

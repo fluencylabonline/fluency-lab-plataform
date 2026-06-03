@@ -44,7 +44,7 @@ export function Providers({ children, locale, messages, themeMode, nonce }: Prov
         </SWRConfig>
         <Toaster />
         <PwaHandler />
-        <ThemeColorUpdater isDarkMode={themeMode === 'dark'} />
+        <ThemeColorUpdater />
         <PwaSplash />
         <NotificationPermissionVault />
         <PwaVault />

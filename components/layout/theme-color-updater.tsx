@@ -1,30 +1,31 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTheme } from "next-themes";
+import { usePathname } from "next/navigation";
 
-export function ThemeColorUpdater({isDarkMode}: {isDarkMode: boolean}) {
+export function ThemeColorUpdater() {
+  const { resolvedTheme } = useTheme();
+  const pathname = usePathname();
+
   useEffect(() => {
-    // Define as cores reais que você quer na barra de status
-    // Você pode usar HEX, RGB ou HSL. (Nem todos os navegadores suportam OKLCH na barra de status ainda, prefira HEX).
-    const lightColor = "oklch(70.9% 0.00008 271.152)"; // Exemplo: cinza bem claro
-    const darkColor = "oklch(12.048% 0.02283 254.114)";  // Exemplo: quase preto
+    // Define as cores reais que você quer na barra de status (HEX ou RGB)
+    // OKLCH não é suportado na tag meta theme-color por navegadores móveis como o Safari do iOS
+    const lightColor = "#f8fafc"; // Cinza bem claro (background do tema claro)
+    const darkColor = "#121520";  // Cor escura (background do tema escuro/layout default)
 
-    const currentColor = isDarkMode ? darkColor : lightColor;
+    const currentColor = resolvedTheme === "dark" ? darkColor : lightColor;
 
-    // Busca a tag meta existente
-    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    // Remove todas as tags meta theme-color existentes para evitar conflitos/duplicações durante a navegação
+    const existingMetas = document.querySelectorAll('meta[name="theme-color"]');
+    existingMetas.forEach((meta) => meta.remove());
 
-    if (metaThemeColor) {
-      // Se existir, atualiza a cor
-      metaThemeColor.setAttribute("content", currentColor);
-    } else {
-      // Se por algum motivo não existir, cria uma nova
-      metaThemeColor = document.createElement("meta");
-      metaThemeColor.setAttribute("name", "theme-color");
-      metaThemeColor.setAttribute("content", currentColor);
-      document.head.appendChild(metaThemeColor);
-    }
-  }, [isDarkMode]); // Roda sempre que isDarkMode mudar
+    // Cria e adiciona a nova tag com a cor correta
+    const metaThemeColor = document.createElement("meta");
+    metaThemeColor.setAttribute("name", "theme-color");
+    metaThemeColor.setAttribute("content", currentColor);
+    document.head.appendChild(metaThemeColor);
+  }, [resolvedTheme, pathname]); // Roda sempre que o tema ou o caminho mudar
 
   return null; // Este componente não renderiza nada na tela
 }

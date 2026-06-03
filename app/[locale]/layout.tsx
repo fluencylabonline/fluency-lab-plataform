@@ -86,7 +86,10 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   interactiveWidget: "resizes-content",
-  themeColor: "#121520",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+    { media: "(prefers-color-scheme: dark)", color: "#121520" },
+  ],
 };
 
 export default async function RootLayout({
@@ -102,7 +105,7 @@ export default async function RootLayout({
   const nonce = (await headers()).get("x-nonce") || undefined;
 
   const themeColor = cookieStore.get("fluency-lab-theme-color")?.value || "indigo";
-  const themeMode = cookieStore.get("fluency-lab-mode")?.value || "system";
+  const themeMode = cookieStore.get("fluency-lab-mode")?.value || "dark";
 
   return (
     <html
