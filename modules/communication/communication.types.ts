@@ -1,12 +1,35 @@
 export interface WhatsAppTemplateComponent {
   type: "header" | "body" | "footer" | "button";
-  sub_type?: "quick_reply" | "url" | "copy_code";
+  sub_type?: "quick_reply" | "url" | "copy_code" | "order_details";
   index?: string;
   parameters: WhatsAppParameter[];
 }
 
+export interface WhatsAppActionParameter {
+  order_details?: {
+    reference_id: string;
+    order: {
+      version: number;
+      currency: string;
+      total_amount: {
+        offset: number;
+        value: number;
+      };
+      payment_settings: {
+        type: "pix_dynamic_code";
+        pix_dynamic_code: {
+          code: string;
+          merchant_name: string;
+          key: string;
+          key_type: string;
+        };
+      }[];
+    };
+  };
+}
+
 export interface WhatsAppParameter {
-  type: "text" | "image" | "document" | "video" | "currency" | "date_time" | "payload" | "coupon_code";
+  type: "text" | "image" | "document" | "video" | "currency" | "date_time" | "payload" | "coupon_code" | "action";
   parameter_name?: string; // Para templates que exigem nomes em vez de {{1}}
   text?: string;
   image?: { link: string };
@@ -14,6 +37,7 @@ export interface WhatsAppParameter {
   video?: { link: string };
   payload?: string;
   coupon_code?: string;
+  action?: WhatsAppActionParameter;
 }
 
 export interface SendWhatsAppTemplateOptions {

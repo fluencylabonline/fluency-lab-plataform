@@ -486,7 +486,7 @@ export class CommunicationService {
 
       return await this.sendWhatsAppTemplate({
         to: data.cellphone,
-        templateName: "payment_reminder_v3",
+        templateName: "payment_reminder_v4",
         languageCode,
         components: [
           {
@@ -494,16 +494,41 @@ export class CommunicationService {
             parameters: [
               { type: "text", text: data.studentName },
               { type: "text", text: amountStr },
-              { type: "text", text: dateStr },
-              { type: "text", text: data.pixPayload },
+              { type: "text", text: dateStr }
             ]
           },
           {
             type: "button",
-            sub_type: "copy_code",
+            sub_type: "order_details",
             index: "0",
             parameters: [
-              { type: "coupon_code", coupon_code: data.pixPayload }
+              {
+                type: "action",
+                action: {
+                  order_details: {
+                    reference_id: `rem_${Date.now()}`,
+                    order: {
+                      version: 1,
+                      currency: "BRL",
+                      total_amount: {
+                        offset: 100,
+                        value: data.amount
+                      },
+                      payment_settings: [
+                        {
+                          type: "pix_dynamic_code",
+                          pix_dynamic_code: {
+                            code: data.pixPayload,
+                            merchant_name: "Fluency Lab",
+                            key: "contato@fluencylab.me",
+                            key_type: "EMAIL"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
             ]
           }
         ]
@@ -536,23 +561,48 @@ export class CommunicationService {
 
       return await this.sendWhatsAppTemplate({
         to: data.cellphone,
-        templateName: "payment_overdue_v3",
+        templateName: "payment_overdue_v4",
         languageCode,
         components: [
           {
             type: "body",
             parameters: [
               { type: "text", text: data.studentName },
-              { type: "text", text: amountStr },
-              { type: "text", text: data.pixPayload },
+              { type: "text", text: amountStr }
             ]
           },
           {
             type: "button",
-            sub_type: "copy_code",
+            sub_type: "order_details",
             index: "0",
             parameters: [
-              { type: "coupon_code", coupon_code: data.pixPayload }
+              {
+                type: "action",
+                action: {
+                  order_details: {
+                    reference_id: `over_${Date.now()}`,
+                    order: {
+                      version: 1,
+                      currency: "BRL",
+                      total_amount: {
+                        offset: 100,
+                        value: data.amount
+                      },
+                      payment_settings: [
+                        {
+                          type: "pix_dynamic_code",
+                          pix_dynamic_code: {
+                            code: data.pixPayload,
+                            merchant_name: "Fluency Lab",
+                            key: "contato@fluencylab.me",
+                            key_type: "EMAIL"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
             ]
           }
         ]
