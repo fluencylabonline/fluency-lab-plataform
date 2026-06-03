@@ -103,9 +103,9 @@ export function UsersPageClient({ initialData, currentUser, basePath }: UsersPag
 
           <div className="flex-1" />
 
-          <RoleGuard roles={UserRoles.MANAGER}>
+          <RoleGuard roles={[UserRoles.ADMIN, UserRoles.MANAGER]}>
             <Link
-              href="/hub/manager/students/onboarding"
+              href={basePath.replace("/users", "/students/onboarding")}
               className={cn(buttonVariants({ variant: "outline" }), "shrink-0 border-primary/20 text-primary hover:bg-primary/5")}
             >
               <Sparkles className="mr-2 h-4 w-4 fill-primary/10" /> Perfil Adaptativo

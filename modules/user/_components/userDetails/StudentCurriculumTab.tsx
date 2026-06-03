@@ -326,9 +326,10 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
                 variant="outline"
                 className="shrink-0 border-primary/20 hover:border-primary/50 text-primary"
                 onClick={() => {
+                  const basePath = isAdmin ? "/hub/admin/students/onboarding" : "/hub/manager/students/onboarding";
                   const path = gap?.profileId 
-                    ? `/hub/manager/students/onboarding/${gap.profileId}`
-                    : `/hub/manager/students/onboarding/new?studentId=${studentId}`;
+                    ? `${basePath}/${gap.profileId}`
+                    : `${basePath}/new?studentId=${studentId}`;
                   router.push(path);
                 }}
               >

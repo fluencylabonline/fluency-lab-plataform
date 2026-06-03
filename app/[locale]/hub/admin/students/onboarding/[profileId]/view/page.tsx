@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/lib/auth-server";
 import { learningService } from "@/modules/learning/learning.service";
 import { redirect, notFound } from "next/navigation";
-import { ProfileDiagnosisView } from "./_components/ProfileDiagnosisView";
+import { ProfileDiagnosisView } from "@/app/[locale]/hub/manager/students/onboarding/[profileId]/view/_components/ProfileDiagnosisView";
 
 import { getTranslations } from "next-intl/server";
 import { Metadata } from "next";
@@ -25,7 +25,7 @@ interface DiagnosisPageProps {
   }>;
 }
 
-export default async function ProfileDiagnosisPage({ params }: DiagnosisPageProps) {
+export default async function AdminProfileDiagnosisPage({ params }: DiagnosisPageProps) {
   const user = await getCurrentUser();
 
   if (!user || (user.role !== "admin" && user.role !== "manager")) {
@@ -41,13 +41,13 @@ export default async function ProfileDiagnosisPage({ params }: DiagnosisPageProp
 
   // If the profile is still a draft, redirect back to survey
   if (profile.status === "draft") {
-    redirect(`/hub/manager/students/onboarding/${profileId}`);
+    redirect(`/hub/admin/students/onboarding/${profileId}`);
   }
 
   return (
     <ProfileDiagnosisView
       profile={JSON.parse(JSON.stringify(profile))}
-      basePath="/hub/manager/students/onboarding"
+      basePath="/hub/admin/students/onboarding"
     />
   );
 }

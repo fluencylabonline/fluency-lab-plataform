@@ -45,6 +45,7 @@ interface StudentProfileSurveyProps {
   initialData?: StudentProfileSurveyInput;
   initialStep?: number;
   onComplete?: (profileId: string) => void;
+  basePath?: string;
 }
 
 export function StudentProfileSurvey({
@@ -52,7 +53,8 @@ export function StudentProfileSurvey({
   studentId,
   initialData,
   initialStep = 0,
-  onComplete
+  onComplete,
+  basePath = "/hub/manager/students/onboarding"
 }: StudentProfileSurveyProps) {
   const [profileId, setProfileId] = useState(propProfileId);
   const [isSaving, setIsSaving] = useState(false);
@@ -170,7 +172,7 @@ export function StudentProfileSurvey({
 
   const handleDiscard = async () => {
     if (!profileId) {
-      router.push("/hub/manager/students/onboarding");
+      router.push(basePath);
       return;
     }
 
@@ -181,7 +183,7 @@ export function StudentProfileSurvey({
         notify.success("Rascunho descartado");
         localStorage.removeItem(`survey_${profileId}`);
         localStorage.removeItem(`survey_new`);
-        router.push("/hub/manager/students/onboarding");
+        router.push(basePath);
       } else {
         notify.error(result?.data?.error || "Erro ao descartar");
       }

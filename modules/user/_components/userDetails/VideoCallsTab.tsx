@@ -130,7 +130,7 @@ export function VideoCallsTab({ callHistory }: VideoCallsTabProps) {
                             size="sm"
                             className="w-full h-8 text-xs gap-2 opacity-50"
                           >
-                            <Clock className="w-3 h-3" />
+                            <Clock className="w-3 h-3 mr-2" />
                             Aguardando...
                           </Button>
                         )}

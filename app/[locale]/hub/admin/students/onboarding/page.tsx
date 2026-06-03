@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/lib/auth-server";
 import { learningService } from "@/modules/learning/learning.service";
-import { ProfilesPageClient } from "./_components/ProfilesPageClient";
+import { ProfilesPageClient } from "@/app/[locale]/hub/manager/students/onboarding/_components/ProfilesPageClient";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Metadata } from "next";
@@ -18,7 +18,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function OnboardingProfilesPage() {
+export default async function AdminOnboardingProfilesPage() {
   const user = await getCurrentUser();
 
   if (!user || (user.role !== "admin" && user.role !== "manager")) {
@@ -38,5 +38,5 @@ export default async function OnboardingProfilesPage() {
     } : null
   }));
 
-  return <ProfilesPageClient initialData={formattedProfiles} basePath="/hub/manager/students/onboarding" />;
+  return <ProfilesPageClient initialData={formattedProfiles} basePath="/hub/admin/students/onboarding" />;
 }

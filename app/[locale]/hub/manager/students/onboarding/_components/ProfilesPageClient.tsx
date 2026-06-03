@@ -55,9 +55,10 @@ interface Profile {
 
 interface ProfilesPageClientProps {
   initialData: Profile[];
+  basePath?: string;
 }
 
-export function ProfilesPageClient({ initialData }: ProfilesPageClientProps) {
+export function ProfilesPageClient({ initialData, basePath = "/hub/manager/students/onboarding" }: ProfilesPageClientProps) {
   const t = useTranslations("Survey");
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -95,9 +96,9 @@ export function ProfilesPageClient({ initialData }: ProfilesPageClientProps) {
         actions={[{
           label: "Novo Perfil",
           icon: <Sparkles className="h-4 w-4" />,
-          onClick: () => router.push("/hub/manager/students/onboarding/new")
+          onClick: () => router.push(`${basePath}/new`)
         }]}
-        backHref="/hub/manager/users"
+        backHref={basePath.split("/students/onboarding")[0] + "/users"}
       />
 
       <div className="container">
@@ -139,7 +140,7 @@ export function ProfilesPageClient({ initialData }: ProfilesPageClientProps) {
                 <div className="flex items-center gap-2">
                   {profile.status === "active" && (
                     <Link
-                      href={`/hub/manager/students/onboarding/${profile.id}/view`}
+                      href={`${basePath}/${profile.id}/view`}
                       className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex gap-2 rounded-md border-primary/20 text-primary hover:bg-primary/5")}
                     >
                       <Eye className="h-3.5 w-3.5" /> Ver Diagnóstico
@@ -155,13 +156,13 @@ export function ProfilesPageClient({ initialData }: ProfilesPageClientProps) {
                     <DropdownMenuContent align="end" className="rounded-md">
                       {profile.status === "active" && (
                         <DropdownMenuItem asChild>
-                          <Link href={`/hub/manager/students/onboarding/${profile.id}/view`} className="flex items-center gap-2 cursor-pointer">
+                          <Link href={`${basePath}/${profile.id}/view`} className="flex items-center gap-2 cursor-pointer">
                             <Eye className="h-4 w-4" /> Ver Diagnóstico
                           </Link>
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuItem asChild>
-                        <Link href={`/hub/manager/students/onboarding/${profile.id}`} className="flex items-center gap-2 cursor-pointer">
+                        <Link href={`${basePath}/${profile.id}`} className="flex items-center gap-2 cursor-pointer">
                           <Edit className="h-4 w-4" /> Editar Respostas
                         </Link>
                       </DropdownMenuItem>
@@ -187,7 +188,7 @@ export function ProfilesPageClient({ initialData }: ProfilesPageClientProps) {
                 {search ? `Não encontramos perfis para "${search}"` : "Comece criando o primeiro perfil pedagógico de aluno."}
               </p>
               <Link
-                href="/hub/manager/students/onboarding/new"
+                href={`${basePath}/new`}
                 className={cn(buttonVariants({ variant: "default" }), "gap-2 font-bold")}
               >
                 <Sparkles className="h-4 w-4 fill-primary-foreground/20" /> Criar Primeiro Perfil

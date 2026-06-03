@@ -56,9 +56,10 @@ interface ProfileDiagnosisViewProps {
       step3?: { commitmentLevel: number };
     };
   };
+  basePath?: string;
 }
 
-export function ProfileDiagnosisView({ profile }: ProfileDiagnosisViewProps) {
+export function ProfileDiagnosisView({ profile, basePath = "/hub/manager/students/onboarding" }: ProfileDiagnosisViewProps) {
   const [isPending, startTransition] = useTransition();
   const [allowSuggestions, setAllowSuggestions] = useState(true);
 
@@ -135,7 +136,7 @@ export function ProfileDiagnosisView({ profile }: ProfileDiagnosisViewProps) {
         subtitle="Análise pedagógica gerada por inteligência artificial com base no perfil e nivelamento."
       >
         <div className="flex items-center gap-3 mt-6">
-          <Link href="/hub/manager/students/onboarding">
+          <Link href={basePath}>
             <Button variant="ghost" size="sm" className="gap-2 rounded-md text-muted-foreground hover:text-foreground">
               <ArrowLeft className="h-4 w-4" /> Voltar para Listagem
             </Button>
@@ -258,7 +259,7 @@ export function ProfileDiagnosisView({ profile }: ProfileDiagnosisViewProps) {
                 </div>
               </div>
 
-              <Link href={`/hub/manager/students/onboarding/${profile.id}`} className="block">
+              <Link href={`${basePath}/${profile.id}`} className="block">
                 <Button variant="outline" className="h-12 w-full rounded-md gap-2 text-sm font-semibold border-border/60">
                   <BookOpen className="h-4 w-4" /> Revisar Respostas do Survey
                 </Button>

@@ -2,6 +2,8 @@ import { learningService } from "@/modules/learning/learning.service";
 import { StudentProfileSurvey } from "@/app/[locale]/hub/manager/students/_components/StudentProfileSurvey";
 import { notFound } from "next/navigation";
 import { type StudentProfileSurveyInput } from "@/modules/learning/learning.schema";
+import { getCurrentUser } from "@/lib/auth-server";
+import { redirect } from "next/navigation";
 
 interface OnboardingPageProps {
   params: Promise<{
@@ -14,7 +16,13 @@ interface OnboardingPageProps {
   }>;
 }
 
-export default async function OnboardingPage({ params, searchParams }: OnboardingPageProps) {
+export default async function AdminOnboardingPage({ params, searchParams }: OnboardingPageProps) {
+  const user = await getCurrentUser();
+
+  if (!user || (user.role !== "admin" && user.role !== "manager")) {
+    redirect("/hub");
+  }
+
   const { profileId } = await params;
   const { studentId, step } = await searchParams;
   const isNew = profileId === "new";
@@ -32,7 +40,7 @@ export default async function OnboardingPage({ params, searchParams }: Onboardin
       studentId={studentId}
       initialData={initialData}
       initialStep={step ? parseInt(step) : 0}
-      basePath="/hub/manager/students/onboarding"
+      basePath="/hub/admin/students/onboarding"
     />
   );
 }

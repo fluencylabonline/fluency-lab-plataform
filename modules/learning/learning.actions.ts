@@ -303,6 +303,7 @@ export const finalizeProfileAction = protectedAction
 
     const result = await learningService.finalizeProfile(parsedInput.profileId, ctx.user.id);
     revalidatePath("/hub/manager/students");
+    revalidatePath("/hub/admin/students");
     return { success: true, profile: result };
   });
 
@@ -315,6 +316,7 @@ export const associateProfileToStudentAction = permissionAction("student.support
   .action(async ({ parsedInput }) => {
     await learningService.associateStudentProfile(parsedInput.profileId, parsedInput.studentId);
     revalidatePath("/hub/manager/students");
+    revalidatePath("/hub/admin/students");
     return { success: true };
   });
 
@@ -338,6 +340,7 @@ export const generatePersonalizedPlanAction = protectedAction
     );
 
     revalidatePath(`/hub/manager/students/onboarding/${parsedInput.profileId}/view`);
+    revalidatePath(`/hub/admin/students/onboarding/${parsedInput.profileId}/view`);
     return { success: true, planId: plan.id };
   });
 
@@ -358,6 +361,7 @@ export const archiveProfileAction = permissionAction("student.support")
 
     await learningService.archiveProfile(parsedInput.profileId);
     revalidatePath("/hub/manager/students/onboarding");
+    revalidatePath("/hub/admin/students/onboarding");
     return { success: true };
   });
 
