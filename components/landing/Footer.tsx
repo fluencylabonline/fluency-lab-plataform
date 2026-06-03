@@ -143,7 +143,7 @@ export default function Footer() {
                   src={Logo}
                   alt="Logo"
                   width={200}
-                  style={{ height: "auto", width: "auto" }}
+                  style={{ height: "auto", width: "200" }}
                   priority
                 />
               </div>
