@@ -164,6 +164,14 @@ export default async function RootLayout({
                   
                   if (!hasShown) {
                     document.documentElement.classList.add('pwa-initializing');
+                    
+                    // Altera a cor do status bar para #212121 imediatamente durante o splash
+                    var metas = document.querySelectorAll('meta[name="theme-color"]');
+                    metas.forEach(function(meta) {
+                      meta.setAttribute('content', '#212121');
+                      meta.removeAttribute('media');
+                    });
+
                     var staticSplash = document.getElementById('pwa-static-splash');
                     if (staticSplash) staticSplash.style.display = 'flex';
                     
