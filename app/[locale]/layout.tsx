@@ -163,6 +163,7 @@ export default async function RootLayout({
                   }
                   
                   if (!hasShown) {
+                    window.__pwa_initializing = true;
                     document.documentElement.classList.add('pwa-initializing');
                     
                     // Altera a cor do status bar para #212121 imediatamente durante o splash

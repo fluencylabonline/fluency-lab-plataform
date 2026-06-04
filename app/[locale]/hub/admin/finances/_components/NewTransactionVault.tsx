@@ -118,9 +118,9 @@ export function NewTransactionVault() {
   return (
     <Vault open={open} onOpenChange={setOpen}>
       <VaultTrigger asChild>
-        <Button>
-          <Plus size={18} className="mr-2" />
-          {t("trigger")}
+        <Button className="flex items-center gap-2">
+          <Plus size={18} />
+          <span className="hidden md:block">{t("trigger")}</span>
         </Button>
       </VaultTrigger>
 

@@ -106,9 +106,9 @@ export function FiscalConfigVault({ initialConfig, year }: FiscalConfigVaultProp
   return (
     <Vault open={open} onOpenChange={setOpen}>
       <VaultTrigger asChild>
-        <Button variant="outline" className="h-10 px-4">
-          <Settings size={18} className="mr-2" />
-          {t("trigger")}
+        <Button variant="outline" className="flex items-center gap-2">
+          <Settings size={18} />
+          <span className="hidden md:block">{t("trigger")}</span>
         </Button>
       </VaultTrigger>
 

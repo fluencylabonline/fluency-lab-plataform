@@ -10,7 +10,11 @@ export function ThemeColorUpdater() {
 
   useEffect(() => {
     const updateColor = () => {
-      const isInitializing = document.documentElement.classList.contains("pwa-initializing");
+      const isInitializing =
+        typeof window !== "undefined" &&
+        (!!window.__pwa_initializing ||
+          document.documentElement.classList.contains("pwa-initializing"));
+
       const lightColor = "#f0f0f0"; // Cinza bem claro (oklch(95.514% 0.00011 271.152))
       const darkColor = "#02060e";  // Cor escura (oklch(12.048% 0.02283 254.114))
       const splashColor = "#212121"; // Cor da splash screen
@@ -42,6 +46,9 @@ export function ThemeColorUpdater() {
     // Atualiza inicialmente
     updateColor();
 
+    // Escuta evento customizado disparado quando o splash termina
+    window.addEventListener("pwa-splash-hidden", updateColor);
+
     // Observa mudanças nas classes do elemento HTML para saber quando "pwa-initializing" for removida
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
@@ -56,7 +63,10 @@ export function ThemeColorUpdater() {
       attributeFilter: ["class"],
     });
 
-    return () => observer.disconnect();
+    return () => {
+      window.removeEventListener("pwa-splash-hidden", updateColor);
+      observer.disconnect();
+    };
   }, [resolvedTheme, pathname]); // Roda sempre que o tema ou o caminho mudar
 
   return null; // Este componente não renderiza nada na tela

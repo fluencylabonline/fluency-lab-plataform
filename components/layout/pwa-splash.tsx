@@ -9,12 +9,19 @@ export function PwaSplash() {
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches || 
                          ("standalone" in window.navigator && (window.navigator as Navigator & { standalone: boolean }).standalone === true);
     const hasShown = sessionStorage.getItem("pwa-splash-shown");
-    return !!(isStandalone && !hasShown);
+    const willShow = !!(isStandalone && !hasShown);
+    if (willShow) {
+      window.__pwa_initializing = true;
+    }
+    return willShow;
   });
 
   useEffect(() => {
     if (showSplash) {
       sessionStorage.setItem("pwa-splash-shown", "true");
+      
+      // Garante que a classe pwa-initializing está presente mesmo após a hidratação do React
+      document.documentElement.classList.add("pwa-initializing");
       
       // Hide the static splash as soon as the animated one is ready
       const staticSplash = document.getElementById("pwa-static-splash");
@@ -24,12 +31,16 @@ export function PwaSplash() {
 
       const hideTimer = setTimeout(() => {
         setShowSplash(false);
+        window.__pwa_initializing = false;
         document.documentElement.classList.remove("pwa-initializing");
+        window.dispatchEvent(new Event("pwa-splash-hidden"));
       }, 3000); 
 
       return () => {
         clearTimeout(hideTimer);
+        window.__pwa_initializing = false;
         document.documentElement.classList.remove("pwa-initializing");
+        window.dispatchEvent(new Event("pwa-splash-hidden"));
       };
     }
   }, [showSplash]);
