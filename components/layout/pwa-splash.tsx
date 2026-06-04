@@ -29,14 +29,20 @@ export function PwaSplash() {
         staticSplash.style.display = "none";
       }
 
-      const hideTimer = setTimeout(() => {
-        setShowSplash(false);
+      // Timer para restaurar a cor do status bar assim que o círculo de expansão toca a borda superior (1.9s)
+      const colorTimer = setTimeout(() => {
         window.__pwa_initializing = false;
         document.documentElement.classList.remove("pwa-initializing");
         window.dispatchEvent(new Event("pwa-splash-hidden"));
+      }, 1900);
+
+      // Timer para remover o componente de splash completamente (3.0s)
+      const hideTimer = setTimeout(() => {
+        setShowSplash(false);
       }, 3000); 
 
       return () => {
+        clearTimeout(colorTimer);
         clearTimeout(hideTimer);
         window.__pwa_initializing = false;
         document.documentElement.classList.remove("pwa-initializing");
