@@ -85,12 +85,23 @@ export function StepWelcome({
         }
     };
 
+    const getErrorMessage = (message?: string) => {
+        if (!message) return undefined;
+        const cleanKey = message.startsWith("Onboarding.") ? message.replace("Onboarding.", "") : message;
+        const finalKey = cleanKey.startsWith("validation.") ? cleanKey : `validation.${cleanKey}`;
+        try {
+            return t(finalKey);
+        } catch {
+            return message;
+        }
+    };
+
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
             <div className="space-y-5">
                 <Field
                     label={t("stepWelcome.name")}
-                    error={errors.name?.message ? t(`validation.${errors.name.message}`) : undefined}
+                    error={getErrorMessage(errors.name?.message)}
                 >
                     <input
                         {...register("name")}
@@ -101,7 +112,7 @@ export function StepWelcome({
 
                 <Field
                     label={t("stepWelcome.nickname")}
-                    error={errors.nickname?.message ? t(`validation.${errors.nickname.message}`) : undefined}
+                    error={getErrorMessage(errors.nickname?.message)}
                 >
                     <input
                         {...register("nickname")}
@@ -112,7 +123,7 @@ export function StepWelcome({
 
                 <Field
                     label={t("stepWelcome.birthDate")}
-                    error={errors.birthDate?.message ? t(`validation.${errors.birthDate.message}`) : undefined}
+                    error={getErrorMessage(errors.birthDate?.message)}
                 >
                     <input
                         {...register("birthDate")}
@@ -152,7 +163,7 @@ export function StepWelcome({
                         </label>
                     </div>
                     {errors.acceptedTerms && (
-                        <p className="text-xs text-red-400/80">{t(`validation.${errors.acceptedTerms.message}`)}</p>
+                        <p className="text-xs text-red-400/80">{getErrorMessage(errors.acceptedTerms.message)}</p>
                     )}
 
                     {isMinor && (

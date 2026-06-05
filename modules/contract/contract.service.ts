@@ -1,6 +1,6 @@
 import { contractRepository } from "./contract.repository";
 import { userService } from "../user/user.service";
-import { encrypt, generateIntegrityHash } from "@/lib/cryptography";
+import { encrypt, decrypt, generateIntegrityHash } from "@/lib/cryptography";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import { adminStorage } from "@/lib/firebase-admin";
 import { injectTemplateData } from "./contract.service.utils";
@@ -124,11 +124,15 @@ export const contractService = {
 
     // 6. Geração de PDF e Upload para Firebase Storage
     // Adicionamos o Integrity Hash e o link de verificação no PDF
+    const signeeName = guardianData 
+      ? `${guardianData.name} (Responsável por ${user.name})` 
+      : user.name;
+
     const verificationUrl = `${env.NEXT_PUBLIC_APP_URL}/verify/${integrityHash}`;
     const pdfBytes = await this.generatePDF(
       instance.template.name, 
       finalContent, 
-      user.name,
+      signeeName,
       { hash: integrityHash, url: verificationUrl }
     );
     const pdfPath = `contracts/${userId}/${instanceId}_${Date.now()}.pdf`;
@@ -440,10 +444,25 @@ export const contractService = {
     const instance = await contractRepository.findInstanceByIntegrityHash(hash);
     if (!instance) return { isValid: false };
 
+    let signedBy = instance.user?.name;
+    if (instance.guardianData) {
+      try {
+        const decryptedStr = decrypt(instance.guardianData as unknown as string);
+        if (decryptedStr) {
+          const guardian = JSON.parse(decryptedStr);
+          if (guardian.name) {
+            signedBy = `${guardian.name} (Responsável por ${instance.user?.name})`;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to decrypt guardianData for verification:", e);
+      }
+    }
+
     return {
       isValid: true,
       contractName: instance.template.name,
-      signedBy: instance.user?.name,
+      signedBy,
       signedAt: instance.signedAt,
       region: instance.template.region,
       status: instance.status,

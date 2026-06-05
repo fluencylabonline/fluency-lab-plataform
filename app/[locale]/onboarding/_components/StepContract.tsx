@@ -18,7 +18,13 @@ export function StepContract({
 }: {
     onNext: () => void;
     onBack: () => void;
-    user: User;
+    user: User & {
+        guardianData?: {
+            name?: string;
+            taxId?: string;
+            relationship?: string;
+        };
+    };
 }) {
     const t = useTranslations("Onboarding");
     const [loading, setLoading] = useState(false);
@@ -26,6 +32,20 @@ export function StepContract({
     const [contract, setContract] = useState<(ContractInstance & { template?: ContractTemplate }) | null>(null);
     const [signed, setSigned] = useState(false);
     const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+
+    const guardian = user.guardianName
+        ? {
+            name: user.guardianName,
+            taxId: user.guardianTaxId || "",
+            relationship: user.guardianRelationship || "",
+          }
+        : user.guardianData?.name
+            ? {
+                name: user.guardianData.name,
+                taxId: user.guardianData.taxId || "",
+                relationship: user.guardianData.relationship || "",
+              }
+            : undefined;
 
     useEffect(() => {
         const fetchContract = async () => {
@@ -57,13 +77,7 @@ export function StepContract({
         const signResult = await signContractAction({
             instanceId: contract.id,
             fingerprint,
-            guardianData: user.guardianName
-                ? {
-                    name: user.guardianName,
-                    taxId: user.guardianTaxId || "",
-                    relationship: user.guardianRelationship || "",
-                }
-                : undefined,
+            guardianData: guardian,
         });
 
         setLoading(false);
@@ -142,13 +156,7 @@ export function StepContract({
                 businessTaxId: user.businessTaxId || "",
                 pixKey: user.pixKey || "",
             },
-            guardian: user.guardianName
-                ? {
-                    name: user.guardianName,
-                    taxId: user.guardianTaxId || "",
-                    relationship: user.guardianRelationship || "",
-                }
-                : undefined,
+            guardian,
             school: {
                 name: "FluencyLab",
                 legalName: "FluencyLab LTDA",

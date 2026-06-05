@@ -1748,6 +1748,7 @@
       "termsLink": "Termos de Uso",
       "privacyLink": "Política de Privacidade",
       "guardianConsent": "Declaro que sou menor de idade e possuo consentimento dos meus pais ou responsáveis para o tratamento dos meus dados.",
+      "guardianRequiredHint": "Consentimento obrigatório para menores de 18 anos",
       "next": "Continuar"
     }
   },

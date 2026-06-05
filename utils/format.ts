@@ -55,12 +55,15 @@ export function maskDocument(doc?: string): string {
   if (!doc) return "—";
   const digits = doc.replace(/\D/g, "");
   if (digits.length === 11) {
-    return doc.replace(/(\d{3})\.\d{3}\.(\d{3})-\d{2}/, "$1.***.***-**");
+    return `${digits.slice(0, 3)}.***.***-**`;
   }
-  return doc.replace(
-    /(\d{2})\.\d{3}\.\d{3}\/\d{4}-\d{2}/,
-    "$1.***.***\/****-**"
-  );
+  if (digits.length === 14) {
+    return `${digits.slice(0, 2)}.***.***/****-**`;
+  }
+  if (digits.length > 4) {
+    return `${digits.slice(0, 3)}***${digits.slice(-2)}`;
+  }
+  return doc;
 }
 
 /**

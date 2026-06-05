@@ -1748,6 +1748,7 @@
       "termsLink": "Terms of Use",
       "privacyLink": "Privacy Policy",
       "guardianConsent": "I declare that I am a minor and have consent from my parents or guardians for the processing of my data.",
+      "guardianRequiredHint": "Consent required for minors under 18 years old",
       "next": "Continue"
     }
   },
