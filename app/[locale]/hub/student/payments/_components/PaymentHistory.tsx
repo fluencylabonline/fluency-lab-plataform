@@ -3,7 +3,7 @@
 import { useTranslations, useFormatter } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { FileText, Receipt, Download, ChevronDown, ChevronUp, Copy, RotateCw } from "lucide-react";
+import { FileText, Receipt, Download, ChevronDown, ChevronUp, Copy, RotateCw, CreditCard } from "lucide-react";
 import { notify } from "@/components/ui/toaster";
 import { motion, AnimatePresence } from "framer-motion";
 import { containerVariants, itemVariants } from "@/lib/animations";
@@ -20,6 +20,7 @@ export interface PaymentRecord {
   subscription?: {
     plan?: {
       name: string;
+      currency?: string;
     };
   };
   pixPayload?: string | null;
@@ -38,10 +39,10 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
   const [expandedPaymentId, setExpandedPaymentId] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState<string | null>(null);
 
-  const formatCurrency = (val: number) =>
+  const formatCurrency = (val: number, currency: string = "BRL") =>
     formatIntl.number(val / 100, {
       style: "currency",
-      currency: "BRL",
+      currency,
     });
 
   const getStatusColor = (status: string) => {
@@ -131,7 +132,8 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
       className="flex flex-col gap-4"
     >
       {initialData.map((payment) => {
-        const hasPix = payment.status !== "paid" && !!payment.pixPayload && !!payment.pixImage;
+        const isPending = payment.status !== "paid";
+        const hasActionDetails = isPending && !!payment.pixPayload;
         const isExpanded = expandedPaymentId === payment.id;
 
         return (
@@ -139,13 +141,13 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
             key={payment.id}
             variants={itemVariants}
             onClick={() => {
-              if (hasPix) {
+              if (hasActionDetails) {
                 setExpandedPaymentId(isExpanded ? null : payment.id);
               }
             }}
             className={cn(
               "item flex flex-col p-4 gap-4 transition-all duration-200",
-              hasPix && "cursor-pointer hover:bg-zinc-50/50 dark:hover:bg-zinc-800/10"
+              hasActionDetails && "cursor-pointer hover:bg-zinc-50/50 dark:hover:bg-zinc-800/10"
             )}
           >
             {/* Top row */}
@@ -164,7 +166,7 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
 
               <div className="flex flex-wrap items-center gap-4 md:gap-8">
                 <div className="text-right">
-                  <p className="font-bold">{formatCurrency(payment.amount)}</p>
+                  <p className="font-bold">{formatCurrency(payment.amount, payment.subscription?.plan?.currency)}</p>
                   <div className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full inline-block ${getStatusColor(payment.status)}`}>
                     {t(payment.status)}
                   </div>
@@ -198,7 +200,7 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
                     <span className="hidden sm:inline">{t("getInvoice")}</span>
                   </Button>
 
-                  {hasPix && (
+                  {hasActionDetails && (
                     <div className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors ml-1 p-1">
                       {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </div>
@@ -209,7 +211,7 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
 
             {/* Accordion panel */}
             <AnimatePresence initial={false}>
-              {hasPix && isExpanded && (
+              {hasActionDetails && isExpanded && (
                 <motion.div
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
@@ -218,70 +220,118 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
                   onClick={(e) => e.stopPropagation()} // Prevent toggling when clicking inside content
                   className="border-t border-zinc-100 dark:border-zinc-800/50 pt-4 flex flex-col md:flex-row gap-5 items-center md:items-start w-full overflow-hidden"
                 >
-                  {payment.pixImage && (
-                    <div className="shrink-0 bg-white p-2 rounded-md border border-zinc-200 dark:border-zinc-700">
-                      <Image
-                        src={payment.pixImage}
-                        alt="QR Code PIX"
-                        width={120}
-                        height={120}
-                        className="rounded-lg mix-blend-multiply dark:mix-blend-normal dark:bg-white"
-                      />
-                    </div>
-                  )}
-                  
-                  <div className="flex-1 w-full space-y-3 min-w-0">
-                    <div className="text-center md:text-left">
-                      <p className="font-medium text-zinc-900 dark:text-zinc-100">
-                        {tProfile("pixInstructions") || "Pagamento via PIX"}
-                      </p>
-                      <p className="text-xs text-zinc-500 mt-1">
-                        {tProfile("pix_qr_instructions") || "Use o app do seu banco para escanear ou copie o código abaixo."}
-                      </p>
-                    </div>
+                  {payment.pixImage ? (
+                    <>
+                      <div className="shrink-0 bg-white p-2 rounded-md border border-zinc-200 dark:border-zinc-700">
+                        <Image
+                          src={payment.pixImage}
+                          alt="QR Code PIX"
+                          width={120}
+                          height={120}
+                          className="rounded-lg mix-blend-multiply dark:mix-blend-normal dark:bg-white"
+                        />
+                      </div>
+                      
+                      <div className="flex-1 w-full space-y-3 min-w-0">
+                        <div className="text-center md:text-left">
+                          <p className="font-medium text-zinc-900 dark:text-zinc-100">
+                            {tProfile("pixInstructions") || "Pagamento via PIX"}
+                          </p>
+                          <p className="text-xs text-zinc-500 mt-1">
+                            {tProfile("pix_qr_instructions") || "Use o app do seu banco para escanear ou copie o código abaixo."}
+                          </p>
+                        </div>
 
-                    <div className="relative flex items-center w-full">
-                      <div className="w-full flex items-center gap-2 p-1.5 pl-3 bg-zinc-100 dark:bg-zinc-800/80 rounded-lg border border-zinc-200 dark:border-zinc-700 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
-                        <code className="flex-1 text-xs font-mono text-zinc-600 dark:text-zinc-400 truncate select-all">
-                          {payment.pixPayload}
-                        </code>
+                        <div className="relative flex items-center w-full">
+                          <div className="w-full flex items-center gap-2 p-1.5 pl-3 bg-zinc-100 dark:bg-zinc-800/80 rounded-lg border border-zinc-200 dark:border-zinc-700 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+                            <code className="flex-1 text-xs font-mono text-zinc-600 dark:text-zinc-400 truncate select-all">
+                              {payment.pixPayload}
+                            </code>
+                            <Button
+                              size="sm"
+                              className="h-8 shadow-sm bg-white dark:bg-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-600"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copyPixCode(payment.pixPayload!);
+                              }}
+                            >
+                              <Copy className="w-3.5 h-3.5 mr-2" />
+                              {tProfile("copyPix") || "Copiar Código"}
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-2 w-full">
+                          <Button
+                            size="default"
+                            variant="outline"
+                            className="w-full sm:w-auto gap-2 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleVerifyPayment(payment.id);
+                            }}
+                            disabled={isVerifying === payment.id}
+                          >
+                            <RotateCw
+                              className={cn(
+                                "w-4 h-4 mr-2 text-zinc-500 dark:text-zinc-400",
+                                isVerifying === payment.id && "animate-spin",
+                              )}
+                            />
+                            {isVerifying === payment.id
+                              ? tProfile("verifying") || "Verificando..."
+                              : tProfile("verifyPayment") || "Já paguei, verificar pagamento"}
+                          </Button>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex-1 w-full space-y-3 min-w-0">
+                      <div className="text-center md:text-left">
+                        <p className="font-medium text-zinc-900 dark:text-zinc-100">
+                          {tProfile("stripeInstructions") || "Pagamento via Cartão de Crédito"}
+                        </p>
+                        <p className="text-xs text-zinc-500 mt-1">
+                          {tProfile("stripe_instructions_desc") || "Para efetuar o pagamento, clique no botão abaixo para ir ao checkout seguro."}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row gap-2 w-full pt-2">
+                        {payment.pixPayload && (
+                          <a
+                            href={payment.pixPayload}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex h-9 items-center justify-center rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow transition-all hover:bg-violet-500 hover:scale-[1.01] w-full sm:w-auto"
+                          >
+                            <CreditCard className="w-4 h-4 mr-2" />
+                            {tProfile("payNowBtn") || "Ir para o Pagamento"}
+                          </a>
+                        )}
+
                         <Button
-                          size="sm"
-                          className="h-8 shadow-sm bg-white dark:bg-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-600"
+                          size="default"
+                          variant="outline"
+                          className="w-full sm:w-auto gap-2 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            copyPixCode(payment.pixPayload!);
+                            handleVerifyPayment(payment.id);
                           }}
+                          disabled={isVerifying === payment.id}
                         >
-                          <Copy className="w-3.5 h-3.5 mr-2" />
-                          {tProfile("copyPix") || "Copiar Código"}
+                          <RotateCw
+                            className={cn(
+                              "w-4 h-4 mr-2 text-zinc-500 dark:text-zinc-400",
+                              isVerifying === payment.id && "animate-spin",
+                            )}
+                          />
+                          {isVerifying === payment.id
+                            ? tProfile("verifying") || "Verificando..."
+                            : tProfile("verifyPayment") || "Já paguei, verificar pagamento"}
                         </Button>
                       </div>
                     </div>
-
-                    <div className="flex flex-col sm:flex-row gap-2 w-full">
-                      <Button
-                        size="default"
-                        variant="outline"
-                        className="w-full sm:w-auto gap-2 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleVerifyPayment(payment.id);
-                        }}
-                        disabled={isVerifying === payment.id}
-                      >
-                        <RotateCw
-                          className={cn(
-                            "w-4 h-4 mr-2 text-zinc-500 dark:text-zinc-400",
-                            isVerifying === payment.id && "animate-spin",
-                          )}
-                        />
-                        {isVerifying === payment.id
-                          ? tProfile("verifying") || "Verificando..."
-                          : tProfile("verifyPayment") || "Já paguei, verificar pagamento"}
-                      </Button>
-                    </div>
-                  </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>

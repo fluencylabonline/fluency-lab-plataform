@@ -703,7 +703,6 @@ export const billingService = {
       orderBy: [asc(installmentsTable.orderIndex)],
     });
 
-    const student = await userService.getUser(sub.studentId);
     const isUsdPlan = sub.plan?.currency === "USD";
     const hasBilling = isUsdPlan ? !!installment?.stripePaymentIntentId : !!installment?.abacatePayBillingId;
 
@@ -1191,12 +1190,17 @@ export const billingService = {
         : schoolSettings.taxId;
     }
 
+    const isStripe = !!installment.stripePaymentIntentId;
+    const paymentMethod = isStripe ? "Credit Card" : "PIX";
+    const currency = plan?.currency || "BRL";
+
     return {
       id: installment.id,
       studentId: student.id,
       amount: installment.amount,
       paymentDate: installment.paidAt || installment.updatedAt,
-      paymentMethod: "PIX",
+      paymentMethod,
+      currency,
       description: `Mensalidade ${plan?.name} - ${installment.orderIndex}/${plan?.durationMonths}`,
       studentName: student.name,
       studentEmail: student.email,

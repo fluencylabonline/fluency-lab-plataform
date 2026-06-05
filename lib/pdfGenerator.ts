@@ -13,6 +13,7 @@ interface ReceiptData {
   payerDocument?: string;
   receiverDocument?: string;
   receiverName?: string;
+  currency?: string;
 }
 
 interface NotebookData {
@@ -47,8 +48,9 @@ function maskName(name?: string): string {
   return `${parts[0]} ${parts[parts.length - 1][0]}.`;
 }
 
-function formatCurrency(val: number): string {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(val / 100);
+function formatCurrency(val: number, currency: string = "BRL"): string {
+  const locale = currency === "USD" ? "en-US" : "pt-BR";
+  return new Intl.NumberFormat(locale, { style: "currency", currency }).format(val / 100);
 }
 
 function formatDate(date: Date | string): string {
@@ -224,8 +226,9 @@ export async function generateReceiptPDF(data: ReceiptData) {
   ]);
 
   // Descrição
+  const displayPaymentMethod = data.paymentMethod === "Credit Card" ? "Cartão de Crédito" : data.paymentMethod;
   drawSection("Descrição", [
-    ["Forma de pagamento", data.paymentMethod],
+    ["Forma de pagamento", displayPaymentMethod],
     ["Aluno", maskName(data.studentName)],
     ["E-mail", maskEmail(data.studentEmail)],
     ["Data de pagamento", formatDate(data.paymentDate)],
@@ -272,7 +275,7 @@ export async function generateReceiptPDF(data: ReceiptData) {
     font: boldFont,
     color: GRAY_DARK,
   });
-  const amtText = formatCurrency(data.amount);
+  const amtText = formatCurrency(data.amount, data.currency);
   const amtW = boldFont.widthOfTextAtSize(amtText, 20);
   page.drawText(amtText, {
     x: PAGE_W - MARGIN - amtW,

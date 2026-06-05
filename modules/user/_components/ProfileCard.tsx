@@ -27,6 +27,13 @@ const mockUser: Partial<User> = {
   photoUrl: null,
 };
 
+function formatDisplayName(name?: string | null): string {
+  if (!name) return "";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length <= 2) return name;
+  return `${parts[0]} ${parts[parts.length - 1]}`;
+}
+
 export function ProfileCard({ user, isLoading = false }: ProfileCardProps) {
   const t = useTranslations("Hub.Profile");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -83,12 +90,13 @@ export function ProfileCard({ user, isLoading = false }: ProfileCardProps) {
 
   const displayUser = user || (hasHydrated ? storedUser : null) || mockUser;
   const userRoleLabel = t(`roles.${displayUser.role}`) || displayUser.role;
+  const displayName = formatDisplayName(displayUser.name);
 
   return (
     <Shimmer loading={isLoading && !storedUser} templateProps={{ user: mockUser }}>
       <div className="card p-4 flex flex-row justify-between items-center">
-        <div className="flex flex-row items-center sm:items-start gap-4">
-          <div className="relative">
+        <div className="flex flex-row items-center sm:items-start gap-4 min-w-0">
+          <div className="relative flex-shrink-0">
             <Avatar size="xl">
               <AvatarImage
                 src={displayUser.photoUrl || ""}
@@ -110,11 +118,11 @@ export function ProfileCard({ user, isLoading = false }: ProfileCardProps) {
               )}
             </button>
           </div>
-          <div className="flex flex-col items-start mt-0 sm:mt-2">
-            <p className="font-semibold text-lg capitalize text-foreground">
-              {displayUser.name}
+          <div className="flex flex-col items-start mt-0 sm:mt-2 min-w-0">
+            <p className="font-semibold text-lg capitalize text-foreground truncate w-full" title={displayName}>
+              {displayName}
             </p>
-            <p className="text-sm text-muted-foreground truncate max-w-[150px] sm:max-w-none">
+            <p className="text-sm text-muted-foreground truncate w-full" title={displayUser.email || ""}>
               {displayUser.email}
             </p>
             <Badge variant="default" className="mt-2 px-3">

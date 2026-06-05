@@ -25,6 +25,7 @@ export interface Receipt {
   payerDocument?: string;
   receiverDocument?: string;
   receiverName?: string;
+  currency?: string;
 }
 
 interface ReceiptViewProps {
@@ -82,7 +83,7 @@ export function ReceiptView({ payment }: ReceiptViewProps) {
         <div className="relative flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <BackButton href="/hub/student/profile" />
+              <BackButton href="/hub/student/payments" />
               {/* icon */}
               <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/20">
                 <Wallet className="w-6 h-6 text-text" />
@@ -140,7 +141,16 @@ export function ReceiptView({ payment }: ReceiptViewProps) {
                 {t("paymentDetails")}
               </p>
               <div className="space-y-2">
-                <Row label={t("methodLabel")} value={payment.paymentMethod} />
+                <Row
+                  label={t("methodLabel")}
+                  value={
+                    payment.paymentMethod === "Credit Card"
+                      ? (t("creditCard") || "Cartão de Crédito")
+                      : payment.paymentMethod === "PIX"
+                      ? (t("pix") || "PIX")
+                      : payment.paymentMethod
+                  }
+                />
                 <Row label={t("studentLabel")} value={maskName(payment.studentName)} />
                 <Row label={t("emailLabel")} value={maskEmail(payment.studentEmail)} />
                 <Row label={t("dateLabel")} value={formatIntl.dateTime(new Date(payment.paymentDate), { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })} />
@@ -170,7 +180,10 @@ export function ReceiptView({ payment }: ReceiptViewProps) {
           <div className="flex flex-col items-center md:items-start">
             <span className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">{t("totalPaid")}</span>
             <span className="text-4xl font-bold" style={{ color: "#38b053" }}>
-              {formatIntl.number(payment.amount / 100, { style: 'currency', currency: 'BRL' })}
+              {formatIntl.number(payment.amount / 100, {
+                style: "currency",
+                currency: payment.currency || "BRL",
+              })}
             </span>
           </div>
 

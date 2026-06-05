@@ -108,7 +108,7 @@ export function PlacementDashboard({ initialData }: PlacementDashboardProps) {
   // const isCooldown = !initialData.eligibility.isEligible && initialData.eligibility.nextEligibleDate;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-12">
+    <div className="space-y-12">
       {/* ── Cooldown / Active Test Card ── */}
       {!initialData.eligibility.isEligible && (
         <motion.div 

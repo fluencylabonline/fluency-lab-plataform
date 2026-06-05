@@ -5,7 +5,7 @@ import { env } from "@/env";
 const stripeSecretKey = env.STRIPE_SECRET_KEY || "mock_secret_key";
 
 export const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: "2026-05-27" as unknown as NonNullable<ConstructorParameters<typeof Stripe>[1]>["apiVersion"],
+  apiVersion: "2023-10-16" as unknown as NonNullable<ConstructorParameters<typeof Stripe>[1]>["apiVersion"],
 });
 
 /**
