@@ -1,6 +1,6 @@
 import { billingRepository } from "./billing.repository";
 import { abacate, createPixCharge } from "@/lib/abacate-pay";
-import { createStripePixPaymentIntent, stripe } from "@/lib/stripe";
+import { createStripeCheckoutSession, stripe } from "@/lib/stripe";
 import { userService } from "../user/user.service";
 import { communicationService } from "../communication/communication.service";
 import { notificationService } from "../notification/notification.service";
@@ -18,19 +18,34 @@ export const billingService = {
   },
 
   // 1. Setup Plans (Sync with AbacatePay)
-  async createPlan(data: { name: string; price: number; durationMonths: number; description?: string }) {
-    // Create Product (Plan) in AbacatePay
-    const product = await abacate.products.create({
-      externalId: `plan-${Date.now()}`,
-      name: data.name,
-      price: data.price,
-      currency: "BRL",
-      description: data.description,
-    });
+  async createPlan(data: { 
+    name: string; 
+    price: number; 
+    durationMonths: number; 
+    description?: string; 
+    currency?: "BRL" | "USD";
+    language?: string;
+    classesPerWeek?: number;
+  }) {
+    const currency = data.currency || "BRL";
+    let abacatePayProductId: string | null = null;
+
+    if (currency === "BRL") {
+      // Create Product (Plan) in AbacatePay
+      const product = await abacate.products.create({
+        externalId: `plan-${Date.now()}`,
+        name: data.name,
+        price: data.price,
+        currency: "BRL",
+        description: data.description,
+      });
+      abacatePayProductId = product.id;
+    }
 
     return billingRepository.createPlan({
       ...data,
-      abacatePayProductId: product.id,
+      currency,
+      abacatePayProductId,
     });
   },
 
@@ -44,6 +59,7 @@ export const billingService = {
       classesPerWeek: number;
       description: string;
       isActive: boolean;
+      currency: "BRL" | "USD";
       effectiveDate?: string | null;
     }>
   ) {
@@ -52,8 +68,9 @@ export const billingService = {
 
     const { effectiveDate, ...fieldsToUpdate } = data;
 
-    // Sync with AbacatePay if relevant fields changed
-    if (plan.abacatePayProductId && (fieldsToUpdate.name || fieldsToUpdate.price)) {
+    // Sync with AbacatePay if relevant fields changed and currency is BRL
+    const currentCurrency = fieldsToUpdate.currency || plan.currency;
+    if (currentCurrency === "BRL" && plan.abacatePayProductId && (fieldsToUpdate.name || fieldsToUpdate.price)) {
       try {
         // @ts-expect-error - Assuming update exists in SDK or will be handled
         await abacate.products.update(plan.abacatePayProductId, {
@@ -225,7 +242,8 @@ export const billingService = {
         ),
       });
 
-      const hasBilling = isForeign
+      const isUsdPlan = plan.currency === "USD";
+      const hasBilling = isUsdPlan
         ? !!updatedFirstInstallment?.stripePaymentIntentId
         : !!updatedFirstInstallment?.abacatePayBillingId;
 
@@ -399,48 +417,50 @@ export const billingService = {
     const student = await userService.getUser(sub.studentId);
     if (!student) return;
 
-    const isForeign = student.nationality === "foreign";
+    const isUsdPlan = sub.plan.currency === "USD";
 
-    if (isForeign) {
+    if (isUsdPlan) {
       if (installment.stripePaymentIntentId) return;
 
-      console.log("[Stripe Pix] Generating PaymentIntent for student:", student.email);
+      console.log("[Stripe Checkout] Generating Checkout Session for student:", student.email);
       try {
-        const intent = await createStripePixPaymentIntent({
+        const baseUrl = env.NEXT_PUBLIC_APP_URL || "https://fluencylab.live";
+        const redirectPath = installment.orderIndex === 1 ? "/onboarding" : "/hub/student/payments";
+        const successUrl = `${baseUrl}${redirectPath}?success=true`;
+        const cancelUrl = `${baseUrl}${redirectPath}?cancelled=true`;
+
+        const session = await createStripeCheckoutSession({
           amount: installment.amount,
           email: student.email,
           name: student.name,
           description: `Mensalidade ${sub.plan.name} - ${installment.orderIndex}/${sub.plan.durationMonths}`,
+          successUrl,
+          cancelUrl,
           metadata: {
             installmentId: installment.id,
             subscriptionId: sub.id,
           },
         });
 
-        const pixData = (intent.next_action as unknown as {
-          display_pix_qr_code?: { data: string; qr_code_image_base64: string };
-        })?.display_pix_qr_code;
-        if (!pixData) {
-          throw new Error("Stripe did not return Pix next_action details.");
+        if (!session.url) {
+          throw new Error("Stripe did not return a URL for Checkout Session.");
         }
 
-        const qrCodeBase64 = `data:image/png;base64,${pixData.qr_code_image_base64}`;
-
         await billingRepository.updateInstallment(installment.id, {
-          stripePaymentIntentId: intent.id,
-          pixPayload: pixData.data,
-          pixImage: qrCodeBase64,
+          stripePaymentIntentId: session.id,
+          pixPayload: session.url,
+          pixImage: null,
           status: "pending",
         });
 
-        // Send email with PIX
+        // Send email with payment link instead of Pix QR code
         if (student?.email) {
           await communicationService.sendNewInvoiceEmail(student.email, {
             studentName: student.name || "Aluno",
             amount: installment.amount,
             dueDate: installment.dueDate,
-            pixPayload: pixData.data,
-            pixImage: qrCodeBase64,
+            pixPayload: session.url,
+            pixImage: "",
             description: `Mensalidade ${sub.plan.name} - ${installment.orderIndex}/${sub.plan.durationMonths}`,
           });
         }
@@ -448,19 +468,19 @@ export const billingService = {
         // WhatsApp
         let cellphone = student.cellphone;
         if (cellphone?.includes(":")) cellphone = decrypt(cellphone);
-        if (cellphone && pixData.data) {
+        if (cellphone && session.url) {
           await communicationService.sendPaymentReminderWhatsApp({
             cellphone: cellphone,
             studentName: student.name || "Aluno",
             amount: installment.amount,
             dueDate: installment.dueDate,
-            pixPayload: pixData.data,
+            pixPayload: session.url,
           });
         }
 
-        return intent;
+        return session;
       } catch (error) {
-        console.error("Failed to generate Stripe Pix PaymentIntent:", error);
+        console.error("Failed to generate Stripe Checkout Session:", error);
         throw error;
       }
     }
@@ -684,8 +704,8 @@ export const billingService = {
     });
 
     const student = await userService.getUser(sub.studentId);
-    const isForeign = student?.nationality === "foreign";
-    const hasBilling = isForeign ? !!installment?.stripePaymentIntentId : !!installment?.abacatePayBillingId;
+    const isUsdPlan = sub.plan?.currency === "USD";
+    const hasBilling = isUsdPlan ? !!installment?.stripePaymentIntentId : !!installment?.abacatePayBillingId;
 
     if (!installment || !hasBilling) return null;
 
@@ -698,6 +718,7 @@ export const billingService = {
       orderIndex: installment.orderIndex,
       totalMonths: sub.plan?.durationMonths ?? 0,
       status: installment.status,
+      currency: sub.plan?.currency || "BRL",
     };
   },
 
@@ -716,6 +737,7 @@ export const billingService = {
       subscriptionId: sub.id,
       subscriptionStatus: sub.status,
       planName: sub.plan?.name,
+      currency: sub.plan?.currency || "BRL",
       currentInstallment: currentInstallment ? {
         id: currentInstallment.id,
         amount: currentInstallment.amount,
@@ -747,18 +769,29 @@ export const billingService = {
       return { status: "paid" };
     }
 
-    const student = await userService.getUser(subscription.studentId);
-    const isForeign = student?.nationality === "foreign";
+    const isUsdPlan = subscription.plan?.currency === "USD";
 
-    if (isForeign) {
+    if (isUsdPlan) {
       if (!installment.stripePaymentIntentId) {
         throw new Error("Esta parcela não possui uma cobrança ativa no Stripe.");
       }
-      console.log(`[BillingService] Sincronizando parcela Stripe ${installmentId} (PaymentIntent ID: ${installment.stripePaymentIntentId})`);
-      const intent = await stripe.paymentIntents.retrieve(installment.stripePaymentIntentId);
-      if (intent.status === "succeeded") {
-        await this.markInstallmentAsPaid(installmentId, intent.id);
-        return { status: "paid" };
+      console.log(`[BillingService] Sincronizando parcela Stripe ${installmentId} (ID: ${installment.stripePaymentIntentId})`);
+      
+      if (installment.stripePaymentIntentId.startsWith("cs_")) {
+        const session = await stripe.checkout.sessions.retrieve(installment.stripePaymentIntentId);
+        if (session.payment_status === "paid") {
+          const paymentIntentId = typeof session.payment_intent === "string" 
+            ? session.payment_intent 
+            : session.id;
+          await this.markInstallmentAsPaid(installmentId, paymentIntentId);
+          return { status: "paid" };
+        }
+      } else {
+        const intent = await stripe.paymentIntents.retrieve(installment.stripePaymentIntentId);
+        if (intent.status === "succeeded") {
+          await this.markInstallmentAsPaid(installmentId, intent.id);
+          return { status: "paid" };
+        }
       }
       return { status: installment.status };
     }

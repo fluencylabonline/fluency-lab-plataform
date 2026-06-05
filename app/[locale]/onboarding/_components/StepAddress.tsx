@@ -4,8 +4,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
-import { onboardingAddressAction } from "@/modules/onboarding/onboarding.actions";
+import { onboardingAddressAction, updateOnboardingNationalityAction } from "@/modules/onboarding/onboarding.actions";
 import { notify } from "@/components/ui/toaster";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { getAddressByCep, isMinor as checkIsMinor, isValidTaxId, isValidCEP, isValidZipCode } from "@/modules/contract/contract.utils";
 import { useState } from "react";
 import { Loader2, ArrowLeft, ArrowRight, Info } from "lucide-react";
@@ -88,6 +89,8 @@ export function StepAddress({
     inputClass?: string;
 }) {
     const t = useTranslations("Onboarding");
+    const router = useRouter();
+    const pathname = usePathname();
     const [loading, setLoading] = useState(false);
     const [isFetchingZip, setIsFetchingZip] = useState(false);
 
@@ -197,7 +200,15 @@ export function StepAddress({
                 <Field label={t("address.nationality")} error={errors.nationality?.message}>
                     <Select
                         value={nationality}
-                        onValueChange={(value) => setValue("nationality", value)}
+                        onValueChange={async (value) => {
+                            setValue("nationality", value);
+                            try {
+                                await updateOnboardingNationalityAction({ nationality: value });
+                                router.replace(pathname, { locale: value === "foreign" ? "en" : "pt" });
+                            } catch (error) {
+                                console.error("Failed to update nationality:", error);
+                            }
+                        }}
                     >
                         <SelectTrigger className={cn(inputClass, "cursor-pointer")}>
                             <SelectValue placeholder={t("address.nationality")} />

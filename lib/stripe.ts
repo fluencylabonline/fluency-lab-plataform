@@ -5,7 +5,7 @@ import { env } from "@/env";
 const stripeSecretKey = env.STRIPE_SECRET_KEY || "mock_secret_key";
 
 export const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: "2023-10-16" as unknown as NonNullable<ConstructorParameters<typeof Stripe>[1]>["apiVersion"],
+  apiVersion: "2026-05-27" as unknown as NonNullable<ConstructorParameters<typeof Stripe>[1]>["apiVersion"],
 });
 
 /**
@@ -37,3 +37,42 @@ export async function createStripePixPaymentIntent(params: {
     metadata: params.metadata,
   });
 }
+
+/**
+ * Creates a Stripe Checkout Session for a credit card payment in USD.
+ */
+export async function createStripeCheckoutSession(params: {
+  amount: number; // in cents
+  email: string;
+  name: string;
+  description: string;
+  successUrl: string;
+  cancelUrl: string;
+  metadata: Record<string, string>;
+}) {
+  if (!env.STRIPE_SECRET_KEY) {
+    throw new Error("Stripe secret key (STRIPE_SECRET_KEY) is missing in environment variables.");
+  }
+
+  return await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: params.description.slice(0, 127),
+          },
+          unit_amount: params.amount,
+        },
+        quantity: 1,
+      },
+    ],
+    mode: "payment",
+    customer_email: params.email,
+    success_url: params.successUrl,
+    cancel_url: params.cancelUrl,
+    metadata: params.metadata,
+  });
+}
+

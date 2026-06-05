@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Loader2, ArrowLeft, Info, CheckCircle2,
-    Copy, QrCode, Calendar, ArrowRight
+    Copy, QrCode, Calendar, ArrowRight, CreditCard
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { User } from "@/modules/user/user.schema";
@@ -43,6 +43,7 @@ export function StepPayment({
         expiresAt: Date;
         installmentId: string;
         status: string;
+        currency?: string | null;
     } | null>(null);
     const [checkingPayment, setCheckingPayment] = useState(false);
 
@@ -68,6 +69,7 @@ export function StepPayment({
                         expiresAt: new Date(payment.dueDate),
                         installmentId: payment.installmentId,
                         status: payment.status,
+                        currency: payment.currency,
                     });
                     if (user.dueDay) setSelectedDueDay(user.dueDay.toString());
                 }
@@ -219,37 +221,41 @@ export function StepPayment({
                         className="space-y-6"
                     >
                         {/* Plan summary */}
-                        {plan && (
-                            <div className="rounded-md border border-white/[0.07] bg-white/3 p-5 space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium text-slate-200">
-                                        {plan.name}
-                                    </span>
-                                    <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-0.5 text-[11px] font-medium text-violet-400">
-                                        {plan.classesPerWeek} aulas/semana
-                                    </span>
-                                </div>
+                        {plan && (() => {
+                            const isUsdPlan = plan.currency === "USD";
+                            const currencySymbol = isUsdPlan ? "US$" : "R$";
+                            return (
+                                <div className="rounded-md border border-white/[0.07] bg-white/3 p-5 space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm font-medium text-slate-200">
+                                            {plan.name}
+                                        </span>
+                                        <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-0.5 text-[11px] font-medium text-violet-400">
+                                            {plan.classesPerWeek} aulas/semana
+                                        </span>
+                                    </div>
 
-                                <div className="border-t border-white/6 pt-4 space-y-2">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-slate-500">
-                                            {t("payment.totalValue")}
-                                        </span>
-                                        <span className="text-slate-400">
-                                            R$ {(plan.price / 100).toFixed(2)}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-sm text-slate-300">
-                                            {t("payment.firstPayment")}
-                                        </span>
-                                        <span className="text-base font-semibold text-violet-400">
-                                            R$ {(amount / 100).toFixed(2)}
-                                        </span>
+                                    <div className="border-t border-white/6 pt-4 space-y-2">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-slate-500">
+                                                {t("payment.totalValue") || "Valor Mensal"}
+                                            </span>
+                                            <span className="text-slate-400">
+                                                {currencySymbol} {(plan.price / 100).toFixed(2)}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-sm text-slate-300">
+                                                {t("payment.firstPayment") || "Primeiro Pagamento"}
+                                            </span>
+                                            <span className="text-base font-semibold text-violet-400">
+                                                {currencySymbol} {(amount / 100).toFixed(2)}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            );
+                        })()}
 
                         {/* Due day selector */}
                         <div className="space-y-3">
@@ -330,68 +336,126 @@ export function StepPayment({
                         transition={{ duration: 0.3 }}
                         className="space-y-5"
                     >
-                        <div className="overflow-hidden rounded-md border border-white/[0.07] bg-white/3">
-                            {/* Header */}
-                            <div className="flex items-center gap-2.5 border-b border-white/6 px-5 py-3.5">
-                                <QrCode className="h-4 w-4 text-violet-400" />
-                                <span className="text-sm font-medium text-slate-400">
-                                    {t("payment.payNowTitle") || "Pagar com PIX"}
-                                </span>
-                            </div>
-
-                            {/* Body */}
-                            <div className="flex flex-col items-center gap-5 px-6 py-6">
-                                {/* QR Code */}
-                                <div className="rounded-md border-4 border-white bg-white p-1 shadow-lg">
-                                    {pixData.pixImage ? (
-                                        <Image
-                                            src={pixData.pixImage}
-                                            alt="PIX QR Code"
-                                            width={180}
-                                            height={180}
-                                            className="rounded"
-                                        />
-                                    ) : (
-                                        <div className="flex h-[180px] w-[180px] items-center justify-center bg-slate-100 rounded">
-                                            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+                        {(() => {
+                            const isUsdPayment = pixData.currency === "USD" || (plan?.currency === "USD");
+                            if (isUsdPayment) {
+                                return (
+                                    <div className="overflow-hidden rounded-md border border-white/[0.07] bg-white/3">
+                                        {/* Header */}
+                                        <div className="flex items-center gap-2.5 border-b border-white/6 px-5 py-3.5">
+                                            <CreditCard className="h-4 w-4 text-violet-400" />
+                                            <span className="text-sm font-medium text-slate-400">
+                                                {t("payment.payWithCreditCard") || "Pagar com Cartão de Crédito"}
+                                            </span>
                                         </div>
-                                    )}
-                                </div>
 
-                                {/* Expiry */}
-                                <div className="flex items-center gap-2 text-sm text-slate-500">
-                                    <Calendar className="h-3.5 w-3.5" />
-                                    <span>
-                                        Vence em{" "}
-                                        <strong className="font-medium text-slate-400">
-                                            {format(new Date(pixData.expiresAt), "dd 'de' MMMM", {
-                                                locale: ptBR,
-                                            })}
-                                        </strong>
-                                    </span>
-                                </div>
+                                        {/* Body */}
+                                        <div className="flex flex-col items-center gap-5 px-6 py-8 text-center">
+                                            <div className="rounded-full border border-violet-500/20 bg-violet-500/10 p-4 text-violet-400">
+                                                <CreditCard className="h-8 w-8" />
+                                            </div>
 
-                                {/* Copy-paste */}
-                                <div className="w-full space-y-2">
-                                    <p className="text-[11px] font-medium uppercase tracking-widest text-slate-600">
-                                        {t("payment.copyPaste") || "Copia e Cola"}
-                                    </p>
-                                    <div className="flex gap-2">
-                                        <div className="flex-1 overflow-hidden rounded-lg border border-white/[0.07] bg-white/3 px-3 py-2.5 font-mono text-[11px] text-slate-600 truncate">
-                                            {pixData.pixPayload}
+                                            <div className="space-y-2">
+                                                <h4 className="text-base font-semibold text-slate-200">
+                                                    {t("payment.stripeCheckoutTitle") || "Checkout Seguro via Stripe"}
+                                                </h4>
+                                                <p className="text-sm text-slate-400 max-w-sm leading-relaxed">
+                                                    {t("payment.stripeCheckoutDesc") || "Clique no botão abaixo para concluir o pagamento de sua assinatura de forma segura usando cartão de crédito internacional."}
+                                                </p>
+                                            </div>
+
+                                            <a
+                                                href={pixData.pixPayload || "#"}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex h-12 w-full max-w-xs items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-semibold text-white transition-all hover:bg-violet-500 hover:scale-[1.01]"
+                                            >
+                                                {t("payment.payNowBtn") || "Pagar Agora"}
+                                                <ArrowRight className="h-4 w-4" />
+                                            </a>
+
+                                            {/* Expiry */}
+                                            <div className="flex items-center gap-2 text-sm text-slate-500">
+                                                <Calendar className="h-3.5 w-3.5" />
+                                                <span>
+                                                    Link expira em{" "}
+                                                    <strong className="font-medium text-slate-400">
+                                                        {format(new Date(pixData.expiresAt), "dd 'de' MMMM", {
+                                                            locale: ptBR,
+                                                        })}
+                                                    </strong>
+                                                </span>
+                                            </div>
                                         </div>
-                                        <button
-                                            onClick={() =>
-                                                copyToClipboard(pixData.pixPayload || "")
-                                            }
-                                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/[0.07] bg-white/3 text-slate-500 transition-all hover:border-violet-500/30 hover:bg-violet-500/10 hover:text-violet-400"
-                                        >
-                                            <Copy className="h-3.5 w-3.5" />
-                                        </button>
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <div className="overflow-hidden rounded-md border border-white/[0.07] bg-white/3">
+                                    {/* Header */}
+                                    <div className="flex items-center gap-2.5 border-b border-white/6 px-5 py-3.5">
+                                        <QrCode className="h-4 w-4 text-violet-400" />
+                                        <span className="text-sm font-medium text-slate-400">
+                                            {t("payment.payNowTitle") || "Pagar com PIX"}
+                                        </span>
+                                    </div>
+
+                                    {/* Body */}
+                                    <div className="flex flex-col items-center gap-5 px-6 py-6">
+                                        {/* QR Code */}
+                                        <div className="rounded-md border-4 border-white bg-white p-1 shadow-lg">
+                                            {pixData.pixImage ? (
+                                                <Image
+                                                    src={pixData.pixImage}
+                                                    alt="PIX QR Code"
+                                                    width={180}
+                                                    height={180}
+                                                    className="rounded"
+                                                />
+                                            ) : (
+                                                <div className="flex h-[180px] w-[180px] items-center justify-center bg-slate-100 rounded">
+                                                    <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Expiry */}
+                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                            <Calendar className="h-3.5 w-3.5" />
+                                            <span>
+                                                Vence em{" "}
+                                                <strong className="font-medium text-slate-400">
+                                                    {format(new Date(pixData.expiresAt), "dd 'de' MMMM", {
+                                                        locale: ptBR,
+                                                    })}
+                                                </strong>
+                                            </span>
+                                        </div>
+
+                                        {/* Copy-paste */}
+                                        <div className="w-full space-y-2">
+                                            <p className="text-[11px] font-medium uppercase tracking-widest text-slate-600">
+                                                {t("payment.copyPaste") || "Copia e Cola"}
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <div className="flex-1 overflow-hidden rounded-lg border border-white/[0.07] bg-white/3 px-3 py-2.5 font-mono text-[11px] text-slate-600 truncate">
+                                                    {pixData.pixPayload}
+                                                </div>
+                                                <button
+                                                    onClick={() =>
+                                                        copyToClipboard(pixData.pixPayload || "")
+                                                    }
+                                                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/[0.07] bg-white/3 text-slate-500 transition-all hover:border-violet-500/30 hover:bg-violet-500/10 hover:text-violet-400"
+                                                >
+                                                    <Copy className="h-3.5 w-3.5" />
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+                            );
+                        })()}
 
                         {/* Pay later warning */}
                         <div className="flex gap-3 rounded-md border border-amber-500/20 bg-amber-500/[0.07] px-4 py-3 text-sm text-amber-500/80">

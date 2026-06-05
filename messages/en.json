@@ -834,7 +834,11 @@
         "verifying": "Verifying...",
         "view_plans": "View Plans",
         "paymentConfirmed": "Payment successfully confirmed!",
-        "paymentPending": "Your payment is still pending at the intermediate gateway. If you have already paid, please wait a few moments and try again."
+        "paymentPending": "Your payment is still pending at the intermediate gateway. If you have already paid, please wait a few moments and try again.",
+        "creditCard": "Credit Card",
+        "creditCardInstructions": "Stripe Pending Payment",
+        "stripeInstructions": "Click the button below to go to the secure Stripe checkout page and pay using an international credit card.",
+        "payNowBtn": "Go to Payment"
       },
       "ProgressHero": {
         "classes": "Classes",
@@ -1649,7 +1653,11 @@
       "payLaterBtn": "Pay later / Next",
       "checkPaymentBtn": "Verify Payment",
       "pendingCheck": "Payment still pending confirmation. If you have already paid, please wait a few moments and try again.",
-      "errorChecking": "Error verifying payment status."
+      "errorChecking": "Error verifying payment status.",
+      "payWithCreditCard": "Pay with Credit Card",
+      "stripeCheckoutTitle": "Secure Stripe Checkout",
+      "stripeCheckoutDesc": "Click the button below to securely complete your subscription payment using an international credit card.",
+      "payNowBtn": "Pay Now"
     },
     "steps": {
       "back": "Back",

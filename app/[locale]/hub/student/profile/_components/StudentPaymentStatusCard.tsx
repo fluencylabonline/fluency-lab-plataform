@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/format";
+import type { Locale } from "@/i18n/config";
 import { notify } from "@/components/ui/toaster";
 import Image from "next/image";
 import {
@@ -15,6 +16,7 @@ import {
   Wallet,
   Wallet2,
   RotateCw,
+  CreditCard,
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
@@ -26,6 +28,7 @@ interface StudentPaymentStatusCardProps {
     subscriptionId: string;
     subscriptionStatus: string;
     planName: string;
+    currency?: string;
     currentInstallment: {
       id: string;
       amount: number;
@@ -170,6 +173,8 @@ export function StudentPaymentStatusCard({
     );
   }
 
+  const isCreditCard = subscription.currency === "USD" || !!subscription.currentInstallment?.pixCode?.startsWith("http");
+
   const currentStatus =
     subscription.currentInstallment?.status || subscription.subscriptionStatus;
   const statusConfig = getStatusConfig(currentStatus);
@@ -194,13 +199,13 @@ export function StudentPaymentStatusCard({
               "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900/50 dark:text-emerald-400",
             )}
           >
-            <QrCode className="w-5 h-5" />
+            {isCreditCard ? <CreditCard className="w-5 h-5" /> : <QrCode className="w-5 h-5" />}
           </div>
           <div>
             <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-lg leading-tight">
               {subscription.planName}
             </h3>
-            <p className="text-xs text-zinc-500">{t("pix")}</p>
+            <p className="text-xs text-zinc-500">{isCreditCard ? (t("creditCard") || "Cartão de Crédito") : t("pix")}</p>
           </div>
         </div>
 
@@ -226,52 +231,32 @@ export function StudentPaymentStatusCard({
               subscription.currentInstallment.pixCode)) ? (
             <div className="space-y-5 animate-in fade-in zoom-in-95 duration-300">
               {subscription.currentInstallment.pixCode ? (
-                <div className="flex flex-col lg:flex-row gap-5 items-center lg:items-start">
-                  <div className="relative shrink-0 group bg-white p-2 rounded-md border-2 border-dashed border-zinc-200 dark:border-zinc-700 shadow-sm">
-                    {subscription.currentInstallment.pixQrCode && (
-                      <Image
-                        src={subscription.currentInstallment.pixQrCode}
-                        alt="QR Code PIX"
-                        width={120}
-                        height={120}
-                        className="rounded-lg mix-blend-multiply dark:mix-blend-normal dark:bg-white"
-                      />
-                    )}
-                    <div className="absolute inset-x-0 -bottom-3 flex justify-center">
-                      <span className="bg-zinc-900 text-white text-[10px] px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
-                        <Clock className="w-3 h-3" />{" "}
-                        {isOverdue ? t("overdue_badge") : t("pending_badge")}
-                      </span>
+                isCreditCard ? (
+                  <div className="flex flex-col items-center gap-4 text-center py-4">
+                    <div className="w-12 h-12 rounded-full bg-violet-50 dark:bg-violet-900/10 flex items-center justify-center">
+                      <CreditCard className="w-6 h-6 text-violet-500" />
                     </div>
-                  </div>
-
-                  <div className="flex-1 w-full space-y-3 min-w-0">
-                    <div className="text-center lg:text-left">
-                      <p className="font-medium text-zinc-900 dark:text-zinc-100">
-                        {t("pixInstructions")}
+                    
+                    <div className="space-y-1">
+                      <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                        {t("creditCardInstructions") || "Pagamento Pendente via Stripe"}
                       </p>
-                      <p className="text-xs text-zinc-500 mt-1">
-                        {t("pix_qr_instructions")}
+                      <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+                        {t("stripeInstructions") || "Clique no botão abaixo para ir à página segura de pagamentos da Stripe e efetuar o checkout com cartão de crédito internacional."}
                       </p>
                     </div>
 
-                    <div className="relative flex items-center">
-                      <div className="w-full flex items-center gap-2 p-1.5 pl-3 bg-zinc-100 dark:bg-zinc-800/80 rounded-lg border border-zinc-200 dark:border-zinc-700 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
-                        <code className="flex-1 text-xs font-mono text-zinc-600 dark:text-zinc-400 truncate select-all">
-                          {subscription.currentInstallment.pixCode}
-                        </code>
-                        <Button
-                          size="sm"
-                          className="h-8 shadow-sm bg-white dark:bg-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-600"
-                          onClick={copyPixCode}
-                        >
-                          <Copy className="w-3.5 h-3.5 mr-2" />
-                          {t("copyPix")}
-                        </Button>
-                      </div>
-                    </div>
+                    <div className="flex flex-col gap-2 w-full max-w-xs pt-2">
+                      <a
+                        href={subscription.currentInstallment.pixCode}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex h-10 items-center justify-center rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow transition-all hover:bg-violet-500 hover:scale-[1.01]"
+                      >
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        {t("payNowBtn") || "Ir para o Pagamento"}
+                      </a>
 
-                    <div className="flex flex-col gap-2 w-full">
                       <Button
                         size="default"
                         variant="outline"
@@ -287,26 +272,93 @@ export function StudentPaymentStatusCard({
                         />
                         {isVerifying
                           ? t("verifying") || "Verificando..."
-                          : t("verifyPayment") ||
-                            "Já paguei, verificar pagamento"}
-                      </Button>
-
-                      <Button
-                        size="default"
-                        variant="ghost"
-                        className="w-full gap-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200/50 dark:border-zinc-800/50"
-                      >
-                        <a
-                          href={`/${locale}/hub/student/payments`}
-                          className="flex flex-row items-center gap-2"
-                        >
-                          <Wallet2 className="w-4 h-4 mr-2 text-zinc-500" />
-                          {t("managePayments") || "Gerenciar pagamentos"}
-                        </a>
+                          : t("verifyPayment") || "Verificar Pagamento"}
                       </Button>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex flex-col lg:flex-row gap-5 items-center lg:items-start">
+                    <div className="relative shrink-0 group bg-white p-2 rounded-md border-2 border-dashed border-zinc-200 dark:border-zinc-700 shadow-sm">
+                      {subscription.currentInstallment.pixQrCode && (
+                        <Image
+                          src={subscription.currentInstallment.pixQrCode}
+                          alt="QR Code PIX"
+                          width={120}
+                          height={120}
+                          className="rounded-lg mix-blend-multiply dark:mix-blend-normal dark:bg-white"
+                        />
+                      )}
+                      <div className="absolute inset-x-0 -bottom-3 flex justify-center">
+                        <span className="bg-zinc-900 text-white text-[10px] px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+                          <Clock className="w-3 h-3" />{" "}
+                          {isOverdue ? t("overdue_badge") : t("pending_badge")}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 w-full space-y-3 min-w-0">
+                      <div className="text-center lg:text-left">
+                        <p className="font-medium text-zinc-900 dark:text-zinc-100">
+                          {t("pixInstructions")}
+                        </p>
+                        <p className="text-xs text-zinc-500 mt-1">
+                          {t("pix_qr_instructions")}
+                        </p>
+                      </div>
+
+                      <div className="relative flex items-center">
+                        <div className="w-full flex items-center gap-2 p-1.5 pl-3 bg-zinc-100 dark:bg-zinc-800/80 rounded-lg border border-zinc-200 dark:border-zinc-700 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+                          <code className="flex-1 text-xs font-mono text-zinc-600 dark:text-zinc-400 truncate select-all">
+                            {subscription.currentInstallment.pixCode}
+                          </code>
+                          <Button
+                            size="sm"
+                            className="h-8 shadow-sm bg-white dark:bg-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-600"
+                            onClick={copyPixCode}
+                          >
+                            <Copy className="w-3.5 h-3.5 mr-2" />
+                            {t("copyPix")}
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2 w-full">
+                        <Button
+                          size="default"
+                          variant="outline"
+                          className="w-full gap-2 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm"
+                          onClick={handleVerifyPayment}
+                          disabled={isVerifying}
+                        >
+                          <RotateCw
+                            className={cn(
+                              "w-4 h-4 mr-2 text-zinc-500 dark:text-zinc-400",
+                              isVerifying && "animate-spin",
+                            )}
+                          />
+                          {isVerifying
+                            ? t("verifying") || "Verificando..."
+                            : t("verifyPayment") ||
+                              "Já paguei, verificar pagamento"}
+                        </Button>
+
+                        <Button
+                          size="default"
+                          variant="ghost"
+                          className="w-full gap-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200/50 dark:border-zinc-800/50"
+                        >
+                          <a
+                            href={`/${locale}/hub/student/payments`}
+                            className="flex flex-row items-center gap-2"
+                          >
+                            <Wallet2 className="w-4 h-4 mr-2 text-zinc-500" />
+                            {t("managePayments") || "Gerenciar pagamentos"}
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )
               ) : (
                 <div className="flex flex-col items-center justify-center py-10 text-zinc-400 text-center space-y-4">
                   <div className="flex flex-col items-center">
@@ -377,7 +429,7 @@ export function StudentPaymentStatusCard({
             </span>
             <span className="text-base lg:text-lg font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
               {subscription.currentInstallment?.amount
-                ? formatCurrency(subscription.currentInstallment.amount)
+                ? formatCurrency(subscription.currentInstallment.amount, locale as Locale, subscription.currency)
                 : "-"}
             </span>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import {
@@ -35,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface PlanVaultProps {
   open: boolean;
@@ -49,7 +50,7 @@ const clientPlanSchema = createPlanSchema.extend({
   effectiveDate: z.string().optional().nullable(),
 });
 
-type PlanFormValues = z.infer<typeof clientPlanSchema>;
+type PlanFormValues = z.input<typeof clientPlanSchema>;
 
 export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: PlanVaultProps) {
   const t = useTranslations("Billing");
@@ -65,21 +66,29 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
       classesPerWeek: 2,
       description: "",
       effectiveDate: "",
+      currency: "BRL",
     },
   });
 
   const { formState: { errors, isSubmitting }, handleSubmit, reset, register, setValue, getValues } = form;
 
+  const selectedCurrency = useWatch({
+    control: form.control,
+    name: "currency",
+    defaultValue: "BRL",
+  });
+
   useEffect(() => {
     if (plan && open) {
       reset({
         name: plan.name,
-        price: plan.price / 100, // Convert from cents to Reais
+        price: plan.price / 100, // Convert from cents to Reais/Dollars
         durationMonths: plan.durationMonths,
         language: plan.language || "",
         classesPerWeek: plan.classesPerWeek || 2,
         description: plan.description || "",
         effectiveDate: "",
+        currency: (plan.currency as "BRL" | "USD") || "BRL",
       });
     } else if (!plan && open) {
       reset({
@@ -90,6 +99,7 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
         classesPerWeek: 2,
         description: "",
         effectiveDate: "",
+        currency: "BRL",
       });
     }
   }, [plan, reset, open]);
@@ -97,7 +107,7 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
   const onSubmit: SubmitHandler<PlanFormValues> = async (values) => {
     let result;
 
-    // Convert from Reais back to cents
+    // Convert from currency units back to cents
     const apiValues = {
       ...values,
       price: Math.round(values.price * 100),
@@ -198,22 +208,44 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
                 />
               </VaultField>
               <VaultField
-                label={t("monthlyPrice") || "Mensalidade"}
+                label="Moeda"
                 required
-                error={errors.price?.message}
+                error={errors.currency?.message}
               >
-                <div className="relative flex items-center">
-                  <span className="absolute left-3 text-slate-400 text-sm pointer-events-none">R$</span>
-                  <VaultInput
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    className="pl-9 h-10"
-                    {...register("price", { valueAsNumber: true })}
-                  />
-                </div>
+                <Select
+                  key={plan?.id ? `${plan.id}-currency` : "new-currency"}
+                  onValueChange={(value) => setValue("currency", value as "BRL" | "USD", { shouldValidate: true })}
+                  defaultValue={getValues("currency") || "BRL"}
+                >
+                  <SelectTrigger className="h-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-md">
+                    <SelectValue placeholder="Moeda" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BRL">BRL (R$)</SelectItem>
+                    <SelectItem value="USD">USD ($)</SelectItem>
+                  </SelectContent>
+                </Select>
               </VaultField>
             </div>
+
+            <VaultField
+              label={t("monthlyPrice") || "Mensalidade"}
+              required
+              error={errors.price?.message}
+            >
+              <div className="relative flex items-center">
+                <span className="absolute left-3 text-slate-400 text-sm pointer-events-none">
+                  {selectedCurrency === "USD" ? "US$" : "R$"}
+                </span>
+                <VaultInput
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  className={cn("h-10", selectedCurrency === "USD" ? "pl-11" : "pl-9")}
+                  {...register("price", { valueAsNumber: true })}
+                />
+              </div>
+            </VaultField>
 
             <VaultField
               label={t("description") || "Descrição (Opcional)"}
@@ -266,3 +298,4 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
     </Vault>
   );
 }
+

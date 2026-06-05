@@ -3,7 +3,7 @@ import {
   boolean, uniqueIndex, primaryKey
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { usersTable } from "@/modules/user/user.schema";
+import { usersTable } from "../user/user.schema";
 import type {
   Segment,
   MediaConfig,

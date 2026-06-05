@@ -63,33 +63,55 @@ export const NewInvoiceEmail = ({
               {t.dueDateText(formattedDueDate)}
             </Text>
 
-            <Section style={{ textAlign: "center", margin: "24px 0" }}>
-              <Img
-                src={pixImage}
-                alt="QR Code PIX"
-                width="200"
-                height="200"
-                style={{ margin: "0 auto", display: "block" }}
-              />
-            </Section>
+            {pixImage ? (
+              <>
+                <Section style={{ textAlign: "center", margin: "24px 0" }}>
+                  <Img
+                    src={pixImage}
+                    alt="QR Code PIX"
+                    width="200"
+                    height="200"
+                    style={{ margin: "0 auto", display: "block" }}
+                  />
+                </Section>
 
-            <Text style={{ ...emailStyles.text, textAlign: "center", fontSize: "14px", color: "#666" }}>
-              {t.copyPasteText}
-            </Text>
+                <Text style={{ ...emailStyles.text, textAlign: "center", fontSize: "14px", color: "#666" }}>
+                  {t.copyPasteText}
+                </Text>
 
-            <Section style={{
-              backgroundColor: "#f4f4f4",
-              padding: "16px",
-              borderRadius: "8px",
-              margin: "16px 0",
-              wordBreak: "break-all",
-              fontFamily: "monospace",
-              fontSize: "12px",
-              color: "#333",
-              border: "1px solid #ddd"
-            }}>
-              {pixPayload}
-            </Section>
+                <Section style={{
+                  backgroundColor: "#f4f4f4",
+                  padding: "16px",
+                  borderRadius: "8px",
+                  margin: "16px 0",
+                  wordBreak: "break-all",
+                  fontFamily: "monospace",
+                  fontSize: "12px",
+                  color: "#333",
+                  border: "1px solid #ddd"
+                }}>
+                  {pixPayload}
+                </Section>
+              </>
+            ) : (
+              <Section style={{ textAlign: "center", margin: "24px 0" }}>
+                <a
+                  href={pixPayload}
+                  style={{
+                    display: "inline-block",
+                    backgroundColor: "#7f5af0",
+                    color: "#fffffe",
+                    padding: "12px 24px",
+                    borderRadius: "6px",
+                    textDecoration: "none",
+                    fontWeight: "bold",
+                    fontSize: "16px",
+                  }}
+                >
+                  {locale === "pt" ? "Pagar com Cartão de Crédito" : "Pay with Credit Card"}
+                </a>
+              </Section>
+            )}
 
             <Text style={emailStyles.text}>
               {t.questions}

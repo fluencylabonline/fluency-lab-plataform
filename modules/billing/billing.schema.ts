@@ -18,6 +18,7 @@ export const plansTable = pgTable("plans", {
   language: text("language"),
   classesPerWeek: integer("classes_per_week"),
   isActive: boolean("is_active").notNull().default(true),
+  currency: text("currency").notNull().default("BRL"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .notNull()
@@ -123,6 +124,7 @@ export const createPlanSchema = z.object({
   durationMonths: z.number().int().min(1),
   language: z.string().min(1),
   classesPerWeek: z.number().int().min(1),
+  currency: z.enum(["BRL", "USD"]).default("BRL"),
   description: z.string().optional(),
 });
 

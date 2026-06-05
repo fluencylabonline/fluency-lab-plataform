@@ -2,8 +2,8 @@ import {
   pgTable, uuid, varchar, timestamp, integer, pgEnum, jsonb, text
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { usersTable } from "@/modules/user/user.schema";
-import { slotInstances, recurrenceRules, studentCredits } from "@/modules/scheduling/scheduling.schema";
+import { usersTable } from "../user/user.schema";
+import { slotInstances, recurrenceRules, studentCredits } from "../scheduling/scheduling.schema";
 
 export const payoutStatusEnum = pgEnum("payout_status", ["pending", "completed", "failed"]);
 

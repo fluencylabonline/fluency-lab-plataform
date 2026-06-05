@@ -1,6 +1,7 @@
 "use server";
 
 import { protectedAction } from "@/lib/safe-action";
+import { z } from "zod";
 import {
   onboardingWelcomeSchema,
   onboardingAddressSchema,
@@ -42,6 +43,18 @@ export const onboardingWelcomeAction = protectedAction
 
     revalidatePath("/onboarding");
     return { success: true } as { success: boolean; error?: string };
+  });
+
+export const updateOnboardingNationalityAction = protectedAction
+  .inputSchema(z.object({ nationality: z.string() }))
+  .metadata({ name: "updateOnboardingNationalityAction" })
+  .action(async ({ parsedInput, ctx }) => {
+    await userService.updateUser(ctx.user.id, {
+      nationality: parsedInput.nationality,
+      locale: parsedInput.nationality === "foreign" ? "en" : "pt",
+    });
+    revalidatePath("/onboarding");
+    return { success: true };
   });
 
 export const onboardingAddressAction = protectedAction

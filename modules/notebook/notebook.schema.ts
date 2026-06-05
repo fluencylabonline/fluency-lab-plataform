@@ -1,7 +1,7 @@
 import { pgTable, text, timestamp, uuid, integer } from "drizzle-orm/pg-core";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { usersTable } from "@/modules/user/user.schema";
+import { usersTable } from "../user/user.schema";
 
 // --- Tables ---
 

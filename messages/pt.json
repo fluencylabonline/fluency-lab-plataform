@@ -834,7 +834,11 @@
         "verifying": "Verificando...",
         "paymentConfirmed": "Pagamento confirmado com sucesso!",
         "paymentPending": "Seu pagamento ainda consta como pendente no intermediador. Caso já tenha pago, aguarde alguns instantes e tente novamente.",
-        "verifyError": "Erro ao verificar status do pagamento."
+        "verifyError": "Erro ao verificar status do pagamento.",
+        "creditCard": "Cartão de Crédito",
+        "creditCardInstructions": "Pagamento Pendente via Stripe",
+        "stripeInstructions": "Clique no botão abaixo para ir à página segura de pagamentos da Stripe e efetuar o checkout com cartão de crédito internacional.",
+        "payNowBtn": "Ir para o Pagamento"
       },
       "ProgressHero": {
         "classes": "Aulas",
@@ -1649,7 +1653,11 @@
       "payLaterBtn": "Pagar depois / Próximo",
       "checkPaymentBtn": "Verificar Pagamento",
       "pendingCheck": "Pagamento ainda pendente de confirmação. Se você já pagou, aguarde alguns instantes e tente novamente.",
-      "errorChecking": "Erro ao verificar status do pagamento."
+      "errorChecking": "Erro ao verificar status do pagamento.",
+      "payWithCreditCard": "Pagar com Cartão de Crédito",
+      "stripeCheckoutTitle": "Checkout Seguro via Stripe",
+      "stripeCheckoutDesc": "Clique no botão abaixo para concluir o pagamento de sua assinatura de forma segura usando cartão de crédito internacional.",
+      "payNowBtn": "Pagar Agora"
     },
     "steps": {
       "back": "Voltar",

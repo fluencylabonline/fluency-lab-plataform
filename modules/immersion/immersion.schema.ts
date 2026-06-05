@@ -1,6 +1,6 @@
 import { pgTable, uuid, varchar, timestamp, integer, boolean, jsonb, uniqueIndex } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { usersTable } from "@/modules/user/user.schema";
+import { usersTable } from "../user/user.schema";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 

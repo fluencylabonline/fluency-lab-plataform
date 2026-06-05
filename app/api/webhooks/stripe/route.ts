@@ -51,6 +51,19 @@ export async function POST(req: Request) {
       } else {
         console.warn(`[Stripe Webhook] No installment found for Stripe PaymentIntent ID: ${intent.id}`);
       }
+    } else if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+      const installmentId = session.metadata?.installmentId;
+      const paymentIntentId = typeof session.payment_intent === "string"
+        ? session.payment_intent
+        : session.id;
+
+      if (installmentId) {
+        console.log(`[Stripe Webhook] Checkout Session completed. Marking installment ${installmentId} as PAID with ID ${paymentIntentId}`);
+        await billingService.markInstallmentAsPaid(installmentId, paymentIntentId);
+      } else {
+        console.warn(`[Stripe Webhook] Checkout Session ${session.id} completed but missing installmentId in metadata`);
+      }
     }
 
     return NextResponse.json({ received: true });

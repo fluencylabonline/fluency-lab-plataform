@@ -11,7 +11,7 @@ import {
 import { relations } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { usersTable } from "@/modules/user/user.schema";
+import { usersTable } from "../user/user.schema";
 import type { JSONContent } from "@tiptap/core";
 
 // ================= TYPES =================

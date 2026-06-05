@@ -50,6 +50,20 @@
       "when": 1777907061333,
       "tag": "0006_normal_thunderball",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1780654204532,
+      "tag": "0007_ambiguous_boom_boom",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1780656002096,
+      "tag": "0008_married_sunset_bain",
+      "breakpoints": true
     }
   ]
 }

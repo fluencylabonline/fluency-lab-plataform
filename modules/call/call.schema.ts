@@ -7,8 +7,8 @@ import {
   text,
   pgEnum,
 } from "drizzle-orm/pg-core";
-import { usersTable } from "@/modules/user/user.schema";
-import { notebooksTable } from "@/modules/notebook/notebook.schema";
+import { usersTable } from "../user/user.schema";
+import { notebooksTable } from "../notebook/notebook.schema";
 import { z } from "zod";
 
 // ================= ENUMS =================

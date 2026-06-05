@@ -2,8 +2,8 @@ import {
   pgTable, uuid, varchar, text, timestamp, integer, doublePrecision, pgEnum, jsonb, vector, boolean, uniqueIndex, primaryKey
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
-import { usersTable } from "@/modules/user/user.schema";
-import { languages, learningItems, lessons } from "@/modules/curriculum/curriculum.schema";
+import { usersTable } from "../user/user.schema";
+import { languages, learningItems, lessons } from "../curriculum/curriculum.schema";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 

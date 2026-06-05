@@ -2,15 +2,20 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { billingService } from "../billing.service";
 import { billingRepository } from "../billing.repository";
 import { userService } from "../../user/user.service";
-import { createStripePixPaymentIntent } from "@/lib/stripe";
+import { createStripeCheckoutSession } from "@/lib/stripe";
 import { createPixCharge } from "@/lib/abacate-pay";
 
 // Mocks
 vi.mock("@/lib/stripe", () => ({
-  createStripePixPaymentIntent: vi.fn(),
+  createStripeCheckoutSession: vi.fn(),
   stripe: {
     paymentIntents: {
       retrieve: vi.fn(),
+    },
+    checkout: {
+      sessions: {
+        retrieve: vi.fn(),
+      },
     },
   },
 }));
@@ -44,7 +49,7 @@ vi.mock("../../communication/communication.service", () => ({
   },
 }));
 
-describe("Billing Gateway Dispatcher (Stripe vs AbacatePay)", () => {
+describe("Billing Gateway Dispatcher (Stripe Checkout vs AbacatePay)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -53,7 +58,7 @@ describe("Billing Gateway Dispatcher (Stripe vs AbacatePay)", () => {
   const SUB_ID = "sub-123";
   const STUDENT_ID = "student-123";
 
-  it("SHOULD dispatch to Stripe Pix when the student is a foreign student", async () => {
+  it("SHOULD dispatch to Stripe Checkout Session when the plan currency is USD", async () => {
     // 1. Mock DB data
     vi.spyOn(billingService, "getInstallmentById").mockResolvedValue({
       id: INSTALLMENT_ID,
@@ -70,6 +75,7 @@ describe("Billing Gateway Dispatcher (Stripe vs AbacatePay)", () => {
       plan: {
         name: "Premium Plan",
         durationMonths: 12,
+        currency: "USD",
       },
     } as unknown as Awaited<ReturnType<typeof billingRepository.findSubscriptionById>>);
 
@@ -81,26 +87,23 @@ describe("Billing Gateway Dispatcher (Stripe vs AbacatePay)", () => {
       cellphone: "123456789",
     } as unknown as Awaited<ReturnType<typeof userService.getUser>>);
 
-    // 2. Mock Stripe PaymentIntent response
-    vi.mocked(createStripePixPaymentIntent).mockResolvedValue({
-      id: "pi_stripe_123",
-      next_action: {
-        display_pix_qr_code: {
-          data: "stripe_pix_copy_paste_payload",
-          qr_code_image_base64: "stripe_qr_code_base64_data",
-        },
-      },
-    } as unknown as Awaited<ReturnType<typeof createStripePixPaymentIntent>>);
+    // 2. Mock Stripe Checkout Session response
+    vi.mocked(createStripeCheckoutSession).mockResolvedValue({
+      id: "cs_stripe_123",
+      url: "https://checkout.stripe.com/pay/cs_stripe_123",
+    } as unknown as Awaited<ReturnType<typeof createStripeCheckoutSession>>);
 
     // 3. Call service
     await billingService.generateInvoiceForInstallment(INSTALLMENT_ID);
 
     // 4. Assertions
-    expect(createStripePixPaymentIntent).toHaveBeenCalledWith({
+    expect(createStripeCheckoutSession).toHaveBeenCalledWith({
       amount: 15000,
       email: "foreign@example.com",
       name: "John Doe",
       description: "Mensalidade Premium Plan - 1/12",
+      successUrl: expect.stringContaining("/onboarding?success=true"),
+      cancelUrl: expect.stringContaining("/onboarding?cancelled=true"),
       metadata: {
         installmentId: INSTALLMENT_ID,
         subscriptionId: SUB_ID,
@@ -108,16 +111,16 @@ describe("Billing Gateway Dispatcher (Stripe vs AbacatePay)", () => {
     });
 
     expect(billingRepository.updateInstallment).toHaveBeenCalledWith(INSTALLMENT_ID, {
-      stripePaymentIntentId: "pi_stripe_123",
-      pixPayload: "stripe_pix_copy_paste_payload",
-      pixImage: "data:image/png;base64,stripe_qr_code_base64_data",
+      stripePaymentIntentId: "cs_stripe_123",
+      pixPayload: "https://checkout.stripe.com/pay/cs_stripe_123",
+      pixImage: null,
       status: "pending",
     });
 
     expect(createPixCharge).not.toHaveBeenCalled();
   });
 
-  it("SHOULD dispatch to AbacatePay when the student is a Brazilian student", async () => {
+  it("SHOULD dispatch to AbacatePay when the plan currency is BRL", async () => {
     // 1. Mock DB data
     vi.spyOn(billingService, "getInstallmentById").mockResolvedValue({
       id: INSTALLMENT_ID,
@@ -135,6 +138,7 @@ describe("Billing Gateway Dispatcher (Stripe vs AbacatePay)", () => {
         name: "Premium Plan",
         durationMonths: 12,
         abacatePayProductId: "prod-123",
+        currency: "BRL",
       },
     } as unknown as Awaited<ReturnType<typeof billingRepository.findSubscriptionById>>);
 
@@ -160,7 +164,7 @@ describe("Billing Gateway Dispatcher (Stripe vs AbacatePay)", () => {
 
     // 4. Assertions
     expect(createPixCharge).toHaveBeenCalled();
-    expect(createStripePixPaymentIntent).not.toHaveBeenCalled();
+    expect(createStripeCheckoutSession).not.toHaveBeenCalled();
 
     expect(billingRepository.updateInstallment).toHaveBeenCalledWith(INSTALLMENT_ID, {
       abacatePayBillingId: "ch_abacate_123",
