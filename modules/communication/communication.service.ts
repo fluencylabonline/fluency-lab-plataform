@@ -484,6 +484,36 @@ export class CommunicationService {
         ? data.dueDate.toLocaleDateString("pt-BR")
         : data.dueDate.toLocaleDateString("en-US");
 
+      const isUrl = data.pixPayload.startsWith("http://") || data.pixPayload.startsWith("https://");
+
+      if (isUrl) {
+        const dynamicUrlSuffix = `api/pay?url=${encodeURIComponent(data.pixPayload)}`;
+
+        return await this.sendWhatsAppTemplate({
+          to: data.cellphone,
+          templateName: "payment_reminder_v5",
+          languageCode,
+          components: [
+            {
+              type: "body",
+              parameters: [
+                { type: "text", text: data.studentName },
+                { type: "text", text: amountStr },
+                { type: "text", text: dateStr }
+              ]
+            },
+            {
+              type: "button",
+              sub_type: "url",
+              index: "0",
+              parameters: [
+                { type: "text", text: dynamicUrlSuffix }
+              ]
+            }
+          ]
+        });
+      }
+
       return await this.sendWhatsAppTemplate({
         to: data.cellphone,
         templateName: "payment_reminder_v4",
@@ -507,25 +537,23 @@ export class CommunicationService {
                 action: {
                   order_details: {
                     reference_id: `rem_${Date.now()}`,
-                    order: {
-                      version: 1,
-                      currency: "BRL",
-                      total_amount: {
-                        offset: 100,
-                        value: data.amount
-                      },
-                      payment_settings: [
-                        {
-                          type: "pix_dynamic_code",
-                          pix_dynamic_code: {
-                            code: data.pixPayload,
-                            merchant_name: "Fluency Lab",
-                            key: "contato@fluencylab.me",
-                            key_type: "EMAIL"
-                          }
+                    type: "digital-goods",
+                    currency: "BRL",
+                    total_amount: {
+                      offset: 100,
+                      value: data.amount
+                    },
+                    payment_settings: [
+                      {
+                        type: "pix_dynamic_code",
+                        pix_dynamic_code: {
+                          code: data.pixPayload,
+                          merchant_name: "Fluency Lab",
+                          key: "contato@fluencylab.me",
+                          key_type: "EMAIL"
                         }
-                      ]
-                    }
+                      }
+                    ]
                   }
                 }
               }
@@ -559,6 +587,35 @@ export class CommunicationService {
         currency: locale === "pt" ? "BRL" : "USD"
       }).format(data.amount / 100);
 
+      const isUrl = data.pixPayload.startsWith("http://") || data.pixPayload.startsWith("https://");
+
+      if (isUrl) {
+        const dynamicUrlSuffix = `api/pay?url=${encodeURIComponent(data.pixPayload)}`;
+
+        return await this.sendWhatsAppTemplate({
+          to: data.cellphone,
+          templateName: "payment_overdue_v5",
+          languageCode,
+          components: [
+            {
+              type: "body",
+              parameters: [
+                { type: "text", text: data.studentName },
+                { type: "text", text: amountStr }
+              ]
+            },
+            {
+              type: "button",
+              sub_type: "url",
+              index: "0",
+              parameters: [
+                { type: "text", text: dynamicUrlSuffix }
+              ]
+            }
+          ]
+        });
+      }
+
       return await this.sendWhatsAppTemplate({
         to: data.cellphone,
         templateName: "payment_overdue_v4",
@@ -581,25 +638,23 @@ export class CommunicationService {
                 action: {
                   order_details: {
                     reference_id: `over_${Date.now()}`,
-                    order: {
-                      version: 1,
-                      currency: "BRL",
-                      total_amount: {
-                        offset: 100,
-                        value: data.amount
-                      },
-                      payment_settings: [
-                        {
-                          type: "pix_dynamic_code",
-                          pix_dynamic_code: {
-                            code: data.pixPayload,
-                            merchant_name: "Fluency Lab",
-                            key: "contato@fluencylab.me",
-                            key_type: "EMAIL"
-                          }
+                    type: "digital-goods",
+                    currency: "BRL",
+                    total_amount: {
+                      offset: 100,
+                      value: data.amount
+                    },
+                    payment_settings: [
+                      {
+                        type: "pix_dynamic_code",
+                        pix_dynamic_code: {
+                          code: data.pixPayload,
+                          merchant_name: "Fluency Lab",
+                          key: "contato@fluencylab.me",
+                          key_type: "EMAIL"
                         }
-                      ]
-                    }
+                      }
+                    ]
                   }
                 }
               }
@@ -625,7 +680,7 @@ export class CommunicationService {
   ) {
     try {
       const locale = explicitLocale || await this.getRecipientLocale(data.cellphone);
-      const languageCode = locale === "en" ? "en_US" : "pt_BR";
+      const languageCode = locale === "en" ? "en" : "pt_BR";
 
       // Extrai o código de ação do link do Firebase
       const u = new URL(data.actionLink);

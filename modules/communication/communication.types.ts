@@ -8,23 +8,30 @@ export interface WhatsAppTemplateComponent {
 export interface WhatsAppActionParameter {
   order_details?: {
     reference_id: string;
-    order: {
-      version: number;
-      currency: string;
-      total_amount: {
-        offset: number;
-        value: number;
-      };
-      payment_settings: {
-        type: "pix_dynamic_code";
-        pix_dynamic_code: {
-          code: string;
-          merchant_name: string;
-          key: string;
-          key_type: string;
-        };
-      }[];
+    type: "digital-goods" | "physical-goods";
+    payment_type?: "br" | "upi" | "mx";
+    currency: string;
+    total_amount: {
+      offset: number;
+      value: number;
     };
+    payment_settings: (
+      | {
+          type: "pix_dynamic_code";
+          pix_dynamic_code: {
+            code: string;
+            merchant_name: string;
+            key: string;
+            key_type: string;
+          };
+        }
+      | {
+          type: "payment_link";
+          payment_link: {
+            uri: string;
+          };
+        }
+    )[];
   };
 }
 
