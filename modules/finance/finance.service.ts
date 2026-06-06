@@ -4,6 +4,16 @@ import { payoutService } from "../payout/payout.service";
 import { userService } from "../user/user.service";
 import { startOfYear, endOfYear, startOfMonth, endOfMonth, addDays } from "date-fns";
 import { CreateTransactionValues, UpsertFiscalConfigValues } from "./finance.schema";
+import { db } from "@/lib/db";
+import { installmentsTable } from "../billing/billing.schema";
+import { payoutsTable } from "../payout/payout.schema";
+import { transactionsTable } from "./finance.schema";
+import { and, between, eq, inArray, sql } from "drizzle-orm";
+import { stripe } from "@/lib/stripe";
+import { env } from "@/env";
+import { UnifiedTransaction } from "./finance.types";
+
+
 
 export const financeService = {
   async getFiscalMetrics(year: number) {
@@ -180,8 +190,234 @@ export const financeService = {
     return financeRepository.deleteTransaction(id);
   },
 
-  async getTransactions(filters: { type?: "income" | "expense"; status?: "paid" | "pending" | "cancelled"; start?: Date; end?: Date }) {
-    return financeRepository.getTransactions(filters);
+  async getTransactions(filters: { 
+    type?: "income" | "expense"; 
+    status?: "paid" | "pending" | "cancelled"; 
+    start?: Date; 
+    end?: Date;
+    source?: "all" | "student_payments" | "teacher_payouts" | "manual_income" | "manual_expenses";
+  }): Promise<UnifiedTransaction[]> {
+    const source = filters.source || "all";
+    
+    const fetchManual = source === "all" || source === "manual_income" || source === "manual_expenses";
+    const fetchInstallments = (source === "all" || source === "student_payments") && (!filters.type || filters.type === "income");
+    const fetchPayouts = (source === "all" || source === "teacher_payouts") && (!filters.type || filters.type === "expense");
+    
+    // Determine type for manual fetch if source is specific
+    let manualType = filters.type;
+    if (source === "manual_income") manualType = "income";
+    if (source === "manual_expenses") manualType = "expense";
+    
+    const promises = [];
+    
+    if (fetchManual) {
+      let manualWhere = sql`1=1`;
+      if (filters.status) {
+        manualWhere = and(manualWhere, eq(transactionsTable.status, filters.status))!;
+      }
+      if (filters.start && filters.end) {
+        manualWhere = and(manualWhere, between(transactionsTable.date, filters.start, filters.end))!;
+      }
+      if (manualType) {
+        manualWhere = and(manualWhere, eq(transactionsTable.type, manualType))!;
+      }
+      promises.push(
+        db.query.transactionsTable.findMany({
+          where: manualWhere,
+          orderBy: (t, { desc }) => [desc(t.date)],
+        }).then(res => res.map(tx => ({
+          id: tx.id,
+          type: tx.type,
+          amount: tx.amount,
+          currency: tx.currency,
+          date: tx.date,
+          description: tx.description || "",
+          category: tx.category || "Outros",
+          method: tx.method,
+          deductible: tx.deductible,
+          status: tx.status,
+          attachmentUrl: tx.attachmentUrl,
+          source: "manual" as const,
+        })))
+      );
+    } else {
+      promises.push(Promise.resolve([]));
+    }
+    
+    if (fetchInstallments) {
+      let installmentWhere = sql`1=1`;
+      if (filters.status) {
+        const dbStatus = filters.status === "pending" ? "pending" : (filters.status === "paid" ? "paid" : "cancelled");
+        const dateField = dbStatus === "paid" ? installmentsTable.paidAt : installmentsTable.dueDate;
+        
+        if (filters.status === "pending") {
+          installmentWhere = and(
+            installmentWhere,
+            inArray(installmentsTable.status, ["pending", "overdue"])
+          )!;
+        } else {
+          installmentWhere = and(
+            installmentWhere,
+            eq(installmentsTable.status, dbStatus)
+          )!;
+        }
+        
+        if (filters.start && filters.end) {
+          installmentWhere = and(
+            installmentWhere,
+            between(dateField, filters.start, filters.end)
+          )!;
+        }
+      } else {
+        if (filters.start && filters.end) {
+          installmentWhere = and(
+            installmentWhere,
+            sql`COALESCE(${installmentsTable.paidAt}, ${installmentsTable.dueDate}) BETWEEN ${filters.start} AND ${filters.end}`
+          )!;
+        }
+      }
+      promises.push(
+        db.query.installmentsTable.findMany({
+          where: installmentWhere,
+          with: {
+            subscription: {
+              with: {
+                student: true,
+                plan: true,
+              },
+            },
+          },
+        }).then(res => res.map(inst => {
+          const studentName = inst.subscription?.student?.name || "Aluno";
+          const planName = inst.subscription?.plan?.name || "Plano";
+          return {
+            id: inst.id,
+            type: "income" as const,
+            amount: inst.amount,
+            currency: inst.subscription?.plan?.currency || "BRL",
+            date: inst.paidAt || inst.dueDate,
+            description: `Mensalidade: ${studentName} (${planName} - ${inst.orderIndex}/${inst.subscription?.plan?.durationMonths || 1})`,
+            category: "Mensalidade",
+            method: inst.stripePaymentIntentId ? "credit_card" : "pix",
+            deductible: false,
+            status: inst.status === "paid" ? "paid" as const : (inst.status === "cancelled" ? "cancelled" as const : "pending" as const),
+            attachmentUrl: null,
+            source: "student_payment" as const,
+          };
+        }))
+      );
+    } else {
+      promises.push(Promise.resolve([]));
+    }
+    
+    if (fetchPayouts) {
+      let payoutWhere = sql`1=1`;
+      if (filters.status) {
+        if (filters.status === "paid") {
+          payoutWhere = and(payoutWhere, eq(payoutsTable.status, "completed"))!;
+        } else if (filters.status === "pending") {
+          payoutWhere = and(payoutWhere, eq(payoutsTable.status, "pending"))!;
+        } else if (filters.status === "cancelled") {
+          payoutWhere = and(payoutWhere, eq(payoutsTable.status, "failed"))!;
+        }
+      }
+      if (filters.start && filters.end) {
+        payoutWhere = and(payoutWhere, between(payoutsTable.createdAt, filters.start, filters.end))!;
+      }
+      promises.push(
+        db.query.payoutsTable.findMany({
+          where: payoutWhere,
+          with: {
+            teacher: true,
+          },
+        }).then(res => res.map(p => {
+          const teacherName = p.teacher?.name || "Professor";
+          return {
+            id: p.id,
+            type: "expense" as const,
+            amount: p.amount,
+            currency: "BRL",
+            date: p.createdAt,
+            description: `Repasse: ${teacherName} (${p.month + 1}/${p.year})`,
+            category: "Repasse Professor",
+            method: "pix",
+            deductible: true,
+            status: p.status === "completed" ? "paid" as const : (p.status === "failed" ? "cancelled" as const : "pending" as const),
+            attachmentUrl: null,
+            source: "teacher_payout" as const,
+          };
+        }))
+      );
+    } else {
+      promises.push(Promise.resolve([]));
+    }
+    
+    const [manualMapped, installmentsMapped, payoutsMapped] = await Promise.all(promises);
+    
+    const merged = [...manualMapped, ...installmentsMapped, ...payoutsMapped];
+    merged.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    return merged;
+  },
+
+  async getGatewayBalances() {
+    let stripeAvailable = 0;
+    let stripePending = 0;
+    let abacateAvailable = 0;
+    let abacatePending = 0;
+    let abacateBlocked = 0;
+
+    // Fetch Stripe Balance
+    if (env.STRIPE_SECRET_KEY && env.STRIPE_SECRET_KEY !== "mock_secret_key") {
+      try {
+        const balance = await stripe.balance.retrieve();
+        const usdAvailable = balance.available.find((b) => b.currency === "usd")?.amount ?? 0;
+        const usdPending = balance.pending.find((b) => b.currency === "usd")?.amount ?? 0;
+        stripeAvailable = usdAvailable;
+        stripePending = usdPending;
+      } catch (error) {
+        console.error("[financeService.getGatewayBalances] Stripe error:", error);
+      }
+    }
+
+    // Fetch AbacatePay Balance
+    if (env.ABACATEPAY_API_KEY) {
+      try {
+        const res = await fetch("https://api.abacatepay.com/v2/store/get", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${env.ABACATEPAY_API_KEY}`,
+          },
+        });
+        if (res.ok) {
+          const result = await res.json();
+          if (result.success && result.data?.balance) {
+            abacateAvailable = result.data.balance.available ?? 0;
+            abacatePending = result.data.balance.pending ?? 0;
+            abacateBlocked = result.data.balance.blocked ?? 0;
+          }
+        } else {
+          console.error(`[financeService.getGatewayBalances] AbacatePay error HTTP ${res.status}`);
+        }
+      } catch (error) {
+        console.error("[financeService.getGatewayBalances] AbacatePay error:", error);
+      }
+    }
+
+    return {
+      stripe: {
+        available: stripeAvailable,
+        pending: stripePending,
+        currency: "USD",
+      },
+      abacate: {
+        available: abacateAvailable,
+        pending: abacatePending,
+        blocked: abacateBlocked,
+        currency: "BRL",
+      },
+    };
   },
 
   async upsertFiscalConfig(data: UpsertFiscalConfigValues) {

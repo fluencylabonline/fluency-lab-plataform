@@ -16,9 +16,10 @@ import { EmptyResults } from "@/components/ui/empty";
 import { useState } from "react";
 import { EditTransactionVault } from "./EditTransactionVault";
 import { Transaction } from "@/modules/finance/finance.schema";
+import { UnifiedTransaction } from "@/modules/finance/finance.types";
 
 interface TransactionsTableProps {
-  transactions: Transaction[];
+  transactions: UnifiedTransaction[];
 }
 
 export function TransactionsTable({ transactions }: TransactionsTableProps) {
@@ -55,8 +56,15 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
           {transactions.map((tx) => (
             <TableRow 
               key={tx.id} 
-              className="group hover:bg-muted/20 transition-colors cursor-pointer"
-              onClick={() => setSelectedTransaction(tx)}
+              className={cn(
+                "group hover:bg-muted/20 transition-colors",
+                tx.source === "manual" && "cursor-pointer"
+              )}
+              onClick={() => {
+                if (tx.source === "manual") {
+                  setSelectedTransaction(tx as unknown as Transaction);
+                }
+              }}
             >
               <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                 {format.dateTime(new Date(tx.date), { day: '2-digit', month: '2-digit', year: 'numeric' })}

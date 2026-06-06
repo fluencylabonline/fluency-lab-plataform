@@ -143,6 +143,13 @@
       "paid": "Pagos/Recebidos",
       "pending": "Pendentes"
     },
+    "sources": {
+      "all": "Todas as origens",
+      "student_payments": "Mensalidades de Alunos",
+      "teacher_payouts": "Repasse de Professores",
+      "manual_income": "Outras Receitas (Manuais)",
+      "manual_expenses": "Outras Despesas (Manuais)"
+    },
     "subtitle": "Gestão fiscal, transações e projeções de faturamento.",
     "title": "Financeiro",
     "transactions": {

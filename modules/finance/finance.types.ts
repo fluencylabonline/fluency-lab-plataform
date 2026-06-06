@@ -56,3 +56,19 @@ export interface MEICapacity {
   remainingRevenue: number;
   averageTicket: number;
 }
+
+export interface UnifiedTransaction {
+  id: string;
+  type: "income" | "expense";
+  amount: number;
+  currency: string;
+  date: Date;
+  description: string;
+  category: string;
+  method: string | null;
+  deductible: boolean;
+  status: "paid" | "pending" | "cancelled";
+  attachmentUrl?: string | null;
+  source: "student_payment" | "teacher_payout" | "manual";
+}
+

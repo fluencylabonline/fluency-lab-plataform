@@ -119,6 +119,7 @@ export const getTransactionsAction = protectedAction
     status: z.enum(["pending", "paid", "cancelled"]).optional(),
     year: z.number().optional(),
     month: z.number().optional(),
+    source: z.enum(["all", "student_payments", "teacher_payouts", "manual_income", "manual_expenses"]).optional(),
   }))
   .action(async ({ parsedInput, ctx }) => {
     if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
@@ -144,6 +145,7 @@ export const getTransactionsAction = protectedAction
         status: parsedInput.status,
         start,
         end,
+        source: parsedInput.source,
       });
 
       return { success: true, data: transactions };

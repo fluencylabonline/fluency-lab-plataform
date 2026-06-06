@@ -143,6 +143,13 @@
       "paid": "Paid/Received",
       "pending": "Pending"
     },
+    "sources": {
+      "all": "All sources",
+      "student_payments": "Student Installments",
+      "teacher_payouts": "Teacher Payouts",
+      "manual_income": "Other Income (Manual)",
+      "manual_expenses": "Other Expenses (Manual)"
+    },
     "subtitle": "Fiscal management, transactions and revenue projections.",
     "title": "Finances",
     "transactions": {

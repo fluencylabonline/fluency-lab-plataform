@@ -8,6 +8,7 @@ interface FinancesPageProps {
     month?: string;
     year?: string;
     status?: string;
+    source?: string;
   }>;
 }
 
@@ -22,6 +23,7 @@ export default async function AdminFinancesPage({ searchParams }: FinancesPagePr
   const monthStr = resolvedParams.month;
   const year = resolvedParams.year ? parseInt(resolvedParams.year) : now.getFullYear();
   const status = (resolvedParams.status || "all") as "paid" | "pending" | "cancelled" | "all";
+  const source = (resolvedParams.source || "all") as "all" | "student_payments" | "teacher_payouts" | "manual_income" | "manual_expenses";
 
   let startDate: Date;
   let endDate: Date;
@@ -36,17 +38,19 @@ export default async function AdminFinancesPage({ searchParams }: FinancesPagePr
   }
 
   // Fetch initial data
-  const [metrics, forecast, transactions, monthlyBreakdown, fiscalConfig, meiCapacity] = await Promise.all([
+  const [metrics, forecast, transactions, monthlyBreakdown, fiscalConfig, meiCapacity, gatewayBalances] = await Promise.all([
     financeService.getFiscalMetrics(year),
     financeService.getForecast(year, monthStr === "all" ? undefined : (monthStr ? parseInt(monthStr) : now.getMonth())),
     financeService.getTransactions({
       start: startDate,
       end: endDate,
-      status: status === "all" ? undefined : status
+      status: status === "all" ? undefined : status,
+      source: source
     }),
     financeService.getMonthlyBreakdown(year),
     financeService.getFiscalConfig(year),
-    financeService.getMEICapacity(year)
+    financeService.getMEICapacity(year),
+    financeService.getGatewayBalances()
   ]);
 
   return (
@@ -64,9 +68,11 @@ export default async function AdminFinancesPage({ searchParams }: FinancesPagePr
           initialMonthlyBreakdown={monthlyBreakdown}
           initialFiscalConfig={fiscalConfig ?? null}
           initialMEICapacity={meiCapacity}
+          initialGatewayBalances={gatewayBalances}
           currentMonth={monthStr === "all" ? "all" : (monthStr ? parseInt(monthStr) : now.getMonth())}
           currentYear={year}
           currentStatus={status}
+          currentSource={source}
         />
       </main>
     </div>

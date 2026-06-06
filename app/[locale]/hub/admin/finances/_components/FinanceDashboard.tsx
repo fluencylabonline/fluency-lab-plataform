@@ -15,27 +15,34 @@ import { ForecastCards } from "./ForecastCards";
 import { MetricsCards } from "./MetricsCards";
 import { NewTransactionVault } from "./NewTransactionVault";
 import { TransactionsTable } from "./TransactionsTable";
-import { Transaction, FiscalConfig } from "@/modules/finance/finance.schema";
+import { FiscalConfig } from "@/modules/finance/finance.schema";
 import {
   FinanceMetrics,
   FinanceForecast,
   MonthlyBreakdownItem,
   MEICapacity,
+  UnifiedTransaction,
 } from "@/modules/finance/finance.types";
 import { MEICapacityCard } from "./MEICapacityCard";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { GatewayBalancesCard } from "./GatewayBalancesCard";
 
 interface FinanceDashboardProps {
   initialMetrics: FinanceMetrics;
   initialForecast: FinanceForecast;
-  initialTransactions: Transaction[];
+  initialTransactions: UnifiedTransaction[];
   initialMonthlyBreakdown: MonthlyBreakdownItem[];
   initialFiscalConfig: FiscalConfig | null;
   initialMEICapacity: MEICapacity;
+  initialGatewayBalances: {
+    stripe: { available: number; pending: number; currency: string };
+    abacate: { available: number; pending: number; blocked: number; currency: string };
+  };
   currentMonth: number | "all";
   currentYear: number;
   currentStatus: string;
+  currentSource: string;
 }
 
 export function FinanceDashboard({
@@ -45,9 +52,11 @@ export function FinanceDashboard({
   initialMonthlyBreakdown,
   initialFiscalConfig,
   initialMEICapacity,
+  initialGatewayBalances,
   currentMonth,
   currentYear,
   currentStatus,
+  currentSource,
 }: FinanceDashboardProps) {
   const t = useTranslations("AdminFinances");
   const router = useRouter();
@@ -135,6 +144,22 @@ export function FinanceDashboard({
               <SelectItem value="cancelled">{t("status.cancelled")}</SelectItem>
             </SelectContent>
           </Select>
+
+          <Select
+            value={currentSource}
+            onValueChange={(v) => updateFilters("source", v)}
+          >
+            <SelectTrigger className="w-[160px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("sources.all")}</SelectItem>
+              <SelectItem value="student_payments">{t("sources.student_payments")}</SelectItem>
+              <SelectItem value="teacher_payouts">{t("sources.teacher_payouts")}</SelectItem>
+              <SelectItem value="manual_income">{t("sources.manual_income")}</SelectItem>
+              <SelectItem value="manual_expenses">{t("sources.manual_expenses")}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="flex items-center gap-2 w-full md:w-auto">
@@ -159,6 +184,9 @@ export function FinanceDashboard({
         monthlyBreakdown={initialMonthlyBreakdown}
         currentMonth={currentMonth}
       />
+
+      {/* Gateway Balances Section */}
+      <GatewayBalancesCard balances={initialGatewayBalances} />
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
