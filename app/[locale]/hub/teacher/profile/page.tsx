@@ -25,10 +25,8 @@ export default async function ProfilePage() {
 
     return (
         <div>
-            <header>
-                <Header title="Perfil" user={user} showSubHeader={false} />
-            </header>
-            <main className="container py-8">
+            <Header title="Perfil" className="contents" user={user} showSubHeader={false} />
+            <main className="container pt-8 pb-24 md:pb-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column: Basic Info & Stats */}
                     <div className="lg:col-span-1 space-y-6">

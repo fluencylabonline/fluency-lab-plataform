@@ -223,7 +223,7 @@ export function PayoutSummary({ history, projections: initialProjections, teache
             </div>
           ) : (
             filteredHistory.map((payout) => (
-              <div key={payout.id} className="item p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
+              <div key={payout.id} className="item p-4 m-2 flex items-center justify-between hover:bg-muted/30 transition-colors">
                 <div className="flex items-center gap-4">
                   <div className={cn(
                     "p-2 rounded-full",
