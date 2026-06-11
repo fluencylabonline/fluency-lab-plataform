@@ -32,6 +32,20 @@ import {
 } from "date-fns";
 import { notificationService } from "@/modules/notification/notification.service";
 import { NewSlotInstance } from "./scheduling.types";
+function isRecessPeriod(date: Date): boolean {
+  const month = date.getMonth(); // 0 = Jan, 11 = Dez
+  const day = date.getDate();
+
+  // Dezembro: duas últimas semanas (a partir do dia 18/12)
+  if (month === 11 && day >= 18) {
+    return true;
+  }
+  // Janeiro: duas primeiras semanas (até o dia 14/01)
+  if (month === 0 && day <= 14) {
+    return true;
+  }
+  return false;
+}
 
 export const schedulingService = {
   // --- Rule Management ---
@@ -213,22 +227,24 @@ export const schedulingService = {
       endAt.setHours(endHour, endMin, 0, 0);
 
       if (isAfter(startAt, now)) {
-        const exists = await schedulingRepository.findSlotByRuleAndDate(ruleId, startAt, dbClient);
-        const conflict = await schedulingRepository.findOverlappingSlot(rule.teacherId, startAt, endAt, undefined, dbClient);
+        if (!isRecessPeriod(startAt)) {
+          const exists = await schedulingRepository.findSlotByRuleAndDate(ruleId, startAt, dbClient);
+          const conflict = await schedulingRepository.findOverlappingSlot(rule.teacherId, startAt, endAt, undefined, dbClient);
 
-        if (!exists && !conflict) {
-          const shouldAssignStudent = overrideStudentId && (!startAllocationFrom || !isBefore(startAt, startAllocationFrom));
+          if (!exists && !conflict) {
+            const shouldAssignStudent = overrideStudentId && (!startAllocationFrom || !isBefore(startAt, startAllocationFrom));
 
-          await schedulingRepository.createSlotInstance({
-            ruleId: rule.id,
-            teacherId: rule.teacherId,
-            studentId: shouldAssignStudent ? overrideStudentId : null,
-            type: rule.type,
-            status: shouldAssignStudent ? "scheduled" : "available",
-            startAt,
-            endAt,
-          });
-          generatedCount++;
+            await schedulingRepository.createSlotInstance({
+              ruleId: rule.id,
+              teacherId: rule.teacherId,
+              studentId: shouldAssignStudent ? overrideStudentId : null,
+              type: rule.type,
+              status: shouldAssignStudent ? "scheduled" : "available",
+              startAt,
+              endAt,
+            });
+            generatedCount++;
+          }
         }
       }
 
@@ -847,23 +863,25 @@ export const schedulingService = {
 
       // Final checks
       if (isAfter(startAt, now)) {
-        // 1. Check for specific materialized slot
-        const exists = await schedulingRepository.findSlotByRuleAndDate(ruleId, startAt);
+        if (!isRecessPeriod(startAt)) {
+          // 1. Check for specific materialized slot
+          const exists = await schedulingRepository.findSlotByRuleAndDate(ruleId, startAt);
 
-        // 2. Check for ANY overlapping slot for this teacher (Conflict Prevention)
-        const conflict = await schedulingRepository.findOverlappingSlot(rule.teacherId, startAt, endAt);
+          // 2. Check for ANY overlapping slot for this teacher (Conflict Prevention)
+          const conflict = await schedulingRepository.findOverlappingSlot(rule.teacherId, startAt, endAt);
 
-        if (!exists && !conflict) {
-          await schedulingRepository.createSlotInstance({
-            ruleId: rule.id,
-            teacherId: rule.teacherId,
-            studentId: rule.studentId, // Inherit current allocation
-            type: rule.type,
-            status: rule.studentId ? "scheduled" : "available",
-            startAt,
-            endAt,
-          });
-          generatedCount++;
+          if (!exists && !conflict) {
+            await schedulingRepository.createSlotInstance({
+              ruleId: rule.id,
+              teacherId: rule.teacherId,
+              studentId: rule.studentId, // Inherit current allocation
+              type: rule.type,
+              status: rule.studentId ? "scheduled" : "available",
+              startAt,
+              endAt,
+            });
+            generatedCount++;
+          }
         }
       }
 
