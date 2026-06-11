@@ -9,8 +9,8 @@ import { generateHash, approximateTokens, truncateByTokens } from "./ai.utils";
 const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
 
 const MODELS = {
-  fast: "gemini-2.0-flash",
-  pro: process.env.TRANSCRIPTION_MODEL || "gemini-2.0-flash",
+  fast: "gemini-2.5-flash",
+  pro: process.env.TRANSCRIPTION_MODEL || "gemini-2.5-pro",
   embedding: "gemini-embedding-2-preview",
   media: "gemini-2.5-flash",
 };
@@ -1068,7 +1068,7 @@ ${safeContent}
     }
 
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.0-flash",
+      model: `models/${MODELS.pro}`,
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {

@@ -24,6 +24,7 @@ import { YouTubeSyncNode } from "@/components/tiptap-extension/youtube-sync/Yout
 import { LyricsSyncNode } from "@/components/tiptap-extension/lyrics-sync/LyricsSyncNode";
 import { QuizNode } from "@/components/tiptap-extension/quiz/QuizNode";
 import { AudioSyncNode } from "@/components/tiptap-extension/audio-sync/AudioSyncNode";
+import { SpeakingRecorderNode } from "@/components/tiptap-extension/speaking-recorder/SpeakingRecorderNode";
 
 // --- Call Feature ---
 import { FloatCallButton } from "./call/FloatCallButton";
@@ -100,7 +101,8 @@ export function NotebookEditor({
     (globalThis as Record<string, unknown>).__userId = userId;
     (globalThis as Record<string, unknown>).__userRole = userRole;
     (globalThis as Record<string, unknown>).__studentId = studentId;
-  }, [userId, userRole, studentId]);
+    (globalThis as Record<string, unknown>).__notebookId = notebookId;
+  }, [userId, userRole, studentId, notebookId]);
 
   // 3. Video Call Logic
   // Students: listen for incoming calls via Firestore onSnapshot (scoped to this page only)
@@ -199,6 +201,7 @@ export function NotebookEditor({
         LyricsSyncNode,
         QuizNode,
         AudioSyncNode,
+        SpeakingRecorderNode,
       ],
     },
     [ydoc, awareness],

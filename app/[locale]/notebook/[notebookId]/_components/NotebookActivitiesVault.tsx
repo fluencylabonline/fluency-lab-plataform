@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Music, Play, Music2, FileQuestionMark, LucideIcon } from "lucide-react";
+import { Sparkles, Music, Play, Music2, FileQuestionMark, LucideIcon, Mic } from "lucide-react";
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 import { NotebookAudioSyncVault } from "./NotebookAudioSyncVault";
 import {
@@ -61,6 +61,15 @@ const ACTIVITIES_OPTIONS: ActivityOption[] = [
     iconBgClass: "bg-indigo-500/10",
     iconColorClass: "text-indigo-500",
     action: (editor) => editor.chain().focus().insertQuiz().run(),
+  },
+  {
+    id: "speaking-recorder",
+    title: "Gravador de Voz (Speaking)",
+    description: "Insira um gravador de áudio no caderno para o aluno praticar a leitura e registrar sua voz.",
+    icon: Mic,
+    iconBgClass: "bg-pink-500/10",
+    iconColorClass: "text-pink-600",
+    action: (editor) => editor.chain().focus().insertSpeaking().run(),
   },
 ];
 
