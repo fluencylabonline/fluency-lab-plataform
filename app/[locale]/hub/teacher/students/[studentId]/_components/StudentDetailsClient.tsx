@@ -64,6 +64,7 @@ export function StudentDetailsClient({
         actions={headerActions}
         showSubHeader={isTabletSize}
         className="contents"
+        backHref="/hub/teacher/students"
       />
 
       <main className="container">

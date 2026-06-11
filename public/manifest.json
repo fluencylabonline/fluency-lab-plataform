@@ -108,5 +108,35 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/screenshot1.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Área de Estudos no Computador"
+    },
+    {
+      "src": "/screenshots/screenshot2.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Área de Estudos no Celular"
+    },
+    {
+      "src": "/screenshots/screenshot3.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Área de Estudos no Celular"
+    },
+    {
+      "src": "/screenshots/screenshot4.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Área de Estudos no Celular"
+    }
   ]
 }
