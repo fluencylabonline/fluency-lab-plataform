@@ -827,15 +827,65 @@ export const schedulingService = {
           .set({ ...data, updatedAt: new Date() })
           .where(eq(slotInstances.id, slotId));
       } else if (scope === "future" && slot.ruleId) {
-        // Update this and all future materialized slots
-        await tx.update(slotInstances)
-          .set({ ...data, updatedAt: new Date() })
+        // Fetch this and all future materialized slots
+        const futureSlots = await tx.select()
+          .from(slotInstances)
           .where(
             and(
               eq(slotInstances.ruleId, slot.ruleId),
               gte(slotInstances.startAt, slot.startAt)
             )
           );
+
+        let targetStartHour = 0;
+        let targetStartMin = 0;
+        let targetEndHour = 0;
+        let targetEndMin = 0;
+        let timeChanged = false;
+
+        if (data.startAt && data.endAt) {
+          const newStartLocal = getLocalDateParts(new Date(data.startAt));
+          targetStartHour = newStartLocal.hour;
+          targetStartMin = newStartLocal.minute;
+
+          const newEndLocal = getLocalDateParts(new Date(data.endAt));
+          targetEndHour = newEndLocal.hour;
+          targetEndMin = newEndLocal.minute;
+
+          timeChanged = true;
+        }
+
+        for (const futureSlot of futureSlots) {
+          const updateObj: Partial<typeof slotInstances.$inferInsert> = {
+            ...data,
+            updatedAt: new Date(),
+          };
+
+          if (timeChanged) {
+            const originalStartParts = getLocalDateParts(futureSlot.startAt);
+            const originalEndParts = getLocalDateParts(futureSlot.endAt);
+
+            updateObj.startAt = localToUtc(
+              originalStartParts.year,
+              originalStartParts.month,
+              originalStartParts.day,
+              targetStartHour,
+              targetStartMin
+            );
+
+            updateObj.endAt = localToUtc(
+              originalEndParts.year,
+              originalEndParts.month,
+              originalEndParts.day,
+              targetEndHour,
+              targetEndMin
+            );
+          }
+
+          await tx.update(slotInstances)
+            .set(updateObj)
+            .where(eq(slotInstances.id, futureSlot.id));
+        }
 
         // Synchronize rule template if time or basic metadata changed
         const ruleUpdate: Partial<typeof recurrenceRules.$inferSelect> = {};
