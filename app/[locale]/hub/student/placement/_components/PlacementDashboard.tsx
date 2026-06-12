@@ -3,16 +3,18 @@
 import { useTranslations, useFormatter } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Play, RotateCcw, Clock, Languages, ChevronRight, Loader2 } from "lucide-react";
+import { Trophy, Play, RotateCcw, Clock, Languages, ChevronRight, Loader2, HelpCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { mapEloToCEFR } from "@/lib/adaptive-scoring";
 import { Vault, VaultContent, VaultHeader, VaultTitle, VaultDescription } from "@/components/ui/vault";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ResultView, type PlacementResult } from "./ResultView";
 import { getTestResultAction } from "@/modules/placement/placement.actions";
 import { notify } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
+import { Header } from "@/components/layout/header";
+import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
 
 interface PlacementHistoryItem {
   id: number;
@@ -45,6 +47,12 @@ interface PlacementDashboardProps {
       lastTestDate: Date | string | null | undefined;
     };
   };
+  user: {
+    name: string | null;
+    email: string | null;
+    photoUrl?: string | null;
+    role?: string;
+  };
 }
 
 const fadeUp = {
@@ -67,13 +75,37 @@ function SectionLabel({ icon, children }: { icon: React.ReactNode; children: Rea
   );
 }
 
-export function PlacementDashboard({ initialData }: PlacementDashboardProps) {
+export function PlacementDashboard({ initialData, user }: PlacementDashboardProps) {
   const t = useTranslations("Placement");
+  const th = useTranslations("StudentHelpWizard");
   const format = useFormatter();
   const router = useRouter();
   const [selectedTestResult, setSelectedTestResult] = useState<PlacementResult | null>(null);
   const [isLoadingResult, setIsLoadingResult] = useState(false);
   const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+
+  useEffect(() => {
+    const hasSeen = localStorage.getItem("student-placement-wizard-seen");
+    if (!hasSeen) {
+      const timer = setTimeout(() => {
+        setIsHelpOpen(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleCompleteHelp = () => {
+    localStorage.setItem("student-placement-wizard-seen", "true");
+  };
+
+  const headerActions = [
+    {
+      icon: <HelpCircle className="h-5 w-5" />,
+      onClick: () => setIsHelpOpen(true),
+      label: th("common.helpLabel") || "Ajuda",
+    },
+  ];
 
   const handleViewResult = async (testId: number) => {
     setIsLoadingResult(true);
@@ -108,7 +140,17 @@ export function PlacementDashboard({ initialData }: PlacementDashboardProps) {
   // const isCooldown = !initialData.eligibility.isEligible && initialData.eligibility.nextEligibleDate;
 
   return (
-    <div className="space-y-12">
+    <div>
+      <Header
+        title={t("title")}
+        subtitle={t("subtitle")}
+        user={user}
+        backHref="/hub/student/profile"
+        className="contents"
+        actions={headerActions}
+      />
+      <main className="container">
+        <div className="space-y-12">
       {/* ── Cooldown / Active Test Card ── */}
       {!initialData.eligibility.isEligible && (
         <motion.div 
@@ -337,6 +379,15 @@ export function PlacementDashboard({ initialData }: PlacementDashboardProps) {
           )}
         </VaultContent>
       </Vault>
+        </div>
+      </main>
+
+      <StudentHelpWizard
+        page="placement"
+        open={isHelpOpen}
+        onOpenChange={setIsHelpOpen}
+        onComplete={handleCompleteHelp}
+      />
     </div>
   );
 }

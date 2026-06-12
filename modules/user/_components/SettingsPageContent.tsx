@@ -1,15 +1,16 @@
 "use client";
-
+import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/header";
 import { NotificationSettings } from "./NotificationSettings";
 import { SecuritySettings } from "./SecuritySettings";
 import { AccountSettings } from "./AccountSettings";
 import { AppearanceSettings } from "@/modules/appearance/_components/AppearanceSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Palette, Bell, User, Shield, Smartphone } from "lucide-react";
+import { Palette, Bell, User, Shield, Smartphone, HelpCircle } from "lucide-react";
 import { AppSettings } from "./AppSettings";
 import type { NotificationPrefs, SettingsUserDTO } from "@/modules/user/user.schema";
 import { useTranslations } from "next-intl";
+import { StudentHelpWizard } from "@/app/[locale]/hub/student/_components/StudentHelpWizard";
 
 interface SettingsPageContentProps {
   initialData: {
@@ -23,6 +24,30 @@ interface SettingsPageContentProps {
 export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
   const t = useTranslations("Settings");
   const tc = useTranslations("Common");
+  const th = useTranslations("StudentHelpWizard");
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+
+  useEffect(() => {
+    const hasSeen = localStorage.getItem("student-settings-wizard-seen");
+    if (!hasSeen) {
+      const timer = setTimeout(() => {
+        setIsHelpOpen(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleCompleteHelp = () => {
+    localStorage.setItem("student-settings-wizard-seen", "true");
+  };
+
+  const headerActions = [
+    {
+      icon: <HelpCircle className="h-5 w-5" />,
+      onClick: () => setIsHelpOpen(true),
+      label: th("common.helpLabel") || "Ajuda",
+    },
+  ];
 
   return (
     <div>
@@ -30,6 +55,7 @@ export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
         title={tc("settings")}
         subtitle={t("subtitle")}
         className="contents"
+        actions={headerActions}
       />
 
       <div className="container">
@@ -103,6 +129,13 @@ export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
           </TabsContent>
         </Tabs>
       </div>
+
+      <StudentHelpWizard
+        page="settings"
+        open={isHelpOpen}
+        onOpenChange={setIsHelpOpen}
+        onComplete={handleCompleteHelp}
+      />
     </div>
   );
 }

@@ -2925,5 +2925,157 @@
     "hints": {
       "text": "Hint: The word has {length} letters and starts with \"{letter}\""
     }
+  },
+  "StudentHelpWizard": {
+    "common": {
+      "helpLabel": "Help",
+      "close": "Got it!"
+    },
+    "profile": {
+      "steps": {
+        "overview": {
+          "title": "Your Fluency Profile",
+          "description": "See your account summary, current proficiency, and ELO level.",
+          "content1": "Here you can track your overall progress and communication development.",
+          "item1": "<strongNode>Real-Time Metrics:</strongNode> Your estimated proficiency level and accumulated study hours.",
+          "item2": "<strongNode>Onboarding Steps:</strongNode> Check if you still need to sign the contract or complete the initial placement test."
+        },
+        "nextClass": {
+          "title": "Live Classes (Video)",
+          "description": "How to access your classes with the teacher at the scheduled time.",
+          "content1": "Online classes take place 100% integrated into the platform:",
+          "item1": "<strongNode>No External Links:</strongNode> You do not need Zoom or Google Meet. At the class time, the next class card will display the <strongNode>Access Room</strongNode> button.",
+          "item2": "<strongNode>Quick Access:</strongNode> Simply click the button to enter the video call and open the corresponding class notebook."
+        },
+        "badges": {
+          "title": "Proficiency Levels (CEFR)",
+          "description": "Understand the achievements and badges from the Common European Framework of Reference.",
+          "content1": "The badges on your profile represent your current level in the target language:",
+          "item1": "<strongNode>Click the Badges:</strongNode> Clicking on the badges opens a complete panel describing what each level (from A1 to C2) means for your conversation skills.",
+          "item2": "<strongNode>Evolution:</strongNode> As you complete new placement tests, your badges and descriptions will be updated automatically."
+        },
+        "streak": {
+          "title": "Daily Practice and Streak",
+          "description": "Maintain your study rhythm and track your consistency.",
+          "content1": "Consistency is key to long-term fluency:",
+          "item1": "<strongNode>Streak Count:</strongNode> The number of consecutive days you have practiced. Don't let the fire go out!",
+          "item2": "<strongNode>Practice Status:</strongNode> Indicates whether you have already completed today's reviews or if there are pending activities."
+        }
+      }
+    },
+    "schedule": {
+      "steps": {
+        "calendar": {
+          "title": "Class Calendar",
+          "description": "View and manage your scheduled and makeup classes.",
+          "content1": "The calendar centralizes your routine with FluencyLab:",
+          "item1": "<strongNode>Active Bookings:</strongNode> Dates and times in blue represent your next scheduled classes.",
+          "item2": "<strongNode>History & Status:</strongNode> Completed classes are shown in green, no-shows in yellow, and cancellations in gray."
+        },
+        "credits": {
+          "title": "Credits Balance",
+          "description": "Understand how booking works using your class credits.",
+          "content1": "Your monthly plan provides credits to schedule classes:",
+          "item1": "<strongNode>Credit Consumption:</strongNode> Each active booking consumes exactly 1 credit from your balance.",
+          "item2": "<strongNode>Makeup Credits:</strongNode> In case of a justified absence or teacher cancellation, the credit is returned for you to reschedule."
+        },
+        "policy": {
+          "title": "Rescheduling Rules",
+          "description": "Monthly limits and deadlines to cancel without losing your credit.",
+          "content1": "We value the time of both our tutors and students:",
+          "item1": "<strongNode>Reschedule Limits:</strongNode> The sidebar shows how many reschedules you still have available for the current month.",
+          "item2": "<strongNode>Advance Notice:</strongNode> Cancellations made at the last minute (less than 4 hours before class) are considered no-shows and the credit is consumed."
+        }
+      }
+    },
+    "settings": {
+      "steps": {
+        "notifications": {
+          "title": "Notification Preferences",
+          "description": "Customize which reminders you want to receive.",
+          "content1": "Never miss a class or break your daily study streak:",
+          "item1": "<strongNode>WhatsApp Alerts:</strongNode> Enable to receive automatic reminders directly on your phone before classes start.",
+          "item2": "<strongNode>Streak Reminders:</strongNode> Get notified to practice before your daily streak expires."
+        },
+        "app": {
+          "title": "Install the App (PWA)",
+          "description": "Access the platform with a single click from your home screen.",
+          "content1": "You can use FluencyLab as a native application:",
+          "item1": "<strongNode>Quick Installation:</strongNode> In the <strongNode>App</strongNode> tab, click install to add the icon to your phone or computer home screen.",
+          "item2": "<strongNode>No Browser Needed:</strongNode> The app opens in full screen, uses less data, and loads much faster."
+        },
+        "security": {
+          "title": "Security & Account",
+          "description": "Change your password and update your personal information.",
+          "content1": "Keep your account secure on the platform:",
+          "item1": "<strongNode>Change Password:</strongNode> Create a new access password in the security tab at any time.",
+          "item2": "<strongNode>Profile Data:</strongNode> Update your registered email or change your official display photo."
+        }
+      }
+    },
+    "placement": {
+      "steps": {
+        "intro": {
+          "title": "Adaptive Placement Test",
+          "description": "How the FluencyLab level test works.",
+          "content1": "Our test dynamically evaluates your real communication skills:",
+          "item1": "<strongNode>Smart Questions:</strongNode> The test adapts to your answers. If you answer correctly, the difficulty increases; if you miss, the system recalculates.",
+          "item2": "<strongNode>Pedagogical Focus:</strongNode> We evaluate reading, grammar, vocabulary, and listening comprehension simultaneously."
+        },
+        "resume": {
+          "title": "Save & Resume",
+          "description": "Your progress is protected against connection drops or interruptions.",
+          "content1": "You won't lose your progress if you need to stop:",
+          "item1": "<strongNode>Progress Saved:</strongNode> If the tab closes or connection is lost, your test session is paused.",
+          "item2": "<strongNode>Resume Test:</strongNode> Upon returning to the page, click <strongNode>Resume Test</strongNode> to continue exactly where you left off."
+        },
+        "cooldown": {
+          "title": "Cooldown Period",
+          "description": "Why there is a minimum interval between tests.",
+          "content1": "The level test is designed to measure your pedagogical progress over time:",
+          "item1": "<strongNode>Cooldown Interval:</strongNode> After completing a test, you enter a cooldown period (usually 6 months) before you can take another.",
+          "item2": "<strongNode>Progress Tracking:</strongNode> This timeframe ensures you have enough time to study and see real improvements in your CEFR/ELO score."
+        },
+        "history": {
+          "title": "Test History",
+          "description": "Access the details of your previous level tests.",
+          "content1": "Your completed tests are archived on the platform:",
+          "item1": "<strongNode>Full Report:</strongNode> Click on any test in your history to open a complete report with ELO, CEFR levels, and detailed feedback.",
+          "item2": "<strongNode>Skill Breakdown:</strongNode> View your detailed score in each of the four core communication areas."
+        }
+      }
+    },
+    "notebook": {
+      "steps": {
+        "shared": {
+          "title": "Shared Notes",
+          "description": "The space where your teacher records the notes from each class.",
+          "content1": "Class notebooks act as the official diary of your learning journey:",
+          "item1": "<strongNode>Real-Time Sync:</strongNode> Everything the teacher types during your online class appears instantly on your screen.",
+          "item2": "<strongNode>Advanced Search:</strongNode> Use the search bar to find words, grammar structures, or translations across any past class."
+        },
+        "wotd": {
+          "title": "Word of the Day",
+          "description": "A quick daily exercise to build vocabulary and earn extra XP.",
+          "content1": "Get a new vocabulary term on your dashboard every day:",
+          "item1": "<strongNode>Daily Challenge:</strongNode> Open the <strongNode>Word of the Day</strongNode> card to see the definition, phonetic spelling, and usage examples.",
+          "item2": "<strongNode>Experience Bonus:</strongNode> Your first click of the day grants extra experience points (XP) toward your daily goal."
+        },
+        "path": {
+          "title": "Learning Plan (Roadmap)",
+          "description": "View the complete curriculum sequence planned for you.",
+          "content1": "A structured path tailored to your specific goals:",
+          "item1": "<strongNode>Sequential Modules:</strongNode> The lessons you need to complete are linked in a vertical timeline.",
+          "item2": "<strongNode>Lesson Status:</strongNode> Easily see which topics are completed, in progress, or scheduled next."
+        },
+        "stats": {
+          "title": "Learning Metrics",
+          "description": "Visual tracking of your study metrics.",
+          "content1": "Detailed insights from your adaptive practice:",
+          "item1": "<strongNode>Vocabulary & Retention:</strongNode> Track the total words learned and your estimated memory retention rate.",
+          "item2": "<strongNode>Completed Classes:</strongNode> Total meetings completed relative to the target planned for your study cycle."
+        }
+      }
+    }
   }
 }

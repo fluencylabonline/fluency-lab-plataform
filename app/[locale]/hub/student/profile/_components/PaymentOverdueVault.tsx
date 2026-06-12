@@ -29,7 +29,7 @@ interface PaymentOverdueVaultProps {
   subscription: {
     subscriptionId: string;
     subscriptionStatus: string;
-    planName: string;
+    planName: string | undefined;
     currency?: string;
     currentInstallment: {
       id: string;

@@ -1,18 +1,17 @@
 "use client";
 import { Header } from "@/components/layout/header";
-
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { CalendarView, type CalendarEvent } from "@/components/ui/calendar-view";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { CreditsSummary } from "./CreditsSummary";
 import { format } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
-import { useLocale } from "next-intl";
 import { useIsMobile } from "@/hooks/ui/use-device";
 import { Badge } from "@/components/ui/badge";
 import { Vault, VaultHeader, VaultTitle, VaultBody, VaultContent } from "@/components/ui/vault";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, Clock, Ticket } from "lucide-react";
+import { Calendar, User, Clock, Ticket, HelpCircle } from "lucide-react";
+import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
 import { notify } from "@/components/ui/toaster";
 import { cancelClassAction } from "@/modules/scheduling/scheduling.actions";
 import { useRouter } from "next/navigation";
@@ -39,6 +38,7 @@ interface ScheduleCalendarProps {
 
 export function ScheduleCalendar({ initialClasses, balance, rescheduleStats }: ScheduleCalendarProps) {
   const t = useTranslations("Schedule");
+  const th = useTranslations("StudentHelpWizard");
   const locale = useLocale();
   const router = useRouter();
   const dateLocale = locale === "pt" ? ptBR : enUS;
@@ -48,18 +48,40 @@ export function ScheduleCalendar({ initialClasses, balance, rescheduleStats }: S
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
   const [isCreditsOpen, setIsCreditsOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const isMobile = useIsMobile();
 
+  useEffect(() => {
+    const hasSeen = localStorage.getItem("student-schedule-wizard-seen");
+    if (!hasSeen) {
+      const timer = setTimeout(() => {
+        setIsHelpOpen(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleCompleteHelp = () => {
+    localStorage.setItem("student-schedule-wizard-seen", "true");
+  };
+
   const headerActions = useMemo(() => {
-    if (!isMobile) return [];
-    return [
+    const actions = [
       {
+        icon: <HelpCircle className="w-5 h-5" />,
+        onClick: () => setIsHelpOpen(true),
+        label: th("common.helpLabel") || "Ajuda",
+      }
+    ];
+    if (isMobile) {
+      actions.push({
         icon: <Ticket className="w-5 h-5" />,
         onClick: () => setIsCreditsOpen(true),
         label: t("Credits.title") || "Créditos"
-      }
-    ];
-  }, [isMobile, t]);
+      });
+    }
+    return actions;
+  }, [isMobile, t, th]);
 
   const events = useMemo(() => {
     return initialClasses.map((cls): CalendarEvent => {
@@ -256,6 +278,13 @@ export function ScheduleCalendar({ initialClasses, balance, rescheduleStats }: S
           </VaultBody>
         </VaultContent>
       </Vault>
+
+      <StudentHelpWizard
+        page="schedule"
+        open={isHelpOpen}
+        onOpenChange={setIsHelpOpen}
+        onComplete={handleCompleteHelp}
+      />
     </>
   );
 }

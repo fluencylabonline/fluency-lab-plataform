@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/header";
 import { useTranslations } from "next-intl";
 import { StudentLearningStats, LearningItemDetail, StudentRoadmap } from "@/modules/learning/learning.types";
@@ -8,7 +8,8 @@ import { LearningItem } from "@/modules/curriculum/curriculum.types";
 import {
   Sparkles,
   ChevronRight,
-  BookMarkedIcon
+  BookMarkedIcon,
+  HelpCircle
 } from "lucide-react";
 import { StatsDashboard } from "./StatsDashboard";
 import { LearningPath } from "./LearningPath";
@@ -24,6 +25,7 @@ import {
 } from "@/components/ui/vault";
 
 import { Notebook } from "@/modules/notebook/notebook.schema";
+import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
 
 interface StudentNotebookClientProps {
   stats: StudentLearningStats;
@@ -50,7 +52,24 @@ export function StudentNotebookClient({
   user
 }: StudentNotebookClientProps) {
   const t = useTranslations("NotebookHub");
+  const th = useTranslations("StudentHelpWizard");
   const [notebooksOpen, setNotebooksOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+
+  useEffect(() => {
+    const hasSeen = localStorage.getItem("student-notebook-wizard-seen");
+    if (!hasSeen) {
+      const timer = setTimeout(() => {
+        setIsHelpOpen(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleCompleteHelp = () => {
+    localStorage.setItem("student-notebook-wizard-seen", "true");
+  };
+
   // Lazy initializers read localStorage once on mount — no extra render, no effect needed
   const [wordOfTheDayOpen, setWordOfTheDayOpen] = useState(() => {
     if (typeof window === "undefined" || !wordOfTheDay) return false;
@@ -76,6 +95,11 @@ export function StudentNotebookClient({
         user={user}
         className="contents"
         actions={[
+          {
+            label: th("common.helpLabel") || "Ajuda",
+            icon: <HelpCircle className="w-4 h-4" />,
+            onClick: () => setIsHelpOpen(true)
+          },
           {
             label: t("notebooksLabel"),
             icon: <BookMarkedIcon className="w-4 h-4" />,
@@ -164,6 +188,13 @@ export function StudentNotebookClient({
           const today = new Date().toISOString().slice(0, 10);
           localStorage.setItem("wotd_xp_claimed", today);
         }}
+      />
+
+      <StudentHelpWizard
+        page="notebook"
+        open={isHelpOpen}
+        onOpenChange={setIsHelpOpen}
+        onComplete={handleCompleteHelp}
       />
     </div>
   );

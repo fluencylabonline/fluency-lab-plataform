@@ -2924,5 +2924,157 @@
     "hints": {
       "text": "Dica: A palavra tem {length} letras e começa com \"{letter}\""
     }
+  },
+  "StudentHelpWizard": {
+    "common": {
+      "helpLabel": "Ajuda",
+      "close": "Entendi!"
+    },
+    "profile": {
+      "steps": {
+        "overview": {
+          "title": "Seu Perfil de Fluência",
+          "description": "Veja o resumo de sua conta, proficiência atual e nível de ELO.",
+          "content1": "Aqui você acompanha o progresso geral e o desenvolvimento da sua comunicação.",
+          "item1": "<strongNode>Métricas em Tempo Real:</strongNode> Seu nível estimado e as horas acumuladas.",
+          "item2": "<strongNode>Etapas de Onboarding:</strongNode> Verifique se falta assinar o contrato ou realizar o nivelamento inicial."
+        },
+        "nextClass": {
+          "title": "Aulas ao Vivo (Vídeo)",
+          "description": "Como acessar suas aulas com o professor no horário marcado.",
+          "content1": "As aulas online ocorrem de forma 100% integrada à plataforma:",
+          "item1": "<strongNode>Sem Links Externos:</strongNode> Você não precisa de Zoom ou Google Meet. No horário da aula, o card de próxima aula exibirá o botão <strongNode>Acessar Sala</strongNode>.",
+          "item2": "<strongNode>Acesso Rápido:</strongNode> Basta clicar no botão para entrar na chamada de vídeo e abrir o caderno da aula correspondente."
+        },
+        "badges": {
+          "title": "Níveis de Proficiência (CEFR)",
+          "description": "Entenda as conquistas e selos do quadro europeu comum de referência.",
+          "content1": "Os selos no perfil representam seu nível atual no idioma:",
+          "item1": "<strongNode>Clique nos Selos:</strongNode> Ao clicar sobre os emblemas, você abrirá um painel completo descrevendo o que cada nível (de A1 a C2) significa para sua conversação.",
+          "item2": "<strongNode>Evolução:</strongNode> Conforme você realiza novas avaliações, seus emblemas e descrições serão atualizados."
+        },
+        "streak": {
+          "title": "Ofensiva e Prática Diária",
+          "description": "Mantenha o ritmo de estudo e acompanhe sua constância.",
+          "content1": "A constância é a chave para a fluência de longo prazo:",
+          "item1": "<strongNode>Dias Seguidos (Streak):</strongNode> A quantidade de dias consecutivos que você praticou. Não deixe o fogo apagar!",
+          "item2": "<strongNode>Status da Prática:</strongNode> Indica se você já realizou suas revisões de hoje ou se há atividades pendentes."
+        }
+      }
+    },
+    "schedule": {
+      "steps": {
+        "calendar": {
+          "title": "Calendário de Aulas",
+          "description": "Visualize e gerencie seus horários agendados e de reposição.",
+          "content1": "O calendário centraliza sua rotina com a FluencyLab:",
+          "item1": "<strongNode>Agendamentos Ativos:</strongNode> As datas e horários em azul são suas próximas aulas programadas.",
+          "item2": "<strongNode>Histórico e Status:</strongNode> Aulas concluídas ficam em verde, faltas em amarelo e desmarcações em cinza."
+        },
+        "credits": {
+          "title": "Saldo de Créditos",
+          "description": "Entenda como funciona o agendamento utilizando seus créditos.",
+          "content1": "Seu plano mensal fornece créditos para agendar aulas:",
+          "item1": "<strongNode>Consumo de Créditos:</strongNode> Cada agendamento ativo consome exatamente 1 crédito do seu saldo.",
+          "item2": "<strongNode>Créditos de Reposição:</strongNode> Caso haja falta justificada ou cancelamento pelo professor, o crédito retorna para você reagendar."
+        },
+        "policy": {
+          "title": "Regras de Remarcação",
+          "description": "Limites mensais e prazos para cancelar sem perder o crédito.",
+          "content1": "Prezamos pelo tempo de nossos tutores e alunos:",
+          "item1": "<strongNode>Limite de Remarcações:</strongNode> O painel lateral mostra quantas remarcações você ainda tem disponíveis para o mês atual.",
+          "item2": "<strongNode>Prazo de Antecedência:</strongNode> Cancelamentos feitos em cima da hora (menos de 4 horas antes) são considerados falta (No-Show) e o crédito é consumido."
+        }
+      }
+    },
+    "settings": {
+      "steps": {
+        "notifications": {
+          "title": "Preferências de Alertas",
+          "description": "Personalize quais lembretes deseja receber.",
+          "content1": "Nunca perca uma aula ou quebre sua ofensiva de estudos:",
+          "item1": "<strongNode>Alertas de WhatsApp:</strongNode> Ative para receber lembretes automáticos diretamente no celular antes das aulas começarem.",
+          "item2": "<strongNode>Lembretes de Ofensiva:</strongNode> Seja avisado para praticar antes do horário de expiração do seu streak diário."
+        },
+        "app": {
+          "title": "Instalar o Aplicativo (PWA)",
+          "description": "Acesse a plataforma com um clique direto de sua tela inicial.",
+          "content1": "Você pode usar o FluencyLab como um aplicativo nativo:",
+          "item1": "<strongNode>Instalação Rápida:</strongNode> Na aba <strongNode>Aplicativo</strongNode>, clique em instalar para adicionar o ícone à tela do seu celular ou computador.",
+          "item2": "<strongNode>Sem Navegador:</strongNode> O app abre em tela cheia, consome menos internet e carrega de forma muito mais rápida."
+        },
+        "security": {
+          "title": "Segurança e Conta",
+          "description": "Altere suas credenciais e atualize suas informações pessoais.",
+          "content1": "Mantenha seus dados seguros na plataforma:",
+          "item1": "<strongNode>Alterar Senha:</strongNode> Crie uma nova senha de acesso na aba de segurança a qualquer momento.",
+          "item2": "<strongNode>Dados do Perfil:</strongNode> Atualize seu e-mail cadastrado ou altere sua foto oficial de exibição."
+        }
+      }
+    },
+    "placement": {
+      "steps": {
+        "intro": {
+          "title": "Nivelamento Adaptativo",
+          "description": "Como funciona o teste de nivelamento da FluencyLab.",
+          "content1": "Nosso teste avalia de forma dinâmica suas habilidades reais:",
+          "item1": "<strongNode>Questões Inteligentes:</strongNode> O teste se adapta às suas respostas. Se você acertar, a dificuldade aumenta; se errar, o sistema recalcula o nível.",
+          "item2": "<strongNode>Foco Pedagógico:</strongNode> Avaliamos leitura, gramática, vocabulário e compreensão auditiva simultaneamente."
+        },
+        "resume": {
+          "title": "Salvar e Retomar",
+          "description": "Sua evolução protegida contra quedas de conexão ou imprevistos.",
+          "content1": "Você não perde seu progresso se precisar parar:",
+          "item1": "<strongNode>Progresso Salvo:</strongNode> Se a aba fechar ou a conexão cair, sua sessão de teste é pausada.",
+          "item2": "<strongNode>Retomar Teste:</strongNode> Ao acessar a página novamente, clique em <strongNode>Retomar Teste</strongNode> para continuar exatamente de onde parou."
+        },
+        "cooldown": {
+          "title": "Período de Espera (Cooldown)",
+          "description": "Por que existe um intervalo mínimo entre os testes.",
+          "content1": "O nivelamento serve para medir seu avanço pedagógico ao longo do tempo:",
+          "item1": "<strongNode>Intervalo de Recarga:</strongNode> Após concluir um teste, você entra em cooldown (geralmente de 6 meses) até poder realizar outro.",
+          "item2": "<strongNode>Acompanhamento:</strongNode> Esse prazo garante que você terá tempo suficiente para estudar e ver sua proficiência (CEFR/ELO) subir de forma real."
+        },
+        "history": {
+          "title": "Histórico de Resultados",
+          "description": "Acesse os detalhes de suas proficiências anteriores.",
+          "content1": "Seus testes concluídos ficam arquivados na plataforma:",
+          "item1": "<strongNode>Relatório Completo:</strongNode> Clique em qualquer teste do histórico para abrir um painel completo contendo os resultados e feedbacks.",
+          "item2": "<strongNode>Gráficos de Habilidades:</strongNode> Veja sua pontuação detalhada em cada uma das quatro áreas de comunicação."
+        }
+      }
+    },
+    "notebook": {
+      "steps": {
+        "shared": {
+          "title": "Anotações Compartilhadas",
+          "description": "O espaço onde seu professor registra a evolução pedagógica de cada aula.",
+          "content1": "Os cadernos funcionam como o histórico oficial da sua jornada:",
+          "item1": "<strongNode>Sincronização em Tempo Real:</strongNode> Tudo o que o professor digitar durante a aula online aparecerá instantaneamente para você.",
+          "item2": "<strongNode>Busca Avançada:</strongNode> Use o campo de pesquisa para encontrar palavras, gramáticas ou traduções em qualquer aula passada."
+        },
+        "wotd": {
+          "title": "Palavra do Dia",
+          "description": "Um exercício diário simples para enriquecer seu vocabulário e ganhar XP.",
+          "content1": "Novos termos diariamente na sua tela inicial:",
+          "item1": "<strongNode>Desafio Diário:</strongNode> Abra o card <strongNode>Palavra do Dia</strongNode> para ver a definição, pronúncia fonética e exemplos de uso do termo selecionado.",
+          "item2": "<strongNode>Bônus de Experiência:</strongNode> O primeiro clique do dia garante pontos de experiência (XP) adicionais para a sua meta diária."
+        },
+        "path": {
+          "title": "Plano de Estudos (Roadmap)",
+          "description": "Veja o mapa completo de lições desenhado para você.",
+          "content1": "Uma trilha estruturada e personalizada para os seus objetivos:",
+          "item1": "<strongNode>Módulos Sequenciais:</strongNode> As lições que você deve cursar aparecem conectadas em uma linha do tempo vertical.",
+          "item2": "<strongNode>Status das Lições:</strongNode> Veja quais temas foram concluídos, quais estão em andamento e quais serão as próximas etapas."
+        },
+        "stats": {
+          "title": "Métricas de Prática",
+          "description": "Acompanhe de forma visual suas estatísticas de aprendizado.",
+          "content1": "Dados detalhados sobre sua prática adaptativa:",
+          "item1": "<strongNode>Vocabulário e Retenção:</strongNode> Acompanhe quantas palavras você dominou e sua taxa estimada de retenção na memória.",
+          "item2": "<strongNode>Aulas Cursadas:</strongNode> O total de encontros completados em relação ao total planejado no seu ciclo de estudos."
+        }
+      }
+    }
   }
 }

@@ -4,25 +4,13 @@ import { schedulingService } from "@/modules/scheduling/scheduling.service";
 import { contractService } from "@/modules/contract/contract.service";
 import { learningService } from "@/modules/learning/learning.service";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-import { Header } from "@/components/layout/header";
-import { ProfileCard } from "@/modules/user/_components/ProfileCard";
-import { Badges } from "./_components/Badges";
-import { NextClassCard } from "./_components/NextClassCard";
-import { StudentPaymentStatusCard } from "./_components/StudentPaymentStatusCard";
-import { PaymentOverdueVault } from "./_components/PaymentOverdueVault";
-import { ProgressStatusCard } from "./_components/ProgressStatusCard";
-import { OnboardingStatusCard } from "./_components/OnboardingStatusCard";
-import { StreakWidget } from "./_components/StreakWidget";
-import { PracticeStatusWidget } from "./_components/PracticeStatusWidget";
 import { placementRepository } from "@/modules/placement/placement.repository";
 import { getStudentProficiencies } from "@/utils/proficiency";
 import { type OnboardingVariant } from "./_components/OnboardingStatusCard";
 import { type PlacementTest } from "@/modules/placement/placement.schema";
-
+import { StudentProfileClient } from "./_components/StudentProfileClient";
 
 export default async function ProfilePage() {
-    const t = await getTranslations("Hub.Profile");
     const user = await getCurrentUser();
 
     if (!user) redirect("/signin");
@@ -92,46 +80,16 @@ export default async function ProfilePage() {
     const proficiencies = getStudentProficiencies(user, placementHistory as (PlacementTest & { language: { code: string } })[]);
 
     return (
-        <div className="flex flex-col min-h-screen">
-            <Header title={t("title")} user={user} showSubHeader={false} className="contents" />
-
-            <main className="container">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items-start">
-
-                    {/* Column 1: Identity & Onboarding */}
-                    <div className="flex flex-col gap-3">
-                        <ProfileCard user={user} />
-                        <OnboardingStatusCard
-                            contract={onboardingData.contract}
-                            placement={onboardingData.placement}
-                        />
-                        <Badges proficiencies={proficiencies} />
-                    </div>
-
-                    {/* Column 2: Performance & Achievements */}
-                    <div className="flex flex-col gap-3">
-                        <ProgressStatusCard
-                            retentionRate={retentionRate}
-                            vocabularyLevel={vocabularyLevel}
-                            totalClasses={curriculumStats.totalClasses}
-                            completedClasses={curriculumStats.completedClasses}
-                        />
-                        <StreakWidget streak={user.streakCount} />
-                        <PracticeStatusWidget
-                            status={practiceStatus.status}
-                            daysLate={practiceStatus.daysLate}
-                        />
-                    </div>
-
-                    {/* Column 3: Financial & Scheduling */}
-                    <div className="flex flex-col gap-3">
-                        <StudentPaymentStatusCard subscription={subscriptionData} />
-                        <NextClassCard nextClass={nextClassMapped} studentId={user.id} />
-                    </div>
-
-                </div>
-                <PaymentOverdueVault subscription={subscriptionData} />
-            </main>
-        </div>
+        <StudentProfileClient
+            user={user}
+            subscriptionData={subscriptionData}
+            nextClassMapped={nextClassMapped}
+            onboardingData={onboardingData}
+            proficiencies={proficiencies}
+            retentionRate={retentionRate}
+            vocabularyLevel={vocabularyLevel}
+            curriculumStats={curriculumStats}
+            practiceStatus={practiceStatus}
+        />
     );
 }
