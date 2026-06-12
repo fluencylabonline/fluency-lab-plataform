@@ -21,7 +21,7 @@ import {
 import { useTranslations, useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { syncInstallmentPaymentAction } from "@/modules/billing/billing.actions";
+import { syncInstallmentPaymentAction, generateInstallmentInvoiceAction } from "@/modules/billing/billing.actions";
 
 interface StudentPaymentStatusCardProps {
   subscription: {
@@ -101,6 +101,36 @@ export function StudentPaymentStatusCard({
     }
   };
 
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleGenerateInvoice = async () => {
+    if (!subscription?.currentInstallment?.id) return;
+
+    setIsGenerating(true);
+    try {
+      const result = await generateInstallmentInvoiceAction({
+        installmentId: subscription.currentInstallment.id,
+      });
+
+      if (result?.data?.success) {
+        notify.success(
+          t("invoiceGeneratedSuccess") || "Código de pagamento gerado com sucesso!",
+        );
+        window.location.reload();
+      } else {
+        notify.error(
+          result?.data?.error ||
+            "Erro ao gerar código de pagamento.",
+        );
+      }
+    } catch (error) {
+      console.error("Error generating payment code:", error);
+      notify.error("Erro ao gerar código de pagamento.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const getDaysUntilDue = () => {
     if (!subscription?.currentInstallment?.dueDate) return null;
     const dueDate = new Date(subscription.currentInstallment.dueDate);
@@ -175,12 +205,30 @@ export function StudentPaymentStatusCard({
 
   const isCreditCard = subscription.currency === "USD" || !!subscription.currentInstallment?.pixCode?.startsWith("http");
 
-  const currentStatus =
-    subscription.currentInstallment?.status || subscription.subscriptionStatus;
+  const daysUntilDue = getDaysUntilDue();
+
+  const getIsOverdue = () => {
+    const status = subscription?.currentInstallment?.status;
+    if (status === "overdue") return true;
+    if (status === "pending" && subscription?.currentInstallment?.dueDate) {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      return new Date(subscription.currentInstallment.dueDate) < todayStart;
+    }
+    return false;
+  };
+
+  const isOverdue = getIsOverdue();
+  
+  let currentStatus = subscription?.currentInstallment?.status || subscription?.subscriptionStatus || "pending";
+  if (isOverdue) {
+    currentStatus = "overdue";
+  } else if (currentStatus === "pending" && daysUntilDue !== null && daysUntilDue > 7) {
+    currentStatus = "active";
+  }
+
   const statusConfig = getStatusConfig(currentStatus);
   const StatusIcon = statusConfig.icon;
-  const daysUntilDue = getDaysUntilDue();
-  const isOverdue = currentStatus === "overdue";
 
   return (
     <div
@@ -377,30 +425,57 @@ export function StudentPaymentStatusCard({
                     size="default"
                     variant="outline"
                     className="gap-2 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm"
+                    onClick={handleGenerateInvoice}
+                    disabled={isGenerating}
                   >
-                    <a
-                      href={`/${locale}/hub/student/payments`}
-                      className="flex flex-row items-center gap-2"
-                    >
-                      <Wallet2 className="w-4 h-4 mr-2 text-zinc-500" />
-                      {t("managePayments") || "Gerenciar pagamentos"}
-                    </a>
+                    <RotateCw
+                      className={cn(
+                        "w-4 h-4 mr-2 text-zinc-500 dark:text-zinc-400",
+                        isGenerating && "animate-spin",
+                      )}
+                    />
+                    {isGenerating
+                      ? t("generating") || "Gerando..."
+                      : t("generatePix") || "Gerar Código de Pagamento"}
                   </Button>
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-6 text-zinc-400 text-center space-y-4">
+            <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center mb-3">
-                  <Clock className="w-6 h-6 opacity-40" />
-                </div>
-                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                  {t("pixAvailability")}
-                </p>
-                <p className="text-xs text-zinc-400 mt-1">
-                  {t("pixRelease", { days: daysUntilDue ?? 0 })}
-                </p>
+                {daysUntilDue !== null && daysUntilDue > 7 ? (
+                  <>
+                    <div className="w-12 h-12 rounded-full bg-teal-50 dark:bg-teal-950/20 flex items-center justify-center mb-3">
+                      <CheckCircle2 className="w-6 h-6 text-teal-600 dark:text-teal-400" />
+                    </div>
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                      {t("paymentUpToDate") || "Tudo em dia!"}
+                    </p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 max-w-[280px]">
+                      {t("nextInvoiceReleaseDesc", {
+                        dueDate: subscription.currentInstallment?.dueDate
+                          ? new Date(subscription.currentInstallment.dueDate).toLocaleDateString(locale, {
+                              day: "2-digit",
+                              month: "long",
+                            })
+                          : "",
+                      })}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-12 h-12 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center mb-3">
+                      <Clock className="w-6 h-6 opacity-40 text-zinc-400" />
+                    </div>
+                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                      {t("pixAvailability")}
+                    </p>
+                    <p className="text-xs text-zinc-400 mt-1">
+                      {t("pixRelease", { days: daysUntilDue ?? 0 })}
+                    </p>
+                  </>
+                )}
               </div>
 
               <Button

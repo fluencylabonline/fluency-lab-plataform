@@ -821,6 +821,8 @@
         "overdue_badge": "Overdue",
         "payment_ok": "Payments up to date",
         "payment_pending": "Pending invoice",
+        "paymentUpToDate": "All set!",
+        "nextInvoiceReleaseDesc": "Your next payment is due on {dueDate}. The payment code will be available 7 days before the due date.",
         "pending": "Pending",
         "pending_badge": "Pending",
         "pix": "PIX (Transparent)",
@@ -847,7 +849,12 @@
         "creditCard": "Credit Card",
         "creditCardInstructions": "Stripe Pending Payment",
         "stripeInstructions": "Click the button below to go to the secure Stripe checkout page and pay using an international credit card.",
-        "payNowBtn": "Go to Payment"
+        "payNowBtn": "Go to Payment",
+        "overdueBanner": "Your payment is overdue. Please settle your account to keep your benefits active.",
+        "payNowBanner": "Pay Now",
+        "overdueVaultTitle": "Settle your account",
+        "overdueVaultDesc": "We detected an outstanding balance on your plan. Please make the payment below to avoid temporary suspension of your classes and other platform features.",
+        "invoiceGeneratedSuccess": "Payment code generated successfully!"
       },
       "ProgressHero": {
         "classes": "Classes",

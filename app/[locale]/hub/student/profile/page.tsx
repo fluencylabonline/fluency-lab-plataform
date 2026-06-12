@@ -10,6 +10,7 @@ import { ProfileCard } from "@/modules/user/_components/ProfileCard";
 import { Badges } from "./_components/Badges";
 import { NextClassCard } from "./_components/NextClassCard";
 import { StudentPaymentStatusCard } from "./_components/StudentPaymentStatusCard";
+import { PaymentOverdueVault } from "./_components/PaymentOverdueVault";
 import { ProgressStatusCard } from "./_components/ProgressStatusCard";
 import { OnboardingStatusCard } from "./_components/OnboardingStatusCard";
 import { StreakWidget } from "./_components/StreakWidget";
@@ -129,6 +130,7 @@ export default async function ProfilePage() {
                     </div>
 
                 </div>
+                <PaymentOverdueVault subscription={subscriptionData} />
             </main>
         </div>
     );

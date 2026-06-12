@@ -111,30 +111,30 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/screenshot1.png",
+      "src": "/screenshots/screenshot1.jpeg",
       "sizes": "1024x1024",
-      "type": "image/png",
+      "type": "image/jpeg",
       "form_factor": "wide",
       "label": "Área de Estudos no Computador"
     },
     {
-      "src": "/screenshots/screenshot2.png",
+      "src": "/screenshots/screenshot2.jpeg",
       "sizes": "1024x1024",
-      "type": "image/png",
+      "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Área de Estudos no Celular"
     },
     {
-      "src": "/screenshots/screenshot3.png",
+      "src": "/screenshots/screenshot3.jpeg",
       "sizes": "1024x1024",
-      "type": "image/png",
+      "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Área de Estudos no Celular"
     },
     {
-      "src": "/screenshots/screenshot4.png",
+      "src": "/screenshots/screenshot4.jpeg",
       "sizes": "1024x1024",
-      "type": "image/png",
+      "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Área de Estudos no Celular"
     }

@@ -207,6 +207,31 @@ export const syncInstallmentPaymentAction = protectedAction
     }
   });
 
+export const generateInstallmentInvoiceAction = protectedAction
+  .metadata({ name: "generateInstallmentInvoice" })
+  .inputSchema(z.object({ installmentId: z.uuid() }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const installment = await billingService.getInstallmentById(parsedInput.installmentId);
+      if (!installment) return { success: false, error: "notFound" };
+
+      const subscription = await billingRepository.findSubscriptionById(installment.subscriptionId);
+      if (ctx.user.role !== "admin" && subscription?.studentId !== ctx.user.id) {
+        throw new Error("UNAUTHORIZED");
+      }
+
+      await billingService.generateInvoiceForInstallment(parsedInput.installmentId);
+
+      revalidatePath("/student/profile");
+      revalidatePath("/student/billing");
+      return { success: true };
+    } catch (error) {
+      console.error("[generateInstallmentInvoiceAction] Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro ao gerar código de pagamento";
+      return { success: false, error: errorMessage };
+    }
+  });
+
 export const changeStudentPlanAction = managerAction
   .metadata({ name: "changeStudentPlan" })
   .inputSchema(changeStudentPlanSchema)

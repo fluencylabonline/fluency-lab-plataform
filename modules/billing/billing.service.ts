@@ -990,7 +990,6 @@ export const billingService = {
     const today = startOfDay(now);
     const twoDaysFromNowStart = startOfDay(addDays(now, 2));
     const twoDaysFromNowEnd = endOfDay(addDays(now, 2));
-    const yesterdayStart = startOfDay(addDays(now, -1));
     const yesterdayEnd = endOfDay(addDays(now, -1));
 
     // --- CASE 1: 2 Days before due date ---
@@ -1069,8 +1068,8 @@ export const billingService = {
       await billingRepository.updateInstallment(inst.id, { notifiedDueAt: new Date() });
     }
 
-    // --- CASE 3: Overdue (1 day after) ---
-    const reminderOverdue = await billingRepository.findInstallmentsInDateRange(yesterdayStart, yesterdayEnd);
+    // --- CASE 3: Overdue (all pending before/including yesterday) ---
+    const reminderOverdue = await billingRepository.findPendingInstallmentsBeforeDate(yesterdayEnd);
     for (const inst of reminderOverdue) {
       if (
         inst.notifiedOverdueAt || 

@@ -142,6 +142,20 @@ export const billingRepository = {
     });
   },
 
+  async findPendingInstallmentsBeforeDate(maxDate: Date) {
+    return db.query.installmentsTable.findMany({
+      where: and(
+        eq(installmentsTable.status, "pending"),
+        lte(installmentsTable.dueDate, maxDate)
+      ),
+      with: {
+        subscription: {
+          with: { student: true }
+        }
+      }
+    });
+  },
+
   async sumInstallments(filters: { status: "paid" | "pending"; start: Date; end: Date }) {
     const dateField = filters.status === "paid" ? installmentsTable.paidAt : installmentsTable.dueDate;
     

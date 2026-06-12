@@ -821,6 +821,8 @@
         "overdue_badge": "Vencida",
         "payment_ok": "Pagamentos em dia",
         "payment_pending": "Fatura pendente",
+        "paymentUpToDate": "Tudo em dia!",
+        "nextInvoiceReleaseDesc": "Sua próxima mensalidade vence em {dueDate}. O código de pagamento estará disponível 7 dias antes do vencimento.",
         "pending": "Pendente",
         "pending_badge": "Pendente",
         "pix": "PIX (Transparente)",
@@ -847,7 +849,12 @@
         "creditCard": "Cartão de Crédito",
         "creditCardInstructions": "Pagamento Pendente via Stripe",
         "stripeInstructions": "Clique no botão abaixo para ir à página segura de pagamentos da Stripe e efetuar o checkout com cartão de crédito internacional.",
-        "payNowBtn": "Ir para o Pagamento"
+        "payNowBtn": "Ir para o Pagamento",
+        "overdueBanner": "Seu pagamento está vencido. Regularize seu débito para manter seus benefícios ativos.",
+        "payNowBanner": "Pagar Agora",
+        "overdueVaultTitle": "Regularize seu acesso",
+        "overdueVaultDesc": "Detectamos que você possui uma mensalidade em atraso. Efetue o pagamento abaixo para evitar o bloqueio temporário das aulas e demais recursos da plataforma.",
+        "invoiceGeneratedSuccess": "Código de pagamento gerado com sucesso!"
       },
       "ProgressHero": {
         "classes": "Aulas",
