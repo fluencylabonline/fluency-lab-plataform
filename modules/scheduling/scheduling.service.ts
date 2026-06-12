@@ -32,9 +32,45 @@ import {
 } from "date-fns";
 import { notificationService } from "@/modules/notification/notification.service";
 import { NewSlotInstance } from "./scheduling.types";
+function getLocalDateParts(date: Date, timeZone: string = "America/Sao_Paulo") {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(date);
+  const getPart = (type: string) => parts.find(p => p.type === type)!.value;
+  return {
+    year: parseInt(getPart("year")),
+    month: parseInt(getPart("month")) - 1, // 0-indexed
+    day: parseInt(getPart("day")),
+    hour: parseInt(getPart("hour")),
+    minute: parseInt(getPart("minute")),
+  };
+}
+
+function getLocalMidnight(date: Date, timeZone: string = "America/Sao_Paulo"): Date {
+  const parts = getLocalDateParts(date, timeZone);
+  return localToUtc(parts.year, parts.month, parts.day, 0, 0, timeZone);
+}
+
+function localToUtc(year: number, month: number, day: number, hour: number, minute: number, timeZone: string = "America/Sao_Paulo"): Date {
+  const utcDate = new Date(Date.UTC(year, month, day, hour, minute, 0));
+  const parts = getLocalDateParts(utcDate, timeZone);
+  const formattedUtc = Date.UTC(parts.year, parts.month, parts.day, parts.hour, parts.minute, 0);
+  const diff = utcDate.getTime() - formattedUtc;
+  return new Date(utcDate.getTime() + diff);
+}
+
 function isRecessPeriod(date: Date): boolean {
-  const month = date.getMonth(); // 0 = Jan, 11 = Dez
-  const day = date.getDate();
+  const parts = getLocalDateParts(date);
+  const month = parts.month; // 0 = Jan, 11 = Dez
+  const day = parts.day;
 
   // Dezembro: duas últimas semanas (a partir do dia 18/12)
   if (month === 11 && day >= 18) {
@@ -205,11 +241,12 @@ export const schedulingService = {
     if (!rule) throw new Error("Rule not found");
 
     const now = new Date();
-    let current = startOfDay(new Date(rule.startDate));
+    const localMidnightOfToday = getLocalMidnight(now);
+    let current = getLocalMidnight(new Date(rule.startDate));
     let generatedCount = 0;
 
-    if (isBefore(current, startOfDay(now)) && rule.frequency !== "NONE") {
-      while (isBefore(current, startOfDay(now))) {
+    if (isBefore(current, localMidnightOfToday) && rule.frequency !== "NONE") {
+      while (isBefore(current, localMidnightOfToday)) {
         if (rule.frequency === "WEEKLY") current = addWeeks(current, 1);
         else if (rule.frequency === "BIWEEKLY") current = addWeeks(current, 2);
         else if (rule.frequency === "MONTHLY") current = addMonths(current, 1);
@@ -221,10 +258,9 @@ export const schedulingService = {
       const [startHour, startMin] = rule.startTime.split(":").map(Number);
       const [endHour, endMin] = rule.endTime.split(":").map(Number);
 
-      const startAt = new Date(current);
-      startAt.setHours(startHour, startMin, 0, 0);
-      const endAt = new Date(current);
-      endAt.setHours(endHour, endMin, 0, 0);
+      const parts = getLocalDateParts(current);
+      const startAt = localToUtc(parts.year, parts.month, parts.day, startHour, startMin);
+      const endAt = localToUtc(parts.year, parts.month, parts.day, endHour, endMin);
 
       if (isAfter(startAt, now)) {
         if (!isRecessPeriod(startAt)) {
@@ -834,13 +870,14 @@ export const schedulingService = {
 
     const now = new Date();
     const horizon = addWeeks(now, weeksAhead);
-    let current = startOfDay(new Date(rule.startDate));
+    const localMidnightOfToday = getLocalMidnight(now);
+    let current = getLocalMidnight(new Date(rule.startDate));
     let generatedCount = 0;
 
     // Safety: ensure we don't start too far in the past for recurrence
     // If startDate is old, align 'current' to the first occurrence >= today
-    if (isBefore(current, startOfDay(now)) && rule.frequency !== "NONE") {
-      while (isBefore(current, startOfDay(now))) {
+    if (isBefore(current, localMidnightOfToday) && rule.frequency !== "NONE") {
+      while (isBefore(current, localMidnightOfToday)) {
         if (rule.frequency === "WEEKLY") current = addWeeks(current, 1);
         else if (rule.frequency === "BIWEEKLY") current = addWeeks(current, 2);
         else if (rule.frequency === "MONTHLY") current = addMonths(current, 1);
@@ -855,11 +892,9 @@ export const schedulingService = {
       const [startHour, startMin] = rule.startTime.split(":").map(Number);
       const [endHour, endMin] = rule.endTime.split(":").map(Number);
 
-      const startAt = new Date(current);
-      startAt.setHours(startHour, startMin, 0, 0);
-
-      const endAt = new Date(current);
-      endAt.setHours(endHour, endMin, 0, 0);
+      const parts = getLocalDateParts(current);
+      const startAt = localToUtc(parts.year, parts.month, parts.day, startHour, startMin);
+      const endAt = localToUtc(parts.year, parts.month, parts.day, endHour, endMin);
 
       // Final checks
       if (isAfter(startAt, now)) {
