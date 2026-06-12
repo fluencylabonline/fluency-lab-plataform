@@ -15,9 +15,7 @@ import {
   VaultHeader,
   VaultTitle,
   VaultDescription,
-  VaultBody,
-  VaultFooter,
-  VaultSecondaryButton,
+  VaultBody
 } from "@/components/ui/vault";
 
 interface VideoCallsTabProps {
@@ -145,12 +143,6 @@ export function VideoCallsTab({ callHistory }: VideoCallsTabProps) {
                                   {call.transcription || "Nenhuma fala detectada na aula."}
                                 </div>
                               </VaultBody>
-
-                              <VaultFooter>
-                                <VaultSecondaryButton>
-                                  Fechar
-                                </VaultSecondaryButton>
-                              </VaultFooter>
                             </VaultContent>
                           </Vault>
                         ) : (
