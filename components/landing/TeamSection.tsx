@@ -19,37 +19,53 @@ type TeamMember = {
   image: string;
   bio: string;
   lang: string;
+  tags: string[];
 };
 
 const TutorCard = ({ member }: { member: TeamMember }) => (
   <motion.div
-    whileHover={{ y: -5 }}
-    className="group flex flex-col items-center text-center p-4 rounded-2xl transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-900/50"
+    whileHover={{ y: -4 }}
+    className="item group flex flex-col items-center text-center p-6 rounded-2xl h-full justify-between transition-all duration-200"
   >
-    <div className="relative mb-4">
-      <Avatar className="w-24 h-24 md:w-32 md:h-32 border-4 border-white dark:border-slate-950 group-hover:border-primary/20 transition-colors duration-300">
-        <AvatarImage src={member.image} alt={member.name} />
-        <AvatarFallback className="bg-slate-100 dark:bg-slate-800 text-slate-400">
-          {member.name?.[0] || "?"}
-        </AvatarFallback>
-      </Avatar>
+    <div className="flex flex-col items-center">
+      <div className="relative mb-5">
+        <Avatar className="w-24 h-24 md:w-28 md:h-28 border-4 border-white dark:border-slate-900/60 transition-colors duration-300 group-hover:border-primary/30">
+          <AvatarImage src={member.image} alt={member.name} className="object-cover" />
+          <AvatarFallback className="bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold text-xl">
+            {member.name?.[0] || "?"}
+          </AvatarFallback>
+        </Avatar>
 
-      <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-950 px-2 py-0.5 rounded-full text-xs border border-slate-100 dark:border-slate-800">
-        {member.lang}
-      </span>
+        <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-950 px-2 py-0.5 rounded-full text-xs border border-slate-100 dark:border-slate-800 font-medium select-none">
+          {member.lang}
+        </span>
+      </div>
+
+      <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 group-hover:text-primary transition-colors duration-300">
+        {member.name}
+      </h3>
+      <p className="text-xs font-semibold text-primary dark:text-primary/90 mt-1 mb-2 uppercase tracking-wider">
+        {member.role}
+      </p>
+      
+      <div className="flex flex-wrap gap-1.5 justify-center mb-3">
+        {member.tags.map((tag, i) => (
+          <Badge 
+            key={i} 
+            variant="outline" 
+            className="text-[10px] px-2 py-0.5 font-medium rounded-full bg-slate-500/5 dark:bg-slate-400/5 text-slate-600 dark:text-slate-400 border-slate-200/50 dark:border-slate-800"
+          >
+            {tag}
+          </Badge>
+        ))}
+      </div>
+
+      <p className="text-xs text-slate-500 dark:text-slate-400 max-w-[200px] leading-relaxed">
+        {member.bio}
+      </p>
     </div>
 
-    <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 group-hover:text-primary transition-colors duration-300">
-      {member.name}
-    </h3>
-    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">
-      {member.role}
-    </p>
-    <p className="text-xs text-slate-400 dark:text-slate-500 max-w-[200px] leading-relaxed">
-      {member.bio}
-    </p>
-
-    <div className="mt-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
+    <div className="mt-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
       <Globe className="w-4 h-4 text-slate-400 hover:text-primary cursor-pointer transition-colors" />
     </div>
   </motion.div>
@@ -60,32 +76,48 @@ export default function TeamSection() {
 
   const team: TeamMember[] = [
     {
-      name: t("members.ana.name") || "Ana Silva",
-      role: t("members.ana.role") || "Head de Metodologia",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80",
-      bio: t("members.ana.bio") || "",
-      lang: "🇧🇷 🇺🇸",
-    },
-    {
-      name: t("members.mark.name") || "Mark Miller",
-      role: t("members.mark.role") || "English Lead",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80",
-      bio: t("members.mark.bio") || "",
-      lang: "🇬🇧",
-    },
-    {
-      name: t("members.sofia.name") || "Sofia Martinez",
-      role: t("members.sofia.role") || "Tutora de Espanhol",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&h=150&q=80",
-      bio: t("members.sofia.bio") || "",
-      lang: "🇦🇷",
-    },
-    {
-      name: t("members.lucas.name") || "Lucas Oliveira",
-      role: t("members.lucas.role") || "Coordenador de Alunos",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80",
-      bio: t("members.lucas.bio") || "",
+      name: t("members.deise.name") || "Deise Laiane",
+      role: t("members.deise.role") || "Coordenadora de Curso",
+      image: "/images/team/deise.png",
+      bio: t("members.deise.bio") || "Coordenadora de curso, gerencia a escola e os professores.",
       lang: "🇧🇷",
+      tags: [
+        t("tags.management") || "Gestão", 
+        t("tags.coordination") || "Coordenação"
+      ],
+    },
+    {
+      name: t("members.luara.name") || "Luara",
+      role: t("members.luara.role") || "Professora de Inglês",
+      image: "/images/team/luara.png",
+      bio: t("members.luara.bio") || "Professora de inglês com anos de experiência, focada no ensino de adultos.",
+      lang: "🇧🇷 🇺🇸",
+      tags: [
+        t("tags.adults") || "Adultos", 
+        t("tags.experience") || "Experiência"
+      ],
+    },
+    {
+      name: t("members.gideon.name") || "Gideon",
+      role: t("members.gideon.role") || "Professor Nativo de Inglês",
+      image: "/images/team/gideon.png",
+      bio: t("members.gideon.bio") || "Professor nativo de inglês, focado em conversação e fluência prática.",
+      lang: "🇬🇧 🇺🇸",
+      tags: [
+        t("tags.native") || "Nativo", 
+        t("tags.conversation") || "Conversação"
+      ],
+    },
+    {
+      name: t("members.giulia.name") || "Giulia",
+      role: t("members.giulia.role") || "Professora de Inglês",
+      image: "/images/team/giulia.png",
+      bio: t("members.giulia.bio") || "Professora de inglês, focada no ensino de crianças e adolescentes.",
+      lang: "🇧🇷 🇺🇸",
+      tags: [
+        t("tags.kidsTeens") || "Kids & Teens", 
+        t("tags.english") || "Inglês"
+      ],
     },
   ];
 
@@ -172,7 +204,7 @@ export default function TeamSection() {
                     {t("stats.tutors") || "+150"}
                   </p>
                   <p className="text-sm text-slate-500">
-                    {t("stats.tutorsLabel") || "Tutores Nativos"}
+                    {t("stats.tutorsLabel") || "Alunos"}
                   </p>
                 </div>
                 <div>

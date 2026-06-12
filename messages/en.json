@@ -1050,37 +1050,47 @@
       "cta": "I want to book a trial lesson",
       "description": "Dedicated tutors ready to personalize your learning journey based on your real goals. We aren't just teachers, we are partners in your evolution.",
       "members": {
-        "ana": {
-          "bio": "Neuro-linguistics specialist with 10 years of experience in adaptive teaching.",
-          "name": "Ana Silva",
-          "role": "Head of Methodology",
-          "rating": "4.9 · 140 students"
+        "deise": {
+          "bio": "Course coordinator, manages the school and the teachers.",
+          "name": "Deise Laiane",
+          "role": "Course Coordinator",
+          "rating": "4.9 · 120 students"
         },
-        "lucas": {
-          "bio": "Ensures your study plan is always aligned with your routine.",
-          "name": "Lucas Oliveira",
-          "role": "Student Coordinator",
-          "rating": "4.9 · 210 students"
+        "luara": {
+          "bio": "English teacher with years of experience, focusing on adult students.",
+          "name": "Luara",
+          "role": "English Teacher",
+          "rating": "5.0 · 150 students"
         },
-        "mark": {
-          "bio": "London native, focused on Business English and corporate communication.",
-          "name": "Mark Miller",
-          "role": "English Lead",
-          "rating": "5.0 · 180 students"
+        "gideon": {
+          "bio": "Native English teacher, focused on conversation and practical fluency.",
+          "name": "Gideon",
+          "role": "Native English Teacher",
+          "rating": "4.9 · 90 students"
         },
-        "sofia": {
-          "bio": "Argentine journalist who teaches through culture and current events.",
-          "name": "Sofia Martinez",
-          "role": "Spanish Tutor",
-          "rating": "4.9 · 95 students"
+        "giulia": {
+          "bio": "English teacher, focusing on kids and teenagers.",
+          "name": "Giulia",
+          "role": "English Teacher",
+          "rating": "4.8 · 110 students"
         }
+      },
+      "tags": {
+        "management": "Management",
+        "coordination": "Coordination",
+        "adults": "Adults",
+        "experience": "Experience",
+        "native": "Native",
+        "conversation": "Conversation",
+        "kidsTeens": "Kids & Teens",
+        "english": "English"
       },
       "mobileSwipe": "Swipe to see →",
       "stats": {
         "rating": "4.9/5",
         "ratingLabel": "Average Rating",
         "tutors": "+150",
-        "tutorsLabel": "Native Tutors"
+        "tutorsLabel": "Students"
       },
       "title": "Meet our team of <primary>professionals</primary>"
     },

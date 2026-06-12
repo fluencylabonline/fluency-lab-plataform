@@ -1050,37 +1050,47 @@
       "cta": "Quero marcar uma aula teste",
       "description": "Tutores dedicados prontos para personalizar sua jornada de aprendizado baseada nos seus objetivos reais. Não somos apenas professores, somos parceiros na sua evolução.",
       "members": {
-        "ana": {
-          "bio": "Especialista em neurolinguística com 10 anos de experiência em ensino adaptativo.",
-          "name": "Ana Silva",
-          "role": "Head de Metodologia",
-          "rating": "4.9 · 140 alunos"
+        "deise": {
+          "bio": "Coordenadora de curso, gerencia a escola e os professores.",
+          "name": "Deise Laiane",
+          "role": "Coordenadora de Curso",
+          "rating": "4.9 · 120 alunos"
         },
-        "lucas": {
-          "bio": "Garante que seu plano de estudos esteja sempre alinhado com sua rotina.",
-          "name": "Lucas Oliveira",
-          "role": "Coordenador de Alunos",
-          "rating": "4.9 · 210 alunos"
+        "luara": {
+          "bio": "Professora de inglês com anos de experiência, focada no ensino de adultos.",
+          "name": "Luara",
+          "role": "Professora de Inglês",
+          "rating": "5.0 · 150 alunos"
         },
-        "mark": {
-          "bio": "Nativo de Londres, focado em Business English e comunicação corporativa.",
-          "name": "Mark Miller",
-          "role": "English Lead",
-          "rating": "5.0 · 180 alunos"
+        "gideon": {
+          "bio": "Professor nativo de inglês, focado em conversação e fluência prática.",
+          "name": "Gideon",
+          "role": "Professor Nativo de Inglês",
+          "rating": "4.9 · 90 alunos"
         },
-        "sofia": {
-          "bio": "Jornalista argentina que ensina através da cultura e atualidades.",
-          "name": "Sofia Martinez",
-          "role": "Tutora de Espanhol",
-          "rating": "4.9 · 95 alunos"
+        "giulia": {
+          "bio": "Professora de inglês, focada no ensino de crianças e adolescentes.",
+          "name": "Giulia",
+          "role": "Professora de Inglês",
+          "rating": "4.8 · 110 alunos"
         }
+      },
+      "tags": {
+        "management": "Gestão",
+        "coordination": "Coordenação",
+        "adults": "Adultos",
+        "experience": "Experiência",
+        "native": "Nativo",
+        "conversation": "Conversação",
+        "kidsTeens": "Kids & Teens",
+        "english": "Inglês"
       },
       "mobileSwipe": "Deslize para ver →",
       "stats": {
         "rating": "4.9/5",
         "ratingLabel": "Avaliação Média",
         "tutors": "+150",
-        "tutorsLabel": "Tutores Nativos"
+        "tutorsLabel": "Alunos"
       },
       "title": "Conheça nosso time de <primary>profissionais</primary>"
     },
