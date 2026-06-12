@@ -160,6 +160,7 @@ export const createContractTemplateAction = adminAction
       region: z.enum(["BR", "US"]),
       type: z.enum(["student", "teacher"]),
       partyType: z.enum(["individual", "business"]).optional().default("individual"),
+      durationMonths: z.number().int().min(1, "A duração deve ser de pelo menos 1 mês.").optional().nullable(),
     })
   )
   .action(async ({ parsedInput }) => {

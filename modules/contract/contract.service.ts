@@ -8,7 +8,7 @@ import { communicationService } from "../communication/communication.service";
 import { env } from "@/env";
 import { billingService } from "../billing/billing.service";
 import { addMonths } from "date-fns";
-import { ContractSignatureMetadata, SchoolSettings } from "./contract.schema";
+import { ContractSignatureMetadata, SchoolSettings, ContractInstance } from "./contract.schema";
 import { schedulingService } from "../scheduling/scheduling.service";
 
 interface GuardianData {
@@ -45,6 +45,7 @@ export const contractService = {
     region: "BR" | "US"; 
     type: "student" | "teacher";
     partyType?: "individual" | "business";
+    durationMonths?: number | null;
   }) {
     const lastTemplate = await contractRepository.findLastTemplateVersion(data.name, data.region);
     const nextVersion = lastTemplate ? (parseInt(lastTemplate.version) + 1).toString() : "1";
@@ -101,6 +102,12 @@ export const contractService = {
       throw new Error("Configurações da escola (CNPJ/Endereço) não encontradas no sistema.");
     }
 
+    // 2.5 Obter duração em meses
+    const subscription = await billingService.getActiveSubscription(userId);
+    const durationMonths = instance.durationMonths || 
+      (user.role === "teacher" ? instance.template.durationMonths : subscription?.plan?.durationMonths) || 
+      6;
+
     // 3. Injeção de Dados e Geração de Conteúdo Final (Snapshot)
     const finalContent = injectTemplateData(instance.template.content, {
       user: {
@@ -111,6 +118,9 @@ export const contractService = {
       guardian: guardianData,
       school: schoolSettings,
       date: new Date().toLocaleDateString("pt-BR"),
+      contract: {
+        durationMonths,
+      },
     });
 
     // 4. Integridade: Hash SHA-256 do conteúdo + metadados
@@ -156,11 +166,8 @@ export const contractService = {
       throw new Error("Erro ao salvar o arquivo PDF do contrato.");
     }
 
-    // 6.5 Calcular expiração baseada no plano
-    const subscription = await billingService.getActiveSubscription(userId);
-    const expiresAt = subscription?.plan?.durationMonths 
-      ? addMonths(new Date(), subscription.plan.durationMonths)
-      : null;
+    // 6.5 Calcular expiração baseada na duração obtida
+    const expiresAt = addMonths(new Date(), durationMonths);
 
     // 7. Persistência Final: Transação de atualização
     await contractRepository.updateInstance(instanceId, {
@@ -334,6 +341,7 @@ export const contractService = {
       signedContent: isAuto ? oldInstance.signedContent : null,
       integrityHash: isAuto ? oldInstance.integrityHash : null,
       guardianData: isAuto ? oldInstance.guardianData : null,
+      durationMonths: oldSubscription?.plan?.durationMonths ?? oldInstance.durationMonths ?? 6,
     });
 
     if (isAuto && oldInstance.user?.email) {
@@ -487,30 +495,47 @@ export const contractService = {
     // Get active subscription to link (both share the same validity)
     const subscription = await billingService.getActiveSubscription(userId);
 
+    const user = await userService.getUser(userId);
+    if (!user) throw new Error("Usuário não encontrado.");
+
     if (instance) {
-      // If we found a pending instance but it doesn't have a subscriptionId, link it now
+      // If we found a pending instance, sync subscriptionId and durationMonths if missing
+      const updates: Partial<ContractInstance> = {};
       if (!instance.subscriptionId && subscription) {
-        return contractRepository.updateInstance(instance.id, { subscriptionId: subscription.id });
+        updates.subscriptionId = subscription.id;
+      }
+      if (!instance.durationMonths) {
+        updates.durationMonths = user.role === "teacher"
+          ? (instance.template?.durationMonths ?? 6)
+          : (subscription?.plan?.durationMonths ?? 6);
+      }
+      if (Object.keys(updates).length > 0) {
+        return contractRepository.updateInstance(instance.id, updates);
       }
       return instance;
     }
 
     // 2. Get active template based on user role
-    const user = await userService.getUser(userId);
-    if (!user) throw new Error("Usuário não encontrado.");
-
     const inferredRegion = region || (user.nationality === "foreign" ? "US" : "BR");
 
     const contractType = user.role === "teacher" ? "teacher" : "student";
     const template = await contractRepository.findActiveTemplateByType(contractType, inferredRegion);
     if (!template) throw new Error(`Template de contrato (${contractType}) de região ${inferredRegion} não encontrado.`);
 
-    // 3. Create instance with the subscription link
+    let durationMonths: number | null = null;
+    if (contractType === "student") {
+      durationMonths = subscription?.plan?.durationMonths ?? 6;
+    } else {
+      durationMonths = template.durationMonths ?? 6;
+    }
+
+    // 3. Create instance with the subscription link and duration
     return contractRepository.insertInstance({
       templateId: template.id,
       userId,
       subscriptionId: subscription?.id,
       status: "pending",
+      durationMonths,
     });
   },
 

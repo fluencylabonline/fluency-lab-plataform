@@ -178,6 +178,9 @@ export function ContractDetails({ contract, user }: ContractDetailsProps) {
           representativeName: "Diretoria",
         },
         date: new Date().toLocaleDateString("pt-BR"),
+        contract: {
+          durationMonths: currentContract.durationMonths,
+        },
       })
     : "";
 

@@ -22,6 +22,9 @@ interface TemplateData {
     representativeName: string;
   };
   date: string;
+  contract?: {
+    durationMonths?: number | null;
+  };
 }
 
 /**
@@ -59,6 +62,12 @@ export function injectTemplateData(template: string, data: TemplateData): string
     mapping["guardian.name"] = escapeHtml(data.guardian.name || "");
     mapping["guardian.taxId"] = escapeHtml(data.guardian.taxId || "");
     mapping["guardian.relationship"] = escapeHtml(data.guardian.relationship || "");
+  }
+
+  if (data.contract) {
+    const months = data.contract.durationMonths;
+    mapping["contract.durationMonths"] = months ? String(months) : "";
+    mapping["contract.duration"] = months ? `${months} meses` : "";
   }
 
   // Iteramos sobre o mapeamento e substituímos no template

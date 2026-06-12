@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, pgEnum, uuid, jsonb, AnyPgColumn } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, pgEnum, uuid, jsonb, AnyPgColumn, integer } from "drizzle-orm/pg-core";
 import { usersTable } from "../user/user.schema";
 import { relations } from "drizzle-orm";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
@@ -20,6 +20,7 @@ export const contractTemplatesTable = pgTable("contract_templates", {
   type: contractTypeEnum("type").notNull(),
   partyType: partyTypeEnum("party_type").notNull().default("individual"),
   isActive: boolean("is_active").notNull().default(true),
+  durationMonths: integer("duration_months"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -50,6 +51,7 @@ export const contractInstancesTable = pgTable("contract_instances", {
   signedAt: timestamp("signed_at"),
   expiresAt: timestamp("expires_at"),
   autoRenew: boolean("auto_renew").notNull().default(true),
+  durationMonths: integer("duration_months"),
 
   pdfUrl: text("pdf_url"), // Caminho no Firebase Storage
 

@@ -184,6 +184,9 @@ export function StepContract({
                 representativeName: "Diretoria",
             },
             date: new Date().toLocaleDateString("pt-BR"),
+            contract: {
+                durationMonths: contract.durationMonths,
+            },
         })
         : "";
 

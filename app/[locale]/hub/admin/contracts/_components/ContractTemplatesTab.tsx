@@ -80,9 +80,16 @@ export function ContractTemplatesTab({
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="capitalize">
-                        {template.type === "student" ? "Aluno" : "Professor"}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="capitalize">
+                          {template.type === "student" ? "Aluno" : "Professor"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {template.type === "student" 
+                            ? "Duração: Plano" 
+                            : `Duração: ${template.durationMonths || 6} meses`}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <span className="capitalize text-xs font-medium bg-muted px-2.5 py-1 rounded">
@@ -148,7 +155,11 @@ export function ContractTemplatesTab({
                   <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
                     <div>
                       <span className="font-medium text-gray-400 mr-1">Destinatário:</span>
-                      <span className="font-semibold">{template.type === "student" ? "Aluno" : "Professor"}</span>
+                      <span className="font-semibold">
+                        {template.type === "student" 
+                          ? "Aluno (Vigência do plano)" 
+                          : `Professor (${template.durationMonths || 6} meses)`}
+                      </span>
                     </div>
                   </div>
                   <div className="col-span-2 flex items-center gap-1.5 text-gray-600 dark:text-gray-400">

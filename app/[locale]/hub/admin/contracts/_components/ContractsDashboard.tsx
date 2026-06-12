@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
@@ -77,9 +77,10 @@ const createTemplateFormSchema = z.object({
   region: z.enum(["BR", "US"]),
   type: z.enum(["student", "teacher"]),
   partyType: z.enum(["individual", "business"]),
+  durationMonths: z.number().int().min(1, "A duração deve ser de pelo menos 1 mês.").optional().nullable(),
 });
 
-type CreateTemplateFormValues = z.input<typeof createTemplateFormSchema>;
+type CreateTemplateFormValues = z.infer<typeof createTemplateFormSchema>;
 
 export function ContractsDashboard({
   user,
@@ -110,14 +111,27 @@ export function ContractsDashboard({
       region: "BR",
       type: "student",
       partyType: "individual",
+      durationMonths: undefined,
     },
+  });
+
+  const selectedType = useWatch({
+    control: templateForm.control,
+    name: "type",
+    defaultValue: "student",
   });
 
   // Actions execution helpers
   const handleCreateTemplate = async (values: CreateTemplateFormValues) => {
     startTransition(async () => {
       try {
-        const result = await createContractTemplateAction(values);
+        const payload = {
+          ...values,
+          durationMonths: (values.durationMonths === undefined || isNaN(values.durationMonths as number) || values.durationMonths === null) 
+            ? null 
+            : Number(values.durationMonths),
+        };
+        const result = await createContractTemplateAction(payload);
         if (result?.data?.success && result.data.data) {
           notify.success(t("notifications.templateCreated") || "Template de contrato criado com sucesso!");
           
@@ -150,6 +164,7 @@ export function ContractsDashboard({
       region: template.region,
       type: template.type,
       partyType: template.partyType,
+      durationMonths: template.durationMonths || undefined,
     });
     setIsViewTemplateOpen(false);
     setIsCreateTemplateOpen(true);
@@ -380,6 +395,20 @@ export function ContractsDashboard({
               </VaultField>
             </div>
 
+            {selectedType === "teacher" && (
+              <VaultField
+                label="Duração do Contrato (Meses)"
+                error={templateForm.formState.errors.durationMonths?.message}
+                required
+              >
+                <Input
+                  type="number"
+                  placeholder="Ex: 12"
+                  {...templateForm.register("durationMonths", { valueAsNumber: true })}
+                />
+              </VaultField>
+            )}
+
             <VaultField
               label={t("form.content") || "Conteúdo do Contrato (Monospace)"}
               error={templateForm.formState.errors.content?.message}
@@ -423,6 +452,9 @@ export function ContractsDashboard({
               <span>Região: <strong className="uppercase">{selectedTemplate?.region}</strong></span>
               <span>Destinatário: <strong>{selectedTemplate?.type === "student" ? "Aluno" : "Professor"}</strong></span>
               <span>Tipo: <strong>{selectedTemplate?.partyType === "individual" ? "Pessoa Física (PF)" : "Pessoa Jurídica (PJ)"}</strong></span>
+              {selectedTemplate?.durationMonths && (
+                <span>Duração: <strong>{selectedTemplate.durationMonths} meses</strong></span>
+              )}
               <span>Versão atual: <strong className="font-mono bg-muted px-1.5 py-0.5 rounded">v{selectedTemplate?.version}</strong></span>
             </VaultDescription>
           </VaultHeader>
