@@ -347,7 +347,10 @@ export const billingService = {
   },
 
   async updateSubscription(id: string, data: Partial<Subscription>) {
-    return billingRepository.updateSubscription(id, data);
+    await billingRepository.updateSubscription(id, data);
+    if (data.status === "cancelled") {
+      await billingRepository.cancelPendingInstallments(id);
+    }
   },
 
   async changeStudentPlan(studentId: string, newPlanId: string) {
@@ -654,7 +657,7 @@ export const billingService = {
         });
       }
 
-      await billingRepository.updateSubscription(sub.id, {
+      await this.updateSubscription(sub.id, {
         status: "pending_fee",
         cancellationDate: new Date(),
         cancellationFeeInstallmentId: pix.id,
@@ -680,7 +683,7 @@ export const billingService = {
       };
     }
 
-    await billingRepository.updateSubscription(sub.id, {
+    await this.updateSubscription(sub.id, {
       status: "cancelled",
       cancellationDate: new Date(),
     });

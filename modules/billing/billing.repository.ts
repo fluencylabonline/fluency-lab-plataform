@@ -7,7 +7,7 @@ import {
   Subscription, 
   Installment 
 } from "./billing.schema";
-import { eq, and, lte, isNull, between, sum } from "drizzle-orm";
+import { eq, and, lte, isNull, between, sum, ne } from "drizzle-orm";
 
 export const billingRepository = {
   // Audit
@@ -82,6 +82,16 @@ export const billingRepository = {
   },
   async updateInstallment(id: string, data: Partial<Installment>) {
     await db.update(installmentsTable).set(data).where(eq(installmentsTable.id, id));
+  },
+  async cancelPendingInstallments(subscriptionId: string) {
+    await db.update(installmentsTable)
+      .set({ status: "cancelled" })
+      .where(
+        and(
+          eq(installmentsTable.subscriptionId, subscriptionId),
+          ne(installmentsTable.status, "paid")
+        )
+      );
   },
   async findSubscriptionsForCron(date: Date) {
     // Subscriptions that have an installment due in exactly 7 days

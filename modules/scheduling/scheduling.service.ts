@@ -1266,7 +1266,10 @@ export const schedulingService = {
     if (studentIds.length === 0) return [];
 
     const students = await db.query.usersTable.findMany({
-      where: inArray(usersTable.id, studentIds),
+      where: and(
+        inArray(usersTable.id, studentIds),
+        eq(usersTable.isActive, true)
+      ),
     });
 
     const enrichedStudents = await Promise.all(students.map(async (student) => {

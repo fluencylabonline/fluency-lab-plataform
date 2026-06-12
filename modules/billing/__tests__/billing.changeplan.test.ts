@@ -56,6 +56,7 @@ vi.mock("../billing.repository", () => ({
     findPlanById: vi.fn(),
     updatePlan: vi.fn(),
     updateSubscription: vi.fn(),
+    cancelPendingInstallments: vi.fn(),
   },
 }));
 
@@ -190,6 +191,24 @@ describe("Billing Service - Plan Modification Logic", () => {
         "Plano Inglês",
         45000
       );
+    });
+  });
+
+  describe("updateSubscription", () => {
+    it("SHOULD update subscription status and not cancel installments if status is not cancelled", async () => {
+      const subscriptionId = "sub-123";
+      await billingService.updateSubscription(subscriptionId, { status: "active" });
+
+      expect(billingRepository.updateSubscription).toHaveBeenCalledWith(subscriptionId, { status: "active" });
+      expect(billingRepository.cancelPendingInstallments).not.toHaveBeenCalled();
+    });
+
+    it("SHOULD update subscription status and cancel pending installments if status is cancelled", async () => {
+      const subscriptionId = "sub-123";
+      await billingService.updateSubscription(subscriptionId, { status: "cancelled" });
+
+      expect(billingRepository.updateSubscription).toHaveBeenCalledWith(subscriptionId, { status: "cancelled" });
+      expect(billingRepository.cancelPendingInstallments).toHaveBeenCalledWith(subscriptionId);
     });
   });
 });
