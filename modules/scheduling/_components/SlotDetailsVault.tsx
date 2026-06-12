@@ -15,7 +15,9 @@ import {
   Trash2,
   Edit2,
   AlertTriangle,
+  Repeat,
 } from "lucide-react";
+import { useIsMobile } from "@/hooks/ui/use-device";
 
 import { Badge } from "@/components/ui/badge";
 import { notify } from "@/components/ui/toaster";
@@ -65,6 +67,7 @@ export function SlotDetailsVault({
   onSuccess,
 }: SlotDetailsVaultProps) {
   const t = useTranslations("UserManagement");
+  const isMobile = useIsMobile();
 
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteScope, setShowDeleteScope] = useState(false);
@@ -298,20 +301,40 @@ export function SlotDetailsVault({
             {!isEditing ? (
               <div className="space-y-6">
                 <div className="flex items-center gap-4 p-4 rounded-md bg-muted-foreground/15 border border-white/10">
-                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                    <UserIcon className="w-6 h-6" />
+                  <div className="min-w-12 min-h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                    <UserIcon className="min-w-6 min-h-6" />
                   </div>
                   <div>
                     <h3 className="text-lg font-bold">{event.title}</h3>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-start gap-1">
                       <Badge variant="outline" className={cn(
                         "text-[10px] font-black uppercase",
-                        event.type === "REPOSICAO" ? "text-orange-500 border-orange-500/20" : "text-blue-500 border-blue-500/20"
+                        event.type === "REPOSICAO" ? "text-orange-500 border-orange-500/20" : "text-blue-500 border-blue-500/20",
+                        isMobile && "flex items-center justify-center p-1.5 h-6 w-6"
                       )}>
-                        {event.type === "REPOSICAO" ? "Reposição" : "Aula Regular"}
+                        {isMobile ? (
+                          event.type === "REPOSICAO" ? (
+                            <ArrowRightLeft className="w-3.5 h-3.5" />
+                          ) : (
+                            <BookOpen className="w-3.5 h-3.5" />
+                          )
+                        ) : (
+                          event.type === "REPOSICAO" ? "Reposição" : "Aula Regular"
+                        )}
                       </Badge>
-                      <Badge variant="secondary" className="text-[10px] font-black uppercase">
-                        {event.isRecurring ? "Recorrente" : "Aula Única"}
+                      <Badge variant="secondary" className={cn(
+                        "text-[10px] font-black uppercase",
+                        isMobile && "flex items-center justify-center p-1.5 h-6 w-6"
+                      )}>
+                        {isMobile ? (
+                          event.isRecurring ? (
+                            <Repeat className="w-3.5 h-3.5" />
+                          ) : (
+                            <CalendarIcon className="w-3.5 h-3.5" />
+                          )
+                        ) : (
+                          event.isRecurring ? "Recorrente" : "Aula Única"
+                        )}
                       </Badge>
                       <Badge className="text-[10px] font-black uppercase">{event.status}</Badge>
                     </div>

@@ -32,6 +32,7 @@ import { RecessRequest } from "@/modules/scheduling/scheduling.types";
 
 interface CommunicateRecessVaultProps {
   teacherId: string;
+  iconOnly?: boolean;
 }
 
 type Step = "dates" | "impact" | "fallback" | "review" | "success";
@@ -76,7 +77,7 @@ const fallbackSchema = z.object({
 type FallbackFormValues = z.infer<typeof fallbackSchema>;
 
 
-export function CommunicateRecessVault({ teacherId }: CommunicateRecessVaultProps) {
+export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateRecessVaultProps) {
   const t = useTranslations("Recess");
   const tCommon = useTranslations("Common");
   const [isOpen, setIsOpen] = useState(false);
@@ -195,10 +196,21 @@ export function CommunicateRecessVault({ teacherId }: CommunicateRecessVaultProp
   return (
     <Vault open={isOpen} onOpenChange={setIsOpen}>
       <VaultTrigger asChild>
-        <Button variant="default" className="gap-2 font-bold shadow-lg shadow-primary/20">
-          <CalendarIcon className="w-4 h-4 mr-2" />
-          {t('communicateRecess') || "Comunicar Recesso"}
-        </Button>
+        {iconOnly ? (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-10 w-10 text-muted-foreground hover:text-foreground"
+          >
+            <CalendarIcon className="w-5 h-5" />
+            <span className="sr-only">{t('communicateRecess') || "Comunicar Recesso"}</span>
+          </Button>
+        ) : (
+          <Button variant="outline" className="gap-2 font-bold">
+            <CalendarIcon className="w-4 h-4 mr-2" />
+            {t('communicateRecess') || "Comunicar Recesso"}
+          </Button>
+        )}
       </VaultTrigger>
 
       <VaultContent className="sm:max-w-xl">

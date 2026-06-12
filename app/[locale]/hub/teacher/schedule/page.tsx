@@ -3,7 +3,6 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { TeacherScheduleClient } from "./_components/TeacherScheduleClient";
 import { addMonths, startOfMonth, endOfMonth } from "date-fns";
 import { redirect } from "next/navigation";
-import { Header } from "@/components/layout/header";
 import { CalendarEvent } from "@/components/ui/calendar-view";
 
 export default async function TeacherSchedulePage() {
@@ -40,19 +39,10 @@ export default async function TeacherSchedulePage() {
   }));
 
   return (
-    <div className="flex flex-col gap-6">
-      <Header 
-        title="Minha Agenda" 
-        subtitle="Gerencie suas aulas e períodos de recesso"
-        className="contents"
-      />
-      
-      <main className="px-4 pb-10">
-        <TeacherScheduleClient 
-          teacherId={user.id}
-          initialEvents={events}
-        />
-      </main>
-    </div>
+    <TeacherScheduleClient 
+      teacherId={user.id}
+      initialEvents={events}
+      user={user}
+    />
   );
 }

@@ -580,14 +580,12 @@ export function CalendarView({
     ? ["DOM.", "SEG.", "TER.", "QUA.", "QUI.", "SEX.", "SÁB."]
     : ["SUN.", "MON.", "TUE.", "WED.", "THU.", "FRI.", "SAT."], [locale]);
 
-  // Corrigido: `onDateClick` encapsulado em useCallback para não quebrar memoização
   const handleGridDateClick = React.useCallback((day: Date) => {
     setSelectedDate(day);
     onDateClick?.(day);
     scrollToDay(format(day, "yyyy-MM-dd"));
   }, [onDateClick, scrollToDay]);
 
-  // Corrigido: Removido `shadow-2xl` e altura baseada em dvh para evitar problemas com header
   return (
     <div className={cn("flex flex-col lg:grid lg:grid-cols-[1fr_400px] gap-0 backdrop-blur-xl border border-white/5 rounded-md overflow-hidden h-[85dvh] lg:h-[85dvh]", className)}>
       <div className="flex flex-col border-r border-foreground/10 bg-card/50 sticky top-0 lg:relative z-20">

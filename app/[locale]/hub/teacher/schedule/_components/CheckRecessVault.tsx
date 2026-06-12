@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   Vault, VaultContent, VaultHeader, VaultTitle, VaultDescription,
-  VaultBody, VaultFooter, VaultSecondaryButton, VaultIcon,
+  VaultBody, VaultIcon,
   VaultTrigger
 } from "@/components/ui/vault";
 import { format } from "date-fns";
@@ -19,6 +19,7 @@ import { useTranslations } from "next-intl";
 
 interface CheckRecessVaultProps {
   teacherId: string;
+  iconOnly?: boolean;
 }
 
 const MOCK_RECESSES: RecessRequest[] = [
@@ -109,9 +110,8 @@ function RecessList({ recesses }: { recesses: RecessRequest[] }) {
   );
 }
 
-export function CheckRecessVault({ teacherId }: CheckRecessVaultProps) {
+export function CheckRecessVault({ teacherId, iconOnly }: CheckRecessVaultProps) {
   const t = useTranslations("Recess");
-  const tCommon = useTranslations("Common");
   const [isOpen, setIsOpen] = useState(false);
 
   const { data: recesses, isLoading } = useSWR(
@@ -122,10 +122,21 @@ export function CheckRecessVault({ teacherId }: CheckRecessVaultProps) {
   return (
     <Vault open={isOpen} onOpenChange={setIsOpen}>
       <VaultTrigger asChild>
-        <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5">
-          <Calendar className="w-4 h-4 mr-2 text-primary" />
-          {t('checkRecesses') || "Conferir Recessos"}
-        </Button>
+        {iconOnly ? (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-10 w-10 text-muted-foreground hover:text-foreground"
+          >
+            <Calendar className="w-5 h-5 text-primary" />
+            <span className="sr-only">{t('checkRecesses') || "Conferir Recessos"}</span>
+          </Button>
+        ) : (
+          <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5">
+            <Calendar className="w-4 h-4 mr-2 text-primary" />
+            {t('checkRecesses') || "Conferir Recessos"}
+          </Button>
+        )}
       </VaultTrigger>
 
       <VaultContent className="sm:max-w-lg">
@@ -143,9 +154,6 @@ export function CheckRecessVault({ teacherId }: CheckRecessVaultProps) {
           </Shimmer>
         </VaultBody>
 
-        <VaultFooter>
-          <VaultSecondaryButton onClick={() => setIsOpen(false)}>{tCommon('close') || "Fechar"}</VaultSecondaryButton>
-        </VaultFooter>
       </VaultContent>
     </Vault>
   );
