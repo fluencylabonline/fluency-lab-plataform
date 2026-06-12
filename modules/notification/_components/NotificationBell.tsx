@@ -15,7 +15,11 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import { useParams } from "next/navigation";
-import { markNotificationAsReadAction } from "../notification.actions";
+import {
+  markNotificationAsReadAction,
+  markAllNotificationsAsReadAction,
+  clearNotificationsAction,
+} from "../notification.actions";
 import { notify } from "@/components/ui/toaster";
 
 export function NotificationBell() {
@@ -29,8 +33,33 @@ export function NotificationBell() {
     const result = await markNotificationAsReadAction({ id });
     if (result?.data?.success) {
       mutate();
+      notify.success("Notificação marcada como lida");
     } else {
       notify.error("Erro ao marcar como lida");
+    }
+  };
+
+  const handleMarkAllAsRead = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const result = await markAllNotificationsAsReadAction();
+    if (result?.data?.success) {
+      mutate();
+      notify.success("Todas as notificações foram marcadas como lidas");
+    } else {
+      notify.error("Erro ao marcar todas como lidas");
+    }
+  };
+
+  const handleClearAll = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const result = await clearNotificationsAction();
+    if (result?.data?.success) {
+      mutate();
+      notify.success("Todas as notificações foram limpas");
+    } else {
+      notify.error("Erro ao limpar notificações");
     }
   };
 
@@ -47,13 +76,31 @@ export function NotificationBell() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel className="flex items-center justify-between">
-          <span>Notificações</span>
-          {unreadCount > 0 && (
-            <span className="text-xs font-normal text-muted-foreground">
-              {unreadCount} novas
-            </span>
-          )}
+        <DropdownMenuLabel className="flex flex-col gap-1.5 pb-2">
+          <div className="flex items-center justify-between">
+            <span className="font-bold">Notificações</span>
+            {unreadCount > 0 && (
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                {unreadCount} novas
+              </span>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-2 text-xs font-normal mt-1">
+            <button
+              onClick={handleMarkAllAsRead}
+              disabled={unreadCount === 0}
+              className="text-muted-foreground hover:text-primary transition-colors text-[10px] font-black uppercase tracking-wider disabled:opacity-40 disabled:hover:text-muted-foreground"
+            >
+              Lidas
+            </button>
+            <button
+              onClick={handleClearAll}
+              disabled={!notifications || notifications.length === 0}
+              className="text-muted-foreground hover:text-destructive transition-colors text-[10px] font-black uppercase tracking-wider disabled:opacity-40 disabled:hover:text-muted-foreground"
+            >
+              Limpar todas
+            </button>
+          </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <div className="max-h-[400px] overflow-y-auto">

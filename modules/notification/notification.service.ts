@@ -81,6 +81,14 @@ export const notificationService = {
     return notificationRepository.markAsRead(id, userId);
   },
 
+  async markAllAsRead(userId: string) {
+    return notificationRepository.markAllAsRead(userId);
+  },
+
+  async clearAll(userId: string) {
+    return notificationRepository.clearAll(userId);
+  },
+
   async getGlobalHistory() {
     return notificationRepository.findGlobalHistory();
   },

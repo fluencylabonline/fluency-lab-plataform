@@ -47,3 +47,19 @@ export const getGlobalHistoryAction = adminAction
   .action(async () => {
     return await notificationService.getGlobalHistory();
   });
+
+export const markAllNotificationsAsReadAction = protectedAction
+  .metadata({ name: "markAllNotificationsAsReadAction" })
+  .action(async ({ ctx }) => {
+    await notificationService.markAllAsRead(ctx.user.id);
+    revalidatePath("/hub");
+    return { success: true };
+  });
+
+export const clearNotificationsAction = protectedAction
+  .metadata({ name: "clearNotificationsAction" })
+  .action(async ({ ctx }) => {
+    await notificationService.clearAll(ctx.user.id);
+    revalidatePath("/hub");
+    return { success: true };
+  });

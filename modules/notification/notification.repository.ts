@@ -102,4 +102,17 @@ export const notificationRepository = {
       .orderBy((notifications) => [desc(notifications.createdAt)])
       .limit(limit);
   },
+
+  async markAllAsRead(userId: string) {
+    return db
+      .update(notificationsTable)
+      .set({ isRead: true })
+      .where(eq(notificationsTable.userId, userId));
+  },
+
+  async clearAll(userId: string) {
+    return db
+      .delete(notificationsTable)
+      .where(eq(notificationsTable.userId, userId));
+  },
 };
