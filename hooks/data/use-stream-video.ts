@@ -58,6 +58,7 @@ export function useStreamVideo(
               transcription: {
                 mode: "auto-on",
                 closed_caption_mode: "available",
+                language: "auto",
               },
             },
           },
