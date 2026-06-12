@@ -142,7 +142,7 @@ export const schedulingService = {
     if (isAfter(horizon, maxHorizon)) horizon = maxHorizon;
     if (isBefore(horizon, minHorizon)) horizon = minHorizon;
 
-    const startAllocationFrom = student.classesStartDate && isAfter(new Date(student.classesStartDate), now)
+    const startAllocationFrom = student.classesStartDate
       ? new Date(student.classesStartDate)
       : now;
 
@@ -241,18 +241,20 @@ export const schedulingService = {
     if (!rule) throw new Error("Rule not found");
 
     const now = new Date();
-    const localMidnightOfToday = getLocalMidnight(now);
+    const alignThreshold = startAllocationFrom ? getLocalMidnight(startAllocationFrom) : getLocalMidnight(now);
     let current = getLocalMidnight(new Date(rule.startDate));
     let generatedCount = 0;
 
-    if (isBefore(current, localMidnightOfToday) && rule.frequency !== "NONE") {
-      while (isBefore(current, localMidnightOfToday)) {
+    if (isBefore(current, alignThreshold) && rule.frequency !== "NONE") {
+      while (isBefore(current, alignThreshold)) {
         if (rule.frequency === "WEEKLY") current = addWeeks(current, 1);
         else if (rule.frequency === "BIWEEKLY") current = addWeeks(current, 2);
         else if (rule.frequency === "MONTHLY") current = addMonths(current, 1);
         else break;
       }
     }
+
+    const startGenerationThreshold = startAllocationFrom || now;
 
     while (!isAfter(current, horizon)) {
       const [startHour, startMin] = rule.startTime.split(":").map(Number);
@@ -262,7 +264,7 @@ export const schedulingService = {
       const startAt = localToUtc(parts.year, parts.month, parts.day, startHour, startMin);
       const endAt = localToUtc(parts.year, parts.month, parts.day, endHour, endMin);
 
-      if (isAfter(startAt, now)) {
+      if (!isBefore(startAt, startGenerationThreshold)) {
         if (!isRecessPeriod(startAt)) {
           const exists = await schedulingRepository.findSlotByRuleAndDate(ruleId, startAt, dbClient);
           const conflict = await schedulingRepository.findOverlappingSlot(rule.teacherId, startAt, endAt, undefined, dbClient);
