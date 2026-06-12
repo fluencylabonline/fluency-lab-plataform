@@ -25,6 +25,7 @@ export const notebooksTable = pgTable("notebooks", {
     .notNull()
     .defaultNow()
     .$onUpdate(() => new Date()),
+  deletedAt: timestamp("deleted_at"),
 });
 
 export const notebookSessionsTable = pgTable("notebook_sessions", {

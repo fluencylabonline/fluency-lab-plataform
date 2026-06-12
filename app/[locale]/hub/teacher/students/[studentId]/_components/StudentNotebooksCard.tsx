@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, CloudDownload, BookOpen } from "lucide-react";
+import { Plus, CloudDownload, BookOpen, Trash2 } from "lucide-react";
+import { Shimmer } from "@shimmer-from-structure/react";
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/ui/search-bar";
 import { EmptyResults } from "@/components/ui/empty";
@@ -26,6 +27,7 @@ import { cn } from "@/lib/utils";
 import {
   createNotebookAction,
   getNotebookAction,
+  deleteNotebookAction,
 } from "@/modules/notebook/notebook.actions";
 import type { Notebook } from "@/modules/notebook/notebook.schema";
 import { generateNotebookPDF } from "@/lib/pdfGenerator";
@@ -50,10 +52,41 @@ export function StudentNotebooksCard({
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isVaultOpen, setIsVaultOpen] = useState(false);
+  const [isDeleteVaultOpen, setIsDeleteVaultOpen] = useState(false);
+  const [notebookToDelete, setNotebookToDelete] = useState<Notebook | null>(null);
   const [newNotebookTitle, setNewNotebookTitle] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
   const [notebooks, setNotebooks] = useState<Notebook[]>(initialNotebooks);
+
+  const handleDeleteNotebook = async () => {
+    if (!notebookToDelete) return;
+    setIsDeleting(notebookToDelete.id);
+    setIsDeleteVaultOpen(false);
+
+    try {
+      const result = await deleteNotebookAction({
+        notebookId: notebookToDelete.id,
+      });
+
+      if (result?.serverError || !result?.data?.success) {
+        notify.error(
+          result?.serverError || t("errorDeleted") || "Erro ao deletar notebook.",
+        );
+        return;
+      }
+
+      setNotebooks((prev) => prev.filter((nb) => nb.id !== notebookToDelete.id));
+      notify.success(t("successDeleted") || "Notebook excluído com sucesso!");
+    } catch (error) {
+      console.error("[handleDeleteNotebook] Error:", error);
+      notify.error(t("errorDeleted") || "Erro ao deletar notebook.");
+    } finally {
+      setIsDeleting(null);
+      setNotebookToDelete(null);
+    }
+  };
 
   const notebooksWithPlainText = useMemo(() => {
     return notebooks.map((nb) => ({
@@ -75,27 +108,34 @@ export function StudentNotebooksCard({
   const handleCreateNotebook = async () => {
     if (!newNotebookTitle.trim()) return;
     setIsLoading(true);
-
-    const result = await createNotebookAction({
-      title: newNotebookTitle,
-      studentId,
-    });
-
-    setIsLoading(false);
-
-    if (result?.serverError || !result?.data?.notebook) {
-      notify.error(
-        result?.serverError || t("errorCreated") || "Erro ao criar notebook.",
-      );
-      return;
-    }
-
-    const created = result.data.notebook;
-    setNotebooks((prev) => [created, ...prev]);
-    setNewNotebookTitle("");
     setIsVaultOpen(false);
-    notify.success(t("successCreated") || "Notebook criado com sucesso!");
-    router.push(`/${locale}/notebook/${created.id}`);
+
+    try {
+      const result = await createNotebookAction({
+        title: newNotebookTitle,
+        studentId,
+      });
+
+      if (result?.serverError || !result?.data?.notebook) {
+        notify.error(
+          result?.serverError || t("errorCreated") || "Erro ao criar notebook.",
+        );
+        setNewNotebookTitle("");
+        return;
+      }
+
+      const created = result.data.notebook;
+      setNotebooks((prev) => [created, ...prev]);
+      setNewNotebookTitle("");
+      notify.success(t("successCreated") || "Notebook criado com sucesso!");
+      router.push(`/${locale}/notebook/${created.id}`);
+    } catch (error) {
+      console.error("[handleCreateNotebook] Error:", error);
+      notify.error(t("errorCreated") || "Erro ao criar notebook.");
+      setNewNotebookTitle("");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDownloadPDF = async (notebookId: string) => {
@@ -177,7 +217,30 @@ export function StudentNotebooksCard({
       {/* List Area */}
       <div className="flex-1 overflow-y-auto scrollbar-hide px-0 pb-4">
         <div className="space-y-2 pr-1">
-          {filteredNotebooks.length === 0 ? (
+          {isLoading && (
+            <Shimmer loading={true}>
+              <div className="item flex items-center justify-between p-4 group">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-sm truncate text-primary/70">
+                    {newNotebookTitle || "Novo Notebook"}
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    {new Date().toLocaleDateString(locale === "pt" ? "pt-BR" : "en-US")}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 ml-2">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground" disabled>
+                    <CloudDownload className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground" disabled>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </Shimmer>
+          )}
+
+          {filteredNotebooks.length === 0 && !isLoading ? (
             <EmptyResults
               searchQuery={searchQuery}
               customMessage={{
@@ -195,46 +258,62 @@ export function StudentNotebooksCard({
                   new Date(a.createdAt).getTime(),
               )
               .map((notebook) => (
-                <div
+                <Shimmer
                   key={notebook.id}
-                  className="item flex items-center justify-between p-4 group"
+                  loading={isDeleting === notebook.id}
                 >
-                  <Link
-                    href={`/${locale}/notebook/${notebook.id}`}
-                    className="flex-1 min-w-0"
+                  <div
+                    className="item flex items-center justify-between p-4 group"
                   >
-                    <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
-                      {highlightText(notebook.title, searchQuery)}
-                    </h3>
-                    {searchQuery.trim() && notebook.content && stripHtml(notebook.content).toLowerCase().includes(searchQuery.toLowerCase()) && (
-                      <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2 bg-muted/40 p-1.5 rounded border border-border/45 font-normal select-none">
-                        {highlightText(getContentSnippet(notebook.content, searchQuery), searchQuery)}
-                      </p>
-                    )}
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      {new Date(notebook.createdAt).toLocaleDateString(
-                        locale === "pt" ? "pt-BR" : "en-US",
-                      )}
-                    </p>
-                  </Link>
-
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5"
-                      disabled={isDownloading === notebook.id}
-                      onClick={() => handleDownloadPDF(notebook.id)}
+                    <Link
+                      href={`/${locale}/notebook/${notebook.id}`}
+                      className="flex-1 min-w-0"
                     >
-                      <CloudDownload
-                        className={cn(
-                          "h-4 w-4",
-                          isDownloading === notebook.id && "animate-pulse",
+                      <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
+                        {highlightText(notebook.title, searchQuery)}
+                      </h3>
+                      {searchQuery.trim() && notebook.content && stripHtml(notebook.content).toLowerCase().includes(searchQuery.toLowerCase()) && (
+                        <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2 bg-muted/40 p-1.5 rounded border border-border/45 font-normal select-none">
+                          {highlightText(getContentSnippet(notebook.content, searchQuery), searchQuery)}
+                        </p>
+                      )}
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        {new Date(notebook.createdAt).toLocaleDateString(
+                          locale === "pt" ? "pt-BR" : "en-US",
                         )}
-                      />
-                    </Button>
+                      </p>
+                    </Link>
+
+                    <div className="flex items-center gap-2 ml-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5"
+                        disabled={isDownloading === notebook.id || isDeleting === notebook.id}
+                        onClick={() => handleDownloadPDF(notebook.id)}
+                      >
+                        <CloudDownload
+                          className={cn(
+                            "h-4 w-4",
+                            isDownloading === notebook.id && "animate-pulse",
+                          )}
+                        />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/5"
+                        disabled={isLoading || isDeleting === notebook.id}
+                        onClick={() => {
+                          setNotebookToDelete(notebook);
+                          setIsDeleteVaultOpen(true);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                </Shimmer>
               ))
           )}
         </div>
@@ -282,6 +361,31 @@ export function StudentNotebooksCard({
               {isLoading
                 ? t("creating") || "Criando..."
                 : t("create") || "Criar"}
+            </VaultPrimaryButton>
+          </VaultFooter>
+        </VaultContent>
+      </Vault>
+
+      {/* Delete Confirmation Vault */}
+      <Vault open={isDeleteVaultOpen} onOpenChange={setIsDeleteVaultOpen}>
+        <VaultContent>
+          <VaultHeader>
+            <VaultIcon type="warning" />
+            <VaultTitle>{t("deleteConfirm") || "Mover para a lixeira"}</VaultTitle>
+            <VaultDescription>
+              {t("deleteWarning") || "Tem certeza que deseja mover este notebook para a lixeira? Ele será excluído permanentemente após 60 dias."}
+            </VaultDescription>
+          </VaultHeader>
+
+          <VaultFooter>
+            <VaultSecondaryButton onClick={() => setIsDeleteVaultOpen(false)}>
+              {t("cancel") || "Cancelar"}
+            </VaultSecondaryButton>
+            <VaultPrimaryButton
+              variant="destructive"
+              onClick={handleDeleteNotebook}
+            >
+              {t("delete") || "Excluir"}
             </VaultPrimaryButton>
           </VaultFooter>
         </VaultContent>

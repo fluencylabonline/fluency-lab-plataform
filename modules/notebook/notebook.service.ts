@@ -78,7 +78,7 @@ export const notebookService = {
   },
 
   /**
-   * Deletes a notebook. Marks all associated assets for cleanup.
+   * Deletes a notebook (soft delete).
    */
   async deleteNotebook(
     requesterId: string,
@@ -96,13 +96,70 @@ export const notebookService = {
       throw new Error("Unauthorized");
     }
 
-    // Mark all assets for cleanup before deleting notebook record
-    const assets = await notebookRepository.getNotebookAssets(notebookId);
-    for (const asset of assets) {
-      await notebookRepository.markAssetAsDeleted(asset.filePath);
+    await notebookRepository.softDelete(notebookId);
+  },
+
+  /**
+   * Final cleanup for soft-deleted notebooks.
+   * Deletes the notebook, sessions, and files from Firebase Storage, Firestore, RTDB.
+   * This is called by a CRON job for notebooks deleted > 60 days.
+   */
+  async cleanupExpiredNotebooks() {
+    const THRESHOLD_DAYS = 60;
+    const thresholdDate = new Date();
+    thresholdDate.setDate(thresholdDate.getDate() - THRESHOLD_DAYS);
+
+    const expiredNotebooks = await notebookRepository.getExpiredNotebooks(thresholdDate);
+    const bucket = adminStorage.bucket();
+
+    const results = {
+      total: expiredNotebooks.length,
+      deleted: 0,
+      errors: 0,
+    };
+
+    for (const notebook of expiredNotebooks) {
+      try {
+        // 1. Delete associated Firebase Storage files
+        const assets = await notebookRepository.getNotebookAssets(notebook.id);
+        for (const asset of assets) {
+          try {
+            const file = bucket.file(asset.filePath);
+            const [exists] = await file.exists();
+            if (exists) {
+              await file.delete();
+            }
+          } catch (storageErr) {
+            console.error(`[cleanupExpiredNotebooks] Storage delete failed for ${asset.filePath}:`, storageErr);
+          }
+        }
+
+        // 2. Delete Firestore record
+        try {
+          const { adminDb } = await import("@/lib/firebase-admin");
+          await adminDb.collection("Notebooks").doc(notebook.id).delete();
+        } catch (firestoreErr) {
+          console.error(`[cleanupExpiredNotebooks] Firestore delete failed for notebook ${notebook.id}:`, firestoreErr);
+        }
+
+        // 3. Delete RTDB path
+        try {
+          const { adminRtdb } = await import("@/lib/firebase-admin");
+          await adminRtdb.ref(`notebooks/${notebook.id}`).remove();
+        } catch (rtdbErr) {
+          console.error(`[cleanupExpiredNotebooks] RTDB delete failed for notebook ${notebook.id}:`, rtdbErr);
+        }
+
+        // 4. Delete the notebook record in PostgreSQL. Cascade will delete related DB records.
+        await notebookRepository.delete(notebook.id);
+        results.deleted++;
+      } catch (err) {
+        console.error(`[cleanupExpiredNotebooks] Failed to completely clean up notebook ${notebook.id}:`, err);
+        results.errors++;
+      }
     }
 
-    await notebookRepository.delete(notebookId);
+    return results;
   },
 
   // --- Session Tracking ---

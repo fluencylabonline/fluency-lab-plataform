@@ -1574,7 +1574,12 @@
     "successCreated": "Notebook created successfully!",
     "successDownload": "Starting PDF download...",
     "successTask": "Task added to plan!",
-    "title": "Notebooks"
+    "title": "Notebooks",
+    "delete": "Delete",
+    "deleteConfirm": "Move to Trash",
+    "deleteWarning": "Are you sure you want to move this notebook to the trash? It will be permanently deleted after 60 days.",
+    "successDeleted": "Notebook moved to trash!",
+    "errorDeleted": "Error deleting notebook."
   },
   "Notification": {
     "validation": {

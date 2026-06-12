@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout/header";
 import { EmptyResults } from "@/components/ui/empty";
 import { StudentCard, type StudentWithNextClass } from "./StudentCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { containerVariants, itemVariants } from "@/lib/animations";
+import { HelpCircle } from "lucide-react";
+import { TeacherStudentsWizard } from "./TeacherStudentsWizard";
 
 interface StudentsListProps {
   initialData: StudentWithNextClass[];
@@ -23,6 +25,21 @@ interface StudentsListProps {
 export function StudentsList({ initialData, user, title, subtitle }: StudentsListProps) {
   const t = useTranslations("MyStudentsPage");
   const [search, setSearch] = useState("");
+  const [wizardOpen, setWizardOpen] = useState(false);
+
+  useEffect(() => {
+    const hasSeen = localStorage.getItem("teacher-students-wizard-seen");
+    if (!hasSeen) {
+      const timer = setTimeout(() => {
+        setWizardOpen(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleCompleteWizard = () => {
+    localStorage.setItem("teacher-students-wizard-seen", "true");
+  };
 
   const filteredStudents = useMemo(() => {
     if (!search) return initialData;
@@ -42,6 +59,18 @@ export function StudentsList({ initialData, user, title, subtitle }: StudentsLis
         user={user}
         onSearchChange={setSearch}
         className="contents"
+        actions={[
+          {
+            label: "Ajuda",
+            icon: <HelpCircle className="w-4 h-4" />,
+            onClick: () => setWizardOpen(true),
+          },
+        ]}
+      />
+      <TeacherStudentsWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        onComplete={handleCompleteWizard}
       />
 
       <main className="container">

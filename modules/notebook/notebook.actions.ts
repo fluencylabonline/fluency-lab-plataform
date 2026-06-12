@@ -205,3 +205,18 @@ export const getQuizLimitCountAction = protectedAction
     return { count };
   });
 
+/**
+ * Soft deletes a notebook.
+ */
+export const deleteNotebookAction = protectedAction
+  .schema(z.object({ notebookId: z.string().uuid() }))
+  .metadata({ name: "deleteNotebookAction" })
+  .action(async ({ parsedInput, ctx }) => {
+    const { user } = ctx;
+    const notebook = await notebookService.getNotebook(user.id, user.role, parsedInput.notebookId);
+    await notebookService.deleteNotebook(user.id, user.role, parsedInput.notebookId);
+    
+    revalidatePath(`/hub/teacher/students/${notebook.studentId}`);
+    return { success: true };
+  });
+

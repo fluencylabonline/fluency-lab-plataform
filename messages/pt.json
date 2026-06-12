@@ -1574,7 +1574,12 @@
     "successCreated": "Notebook criado com sucesso!",
     "successDownload": "Iniciando download do PDF...",
     "successTask": "Tarefa adicionada ao plano!",
-    "title": "Notebooks"
+    "title": "Notebooks",
+    "delete": "Excluir",
+    "deleteConfirm": "Mover para a lixeira",
+    "deleteWarning": "Tem certeza que deseja mover este notebook para a lixeira? Ele será excluído permanentemente após 60 dias.",
+    "successDeleted": "Notebook movido para a lixeira!",
+    "errorDeleted": "Erro ao excluir o notebook."
   },
   "Notification": {
     "validation": {

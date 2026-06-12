@@ -71,6 +71,13 @@
       "when": 1781227503526,
       "tag": "0009_medical_rage",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1781290284633,
+      "tag": "0010_soft_quasimodo",
+      "breakpoints": true
     }
   ]
 }

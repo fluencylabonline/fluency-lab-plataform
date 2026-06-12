@@ -1,23 +1,27 @@
 import { db } from "@/lib/db";
 import { notebooksTable, notebookSessionsTable, notebookAssetsTable, notebookQuizLimitsTable } from "./notebook.schema";
-import { eq, and, lte } from "drizzle-orm";
+import { eq, and, lte, isNull } from "drizzle-orm";
 
 export const notebookRepository = {
   async findById(id: string) {
     return db.query.notebooksTable.findFirst({
-      where: eq(notebooksTable.id, id),
+      where: and(eq(notebooksTable.id, id), isNull(notebooksTable.deletedAt)),
     });
   },
 
   async findAll() {
     return db.query.notebooksTable.findMany({
+      where: isNull(notebooksTable.deletedAt),
       orderBy: (t, { desc }) => [desc(t.createdAt)],
     });
   },
 
   async findByStudent(studentId: string) {
     return db.query.notebooksTable.findMany({
-      where: eq(notebooksTable.studentId, studentId),
+      where: and(
+        eq(notebooksTable.studentId, studentId),
+        isNull(notebooksTable.deletedAt)
+      ),
       orderBy: (t, { desc }) => [desc(t.createdAt)],
     });
   },
@@ -26,7 +30,8 @@ export const notebookRepository = {
     return db.query.notebooksTable.findMany({
       where: and(
         eq(notebooksTable.studentId, studentId),
-        eq(notebooksTable.teacherId, teacherId)
+        eq(notebooksTable.teacherId, teacherId),
+        isNull(notebooksTable.deletedAt)
       ),
       orderBy: (t, { desc }) => [desc(t.createdAt)],
     });
@@ -42,6 +47,19 @@ export const notebookRepository = {
       .values(data)
       .returning();
     return notebook;
+  },
+
+  async softDelete(id: string) {
+    await db
+      .update(notebooksTable)
+      .set({ deletedAt: new Date() })
+      .where(eq(notebooksTable.id, id));
+  },
+
+  async getExpiredNotebooks(thresholdDate: Date) {
+    return db.query.notebooksTable.findMany({
+      where: lte(notebooksTable.deletedAt, thresholdDate),
+    });
   },
 
   async delete(id: string) {

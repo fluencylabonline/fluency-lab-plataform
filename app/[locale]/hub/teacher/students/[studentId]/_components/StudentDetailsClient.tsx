@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/header";
 import { SlotInstanceWithDetails } from "@/modules/scheduling/scheduling.types";
 import { StudentRoadmap } from "@/modules/learning/learning.types";
 import {
   Goal,
   Notebook as NotebookIcon,
+  HelpCircle,
 } from "lucide-react";
 import {
   Vault,
@@ -21,6 +22,7 @@ import { StudentPlanCard } from "./StudentPlanCard";
 import { StudentClassesCard } from "./StudentClassesCard";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { Notebook } from "@/modules/notebook/notebook.schema";
+import { StudentDetailsWizard } from "./StudentDetailsWizard";
 
 interface StudentDetailsClientProps {
   studentId: string;
@@ -39,18 +41,36 @@ export function StudentDetailsClient({
 }: StudentDetailsClientProps) {
   const [isNotebooksOpen, setIsNotebooksOpen] = useState(false);
   const [isPlanOpen, setIsPlanOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const isTabletSize = useIsBreakpoint("max", 1024);
 
-  // Botões de ação para o Header (Apenas Tablet e Mobile)
+  useEffect(() => {
+    const hasSeen = localStorage.getItem("teacher-student-detail-wizard-seen");
+    if (!hasSeen) {
+      const timer = setTimeout(() => {
+        setIsHelpOpen(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleCompleteWizard = () => {
+    localStorage.setItem("teacher-student-detail-wizard-seen", "true");
+  };
+
+  // Botões de ação para o Header
   const headerActions = [
     {
-      id: "notebooks",
+      icon: <HelpCircle className="h-5 w-5" />,
+      onClick: () => setIsHelpOpen(true),
+      label: "Ajuda",
+    },
+    {
       icon: <NotebookIcon className="h-5 w-5" />,
       onClick: () => setIsNotebooksOpen(true),
       className: "lg:hidden" // Esconde no desktop e mostra no tablet
     },
     {
-      id: "plan",
       icon: <Goal className="h-5 w-5" />,
       onClick: () => setIsPlanOpen(true),
       className: "lg:hidden" // Esconde no desktop e mostra no tablet
@@ -141,6 +161,12 @@ export function StudentDetailsClient({
           </VaultBody>
         </VaultContent>
       </Vault>
+
+      <StudentDetailsWizard
+        open={isHelpOpen}
+        onOpenChange={setIsHelpOpen}
+        onComplete={handleCompleteWizard}
+      />
     </div>
   );
 }
