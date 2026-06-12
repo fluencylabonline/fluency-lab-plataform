@@ -80,11 +80,19 @@ export const leaveCallSchema = z.object({
   studentId: z.string().min(1, "Student ID is required"),
 });
 
+/**
+ * Schema for manually syncing call transcriptions.
+ */
+export const syncCallTranscriptionSchema = z.object({
+  streamCallId: z.string().min(1, "Stream Call ID is required"),
+});
+
 // --- Types ---
 export type StartCallValues = z.input<typeof startCallSchema>;
 export type EndCallValues = z.input<typeof endCallSchema>;
 export type GenerateStreamTokenValues = z.input<typeof generateStreamTokenSchema>;
 export type LeaveCallValues = z.input<typeof leaveCallSchema>;
+export type SyncCallTranscriptionValues = z.input<typeof syncCallTranscriptionSchema>;
 
 export type CallSession = typeof callSessionsTable.$inferSelect;
 export type NewCallSession = typeof callSessionsTable.$inferInsert;

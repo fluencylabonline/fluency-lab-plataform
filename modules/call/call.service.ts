@@ -99,16 +99,71 @@ async function generateStreamToken(userId: string): Promise<string> {
 }
 
 /**
+ * Parses GetStream JSONL transcription text into human-readable formatted dialogue.
+ */
+function parseStreamTranscriptionJsonl(
+  rawText: string,
+  studentId: string,
+  teacherId: string
+): string {
+  try {
+    const lines = rawText.trim().split("\n");
+    const formattedLines = lines
+      .map((line) => {
+        if (!line.trim()) return "";
+        try {
+          const parsed = JSON.parse(line);
+          const text = parsed.text || parsed.alternative?.transcript || "";
+          if (text) {
+            const rawUserId = parsed.speaker_id || parsed.user_id || parsed.user?.id;
+            let speaker = "Sistema";
+            if (rawUserId) {
+              if (rawUserId === studentId) {
+                speaker = "Aluno";
+              } else if (rawUserId === teacherId) {
+                speaker = "Professor";
+              } else {
+                speaker = rawUserId;
+              }
+            }
+            return `[${speaker}]: ${text}`;
+          }
+        } catch (e) {
+          console.error("[callService] Error parsing transcription line:", e);
+        }
+        return "";
+      })
+      .filter(Boolean);
+
+    return formattedLines.join("\n");
+  } catch (error) {
+    console.error("[callService] Failed to parse transcription:", error);
+    return rawText;
+  }
+}
+
+/**
  * Handle incoming transcription from Stream Webhook.
  */
 async function handleTranscriptionWebhook(streamCallId: string, transcriptionUrl: string) {
   // Fetch transcription text from the provided URL
   try {
+    const session = await callRepository.findByStreamId(streamCallId);
+    if (!session) {
+      throw new Error(`Call session ${streamCallId} not found in database`);
+    }
+
     const response = await fetch(transcriptionUrl);
-    const transcription = await response.text();
+    const rawText = await response.text();
+
+    const formattedTranscription = parseStreamTranscriptionJsonl(
+      rawText,
+      session.studentId,
+      session.teacherId
+    );
 
     await callRepository.update(streamCallId, {
-      transcription,
+      transcription: formattedTranscription,
       transcriptionStatus: "available",
     });
   } catch (error) {
@@ -117,6 +172,46 @@ async function handleTranscriptionWebhook(streamCallId: string, transcriptionUrl
       transcriptionStatus: "failed",
     });
   }
+}
+
+/**
+ * Manually syncs and retrieves call transcriptions from GetStream.
+ */
+async function syncCallTranscription(streamCallId: string): Promise<boolean> {
+  const session = await callRepository.findByStreamId(streamCallId);
+  if (!session) {
+    throw new Error("Call session not found in database");
+  }
+
+  const client = new StreamClient(env.NEXT_PUBLIC_STREAM_API_KEY, env.STREAM_SECRET);
+  const call = client.video.call("default", streamCallId);
+  const res = await call.listTranscriptions();
+
+  if (!res.transcriptions || res.transcriptions.length === 0) {
+    return false;
+  }
+
+  const transcriptionInfo = res.transcriptions[0];
+  const transcriptionUrl = transcriptionInfo.url;
+
+  const response = await fetch(transcriptionUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to download transcription: ${response.statusText}`);
+  }
+  const rawText = await response.text();
+
+  const formattedTranscription = parseStreamTranscriptionJsonl(
+    rawText,
+    session.studentId,
+    session.teacherId
+  );
+
+  await callRepository.update(streamCallId, {
+    transcription: formattedTranscription,
+    transcriptionStatus: "available",
+  });
+
+  return true;
 }
 
 /**
@@ -132,6 +227,7 @@ export const callService = {
   studentLeaveCall,
   generateStreamToken,
   handleTranscriptionWebhook,
+  syncCallTranscription,
   getStudentCallHistory,
   getCallByStreamId: async (streamCallId: string) => callRepository.findByStreamId(streamCallId),
 };

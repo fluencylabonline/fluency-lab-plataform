@@ -21,9 +21,15 @@ export async function POST(req: Request) {
     .update(rawBody)
     .digest("hex");
 
+  const sigLower = signature.toLowerCase();
+  const expectedSigLower = expectedSignature.toLowerCase();
+
+  const sigBuffer = Buffer.from(sigLower);
+  const expectedBuffer = Buffer.from(expectedSigLower);
+
   if (
-    signature.length !== expectedSignature.length ||
-    !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
+    sigBuffer.length !== expectedBuffer.length ||
+    !crypto.timingSafeEqual(sigBuffer, expectedBuffer)
   ) {
     console.error("[Stream Webhook] Invalid signature");
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
@@ -36,8 +42,8 @@ export async function POST(req: Request) {
     console.log(`[Stream Webhook] Received event: ${type}`);
 
     if (type === "call.transcription_ready") {
-      // call_cid is in format "default:callId"
-      const streamCallId = call_cid?.split(":")[1];
+      // call_cid is in format "default:callId", but fallback to call.id if missing/unprefixed
+      const streamCallId = (call_cid?.includes(":") ? call_cid.split(":")[1] : call_cid) || body.call?.id;
       const transcriptionUrl = call_transcription?.url;
 
       if (streamCallId && transcriptionUrl) {

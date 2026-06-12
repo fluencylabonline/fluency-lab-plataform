@@ -7,7 +7,9 @@ import {
   endCallSchema,
   generateStreamTokenSchema,
   leaveCallSchema,
+  syncCallTranscriptionSchema,
 } from "./call.schema";
+import { revalidatePath } from "next/cache";
 
 /**
  * startCallAction — Teacher initiates a call from the notebook.
@@ -117,5 +119,35 @@ export const generateStreamTokenAction = protectedAction
     return {
       token,
       apiKey: env.NEXT_PUBLIC_STREAM_API_KEY,
+    };
+  });
+
+/**
+ * syncCallTranscriptionAction — Manually sync and retrieve call transcriptions from GetStream.
+ *
+ * RBAC: Admin and Manager roles only.
+ */
+export const syncCallTranscriptionAction = protectedAction
+  .metadata({ name: "syncCallTranscription" })
+  .schema(syncCallTranscriptionSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const { user } = ctx;
+
+    // RBAC: Only admins or managers can sync transcriptions
+    if (user.role !== "admin" && user.role !== "manager") {
+      throw new Error("Unauthorized");
+    }
+
+    const session = await callService.getCallByStreamId(parsedInput.streamCallId);
+    const success = await callService.syncCallTranscription(parsedInput.streamCallId);
+
+    if (success && session) {
+      revalidatePath(`/hub/admin/users/${session.studentId}`);
+      revalidatePath(`/hub/manager/users/${session.studentId}`);
+    }
+
+    return {
+      success,
+      error: success ? undefined : "Transcrição ainda não disponível no GetStream.",
     };
   });

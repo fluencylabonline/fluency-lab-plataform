@@ -1,9 +1,13 @@
 "use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { format, startOfWeek, endOfWeek, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { CallSession } from "../../../call/call.schema";
-import { Clock, Video, FileText } from "lucide-react";
+import { Clock, Video, FileText, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { notify } from "@/components/ui/toaster";
+import { syncCallTranscriptionAction } from "@/modules/call/call.actions";
 import {
   Vault,
   VaultTrigger,
@@ -21,6 +25,26 @@ interface VideoCallsTabProps {
 }
 
 export function VideoCallsTab({ callHistory }: VideoCallsTabProps) {
+  const [syncingCallId, setSyncingCallId] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleSync = async (streamCallId: string) => {
+    setSyncingCallId(streamCallId);
+    try {
+      const result = await syncCallTranscriptionAction({ streamCallId });
+      if (result?.data?.success) {
+        notify.success("Transcrição sincronizada com sucesso!");
+        router.refresh();
+      } else {
+        notify.error(result?.data?.error || "Transcrição ainda não disponível no GetStream.");
+      }
+    } catch {
+      notify.error("Erro ao sincronizar transcrição.");
+    } finally {
+      setSyncingCallId(null);
+    }
+  };
+
   // Group by Month and then by Week
   const groupedCalls = callHistory.reduce((acc, call) => {
     const date = call.startedAt instanceof Date ? call.startedAt : parseISO(call.startedAt as unknown as string);
@@ -80,9 +104,15 @@ export function VideoCallsTab({ callHistory }: VideoCallsTabProps) {
                           <span className={
                             call.transcriptionStatus === "available"
                               ? "text-green-500 font-medium"
+                              : call.transcriptionStatus === "failed"
+                              ? "text-red-500 font-medium"
                               : "text-amber-500"
                           }>
-                            {call.transcriptionStatus === "available" ? "Disponível" : "Processando..."}
+                            {call.transcriptionStatus === "available"
+                              ? "Disponível"
+                              : call.transcriptionStatus === "failed"
+                              ? "Falhou"
+                              : "Processando..."}
                           </span>
                         </div>
 
@@ -112,7 +142,7 @@ export function VideoCallsTab({ callHistory }: VideoCallsTabProps) {
 
                               <VaultBody>
                                 <div className="p-4 bg-muted/30 rounded-lg max-h-[60vh] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed">
-                                  {call.transcription}
+                                  {call.transcription || "Nenhuma fala detectada na aula."}
                                 </div>
                               </VaultBody>
 
@@ -125,13 +155,23 @@ export function VideoCallsTab({ callHistory }: VideoCallsTabProps) {
                           </Vault>
                         ) : (
                           <Button
-                            disabled
                             variant="outline"
                             size="sm"
-                            className="w-full h-8 text-xs gap-2 opacity-50"
+                            className="w-full h-8 text-xs gap-2"
+                            onClick={() => handleSync(call.streamCallId)}
+                            disabled={syncingCallId === call.streamCallId}
                           >
-                            <Clock className="w-3 h-3 mr-2" />
-                            Aguardando...
+                            {syncingCallId === call.streamCallId ? (
+                              <>
+                                <RefreshCw className="w-3 h-3 animate-spin mr-1" />
+                                Sincronizando...
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="w-3 h-3 mr-1" />
+                                Sincronizar
+                              </>
+                            )}
                           </Button>
                         )}
                       </div>
