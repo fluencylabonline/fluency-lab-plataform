@@ -2969,7 +2969,8 @@
           "description": "Visualize e gerencie seus horários agendados e de reposição.",
           "content1": "O calendário centraliza sua rotina com a FluencyLab:",
           "item1": "<strongNode>Agendamentos Ativos:</strongNode> As datas e horários em azul são suas próximas aulas programadas.",
-          "item2": "<strongNode>Histórico e Status:</strongNode> Aulas concluídas ficam em verde, faltas em amarelo e desmarcações em cinza."
+          "item2": "<strongNode>Histórico e Status:</strongNode> Aulas concluídas ficam em verde, faltas em amarelo e desmarcações em cinza.",
+          "item3": "<strongNode>Remarcar ou Cancelar:</strongNode> Clique sobre a aula agendada (azul) no calendário para abrir os detalhes e escolher se deseja reagendar ou cancelar a aula."
         },
         "credits": {
           "title": "Saldo de Créditos",

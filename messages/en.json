@@ -2970,7 +2970,8 @@
           "description": "View and manage your scheduled and makeup classes.",
           "content1": "The calendar centralizes your routine with FluencyLab:",
           "item1": "<strongNode>Active Bookings:</strongNode> Dates and times in blue represent your next scheduled classes.",
-          "item2": "<strongNode>History & Status:</strongNode> Completed classes are shown in green, no-shows in yellow, and cancellations in gray."
+          "item2": "<strongNode>History & Status:</strongNode> Completed classes are shown in green, no-shows in yellow, and cancellations in gray.",
+          "item3": "<strongNode>Reschedule or Cancel:</strongNode> Click on a scheduled class (blue) in the calendar to open its details and choose to reschedule or cancel it."
         },
         "credits": {
           "title": "Credits Balance",

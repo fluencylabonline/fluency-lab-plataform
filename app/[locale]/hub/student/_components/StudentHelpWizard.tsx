@@ -159,6 +159,10 @@ export function StudentHelpWizard({
                     <div className="size-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
                     <span>{t.rich("schedule.steps.calendar.item2", richStrong)}</span>
                   </li>
+                  <li className="flex gap-2">
+                    <div className="size-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                    <span>{t.rich("schedule.steps.calendar.item3", richStrong)}</span>
+                  </li>
                 </ul>
               </div>
             ),

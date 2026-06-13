@@ -459,7 +459,9 @@ export function CurriculumVaults({
                     {studentRules.map((rule) => (
                       <div key={rule.id} className="flex items-center justify-between p-3 bg-accent/20 rounded-lg border">
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium">{rule.startTime} - {rule.endTime}</span>
+                          <span className="text-sm font-medium">
+                            <span className="capitalize">{format(new Date(rule.startDate), "EEEE", { locale: ptBR })}</span> • {rule.startTime} - {rule.endTime}
+                          </span>
                           <span className="text-xs text-muted-foreground capitalize">Freq: {rule.frequency}</span>
                         </div>
                         <Button
@@ -512,7 +514,9 @@ export function CurriculumVaults({
                             )}
                           >
                             <div className="flex flex-col">
-                              <span className="text-sm font-medium">{rule.startTime} - {rule.endTime}</span>
+                              <span className="text-sm font-medium">
+                                <span className="capitalize">{format(new Date(rule.startDate), "EEEE", { locale: ptBR })}</span> • {rule.startTime} - {rule.endTime}
+                              </span>
                               <span className="text-xs text-muted-foreground">
                                 {teacher?.name || "Professor"} • {rule.frequency}
                               </span>

@@ -3,7 +3,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { CreditCard, Clock, Edit2, AlertCircle, CheckCircle2 } from "lucide-react";
-import { format, endOfMonth } from "date-fns";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,6 +48,25 @@ export function StudentPaymentTab({
 }: StudentPaymentTabProps) {
   const t = useTranslations("UserManagement");
 
+  // Helper to format calendar dates in UTC to avoid local timezone offset shifting the day
+  const formatUTCDate = (dateInput: Date | string) => {
+    try {
+      const d = new Date(dateInput);
+      if (isNaN(d.getTime())) return "—";
+      const day = String(d.getUTCDate()).padStart(2, "0");
+      const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+      const year = d.getUTCFullYear();
+      return `${day}/${month}/${year}`;
+    } catch {
+      return "—";
+    }
+  };
+
+  // Find the next unpaid (pending or overdue) installment to display as the next due date
+  const nextUnpaidInstallment = installments
+    .filter((inst) => inst.status === "pending" || inst.status === "overdue")
+    .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
+
   return (
     <div className="flex flex-col gap-8">
       {/* Subscription block */}
@@ -91,7 +110,7 @@ export function StudentPaymentTab({
             />
             <StatBlock
               label={t("nextDueDate")}
-              value={format(endOfMonth(new Date()), "dd/MM/yyyy")}
+              value={nextUnpaidInstallment ? formatUTCDate(nextUnpaidInstallment.dueDate) : "—"}
             />
             <StatBlock
               label={t("monthlyFee")}
@@ -128,7 +147,7 @@ export function StudentPaymentTab({
                     </p>
                     <p className="text-[10px] font-bold text-muted-foreground flex items-center gap-1.5 mt-1 uppercase tracking-wider">
                       <Clock className="w-3 h-3 shrink-0 opacity-60" />
-                      {format(new Date(inst.dueDate), "dd/MM/yyyy")}
+                      {formatUTCDate(inst.dueDate)}
                     </p>
                   </div>
                 </div>
