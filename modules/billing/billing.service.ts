@@ -852,6 +852,87 @@ export const billingService = {
     const installment = await billingRepository.findInstallmentById(installmentId);
     if (!installment) throw new Error("Parcela não encontrada");
 
+    // Idempotency: skip if already paid to prevent double charges and fees
+    if (installment.status === "paid") {
+      return { success: true };
+    }
+
+    const sub = await billingRepository.findSubscriptionById(installment.subscriptionId);
+    const isUsdPlan = sub?.plan?.currency === "USD";
+    let feeAmount = 0;
+
+    if (isUsdPlan) {
+      const resolvedStripeId = abacatePayBillingId || installment.stripePaymentIntentId;
+      if (resolvedStripeId) {
+        try {
+          if (resolvedStripeId.startsWith("cs_")) {
+            const session = await stripe.checkout.sessions.retrieve(resolvedStripeId);
+            const piId = typeof session.payment_intent === "string" ? session.payment_intent : null;
+            if (piId) {
+              const pi = await stripe.paymentIntents.retrieve(piId);
+              const chargeId = pi.latest_charge;
+              if (chargeId && typeof chargeId === "string") {
+                const charge = await stripe.charges.retrieve(chargeId);
+                if (charge.balance_transaction && typeof charge.balance_transaction === "string") {
+                  const bt = await stripe.balanceTransactions.retrieve(charge.balance_transaction);
+                  feeAmount = bt.fee;
+                }
+              }
+            }
+          } else if (resolvedStripeId.startsWith("pi_")) {
+            const pi = await stripe.paymentIntents.retrieve(resolvedStripeId);
+            const chargeId = pi.latest_charge;
+            if (chargeId && typeof chargeId === "string") {
+              const charge = await stripe.charges.retrieve(chargeId);
+              if (charge.balance_transaction && typeof charge.balance_transaction === "string") {
+                const bt = await stripe.balanceTransactions.retrieve(charge.balance_transaction);
+                feeAmount = bt.fee;
+              }
+            }
+          } else if (resolvedStripeId.startsWith("ch_")) {
+            const charge = await stripe.charges.retrieve(resolvedStripeId);
+            if (charge.balance_transaction && typeof charge.balance_transaction === "string") {
+              const bt = await stripe.balanceTransactions.retrieve(charge.balance_transaction);
+              feeAmount = bt.fee;
+            }
+          }
+        } catch (stripeError) {
+          console.error("[BillingService] Failed to retrieve Stripe fee, falling back to estimate:", stripeError);
+        }
+      }
+
+      if (feeAmount === 0) {
+        // Stripe fallback: 3.9% + 30 cents USD
+        feeAmount = Math.round(installment.amount * 0.039 + 30);
+      }
+    } else {
+      feeAmount = env.ABACATEPAY_TRANSACTION_FEE_CENTS || 80;
+    }
+
+    // Record gateway fee transaction in the finance ledger as an expense
+    try {
+      const { financeService } = await import("../finance/finance.service");
+      const studentName = sub?.student?.name || "Aluno";
+      const planName = sub?.plan?.name || "Plano";
+      const currency = sub?.plan?.currency || "BRL";
+      const description = `Taxa de transação: Mensalidade ${studentName} (${planName} - ${installment.orderIndex}/${sub?.plan?.durationMonths || 1})`;
+
+      await financeService.createTransaction(actor?.id || null, {
+        type: "expense",
+        amount: feeAmount,
+        currency,
+        date: new Date(),
+        description,
+        category: "Taxa do Gateway",
+        method: isUsdPlan ? "credit_card" : "pix",
+        deductible: true,
+        status: "paid",
+      });
+      console.log(`[BillingService] Gateway fee transaction created for installment ${installmentId}: ${feeAmount} cents (${currency})`);
+    } catch (err) {
+      console.error("[BillingService] Failed to create gateway fee transaction:", err);
+    }
+
     await billingRepository.updateInstallment(installmentId, {
       status: "paid",
       paidAt: new Date(),
@@ -874,8 +955,6 @@ export const billingService = {
       newAmount: installment.amount,
       reason: actor ? "Confirmação manual de pagamento pelo admin" : "Pagamento confirmado via Webhook",
     });
-
-    const sub = await billingRepository.findSubscriptionById(installment.subscriptionId);
 
     if (sub) {
       const student = await userService.getUser(sub.studentId);

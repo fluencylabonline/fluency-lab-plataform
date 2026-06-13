@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { and, between, eq } from "drizzle-orm";
 import { slotInstances } from "../scheduling/scheduling.schema";
 import { payoutsTable } from "./payout.schema";
+import { env } from "@/env";
 
 export const payoutService = {
   async getTeacherUnpaidClasses(teacherId: string, month: number, year: number) {
@@ -66,6 +67,27 @@ export const payoutService = {
     });
 
     await payoutRepository.linkClassesToPayout(classes.map(c => c.id), payout.id);
+
+    // Record gateway transfer fee in the finance ledger as an expense
+    try {
+      const { financeService } = await import("../finance/finance.service");
+      const description = `Taxa de transferência: Repasse ${teacher.name} (${month + 1}/${year})`;
+
+      await financeService.createTransaction(null, {
+        type: "expense",
+        amount: env.ABACATEPAY_PAYOUT_FEE_CENTS || 80,
+        currency: "BRL",
+        date: new Date(),
+        description,
+        category: "Taxa do Gateway",
+        method: "pix",
+        deductible: true,
+        status: "paid",
+      });
+      console.log(`[payoutService] Gateway payout fee transaction created: ${env.ABACATEPAY_PAYOUT_FEE_CENTS || 80} cents`);
+    } catch (err) {
+      console.error("[payoutService] Failed to create gateway fee transaction for payout:", err);
+    }
 
     // 4. Send Email Report
     try {

@@ -32,6 +32,8 @@ export const env = createEnv({
     ABACATEPAY_API_KEY: z.string().min(1),
     ABACATEPAY_WEBHOOK_SECRET: z.string().min(1),
     ABACATEPAY_PUBLIC_KEY: z.string().optional(),
+    ABACATEPAY_TRANSACTION_FEE_CENTS: z.coerce.number().int().default(80),
+    ABACATEPAY_PAYOUT_FEE_CENTS: z.coerce.number().int().default(80),
 
     // Stripe
     STRIPE_SECRET_KEY: z.string().optional(),
@@ -96,6 +98,8 @@ export const env = createEnv({
     ABACATEPAY_API_KEY: process.env.ABACATEPAY_API_KEY,
     ABACATEPAY_WEBHOOK_SECRET: process.env.ABACATEPAY_WEBHOOK_SECRET,
     ABACATEPAY_PUBLIC_KEY: process.env.ABACATEPAY_PUBLIC_KEY,
+    ABACATEPAY_TRANSACTION_FEE_CENTS: process.env.ABACATEPAY_TRANSACTION_FEE_CENTS,
+    ABACATEPAY_PAYOUT_FEE_CENTS: process.env.ABACATEPAY_PAYOUT_FEE_CENTS,
 
     // Stripe
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,

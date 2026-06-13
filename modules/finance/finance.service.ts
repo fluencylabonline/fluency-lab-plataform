@@ -171,11 +171,11 @@ export const financeService = {
     return breakdown;
   },
 
-  async createTransaction(userId: string, data: CreateTransactionValues) {
+  async createTransaction(userId: string | null, data: CreateTransactionValues) {
     return financeRepository.createTransaction({
       ...data,
       date: new Date(data.date),
-      createdBy: userId,
+      createdBy: userId || undefined,
     });
   },
 
@@ -382,26 +382,31 @@ export const financeService = {
 
     // Fetch AbacatePay Balance
     if (env.ABACATEPAY_API_KEY) {
-      try {
-        const res = await fetch("https://api.abacatepay.com/v2/store/get", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${env.ABACATEPAY_API_KEY}`,
-          },
-        });
-        if (res.ok) {
-          const result = await res.json();
-          if (result.success && result.data?.balance) {
-            abacateAvailable = result.data.balance.available ?? 0;
-            abacatePending = result.data.balance.pending ?? 0;
-            abacateBlocked = result.data.balance.blocked ?? 0;
+      if (env.ABACATEPAY_API_KEY.startsWith("abc_dev_")) {
+        console.log("[financeService.getGatewayBalances] AbacatePay: Chave de sandbox detectada. Ignorando consulta de saldo e definindo como R$ 0,00.");
+      } else {
+        try {
+          const res = await fetch("https://api.abacatepay.com/v2/store/get", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${env.ABACATEPAY_API_KEY}`,
+            },
+          });
+          if (res.ok) {
+            const result = await res.json();
+            if (result.success && result.data?.balance) {
+              abacateAvailable = result.data.balance.available ?? 0;
+              abacatePending = result.data.balance.pending ?? 0;
+              abacateBlocked = result.data.balance.blocked ?? 0;
+            }
+          } else {
+            const errorBody = await res.text();
+            console.warn(`[financeService.getGatewayBalances] AbacatePay error HTTP ${res.status}:`, errorBody);
           }
-        } else {
-          console.error(`[financeService.getGatewayBalances] AbacatePay error HTTP ${res.status}`);
+        } catch (error) {
+          console.warn("[financeService.getGatewayBalances] AbacatePay error:", error);
         }
-      } catch (error) {
-        console.error("[financeService.getGatewayBalances] AbacatePay error:", error);
       }
     }
 
