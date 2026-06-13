@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { useTranslations } from "next-intl";
 import { StudentLearningStats, LearningItemDetail, StudentRoadmap } from "@/modules/learning/learning.types";
@@ -26,6 +26,7 @@ import {
 
 import { Notebook } from "@/modules/notebook/notebook.schema";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
+import { useWizard } from "@/hooks/ui/use-wizard";
 
 interface StudentNotebookClientProps {
   stats: StudentLearningStats;
@@ -54,21 +55,11 @@ export function StudentNotebookClient({
   const t = useTranslations("NotebookHub");
   const th = useTranslations("StudentHelpWizard");
   const [notebooksOpen, setNotebooksOpen] = useState(false);
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
-
-  useEffect(() => {
-    const hasSeen = localStorage.getItem("student-notebook-wizard-seen");
-    if (!hasSeen) {
-      const timer = setTimeout(() => {
-        setIsHelpOpen(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  const handleCompleteHelp = () => {
-    localStorage.setItem("student-notebook-wizard-seen", "true");
-  };
+  const {
+    isOpen: isHelpOpen,
+    setIsOpen: setIsHelpOpen,
+    completeWizard: handleCompleteHelp,
+  } = useWizard("student-notebook");
 
   // Lazy initializers read localStorage once on mount — no extra render, no effect needed
   const [wordOfTheDayOpen, setWordOfTheDayOpen] = useState(() => {

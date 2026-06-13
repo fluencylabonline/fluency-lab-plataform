@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout/header";
 import { EmptyResults } from "@/components/ui/empty";
@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { containerVariants, itemVariants } from "@/lib/animations";
 import { HelpCircle } from "lucide-react";
 import { TeacherStudentsWizard } from "./TeacherStudentsWizard";
+import { useWizard } from "@/hooks/ui/use-wizard";
 
 interface StudentsListProps {
   initialData: StudentWithNextClass[];
@@ -25,21 +26,12 @@ interface StudentsListProps {
 export function StudentsList({ initialData, user, title, subtitle }: StudentsListProps) {
   const t = useTranslations("MyStudentsPage");
   const [search, setSearch] = useState("");
-  const [wizardOpen, setWizardOpen] = useState(false);
 
-  useEffect(() => {
-    const hasSeen = localStorage.getItem("teacher-students-wizard-seen");
-    if (!hasSeen) {
-      const timer = setTimeout(() => {
-        setWizardOpen(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  const handleCompleteWizard = () => {
-    localStorage.setItem("teacher-students-wizard-seen", "true");
-  };
+  const {
+    isOpen: wizardOpen,
+    setIsOpen: setWizardOpen,
+    completeWizard: handleCompleteWizard,
+  } = useWizard("teacher-students");
 
   const filteredStudents = useMemo(() => {
     if (!search) return initialData;

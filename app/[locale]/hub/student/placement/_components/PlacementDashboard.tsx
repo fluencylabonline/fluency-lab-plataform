@@ -8,13 +8,14 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { mapEloToCEFR } from "@/lib/adaptive-scoring";
 import { Vault, VaultContent, VaultHeader, VaultTitle, VaultDescription } from "@/components/ui/vault";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ResultView, type PlacementResult } from "./ResultView";
 import { getTestResultAction } from "@/modules/placement/placement.actions";
 import { notify } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/header";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
+import { useWizard } from "@/hooks/ui/use-wizard";
 
 interface PlacementHistoryItem {
   id: number;
@@ -83,21 +84,12 @@ export function PlacementDashboard({ initialData, user }: PlacementDashboardProp
   const [selectedTestResult, setSelectedTestResult] = useState<PlacementResult | null>(null);
   const [isLoadingResult, setIsLoadingResult] = useState(false);
   const [loadingId, setLoadingId] = useState<number | null>(null);
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
-  useEffect(() => {
-    const hasSeen = localStorage.getItem("student-placement-wizard-seen");
-    if (!hasSeen) {
-      const timer = setTimeout(() => {
-        setIsHelpOpen(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  const handleCompleteHelp = () => {
-    localStorage.setItem("student-placement-wizard-seen", "true");
-  };
+  const {
+    isOpen: isHelpOpen,
+    setIsOpen: setIsHelpOpen,
+    completeWizard: handleCompleteHelp,
+  } = useWizard("student-placement");
 
   const headerActions = [
     {

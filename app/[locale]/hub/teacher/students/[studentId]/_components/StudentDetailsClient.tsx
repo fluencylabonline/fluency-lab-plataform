@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { SlotInstanceWithDetails } from "@/modules/scheduling/scheduling.types";
 import { StudentRoadmap } from "@/modules/learning/learning.types";
@@ -23,6 +23,7 @@ import { StudentClassesCard } from "./StudentClassesCard";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { Notebook } from "@/modules/notebook/notebook.schema";
 import { StudentDetailsWizard } from "./StudentDetailsWizard";
+import { useWizard } from "@/hooks/ui/use-wizard";
 
 interface StudentDetailsClientProps {
   studentId: string;
@@ -41,22 +42,13 @@ export function StudentDetailsClient({
 }: StudentDetailsClientProps) {
   const [isNotebooksOpen, setIsNotebooksOpen] = useState(false);
   const [isPlanOpen, setIsPlanOpen] = useState(false);
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const isTabletSize = useIsBreakpoint("max", 1024);
 
-  useEffect(() => {
-    const hasSeen = localStorage.getItem("teacher-student-detail-wizard-seen");
-    if (!hasSeen) {
-      const timer = setTimeout(() => {
-        setIsHelpOpen(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  const handleCompleteWizard = () => {
-    localStorage.setItem("teacher-student-detail-wizard-seen", "true");
-  };
+  const {
+    isOpen: isHelpOpen,
+    setIsOpen: setIsHelpOpen,
+    completeWizard: handleCompleteWizard,
+  } = useWizard("teacher-student-detail");
 
   // Botões de ação para o Header
   const headerActions = [

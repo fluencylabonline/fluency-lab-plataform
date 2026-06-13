@@ -1,5 +1,4 @@
 "use client";
-import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/header";
 import { NotificationSettings } from "./NotificationSettings";
 import { SecuritySettings } from "./SecuritySettings";
@@ -11,6 +10,7 @@ import { AppSettings } from "./AppSettings";
 import type { NotificationPrefs, SettingsUserDTO } from "@/modules/user/user.schema";
 import { useTranslations } from "next-intl";
 import { StudentHelpWizard } from "@/app/[locale]/hub/student/_components/StudentHelpWizard";
+import { useWizard } from "@/hooks/ui/use-wizard";
 
 interface SettingsPageContentProps {
   initialData: {
@@ -25,21 +25,12 @@ export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
   const t = useTranslations("Settings");
   const tc = useTranslations("Common");
   const th = useTranslations("StudentHelpWizard");
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
-  useEffect(() => {
-    const hasSeen = localStorage.getItem("student-settings-wizard-seen");
-    if (!hasSeen) {
-      const timer = setTimeout(() => {
-        setIsHelpOpen(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  const handleCompleteHelp = () => {
-    localStorage.setItem("student-settings-wizard-seen", "true");
-  };
+  const {
+    isOpen: isHelpOpen,
+    setIsOpen: setIsHelpOpen,
+    completeWizard: handleCompleteHelp,
+  } = useWizard("student-settings");
 
   const headerActions = [
     {

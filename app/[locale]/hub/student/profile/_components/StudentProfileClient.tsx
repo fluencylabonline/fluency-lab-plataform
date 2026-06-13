@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/header";
 import { ProfileCard } from "@/modules/user/_components/ProfileCard";
 import { Badges } from "./Badges";
@@ -14,6 +13,7 @@ import { PracticeStatusWidget } from "./PracticeStatusWidget";
 import { useTranslations } from "next-intl";
 import { HelpCircle } from "lucide-react";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
+import { useWizard } from "@/hooks/ui/use-wizard";
 import type { User } from "@/modules/user/user.schema";
 import type { StudentProficiency } from "@/utils/proficiency";
 
@@ -90,21 +90,12 @@ export function StudentProfileClient({
 }: StudentProfileClientProps) {
   const t = useTranslations("Hub.Profile");
   const th = useTranslations("StudentHelpWizard");
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
-
-  useEffect(() => {
-    const hasSeen = localStorage.getItem("student-profile-wizard-seen");
-    if (!hasSeen) {
-      const timer = setTimeout(() => {
-        setIsHelpOpen(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  const handleCompleteHelp = () => {
-    localStorage.setItem("student-profile-wizard-seen", "true");
-  };
+  
+  const {
+    isOpen: isHelpOpen,
+    setIsOpen: setIsHelpOpen,
+    completeWizard: handleCompleteHelp,
+  } = useWizard("student-profile");
 
   const headerActions = [
     {

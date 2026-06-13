@@ -1,6 +1,6 @@
 "use client";
 import { Header } from "@/components/layout/header";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { CalendarView, type CalendarEvent } from "@/components/ui/calendar-view";
 import { useTranslations, useLocale } from "next-intl";
 import { CreditsSummary } from "./CreditsSummary";
@@ -12,6 +12,7 @@ import { Vault, VaultHeader, VaultTitle, VaultBody, VaultContent } from "@/compo
 import { Button } from "@/components/ui/button";
 import { Calendar, User, Clock, Ticket, HelpCircle } from "lucide-react";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
+import { useWizard } from "@/hooks/ui/use-wizard";
 import { notify } from "@/components/ui/toaster";
 import { cancelClassAction } from "@/modules/scheduling/scheduling.actions";
 import { useRouter } from "next/navigation";
@@ -48,22 +49,13 @@ export function ScheduleCalendar({ initialClasses, balance, rescheduleStats }: S
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
   const [isCreditsOpen, setIsCreditsOpen] = useState(false);
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const isMobile = useIsMobile();
 
-  useEffect(() => {
-    const hasSeen = localStorage.getItem("student-schedule-wizard-seen");
-    if (!hasSeen) {
-      const timer = setTimeout(() => {
-        setIsHelpOpen(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  const handleCompleteHelp = () => {
-    localStorage.setItem("student-schedule-wizard-seen", "true");
-  };
+  const {
+    isOpen: isHelpOpen,
+    setIsOpen: setIsHelpOpen,
+    completeWizard: handleCompleteHelp,
+  } = useWizard("student-schedule");
 
   const headerActions = useMemo(() => {
     const actions = [
@@ -81,7 +73,7 @@ export function ScheduleCalendar({ initialClasses, balance, rescheduleStats }: S
       });
     }
     return actions;
-  }, [isMobile, t, th]);
+  }, [isMobile, t, th, setIsHelpOpen, setIsCreditsOpen]);
 
   const events = useMemo(() => {
     return initialClasses.map((cls): CalendarEvent => {
