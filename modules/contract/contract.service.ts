@@ -108,12 +108,18 @@ export const contractService = {
       (user.role === "teacher" ? instance.template.durationMonths : subscription?.plan?.durationMonths) || 
       6;
 
+    const decryptedTaxId = user.taxId && user.taxId.includes(":") ? decrypt(user.taxId) : user.taxId;
+    const decryptedBusinessTaxId = user.businessTaxId && user.businessTaxId.includes(":") ? decrypt(user.businessTaxId) : user.businessTaxId;
+    const decryptedPixKey = user.pixKey && user.pixKey.includes(":") ? decrypt(user.pixKey) : user.pixKey;
+
     // 3. Injeção de Dados e Geração de Conteúdo Final (Snapshot)
     const finalContent = injectTemplateData(instance.template.content, {
       user: {
         name: user.name,
         email: user.email,
-        taxId: user.taxId ?? "",
+        taxId: decryptedTaxId ?? "",
+        businessTaxId: decryptedBusinessTaxId ?? "",
+        pixKey: decryptedPixKey ?? "",
       },
       guardian: guardianData,
       school: schoolSettings,
@@ -372,6 +378,7 @@ export const contractService = {
     let page = pdfDoc.addPage();
     const { width, height } = page.getSize();
     const margin = 50;
+    const maxWidth = width - (margin * 2);
 
     // Cabeçalho
     page.drawText(title.toUpperCase(), {
@@ -396,26 +403,66 @@ export const contractService = {
     });
 
     // Corpo do documento
-    const lines = content.split("\n");
+    const paragraphs = content.split("\n");
     let currentY = height - 120;
     const fontSize = 11;
+    const lineHeight = 15;
 
-    for (const line of lines) {
-      if (currentY < margin + 60) { // Espaço para o selo no rodapé
-        page = pdfDoc.addPage();
-        currentY = height - margin;
+    // Helper to wrap text into lines safely
+    const wrapText = (text: string, maxW: number): string[] => {
+      const words = text.trim().split(/\s+/);
+      const wrapped: string[] = [];
+      let currentLine = "";
+
+      for (const word of words) {
+        if (!currentLine) {
+          currentLine = word;
+          continue;
+        }
+        const testLine = `${currentLine} ${word}`;
+        const textWidth = font.widthOfTextAtSize(testLine, fontSize);
+        if (textWidth > maxW) {
+          wrapped.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
       }
-      
-      if (line.trim()) {
-        page.drawText(line.trim(), {
+      if (currentLine) {
+        wrapped.push(currentLine);
+      }
+      return wrapped;
+    };
+
+    for (const paragraph of paragraphs) {
+      const trimmed = paragraph.trim();
+      if (!trimmed) {
+        // Empty line / Paragraph gap
+        if (currentY < margin + 60) {
+          page = pdfDoc.addPage();
+          currentY = height - margin;
+        }
+        currentY -= lineHeight;
+        continue;
+      }
+
+      const wrappedLines = wrapText(trimmed, maxWidth);
+      for (const line of wrappedLines) {
+        if (currentY < margin + 60) { // Espaço para o selo no rodapé
+          page = pdfDoc.addPage();
+          currentY = height - margin;
+        }
+        
+        page.drawText(line, {
           x: margin,
           y: currentY,
           size: fontSize,
           font,
-          maxWidth: width - (margin * 2),
         });
+        currentY -= lineHeight;
       }
-      currentY -= 15;
+      // Add a small extra gap between paragraphs
+      currentY -= 5;
     }
 
     // Selo de Verificação (Apenas na última página)
