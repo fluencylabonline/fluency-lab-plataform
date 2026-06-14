@@ -3,8 +3,10 @@ import { usersTable } from "../user/user.schema";
 import { transactionsTable } from "../finance/finance.schema";
 import { slotInstances } from "../scheduling/scheduling.schema";
 import { coursesTable, courseEnrollmentsTable } from "../course/course.schema";
-import { eq, and, gte, lte, sql, count, sum, desc } from "drizzle-orm";
-import { startOfMonth, subMonths } from "date-fns";
+import { eq, and, gte, lte, sql, count, sum, desc, inArray } from "drizzle-orm";
+import { startOfMonth, subMonths, format } from "date-fns";
+import { installmentsTable } from "../billing/billing.schema";
+import { payoutsTable } from "../payout/payout.schema";
 
 export const dashboardRepository = {
   async countActiveStudents() {
@@ -30,7 +32,18 @@ export const dashboardRepository = {
   },
 
   async getMonthlyRevenue(startDate: Date, endDate: Date) {
-    const result = await db
+    const installmentsResult = await db
+      .select({ value: sum(installmentsTable.amount) })
+      .from(installmentsTable)
+      .where(
+        and(
+          eq(installmentsTable.status, "paid"),
+          gte(installmentsTable.paidAt, startDate),
+          lte(installmentsTable.paidAt, endDate)
+        )
+      );
+
+    const transactionsResult = await db
       .select({ value: sum(transactionsTable.amount) })
       .from(transactionsTable)
       .where(
@@ -41,11 +54,24 @@ export const dashboardRepository = {
           lte(transactionsTable.date, endDate)
         )
       );
-    return Number(result[0]?.value ?? 0);
+
+    const installmentsSum = Number(installmentsResult[0]?.value ?? 0);
+    const transactionsSum = Number(transactionsResult[0]?.value ?? 0);
+
+    return installmentsSum + transactionsSum;
   },
 
   async getPendingRevenue() {
-    const result = await db
+    const installmentsResult = await db
+      .select({ value: sum(installmentsTable.amount) })
+      .from(installmentsTable)
+      .where(
+        and(
+          inArray(installmentsTable.status, ["pending", "overdue"])
+        )
+      );
+
+    const transactionsResult = await db
       .select({ value: sum(transactionsTable.amount) })
       .from(transactionsTable)
       .where(
@@ -54,26 +80,104 @@ export const dashboardRepository = {
           eq(transactionsTable.status, "pending")
         )
       );
-    return Number(result[0]?.value ?? 0);
+
+    const installmentsSum = Number(installmentsResult[0]?.value ?? 0);
+    const transactionsSum = Number(transactionsResult[0]?.value ?? 0);
+
+    return installmentsSum + transactionsSum;
   },
 
   async getCashFlow(limitMonths = 6) {
-    const startDate = startOfMonth(subMonths(new Date(), limitMonths - 1));
+    const now = new Date();
+    const startDate = startOfMonth(subMonths(now, limitMonths - 1));
 
-    // Using raw SQL for grouping by month because Drizzle's grouping can be tricky across different DBs
-    // but Neon is Postgres, so we use to_char or date_trunc
-    const result = await db.execute(sql`
-      SELECT 
-        to_char(date_trunc('month', date), 'YYYY-MM') as month,
-        SUM(CASE WHEN type = 'income' AND status = 'paid' THEN amount ELSE 0 END) as income,
-        SUM(CASE WHEN type = 'expense' AND status = 'paid' THEN amount ELSE 0 END) as expense
-      FROM transactions
-      WHERE date >= ${startDate}
-      GROUP BY 1
-      ORDER BY 1 ASC
-    `);
+    // 1. Fetch paid installments (income)
+    const installmentsResult = await db
+      .select({
+        month: sql<string>`to_char(date_trunc('month', ${installmentsTable.paidAt}), 'YYYY-MM')`,
+        amount: sum(installmentsTable.amount),
+      })
+      .from(installmentsTable)
+      .where(
+        and(
+          eq(installmentsTable.status, "paid"),
+          gte(installmentsTable.paidAt, startDate)
+        )
+      )
+      .groupBy(sql`date_trunc('month', ${installmentsTable.paidAt})`);
 
-    return result.rows as unknown as { month: string; income: string; expense: string }[];
+    // 2. Fetch manual transactions (income & expenses)
+    const transactionsResult = await db
+      .select({
+        month: sql<string>`to_char(date_trunc('month', ${transactionsTable.date}), 'YYYY-MM')`,
+        type: transactionsTable.type,
+        amount: sum(transactionsTable.amount),
+      })
+      .from(transactionsTable)
+      .where(
+        and(
+          eq(transactionsTable.status, "paid"),
+          gte(transactionsTable.date, startDate)
+        )
+      )
+      .groupBy(sql`date_trunc('month', ${transactionsTable.date})`, transactionsTable.type);
+
+    // 3. Fetch completed teacher payouts (expenses)
+    const payoutsResult = await db
+      .select({
+        month: sql<string>`to_char(date_trunc('month', ${payoutsTable.createdAt}), 'YYYY-MM')`,
+        amount: sum(payoutsTable.amount),
+      })
+      .from(payoutsTable)
+      .where(
+        and(
+          eq(payoutsTable.status, "completed"),
+          gte(payoutsTable.createdAt, startDate)
+        )
+      )
+      .groupBy(sql`date_trunc('month', ${payoutsTable.createdAt})`);
+
+    // 4. Initialize months map for the last limitMonths to guarantee no month is missing
+    const monthsMap = new Map<string, { income: number; expense: number }>();
+    for (let i = limitMonths - 1; i >= 0; i--) {
+      const monthStr = format(subMonths(now, i), "yyyy-MM");
+      monthsMap.set(monthStr, { income: 0, expense: 0 });
+    }
+
+    // 5. Aggregate installments (income)
+    for (const row of installmentsResult) {
+      if (row.month && monthsMap.has(row.month)) {
+        const val = monthsMap.get(row.month)!;
+        val.income += Number(row.amount || 0);
+      }
+    }
+
+    // 6. Aggregate payouts (expense)
+    for (const row of payoutsResult) {
+      if (row.month && monthsMap.has(row.month)) {
+        const val = monthsMap.get(row.month)!;
+        val.expense += Number(row.amount || 0);
+      }
+    }
+
+    // 7. Aggregate manual transactions (income & expense)
+    for (const row of transactionsResult) {
+      if (row.month && monthsMap.has(row.month)) {
+        const val = monthsMap.get(row.month)!;
+        if (row.type === "income") {
+          val.income += Number(row.amount || 0);
+        } else if (row.type === "expense") {
+          val.expense += Number(row.amount || 0);
+        }
+      }
+    }
+
+    // 8. Convert to result array ordered chronologically
+    return Array.from(monthsMap.entries()).map(([month, data]) => ({
+      month,
+      income: String(data.income),
+      expense: String(data.expense),
+    }));
   },
 
   async getTodayClassesCount() {
