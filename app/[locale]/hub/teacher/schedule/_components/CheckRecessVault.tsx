@@ -81,12 +81,12 @@ function RecessList({ recesses }: { recesses: RecessRequest[] }) {
           </div>
 
           <div className="flex items-center justify-between gap-4 p-3 bg-background rounded-md border border-border/30">
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-2">
               <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">{t('start') || "Início"}</span>
               <span className="text-sm font-bold">{format(new Date(recess.startDate), "dd 'de' MMM", { locale: ptBR })}</span>
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            <div className="flex flex-col text-right">
+            <div className="flex flex-col text-right gap-2">
               <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">{t('end') || "Fim"}</span>
               <span className="text-sm font-bold">{format(new Date(recess.endDate), "dd 'de' MMM", { locale: ptBR })}</span>
             </div>
@@ -129,12 +129,12 @@ export function CheckRecessVault({ teacherId, iconOnly }: CheckRecessVaultProps)
             className="h-10 w-10 text-muted-foreground hover:text-foreground"
           >
             <Calendar className="w-5 h-5 text-primary" />
-            <span className="sr-only">{t('checkRecesses') || "Conferir Recessos"}</span>
+            <span className="sr-only">{t('checkRecesses') || "Recessos"}</span>
           </Button>
         ) : (
           <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5">
             <Calendar className="w-4 h-4 mr-2 text-primary" />
-            {t('checkRecesses') || "Conferir Recessos"}
+            {t('checkRecesses') || "Recessos"}
           </Button>
         )}
       </VaultTrigger>

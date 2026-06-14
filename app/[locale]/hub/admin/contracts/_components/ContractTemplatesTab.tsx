@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { FileText, Globe, Eye } from "lucide-react";
+import { FileText, Globe, Eye, Check, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -16,14 +16,20 @@ import { type ContractTemplate } from "@/modules/contract/contract.schema";
 
 interface ContractTemplatesTabProps {
   templates: ContractTemplate[];
+  actionLoadingId?: string | null;
   onView: (template: ContractTemplate) => void;
   onCreateNew: () => void;
+  onActivate?: (templateId: string) => void;
+  onDelete?: (template: ContractTemplate) => void;
 }
 
 export function ContractTemplatesTab({
   templates,
+  actionLoadingId,
   onView,
   onCreateNew,
+  onActivate,
+  onDelete,
 }: ContractTemplatesTabProps) {
   const t = useTranslations("Contracts");
 
@@ -107,14 +113,43 @@ export function ContractTemplatesTab({
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onView(template)}
-                        title={t("actions.view") || "Visualizar Modelo"}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onView(template)}
+                          title={t("actions.view") || "Visualizar Modelo"}
+                          disabled={actionLoadingId === template.id}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+
+                        {!template.isActive && onActivate && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onActivate(template.id)}
+                            title={t("actions.activate") || "Ativar Modelo"}
+                            disabled={actionLoadingId === template.id}
+                            className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950/20"
+                          >
+                            <Check className="w-4 h-4" />
+                          </Button>
+                        )}
+
+                        {onDelete && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onDelete(template)}
+                            title={t("actions.delete") || "Excluir Modelo"}
+                            disabled={actionLoadingId === template.id}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -172,16 +207,43 @@ export function ContractTemplatesTab({
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-2 border-t border-gray-100 dark:border-gray-900">
+                <div className="flex items-center gap-2 pt-2 border-t border-gray-100 dark:border-gray-900">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full text-xs"
+                    className="flex-1 text-xs"
                     onClick={() => onView(template)}
                     leftIcon={<Eye className="w-3.5 h-3.5" />}
+                    disabled={actionLoadingId === template.id}
                   >
-                    {t("actions.view") || "Visualizar Modelo"}
+                    {t("actions.view") || "Visualizar"}
                   </Button>
+
+                  {!template.isActive && onActivate && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 text-xs border-green-200 text-green-700 hover:bg-green-50 dark:border-green-900/30 dark:text-green-400 dark:hover:bg-green-950/20"
+                      onClick={() => onActivate(template.id)}
+                      leftIcon={<Check className="w-3.5 h-3.5" />}
+                      disabled={actionLoadingId === template.id}
+                    >
+                      {t("actions.activate") || "Ativar"}
+                    </Button>
+                  )}
+
+                  {onDelete && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 text-xs border-red-200 text-red-700 hover:bg-red-50 dark:border-red-900/30 dark:text-red-400 dark:hover:bg-red-950/20"
+                      onClick={() => onDelete(template)}
+                      leftIcon={<Trash2 className="w-3.5 h-3.5" />}
+                      disabled={actionLoadingId === template.id}
+                    >
+                      {t("actions.delete") || "Excluir"}
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}

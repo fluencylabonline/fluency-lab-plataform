@@ -55,6 +55,46 @@ export const contractRepository = {
       ));
   },
 
+  async deactivateTemplatesByTypeAndRegion(type: "student" | "teacher", region: "BR" | "US") {
+    return db.update(contractTemplatesTable)
+      .set({ isActive: false })
+      .where(and(
+        eq(contractTemplatesTable.type, type),
+        eq(contractTemplatesTable.region, region)
+      ));
+  },
+
+  async activateTemplate(id: string, type: "student" | "teacher", region: "BR" | "US") {
+    return db.transaction(async (tx) => {
+      await tx.update(contractTemplatesTable)
+        .set({ isActive: false })
+        .where(and(
+          eq(contractTemplatesTable.type, type),
+          eq(contractTemplatesTable.region, region)
+        ));
+      const [updated] = await tx.update(contractTemplatesTable)
+        .set({ isActive: true })
+        .where(eq(contractTemplatesTable.id, id))
+        .returning();
+      return updated;
+    });
+  },
+
+  async countTemplateInstances(templateId: string) {
+    const instances = await db.query.contractInstancesTable.findMany({
+      where: eq(contractInstancesTable.templateId, templateId),
+      columns: { id: true },
+    });
+    return instances.length;
+  },
+
+  async deleteTemplate(id: string) {
+    const [deleted] = await db.delete(contractTemplatesTable)
+      .where(eq(contractTemplatesTable.id, id))
+      .returning();
+    return deleted;
+  },
+
   // --- Instâncias ---
   async findInstanceById(id: string) {
     return db.query.contractInstancesTable.findFirst({

@@ -211,3 +211,34 @@ export const updateSchoolSettingsAction = adminAction
       return { success: false, error: err.message || "Falha ao salvar as configurações da escola." };
     }
   });
+
+export const activateContractTemplateAction = adminAction
+  .metadata({ name: "activateContractTemplate" })
+  .inputSchema(z.object({ id: z.string().uuid() }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const template = await contractService.activateTemplate(parsedInput.id);
+      console.log("[SERVER ACTION] Activated template:", JSON.stringify(template, null, 2));
+      revalidatePath("/admin/contracts");
+      return { success: true, data: template };
+    } catch (error) {
+      const err = error as Error;
+      console.error("[activateContractTemplateAction] Error:", err.message);
+      return { success: false, error: err.message || "Falha ao ativar o template de contrato." };
+    }
+  });
+
+export const deleteContractTemplateAction = adminAction
+  .metadata({ name: "deleteContractTemplate" })
+  .inputSchema(z.object({ id: z.string().uuid() }))
+  .action(async ({ parsedInput }) => {
+    try {
+      await contractService.deleteTemplate(parsedInput.id);
+      revalidatePath("/admin/contracts");
+      return { success: true };
+    } catch (error) {
+      const err = error as Error;
+      console.error("[deleteContractTemplateAction] Error:", err.message);
+      return { success: false, error: err.message || "Falha ao excluir o template de contrato." };
+    }
+  });

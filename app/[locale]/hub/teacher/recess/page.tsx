@@ -23,15 +23,16 @@ export default async function RecessActivitiesPage() {
       <Header
         title="Biblioteca de Recesso"
         subtitle="Atividades de fallback para garantir o engajamento dos alunos durante suas ausências"
-      /><div className="flex items-center gap-2">
-        <Link
-          href="/hub/teacher/recess/new"
-          className={buttonVariants({ variant: "default", size: "sm", className: "gap-2" })}
-        >
-          <Plus className="w-4 h-4" />
-          Criar Atividade
-        </Link>
-      </div>
+        className="contents"
+        backHref="/hub/teacher/schedule"
+        actions={[
+          {
+            label: "Criar atividade",
+            icon: <Plus className="w-4 h-4" />,
+            //onClick: () => router.push("/produtos/novo"),
+          },
+        ]}
+      />
 
       <main className="flex-1 p-4 md:p-6 container max-w-7xl mx-auto space-y-8">
         {/* Call to Action Section */}
@@ -41,15 +42,22 @@ export default async function RecessActivitiesPage() {
               <Calendar className="w-6 h-6 text-primary" />
             </div>
             <div className="space-y-1">
-              <h3 className="font-bold text-xl tracking-tight">Comunique seu Recesso</h3>
+              <h3 className="font-bold text-xl tracking-tight">
+                Comunique seu Recesso
+              </h3>
               <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-                Planejando um descanso? Informe as datas com 20 dias de antecedência para garantir a validação automática do seu SLA.
+                Planejando um descanso? Informe as datas com 20 dias de
+                antecedência para garantir a validação automática do seu SLA.
               </p>
             </div>
           </div>
           <Link
             href="/hub/teacher/my-schedule"
-            className={buttonVariants({ variant: "default", className: "gap-2 h-11 px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all" })}
+            className={buttonVariants({
+              variant: "default",
+              className:
+                "gap-2 h-11 px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all",
+            })}
           >
             Comunicar Agora
           </Link>
@@ -59,18 +67,27 @@ export default async function RecessActivitiesPage() {
         <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-950/20 rounded-md border border-amber-200 dark:border-amber-900/50">
           <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-500 shrink-0" />
           <p className="text-xs md:text-sm text-amber-800 dark:text-amber-400 font-medium leading-tight">
-            <span className="font-bold">Atenção:</span> Para cada aluno afetado, você deve selecionar uma atividade de fallback desta biblioteca. Atividades globais estão disponíveis, mas você pode criar as suas próprias.
+            <span className="font-bold">Atenção:</span> Para cada aluno afetado,
+            você deve selecionar uma atividade de fallback desta biblioteca.
+            Atividades globais estão disponíveis, mas você pode criar as suas
+            próprias.
           </p>
         </div>
 
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold tracking-tight">Atividades Disponíveis</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">Lições marcadas como conteúdo de fallback para períodos de recesso.</p>
+              <h2 className="text-2xl font-bold tracking-tight">
+                Atividades Disponíveis
+              </h2>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Lições marcadas como conteúdo de fallback para períodos de
+                recesso.
+              </p>
             </div>
             <div className="text-sm font-semibold bg-muted px-3 py-1.5 rounded-full border border-border/50">
-              {activities.length} {activities.length === 1 ? "atividade" : "atividades"}
+              {activities.length}{" "}
+              {activities.length === 1 ? "atividade" : "atividades"}
             </div>
           </div>
 

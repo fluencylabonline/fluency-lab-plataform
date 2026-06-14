@@ -7,7 +7,7 @@ import { SlotDetailsVault } from "@/modules/scheduling/_components/SlotDetailsVa
 import { CommunicateRecessVault } from "./CommunicateRecessVault";
 import { CheckRecessVault } from "./CheckRecessVault";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, BookOpen } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/layout/header";
@@ -30,6 +30,7 @@ export function TeacherScheduleClient({
   user,
 }: TeacherScheduleClientProps) {
   const t = useTranslations("UserManagement");
+  const tRecess = useTranslations("Recess");
   const router = useRouter();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -68,9 +69,33 @@ export function TeacherScheduleClient({
     </Button>
   );
 
+  const renderRecessLibraryButton = (iconOnly: boolean) => (
+    <Button
+      onClick={() => router.push("/hub/teacher/recess")}
+      variant={iconOnly ? "ghost" : "outline"}
+      size={iconOnly ? "icon" : "sm"}
+      className={iconOnly ? "h-10 w-10 text-muted-foreground hover:text-foreground" : "h-10"}
+    >
+      {iconOnly ? (
+        <>
+          <BookOpen className="w-5 h-5 text-primary" />
+          <span className="sr-only">{tRecess("recessLibrary") || "Atividades de Recesso"}</span>
+        </>
+      ) : (
+        <>
+          <BookOpen className="w-4 h-4 mr-2 text-primary" />
+          {tRecess("recessLibrary") || "Atividades de Recesso"}
+        </>
+      )}
+    </Button>
+  );
+
   const headerActionsList = [
     {
       component: renderCreateButton(true)
+    },
+    {
+      component: renderRecessLibraryButton(true)
     },
     {
       component: <CheckRecessVault teacherId={teacherId} iconOnly />
@@ -83,6 +108,7 @@ export function TeacherScheduleClient({
   const calendarActions = (
     <div className="flex items-center gap-2">
       {renderCreateButton(false)}
+      {renderRecessLibraryButton(false)}
       <CheckRecessVault teacherId={teacherId} />
       <CommunicateRecessVault teacherId={teacherId} />
     </div>

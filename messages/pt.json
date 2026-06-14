@@ -409,7 +409,8 @@
     "switchLanguage": "Alternar idioma",
     "system": "Sistema",
     "unauthorized": "Você não tem permissão para realizar esta ação.",
-    "unreadSuffix": "{count} {count, plural, one {não lida} other {não lidas}}"
+    "unreadSuffix": "{count} {count, plural, one {não lida} other {não lidas}}",
+    "select": "Selecione"
   },
   "ConvertClass": {
     "cancelButton": "Cancelar",
@@ -1981,6 +1982,7 @@
     "title": "Bem-vindo à FluencyLab!"
   },
   "Recess": {
+    "recessLibrary": "Atividades de Recesso",
     "activityContent": "Conteúdo da Atividade",
     "activityCreated": "Atividade criada!",
     "activityText": "Texto da Atividade",
@@ -1991,7 +1993,7 @@
     "allSetDesc": "Seu recesso foi agendado e as atividades de fallback configuradas. Os alunos serão notificados em breve.",
     "approved": "Aprovado",
     "autoValidatedSLA": "Validado automaticamente conforme o SLA",
-    "checkRecesses": "Conferir Recessos",
+    "checkRecesses": "Recessos",
     "classes": "Aulas",
     "classes_lower": "aulas",
     "communicateRecess": "Comunicar Recesso",
@@ -2732,7 +2734,9 @@
       "download": "Baixar PDF",
       "resendEmail": "Reenviar Contrato",
       "verify": "Verificar Assinatura",
-      "view": "Visualizar Modelo"
+      "view": "Visualizar Modelo",
+      "activate": "Ativar Modelo",
+      "delete": "Excluir Modelo"
     },
     "verify": {
       "title": "Validação de Assinatura",
@@ -2781,7 +2785,11 @@
       "downloadInitiated": "Download iniciado.",
       "downloadError": "Não foi possível carregar o arquivo PDF.",
       "emailSent": "E-mail com contrato enviado com sucesso.",
-      "emailError": "Erro ao reenviar e-mail de contrato."
+      "emailError": "Erro ao reenviar e-mail de contrato.",
+      "templateActivated": "Template de contrato ativado com sucesso!",
+      "activateTemplateError": "Falha ao ativar o template de contrato.",
+      "templateDeleted": "Template de contrato excluído com sucesso!",
+      "deleteTemplateError": "Falha ao excluir o template de contrato."
     }
   },
   "AudioSync": {

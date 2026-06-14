@@ -15,7 +15,9 @@ import {
   VaultForm,
   VaultField,
   VaultFooter,
-  VaultPrimaryButton
+  VaultPrimaryButton,
+  VaultSecondaryButton,
+  VaultIcon,
 } from "@/components/ui/vault";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,6 +36,8 @@ import {
   updateSchoolSettingsAction,
   getContractDownloadUrlAction,
   resendContractEmailAction,
+  activateContractTemplateAction,
+  deleteContractTemplateAction,
 } from "@/modules/contract/contract.actions";
 import {
   type ContractTemplate,
@@ -101,6 +105,8 @@ export function ContractsDashboard({
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [isViewTemplateOpen, setIsViewTemplateOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | null>(null);
+  const [templateToDelete, setTemplateToDelete] = useState<ContractTemplate | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   // Forms initializations
   const templateForm = useForm<CreateTemplateFormValues>({
@@ -135,11 +141,11 @@ export function ContractsDashboard({
         if (result?.data?.success && result.data.data) {
           notify.success(t("notifications.templateCreated") || "Template de contrato criado com sucesso!");
           
-          // Prepend new active template and update others under the same name and region to inactive
+          // Prepend new active template and update others under the same type and region to inactive
           const newTemplate = result.data.data as ContractTemplate;
           setTemplates((prev) => {
             const updated = prev.map((item) =>
-              item.name === newTemplate.name && item.region === newTemplate.region
+              item.type === newTemplate.type && item.region === newTemplate.region
                 ? { ...item, isActive: false }
                 : item
             );
@@ -219,6 +225,53 @@ export function ContractsDashboard({
     }
   };
 
+  const handleActivateTemplate = async (templateId: string) => {
+    setActionLoadingId(templateId);
+    try {
+      const result = await activateContractTemplateAction({ id: templateId });
+      if (result?.data?.success) {
+        notify.success(t("notifications.templateActivated") || "Template de contrato ativado com sucesso!");
+        setTemplates((prev) => {
+          const target = prev.find((item) => item.id === templateId);
+          if (!target) return prev;
+          return prev.map((item) =>
+            item.type === target.type && item.region === target.region
+              ? { ...item, isActive: item.id === templateId }
+              : item
+          );
+        });
+      } else {
+        notify.error(result?.data?.error || t("notifications.activateTemplateError") || "Falha ao ativar o template.");
+      }
+    } catch {
+      notify.error(t("notifications.unexpectedError") || "Erro inesperado ao realizar operação.");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleDeleteTemplate = async (templateId: string) => {
+    setActionLoadingId(templateId);
+    try {
+      const result = await deleteContractTemplateAction({ id: templateId });
+      if (result?.data?.success) {
+        notify.success(t("notifications.templateDeleted") || "Template excluído com sucesso!");
+        setTemplates((prev) => prev.filter((item) => item.id !== templateId));
+      } else {
+        notify.error(result?.data?.error || t("notifications.deleteTemplateError") || "Falha ao excluir o template.");
+      }
+    } catch {
+      notify.error(t("notifications.unexpectedError") || "Erro inesperado ao realizar operação.");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleDeleteClick = (template: ContractTemplate) => {
+    setTemplateToDelete(template);
+    setIsDeleteConfirmOpen(true);
+  };
+
   return (
     <div>
       <header>
@@ -276,11 +329,14 @@ export function ContractsDashboard({
           <TabsContent value="templates" className="space-y-4">
             <ContractTemplatesTab
               templates={templates}
+              actionLoadingId={actionLoadingId}
               onView={(template) => {
                 setSelectedTemplate(template);
                 setIsViewTemplateOpen(true);
               }}
               onCreateNew={() => setIsCreateTemplateOpen(true)}
+              onActivate={handleActivateTemplate}
+              onDelete={handleDeleteClick}
             />
           </TabsContent>
 
@@ -479,6 +535,39 @@ export function ContractsDashboard({
             >
               Criar Nova Versão ({selectedTemplate ? `v${parseInt(selectedTemplate.version) + 1}` : ""})
             </Button>
+          </VaultFooter>
+        </VaultContent>
+      </Vault>
+
+      {/* Vault de Confirmação de Exclusão */}
+      <Vault open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+        <VaultContent className="sm:max-w-md animate-in fade-in zoom-in-95 duration-200">
+          <VaultHeader>
+            <VaultIcon type="delete" />
+            <VaultTitle className="text-red-600">
+              Excluir Modelo de Contrato
+            </VaultTitle>
+            <VaultDescription>
+              Tem certeza que deseja excluir o modelo <strong>{templateToDelete?.name}</strong> (Versão v{templateToDelete?.version})? Esta ação não poderá ser desfeita e só funcionará se o template não estiver ativo e não houver assinaturas vinculadas.
+            </VaultDescription>
+          </VaultHeader>
+
+          <VaultFooter className="mt-6 flex justify-end gap-3">
+            <VaultSecondaryButton onClick={() => setIsDeleteConfirmOpen(false)}>
+              Cancelar
+            </VaultSecondaryButton>
+            <VaultPrimaryButton 
+              variant="destructive" 
+              onClick={async () => {
+                if (templateToDelete) {
+                  setIsDeleteConfirmOpen(false);
+                  await handleDeleteTemplate(templateToDelete.id);
+                }
+              }}
+              disabled={actionLoadingId === templateToDelete?.id}
+            >
+              Excluir
+            </VaultPrimaryButton>
           </VaultFooter>
         </VaultContent>
       </Vault>

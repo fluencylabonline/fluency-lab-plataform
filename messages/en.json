@@ -409,7 +409,8 @@
     "switchLanguage": "Switch language",
     "system": "System",
     "unauthorized": "You do not have permission to perform this action.",
-    "unreadSuffix": "{count} unread"
+    "unreadSuffix": "{count} unread",
+    "select": "Select"
   },
   "ConvertClass": {
     "cancelButton": "Cancel",
@@ -1981,6 +1982,7 @@
     "title": "Welcome to FluencyLab!"
   },
   "Recess": {
+    "recessLibrary": "Recess Activities",
     "activityContent": "Conteúdo da Atividade",
     "activityCreated": "Atividade criada!",
     "activityText": "Texto da Atividade",
@@ -1991,7 +1993,7 @@
     "allSetDesc": "Seu recesso foi agendado e as atividades de fallback configuradas. Os alunos serão notificados em breve.",
     "approved": "Aprovado",
     "autoValidatedSLA": "Validado automaticamente conforme o SLA",
-    "checkRecesses": "Conferir Recessos",
+    "checkRecesses": "Recessos",
     "classes": "Aulas",
     "classes_lower": "aulas",
     "communicateRecess": "Comunicar Recesso",
@@ -2733,7 +2735,9 @@
       "download": "Download PDF",
       "resendEmail": "Resend Contract",
       "verify": "Verify Signature",
-      "view": "View Model"
+      "view": "View Model",
+      "activate": "Activate Model",
+      "delete": "Delete Model"
     },
     "verify": {
       "title": "Signature Validation",
@@ -2782,7 +2786,11 @@
       "downloadInitiated": "Download initiated.",
       "downloadError": "Could not load the PDF file.",
       "emailSent": "Contract email resent successfully.",
-      "emailError": "Failed to resend contract email."
+      "emailError": "Failed to resend contract email.",
+      "templateActivated": "Contract template activated successfully!",
+      "activateTemplateError": "Failed to activate contract template.",
+      "templateDeleted": "Contract template deleted successfully!",
+      "deleteTemplateError": "Failed to delete contract template."
     }
   },
   "AudioSync": {

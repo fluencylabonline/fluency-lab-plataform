@@ -50,8 +50,8 @@ export const contractService = {
     const lastTemplate = await contractRepository.findLastTemplateVersion(data.name, data.region);
     const nextVersion = lastTemplate ? (parseInt(lastTemplate.version) + 1).toString() : "1";
 
-    // Desativa versões anteriores do mesmo template para que apenas a nova seja ativa
-    await contractRepository.deactivateTemplatesByName(data.name, data.region);
+    // Desativa templates anteriores do mesmo tipo e região para que apenas o novo seja ativo
+    await contractRepository.deactivateTemplatesByTypeAndRegion(data.type, data.region);
 
     return contractRepository.insertTemplate({
       ...data,
@@ -679,6 +679,29 @@ export const contractService = {
     } else {
       return contractRepository.insertSchoolSettings(data);
     }
+  },
+
+  async activateTemplate(id: string) {
+    const template = await contractRepository.findTemplateById(id);
+    if (!template) {
+      throw new Error("Template não encontrado.");
+    }
+    return contractRepository.activateTemplate(id, template.type, template.region);
+  },
+
+  async deleteTemplate(id: string) {
+    const template = await contractRepository.findTemplateById(id);
+    if (!template) {
+      throw new Error("Template não encontrado.");
+    }
+    if (template.isActive) {
+      throw new Error("Não é possível excluir um template ativo. Ative outra versão antes.");
+    }
+    const count = await contractRepository.countTemplateInstances(id);
+    if (count > 0) {
+      throw new Error("Não é possível excluir este template pois existem contratos associados a ele.");
+    }
+    return contractRepository.deleteTemplate(id);
   },
 };
 

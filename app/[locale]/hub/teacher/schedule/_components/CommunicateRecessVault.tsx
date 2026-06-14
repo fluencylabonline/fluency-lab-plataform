@@ -18,7 +18,7 @@ import {
 } from "@/modules/scheduling/scheduling.actions";
 import { getRecessActivitiesAction } from "@/modules/curriculum/curriculum.actions";
 import { notify } from "@/components/ui/toaster";
-import { AlertCircle, CheckCircle2, ChevronRight, Users, BookOpen, Loader2, Calendar as CalendarIcon, ArrowLeft } from "lucide-react";
+import { AlertCircle, CheckCircle2, ChevronRight, Users, BookOpen, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { RecessRequest } from "@/modules/scheduling/scheduling.types";
+import ParasolIcon from "./ParasolIcon";
 
 interface CommunicateRecessVaultProps {
   teacherId: string;
@@ -65,8 +66,6 @@ interface ImpactData {
   }>;
 }
 
-
-
 const fallbackSchema = z.object({
   config: z.record(z.string(), z.object({
     lessonId: z.string().min(1, "Campo obrigatório"),
@@ -75,7 +74,6 @@ const fallbackSchema = z.object({
 });
 
 type FallbackFormValues = z.infer<typeof fallbackSchema>;
-
 
 export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateRecessVaultProps) {
   const t = useTranslations("Recess");
@@ -112,7 +110,6 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
     resolver: zodResolver(fallbackSchema),
     defaultValues: { config: {} }
   });
-
 
   const hasOverlap = date?.from && date?.to && existingRecesses.some(r => {
     return (date.from! <= r.endDate && date.to! >= r.startDate);
@@ -202,12 +199,12 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
             size="icon" 
             className="h-10 w-10 text-muted-foreground hover:text-foreground"
           >
-            <CalendarIcon className="w-5 h-5" />
+            <ParasolIcon className="w-5 h-5" />
             <span className="sr-only">{t('communicateRecess') || "Comunicar Recesso"}</span>
           </Button>
         ) : (
           <Button variant="outline" className="gap-2 font-bold">
-            <CalendarIcon className="w-4 h-4 mr-2" />
+            <ParasolIcon className="w-4 h-4 mr-2" />
             {t('communicateRecess') || "Comunicar Recesso"}
           </Button>
         )}
