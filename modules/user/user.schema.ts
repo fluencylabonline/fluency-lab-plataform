@@ -98,6 +98,10 @@ export const usersTable = pgTable("users", {
   cancellationPixCode: text("cancellation_pix_code"),
   cancellationPixImage: text("cancellation_pix_image"),
   cancellationAmount: integer("cancellation_amount"),
+
+  // PWA Tracking
+  pwaInstalled: boolean("pwa_installed").notNull().default(false),
+  pwaInstalledAt: timestamp("pwa_installed_at"),
 });
 
 // Schemas

@@ -684,3 +684,30 @@ export const sendPasswordResetConfirmationAction = actionClient
       return { success: false, error: "error" };
     }
   });
+
+export const trackPwaInstallationAction = protectedAction
+  .metadata({ name: "trackPwaInstallation" })
+  .action(async ({ ctx }) => {
+    try {
+      // Rate limit: max 5 calls per hour per user (idempotent guard on server)
+      const limit = await checkRateLimit("pwa_install_track", ctx.user.id, 5, 3600 * 1000);
+      if (!limit.success) return { success: false, error: "rateLimitExceeded" };
+
+      // Fetch current state to avoid overwriting an already-set timestamp
+      const user = await userService.getUserById(ctx.user.id);
+      if (!user) return { success: false, error: "userNotFound" };
+
+      // Idempotent: only write if not already tracked
+      if (!user.pwaInstalled) {
+        await userService.updateUser(ctx.user.id, {
+          pwaInstalled: true,
+          pwaInstalledAt: new Date(),
+        });
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error("[trackPwaInstallationAction] Error:", error);
+      return { success: false, error: "error" };
+    }
+  });

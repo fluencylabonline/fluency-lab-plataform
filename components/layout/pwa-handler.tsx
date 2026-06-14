@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { saveSubscriptionAction } from "@/modules/notification/notification.actions";
+import { trackPwaInstallationAction } from "@/modules/user/user.actions";
 import { env } from "@/env";
 
 function urlBase64ToUint8Array(base64String: string) {
@@ -104,6 +105,38 @@ export function PwaHandler() {
       window.removeEventListener("beforeinstallprompt" as unknown as keyof WindowEventMap, handleBeforeInstallPrompt as EventListener);
     };
   }, [setDeferredPrompt, setRegistration, setUpdateAvailable]);
+
+  // Option A: Track PWA install event (fires when user completes the install prompt)
+  useEffect(() => {
+    if (!user) return;
+
+    const handleAppInstalled = async () => {
+      console.log("[PWA] appinstalled event fired — tracking installation");
+      await trackPwaInstallationAction();
+    };
+
+    window.addEventListener("appinstalled", handleAppInstalled);
+    return () => window.removeEventListener("appinstalled", handleAppInstalled);
+  }, [user]);
+
+  // Option B: Track existing PWA users who are already running in standalone mode
+  // This covers students who installed the PWA before this feature was shipped.
+  useEffect(() => {
+    if (!user) return;
+
+    const isAlreadyTracked = user.pwaInstalled === true;
+    if (isAlreadyTracked) return;
+
+    const isInStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+
+    if (isInStandalone) {
+      console.log("[PWA] Standalone mode detected for untracked user — marking installation");
+      trackPwaInstallationAction();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   // Sync Push Notification Subscription with backend only when user is authenticated
   useEffect(() => {

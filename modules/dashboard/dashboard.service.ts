@@ -39,10 +39,11 @@ export const dashboardService = {
     }));
 
     // 3. Academic & Engagement
-    const [attendanceRaw, funnelRaw, popularCourses] = await Promise.all([
+    const [attendanceRaw, funnelRaw, popularCourses, pwaStats] = await Promise.all([
       dashboardRepository.getAttendanceStats(),
       dashboardRepository.getOnboardingFunnel(),
       dashboardRepository.getPopularCourses(5),
+      dashboardRepository.getPwaStats(),
     ]);
 
     const attendance = {
@@ -107,7 +108,8 @@ export const dashboardService = {
           enrollments: c.enrollments
         })),
         pendingCredits: 0, // TODO: Implement credits count in repository if needed
-      }
+      },
+      pwa: pwaStats,
     };
   }
 };

@@ -7,6 +7,21 @@ export interface StatCardData {
   format?: "currency" | "number" | "percentage";
 }
 
+export interface PwaStudent {
+  id: string;
+  name: string;
+  email: string;
+  photoUrl: string | null;
+  pwaInstalled: boolean;
+  pwaInstalledAt: Date | null;
+}
+
+export interface PwaStats {
+  total: number;
+  installed: number;
+  students: PwaStudent[];
+}
+
 export interface MonthlyFinance {
   month: string;
   income: number;
@@ -49,4 +64,5 @@ export interface AdminDashboardOverview {
     popularCourses: PopularCourse[];
     pendingCredits: number;
   };
+  pwa: PwaStats;
 }

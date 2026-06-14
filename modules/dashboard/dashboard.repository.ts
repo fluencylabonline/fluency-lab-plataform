@@ -239,5 +239,26 @@ export const dashboardRepository = {
       .limit(limit);
 
     return result;
+  },
+
+  async getPwaStats() {
+    const students = await db
+      .select({
+        id: usersTable.id,
+        name: usersTable.name,
+        email: usersTable.email,
+        photoUrl: usersTable.photoUrl,
+        pwaInstalled: usersTable.pwaInstalled,
+        pwaInstalledAt: usersTable.pwaInstalledAt,
+      })
+      .from(usersTable)
+      .where(and(eq(usersTable.role, "student"), eq(usersTable.isActive, true)))
+      .orderBy(desc(usersTable.pwaInstalled), usersTable.name);
+
+    const total = students.length;
+    const installed = students.filter((s) => s.pwaInstalled).length;
+
+    return { total, installed, students };
   }
 };
+
