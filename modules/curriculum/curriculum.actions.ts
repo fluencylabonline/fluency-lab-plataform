@@ -422,6 +422,7 @@ export const getLessonsAction = protectedAction
     offset: z.number().optional().default(0),
     languageId: z.string().optional(),
     difficulty: z.string().optional(),
+    status: z.string().optional(),
   }))
   .action(async ({ parsedInput }) => {
     return await curriculumRepository.findLessons(parsedInput);

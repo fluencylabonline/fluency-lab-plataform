@@ -28,7 +28,7 @@ export function LessonList({ initialData, languages }: LessonListProps) {
   const { data, size, setSize, isValidating } = useSWRInfinite<LessonSummary[]>(
     (pageIndex, previousPageData) => {
       if (previousPageData && !previousPageData.length) return null;
-      return ["lessons", pageIndex, search, selectedLanguage, selectedDifficulty];
+      return ["lessons", pageIndex, search, selectedLanguage, selectedDifficulty, "ready"];
     },
     async ([, index, search, lang, diff]: [string, number, string, string | null, string | null]): Promise<LessonSummary[]> => {
       const result = await getLessonsAction({
@@ -37,6 +37,7 @@ export function LessonList({ initialData, languages }: LessonListProps) {
         offset: index * PAGE_SIZE,
         languageId: lang || undefined,
         difficulty: diff || undefined,
+        status: "ready",
       });
       if (!result?.data) throw new Error(result?.serverError || "Failed to fetch");
       return result.data;

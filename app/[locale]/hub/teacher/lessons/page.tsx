@@ -10,7 +10,7 @@ export default async function LessonsPage() {
     redirect("/signin");
   }
 
-  const initialLessons = await curriculumService.getLessonsPaginated({ limit: 20 });
+  const initialLessons = await curriculumService.getLessonsPaginated({ limit: 20, status: "ready" });
   const languages = await curriculumService.findAllLanguages();
 
   return (

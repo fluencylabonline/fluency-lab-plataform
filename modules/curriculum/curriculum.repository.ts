@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import {
-  languages, media, learningItems, lessons, lessonLearningItems
+  languages, media, learningItems, lessons, lessonLearningItems, cefrLevelEnum, lessonStatusEnum
 } from "./curriculum.schema";
 import { LessonWithDetails, LessonSummary } from "./curriculum.types";
 import { eq, and, isNull, sql, desc, inArray } from "drizzle-orm";
@@ -217,11 +217,20 @@ export const curriculumRepository = {
       }
     }) as unknown as Promise<LessonSummary[]>;
   },
-  async findLessons(params: { search?: string, limit?: number, offset?: number }): Promise<LessonSummary[]> {
-    const { search, limit = 50, offset = 0 } = params;
+  async findLessons(params: { search?: string, limit?: number, offset?: number, languageId?: string, difficulty?: string, status?: string }): Promise<LessonSummary[]> {
+    const { search, limit = 50, offset = 0, languageId, difficulty, status } = params;
     const filters = [isNull(lessons.deletedAt)];
     if (search) {
       filters.push(sql`${lessons.title} ILIKE ${`%${search}%`}`);
+    }
+    if (languageId) {
+      filters.push(eq(lessons.languageId, languageId));
+    }
+    if (difficulty) {
+      filters.push(eq(lessons.difficulty, difficulty as typeof cefrLevelEnum.enumValues[number]));
+    }
+    if (status) {
+      filters.push(eq(lessons.status, status as typeof lessonStatusEnum.enumValues[number]));
     }
     return db.query.lessons.findMany({
       where: and(...filters),

@@ -560,7 +560,7 @@ export const curriculumService = {
     return curriculumRepository.findAllLessons();
   },
 
-  async getLessonsPaginated(params: { search?: string, limit?: number, offset?: number }) {
+  async getLessonsPaginated(params: { search?: string, limit?: number, offset?: number, status?: string }) {
     return curriculumRepository.findLessons(params);
   },
 
