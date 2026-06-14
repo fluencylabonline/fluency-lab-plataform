@@ -18,13 +18,14 @@ import {
   Repeat,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/ui/use-device";
+import { useRouter } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { notify } from "@/components/ui/toaster";
 import {
   deleteSlotAction,
   updateSlotAction,
-  checkSlotConflictAction
+  checkSlotConflictAction,
 } from "@/modules/scheduling/scheduling.actions";
 import { getLessonsAction } from "@/modules/curriculum/curriculum.actions";
 import { CalendarEvent } from "@/components/ui/calendar-view";
@@ -38,7 +39,7 @@ import {
   VaultFooter,
   VaultPrimaryButton,
   VaultSecondaryButton,
-  VaultIcon
+  VaultIcon,
 } from "@/components/ui/vault";
 import {
   Command,
@@ -68,6 +69,7 @@ export function SlotDetailsVault({
 }: SlotDetailsVaultProps) {
   const t = useTranslations("UserManagement");
   const isMobile = useIsMobile();
+  const router = useRouter();
 
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteScope, setShowDeleteScope] = useState(false);
@@ -90,7 +92,10 @@ export function SlotDetailsVault({
     planName: null as string | null,
   });
 
-  const [conflict, setConflict] = useState<{ startAt: Date; endAt: Date } | null>(null);
+  const [conflict, setConflict] = useState<{
+    startAt: Date;
+    endAt: Date;
+  } | null>(null);
   const [isCheckingConflict, setIsCheckingConflict] = useState(false);
 
   const [lessonsSearch, setLessonsSearch] = useState("");
@@ -115,7 +120,12 @@ export function SlotDetailsVault({
 
   // Lessons search
   useEffect(() => {
-    if (!lessonsSearch || lessonsSearch.length < 2 || !event?.studentId || !event?.assignedPlanId) {
+    if (
+      !lessonsSearch ||
+      lessonsSearch.length < 2 ||
+      !event?.studentId ||
+      !event?.assignedPlanId
+    ) {
       setLessonsResults([]);
       return;
     }
@@ -124,7 +134,7 @@ export function SlotDetailsVault({
       setIsSearchingLessons(true);
       try {
         const result = await getLessonsAction({
-          search: lessonsSearch
+          search: lessonsSearch,
         });
         if (result?.data) {
           setLessonsResults(result.data);
@@ -167,14 +177,14 @@ export function SlotDetailsVault({
           teacherId,
           startAt: start.toISOString(),
           endAt: end.toISOString(),
-          excludeSlotId: event.id
+          excludeSlotId: event.id,
         });
 
         const data = result?.data;
         if (data?.success && data.hasConflict && data.conflict) {
           setConflict({
             startAt: new Date(data.conflict.startAt),
-            endAt: new Date(data.conflict.endAt)
+            endAt: new Date(data.conflict.endAt),
           });
         } else {
           setConflict(null);
@@ -222,14 +232,18 @@ export function SlotDetailsVault({
       try {
         const result = await deleteSlotAction({
           slotId: event.id,
-          scope: confirmDialog.scope
+          scope: confirmDialog.scope,
         });
         if (result?.data?.success) {
           notify.success(t("slotDeleted") || "Horário excluído com sucesso!");
           onOpenChange(false);
           onSuccess();
         } else {
-          notify.error(result?.data?.error || t("deleteError") || "Erro ao excluir horário.");
+          notify.error(
+            result?.data?.error ||
+              t("deleteError") ||
+              "Erro ao excluir horário.",
+          );
         }
       } catch {
         notify.error(t("deleteError") || "Erro ao excluir horário.");
@@ -259,7 +273,7 @@ export function SlotDetailsVault({
             planName: editForm.planName,
             startAt: start.toISOString(),
             endAt: end.toISOString(),
-          }
+          },
         });
 
         if (result?.data?.success) {
@@ -267,7 +281,11 @@ export function SlotDetailsVault({
           setIsEditing(false);
           onSuccess();
         } else {
-          notify.error(result?.data?.error || t("updateError") || "Erro ao atualizar horário.");
+          notify.error(
+            result?.data?.error ||
+              t("updateError") ||
+              "Erro ao atualizar horário.",
+          );
         }
       } catch {
         notify.error(t("updateError") || "Erro ao atualizar horário.");
@@ -286,14 +304,28 @@ export function SlotDetailsVault({
         <VaultContent>
           <VaultHeader>
             <VaultIcon type={isEditing ? "edit" : "confirm"} />
-            <div className="flex flex-col">
-              <VaultTitle>{isEditing ? "Editar Aula" : "Detalhes da Aula"}</VaultTitle>
+            <div className="flex flex-col items-center">
+              <VaultTitle>
+                {isEditing ? "Editar Aula" : "Detalhes da Aula"}
+              </VaultTitle>
               <VaultDescription>
                 {isEditing
                   ? "Altere as informações desta aula e escolha o alcance da mudança."
-                  : "Confira as informações completas desta reserva."
-                }
+                  : "Confira as informações completas desta reserva."}
               </VaultDescription>
+              {event.status === "canceled-student" &&
+                !event.convertedToAvailableSlot && (
+                  <button
+                    onClick={() => {
+                      onOpenChange(false);
+                      router.push(`/convert-class/${event.id}`);
+                    }}
+                    className="w-fit flex flex-row items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 border border-amber-500/30 text-amber-500 hover:bg-amber-500/25 transition-colors"
+                  >
+                    <ArrowRightLeft className="w-3 h-3" />
+                    Converter
+                  </button>
+                )}
             </div>
           </VaultHeader>
 
@@ -307,36 +339,52 @@ export function SlotDetailsVault({
                   <div>
                     <h3 className="text-lg font-bold">{event.title}</h3>
                     <div className="flex items-start gap-1">
-                      <Badge variant="outline" className={cn(
-                        "text-[10px] font-black uppercase",
-                        event.type === "REPOSICAO" ? "text-orange-500 border-orange-500/20" : "text-blue-500 border-blue-500/20",
-                        isMobile && "flex items-center justify-center p-1.5 h-6 w-6"
-                      )}>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "text-[10px] font-black uppercase",
+                          event.type === "REPOSICAO"
+                            ? "text-orange-500 border-orange-500/20"
+                            : "text-blue-500 border-blue-500/20",
+                          isMobile &&
+                            "flex items-center justify-center p-1.5 h-6 w-6",
+                        )}
+                      >
                         {isMobile ? (
                           event.type === "REPOSICAO" ? (
                             <ArrowRightLeft className="w-3.5 h-3.5" />
                           ) : (
                             <BookOpen className="w-3.5 h-3.5" />
                           )
+                        ) : event.type === "REPOSICAO" ? (
+                          "Reposição"
                         ) : (
-                          event.type === "REPOSICAO" ? "Reposição" : "Aula Regular"
+                          "Aula Regular"
                         )}
                       </Badge>
-                      <Badge variant="secondary" className={cn(
-                        "text-[10px] font-black uppercase",
-                        isMobile && "flex items-center justify-center p-1.5 h-6 w-6"
-                      )}>
+                      <Badge
+                        variant="secondary"
+                        className={cn(
+                          "text-[10px] font-black uppercase",
+                          isMobile &&
+                            "flex items-center justify-center p-1.5 h-6 w-6",
+                        )}
+                      >
                         {isMobile ? (
                           event.isRecurring ? (
                             <Repeat className="w-3.5 h-3.5" />
                           ) : (
                             <CalendarIcon className="w-3.5 h-3.5" />
                           )
+                        ) : event.isRecurring ? (
+                          "Recorrente"
                         ) : (
-                          event.isRecurring ? "Recorrente" : "Aula Única"
+                          "Aula Única"
                         )}
                       </Badge>
-                      <Badge className="text-[10px] font-black uppercase">{event.status}</Badge>
+                      <Badge className="text-[10px] font-black uppercase">
+                        {event.status}
+                      </Badge>
                     </div>
                   </div>
                 </div>
@@ -345,17 +393,24 @@ export function SlotDetailsVault({
                   <div className="p-4 rounded-md bg-white/[0.02] border border-white/5 space-y-1">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <CalendarIcon className="w-3 h-3" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">Data</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest">
+                        Data
+                      </span>
                     </div>
-                    <p className="text-sm font-bold text-text">{format(event.start, "dd 'de' MMMM, yyyy")}</p>
+                    <p className="text-sm font-bold text-text">
+                      {format(event.start, "dd 'de' MMMM, yyyy")}
+                    </p>
                   </div>
                   <div className="p-4 rounded-md bg-white/[0.02] border border-white/5 space-y-1">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Clock className="w-3 h-3" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">Horário</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest">
+                        Horário
+                      </span>
                     </div>
                     <p className="text-sm font-bold text-text">
-                      {format(event.start, "HH:mm")} - {format(event.end || event.start, "HH:mm")}
+                      {format(event.start, "HH:mm")} -{" "}
+                      {format(event.end || event.start, "HH:mm")}
                     </p>
                   </div>
                 </div>
@@ -364,17 +419,27 @@ export function SlotDetailsVault({
                   <div className="p-4 rounded-md bg-primary/5 border border-primary/10 space-y-3">
                     <div className="flex items-center gap-2 text-primary">
                       <ArrowRightLeft className="w-4 h-4" />
-                      <h4 className="text-xs font-black uppercase tracking-widest">Período da Recorrência</h4>
+                      <h4 className="text-xs font-black uppercase tracking-widest">
+                        Período da Recorrência
+                      </h4>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <span className="text-[10px] font-black uppercase text-muted-foreground block mb-1">Início</span>
-                        <p className="text-sm font-bold text-text">{format(event.ruleStartDate, "dd/MM/yyyy")}</p>
+                        <span className="text-[10px] font-black uppercase text-muted-foreground block mb-1">
+                          Início
+                        </span>
+                        <p className="text-sm font-bold text-text">
+                          {format(event.ruleStartDate, "dd/MM/yyyy")}
+                        </p>
                       </div>
                       <div>
-                        <span className="text-[10px] font-black uppercase text-muted-foreground block mb-1">Término</span>
+                        <span className="text-[10px] font-black uppercase text-muted-foreground block mb-1">
+                          Término
+                        </span>
                         <p className="text-sm font-bold text-text">
-                          {event.ruleEndDate ? format(event.ruleEndDate, "dd/MM/yyyy") : "Indeterminado"}
+                          {event.ruleEndDate
+                            ? format(event.ruleEndDate, "dd/MM/yyyy")
+                            : "Indeterminado"}
                         </p>
                       </div>
                     </div>
@@ -387,8 +452,12 @@ export function SlotDetailsVault({
                       <BookOpen className="w-4 h-4 text-primary" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Conteúdo / Plano</h4>
-                      <p className="text-sm font-bold text-text">{event.location || "Nenhum conteúdo definido"}</p>
+                      <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                        Conteúdo / Plano
+                      </h4>
+                      <p className="text-sm font-bold text-text">
+                        {event.location || "Nenhum conteúdo definido"}
+                      </p>
                     </div>
                   </div>
 
@@ -398,7 +467,9 @@ export function SlotDetailsVault({
                         <Info className="w-4 h-4 text-primary" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Notas</h4>
+                        <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                          Notas
+                        </h4>
                         <p className="text-sm text-text/80 leading-relaxed">
                           {event.notes}
                         </p>
@@ -412,7 +483,9 @@ export function SlotDetailsVault({
                 <div className="space-y-4">
                   {event.studentId && event.assignedPlanId && event.isActive ? (
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Buscar Aula (Curriculum)</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                        Buscar Aula (Curriculum)
+                      </label>
                       <Command className="rounded-lg border border-white/10 bg-white/5">
                         <CommandInput
                           placeholder="Buscar por título..."
@@ -422,23 +495,29 @@ export function SlotDetailsVault({
                         />
                         <CommandList className="max-h-[200px]">
                           {isSearchingLessons && (
-                            <div className="p-4 text-xs text-center text-muted-foreground">Buscando...</div>
+                            <div className="p-4 text-xs text-center text-muted-foreground">
+                              Buscando...
+                            </div>
                           )}
-                          {!isSearchingLessons && lessonsResults.length === 0 && lessonsSearch.length >= 2 && (
-                            <CommandEmpty>Nenhuma aula encontrada.</CommandEmpty>
-                          )}
+                          {!isSearchingLessons &&
+                            lessonsResults.length === 0 &&
+                            lessonsSearch.length >= 2 && (
+                              <CommandEmpty>
+                                Nenhuma aula encontrada.
+                              </CommandEmpty>
+                            )}
                           {!isSearchingLessons && lessonsResults.length > 0 && (
                             <CommandGroup>
                               {lessonsResults.map((lesson) => (
                                 <CommandItem
                                   key={lesson.id}
                                   onSelect={() => {
-                                    setEditForm(prev => ({
+                                    setEditForm((prev) => ({
                                       ...prev,
                                       lessonTitle: lesson.title,
                                       lessonId: lesson.id,
                                       planId: event.assignedPlanId || null,
-                                      planName: lesson.title
+                                      planName: lesson.title,
                                     }));
                                     setLessonsSearch("");
                                     setLessonsResults([]);
@@ -446,7 +525,12 @@ export function SlotDetailsVault({
                                   className="text-xs flex items-center justify-between"
                                 >
                                   <span>{lesson.title}</span>
-                                  <Badge variant="outline" className="text-[8px] font-black">{lesson.difficulty}</Badge>
+                                  <Badge
+                                    variant="outline"
+                                    className="text-[8px] font-black"
+                                  >
+                                    {lesson.difficulty}
+                                  </Badge>
                                 </CommandItem>
                               ))}
                             </CommandGroup>
@@ -459,7 +543,13 @@ export function SlotDetailsVault({
                             {editForm.lessonTitle}
                           </span>
                           <button
-                            onClick={() => setEditForm(prev => ({ ...prev, lessonTitle: "", lessonId: null }))}
+                            onClick={() =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                lessonTitle: "",
+                                lessonId: null,
+                              }))
+                            }
                             className="text-primary hover:text-primary/80"
                           >
                             <XCircle className="w-3 h-3" />
@@ -471,20 +561,34 @@ export function SlotDetailsVault({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Horário de Início</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                        Horário de Início
+                      </label>
                       <input
                         type="time"
                         value={editForm.startTime}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, startTime: e.target.value }))}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({
+                            ...prev,
+                            startTime: e.target.value,
+                          }))
+                        }
                         className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-sm text-text focus:outline-none focus:border-primary transition-colors"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Horário de Término</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                        Horário de Término
+                      </label>
                       <input
                         type="time"
                         value={editForm.endTime}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, endTime: e.target.value }))}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({
+                            ...prev,
+                            endTime: e.target.value,
+                          }))
+                        }
                         className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-sm text-text focus:outline-none focus:border-primary transition-colors"
                       />
                     </div>
@@ -494,28 +598,34 @@ export function SlotDetailsVault({
                     <div className="p-2 rounded bg-rose-500/10 border border-rose-500/20 flex items-start gap-2 animate-in fade-in slide-in-from-top-1">
                       <AlertTriangle className="w-3 h-3 text-rose-500 mt-0.5 shrink-0" />
                       <p className="text-[10px] text-rose-500 leading-tight font-medium">
-                        {t("conflictWarning", { 
-                          start: format(conflict.startAt, "HH:mm"), 
-                          end: format(conflict.endAt, "HH:mm") 
-                        }) || `Conflito detectado: O professor já possui uma aula das ${format(conflict.startAt, "HH:mm")} às ${format(conflict.endAt, "HH:mm")}.`}
+                        {t("conflictWarning", {
+                          start: format(conflict.startAt, "HH:mm"),
+                          end: format(conflict.endAt, "HH:mm"),
+                        }) ||
+                          `Conflito detectado: O professor já possui uma aula das ${format(conflict.startAt, "HH:mm")} às ${format(conflict.endAt, "HH:mm")}.`}
                       </p>
                     </div>
                   )}
 
-                  {editForm.endTime && editForm.startTime && editForm.endTime <= editForm.startTime && (
-                    <div className="p-2 rounded bg-amber-500/10 border border-amber-500/20 flex items-start gap-2 animate-in fade-in slide-in-from-top-1">
-                      <AlertCircle className="w-3 h-3 text-amber-500 mt-0.5 shrink-0" />
-                      <p className="text-[10px] text-amber-500 leading-tight font-medium">
-                        {t("invalidTimeWarning") || "Horário inválido: O término deve ser após o início."}
-                      </p>
-                    </div>
-                  )}
+                  {editForm.endTime &&
+                    editForm.startTime &&
+                    editForm.endTime <= editForm.startTime && (
+                      <div className="p-2 rounded bg-amber-500/10 border border-amber-500/20 flex items-start gap-2 animate-in fade-in slide-in-from-top-1">
+                        <AlertCircle className="w-3 h-3 text-amber-500 mt-0.5 shrink-0" />
+                        <p className="text-[10px] text-amber-500 leading-tight font-medium">
+                          {t("invalidTimeWarning") ||
+                            "Horário inválido: O término deve ser após o início."}
+                        </p>
+                      </div>
+                    )}
                 </div>
 
                 <div className="p-4 rounded-md bg-amber-500/5 border border-amber-500/10 flex items-start gap-3">
                   <Info className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                   <p className="text-[11px] text-amber-500/80 leading-relaxed font-medium">
-                    Atenção: Ao alterar o horário de uma aula recorrente, você poderá escolher se a mudança afetará apenas este dia ou todos os próximos horários desta regra.
+                    Atenção: Ao alterar o horário de uma aula recorrente, você
+                    poderá escolher se a mudança afetará apenas este dia ou
+                    todos os próximos horários desta regra.
                   </p>
                 </div>
               </div>
@@ -553,7 +663,12 @@ export function SlotDetailsVault({
                 </VaultSecondaryButton>
                 <VaultPrimaryButton
                   onClick={handleSaveClick}
-                  disabled={isUpdating || !!conflict || (editForm.endTime <= editForm.startTime) || isCheckingConflict}
+                  disabled={
+                    isUpdating ||
+                    !!conflict ||
+                    editForm.endTime <= editForm.startTime ||
+                    isCheckingConflict
+                  }
                 >
                   {isUpdating ? "Salvando..." : "Salvar Alterações"}
                 </VaultPrimaryButton>
@@ -570,7 +685,9 @@ export function SlotDetailsVault({
             <VaultIcon type="warning" />
             <div className="flex flex-col">
               <VaultTitle>Excluir Aula</VaultTitle>
-              <VaultDescription>Como você deseja prosseguir com a exclusão?</VaultDescription>
+              <VaultDescription>
+                Como você deseja prosseguir com a exclusão?
+              </VaultDescription>
             </div>
           </VaultHeader>
           <VaultBody>
@@ -580,8 +697,12 @@ export function SlotDetailsVault({
                 disabled={isDeleting}
                 className="w-full p-4 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 text-left transition-all"
               >
-                <h4 className="text-sm font-bold text-text">Apenas esta aula</h4>
-                <p className="text-xs text-muted-foreground mt-1">Remove apenas o horário selecionado do calendário.</p>
+                <h4 className="text-sm font-bold text-text">
+                  Apenas esta aula
+                </h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Remove apenas o horário selecionado do calendário.
+                </p>
               </button>
 
               <button
@@ -589,8 +710,13 @@ export function SlotDetailsVault({
                 disabled={isDeleting}
                 className="w-full p-4 rounded-md border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-left transition-all"
               >
-                <h4 className="text-sm font-bold text-rose-500">Esta e todas as próximas</h4>
-                <p className="text-xs text-rose-500/60 mt-1">Remove a aula atual e encerra a recorrência para datas futuras.</p>
+                <h4 className="text-sm font-bold text-rose-500">
+                  Esta e todas as próximas
+                </h4>
+                <p className="text-xs text-rose-500/60 mt-1">
+                  Remove a aula atual e encerra a recorrência para datas
+                  futuras.
+                </p>
               </button>
             </div>
           </VaultBody>
@@ -604,7 +730,10 @@ export function SlotDetailsVault({
             <VaultIcon type="warning" />
             <div className="flex flex-col">
               <VaultTitle>Alcance da Edição</VaultTitle>
-              <VaultDescription>Esta aula faz parte de uma recorrência. Onde deseja aplicar as mudanças?</VaultDescription>
+              <VaultDescription>
+                Esta aula faz parte de uma recorrência. Onde deseja aplicar as
+                mudanças?
+              </VaultDescription>
             </div>
           </VaultHeader>
           <VaultBody>
@@ -614,8 +743,12 @@ export function SlotDetailsVault({
                 disabled={isUpdating}
                 className="w-full p-4 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 text-left transition-all"
               >
-                <h4 className="text-sm font-bold text-text">Apenas esta aula</h4>
-                <p className="text-xs text-muted-foreground mt-1">A mudança de horário e conteúdo afetará somente este dia.</p>
+                <h4 className="text-sm font-bold text-text">
+                  Apenas esta aula
+                </h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  A mudança de horário e conteúdo afetará somente este dia.
+                </p>
               </button>
 
               <button
@@ -623,8 +756,13 @@ export function SlotDetailsVault({
                 disabled={isUpdating}
                 className="w-full p-4 rounded-md border border-primary/20 bg-primary/5 hover:bg-primary/10 text-left transition-all"
               >
-                <h4 className="text-sm font-bold text-primary">Esta e todas as próximas</h4>
-                <p className="text-xs text-primary/60 mt-1">Atualiza a regra de recorrência, afetando todas as aulas futuras.</p>
+                <h4 className="text-sm font-bold text-primary">
+                  Esta e todas as próximas
+                </h4>
+                <p className="text-xs text-primary/60 mt-1">
+                  Atualiza a regra de recorrência, afetando todas as aulas
+                  futuras.
+                </p>
               </button>
             </div>
           </VaultBody>
@@ -632,13 +770,20 @@ export function SlotDetailsVault({
       </Vault>
 
       {/* Confirmation Vault */}
-      <Vault open={confirmDialog.isOpen} onClose={() => setConfirmDialog({ isOpen: false, type: null, scope: null })}>
+      <Vault
+        open={confirmDialog.isOpen}
+        onClose={() =>
+          setConfirmDialog({ isOpen: false, type: null, scope: null })
+        }
+      >
         <VaultContent>
           <VaultHeader>
             <VaultIcon type="warning" />
             <div className="flex flex-col">
               <VaultTitle>
-                {confirmDialog.type === "delete" ? "Confirmar Exclusão" : "Confirmar Alterações"}
+                {confirmDialog.type === "delete"
+                  ? "Confirmar Exclusão"
+                  : "Confirmar Alterações"}
               </VaultTitle>
               <VaultDescription>
                 {confirmDialog.type === "delete"
@@ -653,7 +798,9 @@ export function SlotDetailsVault({
           </VaultHeader>
           <VaultFooter>
             <VaultSecondaryButton
-              onClick={() => setConfirmDialog({ isOpen: false, type: null, scope: null })}
+              onClick={() =>
+                setConfirmDialog({ isOpen: false, type: null, scope: null })
+              }
               disabled={isDeleting || isUpdating}
             >
               Cancelar
@@ -662,7 +809,7 @@ export function SlotDetailsVault({
               onClick={executeConfirmAction}
               disabled={isDeleting || isUpdating}
             >
-              {(isDeleting || isUpdating) ? "Processando..." : "Sim, confirmar"}
+              {isDeleting || isUpdating ? "Processando..." : "Sim, confirmar"}
             </VaultPrimaryButton>
           </VaultFooter>
         </VaultContent>

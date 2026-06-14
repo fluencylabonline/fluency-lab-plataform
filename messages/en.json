@@ -410,7 +410,9 @@
     "system": "System",
     "unauthorized": "You do not have permission to perform this action.",
     "unreadSuffix": "{count} unread",
-    "select": "Select"
+    "select": "Select",
+    "native_language": "Native language",
+    "level": "Level"
   },
   "ConvertClass": {
     "cancelButton": "Cancel",

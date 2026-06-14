@@ -3,6 +3,9 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { schedulingRepository } from "@/modules/scheduling/scheduling.repository";
 import { ConvertClassForm } from "./_components/ConvertClassForm";
 import { userRepository } from "@/modules/user/user.repository";
+import { BackButton } from "@/components/ui/back-button";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 
 interface PageProps {
   params: Promise<{ id: string; locale: string }>;
@@ -37,7 +40,18 @@ export default async function ConvertClassPage({ params }: PageProps) {
   const student = slot.studentId ? await userRepository.findById(slot.studentId) : null;
 
   return (
-    <main className="container">
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="sticky top-0 w-full border-b bg-background">
+        <div className="flex h-fit items-center justify-between">
+          <BackButton href="/hub/teacher/schedule" />
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher />
+            <ThemeSwitcher />
+          </div>
+        </div>
+      </header>
+      <main className="container max-w-2xl py-12 px-4">
+    
       <ConvertClassForm 
         classData={{
           id: slot.id,
@@ -46,5 +60,6 @@ export default async function ConvertClassPage({ params }: PageProps) {
         }} 
       />
     </main>
+    </div>
   );
 }

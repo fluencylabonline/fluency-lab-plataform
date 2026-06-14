@@ -20,6 +20,7 @@ export interface HeaderAction {
     label?: string;
     icon?: React.ReactNode;
     onClick?: () => void;
+    href?: string;
     className?: string;
     component?: React.ReactNode;
 }
@@ -87,6 +88,27 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                 {actions.map((act, index) => {
                     if (act.component) {
                         return <React.Fragment key={index}>{act.component}</React.Fragment>;
+                    }
+
+                    if (act.href) {
+                        return (
+                            <Link
+                                key={index}
+                                href={act.href}
+                                className={cn(
+                                    buttonVariants({
+                                        variant: isMobileSlot ? "ghost" : "outline",
+                                        size: isMobileSlot ? "icon" : "sm",
+                                    }),
+                                    "h-9",
+                                    isMobileSlot && "h-10 w-10",
+                                    act.className
+                                )}
+                            >
+                                <span className={cn(act.label && !isMobileSlot && "mr-2")}>{act.icon}</span>
+                                {!isMobileSlot && act.label && <span className="text-xs font-bold">{act.label}</span>}
+                            </Link>
+                        );
                     }
 
                     return (

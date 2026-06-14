@@ -410,7 +410,9 @@
     "system": "Sistema",
     "unauthorized": "Você não tem permissão para realizar esta ação.",
     "unreadSuffix": "{count} {count, plural, one {não lida} other {não lidas}}",
-    "select": "Selecione"
+    "select": "Selecione",
+    "native_language": "Idioma nativo",
+    "level": "Nivel"
   },
   "ConvertClass": {
     "cancelButton": "Cancelar",

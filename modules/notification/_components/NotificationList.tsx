@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useNotifications } from "@/hooks/notification/use-notifications";
 import {
   markNotificationAsReadAction,
@@ -20,11 +20,17 @@ export function NotificationList() {
 
   const unreadCount = notifications?.filter((n) => !n.isRead).length || 0;
 
-  const handleMarkAsRead = async (id: string) => {
+  const router = useRouter();
+
+  const handleMarkAsRead = async (id: string, actionUrl?: string | null) => {
     const result = await markNotificationAsReadAction({ id });
     if (result?.data?.success) {
       mutate();
-      notify.success("Notificação marcada como lida");
+      if (actionUrl) {
+        router.push(actionUrl);
+      } else {
+        notify.success("Notificação marcada como lida");
+      }
     } else {
       notify.error("Erro ao marcar como lida");
     }
@@ -88,7 +94,7 @@ export function NotificationList() {
               "flex flex-col items-start gap-1 p-4 cursor-pointer hover:bg-accent transition-colors rounded-lg mb-1",
               !notification.isRead && "bg-primary/5"
             )}
-            onClick={() => handleMarkAsRead(notification.id)}
+            onClick={() => handleMarkAsRead(notification.id, notification.actionUrl)}
           >
             <div className="flex w-full items-start justify-between gap-2">
               <span className={cn("text-sm font-medium", !notification.isRead && "text-primary")}>

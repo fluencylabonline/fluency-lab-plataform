@@ -29,7 +29,7 @@ export default async function RecessActivitiesPage() {
           {
             label: "Criar atividade",
             icon: <Plus className="w-4 h-4" />,
-            //onClick: () => router.push("/produtos/novo"),
+            href: "/hub/teacher/recess/new",
           },
         ]}
       />

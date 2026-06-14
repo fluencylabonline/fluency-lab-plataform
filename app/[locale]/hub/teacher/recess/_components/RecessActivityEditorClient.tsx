@@ -19,7 +19,6 @@ import {
   Circle,
   Loader2,
   Plus,
-  ArrowLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -104,18 +103,10 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
       <Header
         title={initialActivity ? (t('editActivity') || "Editar Atividade") : (t('newRecessActivity') || "Nova Atividade de Recesso")}
         subtitle={t('recessActivitySubtitle') || "As atividades de recesso são lições de fallback para seus alunos"}
-      >
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="gap-2" 
-          onClick={() => router.back()}
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {tCommon('back') || "Voltar"}
-        </Button>
-      </Header>
-
+        backHref="/hub/teacher/recess"
+        className="contents"
+      />
+      
       <main className="flex-1 p-4 md:p-6 container max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
@@ -184,7 +175,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                   className="w-full gap-2 font-bold h-12 rounded-md"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                   {initialActivity ? (tCommon('saveChanges') || "Salvar Alterações") : (t('createActivity') || "Criar Atividade")}
                 </Button>
               </form>
@@ -195,7 +186,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                   className="w-full justify-start gap-3 h-12 rounded-md"
                   onClick={() => setActiveTab("content")}
                 >
-                  <FileText className="w-4 h-4" />
+                  <FileText className="w-4 h-4 mr-2" />
                   {t('activityContent') || "Conteúdo da Atividade"}
                 </Button>
                 <Button
@@ -203,7 +194,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
                   className="w-full justify-start gap-3 h-12 rounded-md"
                   onClick={() => setActiveTab("quiz")}
                 >
-                  <HelpCircle className="w-4 h-4" />
+                  <HelpCircle className="w-4 h-4 mr-2" />
                   {t('quizEvaluation') || "Avaliação (Quiz)"}
                   {quizQuestions.length > 0 && <Badge className="ml-auto">{quizQuestions.length}</Badge>}
                 </Button>
