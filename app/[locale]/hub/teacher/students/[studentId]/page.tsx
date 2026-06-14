@@ -28,7 +28,7 @@ export default async function StudentDetailsPage({ params }: StudentDetailsPageP
   }
 
   const now = new Date();
-  const [initialClasses, initialNotebooks, initialRoadmap] = await Promise.all([
+  const [initialClasses, initialNotebooks, initialRoadmap, profile] = await Promise.all([
     schedulingService.getStudentClassesByTeacher(
       user,
       studentId,
@@ -37,7 +37,10 @@ export default async function StudentDetailsPage({ params }: StudentDetailsPageP
     ),
     notebookService.getNotebooksForStudent(user.id, user.role, studentId),
     learningService.getStudentRoadmap(studentId),
+    learningService.findProfileByStudentId(studentId),
   ]);
+
+  const profileId = profile?.status === "active" ? profile.id : null;
 
   return (
     <StudentDetailsClient 
@@ -46,6 +49,7 @@ export default async function StudentDetailsPage({ params }: StudentDetailsPageP
       initialClasses={initialClasses}
       initialNotebooks={initialNotebooks}
       initialRoadmap={initialRoadmap}
+      profileId={profileId}
     />
   );
 }

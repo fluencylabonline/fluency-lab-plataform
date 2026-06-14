@@ -10,12 +10,18 @@ export const learningRepository = {
   async findProfileByStudentId(studentId: string) {
     return db.query.studentProfiles.findFirst({
       where: eq(studentProfiles.studentId, studentId),
+      with: {
+        student: true,
+      },
     });
   },
 
   async findProfileById(id: string) {
     return db.query.studentProfiles.findFirst({
       where: eq(studentProfiles.id, id),
+      with: {
+        student: true,
+      },
     });
   },
 

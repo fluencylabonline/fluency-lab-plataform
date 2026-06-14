@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import DOMPurify from "dompurify";
 import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import { ptBR } from "date-fns/locale";
 import { Switch } from "@/components/ui/switch";
 import { generatePersonalizedPlanAction, associateProfileToStudentAction } from "@/modules/learning/learning.actions";
 import { searchStudentsAction } from "@/modules/user/user.actions";
+import { useUserStore } from "@/modules/user/user.store";
 import { useTransition, useState } from "react";
 import { notify } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
@@ -40,6 +42,59 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Search, Check, Link as LinkIcon } from "lucide-react";
 
+function parseInlineMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>");
+}
+
+function markdownToHtml(markdown: string): string {
+  if (!markdown) return "";
+  const lines = markdown.split("\n");
+  let html = "";
+  let inList = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed === "") {
+      if (inList) {
+        html += "</ul>";
+        inList = false;
+      }
+      continue;
+    }
+
+    if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+      if (!inList) {
+        html += '<ul class="list-disc pl-5 space-y-1 my-2">';
+        inList = true;
+      }
+      html += `<li>${parseInlineMarkdown(trimmed.substring(2))}</li>`;
+      continue;
+    }
+
+    if (inList) {
+      html += "</ul>";
+      inList = false;
+    }
+
+    if (trimmed.startsWith("### ")) {
+      html += `<h3>${parseInlineMarkdown(trimmed.substring(4))}</h3>`;
+    } else if (trimmed.startsWith("## ")) {
+      html += `<h2>${parseInlineMarkdown(trimmed.substring(3))}</h2>`;
+    } else if (trimmed.startsWith("# ")) {
+      html += `<h1>${parseInlineMarkdown(trimmed.substring(2))}</h1>`;
+    } else {
+      html += `<p>${parseInlineMarkdown(trimmed)}</p>`;
+    }
+  }
+
+  if (inList) {
+    html += "</ul>";
+  }
+  return html;
+}
+
 interface ProfileDiagnosisViewProps {
   profile: {
     id: string;
@@ -57,9 +112,12 @@ interface ProfileDiagnosisViewProps {
     };
   };
   basePath?: string;
+  readOnly?: boolean;
 }
 
-export function ProfileDiagnosisView({ profile, basePath = "/hub/manager/students/onboarding" }: ProfileDiagnosisViewProps) {
+export function ProfileDiagnosisView({ profile, basePath = "/hub/manager/students/onboarding", readOnly = false }: ProfileDiagnosisViewProps) {
+  const { user: currentUser } = useUserStore();
+  const role = currentUser?.role;
   const [isPending, startTransition] = useTransition();
   const [allowSuggestions, setAllowSuggestions] = useState(true);
 
@@ -134,11 +192,13 @@ export function ProfileDiagnosisView({ profile, basePath = "/hub/manager/student
       <Header
         title={profile.student?.name || "Diagnóstico do Aluno"}
         subtitle="Análise pedagógica gerada por inteligência artificial com base no perfil e nivelamento."
+        className="contents"
+        backHref={(profile.studentId && role === "teacher") ? `/hub/teacher/students/${profile.studentId}` : (profile.studentId && role === "admin") ? `/hub/admin/students/${profile.studentId}` : basePath}
       >
         <div className="flex items-center gap-3 mt-6">
           <Link href={basePath}>
             <Button variant="ghost" size="sm" className="gap-2 rounded-md text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="h-4 w-4" /> Voltar para Listagem
+              <ArrowLeft className="h-4 w-4" /> {readOnly ? "Voltar para o Aluno" : "Voltar para Listagem"}
             </Button>
           </Link>
           <div className="h-4 w-px bg-border/60 mx-1" />
@@ -169,9 +229,12 @@ export function ProfileDiagnosisView({ profile, basePath = "/hub/manager/student
                   <div className="border border-border/60 rounded-md overflow-hidden bg-muted/5">
                     <div className="max-h-[500px] overflow-y-auto p-6 md:p-8 custom-scrollbar">
                       <div className="prose prose-zinc dark:prose-invert max-w-none">
-                        <div className="whitespace-pre-wrap text-base leading-relaxed text-foreground/80">
-                          {qualitativeNotes}
-                        </div>
+                        <div 
+                          className="text-base leading-relaxed text-foreground/80"
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(markdownToHtml(qualitativeNotes))
+                          }}
+                        />
                       </div>
                     </div>
                     <div className="px-6 py-3 border-t border-border/40 bg-muted/10 flex items-center justify-between text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
@@ -189,82 +252,84 @@ export function ProfileDiagnosisView({ profile, basePath = "/hub/manager/student
             </section>
 
             {/* Actions Section */}
-            <section className="space-y-4">
-              <div className="border border-border/60 rounded-md p-6 md:p-8 space-y-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-primary">
-                      <BrainCircuit className="h-4 w-4" />
-                      <h3 className="font-bold">Geração de Plano</h3>
-                    </div>
-                    <p className="text-sm text-muted-foreground max-w-md">
-                      Configure como o plano de estudos deve ser estruturado antes de prosseguir.
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-4 bg-muted/10 p-4 rounded-md border border-border/60">
-                    <div className="text-right">
-                      <p className="text-[10px] font-bold uppercase tracking-wider">IA Criativa</p>
-                      <p className="text-[10px] text-muted-foreground">Sugerir temas se faltar no banco</p>
-                    </div>
-                    <Switch
-                      checked={allowSuggestions}
-                      onCheckedChange={setAllowSuggestions}
-                      disabled={isPending}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  <Button
-                    onClick={handleGeneratePlan}
-                    disabled={!profile.studentId || !profile.student?.lastPlacementTestDate || isPending}
-                    className="h-14 px-8 rounded-md gap-3 text-lg font-bold shadow-sm"
-                  >
-                    {isPending ? (
-                      <>
-                        <div className="size-4 border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin rounded-full" />
-                        Gerando Plano...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="h-5 w-5" />
-                        Gerar Plano de Estudos
-                        <ChevronRight className="h-4 w-4 opacity-40 ml-2" />
-                      </>
-                    )}
-                  </Button>
-
-                  {!profile.studentId ? (
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center gap-2 px-3 py-2 text-destructive text-xs font-medium bg-destructive/5 rounded-md border border-destructive/10">
-                        <AlertTriangle className="size-4 shrink-0" />
-                        Vincule um aluno para prosseguir.
+            {!readOnly && (
+              <section className="space-y-4">
+                <div className="border border-border/60 rounded-md p-6 md:p-8 space-y-6">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-primary">
+                        <BrainCircuit className="h-4 w-4" />
+                        <h3 className="font-bold">Geração de Plano</h3>
                       </div>
-                      <Button 
-                        variant="secondary" 
-                        size="sm" 
-                        className="rounded-md gap-2"
-                        onClick={() => setIsLinkingVaultOpen(true)}
-                      >
-                        <LinkIcon className="size-4" /> Vincular Aluno Agora
-                      </Button>
+                      <p className="text-sm text-muted-foreground max-w-md">
+                        Configure como o plano de estudos deve ser estruturado antes de prosseguir.
+                      </p>
                     </div>
-                  ) : !profile.student?.lastPlacementTestDate ? (
-                    <div className="flex items-center gap-2 px-3 py-2 text-amber-600 dark:text-amber-400 text-xs font-medium">
-                      <AlertTriangle className="size-4 shrink-0" />
-                      Teste de nivelamento pendente.
-                    </div>
-                  ) : null}
-                </div>
-              </div>
 
-              <Link href={`${basePath}/${profile.id}`} className="block">
-                <Button variant="outline" className="h-12 w-full rounded-md gap-2 text-sm font-semibold border-border/60">
-                  <BookOpen className="h-4 w-4" /> Revisar Respostas do Survey
-                </Button>
-              </Link>
-            </section>
+                    <div className="flex items-center gap-4 bg-muted/10 p-4 rounded-md border border-border/60">
+                      <div className="text-right">
+                        <p className="text-[10px] font-bold uppercase tracking-wider">IA Criativa</p>
+                        <p className="text-[10px] text-muted-foreground">Sugerir temas se faltar no banco</p>
+                      </div>
+                      <Switch
+                        checked={allowSuggestions}
+                        onCheckedChange={setAllowSuggestions}
+                        disabled={isPending}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    <Button
+                      onClick={handleGeneratePlan}
+                      disabled={!profile.studentId || !profile.student?.lastPlacementTestDate || isPending}
+                      className="h-14 px-8 rounded-md gap-3 text-lg font-bold shadow-sm"
+                    >
+                      {isPending ? (
+                        <>
+                          <div className="size-4 border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin rounded-full" />
+                          Gerando Plano...
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="h-5 w-5 mr-2" />
+                          Gerar Plano de Estudos
+                          <ChevronRight className="h-4 w-4 opacity-40 ml-2" />
+                        </>
+                      )}
+                    </Button>
+
+                    {!profile.studentId ? (
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2 px-3 py-2 text-destructive text-xs font-medium bg-destructive/5 rounded-md border border-destructive/10">
+                          <AlertTriangle className="size-4 shrink-0" />
+                          Vincule um aluno para prosseguir.
+                        </div>
+                        <Button 
+                          variant="secondary" 
+                          size="sm" 
+                          className="rounded-md gap-2"
+                          onClick={() => setIsLinkingVaultOpen(true)}
+                        >
+                          <LinkIcon className="size-4" /> Vincular Aluno Agora
+                        </Button>
+                      </div>
+                    ) : !profile.student?.lastPlacementTestDate ? (
+                      <div className="flex items-center gap-2 px-3 py-2 text-amber-600 dark:text-amber-400 text-xs font-medium">
+                        <AlertTriangle className="size-4 shrink-0" />
+                        Teste de nivelamento pendente.
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                <Link href={`${basePath}/${profile.id}`} className="block">
+                  <Button variant="outline" className="h-12 w-full rounded-md gap-2 text-sm font-semibold border-border/60">
+                    <BookOpen className="h-4 w-4 mr-2" /> Revisar Respostas do Survey
+                  </Button>
+                </Link>
+              </section>
+            )}
           </div>
 
           {/* Sidebar Area */}
@@ -284,13 +349,15 @@ export function ProfileDiagnosisView({ profile, basePath = "/hub/manager/student
                   {profile.student?.email ? (
                     <p className="text-xs text-muted-foreground truncate max-w-[150px]">{profile.student.email}</p>
                   ) : (
-                    <Button 
-                      variant="link" 
-                      className="h-auto p-0 text-[10px] text-primary font-bold uppercase tracking-wider"
-                      onClick={() => setIsLinkingVaultOpen(true)}
-                    >
-                      Buscar Aluno
-                    </Button>
+                    !readOnly && (
+                      <Button 
+                        variant="link" 
+                        className="h-auto p-0 text-[10px] text-primary font-bold uppercase tracking-wider"
+                        onClick={() => setIsLinkingVaultOpen(true)}
+                      >
+                        Buscar Aluno
+                      </Button>
+                    )
                   )}
                 </div>
               </div>

@@ -42,7 +42,7 @@ function setSeenMap(map: Record<string, boolean>) {
 }
 
 export function useWizard(key: WizardKey, delay = 500) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpenState] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -65,14 +65,14 @@ export function useWizard(key: WizardKey, delay = 500) {
 
     if (!hasSeen) {
       const timer = setTimeout(() => {
-        setIsOpen(true);
+        setIsOpenState(true);
       }, delay);
       return () => clearTimeout(timer);
     }
   }, [key, delay]);
 
   const completeWizard = useCallback(() => {
-    setIsOpen(false);
+    setIsOpenState(false);
     if (typeof window === "undefined") return;
 
     // Mark as seen in central storage
@@ -82,6 +82,19 @@ export function useWizard(key: WizardKey, delay = 500) {
 
     // Also set legacy key just in case other parts of the code look for it directly
     localStorage.setItem(LEGACY_KEYS[key], "true");
+  }, [key]);
+
+  const setIsOpen = useCallback((open: boolean) => {
+    setIsOpenState(open);
+    if (!open) {
+      if (typeof window === "undefined") return;
+      const seenMap = getSeenMap();
+      if (!seenMap[key]) {
+        seenMap[key] = true;
+        setSeenMap(seenMap);
+        localStorage.setItem(LEGACY_KEYS[key], "true");
+      }
+    }
   }, [key]);
 
   return {

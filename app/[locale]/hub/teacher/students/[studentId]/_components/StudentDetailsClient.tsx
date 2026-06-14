@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { SlotInstanceWithDetails } from "@/modules/scheduling/scheduling.types";
 import { StudentRoadmap } from "@/modules/learning/learning.types";
@@ -8,6 +9,7 @@ import {
   Goal,
   Notebook as NotebookIcon,
   HelpCircle,
+  User,
 } from "lucide-react";
 import {
   Vault,
@@ -31,6 +33,7 @@ interface StudentDetailsClientProps {
   initialClasses: SlotInstanceWithDetails[];
   initialNotebooks: Notebook[];
   initialRoadmap: StudentRoadmap | null;
+  profileId: string | null;
 }
 
 export function StudentDetailsClient({
@@ -39,7 +42,9 @@ export function StudentDetailsClient({
   initialClasses,
   initialNotebooks,
   initialRoadmap,
+  profileId,
 }: StudentDetailsClientProps) {
+  const router = useRouter();
   const [isNotebooksOpen, setIsNotebooksOpen] = useState(false);
   const [isPlanOpen, setIsPlanOpen] = useState(false);
   const isTabletSize = useIsBreakpoint("max", 1024);
@@ -57,6 +62,11 @@ export function StudentDetailsClient({
       onClick: () => setIsHelpOpen(true),
       label: "Ajuda",
     },
+    ...(profileId ? [{
+      icon: <User className="h-5 w-5" />,
+      onClick: () => router.push(`/hub/teacher/students/${studentId}/profile`),
+      label: "Perfil Pedagógico",
+    }] : []),
     {
       icon: <NotebookIcon className="h-5 w-5" />,
       onClick: () => setIsNotebooksOpen(true),

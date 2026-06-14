@@ -13,7 +13,7 @@ export default async function ProfilePage() {
     return (
         <div>
             <header>
-                <Header title="Perfil" user={user} showSubHeader={false} />
+                <Header title="Perfil" user={user} showSubHeader={false} className="contents" />
             </header>
             <main className="container">
                 <ProfileCard user={user} />
