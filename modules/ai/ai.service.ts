@@ -187,7 +187,7 @@ export const aiService = {
     }
 
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.0-flash",
+      model: `models/${MODELS.fast}`,
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -279,7 +279,7 @@ export const aiService = {
       if (!limit.success) throw new Error("Rate limit exceeded for AI parsing");
     }
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.0-flash",
+      model: `models/${MODELS.fast}`,
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -377,7 +377,7 @@ export const aiService = {
       if (!limit.success) throw new Error("Rate limit exceeded for AI enrichment");
     }
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.0-flash",
+      model: `models/${MODELS.fast}`,
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -665,7 +665,7 @@ export const aiService = {
     };
 
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.0-flash",
+      model: `models/${MODELS.fast}`,
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -799,7 +799,7 @@ ${safeContent}
     }
 
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.0-flash",
+      model: `models/${MODELS.fast}`,
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -967,7 +967,7 @@ ${safeContent}
     }
 
     const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.0-flash",
+      model: `models/${MODELS.fast}`,
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
