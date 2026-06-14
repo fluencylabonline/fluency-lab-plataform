@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Play, Pause, Save, SkipBack, SkipForward,
-  Loader2, ArrowRight
+  Loader2, ArrowRight, RefreshCw
 } from "lucide-react";
 import { notify } from "@/components/ui/toaster";
 import { updateMediaAction, updateLessonAction } from "@/modules/curriculum/curriculum.actions";
@@ -30,7 +30,75 @@ export function TranscriptionReviewStep({ lessonId, media, onComplete, status }:
   const [isAdvancing, setIsAdvancing] = useState(false);
   const [isMediaReady, setIsMediaReady] = useState(false);
   const [savedRows, setSavedRows] = useState<Set<number>>(new Set());
+  const [isRedoing, setIsRedoing] = useState(false);
+  const [redoTextStream, setRedoTextStream] = useState("");
+  const redoEventSourceRef = useRef<EventSource | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleRedoTranscription = useCallback(() => {
+    setIsRedoing(true);
+    setRedoTextStream("");
+
+    if (redoEventSourceRef.current) {
+      redoEventSourceRef.current.close();
+    }
+
+    try {
+      const eventSource = new EventSource(`/api/curriculum/stream?lessonId=${lessonId}&step=2`);
+      redoEventSourceRef.current = eventSource;
+
+      eventSource.addEventListener("chunk", (e) => {
+        try {
+          const chunk = JSON.parse(e.data);
+          setRedoTextStream((prev) => prev + chunk);
+        } catch (err) {
+          console.error("Error parsing chunk:", err);
+        }
+      });
+
+      eventSource.addEventListener("result", (e) => {
+        try {
+          const rawData = JSON.parse(e.data);
+          const result = typeof rawData === "string" ? JSON.parse(rawData) : rawData;
+          if (result.segments) {
+            setLocalSentences(mapSegmentsToSentences(result.segments));
+          }
+        } catch (err) {
+          console.error("Error parsing result:", err);
+        }
+      });
+
+      eventSource.addEventListener("status", (e) => {
+        const data = JSON.parse(e.data);
+        if (data === "completed") {
+          setIsRedoing(false);
+          notify.success(t("save_success") || "Transcription re-generated successfully!");
+          eventSource.close();
+          redoEventSourceRef.current = null;
+        }
+      });
+
+      eventSource.addEventListener("error", (e) => {
+        console.error("SSE error", e);
+        setIsRedoing(false);
+        notify.error(t("processing_error") || "Error re-generating transcription");
+        eventSource.close();
+        redoEventSourceRef.current = null;
+      });
+    } catch (error) {
+      console.error(error);
+      setIsRedoing(false);
+      notify.error(t("processing_error") || "Error re-generating transcription");
+    }
+  }, [lessonId, t]);
+
+  useEffect(() => {
+    return () => {
+      if (redoEventSourceRef.current) {
+        redoEventSourceRef.current.close();
+      }
+    };
+  }, []);
 
   const initialSegments = (media.transcriptionTimestamps?.length ? media.transcriptionTimestamps : media.config?.segments) || [];
   const [localSentences, setLocalSentences] = useState<Sentence[]>(
@@ -185,12 +253,23 @@ export function TranscriptionReviewStep({ lessonId, media, onComplete, status }:
           <p className="text-sm text-muted-foreground mt-0.5">{t("edit_transcription_desc")}</p>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Button variant="outline" onClick={handleSave} isLoading={isSaving} className="flex-1 sm:flex-none">
+          <Button
+            variant="outline"
+            onClick={handleRedoTranscription}
+            isLoading={isRedoing}
+            disabled={isSaving || isAdvancing}
+            className="flex-1 sm:flex-none"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            <span className="hidden xs:inline">{t("retry_transcription") || "Redo"}</span>
+            <span className="xs:hidden">{t("retry_transcription") || "Redo"}</span>
+          </Button>
+          <Button variant="outline" onClick={handleSave} isLoading={isSaving} disabled={isRedoing} className="flex-1 sm:flex-none">
             <Save className="w-4 h-4 mr-2" />
             <span className="hidden xs:inline">{t("save")}</span>
             <span className="xs:hidden">{t("save")}</span>
           </Button>
-          <Button onClick={handleConfirm} isLoading={isAdvancing}>
+          <Button onClick={handleConfirm} isLoading={isAdvancing} disabled={isRedoing}>
             {t("confirm_and_next")}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
@@ -239,7 +318,7 @@ export function TranscriptionReviewStep({ lessonId, media, onComplete, status }:
           <div className="flex items-center gap-1 md:gap-2">
             <button
               onClick={() => jumpTo(currentTime - 5)}
-              disabled={!isMediaReady}
+              disabled={!isMediaReady || isRedoing}
               className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:pointer-events-none"
               title="-5s"
             >
@@ -248,7 +327,7 @@ export function TranscriptionReviewStep({ lessonId, media, onComplete, status }:
 
             <button
               onClick={togglePlay}
-              disabled={!isMediaReady}
+              disabled={!isMediaReady || isRedoing}
               className="w-10 h-10 md:w-11 md:h-11 flex items-center justify-center rounded-lg border border-border bg-background hover:bg-muted transition-colors disabled:opacity-30 disabled:pointer-events-none"
             >
               {isPlaying
@@ -259,7 +338,7 @@ export function TranscriptionReviewStep({ lessonId, media, onComplete, status }:
 
             <button
               onClick={() => jumpTo(currentTime + 5)}
-              disabled={!isMediaReady}
+              disabled={!isMediaReady || isRedoing}
               className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:pointer-events-none"
               title="+5s"
             >
@@ -286,32 +365,49 @@ export function TranscriptionReviewStep({ lessonId, media, onComplete, status }:
             </span>
           </div>
 
-          <ScrollArea className="flex-1 overflow-y-auto">
-            <div className="p-3 md:p-4 space-y-2 md:space-y-3">
-
-              {localSentences.length === 0 && (
-                <div className="text-center py-20 text-sm text-muted-foreground italic">
-                  {t("no_segments_found")}
+          {isRedoing ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
+              <Loader2 className="w-10 h-10 animate-spin text-primary" />
+              <div>
+                <p className="font-bold text-lg">{t("ai_transcribing") || "AI is transcribing media..."}</p>
+                <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
+                  {t("waiting_for_ai") || "Generating new transcription with corrected sentence timestamps..."}
+                </p>
+              </div>
+              {redoTextStream && (
+                <div className="bg-muted/30 border rounded-2xl p-4 max-w-md w-full max-h-[150px] overflow-y-auto text-left text-xs text-muted-foreground italic no-scrollbar">
+                  {redoTextStream}
                 </div>
               )}
-
-              {localSentences.map((sentence, idx) => (
-                <SentenceRow
-                  key={idx}
-                  idx={idx}
-                  sentence={sentence}
-                  currentTime={currentTime}
-                  isPlaying={isPlaying}
-                  savedRows={savedRows}
-                  jumpTo={jumpTo}
-                  updateTimestamp={updateTimestamp}
-                  updateText={updateText}
-                  t={t}
-                />
-              ))}
-
             </div>
-          </ScrollArea>
+          ) : (
+            <ScrollArea className="flex-1 overflow-y-auto">
+              <div className="p-3 md:p-4 space-y-2 md:space-y-3">
+
+                {localSentences.length === 0 && (
+                  <div className="text-center py-20 text-sm text-muted-foreground italic">
+                    {t("no_segments_found")}
+                  </div>
+                )}
+
+                {localSentences.map((sentence, idx) => (
+                  <SentenceRow
+                    key={idx}
+                    idx={idx}
+                    sentence={sentence}
+                    currentTime={currentTime}
+                    isPlaying={isPlaying}
+                    savedRows={savedRows}
+                    jumpTo={jumpTo}
+                    updateTimestamp={updateTimestamp}
+                    updateText={updateText}
+                    t={t}
+                  />
+                ))}
+
+              </div>
+            </ScrollArea>
+          )}
         </div>
       </div>
     </div>

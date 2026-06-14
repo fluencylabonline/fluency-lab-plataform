@@ -12,7 +12,7 @@ const MODELS = {
   fast: "gemini-2.5-flash",
   pro: process.env.TRANSCRIPTION_MODEL || "gemini-2.5-pro",
   embedding: "gemini-embedding-2-preview",
-  media: "gemini-2.5-flash",
+  media: "gemini-2.5-pro",
 };
 
 export interface PlacementAIQuestion {
@@ -514,16 +514,28 @@ export const aiService = {
     const mimeType = response.headers.get("content-type") || (type === "video" ? "video/mp4" : "audio/mpeg");
 
     const prompt = `Transcribe the content of this ${type} file exactly as spoken.
-    Respond with segments as complete, natural sentences.
+    
+    CRITICAL SEGMENTATION RULE:
+    - You MUST segment the transcription into complete, natural sentences or long clauses (typically 5 to 15 words per segment).
+    - NEVER segment the text into individual words or short fragments (e.g., "This is", "the brief", "on basic").
+    - Even though the JSON key is named "word", its value MUST be a full sentence (e.g., "This is the brief on basic English pronouns and simple sentences.").
+    - The "start" timestamp must be when the first word of the sentence is spoken, and the "end" timestamp must be when the last word of the sentence is finished.
+
+    CRITICAL TIMESTAMP ACCURACY RULES:
+    1. Listen to the audio timeline with maximum precision.
+    2. The "start" and "end" of each sentence must align EXACTLY with when the spoken words are heard on the audio playback timeline.
+    3. Timestamps MUST be strictly sequential, increasing, and non-overlapping (e.g., Segment 2 start time must be >= Segment 1 end time).
+    4. Do not approximate or guess. Pay close attention to the exact millisecond when the speech segment starts and ends.
+
     DO NOT add scene descriptions, explanatory dialogues, summaries, or comments.
     The transcription must be in the language spoken in the media.
     
-    CRITICAL: The "start" and "end" timestamps MUST be STRINGS in "MM:SS.mmm" format.
+    CRITICAL TIMESTAMP FORMATTING:
+    - The "start" and "end" timestamps MUST be STRINGS in "MM:SS.mmm" format.
     - 1 minute and 10.425 seconds must be "01:10.425".
     - 10 seconds must be "00:10.000".
     - 2 minutes and 5 seconds must be "02:05.000".
-    
-    DO NOT use numbers. DO NOT use total seconds. If you return a number like 70.425 or 110.425, it will fail.
+    - DO NOT use numbers. DO NOT use total seconds. If you return a number like 70.425 or 110.425, it will fail.
     
     Respond EXACTLY in this format:
     TRANSCRIPTION_START
