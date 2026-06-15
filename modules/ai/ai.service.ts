@@ -360,16 +360,35 @@ export const aiService = {
     nativeLanguage: string,
     translationInstruction: string,
     onChunkOrUserId?: ((chunk: string) => void) | string,
-    userId?: string
+    userId?: string,
+    skipCache?: boolean
   ): Promise<{ results: LearningItemMetadata[] }> {
     const onChunk = typeof onChunkOrUserId === "function" ? onChunkOrUserId : undefined;
     const resolvedUserId = typeof onChunkOrUserId === "string" ? onChunkOrUserId : userId;
 
     const hash = generateHash({ items, targetLanguage, nativeLanguage, translationInstruction });
-    const cached = await aiRepository.getCache(hash, "gemini_enrich");
-    if (cached) {
-      if (onChunk) onChunk(JSON.stringify(cached));
-      return cached as { results: LearningItemMetadata[] };
+    if (!skipCache) {
+      const cached = await aiRepository.getCache(hash, "gemini_enrich");
+      if (cached) {
+        // Validate cached result is not stale/incomplete (e.g. old bad responses with just {"type":"STRUCTURE"})
+        const cachedResult = cached as { results: LearningItemMetadata[] };
+        const isStale = cachedResult.results?.some((r, i) => {
+          const inputType = items[i]?.type;
+          const raw = r as unknown as Record<string, unknown>;
+          if (inputType === "STRUCTURE") {
+            const explanation = raw["explanation"] as string | undefined;
+            return !explanation || explanation.trim().length < 10;
+          } else {
+            const meanings = raw["meanings"] as Array<unknown> | undefined;
+            return !meanings || meanings.length === 0;
+          }
+        });
+        if (!isStale) {
+          if (onChunk) onChunk(JSON.stringify(cached));
+          return cachedResult;
+        }
+        console.warn(`[aiService.enrichBatchLearningItems] Stale cache detected for hash ${hash}, re-fetching from AI.`);
+      }
     }
 
     if (resolvedUserId) {
@@ -400,9 +419,11 @@ export const aiService = {
                     enum: ["A1", "A2", "B1", "B2", "C1", "C2"],
                     description: "CEFR difficulty level." 
                   },
-                  translation: { type: SchemaType.STRING, description: "Main translation to native language." },
-                  explanation: { type: SchemaType.STRING, description: "Pedagogical explanation for grammatical structures; leave empty for vocabulary." },
-                  phonetic: { type: SchemaType.STRING, description: "Phonetic transcription (IPA) for vocabulary; leave empty for structures." },
+                  translation: { type: SchemaType.STRING, description: "Main translation of the item to native language. REQUIRED for all items." },
+                  explanation: { type: SchemaType.STRING, description: "For STRUCTURE items: a clear pedagogical explanation in native language (REQUIRED). For vocabulary: leave as empty string." },
+                  phonetic: { type: SchemaType.STRING, description: "Phonetic transcription (IPA) for vocabulary; empty string for structures." },
+                  structure_type: { type: SchemaType.STRING, description: "For STRUCTURE items: pedagogical name (e.g. 'Passive Voice'). For vocabulary: empty string." },
+                  syntactic_pattern: { type: SchemaType.STRING, description: "For STRUCTURE items: syntactic pattern code (e.g. 'SVO'). For vocabulary: empty string." },
                   forms: { 
                     type: SchemaType.OBJECT,
                     properties: {
@@ -414,12 +435,26 @@ export const aiService = {
                   },
                   examples: { 
                     type: SchemaType.ARRAY,
+                    description: "REQUIRED for all items. At least 2 examples. For STRUCTURE: include word_order. For VOCABULARY: plain text and translation.",
                     items: {
                       type: SchemaType.OBJECT,
                       properties: {
                         text: { type: SchemaType.STRING },
-                        translation: { type: SchemaType.STRING }
-                      }
+                        translation: { type: SchemaType.STRING },
+                        word_order: {
+                          type: SchemaType.ARRAY,
+                          items: {
+                            type: SchemaType.OBJECT,
+                            properties: {
+                              word: { type: SchemaType.STRING },
+                              index: { type: SchemaType.NUMBER },
+                              role: { type: SchemaType.STRING }
+                            },
+                            required: ["word", "index", "role"]
+                          }
+                        }
+                      },
+                      required: ["text", "translation"]
                     }
                   },
                   synonyms: { 
@@ -428,17 +463,20 @@ export const aiService = {
                   },
                   meanings: { 
                     type: SchemaType.ARRAY,
+                    description: "REQUIRED for VOCABULARY items. At least 1 meaning with definition and translation.",
                     items: {
                       type: SchemaType.OBJECT,
                       properties: {
                         definition: { type: SchemaType.STRING },
                         translation: { type: SchemaType.STRING }
-                      }
+                      },
+                      required: ["definition", "translation"]
                     }
                   },
                   is_visual: { type: SchemaType.BOOLEAN },
                   key_image_words: { type: SchemaType.STRING }
-                }
+                },
+                required: ["type", "level", "translation", "explanation", "examples"]
               }
             }
           },
@@ -447,8 +485,16 @@ export const aiService = {
       }
     });
 
-    const prompt = `Generate pedagogical metadata for the following items in the ${targetLanguage} language.
+    const prompt = `You are a pedagogical linguist. Generate complete enrichment metadata for each item below in ${targetLanguage}.
     ${translationInstruction}. Student's native language: ${nativeLanguage}.
+    
+    CRITICAL RULES (MANDATORY — violating these causes failures):
+    - Return EXACTLY one result object per input item, in THE SAME ORDER.
+    - For items with type="STRUCTURE": you MUST fill "explanation" (didactic, in ${nativeLanguage}), "structure_type", "syntactic_pattern", and at least 2 "examples" with "word_order" mappings.
+    - For VOCABULARY items (noun, verb, etc): you MUST fill "meanings" (at least 1), "phonetic", "examples" (at least 2), and "is_visual".
+    - "translation" is REQUIRED for ALL items.
+    - "examples" is REQUIRED for ALL items (minimum 2 per item).
+    - Do NOT return empty objects. Do NOT leave required fields as empty strings unless they are truly not applicable (e.g., "phonetic" for STRUCTURE).
     
     ${getStructureTaxonomy(nativeLanguage)}
     
@@ -457,7 +503,7 @@ export const aiService = {
     
     ${getEnrichFormatRules(nativeLanguage)}
 
-    Return a JSON with the "results" key, which must be an array maintaining THE SAME ORDER as the items sent.`;
+    Return a JSON with the "results" key as an array of ${items.length} complete objects in the same order as the input.`;
 
     let finalResult: { results: LearningItemMetadata[] };
     let rawText = "";

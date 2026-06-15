@@ -744,12 +744,15 @@ export const curriculumService = {
     }];
     console.log("[enrichSingleItem] Requesting enrichment for:", JSON.stringify(mappedItemsToEnrich));
 
+    // Always skip cache for single-item re-enrichment — avoids serving stale bad responses
     const batchResponse = await aiService.enrichBatchLearningItems(
       mappedItemsToEnrich,
       targetLanguageName,
       nativeLanguageName,
       translationPrompt,
-      userId
+      undefined, // no streaming callback
+      userId,
+      true // skipCache
     );
     console.log("[enrichSingleItem] AI Response results:", JSON.stringify(batchResponse.results));
 
