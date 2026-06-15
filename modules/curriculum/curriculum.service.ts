@@ -712,15 +712,23 @@ export const curriculumService = {
   },
 
   async enrichSingleItem(itemId: string, userId?: string) {
+    console.log("[enrichSingleItem] Starting for itemId:", itemId);
     const item = await curriculumRepository.findItemById(itemId);
-    if (!item) throw new Error("Item not found");
+    if (!item) {
+      console.error("[enrichSingleItem] Item not found in DB");
+      throw new Error("Item not found");
+    }
+    console.log("[enrichSingleItem] Found item:", item.lemma, "type:", item.type, "metadata:", JSON.stringify(item.metadata));
 
     const difficulty = (item.metadata?.level || "A1") as CEFRLevel;
     const isA1A2 = ["A1", "A2"].includes(difficulty);
     const isB1 = difficulty === "B1";
 
     const language = await curriculumRepository.findLanguageById(item.languageId);
-    if (!language) throw new Error("Language not found");
+    if (!language) {
+      console.error("[enrichSingleItem] Language not found:", item.languageId);
+      throw new Error("Language not found");
+    }
 
     const targetLanguageName = language.name;
     const nativeLanguageName = "Português";
@@ -734,6 +742,7 @@ export const curriculumService = {
       type: item.type,
       context: (item.metadata as Record<string, unknown>)?.context as string || ""
     }];
+    console.log("[enrichSingleItem] Requesting enrichment for:", JSON.stringify(mappedItemsToEnrich));
 
     const batchResponse = await aiService.enrichBatchLearningItems(
       mappedItemsToEnrich,
@@ -742,9 +751,13 @@ export const curriculumService = {
       translationPrompt,
       userId
     );
+    console.log("[enrichSingleItem] AI Response results:", JSON.stringify(batchResponse.results));
 
     const metadata = batchResponse.results?.[0];
-    if (!metadata) throw new Error("AI failed to enrich item");
+    if (!metadata) {
+      console.error("[enrichSingleItem] AI failed to enrich item - no metadata returned");
+      throw new Error("AI failed to enrich item");
+    }
 
     const isVocab = item.type !== "STRUCTURE";
 
@@ -754,6 +767,7 @@ export const curriculumService = {
         try {
           const imageUrl = await mediaService.searchImage(vocabMeta.key_image_words, userId);
           vocabMeta.image_url = imageUrl;
+          console.log("[enrichSingleItem] Image found:", imageUrl);
         } catch (e) {
           console.error("Failed to get image", e);
         }
@@ -761,8 +775,9 @@ export const curriculumService = {
     }
 
     metadata.level = difficulty;
+    console.log("[enrichSingleItem] Upserting item with metadata:", JSON.stringify(metadata));
 
-    await curriculumRepository.upsertLearningItem({
+    const upsertResult = await curriculumRepository.upsertLearningItem({
       id: item.id,
       languageId: item.languageId,
       type: (item.type === "STRUCTURE") ? "STRUCTURE" : "VOCABULARY",
@@ -770,6 +785,7 @@ export const curriculumService = {
       translation: (isA1A2 || isB1) ? metadata.translation : null,
       metadata: metadata,
     });
+    console.log("[enrichSingleItem] Upsert result:", JSON.stringify(upsertResult));
 
     return { success: true };
   },
