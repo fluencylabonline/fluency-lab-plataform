@@ -411,6 +411,16 @@ export const getLearningItemsAction = managerAction
     return await curriculumService.getLearningItems(parsedInput);
   });
 
+export const enrichSingleItemAction = managerAction
+  .metadata({ name: "enrichSingleItem" })
+  .inputSchema(z.object({
+    itemId: z.string(),
+  }))
+  .action(async ({ parsedInput, ctx }) => {
+    const result = await curriculumService.enrichSingleItem(parsedInput.itemId, ctx.user.id);
+    return result;
+  });
+
 /**
  * Action to get lessons with filters.
  */

@@ -710,6 +710,69 @@ export const curriculumService = {
 
     return await curriculumRepository.getRandomVocabularyItem(languages);
   },
+
+  async enrichSingleItem(itemId: string, userId?: string) {
+    const item = await curriculumRepository.findItemById(itemId);
+    if (!item) throw new Error("Item not found");
+
+    const difficulty = (item.metadata?.level || "A1") as CEFRLevel;
+    const isA1A2 = ["A1", "A2"].includes(difficulty);
+    const isB1 = difficulty === "B1";
+
+    const language = await curriculumRepository.findLanguageById(item.languageId);
+    if (!language) throw new Error("Language not found");
+
+    const targetLanguageName = language.name;
+    const nativeLanguageName = "Português";
+
+    const translationPrompt = isA1A2
+      ? `translate lemma, meanings and examples to ${nativeLanguageName}`
+      : isB1 ? `translate only lemma to ${nativeLanguageName}` : "no translation";
+
+    const mappedItemsToEnrich = [{
+      lemma: item.lemma,
+      type: item.type,
+      context: (item.metadata as Record<string, unknown>)?.context as string || ""
+    }];
+
+    const batchResponse = await aiService.enrichBatchLearningItems(
+      mappedItemsToEnrich,
+      targetLanguageName,
+      nativeLanguageName,
+      translationPrompt,
+      userId
+    );
+
+    const metadata = batchResponse.results?.[0];
+    if (!metadata) throw new Error("AI failed to enrich item");
+
+    const isVocab = item.type !== "STRUCTURE";
+
+    if (isVocab) {
+      const vocabMeta = metadata as VocabMetadata;
+      if (vocabMeta.is_visual && vocabMeta.key_image_words) {
+        try {
+          const imageUrl = await mediaService.searchImage(vocabMeta.key_image_words, userId);
+          vocabMeta.image_url = imageUrl;
+        } catch (e) {
+          console.error("Failed to get image", e);
+        }
+      }
+    }
+
+    metadata.level = difficulty;
+
+    await curriculumRepository.upsertLearningItem({
+      id: item.id,
+      languageId: item.languageId,
+      type: (item.type === "STRUCTURE") ? "STRUCTURE" : "VOCABULARY",
+      lemma: item.lemma,
+      translation: (isA1A2 || isB1) ? metadata.translation : null,
+      metadata: metadata,
+    });
+
+    return { success: true };
+  },
 };
 
 
