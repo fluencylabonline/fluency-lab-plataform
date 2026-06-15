@@ -29,6 +29,7 @@ import {
   LinkContent,
 } from "@/components/tiptap-ui/link-popover";
 import { TableDropdownMenu } from "@/components/tiptap-ui/table-dropdown-menu";
+import { TextColorPopover } from "@/components/tiptap-ui/text-color-popover";
 
 // Icons & Hooks
 import { ArrowLeftIcon } from "@/components/tiptap-icons/arrow-left-icon";
@@ -115,7 +116,10 @@ export function NotebookToolbar({
               <MarkButton type="bold" />
               <MarkButton type="italic" />
               {!isMobile ? (
-                <ColorHighlightPopover />
+                <>
+                  <TextColorPopover />
+                  <ColorHighlightPopover />
+                </>
               ) : (
                 <ColorHighlightPopoverButton
                   onClick={() => setMobileView("highlighter")}

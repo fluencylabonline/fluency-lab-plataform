@@ -30,6 +30,8 @@ import { QuizNode } from "@/components/tiptap-extension/quiz/QuizNode";
 import { AudioSyncNode } from "@/components/tiptap-extension/audio-sync/AudioSyncNode";
 import { SpeakingRecorderNode } from "@/components/tiptap-extension/speaking-recorder/SpeakingRecorderNode";
 import { TableKit } from "@tiptap/extension-table";
+import { Color } from "@tiptap/extension-color";
+import { TextStyle } from "@tiptap/extension-text-style";
 
 // --- Components & Primitives ---
 import { LessonEditorToolbar } from "./LessonEditorToolbar";
@@ -138,6 +140,8 @@ export function LessonContentStep({
           resizable: true,
         },
       }),
+      TextStyle,
+      Color,
     ],
     content: isValidTiptapDoc(initialContentJson)
       ? initialContentJson
