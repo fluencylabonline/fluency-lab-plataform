@@ -388,11 +388,11 @@ export const aiService = {
               items: {
                 type: SchemaType.OBJECT,
                 properties: {
-                  type: { type: SchemaType.STRING },
-                  level: { type: SchemaType.STRING },
-                  translation: { type: SchemaType.STRING },
-                  explanation: { type: SchemaType.STRING },
-                  phonetic: { type: SchemaType.STRING },
+                  type: { type: SchemaType.STRING, description: "Part of speech (noun, verb, adjective, adverb, pronoun, preposition, conjunction, determiner, particle) or 'STRUCTURE'." },
+                  level: { type: SchemaType.STRING, description: "CEFR level (A1, A2, B1, B2, C1, C2)." },
+                  translation: { type: SchemaType.STRING, description: "Main translation to native language." },
+                  explanation: { type: SchemaType.STRING, description: "Pedagogical explanation for grammatical structures; leave empty for vocabulary." },
+                  phonetic: { type: SchemaType.STRING, description: "Phonetic transcription (IPA) for vocabulary; leave empty for structures." },
                   forms: { 
                     type: SchemaType.OBJECT,
                     properties: {

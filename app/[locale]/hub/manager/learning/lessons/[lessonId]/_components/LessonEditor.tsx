@@ -129,6 +129,7 @@ function StepRenderer({ activeStep, lesson, onComplete }: { activeStep: number; 
                     onComplete={onComplete}
                     initialItems={lesson.items}
                     status={lesson.status}
+                    analysisResult={lesson.analysisResultJson}
                 />
             );
         case 9:

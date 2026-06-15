@@ -22,7 +22,7 @@ import {
     updateItemsPriorityAction,
 } from "@/modules/curriculum/curriculum.actions";
 import { cn } from "@/lib/utils";
-import { LearningItem, LessonWithDetails, StructureMetadata, VocabMetadata } from "@/modules/curriculum/curriculum.types";
+import { LearningItem, LessonWithDetails, StructureMetadata, VocabMetadata, AnalysisResult } from "@/modules/curriculum/curriculum.types";
 
 // No longer needed, using LearningItem from curriculum.types.ts
 
@@ -32,11 +32,18 @@ interface EnrichmentReviewStepProps {
     // Items already linked to lesson (populated after enrichment)
     initialItems?: LessonWithDetails["items"];
     status: string;
+    analysisResult?: AnalysisResult | null;
 }
 
 type EnrichStatus = "idle" | "enriching" | "reviewing" | "saving" | "error";
 
-export function EnrichmentReviewStep({ lessonId, onComplete, initialItems, status: lessonStatus }: EnrichmentReviewStepProps) {
+export function EnrichmentReviewStep({
+    lessonId,
+    onComplete,
+    initialItems,
+    status: lessonStatus,
+    analysisResult,
+}: EnrichmentReviewStepProps) {
     const t = useTranslations("Learning");
 
     // If we already have enriched items from the DB, skip enrichment
@@ -44,6 +51,11 @@ export function EnrichmentReviewStep({ lessonId, onComplete, initialItems, statu
 
     const [status, setStatus] = useState<EnrichStatus>(hasItems ? "reviewing" : "idle");
     const [progress, setProgress] = useState({ current: 0, total: 0 });
+
+    // Count pending/missing items
+    const pendingVocabCount = (analysisResult?.vocabulary || []).filter(v => !v.processed).length;
+    const pendingStructureCount = (analysisResult?.structures || []).filter(s => !s.processed).length;
+    const totalPending = pendingVocabCount + pendingStructureCount;
     const [items, setItems] = useState<LearningItem[]>(
         initialItems?.map(li => li.item) ?? []
     );
@@ -76,31 +88,43 @@ export function EnrichmentReviewStep({ lessonId, onComplete, initialItems, statu
     const startEnrichment = async () => {
         setStatus("enriching");
 
-        try {
-            const res = await enrichLinkedItemsAction({ lessonId });
+        const totalCount = (analysisResult?.vocabulary?.length || 0) + (analysisResult?.structures?.length || 0);
+        setProgress({
+            current: totalCount - totalPending,
+            total: totalCount
+        });
 
-            if (res?.data?.success && res.data.total !== undefined) {
-                const data = res.data;
-                const remaining = data.remaining ?? 0;
+        let hasRemaining = true;
+        while (hasRemaining) {
+            try {
+                const res = await enrichLinkedItemsAction({ lessonId });
 
-                setProgress({
-                    current: data.total - remaining,
-                    total: data.total
-                });
+                if (res?.data?.success && res.data.total !== undefined) {
+                    const data = res.data;
+                    const remaining = data.remaining ?? 0;
+                    const total = data.total;
+                    const current = total - remaining;
 
-                if (remaining === 0) {
-                    notify.success(t("enrichment_done") || "Enrichment complete! Review your items.");
-                    window.location.reload();
+                    setProgress({ current, total });
+
+                    if (remaining === 0) {
+                        hasRemaining = false;
+                        notify.success(t("enrichment_done") || "Enrichment complete! Review your items.");
+                        window.location.reload();
+                    } else {
+                        // Short delay to avoid rate limiting and allow DB commits
+                        await new Promise(resolve => setTimeout(resolve, 800));
+                    }
                 } else {
-                    setStatus("idle"); // Voltar para idle para permitir o próximo clique
+                    throw new Error("Batch failed");
                 }
-            } else {
-                throw new Error("Batch failed");
+            } catch (error) {
+                console.error("Enrichment error:", error);
+                notify.error(t("automation_error") || "Enrichment failed. Please try again.");
+                setStatus("error");
+                hasRemaining = false;
+                return;
             }
-        } catch (error) {
-            console.error("Enrichment error:", error);
-            notify.error(t("automation_error") || "Enrichment failed. Please try again.");
-            setStatus("error");
         }
     };
 
@@ -210,10 +234,20 @@ export function EnrichmentReviewStep({ lessonId, onComplete, initialItems, statu
         return (
             <div className="step-content flex flex-col items-center justify-center min-h-[400px] text-center gap-6">
                 <AlertCircle className="w-12 h-12 text-destructive" />
-                <p className="font-semibold text-destructive">{t("automation_error") || "Enrichment failed"}</p>
-                <Button onClick={startEnrichment} variant="outline">
-                    {t("retry") || "Retry"}
-                </Button>
+                <div>
+                    <p className="font-semibold text-destructive">{t("automation_error") || "Enrichment failed"}</p>
+                    <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+                        You can retry to process the remaining items, or cancel to review the items that succeeded.
+                    </p>
+                </div>
+                <div className="flex gap-4">
+                    <Button onClick={startEnrichment} variant="default">
+                        {t("retry") || "Retry"}
+                    </Button>
+                    <Button onClick={() => setStatus(hasItems ? "reviewing" : "idle")} variant="ghost">
+                        {t("cancel") || "Cancel"}
+                    </Button>
+                </div>
             </div>
         );
     }
@@ -264,6 +298,30 @@ export function EnrichmentReviewStep({ lessonId, onComplete, initialItems, statu
                     <span className="text-primary">{items.length}</span>
                 </div>
             </div>
+
+            {totalPending > 0 && (
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300">
+                    <div className="flex gap-3 items-start">
+                        <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                        <div>
+                            <p className="font-semibold text-sm">
+                                Itens pendentes de enriquecimento
+                            </p>
+                            <p className="text-xs opacity-90 mt-0.5">
+                                Existem {totalPending} itens ({pendingVocabCount} vocabulários e {pendingStructureCount} estruturas) que ainda não foram processados pela Inteligência Artificial.
+                            </p>
+                        </div>
+                    </div>
+                    <Button 
+                        onClick={startEnrichment} 
+                        size="sm"
+                        className="bg-amber-600 hover:bg-amber-700 text-white shrink-0 font-semibold border-none"
+                    >
+                        <Zap className="w-4 h-4 mr-2" />
+                        Enriquecer Pendentes ({totalPending})
+                    </Button>
+                </div>
+            )}
 
             {/* Two column grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">

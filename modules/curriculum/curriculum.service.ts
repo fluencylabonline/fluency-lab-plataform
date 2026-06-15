@@ -249,7 +249,7 @@ export const curriculumService = {
    * Step 8 (entry): Enrich items from analysisResultJson in batches.
    * Acts as a queue processor.
    */
-  async enrichLinkedItems(lessonId: string, userId?: string, batchSize: number = 10) {
+  async enrichLinkedItems(lessonId: string, userId?: string, batchSize: number = 10): Promise<{ success: boolean; processed: number; total: number; remaining: number }> {
     const lesson = await curriculumRepository.findLessonById(lessonId);
     if (!lesson) throw new Error("Lesson not found");
 
@@ -282,6 +282,32 @@ export const curriculumService = {
 
     const totalCount = (analysisResult.vocabulary?.length || 0) + (analysisResult.structures?.length || 0);
     const allPending = [...pendingVocab, ...pendingStructures];
+
+    // Auto-skip any items with invalid or excessively long lemmas/names to prevent AI parsing/JSON truncation errors
+    const invalidVocab = pendingVocab.filter(v => !v.lemma || v.lemma.trim().length === 0 || v.lemma.length > 80);
+    const invalidStructures = pendingStructures.filter(s => !s.lemma || s.lemma.trim().length === 0 || s.lemma.length > 120);
+
+    if (invalidVocab.length > 0 || invalidStructures.length > 0) {
+      console.warn(`[curriculumService.enrichLinkedItems] Auto-skipping ${invalidVocab.length} vocab and ${invalidStructures.length} structures due to invalid or too long lemma/name.`);
+      
+      invalidVocab.forEach(item => {
+        if (analysisResult.vocabulary && analysisResult.vocabulary[item.originalIndex]) {
+          analysisResult.vocabulary[item.originalIndex].processed = true;
+        }
+      });
+      invalidStructures.forEach(item => {
+        if (analysisResult.structures && analysisResult.structures[item.originalIndex]) {
+          analysisResult.structures[item.originalIndex].processed = true;
+        }
+      });
+
+      await curriculumRepository.updateLesson(lessonId, {
+        analysisResultJson: analysisResult
+      });
+
+      // Recurse to process the clean queue
+      return this.enrichLinkedItems(lessonId, userId, batchSize);
+    }
 
     if (allPending.length === 0) {
       await curriculumRepository.updateLesson(lessonId, { creationStep: 8 });
