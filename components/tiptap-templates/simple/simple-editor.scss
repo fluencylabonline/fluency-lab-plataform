@@ -52,6 +52,71 @@ body,
 
 .tiptap.ProseMirror {
   font-family: "DM Sans", sans-serif;
+
+  table {
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    overflow: hidden;
+    width: 100%;
+    table-layout: fixed;
+
+    td,
+    th {
+      border: 1px solid var(--border, var(--tt-gray-light-a-100));
+      box-sizing: border-box;
+      min-width: 1em;
+      padding: 8px 12px;
+      position: relative;
+      vertical-align: top;
+
+      .dark & {
+        border-color: var(--border, var(--tt-gray-dark-a-50));
+      }
+
+      > * {
+        margin-bottom: 0;
+      }
+    }
+
+    th {
+      background-color: var(--muted, rgba(0, 0, 0, 0.04));
+      font-weight: bold;
+      text-align: left;
+
+      .dark & {
+        background-color: var(--muted, rgba(255, 255, 255, 0.04));
+      }
+    }
+
+    .selectedCell:after {
+      background: var(--selection, rgba(200, 200, 255, 0.3));
+      content: "";
+      left: 0; right: 0; top: 0; bottom: 0;
+      pointer-events: none;
+      position: absolute;
+      z-index: 2;
+    }
+
+    .column-resize-handle {
+      background-color: var(--primary, #3b82f6);
+      bottom: -2px;
+      position: absolute;
+      right: -2px;
+      top: 0;
+      width: 4px;
+      z-index: 20;
+      cursor: col-resize;
+    }
+  }
+
+  .tableWrapper {
+    overflow-x: auto;
+  }
+
+  &.resize-cursor {
+    cursor: ew-resize;
+    cursor: col-resize;
+  }
 }
 
 .simple-editor-wrapper {

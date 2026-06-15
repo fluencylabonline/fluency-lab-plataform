@@ -28,6 +28,7 @@ import {
   LinkButton,
   LinkContent,
 } from "@/components/tiptap-ui/link-popover";
+import { TableDropdownMenu } from "@/components/tiptap-ui/table-dropdown-menu";
 
 // Icons & Hooks
 import { ArrowLeftIcon } from "@/components/tiptap-icons/arrow-left-icon";
@@ -107,6 +108,7 @@ export function NotebookToolbar({
                 types={["bulletList", "orderedList", "taskList"]}
               />
               <BlockquoteButton />
+              <TableDropdownMenu modal={false} />
             </ToolbarGroup>
             <ToolbarSeparator />
             <ToolbarGroup>

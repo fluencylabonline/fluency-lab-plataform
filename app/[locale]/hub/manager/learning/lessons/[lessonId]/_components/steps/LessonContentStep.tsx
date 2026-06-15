@@ -29,6 +29,7 @@ import { LyricsSyncNode } from "@/components/tiptap-extension/lyrics-sync/Lyrics
 import { QuizNode } from "@/components/tiptap-extension/quiz/QuizNode";
 import { AudioSyncNode } from "@/components/tiptap-extension/audio-sync/AudioSyncNode";
 import { SpeakingRecorderNode } from "@/components/tiptap-extension/speaking-recorder/SpeakingRecorderNode";
+import { TableKit } from "@tiptap/extension-table";
 
 // --- Components & Primitives ---
 import { LessonEditorToolbar } from "./LessonEditorToolbar";
@@ -132,6 +133,11 @@ export function LessonContentStep({
       QuizNode,
       AudioSyncNode,
       SpeakingRecorderNode,
+      TableKit.configure({
+        table: {
+          resizable: true,
+        },
+      }),
     ],
     content: isValidTiptapDoc(initialContentJson)
       ? initialContentJson

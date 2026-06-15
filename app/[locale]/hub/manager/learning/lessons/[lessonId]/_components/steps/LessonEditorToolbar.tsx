@@ -16,6 +16,7 @@ import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button";
 import { ImageUploadButton } from "@/components/tiptap-ui/image-upload-button";
 import { ColorHighlightPopover } from "@/components/tiptap-ui/color-highlight-popover";
 import { LinkPopover } from "@/components/tiptap-ui/link-popover";
+import { TableDropdownMenu } from "@/components/tiptap-ui/table-dropdown-menu";
 
 interface LessonEditorToolbarProps {
   toolbarRef: RefObject<HTMLDivElement | null>;
@@ -38,6 +39,7 @@ export function LessonEditorToolbar({ toolbarRef }: LessonEditorToolbarProps) {
           types={["bulletList", "orderedList", "taskList"]}
         />
         <BlockquoteButton />
+        <TableDropdownMenu modal={false} />
       </ToolbarGroup>
 
       <ToolbarSeparator />
