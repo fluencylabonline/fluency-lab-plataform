@@ -43,7 +43,8 @@ import { CollaboratorsAvatarGroup } from "./CollaboratorsAvatarGroup";
 import { Awareness } from "y-protocols/awareness";
 import { NotebookSettingsVault } from "./NotebookSettingsVault";
 import { NotebookActivitiesVault } from "./NotebookActivitiesVault";
-import { Sparkles, Settings } from "lucide-react";
+import { NotebookPlansVault } from "./NotebookPlansVault";
+import { Sparkles, Settings, GraduationCap } from "lucide-react";
 
 interface NotebookToolbarProps {
   toolbarRef: RefObject<HTMLDivElement | null>;
@@ -57,6 +58,7 @@ interface NotebookToolbarProps {
     role?: string;
   };
   awareness?: Awareness | null;
+  studentId: string;
 }
 
 export function NotebookToolbar({
@@ -65,9 +67,11 @@ export function NotebookToolbar({
   cursorY,
   user,
   awareness,
+  studentId,
 }: NotebookToolbarProps) {
   const [isToolsVaultOpen, setIsToolsVaultOpen] = useState(false);
   const [isSettingsVaultOpen, setIsSettingsVaultOpen] = useState(false);
+  const [isPlansVaultOpen, setIsPlansVaultOpen] = useState(false);
 
   const isMobile = useIsBreakpoint();
   const { height } = useWindowSize();
@@ -147,6 +151,14 @@ export function NotebookToolbar({
                 >
                   <Sparkles className="tiptap-button-icon text-amber-500 w-4 h-4" />
                 </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  tooltip="Planos e Lições do Aluno"
+                  onClick={() => setIsPlansVaultOpen(true)}
+                >
+                  <GraduationCap className="tiptap-button-icon text-indigo-500 w-4 h-4" />
+                </Button>
               </ToolbarGroup>
             </RoleGuard>
             <Spacer />
@@ -192,6 +204,12 @@ export function NotebookToolbar({
       <NotebookSettingsVault
         open={isSettingsVaultOpen}
         onOpenChange={setIsSettingsVaultOpen}
+      />
+
+      <NotebookPlansVault
+        open={isPlansVaultOpen}
+        onOpenChange={setIsPlansVaultOpen}
+        studentId={studentId}
       />
     </>
   );

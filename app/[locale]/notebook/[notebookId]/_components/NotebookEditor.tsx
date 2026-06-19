@@ -238,6 +238,7 @@ export function NotebookEditor({
           cursorY={rect.y}
           user={user}
           awareness={awareness}
+          studentId={studentId}
         />
 
         <NotebookBubbleMenu editor={editor} />

@@ -52,6 +52,10 @@ const getStudentPlansSchema = z.object({
   studentId: z.string(),
 });
 
+const getStudentLessonsSchema = z.object({
+  studentId: z.string(),
+});
+
 const reorderLessonsSchema = z.object({
   planId: z.uuid(),
   lessonIds: z.array(z.uuid()),
@@ -552,3 +556,17 @@ export const getReviewedItemsAction = protectedAction
       return { success: false, error: (error as Error).message };
     }
   });
+
+export const getStudentLessonsAction = permissionAction("material.view")
+  .metadata({ name: "getStudentLessons" })
+  .schema(getStudentLessonsSchema)
+  .action(async ({ parsedInput }) => {
+    try {
+      const data = await learningService.getStudentEnrichedLessons(parsedInput.studentId);
+      return { success: true, data };
+    } catch (error) {
+      console.error("[getStudentLessonsAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+

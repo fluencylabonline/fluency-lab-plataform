@@ -1,6 +1,7 @@
 import { learningRepository } from "./learning.repository";
 import { curriculumRepository } from "@/modules/curriculum/curriculum.repository";
 import { VocabMetadata } from "@/modules/curriculum/curriculum.types";
+import type { JSONContent } from "@tiptap/core";
 import { addDays } from "date-fns";
 import { db } from "@/lib/db";
 import { 
@@ -13,7 +14,7 @@ import {
 import { lessons, languages } from "@/modules/curriculum/curriculum.schema";
 import { usersTable, type NotificationPrefs } from "@/modules/user/user.schema";
 import { slotInstances } from "@/modules/scheduling/scheduling.schema";
-import { eq, and, asc, gte, desc, sql } from "drizzle-orm";
+import { eq, and, asc, gte, desc, sql, inArray, isNotNull } from "drizzle-orm";
 import { aiService } from "@/modules/ai/ai.service";
 import { notificationService } from "@/modules/notification/notification.service";
 import { userRepository } from "@/modules/user/user.repository";
@@ -1084,6 +1085,68 @@ export const learningService = {
       eventType,
       metadata,
     });
+  },
+
+  async getStudentEnrichedLessons(studentId: string) {
+    // 1. Buscar o plano ativo do aluno e suas lições
+    const activePlan = await learningRepository.findActivePlanWithLessons(studentId);
+
+    // 2. Buscar todas as aulas (slotInstances) agendadas ou completadas do aluno que possuam lições associadas
+    const classes = await db.query.slotInstances.findMany({
+      where: and(
+        eq(slotInstances.studentId, studentId),
+        isNotNull(slotInstances.lessonId)
+      ),
+      orderBy: [desc(slotInstances.startAt)]
+    });
+
+    // 3. Extrair os lessonIds únicos do plano ativo para evitar duplicidade
+    const activePlanLessonIds = new Set(
+      activePlan?.lessons.map((pl) => pl.lessonId) || []
+    );
+
+    // 4. Filtrar as lições das aulas que não fazem parte do plano ativo
+    const classLessonsToFetch = classes
+      .filter((c) => c.lessonId && !activePlanLessonIds.has(c.lessonId))
+      .map((c) => c.lessonId as string);
+
+    const uniqueClassLessonIds = Array.from(new Set(classLessonsToFetch));
+
+    // 5. Buscar o conteúdo/detalhes dessas lições extras
+    let extraLessons: Array<{ id: string; title: string; contentJson: JSONContent | null; scheduledDate?: Date }> = [];
+    if (uniqueClassLessonIds.length > 0) {
+      const dbLessons = await db.query.lessons.findMany({
+        where: inArray(lessons.id, uniqueClassLessonIds)
+      });
+
+      extraLessons = dbLessons.map((l) => {
+        const relatedClass = classes.find((c) => c.lessonId === l.id);
+        return {
+          id: l.id,
+          title: l.title,
+          contentJson: l.contentJson,
+          scheduledDate: relatedClass ? new Date(relatedClass.startAt) : undefined,
+        };
+      });
+    }
+
+    const activeLessons = activePlan?.lessons.map((pl) => ({
+      id: pl.lessonId,
+      title: pl.lesson?.title || "Lição Sem Título",
+      contentJson: pl.lesson?.contentJson || null,
+      scheduledDate: pl.scheduledDate ? new Date(pl.scheduledDate) : undefined,
+    })) || [];
+
+    return {
+      activePlan: activePlan
+        ? {
+            id: activePlan.id,
+            name: activePlan.name,
+            lessons: activeLessons,
+          }
+        : null,
+      classLessons: extraLessons,
+    };
   }
 };
 
