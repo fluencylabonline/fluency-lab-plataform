@@ -2465,6 +2465,7 @@
     "confirmAndSendPix": "Confirmar e Enviar PIX",
     "confirmDeactivation": "Confirm Deactivation",
     "conflictWarning": "This time conflicts with another existing schedule ({start} - {end}).",
+    "durationTooLongWarning": "Free slots cannot be longer than 1 hour.",
     "contract": "Contract",
     "contracts": "Contracts",
     "copyPix": "Copy PIX Code",

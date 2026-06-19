@@ -62,7 +62,7 @@ export function CreateSlotVault({
       type: "NORMAL",
       frequency: "NONE",
       startTime: "09:00",
-      endTime: "10:00",
+      endTime: "09:45",
       startDate: initialDate || new Date(),
       studentId: null,
     },
@@ -81,6 +81,38 @@ export function CreateSlotVault({
   const frequency = watch("frequency");
   const startTime = watch("startTime");
   const endTime = watch("endTime");
+
+  // Helper effect: Automatically set end time to start time + 45 minutes when start time is adjusted.
+  const prevStartTimeRef = React.useRef(startTime);
+  React.useEffect(() => {
+    if (startTime && startTime !== prevStartTimeRef.current) {
+      try {
+        const [h, m] = startTime.split(":").map(Number);
+        const date = new Date();
+        date.setHours(h, m + 45, 0, 0);
+        const nextH = String(date.getHours()).padStart(2, "0");
+        const nextM = String(date.getMinutes()).padStart(2, "0");
+        setValue("endTime", `${nextH}:${nextM}`);
+      } catch (err) {
+        console.error("Error setting default end time:", err);
+      }
+      prevStartTimeRef.current = startTime;
+    }
+  }, [startTime, setValue]);
+
+  // Validation: Slots cannot be longer than 1 hour (60 minutes).
+  const isDurationTooLong = React.useMemo(() => {
+    if (!startTime || !endTime) return false;
+    const [sH, sM] = startTime.split(":").map(Number);
+    const [eH, eM] = endTime.split(":").map(Number);
+    
+    const startMin = sH * 60 + sM;
+    const endMin = eH * 60 + eM;
+    
+    if (endMin <= startMin) return false;
+    
+    return (endMin - startMin) > 60;
+  }, [startTime, endTime]);
 
   React.useEffect(() => {
     if (!isOpen || !startTime || !endTime || !startDate) {
@@ -251,6 +283,15 @@ export function CreateSlotVault({
               </div>
             )}
 
+            {isDurationTooLong && (
+              <div className="p-2 rounded bg-rose-500/10 border border-rose-500/20 flex items-start gap-2 animate-in fade-in slide-in-from-top-1 mt-2">
+                <AlertCircle className="w-3 h-3 text-rose-500 mt-0.5 shrink-0" />
+                <p className="text-[10px] text-rose-500 leading-tight font-medium">
+                  {t("durationTooLongWarning") || "Horários livres não podem ser mais longos que 1 hora."}
+                </p>
+              </div>
+            )}
+
             {frequency !== "NONE" && (
               <VaultField label={t("endDateLabel") || "Data Término (Opcional)"} error={errors.endDate?.message}>
                 <CalendarVault
@@ -273,7 +314,7 @@ export function CreateSlotVault({
               </VaultSecondaryButton>
               <VaultPrimaryButton
                 type="submit"
-                disabled={isSubmitting || !!conflict || (endTime <= startTime) || isCheckingConflict}
+                disabled={isSubmitting || !!conflict || (endTime <= startTime) || isCheckingConflict || isDurationTooLong}
               >
                 {isSubmitting ? (t("creatingSlot") || "Criando...") : (t("createSlot") || "Criar Horário")}
               </VaultPrimaryButton>

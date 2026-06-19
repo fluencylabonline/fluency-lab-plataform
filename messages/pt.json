@@ -2464,6 +2464,7 @@
     "confirmAndSendPix": "Confirmar e Enviar PIX",
     "confirmDeactivation": "Confirmar Desativação",
     "conflictWarning": "Este horário conflita com outro agendamento existente ({start} - {end}).",
+    "durationTooLongWarning": "Horários livres não podem ser mais longos que 1 hora.",
     "contract": "Contrato",
     "contracts": "Contratos",
     "copyPix": "Copiar Código PIX",
