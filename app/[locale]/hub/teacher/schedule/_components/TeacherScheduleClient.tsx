@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CalendarView, CalendarEvent } from "@/components/ui/calendar-view";
 import { CreateSlotVault } from "@/modules/scheduling/_components/CreateSlotVault";
 import { SlotDetailsVault } from "@/modules/scheduling/_components/SlotDetailsVault";
@@ -33,8 +33,15 @@ export function TeacherScheduleClient({
   const tRecess = useTranslations("Recess");
   const router = useRouter();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  const [events, setEvents] = useState<CalendarEvent[]>(initialEvents);
+
+  useEffect(() => {
+    setEvents(initialEvents);
+  }, [initialEvents]);
 
   const { isMobile, isStandalone } = useDevice();
   const showInHeader = isMobile || isStandalone;
@@ -46,6 +53,64 @@ export function TeacherScheduleClient({
 
   const handleRefresh = () => {
     router.refresh();
+  };
+
+  const handleOptimisticCreate = (data: {
+    startDate: Date;
+    startTime: string;
+    endTime: string;
+    type: string;
+    frequency: string;
+    endDate?: Date | null;
+  }) => {
+    const startHour = parseInt(data.startTime.split(":")[0]);
+    const startMin = parseInt(data.startTime.split(":")[1]);
+    const endHour = parseInt(data.endTime.split(":")[0]);
+    const endMin = parseInt(data.endTime.split(":")[1]);
+
+    const newOptimisticEvents: CalendarEvent[] = [];
+    const baseDate = new Date(data.startDate);
+
+    const limit = data.frequency === "NONE" ? 1 : 12;
+    const current = new Date(baseDate);
+
+    for (let i = 0; i < limit; i++) {
+      if (data.endDate && current > new Date(data.endDate)) {
+        break;
+      }
+
+      const start = new Date(current);
+      start.setHours(startHour, startMin, 0, 0);
+
+      const end = new Date(current);
+      end.setHours(endHour, endMin, 0, 0);
+
+      newOptimisticEvents.push({
+        id: `optimistic-${Date.now()}-${i}`,
+        title: data.type === "REPOSICAO" ? "Reposição" : "Disponível",
+        start,
+        end,
+        status: "available",
+        type: data.type === "REPOSICAO" ? "replacement" : "normal",
+        isOptimistic: true,
+      });
+
+      if (data.frequency === "WEEKLY") {
+        current.setDate(current.getDate() + 7);
+      } else if (data.frequency === "BIWEEKLY") {
+        current.setDate(current.getDate() + 14);
+      } else if (data.frequency === "MONTHLY") {
+        current.setMonth(current.getMonth() + 1);
+      } else {
+        break;
+      }
+    }
+
+    setEvents((prev) => [...prev, ...newOptimisticEvents]);
+  };
+
+  const handleOptimisticCancel = () => {
+    setEvents((prev) => prev.filter((e) => !e.isOptimistic));
   };
 
   const renderCreateButton = (iconOnly: boolean) => (
@@ -126,8 +191,9 @@ export function TeacherScheduleClient({
 
       <div className="px-4 pb-10">
         <CalendarView
-          events={initialEvents}
+          events={events}
           onEventClick={handleEventClick}
+          onDateClick={setSelectedDate}
           headerActions={!showInHeader ? calendarActions : undefined}
         />
       </div>
@@ -137,6 +203,9 @@ export function TeacherScheduleClient({
         isOpen={isCreateOpen}
         onOpenChange={setIsCreateOpen}
         onSuccess={handleRefresh}
+        initialDate={selectedDate}
+        onOptimisticCreate={handleOptimisticCreate}
+        onOptimisticCancel={handleOptimisticCancel}
       />
 
       {selectedEvent && (

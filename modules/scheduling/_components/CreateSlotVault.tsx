@@ -3,9 +3,10 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Clock, AlertTriangle, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
+import { ptBR, enUS } from "date-fns/locale";
 
 import {
   Vault,
@@ -30,7 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CalendarVault } from "@/components/ui/calendar";
-import { notify } from "@/components/ui/toaster";
+import { VaultLoadingOverlay } from "@/components/ui/vault-loading-overlay";
 
 import { createRecurrenceRuleSchema, type CreateRecurrenceRuleValues } from "../scheduling.schema";
 import { createRecurrenceRuleAction, checkSlotConflictAction } from "../scheduling.actions";
@@ -41,6 +42,15 @@ interface CreateSlotVaultProps {
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
   initialDate?: Date;
+  onOptimisticCreate?: (data: {
+    startDate: Date;
+    startTime: string;
+    endTime: string;
+    type: string;
+    frequency: string;
+    endDate?: Date | null;
+  }) => void;
+  onOptimisticCancel?: () => void;
 }
 
 export function CreateSlotVault({
@@ -49,11 +59,20 @@ export function CreateSlotVault({
   onOpenChange,
   onSuccess,
   initialDate,
+  onOptimisticCreate,
+  onOptimisticCancel,
 }: CreateSlotVaultProps) {
   const t = useTranslations("UserManagement");
+  const locale = useLocale();
+  const dateLocale = locale === "pt" ? ptBR : enUS;
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [conflict, setConflict] = useState<{ startAt: Date; endAt: Date } | null>(null);
   const [isCheckingConflict, setIsCheckingConflict] = useState(false);
+
+  // Overlay loading animation states
+  const [overlayState, setOverlayState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const form = useForm<CreateRecurrenceRuleValues>({
     resolver: zodResolver(createRecurrenceRuleSchema),
@@ -81,6 +100,45 @@ export function CreateSlotVault({
   const frequency = watch("frequency");
   const startTime = watch("startTime");
   const endTime = watch("endTime");
+
+  // Sync selected date from calendar when vault opens
+  React.useEffect(() => {
+    if (isOpen && initialDate) {
+      setValue("startDate", initialDate);
+    }
+  }, [isOpen, initialDate, setValue]);
+
+  const dayOfWeekName = React.useMemo(() => {
+    if (!startDate) return "";
+    return format(new Date(startDate), "EEEE", { locale: dateLocale });
+  }, [startDate, dateLocale]);
+
+  const getFrequencyLabel = (freq: "WEEKLY" | "BIWEEKLY" | "MONTHLY") => {
+    if (locale === "pt") {
+      if (!dayOfWeekName) {
+        if (freq === "WEEKLY") return "Semanal";
+        if (freq === "BIWEEKLY") return "Quinzenal";
+        return "Mensal";
+      }
+      
+      const isMasculine = dayOfWeekName === "sábado" || dayOfWeekName === "domingo";
+      const determiner = isMasculine ? "todo" : "toda";
+      const preposition = isMasculine ? "no" : "na";
+      
+      if (freq === "WEEKLY") return `Semanal (${determiner} ${dayOfWeekName})`;
+      if (freq === "BIWEEKLY") return `Quinzenal (${determiner} ${dayOfWeekName})`;
+      return `Mensal (${preposition} ${dayOfWeekName})`;
+    } else {
+      if (!dayOfWeekName) {
+        if (freq === "WEEKLY") return "Weekly";
+        if (freq === "BIWEEKLY") return "Biweekly";
+        return "Monthly";
+      }
+      if (freq === "WEEKLY") return `Weekly on ${dayOfWeekName}`;
+      if (freq === "BIWEEKLY") return `Biweekly on ${dayOfWeekName}`;
+      return `Monthly on ${dayOfWeekName}`;
+    }
+  };
 
   // Helper effect: Automatically set end time to start time + 45 minutes when start time is adjusted.
   const prevStartTimeRef = React.useRef(startTime);
@@ -164,26 +222,61 @@ export function CreateSlotVault({
 
   const onSubmit = async (data: CreateRecurrenceRuleValues) => {
     setIsSubmitting(true);
+    setOverlayState("loading");
+
+    // Call optimistic callback before the API request completes!
+    onOptimisticCreate?.({
+      startDate: data.startDate,
+      startTime: data.startTime,
+      endTime: data.endTime,
+      type: data.type,
+      frequency: data.frequency,
+      endDate: data.endDate,
+    });
+
     try {
       const result = await createRecurrenceRuleAction(data);
       if (result?.data?.success) {
-        notify.success(t("slotCreated") || "Horário criado!");
+        setOverlayState("success");
         onSuccess?.();
-        onOpenChange(false);
-        form.reset();
       } else {
-        notify.error(result?.data?.error || t("error") || "Erro ao criar horário");
+        // Cancel optimistic items if failed
+        onOptimisticCancel?.();
+        const err = result?.data?.error || t("error") || "Erro ao criar horário";
+        setErrorMsg(err);
+        setOverlayState("error");
       }
     } catch {
-      notify.error(t("error") || "Erro ao criar horário");
+      onOptimisticCancel?.();
+      setErrorMsg(t("error") || "Erro ao criar horário");
+      setOverlayState("error");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleOverlayDone = () => {
+    if (overlayState === "success") {
+      onOpenChange(false);
+      form.reset();
+    }
+    setOverlayState("idle");
+  };
+
   return (
-    <Vault open={isOpen} onOpenChange={onOpenChange}>
+    <Vault open={isOpen} onOpenChange={(open) => {
+      if (overlayState !== "idle") return;
+      onOpenChange(open);
+    }}>
       <VaultContent>
+        <VaultLoadingOverlay
+          state={overlayState}
+          loadingLabel={t("creatingSlot") || "Criando horário..."}
+          successLabel={t("slotCreated") || "Horário criado com sucesso!"}
+          errorLabel={t("error") || "Erro ao criar horário"}
+          errorSub={errorMsg}
+          onDone={handleOverlayDone}
+        />
         <VaultHeader>
           <VaultIcon type="calendar" />
           <VaultTitle>{t("createSlotTitle") || "Criar Novo Horário"}</VaultTitle>
@@ -219,10 +312,10 @@ export function CreateSlotVault({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="NONE">{t("frequencies.NONE") || "Único"}</SelectItem>
-                    <SelectItem value="WEEKLY">{t("frequencies.WEEKLY") || "Semanal"}</SelectItem>
-                    <SelectItem value="BIWEEKLY">{t("frequencies.BIWEEKLY") || "Quinzenal"}</SelectItem>
-                    <SelectItem value="MONTHLY">{t("frequencies.MONTHLY") || "Mensal"}</SelectItem>
+                    <SelectItem value="NONE">{t("frequencies.NONE") || (locale === "pt" ? "Único" : "None")}</SelectItem>
+                    <SelectItem value="WEEKLY">{getFrequencyLabel("WEEKLY")}</SelectItem>
+                    <SelectItem value="BIWEEKLY">{getFrequencyLabel("BIWEEKLY")}</SelectItem>
+                    <SelectItem value="MONTHLY">{getFrequencyLabel("MONTHLY")}</SelectItem>
                   </SelectContent>
                 </Select>
               </VaultField>

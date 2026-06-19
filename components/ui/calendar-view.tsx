@@ -130,7 +130,13 @@ const CalendarGrid = React.memo(({
                 )}
                 <div className="hidden lg:flex flex-col gap-1 overflow-hidden">
                   {dayEvents.slice(0, 2).map((event: CalendarEvent) => (
-                    <div key={event.id} className="text-[9px] font-bold px-1.5 py-0.5 rounded-sm bg-primary/10 border border-white/10 text-text/20 truncate">
+                    <div
+                      key={event.id}
+                      className={cn(
+                        "text-[9px] font-bold px-1.5 py-0.5 rounded-sm bg-primary/10 border border-white/10 text-text/20 truncate",
+                        !!event.isOptimistic && "animate-pulse bg-primary/5 border-dashed border-primary/30 opacity-60"
+                      )}
+                    >
                       {format(event.start, "HH:mm")} {event.title}
                     </div>
                   ))}
@@ -266,16 +272,27 @@ const WeekSection = React.memo(({
                 )}
 
                 {dayEvents.map((event) => (
-                  <motion.div key={event.id} onClick={() => onEventClick?.(event)} className="cursor-pointer">
+                  <motion.div
+                    key={event.id}
+                    onClick={() => !event.isOptimistic && onEventClick?.(event)}
+                    className={cn(
+                      "cursor-pointer",
+                      !!event.isOptimistic && "cursor-not-allowed pointer-events-none"
+                    )}
+                  >
                     {renderEventCard ? renderEventCard(event) : (
-                      <div className="p-4 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 transition-all space-y-3 group">
+                      <div className={cn(
+                        "p-4 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 transition-all space-y-3 group",
+                        !!event.isOptimistic && "animate-pulse border-dashed border-primary/20 bg-primary/5 opacity-60"
+                      )}>
                         <div className="flex items-start justify-between">
                           <h4 className="text-sm font-bold text-white group-hover:text-primary transition-colors">{event.title}</h4>
                           <Badge variant="outline" className={cn(
                             "text-[8px] font-black uppercase tracking-tighter border-white/10",
-                            event.type === "replacement" ? "bg-orange-500/10 text-orange-500 border-orange-500/20" : "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                            event.type === "replacement" ? "bg-orange-500/10 text-orange-500 border-orange-500/20" : "bg-blue-500/10 text-blue-500 border-blue-500/20",
+                            !!event.isOptimistic && "opacity-50"
                           )}>
-                            {event.type === "replacement" ? (locale === "pt" ? "Reposição" : "Replacement") : (locale === "pt" ? "Regular" : "Regular")}
+                            {event.isOptimistic ? (locale === "pt" ? "Criando..." : "Creating...") : (event.type === "replacement" ? (locale === "pt" ? "Reposição" : "Replacement") : (locale === "pt" ? "Regular" : "Regular"))}
                           </Badge>
                         </div>
                         <div className="flex items-center gap-4 text-[10px] text-muted-foreground font-medium">
