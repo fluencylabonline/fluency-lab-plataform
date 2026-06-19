@@ -537,7 +537,12 @@ export const getStudentClassesByTeacherAction = protectedAction
   }))
   .action(async ({ parsedInput, ctx }) => {
     try {
-      if (ctx.user.role !== "admin" && ctx.user.id !== parsedInput.studentId) {
+      if (
+        ctx.user.role !== "admin" &&
+        ctx.user.role !== "manager" &&
+        ctx.user.role !== "teacher" &&
+        ctx.user.id !== parsedInput.studentId
+      ) {
         throw new Error("Acesso não autorizado aos dados do aluno.");
       }
       const baseDate = new Date(parsedInput.year, parsedInput.month, 1);
