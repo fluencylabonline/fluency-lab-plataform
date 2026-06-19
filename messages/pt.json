@@ -1909,7 +1909,9 @@
     "typeYourAnswer": "Digite sua resposta",
     "using_ai_engine": "Utilizando motor de IA para questões complexas.",
     "vocabulary": "Vocabulário",
-    "writingHint": "Dica: preste atenção na pontuação e fala."
+    "writingHint": "Dica: preste atenção na pontuação e fala.",
+    "exitConfirmTitle": "Tem certeza que deseja sair?",
+    "exit": "Sair"
   },
   "PlanCard": {
     "cancel": "Cancelar",

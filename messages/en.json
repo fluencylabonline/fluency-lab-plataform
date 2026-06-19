@@ -1909,7 +1909,9 @@
     "typeYourAnswer": "Type your answer",
     "using_ai_engine": "Using AI engine for complex questions.",
     "vocabulary": "Vocabulary",
-    "writingHint": "Tip: Pay attention to spelling and punctuation."
+    "writingHint": "Tip: Pay attention to spelling and punctuation.",
+    "exitConfirmTitle": "Are you sure you wanna leave?",
+    "exit": "Leave"
   },
   "PlanCard": {
     "cancel": "Cancel",
