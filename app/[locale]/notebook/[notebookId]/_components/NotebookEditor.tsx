@@ -28,6 +28,7 @@ import { SpeakingRecorderNode } from "@/components/tiptap-extension/speaking-rec
 import { TableKit } from "@tiptap/extension-table";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
+import { Indent } from "@/components/tiptap-extension/indent-extension";
 
 // --- Call Feature ---
 import { FloatCallButton } from "./call/FloatCallButton";
@@ -212,6 +213,7 @@ export function NotebookEditor({
         }),
         TextStyle,
         Color,
+        Indent,
       ],
     },
     [ydoc, awareness],
