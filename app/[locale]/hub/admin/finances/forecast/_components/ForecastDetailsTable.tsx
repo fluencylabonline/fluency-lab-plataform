@@ -90,7 +90,8 @@ export function ForecastDetailsTable({ initialData }: ForecastDetailsTableProps)
                         {format.dateTime(new Date(tx.dueDate), {
                           day: '2-digit',
                           month: 'short',
-                          year: 'numeric'
+                          year: 'numeric',
+                          timeZone: 'UTC'
                         })}
                       </span>
                     </TableCell>
@@ -150,7 +151,8 @@ export function ForecastDetailsTable({ initialData }: ForecastDetailsTableProps)
                         {format.dateTime(new Date(tx.date), {
                           day: '2-digit',
                           month: 'short',
-                          year: 'numeric'
+                          year: 'numeric',
+                          timeZone: 'UTC'
                         })}
                       </span>
                     </TableCell>
