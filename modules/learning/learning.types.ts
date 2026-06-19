@@ -153,5 +153,6 @@ export interface StudentRoadmap {
   id: string;
   name: string;
   progress: number;
+  languageId: string;
   lessons: RoadmapLesson[];
 }

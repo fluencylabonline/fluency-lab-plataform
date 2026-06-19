@@ -96,6 +96,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "class.create.with.credits",
     "credits.view.students",
     "material.view",
+    "material.create",
     "notebook.create",
     "notebook.view.student",
   ],

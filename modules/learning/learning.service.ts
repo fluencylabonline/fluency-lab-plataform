@@ -579,6 +579,7 @@ export const learningService = {
       id: activePlan.id,
       name: activePlan.name,
       progress,
+      languageId: activePlan.languageId,
       lessons: lessonsWithStatus,
     };
   },
