@@ -7,7 +7,7 @@ import {
   Star,
   Lock,
   History as HistoryIcon,
-  ImageIcon,
+  Image as ImageIcon,
   Ear,
   Shuffle,
   FileQuestion,
@@ -227,7 +227,7 @@ function NodeItem({
       return <Lock size={28} />;
     }
     const Icon = getIconForOrder(lesson.order);
-    return <Icon size={32} strokeWidth={2.5} />;
+    return <Icon size={32} />;
   };
 
   return (
@@ -255,9 +255,8 @@ function NodeItem({
                 : "bg-muted border-muted-foreground/20 text-muted-foreground/40",
           )}
         >
-          {renderIcon()}
 
-          {/* Balão "START" */}
+           {/* Balão "START" */}
           {isCurrent && (
             <motion.div
               initial={{ y: 0 }}
@@ -267,12 +266,13 @@ function NodeItem({
                 repeatType: "reverse",
                 duration: 0.8,
               }}
-              className="absolute -top-12 bg-white dark:bg-slate-200 text-primary px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl border-2 border-primary/10 z-20 whitespace-nowrap"
+              className="absolute -top-4 bg-white dark:bg-slate-200 text-primary px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl border-2 border-primary/10 z-20 whitespace-nowrap"
             >
               {t("startBalloon")}
               <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-slate-200 border-b-2 border-r-2 border-primary/10 rotate-45"></div>
             </motion.div>
           )}
+          {renderIcon()}
         </motion.div>
       </div>
 
@@ -294,5 +294,9 @@ function NodeItem({
 
 function getIconForOrder(order: number) {
   const icons = [ImageIcon, Ear, Shuffle, Brain, FileQuestion, Headphones];
-  return icons[(order - 1) % icons.length];
+  
+  // Math.max ensures the index never drops below 0, even if order is 0.
+  const safeIndex = Math.max(0, order - 1) % icons.length;
+  
+  return icons[safeIndex];
 }
