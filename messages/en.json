@@ -366,13 +366,17 @@
     "save": "Save",
     "saveFeedback": "Save Feedback",
     "saveSuccess": "Changes saved successfully!",
+    "saveError": "Error saving feedback",
     "scheduled": "Scheduled",
     "status": "Status",
     "statusUpdated": "Status updated!",
+    "statusUpdateError": "Error updating status",
     "teacher-recess": "Recess",
     "title": "Classes",
     "updateFeedback": "Update Feedback",
     "updateStatus": "Update Status",
+    "updatingStatus": "Updating status...",
+    "updatingFeedback": "Saving feedback...",
     "year": "Year"
   },
   "Common": {

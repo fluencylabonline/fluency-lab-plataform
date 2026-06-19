@@ -42,6 +42,7 @@ import { updateSlotStatusSchema } from "@/modules/scheduling/scheduling.schema";
 import { useLocale } from "next-intl";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
+import { VaultLoadingOverlay } from "@/components/ui/vault-loading-overlay";
 
 interface StudentClassesCardProps {
   studentId: string;
@@ -59,7 +60,6 @@ export function StudentClassesCard({
   const dateLocale = locale === "pt" ? ptBR : enUS;
 
   const [classes, setClasses] = useState<SlotInstanceWithDetails[]>(initialData);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
@@ -70,6 +70,13 @@ export function StudentClassesCard({
   const [isConfirmVaultOpen, setIsConfirmVaultOpen] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
   const [updatingClassId, setUpdatingClassId] = useState<string | null>(null);
+
+  // Loading Overlay states for Vault updates
+  const [confirmOverlayState, setConfirmOverlayState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [confirmErrorMsg, setConfirmErrorMsg] = useState("");
+
+  const [feedbackOverlayState, setFeedbackOverlayState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [feedbackErrorMsg, setFeedbackErrorMsg] = useState("");
 
   const statusConfig = useMemo(() => ({
     scheduled: {
@@ -125,14 +132,12 @@ export function StudentClassesCard({
   }), [t]);
 
   const fetchClasses = async (month: number, year: number) => {
-    setIsLoading(true);
     const result = await getStudentClassesByTeacherAction({ studentId, month, year });
     if (result?.data?.success) {
       setClasses(result.data.data as SlotInstanceWithDetails[]);
     } else {
       notify.error(result?.data?.error || result?.serverError || "Error fetching classes");
     }
-    setIsLoading(false);
   };
 
   const handleMonthChange = (month: string) => {
@@ -174,25 +179,47 @@ export function StudentClassesCard({
       status: status as z.infer<typeof updateSlotStatusSchema>["status"]
     });
 
+    let success = false;
+    let errorMsg = "";
+
     if (res?.data?.success) {
-      notify.success(t("statusUpdated") || "Status atualizado!");
+      //notify.success(t("statusUpdated") || "Status atualizado!");
       await fetchClasses(selectedMonth, selectedYear);
+      success = true;
     } else {
-      notify.error(res?.data?.error || res?.serverError || "Erro ao atualizar status");
+      errorMsg = res?.data?.error || res?.serverError || "Erro ao atualizar status";
+      //notify.error(errorMsg);
     }
     setUpdatingClassId(null);
+    return { success, error: errorMsg };
   };
 
   const confirmStatusUpdate = async () => {
     if (!selectedClass || !pendingStatus) return;
-    await executeStatusUpdate(selectedClass.id, pendingStatus);
-    setIsConfirmVaultOpen(false);
-    setPendingStatus(null);
+    
+    setConfirmOverlayState("loading");
+    const res = await executeStatusUpdate(selectedClass.id, pendingStatus);
+    
+    if (res.success) {
+      setConfirmOverlayState("success");
+    } else {
+      setConfirmErrorMsg(res.error || "Erro ao atualizar status");
+      setConfirmOverlayState("error");
+    }
+  };
+
+  const handleConfirmOverlayDone = () => {
+    if (confirmOverlayState === "success") {
+      setIsConfirmVaultOpen(false);
+      setPendingStatus(null);
+      setSelectedClass(null);
+    }
+    setConfirmOverlayState("idle");
   };
 
   const handleSave = async () => {
     if (!selectedClass) return;
-    setIsLoading(true);
+    setFeedbackOverlayState("loading");
 
     try {
       // Update notes
@@ -200,17 +227,26 @@ export function StudentClassesCard({
         classId: selectedClass.id,
         notes: feedback
       });
-      if (!resNotes?.data?.success) throw new Error(resNotes?.data?.error || resNotes?.serverError || "Error updating notes");
-
-      notify.success(t("saveSuccess") || "Changes saved!");
-      setIsVaultOpen(false);
-      fetchClasses(selectedMonth, selectedYear);
+      
+      if (resNotes?.data?.success) {
+        setFeedbackOverlayState("success");
+        await fetchClasses(selectedMonth, selectedYear);
+      } else {
+        throw new Error(resNotes?.data?.error || resNotes?.serverError || "Error updating notes");
+      }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Error saving changes";
-      notify.error(errorMessage);
-    } finally {
-      setIsLoading(false);
+      setFeedbackErrorMsg(errorMessage);
+      setFeedbackOverlayState("error");
     }
+  };
+
+  const handleFeedbackOverlayDone = () => {
+    if (feedbackOverlayState === "success") {
+      setIsVaultOpen(false);
+      setSelectedClass(null);
+    }
+    setFeedbackOverlayState("idle");
   };
 
   const months = Array.from({ length: 12 }, (_, i) => ({
@@ -388,8 +424,19 @@ export function StudentClassesCard({
         </div>
       </div>
 
-      <Vault open={isVaultOpen} onOpenChange={setIsVaultOpen}>
+      <Vault open={isVaultOpen} onOpenChange={(open) => {
+        if (feedbackOverlayState !== "idle") return;
+        setIsVaultOpen(open);
+      }}>
         <VaultContent>
+          <VaultLoadingOverlay
+            state={feedbackOverlayState}
+            loadingLabel={t("updatingFeedback") || "Salvando feedback..."}
+            successLabel={t("saveSuccess") || "Feedback salvo com sucesso!"}
+            errorLabel={t("saveError") || "Erro ao salvar feedback"}
+            errorSub={feedbackErrorMsg}
+            onDone={handleFeedbackOverlayDone}
+          />
           <VaultHeader>
             <VaultIcon type="calendar" />
             <VaultTitle>{t("updateFeedback") || "Atualizar Feedback"}</VaultTitle>
@@ -411,18 +458,29 @@ export function StudentClassesCard({
           </VaultBody>
 
           <VaultFooter>
-            <VaultSecondaryButton onClick={() => setIsVaultOpen(false)} disabled={isLoading}>
+            <VaultSecondaryButton onClick={() => setIsVaultOpen(false)} disabled={feedbackOverlayState !== "idle"}>
               {t("cancel") || "Cancelar"}
             </VaultSecondaryButton>
-            <VaultPrimaryButton onClick={handleSave} disabled={isLoading}>
-              {isLoading ? "..." : t("saveFeedback")}
+            <VaultPrimaryButton onClick={handleSave} disabled={feedbackOverlayState !== "idle"}>
+              {feedbackOverlayState !== "idle" ? "..." : t("saveFeedback")}
             </VaultPrimaryButton>
           </VaultFooter>
         </VaultContent>
       </Vault>
 
-      <Vault open={isConfirmVaultOpen} onOpenChange={setIsConfirmVaultOpen}>
+      <Vault open={isConfirmVaultOpen} onOpenChange={(open) => {
+        if (confirmOverlayState !== "idle") return;
+        setIsConfirmVaultOpen(open);
+      }}>
         <VaultContent>
+          <VaultLoadingOverlay
+            state={confirmOverlayState}
+            loadingLabel={t("updatingStatus") || "Atualizando status..."}
+            successLabel={t("statusUpdated") || "Status atualizado com sucesso!"}
+            errorLabel={t("statusUpdateError") || "Erro ao atualizar status"}
+            errorSub={confirmErrorMsg}
+            onDone={handleConfirmOverlayDone}
+          />
           <VaultHeader>
             <VaultIcon type="warning" />
             <VaultTitle>{t("confirmStatusChange") || "Confirmar Alteração"}</VaultTitle>
@@ -432,11 +490,11 @@ export function StudentClassesCard({
           </VaultHeader>
 
           <VaultFooter>
-            <VaultSecondaryButton onClick={() => setIsConfirmVaultOpen(false)} disabled={isLoading}>
+            <VaultSecondaryButton onClick={() => setIsConfirmVaultOpen(false)} disabled={confirmOverlayState !== "idle"}>
               {t("cancel") || "Cancelar"}
             </VaultSecondaryButton>
-            <VaultPrimaryButton onClick={confirmStatusUpdate} disabled={isLoading}>
-              {isLoading ? "..." : t("confirm") || "Confirmar"}
+            <VaultPrimaryButton onClick={confirmStatusUpdate} disabled={confirmOverlayState !== "idle"}>
+              {confirmOverlayState !== "idle" ? "..." : t("confirm") || "Confirmar"}
             </VaultPrimaryButton>
           </VaultFooter>
         </VaultContent>
