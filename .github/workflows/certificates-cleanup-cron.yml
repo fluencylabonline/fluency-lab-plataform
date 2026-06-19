@@ -11,15 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
       - name: Trigger Cleanup API
         env:
           APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
@@ -36,3 +27,4 @@ jobs:
           curl -f -X POST "$APP_URL/api/cron/cleanup-certificates" \
           -H "Authorization: Bearer $CRON_SECRET" \
           -H "Content-Type: application/json"
+

@@ -17,7 +17,7 @@ import { eq, and, asc, gte, desc, sql } from "drizzle-orm";
 import { aiService } from "@/modules/ai/ai.service";
 import { notificationService } from "@/modules/notification/notification.service";
 import { userRepository } from "@/modules/user/user.repository";
-import { isSameDay, differenceInDays } from "date-fns";
+import { differenceInDays } from "date-fns";
 import { StudentLearningStats, LearningItemDetail, StudentRoadmap } from "./learning.types";
 import { REMINDER_TEMPLATES } from "./reminder-templates";
 
@@ -1005,7 +1005,8 @@ export const learningService = {
   async sendPracticeReminders() {
     const students = await userRepository.findStudentsForReminders();
     const now = new Date();
-    const isLateDay = now.getHours() >= 20; // After 8 PM
+    const localDetails = getLocalTimeDetails(now);
+    const isLateDay = localDetails.hour >= 20; // After 8 PM
 
     let processedCount = 0;
 
@@ -1015,7 +1016,7 @@ export const learningService = {
 
       // 1. Check if practiced today
       const alreadyPracticed = student.lastPracticeDate && 
-        isSameDay(student.lastPracticeDate, now);
+        isSameDayInTimeZone(student.lastPracticeDate, now);
 
       if (alreadyPracticed) continue;
 
@@ -1085,3 +1086,33 @@ export const learningService = {
     });
   }
 };
+
+export function getLocalTimeDetails(date: Date, timeZone: string = "America/Sao_Paulo") {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(date);
+  const getPart = (type: string) => parts.find(p => p.type === type)!.value;
+  return {
+    year: parseInt(getPart("year")),
+    month: parseInt(getPart("month")), // 1-12
+    day: parseInt(getPart("day")),
+    hour: parseInt(getPart("hour")),
+  };
+}
+
+export function isSameDayInTimeZone(date1: Date, date2: Date, timeZone: string = "America/Sao_Paulo"): boolean {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  });
+  return formatter.format(date1) === formatter.format(date2);
+}

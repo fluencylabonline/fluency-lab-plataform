@@ -60,6 +60,7 @@ describe("Session Flow - Cookie Security", () => {
       id: "user-uuid",
       email: "test@test.com",
       mfaEnabled: false,
+      isActive: true,
     };
     vi.mocked(userRepository.findById).mockResolvedValue(mockUser as unknown as Awaited<ReturnType<typeof userRepository.findById>>);
     vi.mocked(userRepository.upsert).mockResolvedValue(mockUser as unknown as Awaited<ReturnType<typeof userRepository.upsert>>);
@@ -96,6 +97,7 @@ describe("Session Flow - Cookie Security", () => {
       id: "user-uuid",
       email: "test@test.com",
       mfaEnabled: true,
+      isActive: true,
     };
     vi.mocked(userRepository.findById).mockResolvedValue(mockUserMfa as unknown as Awaited<ReturnType<typeof userRepository.findById>>);
     vi.mocked(userRepository.upsert).mockResolvedValue(mockUserMfa as unknown as Awaited<ReturnType<typeof userRepository.upsert>>);

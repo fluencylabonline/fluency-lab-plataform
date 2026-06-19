@@ -11,9 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Trigger Learning Reminders API
         env:
           APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
@@ -30,3 +27,4 @@ jobs:
           curl -f -X POST "$APP_URL/api/cron/learning" \
           -H "Authorization: Bearer $CRON_SECRET" \
           -H "Content-Type: application/json"
+

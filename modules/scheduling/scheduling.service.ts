@@ -59,6 +59,19 @@ function getLocalMidnight(date: Date, timeZone: string = "America/Sao_Paulo"): D
   return localToUtc(parts.year, parts.month, parts.day, 0, 0, timeZone);
 }
 
+function formatLocalTime(date: Date, formatStr: string = "HH:mm", timeZone: string = "America/Sao_Paulo"): string {
+  const parts = getLocalDateParts(date, timeZone);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  if (formatStr === "dd/MM HH:mm") {
+    return `${pad(parts.day)}/${pad(parts.month + 1)} ${pad(parts.hour)}:${pad(parts.minute)}`;
+  }
+  if (formatStr === "dd/MM/yyyy HH:mm") {
+    return `${pad(parts.day)}/${pad(parts.month + 1)}/${parts.year} ${pad(parts.hour)}:${pad(parts.minute)}`;
+  }
+  // Default to HH:mm
+  return `${pad(parts.hour)}:${pad(parts.minute)}`;
+}
+
 function localToUtc(year: number, month: number, day: number, hour: number, minute: number, timeZone: string = "America/Sao_Paulo"): Date {
   const utcDate = new Date(Date.UTC(year, month, day, hour, minute, 0));
   const parts = getLocalDateParts(utcDate, timeZone);
@@ -1002,7 +1015,7 @@ export const schedulingService = {
       // 1. Notify Managers
       await notificationService.sendNotification({
         title: "Aula não atualizada (Atenção)",
-        body: `A aula do prof. ${slot.teacherId} em ${format(slot.startAt, "dd/MM HH:mm")} não foi atualizada e expirou.`,
+        body: `A aula do prof. ${slot.teacherId} em ${formatLocalTime(slot.startAt, "dd/MM HH:mm")} não foi atualizada e expirou.`,
         targetType: "role",
         targetRole: "manager",
         channels: { inApp: true, push: true },
@@ -1013,7 +1026,7 @@ export const schedulingService = {
       if (teacher) {
         await notificationService.sendNotification({
           title: "⚠️ Aula pendente de atualização",
-          body: `Sua aula de ${format(slot.startAt, "dd/MM HH:mm")} passou de 2h e não foi atualizada.`,
+          body: `Sua aula de ${formatLocalTime(slot.startAt, "dd/MM HH:mm")} passou de 2h e não foi atualizada.`,
           targetType: "specific",
           userIds: [slot.teacherId],
           channels: { inApp: true, push: true },
@@ -1022,7 +1035,7 @@ export const schedulingService = {
         if (teacher.email) {
           await communicationService.sendClassOverdueTeacherEmail(teacher.email, {
             teacherName: teacher.name || "Professor",
-            classDate: format(slot.startAt, "dd/MM/yyyy HH:mm"),
+            classDate: formatLocalTime(slot.startAt, "dd/MM/yyyy HH:mm"),
           });
         }
       }
@@ -1047,7 +1060,7 @@ export const schedulingService = {
         // Notify Student
         await notificationService.sendNotification({
           title: "Lembrete de Aula (Amanhã)",
-          body: `Você tem uma aula marcada para amanhã às ${format(slot.startAt, "HH:mm")}.`,
+          body: `Você tem uma aula marcada para amanhã às ${formatLocalTime(slot.startAt, "HH:mm")}.`,
           targetType: "specific",
           userIds: [slot.studentId],
           channels: { inApp: true, push: true },
@@ -1056,7 +1069,7 @@ export const schedulingService = {
         // Notify Teacher
         await notificationService.sendNotification({
           title: "Aula Amanhã",
-          body: `Lembrete: Aula com aluno em ${format(slot.startAt, "HH:mm")}.`,
+          body: `Lembrete: Aula com aluno em ${formatLocalTime(slot.startAt, "HH:mm")}.`,
           targetType: "specific",
           userIds: [slot.teacherId],
           channels: { inApp: true, push: true },
@@ -1078,7 +1091,7 @@ export const schedulingService = {
         // Notify Student
         await notificationService.sendNotification({
           title: "Sua aula começa em breve!",
-          body: `Sua aula das ${format(slot.startAt, "HH:mm")} começa em aproximadamente 1 hora.`,
+          body: `Sua aula das ${formatLocalTime(slot.startAt, "HH:mm")} começa em aproximadamente 1 hora.`,
           targetType: "specific",
           userIds: [slot.studentId],
           channels: { inApp: true, push: true },
@@ -1087,7 +1100,7 @@ export const schedulingService = {
         // Notify Teacher
         await notificationService.sendNotification({
           title: "Aula em 1 hora",
-          body: `Sua próxima aula começa às ${format(slot.startAt, "HH:mm")}.`,
+          body: `Sua próxima aula começa às ${formatLocalTime(slot.startAt, "HH:mm")}.`,
           targetType: "specific",
           userIds: [slot.teacherId],
           channels: { inApp: true, push: true },
