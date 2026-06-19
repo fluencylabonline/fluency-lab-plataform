@@ -533,6 +533,10 @@ export const learningService = {
     return learningRepository.reorderPlanLessons(planId, lessonIds);
   },
 
+  async getActivePlan(studentId: string) {
+    return learningRepository.findActivePlanWithLessons(studentId);
+  },
+
   async getStudentRoadmap(studentId: string): Promise<StudentRoadmap | null> {
     const activePlan = await learningRepository.findActivePlanWithLessons(studentId);
     if (!activePlan) return null;

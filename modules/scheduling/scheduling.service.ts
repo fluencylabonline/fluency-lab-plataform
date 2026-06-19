@@ -12,6 +12,8 @@ import {
 import { usersTable, type User } from "@/modules/user/user.schema";
 import { contractInstancesTable } from "@/modules/contract/contract.schema";
 import { eq, and, gte, lt, asc, desc, inArray, isNotNull, isNull, between, gt } from "drizzle-orm";
+import { learningService } from "@/modules/learning/learning.service";
+import { planLessons } from "@/modules/learning/learning.schema";
 import { communicationService } from "@/modules/communication/communication.service";
 import { userService } from "@/modules/user/user.service";
 import { env } from "@/env";
@@ -94,6 +96,36 @@ function isRecessPeriod(date: Date): boolean {
     return true;
   }
   return false;
+}
+
+async function linkLessonToActivePlan(
+  studentId: string | null,
+  lessonId: string | null,
+  classDate: Date
+): Promise<{ planId: string | null; planName: string | null }> {
+  if (!studentId || !lessonId) return { planId: null, planName: null };
+
+  try {
+    const activePlan = await learningService.getActivePlan(studentId);
+    if (activePlan) {
+      // Check if lesson is already in the plan
+      const hasLesson = activePlan.lessons.some((l) => l.lessonId === lessonId);
+      if (!hasLesson) {
+        await learningService.addLessonToPlan(activePlan.id, lessonId);
+      }
+
+      // Update the scheduledDate of the lesson in the plan to slot date
+      await db.update(planLessons)
+        .set({ scheduledDate: classDate })
+        .where(and(eq(planLessons.planId, activePlan.id), eq(planLessons.lessonId, lessonId)));
+
+      return { planId: activePlan.id, planName: activePlan.name };
+    }
+  } catch (error) {
+    console.error("[linkLessonToActivePlan] Error linking lesson to plan:", error);
+  }
+
+  return { planId: null, planName: null };
 }
 
 export const schedulingService = {
@@ -419,8 +451,19 @@ export const schedulingService = {
       throw new Error("Unauthorized");
     }
 
+    const slot = await schedulingRepository.findById(slotId);
+    if (!slot) throw new Error("Slot instance not found");
+
+    const planInfo = await linkLessonToActivePlan(slot.studentId, lessonId, slot.startAt);
+
     await db.update(slotInstances)
-      .set({ lessonId, lessonTitle, updatedAt: new Date() })
+      .set({
+        lessonId,
+        lessonTitle,
+        planId: planInfo.planId ?? slot.planId,
+        planName: planInfo.planName ?? slot.planName,
+        updatedAt: new Date()
+      })
       .where(eq(slotInstances.id, slotId));
 
     return { success: true };
@@ -835,9 +878,35 @@ export const schedulingService = {
         }
       }
 
+      // 3. Plan & Lesson Synchronization
+      let planId = data.planId;
+      let planName = data.planName;
+
+      if (data.lessonId !== undefined) {
+        if (data.lessonId === null) {
+          planId = null;
+          planName = null;
+        } else if (planId === undefined) {
+          const studentId = data.studentId || slot.studentId;
+          const classDate = data.startAt ? new Date(data.startAt) : slot.startAt;
+          const planInfo = await linkLessonToActivePlan(studentId, data.lessonId, classDate);
+          if (planInfo.planId) {
+            planId = planInfo.planId;
+            planName = planInfo.planName;
+          }
+        }
+      }
+
       if (scope === "single") {
+        const singleUpdate: Partial<typeof slotInstances.$inferInsert> = {
+          ...data,
+          updatedAt: new Date(),
+        };
+        if (planId !== undefined) singleUpdate.planId = planId;
+        if (planName !== undefined) singleUpdate.planName = planName;
+
         await tx.update(slotInstances)
-          .set({ ...data, updatedAt: new Date() })
+          .set(singleUpdate)
           .where(eq(slotInstances.id, slotId));
       } else if (scope === "future" && slot.ruleId) {
         // Fetch this and all future materialized slots
@@ -873,6 +942,8 @@ export const schedulingService = {
             ...data,
             updatedAt: new Date(),
           };
+          if (planId !== undefined) updateObj.planId = planId;
+          if (planName !== undefined) updateObj.planName = planName;
 
           if (timeChanged) {
             const originalStartParts = getLocalDateParts(futureSlot.startAt);
