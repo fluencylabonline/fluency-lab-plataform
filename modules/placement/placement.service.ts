@@ -124,13 +124,25 @@ export const placementService = {
     const textTypes = ["unscramble", "writing", "gapfill"];
 
     if (textTypes.includes(question.type || "")) {
-      // Normalize both strings: lowercase, remove punctuation, trim extra spaces
-      const normalize = (s: string) => s.toLowerCase().replace(/[.,!?;:]/g, "").replace(/\s+/g, " ").trim();
+      // Normalize both strings: lowercase, replace curly quotes, remove punctuation, trim extra spaces
+      const normalize = (s: string) => s
+        .toLowerCase()
+        .replace(/[’‘]/g, "'")
+        .replace(/[“”]/g, '"')
+        .replace(/[.,!?;:]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
       
       // For writing/gapfill, the correct answer might be in correctOptionId (as string) or context
-      const expected = question.type === "unscramble" 
-        ? (question.context || "") 
-        : (question.correctOptionId || "");
+      let expected = "";
+      if (question.type === "unscramble") {
+        expected = question.context || "";
+      } else {
+        const correctOption = (question.options as { id: string; text: string }[] | undefined)?.find(
+          (o) => o.id === question.correctOptionId
+        );
+        expected = correctOption ? correctOption.text : (question.correctOptionId || "");
+      }
         
       isCorrect = normalize(data.selectedOptionId) === normalize(expected);
     } else {
