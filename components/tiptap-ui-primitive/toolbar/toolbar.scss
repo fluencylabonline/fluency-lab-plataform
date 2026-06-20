@@ -49,18 +49,27 @@
       display: none;
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: 767px) {
       position: absolute;
       top: auto;
-      height: calc(var(--tt-toolbar-height) + var(--tt-safe-area-bottom));
+      height: auto;
+      min-height: calc(var(--tt-toolbar-height) + var(--tt-safe-area-bottom));
       border-top: 1px solid var(--tt-toolbar-border-color);
       border-bottom: none;
-      padding: 0 0.5rem var(--tt-safe-area-bottom);
-      flex-wrap: nowrap;
-      justify-content: flex-start;
+      padding: 0.25rem 0.5rem calc(0.25rem + var(--tt-safe-area-bottom));
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-end;
 
       .tiptap-toolbar-group {
         flex: 0 0 auto;
+      }
+
+      // Mobile panel expansion — contain animations
+      &[data-mobile-panel]:not([data-mobile-panel="main"]) {
+        overflow: hidden;
+        gap: 0.5rem;
       }
     }
   }
@@ -88,11 +97,41 @@
       background-color: transparent;
     }
 
-    @media screen and (max-width: 480px) {
+    @media screen and (max-width: 767px) {
       width: 100%;
       border-radius: 0;
       border: none;
       box-shadow: none;
     }
   }
+}
+
+// ─── Mobile Toolbar Panel Content ─────────────────────────────
+
+.toolbar-mobile-content {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tt-toolbar-height);
+  height: auto;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+
+// Wrapper for the mobile active panel
+.toolbar-mobile-panel-wrapper {
+  width: 100%;
+  border-bottom: .5px solid var(--tt-toolbar-border-color);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
