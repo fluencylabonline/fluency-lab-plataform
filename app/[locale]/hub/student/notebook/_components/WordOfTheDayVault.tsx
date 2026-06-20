@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Vault,
   VaultContent,
@@ -74,6 +74,15 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
   const [scramblePool, setScramblePool] = useState<ScrambleWord[]>([]);
   const [scrambleAnswer, setScrambleAnswer] = useState<ScrambleWord[]>([]);
 
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  // Warm up voices on mount to avoid latency/errors on first click
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.getVoices();
+    }
+  }, []);
+
   useEffect(() => {
     if (!open) {
       // Use setTimeout to avoid synchronous setState inside an effect body
@@ -96,13 +105,15 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
       }
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      const langCode = item.languageCode || item.id.split("_")[0].toLowerCase();
+      utteranceRef.current = utterance;
+
+      const langCode = (item.languageCode || item.id.split("_")[0]).toLowerCase();
       const targetLang =
         langCode === "en" ? "en-US" : langCode === "pt" ? "pt-BR" : langCode;
       const voices = window.speechSynthesis.getVoices();
       const voice =
-        voices.find((v) => v.lang.startsWith(targetLang)) ||
-        voices.find((v) => v.lang.startsWith(langCode));
+        voices.find((v) => v.lang.toLowerCase().startsWith(targetLang.toLowerCase())) ||
+        voices.find((v) => v.lang.toLowerCase().startsWith(langCode.toLowerCase()));
       if (voice) utterance.voice = voice;
       utterance.lang = targetLang;
       utterance.rate = 0.85;
@@ -152,8 +163,8 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
   // For structures, we might want to show the structure_type as the main title
   const displayLemma = isStructure ? structMeta?.structure_type : item.lemma;
 
-  const handleSpeakWord = () => speak(item.lemma);
-  const handleSpeakSentence = (text: string) => speak(text);
+  const handleSpeakWord = () => { speak(item.lemma) };
+  const handleSpeakSentence = (text: string) => {speak(text)};
 
   // --- ACTION HANDLERS ---
   const handleStartPractice = () => {
@@ -248,6 +259,7 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
           variant="secondary"
           size="icon"
           onClick={handleSpeakWord}
+          type="button"
           className="rounded-full w-12 h-12 transition-all shrink-0"
         >
           <Volume2 className="w-5 h-5 text-primary" />
@@ -328,6 +340,7 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
               </p>
               <div className="flex items-center gap-3">
                 <button
+                  type="button"
                   onClick={handleSpeakWord}
                   className="hidden w-16 h-16 bg-primary text-primary-foreground rounded-full items-center justify-center hover:scale-105 transition-transform border-b-4 border-black/20 active:border-b-0 active:translate-y-1"
                   title={t("listenWord") || "Ouvir a palavra"}
@@ -337,6 +350,7 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
                 {practiceExample?.text && (
                   <button
                     onClick={() => handleSpeakSentence(practiceExample.text)}
+                    type="button"
                     className="h-10 px-4 bg-secondary text-secondary-foreground rounded-full flex items-center gap-2 text-sm font-medium hover:bg-secondary/80 transition-colors border border-border"
                     title={t("listenSentence") || "Ouvir a frase"}
                   >
@@ -526,6 +540,7 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
               <Button
                 variant="outline"
                 size="sm"
+                type="button"
                 onClick={() => practiceExample?.text && handleSpeakSentence(practiceExample.text)}
                 className="gap-2 rounded-full px-6"
               >
