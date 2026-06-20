@@ -38,6 +38,137 @@ export const TEXT_COLORS = [
   { label: "Vermelho", value: "#dc2626", colorValue: "#dc2626" },
 ]
 
+export interface TextColorPopoverButtonProps extends Omit<ButtonProps, "type"> {
+  editor?: Editor | null
+  "data-active-state"?: "on" | "off"
+}
+
+export const TextColorPopoverButton = forwardRef<
+  HTMLButtonElement,
+  TextColorPopoverButtonProps
+>(
+  (
+    {
+      editor: providedEditor,
+      className,
+      children,
+      "data-active-state": activeStateProp,
+      ...props
+    },
+    ref
+  ) => {
+    const { editor } = useTiptapEditor(providedEditor)
+    if (!editor || !editor.isEditable) return null
+
+    // Determine if any custom text color is currently active
+    const activeColor = TEXT_COLORS.find(
+      (c) =>
+        c.value !== "inherit" && editor.isActive("textStyle", { color: c.value })
+    )
+    const hasActiveColor = !!activeColor
+    const activeState = activeStateProp ?? (hasActiveColor ? "on" : "off")
+
+    return (
+      <Button
+        type="button"
+        className={className}
+        variant="ghost"
+        data-active-state={activeState}
+        aria-label="Cor do texto"
+        tooltip="Cor do Texto"
+        ref={ref}
+        {...props}
+      >
+        {children ?? <BaselineIcon className="tiptap-button-icon" />}
+      </Button>
+    )
+  }
+)
+TextColorPopoverButton.displayName = "TextColorPopoverButton"
+
+export interface TextColorPopoverContentProps {
+  editor?: Editor | null
+  onSelect?: () => void
+}
+
+export function TextColorPopoverContent({
+  editor: providedEditor,
+  onSelect,
+}: TextColorPopoverContentProps) {
+  const { editor } = useTiptapEditor(providedEditor)
+  const isMobile = useIsBreakpoint()
+
+  if (!editor || !editor.isEditable) return null
+
+  const activeColor = TEXT_COLORS.find(
+    (c) => c.value !== "inherit" && editor.isActive("textStyle", { color: c.value })
+  )
+  const hasActiveColor = !!activeColor
+
+  const handleSelectColor = (color: string) => {
+    if (color === "inherit") {
+      editor.chain().focus().unsetColor().run()
+    } else {
+      editor.chain().focus().setColor(color).run()
+    }
+    onSelect?.()
+  }
+
+  const handleClearColor = () => {
+    editor.chain().focus().unsetColor().run()
+    onSelect?.()
+  }
+
+  return (
+    <Card style={isMobile ? { boxShadow: "none", border: 0 } : {}}>
+      <CardBody style={isMobile ? { padding: 0 } : {}}>
+        <CardItemGroup orientation="horizontal">
+          <ButtonGroup>
+            {TEXT_COLORS.map((color) => {
+              const isCurrentActive =
+                color.value === "inherit"
+                  ? !hasActiveColor
+                  : editor.isActive("textStyle", { color: color.value })
+
+              return (
+                <ButtonGroup key={color.value}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => handleSelectColor(color.value)}
+                    data-active-state={isCurrentActive ? "on" : "off"}
+                    aria-label={color.label}
+                    tooltip={color.label}
+                    style={
+                      {
+                        "--text-color-value": color.colorValue,
+                      } as React.CSSProperties
+                    }
+                  >
+                    <span className="tiptap-button-text-color-circle" />
+                  </Button>
+                </ButtonGroup>
+              )
+            })}
+          </ButtonGroup>
+          <Separator />
+          <ButtonGroup>
+            <Button
+              onClick={handleClearColor}
+              aria-label="Remover cor"
+              tooltip="Remover cor"
+              type="button"
+              variant="ghost"
+            >
+              <BanIcon className="tiptap-button-icon" />
+            </Button>
+          </ButtonGroup>
+        </CardItemGroup>
+      </CardBody>
+    </Card>
+  )
+}
+
 export interface TextColorPopoverProps extends Omit<ButtonProps, "type"> {
   editor?: Editor | null
 }
@@ -46,93 +177,24 @@ export const TextColorPopover = forwardRef<HTMLButtonElement, TextColorPopoverPr
   ({ editor: providedEditor, ...props }, ref) => {
     const { editor } = useTiptapEditor(providedEditor)
     const [isOpen, setIsOpen] = useState(false)
-    const isMobile = useIsBreakpoint()
 
     if (!editor || !editor.isEditable) return null
-
-    // Determine if any custom text color is currently active
-    const activeColor = TEXT_COLORS.find(
-      (c) => c.value !== "inherit" && editor.isActive("textStyle", { color: c.value })
-    )
-    const hasActiveColor = !!activeColor
-
-    const handleSelectColor = (color: string) => {
-      if (color === "inherit") {
-        editor.chain().focus().unsetColor().run()
-      } else {
-        editor.chain().focus().setColor(color).run()
-      }
-      setIsOpen(false)
-    }
-
-    const handleClearColor = () => {
-      editor.chain().focus().unsetColor().run()
-      setIsOpen(false)
-    }
 
     return (
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            data-active-state={hasActiveColor ? "on" : "off"}
-            aria-label="Cor do texto"
-            tooltip="Cor do Texto"
+          <TextColorPopoverButton
+            editor={editor}
             ref={ref}
             {...props}
-          >
-            <BaselineIcon className="tiptap-button-icon" />
-          </Button>
+          />
         </PopoverTrigger>
 
         <PopoverContent aria-label="Cores do texto">
-          <Card style={isMobile ? { boxShadow: "none", border: 0 } : {}}>
-            <CardBody style={isMobile ? { padding: 0 } : {}}>
-              <CardItemGroup orientation="horizontal">
-                <ButtonGroup>
-                  {TEXT_COLORS.map((color) => {
-                    const isCurrentActive =
-                      color.value === "inherit"
-                        ? !hasActiveColor
-                        : editor.isActive("textStyle", { color: color.value })
-
-                    return (
-                      <ButtonGroup key={color.value}>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={() => handleSelectColor(color.value)}
-                          data-active-state={isCurrentActive ? "on" : "off"}
-                          aria-label={color.label}
-                          tooltip={color.label}
-                          style={
-                            {
-                              "--text-color-value": color.colorValue,
-                            } as React.CSSProperties
-                          }
-                        >
-                          <span className="tiptap-button-text-color-circle" />
-                        </Button>
-                      </ButtonGroup>
-                    )
-                  })}
-                </ButtonGroup>
-                <Separator />
-                <ButtonGroup>
-                  <Button
-                    onClick={handleClearColor}
-                    aria-label="Remover cor"
-                    tooltip="Remover cor"
-                    type="button"
-                    variant="ghost"
-                  >
-                    <BanIcon className="tiptap-button-icon" />
-                  </Button>
-                </ButtonGroup>
-              </CardItemGroup>
-            </CardBody>
-          </Card>
+          <TextColorPopoverContent
+            editor={editor}
+            onSelect={() => setIsOpen(false)}
+          />
         </PopoverContent>
       </Popover>
     )

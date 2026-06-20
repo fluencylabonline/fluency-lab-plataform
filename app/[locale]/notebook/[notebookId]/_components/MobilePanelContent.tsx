@@ -15,6 +15,7 @@ import { TextAlignButton } from "@/components/tiptap-ui/text-align-button";
 import type { TextAlign } from "@/components/tiptap-ui/text-align-button";
 import { ColorHighlightPopoverContent } from "@/components/tiptap-ui/color-highlight-popover";
 import { LinkContent } from "@/components/tiptap-ui/link-popover";
+import { TextColorPopoverContent } from "@/components/tiptap-ui/text-color-popover";
 
 // Icons
 import { HeadingIcon } from "@/components/tiptap-icons/heading-icon";
@@ -28,6 +29,7 @@ import {
   Split,
   Heading,
   AlignLeft,
+  Baseline as BaselineIcon,
 } from "lucide-react";
 
 // Hooks
@@ -42,6 +44,7 @@ export type MobilePanel =
   | "textAlign"
   | "table"
   | "highlighter"
+  | "textColor"
   | "link";
 
 // ─── Panel Icon Map ─────────────────────────────────────────────
@@ -55,6 +58,7 @@ const PANEL_ICONS: Record<
   textAlign: AlignLeft,
   table: TableIcon,
   highlighter: HighlighterIcon,
+  textColor: BaselineIcon,
   link: LinkIcon,
 };
 
@@ -85,6 +89,7 @@ export function MobilePanelContent({ panel, onBack }: MobilePanelContentProps) {
       {panel === "list" && <ListPanelContent onSelect={onBack} />}
       {panel === "textAlign" && <TextAlignPanelContent onSelect={onBack} />}
       {panel === "highlighter" && <ColorHighlightPopoverContent />}
+      {panel === "textColor" && <TextColorPopoverContent onSelect={onBack} />}
       {panel === "link" && <LinkContent />}
     </>
   );

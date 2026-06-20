@@ -25,7 +25,7 @@ import {
   ColorHighlightPopoverButton,
 } from "@/components/tiptap-ui/color-highlight-popover";
 import { LinkPopover, LinkButton } from "@/components/tiptap-ui/link-popover";
-import { TextColorPopover } from "@/components/tiptap-ui/text-color-popover";
+import { TextColorPopover, TextColorPopoverButton } from "@/components/tiptap-ui/text-color-popover";
 
 import { useHeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu";
 import { useListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu/use-list-dropdown-menu";
@@ -317,6 +317,16 @@ export function NotebookToolbar({
               <ToolbarGroup>
                 <MarkButton type="bold" />
                 <MarkButton type="italic" />
+                <TextColorPopoverButton
+                  data-active-state={
+                    mobileView === "textColor" ? "on" : undefined
+                  }
+                  onClick={() =>
+                    setMobileView(
+                      mobileView === "textColor" ? "main" : "textColor"
+                    )
+                  }
+                />
                 <ColorHighlightPopoverButton
                   onClick={() =>
                     setMobileView(
