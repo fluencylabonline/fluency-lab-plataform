@@ -40,6 +40,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
         return mobileItems.slice(start, start + windowSize);
     }, [mobileItems, pathname]);
 
+    //Para esconder a sidebar
+    const isPracticeSession = pathname.includes("/hub/student/practice/session");
+    if (isPracticeSession) return null;
+
     return (
         <>
             <motion.aside

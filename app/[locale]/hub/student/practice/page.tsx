@@ -73,7 +73,7 @@ export default async function PracticePage({ params }: { params: Promise<{ local
         backHref="/hub/student/notebook"
         className="contents"
       />
-      <div className="w-full px-4 pt-6 space-y-6">
+      <main className="container space-y-6">
         {/* Profile Header */}
         <XPHeader 
           user={{
@@ -146,7 +146,7 @@ export default async function PracticePage({ params }: { params: Promise<{ local
             <HistoryAccordion plans={archivedPlans} />
           </TabsContent>
         </Tabs>
-      </div>
+      </main>
     </div>
   );
 }

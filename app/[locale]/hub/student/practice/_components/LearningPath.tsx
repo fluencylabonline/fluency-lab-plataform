@@ -79,7 +79,7 @@ export function LearningPath({ planId, days, todayDay, userXP }: LearningPathPro
         <span className="text-lg font-bold text-primary">{t("roadmapLabel")}</span>
         <Link
           className="text-muted-foreground hover:text-primary"
-          href="/student/practice"
+          href="/hub/student/practice"
         >
           <HistoryIcon size={20} />
         </Link>
