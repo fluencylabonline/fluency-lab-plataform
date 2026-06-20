@@ -1,7 +1,7 @@
 "use client";
 
-import { RefObject, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { RefObject, useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { BackButton } from "@/components/ui/back-button";
 import {
   Toolbar,
@@ -11,13 +11,11 @@ import {
 import { Spacer } from "@/components/tiptap-ui-primitive/spacer";
 import { Button } from "@/components/tiptap-ui-primitive/button";
 
-// Tiptap UI — Desktop dropdown menus
 import { HeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu";
 import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu";
 import { TextAlignDropdownMenu } from "@/components/tiptap-ui/text-align-dropdown-menu/text-align-dropdown-menu";
 import { TableDropdownMenu } from "@/components/tiptap-ui/table-dropdown-menu";
 
-// Tiptap UI — Shared components
 import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button";
 import { MarkButton } from "@/components/tiptap-ui/mark-button";
 import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button";
@@ -26,26 +24,18 @@ import {
   ColorHighlightPopover,
   ColorHighlightPopoverButton,
 } from "@/components/tiptap-ui/color-highlight-popover";
-import {
-  LinkPopover,
-  LinkButton,
-} from "@/components/tiptap-ui/link-popover";
+import { LinkPopover, LinkButton } from "@/components/tiptap-ui/link-popover";
 import { TextColorPopover } from "@/components/tiptap-ui/text-color-popover";
 
-// Dropdown hooks — active state icons for mobile triggers
 import { useHeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu";
 import { useListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu/use-list-dropdown-menu";
 import { useTextAlignDropdownMenu } from "@/components/tiptap-ui/text-align-dropdown-menu/use-text-align-dropdown-menu";
 
-// Icons
 import { ChevronDownIcon } from "@/components/tiptap-icons/chevron-down-icon";
 
-// Hooks
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
-import { useWindowSize } from "@/hooks/use-window-size";
 
-// Layout & Context
 import { RoleGuard } from "@/components/ui/role-guard";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { CollaboratorsAvatarGroup } from "./CollaboratorsAvatarGroup";
@@ -54,9 +44,73 @@ import { NotebookSettingsVault } from "./NotebookSettingsVault";
 import { NotebookActivitiesVault } from "./NotebookActivitiesVault";
 import { NotebookPlansVault } from "./NotebookPlansVault";
 import { MobilePanelContent, type MobilePanel } from "./MobilePanelContent";
-import { Sparkles, Settings, GraduationCap, Table as TableIcon } from "lucide-react";
+import {
+  Sparkles,
+  Settings,
+  GraduationCap,
+  Table as TableIcon,
+} from "lucide-react";
 
-// ─── Component ──────────────────────────────────────────────────
+// ─── AnimateHeight ────────────────────────────────────────────────
+//
+// Anima entre 0 e a altura real medida (nunca "auto").
+// Sem border, sem background — apenas a janela que revela/esconde
+// o conteúdo do painel. A borda visual pertence ao <Toolbar>.
+//
+interface AnimateHeightProps {
+  isOpen: boolean;
+  children: React.ReactNode;
+}
+
+function AnimateHeight({ isOpen, children }: AnimateHeightProps) {
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [naturalHeight, setNaturalHeight] = useState(0);
+
+  useEffect(() => {
+    const el = innerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      setNaturalHeight(entry.contentRect.height);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <motion.div
+      animate={{ height: isOpen ? naturalHeight : 0 }}
+      initial={false}
+      transition={{
+        type: "spring",
+        stiffness: 320,
+        damping: 36,
+        mass: 0.9,
+      }}
+      // overflow hidden para clip do conteúdo durante animação.
+      // Sem border, sem background — peça transparente que expande.
+      style={{ overflow: "hidden", willChange: "height" }}
+    >
+      <motion.div
+        // O conteúdo faz um fade + slide sutil separado da janela de altura,
+        // assim parece surgir de dentro da toolbar (não cair de cima).
+        animate={{
+          opacity: isOpen ? 1 : 0,
+          y: isOpen ? 0 : 6,
+        }}
+        initial={false}
+        transition={{
+          opacity: { duration: isOpen ? 0.18 : 0.10, ease: "easeOut" },
+          y: { type: "spring", stiffness: 320, damping: 36, mass: 0.9 },
+        }}
+        ref={innerRef}
+      >
+        {children}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─── Component ───────────────────────────────────────────────────
 
 interface NotebookToolbarProps {
   toolbarRef: RefObject<HTMLDivElement | null>;
@@ -76,7 +130,6 @@ interface NotebookToolbarProps {
 export function NotebookToolbar({
   toolbarRef,
   backHref,
-  cursorY,
   user,
   awareness,
   studentId,
@@ -86,12 +139,9 @@ export function NotebookToolbar({
   const [isPlansVaultOpen, setIsPlansVaultOpen] = useState(false);
 
   const isMobile = useIsBreakpoint();
-  const { height } = useWindowSize();
   const [mobileView, setMobileView] = useState<MobilePanel>("main");
-
   const [prevIsMobile, setPrevIsMobile] = useState(isMobile);
 
-  // Hooks for mobile trigger active-state icons
   const { editor } = useTiptapEditor();
   const headingMenu = useHeadingDropdownMenu({ levels: [1, 2, 3, 4] });
   const listMenu = useListDropdownMenu({
@@ -103,17 +153,16 @@ export function NotebookToolbar({
   });
   const isInsideTable = editor?.isActive("table") ?? false;
 
-  // Reset mobile view when switching to desktop
   if (isMobile !== prevIsMobile) {
     setPrevIsMobile(isMobile);
-    if (!isMobile && mobileView !== "main") {
-      setMobileView("main");
-    }
+    if (!isMobile && mobileView !== "main") setMobileView("main");
   }
 
-  const toolbarStyle = isMobile
-    ? { bottom: `calc(100% - ${height - cursorY}px)` }
-    : {};
+  const isPanelOpen = isMobile && mobileView !== "main";
+
+  // No mobile a toolbar fica ancorada no bottom.
+  // O container cresce para cima via flex-col-reverse — o bottom não se move.
+  const toolbarStyle = isMobile ? { bottom: 0 } : {};
 
   return (
     <>
@@ -123,7 +172,7 @@ export function NotebookToolbar({
         data-mobile-panel={isMobile ? mobileView : undefined}
       >
         {!isMobile ? (
-          // ─── Desktop: Dropdown menus (unchanged) ───────────────
+          // ─── Desktop ──────────────────────────────────────────
           <>
             <BackButton href={backHref} />
             <Spacer />
@@ -192,45 +241,16 @@ export function NotebookToolbar({
             />
           </>
         ) : (
-          // ─── Mobile: Two stacked rows (if active) ────────────────
-          <motion.div
-            layout
-            transition={{
-              type: "spring",
-              stiffness: 220,
-              damping: 28,
-              mass: 0.8,
-            }}
-            className="flex flex-col w-full min-w-0"
-          >
-            {/* Top row: active sub-panel */}
-            <AnimatePresence initial={false}>
-              {mobileView !== "main" && (
-                <motion.div
-                  key={mobileView}
-                  initial={{ height: 0, opacity: 0, y: 8 }}
-                  animate={{ height: "auto", opacity: 1, y: 0 }}
-                  exit={{ height: 0, opacity: 0, y: 8 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 220,
-                    damping: 28,
-                    mass: 0.8,
-                  }}
-                  style={{ overflow: "hidden" }}
-                  className="toolbar-mobile-panel-wrapper"
-                >
-                  <div className={mobileView === "table" ? "w-full" : "toolbar-mobile-content flex justify-end"}>
-                    <MobilePanelContent
-                      panel={mobileView as Exclude<MobilePanel, "main">}
-                      onBack={() => setMobileView("main")}
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+          // ─── Mobile ───────────────────────────────────────────
+          //
+          // flex-col-reverse: a linha principal fica sempre na base.
+          // AnimateHeight expande acima dela sem border própria —
+          // a borda superior do <Toolbar> é a única borda visível,
+          // e ela sobe junto com o container inteiro.
+          //
+          <div className="flex flex-col-reverse w-full min-w-0">
 
-            {/* Bottom row: main toolbar buttons */}
+            {/* ── Linha principal (base fixa) ── */}
             <div className="toolbar-mobile-content">
               <BackButton href={backHref} />
               <Spacer />
@@ -240,27 +260,37 @@ export function NotebookToolbar({
               </ToolbarGroup>
               <ToolbarSeparator />
               <ToolbarGroup>
-                {/* Heading trigger — shows active heading icon */}
                 <Button
                   type="button"
                   variant="ghost"
-                  data-active-state={headingMenu.isActive ? "on" : "off"}
+                  data-active-state={
+                    mobileView === "heading" || headingMenu.isActive
+                      ? "on"
+                      : "off"
+                  }
                   disabled={!headingMenu.canToggle}
                   tooltip="Heading"
-                  onClick={() => setMobileView(mobileView === "heading" ? "main" : "heading")}
+                  onClick={() =>
+                    setMobileView(
+                      mobileView === "heading" ? "main" : "heading"
+                    )
+                  }
                 >
                   <headingMenu.Icon className="tiptap-button-icon" />
                   <ChevronDownIcon className="tiptap-button-dropdown-small" />
                 </Button>
 
-                {/* List trigger — shows active list icon */}
                 <Button
                   type="button"
                   variant="ghost"
-                  data-active-state={listMenu.isActive ? "on" : "off"}
+                  data-active-state={
+                    mobileView === "list" || listMenu.isActive ? "on" : "off"
+                  }
                   disabled={!listMenu.canToggle}
                   tooltip="Lista"
-                  onClick={() => setMobileView(mobileView === "list" ? "main" : "list")}
+                  onClick={() =>
+                    setMobileView(mobileView === "list" ? "main" : "list")
+                  }
                 >
                   <listMenu.Icon className="tiptap-button-icon" />
                   <ChevronDownIcon className="tiptap-button-dropdown-small" />
@@ -268,15 +298,16 @@ export function NotebookToolbar({
 
                 <BlockquoteButton />
 
-                {/* Table trigger */}
                 <Button
                   type="button"
                   variant="ghost"
-                  data-active-state={isInsideTable ? "on" : "off"}
-                  tooltip={
-                    isInsideTable ? "Editar Tabela" : "Inserir Tabela"
+                  data-active-state={
+                    mobileView === "table" || isInsideTable ? "on" : "off"
                   }
-                  onClick={() => setMobileView(mobileView === "table" ? "main" : "table")}
+                  tooltip={isInsideTable ? "Editar Tabela" : "Inserir Tabela"}
+                  onClick={() =>
+                    setMobileView(mobileView === "table" ? "main" : "table")
+                  }
                 >
                   <TableIcon className="tiptap-button-icon w-4 h-4" />
                   <ChevronDownIcon className="tiptap-button-dropdown-small" />
@@ -287,22 +318,35 @@ export function NotebookToolbar({
                 <MarkButton type="bold" />
                 <MarkButton type="italic" />
                 <ColorHighlightPopoverButton
-                  onClick={() => setMobileView(mobileView === "highlighter" ? "main" : "highlighter")}
+                  onClick={() =>
+                    setMobileView(
+                      mobileView === "highlighter" ? "main" : "highlighter"
+                    )
+                  }
                 />
                 <LinkButton
-                  onClick={() => setMobileView(mobileView === "link" ? "main" : "link")}
+                  onClick={() =>
+                    setMobileView(mobileView === "link" ? "main" : "link")
+                  }
                 />
               </ToolbarGroup>
               <ToolbarSeparator />
               <ToolbarGroup>
-                {/* Text align trigger — shows active alignment icon */}
                 <Button
                   type="button"
                   variant="ghost"
-                  data-active-state={textAlignMenu.isActive ? "on" : "off"}
+                  data-active-state={
+                    mobileView === "textAlign" || textAlignMenu.isActive
+                      ? "on"
+                      : "off"
+                  }
                   disabled={!textAlignMenu.canToggle}
                   tooltip="Alinhamento"
-                  onClick={() => setMobileView(mobileView === "textAlign" ? "main" : "textAlign")}
+                  onClick={() =>
+                    setMobileView(
+                      mobileView === "textAlign" ? "main" : "textAlign"
+                    )
+                  }
                 >
                   <textAlignMenu.Icon className="tiptap-button-icon" />
                   <ChevronDownIcon className="tiptap-button-dropdown-small" />
@@ -346,7 +390,26 @@ export function NotebookToolbar({
                 awareness={awareness ?? null}
               />
             </div>
-          </motion.div>
+
+            {/* ── Painel secundário (cresce para cima, sem borda própria) ── */}
+            <AnimateHeight isOpen={isPanelOpen}>
+              <div
+                className={
+                  mobileView === "table"
+                    ? "w-full"
+                    : "toolbar-mobile-content flex justify-end"
+                }
+              >
+                {mobileView !== "main" && (
+                  <MobilePanelContent
+                    panel={mobileView as Exclude<MobilePanel, "main">}
+                    onBack={() => setMobileView("main")}
+                  />
+                )}
+              </div>
+            </AnimateHeight>
+
+          </div>
         )}
       </Toolbar>
 
@@ -354,12 +417,10 @@ export function NotebookToolbar({
         open={isToolsVaultOpen}
         onOpenChange={setIsToolsVaultOpen}
       />
-
       <NotebookSettingsVault
         open={isSettingsVaultOpen}
         onOpenChange={setIsSettingsVaultOpen}
       />
-
       <NotebookPlansVault
         open={isPlansVaultOpen}
         onOpenChange={setIsPlansVaultOpen}
