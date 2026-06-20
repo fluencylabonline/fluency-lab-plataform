@@ -14,6 +14,7 @@ interface VaultLoadingReportOverlayProps {
   errorLabel?: string;
   errorSub?: string;
   onDone?: () => void;
+  layoutId?: string;
 }
 
 const PARTICLE_ANGLES = Array.from({ length: 12 }, (_, i) => (i * 360) / 12);
@@ -47,6 +48,7 @@ export function VaultLoadingReportOverlay({
   errorLabel = "Erro ao atualizar",
   errorSub = "Ocorreu um erro no servidor. Tente novamente.",
   onDone,
+  layoutId,
 }: VaultLoadingReportOverlayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
@@ -111,10 +113,14 @@ export function VaultLoadingReportOverlay({
       {isVisible && (
         <motion.div
           ref={containerRef}
+          layoutId={layoutId}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.25, ease: "easeInOut" }}
+          transition={{
+            layout: { type: "spring", stiffness: 280, damping: 26, mass: 0.85 },
+            opacity: { duration: 0.2, ease: "easeInOut" }
+          }}
           className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-6 rounded-xl bg-background/90 backdrop-blur-md select-none"
           aria-live="polite"
           aria-label={
@@ -187,9 +193,9 @@ export function VaultLoadingReportOverlay({
 
             {/* Main Report Sheet */}
             <motion.div
-              initial={{ scale: 0.85, opacity: 0, rotate: -3 }}
+              initial={{ scale: 0.8, opacity: 0, rotate: -3 }}
               animate={{ scale: 1, opacity: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 200, damping: 18 }}
+              transition={{ type: "spring", stiffness: 200, damping: 18, delay: 0.08 }}
               className="relative z-10"
             >
               <div
@@ -317,7 +323,12 @@ export function VaultLoadingReportOverlay({
           </div>
 
           {/* Texts Section */}
-          <div className="flex flex-col items-center gap-1.5 px-6 text-center z-10 max-w-sm">
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, delay: 0.12 }}
+            className="flex flex-col items-center gap-1.5 px-6 text-center z-10 max-w-sm"
+          >
             <AnimatePresence mode="wait">
               <motion.span
                 key={state}
@@ -351,7 +362,7 @@ export function VaultLoadingReportOverlay({
                 </motion.span>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

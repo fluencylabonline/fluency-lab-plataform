@@ -211,11 +211,15 @@ export function StudentClassesCard({
 
   const handleConfirmOverlayDone = () => {
     if (confirmOverlayState === "success") {
-      setIsConfirmVaultOpen(false);
-      setPendingStatus(null);
-      setSelectedClass(null);
+      setConfirmOverlayState("idle");
+      setTimeout(() => {
+        setIsConfirmVaultOpen(false);
+        setPendingStatus(null);
+        setSelectedClass(null);
+      }, 350);
+    } else {
+      setConfirmOverlayState("idle");
     }
-    setConfirmOverlayState("idle");
   };
 
   const handleSave = async () => {
@@ -244,10 +248,14 @@ export function StudentClassesCard({
 
   const handleFeedbackOverlayDone = () => {
     if (feedbackOverlayState === "success") {
-      setIsVaultOpen(false);
-      setSelectedClass(null);
+      setFeedbackOverlayState("idle");
+      setTimeout(() => {
+        setIsVaultOpen(false);
+        setSelectedClass(null);
+      }, 350);
+    } else {
+      setFeedbackOverlayState("idle");
     }
-    setFeedbackOverlayState("idle");
   };
 
   const months = Array.from({ length: 12 }, (_, i) => ({
@@ -437,6 +445,7 @@ export function StudentClassesCard({
             errorLabel={t("saveError") || "Erro ao salvar feedback"}
             errorSub={feedbackErrorMsg}
             onDone={handleFeedbackOverlayDone}
+            layoutId="feedback-vault-overlay"
           />
           <VaultHeader>
             <VaultIcon type="calendar" />
@@ -462,9 +471,16 @@ export function StudentClassesCard({
             <VaultSecondaryButton onClick={() => setIsVaultOpen(false)} disabled={feedbackOverlayState !== "idle"}>
               {t("cancel") || "Cancelar"}
             </VaultSecondaryButton>
-            <VaultPrimaryButton onClick={handleSave} disabled={feedbackOverlayState !== "idle"}>
-              {feedbackOverlayState !== "idle" ? "..." : t("saveFeedback")}
-            </VaultPrimaryButton>
+            {feedbackOverlayState === "idle" ? (
+              <VaultPrimaryButton
+                onClick={handleSave}
+                layoutId="feedback-vault-overlay"
+              >
+                {t("saveFeedback")}
+              </VaultPrimaryButton>
+            ) : (
+              <div className="flex-1 min-w-fit px-7 py-3 h-[46px] opacity-0 pointer-events-none" />
+            )}
           </VaultFooter>
         </VaultContent>
       </Vault>
@@ -481,6 +497,7 @@ export function StudentClassesCard({
             errorLabel={t("statusUpdateError") || "Erro ao atualizar status"}
             errorSub={confirmErrorMsg}
             onDone={handleConfirmOverlayDone}
+            layoutId="confirm-vault-overlay"
           />
           <VaultHeader>
             <VaultIcon type="warning" />
@@ -494,9 +511,16 @@ export function StudentClassesCard({
             <VaultSecondaryButton onClick={() => setIsConfirmVaultOpen(false)} disabled={confirmOverlayState !== "idle"}>
               {t("cancel") || "Cancelar"}
             </VaultSecondaryButton>
-            <VaultPrimaryButton onClick={confirmStatusUpdate} disabled={confirmOverlayState !== "idle"}>
-              {confirmOverlayState !== "idle" ? "..." : t("confirm") || "Confirmar"}
-            </VaultPrimaryButton>
+            {confirmOverlayState === "idle" ? (
+              <VaultPrimaryButton
+                onClick={confirmStatusUpdate}
+                layoutId="confirm-vault-overlay"
+              >
+                {t("confirm") || "Confirmar"}
+              </VaultPrimaryButton>
+            ) : (
+              <div className="flex-1 min-w-fit px-7 py-3 h-[46px] opacity-0 pointer-events-none" />
+            )}
           </VaultFooter>
         </VaultContent>
       </Vault>
