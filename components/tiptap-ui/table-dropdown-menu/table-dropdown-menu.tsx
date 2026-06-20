@@ -64,98 +64,148 @@ export function TableDropdownMenu({
       <DropdownMenuContent align="start" className="w-56">
         {!isInsideTable ? (
           <DropdownMenuGroup>
-            <DropdownMenuItem onClick={insertTable} className="flex items-center gap-2">
-              <TableIcon className="w-4 h-4 text-muted-foreground" />
-              <span>Inserir Tabela (3x3)</span>
+            <DropdownMenuItem asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={insertTable}
+                showTooltip={false}
+              >
+                <TableIcon className="tiptap-button-icon text-muted-foreground" />
+                <span className="tiptap-button-text">Inserir Tabela (3x3)</span>
+              </Button>
             </DropdownMenuItem>
           </DropdownMenuGroup>
         ) : (
           <>
             <DropdownMenuGroup>
-              <DropdownMenuItem
-                onClick={() => editor.chain().focus().addRowBefore().run()}
-                className="flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4 text-muted-foreground rotate-90" />
-                <span>Adicionar Linha Acima</span>
+              <DropdownMenuItem asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => editor.chain().focus().addRowBefore().run()}
+                  showTooltip={false}
+                >
+                  <Plus className="tiptap-button-icon text-muted-foreground rotate-90" />
+                  <span className="tiptap-button-text">Adicionar Linha Acima</span>
+                </Button>
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => editor.chain().focus().addRowAfter().run()}
-                className="flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4 text-muted-foreground" />
-                <span>Adicionar Linha Abaixo</span>
+              <DropdownMenuItem asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => editor.chain().focus().addRowAfter().run()}
+                  showTooltip={false}
+                >
+                  <Plus className="tiptap-button-icon text-muted-foreground" />
+                  <span className="tiptap-button-text">Adicionar Linha Abaixo</span>
+                </Button>
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => editor.chain().focus().deleteRow().run()}
-                className="flex items-center gap-2 text-destructive focus:text-destructive"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Excluir Linha</span>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-
-            <DropdownMenuSeparator />
-
-            <DropdownMenuGroup>
-              <DropdownMenuItem
-                onClick={() => editor.chain().focus().addColumnBefore().run()}
-                className="flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4 text-muted-foreground" />
-                <span>Adicionar Coluna Esquerda</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => editor.chain().focus().addColumnAfter().run()}
-                className="flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4 text-muted-foreground" />
-                <span>Adicionar Coluna Direita</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => editor.chain().focus().deleteColumn().run()}
-                className="flex items-center gap-2 text-destructive focus:text-destructive"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Excluir Coluna</span>
+              <DropdownMenuItem asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => editor.chain().focus().deleteRow().run()}
+                  showTooltip={false}
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <Trash2 className="tiptap-button-icon" />
+                  <span className="tiptap-button-text">Excluir Linha</span>
+                </Button>
               </DropdownMenuItem>
             </DropdownMenuGroup>
 
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              <DropdownMenuItem
-                onClick={() => editor.chain().focus().mergeCells().run()}
-                className="flex items-center gap-2"
-              >
-                <Merge className="w-4 h-4 text-muted-foreground" />
-                <span>Mesclar Células</span>
+              <DropdownMenuItem asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => editor.chain().focus().addColumnBefore().run()}
+                  showTooltip={false}
+                >
+                  <Plus className="tiptap-button-icon text-muted-foreground" />
+                  <span className="tiptap-button-text">Adicionar Coluna Esquerda</span>
+                </Button>
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => editor.chain().focus().splitCell().run()}
-                className="flex items-center gap-2"
-              >
-                <Split className="w-4 h-4 text-muted-foreground" />
-                <span>Dividir Célula</span>
+              <DropdownMenuItem asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => editor.chain().focus().addColumnAfter().run()}
+                  showTooltip={false}
+                >
+                  <Plus className="tiptap-button-icon text-muted-foreground" />
+                  <span className="tiptap-button-text">Adicionar Coluna Direita</span>
+                </Button>
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => editor.chain().focus().toggleHeaderRow().run()}
-                className="flex items-center gap-2"
-              >
-                <Heading className="w-4 h-4 text-muted-foreground" />
-                <span>Alternar Linha de Cabeçalho</span>
+              <DropdownMenuItem asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => editor.chain().focus().deleteColumn().run()}
+                  showTooltip={false}
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <Trash2 className="tiptap-button-icon" />
+                  <span className="tiptap-button-text">Excluir Coluna</span>
+                </Button>
               </DropdownMenuItem>
             </DropdownMenuGroup>
 
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              <DropdownMenuItem
-                onClick={() => editor.chain().focus().deleteTable().run()}
-                className="flex items-center gap-2 text-destructive focus:text-destructive"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Excluir Tabela</span>
+              <DropdownMenuItem asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => editor.chain().focus().mergeCells().run()}
+                  showTooltip={false}
+                >
+                  <Merge className="tiptap-button-icon text-muted-foreground" />
+                  <span className="tiptap-button-text">Mesclar Células</span>
+                </Button>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => editor.chain().focus().splitCell().run()}
+                  showTooltip={false}
+                >
+                  <Split className="tiptap-button-icon text-muted-foreground" />
+                  <span className="tiptap-button-text">Dividir Célula</span>
+                </Button>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => editor.chain().focus().toggleHeaderRow().run()}
+                  showTooltip={false}
+                >
+                  <Heading className="tiptap-button-icon text-muted-foreground" />
+                  <span className="tiptap-button-text">Alternar Linha de Cabeçalho</span>
+                </Button>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => editor.chain().focus().deleteTable().run()}
+                  showTooltip={false}
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <Trash2 className="tiptap-button-icon" />
+                  <span className="tiptap-button-text">Excluir Tabela</span>
+                </Button>
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </>
