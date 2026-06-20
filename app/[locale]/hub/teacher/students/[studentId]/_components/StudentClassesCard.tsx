@@ -43,6 +43,7 @@ import { useLocale } from "next-intl";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { VaultLoadingOverlay } from "@/components/ui/vault-loading-overlay";
+import { VaultLoadingReportOverlay } from "@/components/ui/vault-loading-report-overlay";
 
 interface StudentClassesCardProps {
   studentId: string;
@@ -429,7 +430,7 @@ export function StudentClassesCard({
         setIsVaultOpen(open);
       }}>
         <VaultContent>
-          <VaultLoadingOverlay
+          <VaultLoadingReportOverlay
             state={feedbackOverlayState}
             loadingLabel={t("updatingFeedback") || "Salvando feedback..."}
             successLabel={t("saveSuccess") || "Feedback salvo com sucesso!"}
