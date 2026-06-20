@@ -9,6 +9,7 @@ import {
   FileText,
   Loader2
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   Vault,
@@ -71,6 +72,13 @@ export function StudentClassesCard({
   const [isConfirmVaultOpen, setIsConfirmVaultOpen] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
   const [updatingClassId, setUpdatingClassId] = useState<string | null>(null);
+
+  // Inline row indicator — tracks the target status and the outcome of a
+  // direct (non-confirm-modal) status change, so we can show a result
+  // animation (success/error) before the row reverts back to the Select.
+  const [updatingTargetStatus, setUpdatingTargetStatus] = useState<string | null>(null);
+  const [updatingResult, setUpdatingResult] = useState<"idle" | "success" | "error">("idle");
+  const [updatingErrorMsg, setUpdatingErrorMsg] = useState("");
 
   // Loading Overlay states for Vault updates
   const [confirmOverlayState, setConfirmOverlayState] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -170,10 +178,37 @@ export function StudentClassesCard({
       return;
     }
 
-    await executeStatusUpdate(classId, status);
+    // Direct status change (e.g. marking a class as completed). We hold the
+    // row in its "updating" state a little longer than the request itself
+    // takes, so the success/error animation has time to play before the
+    // row reverts back to the status Select.
+    setUpdatingTargetStatus(status);
+    setUpdatingResult("idle");
+
+    const res = await executeStatusUpdate(classId, status, { autoClear: false });
+
+    if (res.success) {
+      setUpdatingResult("success");
+    } else {
+      setUpdatingErrorMsg(res.error || "Erro ao atualizar status");
+      setUpdatingResult("error");
+    }
+
+    const holdMs = res.success ? (status === "completed" ? 1300 : 900) : 2000;
+    setTimeout(() => {
+      setUpdatingClassId(null);
+      setUpdatingTargetStatus(null);
+      setUpdatingResult("idle");
+    }, holdMs);
   };
 
-  const executeStatusUpdate = async (classId: string, status: string) => {
+  const executeStatusUpdate = async (
+    classId: string,
+    status: string,
+    options?: { autoClear?: boolean }
+  ) => {
+    const autoClear = options?.autoClear ?? true;
+
     setUpdatingClassId(classId);
     const res = await updateClassStatusAction({
       classId,
@@ -191,7 +226,10 @@ export function StudentClassesCard({
       errorMsg = res?.data?.error || res?.serverError || "Erro ao atualizar status";
       //notify.error(errorMsg);
     }
-    setUpdatingClassId(null);
+
+    if (autoClear) {
+      setUpdatingClassId(null);
+    }
     return { success, error: errorMsg };
   };
 
@@ -322,6 +360,12 @@ export function StudentClassesCard({
               const isFutureClass = isFuture(classDate);
               const isPastClass = isPast(classDate);
 
+              const isUpdatingThisRow = updatingClassId === cls.id;
+              const targetConfig = updatingTargetStatus
+                ? statusConfig[updatingTargetStatus as keyof typeof statusConfig]
+                : null;
+              const isCompletingThisRow = isUpdatingThisRow && updatingTargetStatus === "completed";
+
               return (
                 <div
                   key={cls.id}
@@ -355,14 +399,140 @@ export function StudentClassesCard({
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {updatingClassId === cls.id ? (
-                      <div className={cn(
-                        "h-9 flex items-center justify-center bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed",
-                        isMobileMode
-                          ? "w-[140px] sm:w-[180px]"
-                          : "w-[140px] md:w-[180px] lg:w-10 xl:w-[180px]"
-                      )}>
-                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    {isUpdatingThisRow ? (
+                      <div
+                        className={cn(
+                          "relative h-9 flex items-center justify-center gap-1.5 rounded-lg border text-xs font-medium overflow-hidden transition-colors duration-300",
+                          isMobileMode
+                            ? "w-[140px] sm:w-[180px]"
+                            : "w-[140px] md:w-[180px] lg:w-10 xl:w-[180px]",
+                          updatingResult === "idle" &&
+                            "bg-gray-50 dark:bg-gray-800/50 border-dashed border-gray-300 dark:border-gray-700",
+                          updatingResult === "success" &&
+                            (isCompletingThisRow
+                              ? "bg-emerald-50 border-emerald-300 text-emerald-700 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300"
+                              : "bg-gray-50 border-gray-300 text-gray-600 dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-300"),
+                          updatingResult === "error" &&
+                            "bg-red-50 border-red-300 text-red-700 dark:bg-red-950/40 dark:border-red-800 dark:text-red-300"
+                        )}
+                      >
+                        {/* Soft pulsing glow while the request is in flight */}
+                        {updatingResult === "idle" && (
+                          <motion.div
+                            className={cn(
+                              "absolute inset-0",
+                              isCompletingThisRow ? "bg-emerald-400/10" : "bg-primary/10"
+                            )}
+                            animate={{ opacity: [0.25, 0.6, 0.25] }}
+                            transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
+                          />
+                        )}
+
+                        <AnimatePresence mode="wait" initial={false}>
+                          {updatingResult === "idle" && (
+                            <motion.div
+                              key="loading"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.15 }}
+                              className="relative z-10"
+                            >
+                              <Loader2
+                                className={cn(
+                                  "h-4 w-4 animate-spin",
+                                  isCompletingThisRow ? "text-emerald-600" : "text-primary"
+                                )}
+                              />
+                            </motion.div>
+                          )}
+
+                          {updatingResult === "success" && (
+                            <motion.div
+                              key="success"
+                              initial={{ opacity: 0, scale: 0.85 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ type: "spring", stiffness: 380, damping: 18 }}
+                              className="relative z-10 flex items-center gap-1.5"
+                            >
+                              {/* Little burst of confetti, only for the "completed" celebration */}
+                              {isCompletingThisRow && (
+                                <div className="absolute inset-0 pointer-events-none">
+                                  {Array.from({ length: 6 }).map((_, i) => {
+                                    const angle = (i * 360) / 6;
+                                    return (
+                                      <motion.span
+                                        key={i}
+                                        className="absolute top-1/2 left-1/2 w-1 h-1 rounded-full bg-emerald-500"
+                                        initial={{ scale: 0, x: -2, y: -2, opacity: 1 }}
+                                        animate={{
+                                          scale: [0, 1, 0],
+                                          x: Math.cos((angle * Math.PI) / 180) * 26 - 2,
+                                          y: Math.sin((angle * Math.PI) / 180) * 26 - 2,
+                                          opacity: [1, 1, 0],
+                                        }}
+                                        transition={{ duration: 0.6, ease: "easeOut", delay: i * 0.02 }}
+                                      />
+                                    );
+                                  })}
+                                </div>
+                              )}
+
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="3.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <motion.path
+                                  d="M20 6L9 17l-5-5"
+                                  initial={{ pathLength: 0 }}
+                                  animate={{ pathLength: 1 }}
+                                  transition={{ duration: 0.3, ease: "easeOut", delay: 0.05 }}
+                                />
+                              </svg>
+                              <span className={cn("truncate", !isMobileMode && "lg:hidden xl:inline")}>
+                                {targetConfig?.label || t("statusUpdated") || "Atualizado"}
+                              </span>
+                            </motion.div>
+                          )}
+
+                          {updatingResult === "error" && (
+                            <motion.div
+                              key="error"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1, x: [0, -5, 5, -3, 3, 0] }}
+                              exit={{ opacity: 0 }}
+                              transition={{ opacity: { duration: 0.15 }, x: { duration: 0.4, ease: "easeInOut" } }}
+                              className="relative z-10 flex items-center gap-1.5"
+                            >
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="3.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M18 6L6 18" />
+                                <path d="M6 6l12 12" />
+                              </svg>
+                              <span
+                                className={cn("truncate", !isMobileMode && "lg:hidden xl:inline")}
+                                title={updatingErrorMsg}
+                              >
+                                {t("statusUpdateError") || "Falha ao atualizar"}
+                              </span>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     ) : (
                       <Select
