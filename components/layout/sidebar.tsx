@@ -27,18 +27,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
         () => items.filter((item) => !item.subItems),
         [items],
     );
-    const mobileVisibleItems = useMemo(() => {
-        const windowSize = 4;
-        const activeIndex = mobileItems.findIndex((item) => item.href === pathname);
-        const maxStart = Math.max(0, mobileItems.length - windowSize);
 
-        const start =
-            activeIndex >= 0
-                ? Math.min(Math.floor(activeIndex / windowSize) * windowSize, maxStart)
-                : 0;
-
-        return mobileItems.slice(start, start + windowSize);
-    }, [mobileItems, pathname]);
 
     //Para esconder a sidebar
     const isPracticeSession = pathname.includes("/hub/student/practice/session");
@@ -107,15 +96,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
                 key="mobile-navbar"
                 className="vault-bar-layout md:hidden fixed bottom-0 left-0 right-0 px-4 py-2 z-40 flex items-center justify-between"
             >
-                <motion.div className="flex items-center justify-between w-full">
-                    {mobileVisibleItems.map((item) => (
-                        <VaultItem key={item.label} item={item} />
-                    ))}
+                <motion.div className="flex items-center justify-between w-full gap-2">
+                    <div className="flex items-center flex-1 min-w-0 overflow-x-auto no-scrollbar scroll-smooth gap-1">
+                        {mobileItems.map((item) => (
+                            <VaultItem key={item.label} item={item} />
+                        ))}
+                    </div>
 
                     <motion.button
                         whileTap={{ scale: 0.9 }}
                         onClick={() => setIsMobileMenuOpen(true)}
-                        className="relative flex items-center justify-center p-2 flex-1 text-muted-foreground hover:text-primary transition-colors duration-200"
+                        className="relative flex items-center justify-center p-2 text-muted-foreground hover:text-primary transition-colors duration-200 shrink-0"
                     >
                         <div className="w-6 h-6 flex items-center justify-center">
                             <ArrowUp className="w-6 h-6" />

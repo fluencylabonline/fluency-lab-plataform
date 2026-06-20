@@ -27,7 +27,13 @@ export default function VaultItem({
   const iconNode = Icon ? <Icon {...(item.iconProps ?? {})} /> : item.icon;
 
   return (
-    <Link href={item.href} className="flex-1">
+    <Link
+      href={item.href}
+      className={twMerge(
+        "flex flex-1 min-w-[80px] shrink-0",
+        isActive && "min-w-max"
+      )}
+    >
       <motion.div
         whileTap={{ scale: 0.9 }}
         className={twMerge(
