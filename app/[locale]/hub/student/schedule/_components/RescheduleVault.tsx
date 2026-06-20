@@ -3,12 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Vault, VaultHeader, VaultTitle, VaultBody, VaultContent } from "@/components/ui/vault";
+import { VaultLoadingOverlay } from "@/components/ui/vault-loading-overlay";
 import { Button } from "@/components/ui/button";
 import { getTeacherAvailabilityAction, rescheduleAction } from "@/modules/scheduling/scheduling.actions";
 import { format, addDays } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import { useLocale } from "next-intl";
-import { notify } from "@/components/ui/toaster";
 import { Calendar, Clock, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Field } from "@/components/ui/field";
@@ -52,6 +52,8 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, balance, re
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [useCreditId, setUseCreditId] = useState<string | undefined>(undefined);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [overlayState, setOverlayState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const fetchSlots = useCallback(async () => {
     if (!selectedClass?.teacherId) return;
@@ -85,33 +87,53 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, balance, re
       return;
     }
 
-    const promise = rescheduleAction({
-      originalClassId: selectedClass.id,
-      newSlotId: selectedSlotId,
-      creditId: useCreditId,
-    });
+    setOverlayState("loading");
 
-    notify.promise(promise, {
-      loading: t("Reschedule.saving") || "Salvando reagendamento...",
-      success: (result) => {
-        if (result?.data?.success) {
-          onOpenChange(false);
-          setIsConfirming(false);
-          onSuccess();
-          return t("Success.rescheduled") || "Aula reagendada com sucesso!";
-        }
-        throw new Error(result?.data?.error || t("Error.generic") || "Erro ao reagendar");
-      },
-      error: (err: unknown) => (err as Error).message || "Falha na requisição"
-    });
+    try {
+      const result = await rescheduleAction({
+        originalClassId: selectedClass.id,
+        newSlotId: selectedSlotId,
+        creditId: useCreditId,
+      });
+
+      if (result?.data?.success) {
+        setOverlayState("success");
+      } else {
+        const err = result?.data?.error || t("Error.generic") || "Erro ao reagendar";
+        setErrorMsg(err);
+        setOverlayState("error");
+      }
+    } catch (err: unknown) {
+      const errMsg = (err as Error).message || "Falha na requisição";
+      setErrorMsg(errMsg);
+      setOverlayState("error");
+    }
+  };
+
+  const handleOverlayDone = () => {
+    if (overlayState === "success") {
+      onOpenChange(false);
+      setIsConfirming(false);
+      onSuccess();
+    }
+    setOverlayState("idle");
   };
 
   return (
     <Vault open={open} onOpenChange={(val) => {
+      if (overlayState !== "idle") return;
       onOpenChange(val);
       if (!val) setIsConfirming(false);
     }}>
       <VaultContent>
+        <VaultLoadingOverlay
+          state={overlayState}
+          loadingLabel={t("Reschedule.saving") || "Salvando reagendamento..."}
+          successLabel={t("Success.rescheduled") || "Aula reagendada com sucesso!"}
+          errorLabel={t("Error.generic") || "Erro ao reagendar"}
+          errorSub={errorMsg}
+          onDone={handleOverlayDone}
+        />
         <VaultHeader>
           <VaultTitle>
             {isConfirming 
@@ -238,7 +260,7 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, balance, re
             <div className="pt-4 border-t flex flex-col gap-3">
               <Button
                 className="w-full"
-                disabled={!selectedSlotId || (useCreditId === undefined && rescheduleStats?.count >= rescheduleStats?.limit)}
+                disabled={overlayState !== "idle" || !selectedSlotId || (useCreditId === undefined && rescheduleStats?.count >= rescheduleStats?.limit)}
                 onClick={handleConfirm}
               >
                 {isConfirming 
@@ -248,6 +270,7 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, balance, re
               <Button 
                 variant="ghost" 
                 onClick={() => isConfirming ? setIsConfirming(false) : onOpenChange(false)}
+                disabled={overlayState !== "idle"}
               >
                 {isConfirming ? (t("Actions.back") || "Voltar") : (t("Actions.cancel") || "Cancelar")}
               </Button>

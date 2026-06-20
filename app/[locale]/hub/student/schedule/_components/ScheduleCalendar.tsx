@@ -9,11 +9,11 @@ import { ptBR, enUS } from "date-fns/locale";
 import { useIsMobile } from "@/hooks/ui/use-device";
 import { Badge } from "@/components/ui/badge";
 import { Vault, VaultHeader, VaultTitle, VaultBody, VaultContent } from "@/components/ui/vault";
+import { VaultLoadingOverlay } from "@/components/ui/vault-loading-overlay";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, Clock, Ticket, HelpCircle } from "lucide-react";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
 import { useWizard } from "@/hooks/ui/use-wizard";
-import { notify } from "@/components/ui/toaster";
 import { cancelClassAction } from "@/modules/scheduling/scheduling.actions";
 import { useRouter } from "next/navigation";
 import { RescheduleVault } from "./RescheduleVault";
@@ -49,6 +49,8 @@ export function ScheduleCalendar({ initialClasses, balance, rescheduleStats }: S
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
   const [isCreditsOpen, setIsCreditsOpen] = useState(false);
+  const [cancelOverlayState, setCancelOverlayState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [cancelErrorMsg, setCancelErrorMsg] = useState("");
   const isMobile = useIsMobile();
 
   const {
@@ -105,23 +107,26 @@ export function ScheduleCalendar({ initialClasses, balance, rescheduleStats }: S
   const handleCancel = async () => {
     if (!selectedEvent) return;
 
-    const promise = cancelClassAction({
-      classId: selectedEvent.id,
-      reason: "canceled-student"
-    });
+    setCancelOverlayState("loading");
 
-    notify.promise(promise, {
-      loading: t("Actions.canceling") || "Cancelando aula...",
-      success: (result) => {
-        if (result?.data?.success) {
-          setIsDetailOpen(false);
-          router.refresh();
-          return t("Success.canceled") || "Aula cancelada com sucesso!";
-        }
-        throw new Error(result?.data?.error || t("Error.generic") || "Erro ao cancelar aula");
-      },
-      error: (err: unknown) => (err as Error).message || "Falha na requisição"
-    });
+    try {
+      const result = await cancelClassAction({
+        classId: selectedEvent.id,
+        reason: "canceled-student"
+      });
+
+      if (result?.data?.success) {
+        setCancelOverlayState("success");
+      } else {
+        const err = result?.data?.error || t("Error.generic") || "Erro ao cancelar aula";
+        setCancelErrorMsg(err);
+        setCancelOverlayState("error");
+      }
+    } catch (err: unknown) {
+      const errMsg = (err as Error).message || "Falha na requisição";
+      setCancelErrorMsg(errMsg);
+      setCancelOverlayState("error");
+    }
   };
 
   return (
@@ -232,8 +237,26 @@ export function ScheduleCalendar({ initialClasses, balance, rescheduleStats }: S
             onSuccess={() => router.refresh()}
           />
 
-          <Vault open={isCancelConfirmOpen} onOpenChange={setIsCancelConfirmOpen}>
+          <Vault open={isCancelConfirmOpen} onOpenChange={(open) => {
+            if (cancelOverlayState !== "idle") return;
+            setIsCancelConfirmOpen(open);
+          }}>
             <VaultContent>
+              <VaultLoadingOverlay
+                state={cancelOverlayState}
+                loadingLabel={t("Actions.canceling") || "Cancelando aula..."}
+                successLabel={t("Success.canceled") || "Aula cancelada com sucesso!"}
+                errorLabel={t("Error.generic") || "Erro ao cancelar aula"}
+                errorSub={cancelErrorMsg}
+                onDone={() => {
+                  if (cancelOverlayState === "success") {
+                    setIsCancelConfirmOpen(false);
+                    setIsDetailOpen(false);
+                    router.refresh();
+                  }
+                  setCancelOverlayState("idle");
+                }}
+              />
               <VaultHeader>
                 <VaultTitle>{t("CancelConfirm.title") || "Confirmar Cancelamento"}</VaultTitle>
               </VaultHeader>
@@ -244,10 +267,20 @@ export function ScheduleCalendar({ initialClasses, balance, rescheduleStats }: S
                   </p>
                   
                   <div className="flex flex-col gap-3 pt-4">
-                    <Button variant="destructive" className="w-full" onClick={handleCancel}>
+                    <Button 
+                      variant="destructive" 
+                      className="w-full" 
+                      onClick={handleCancel}
+                      disabled={cancelOverlayState !== "idle"}
+                    >
                       {t("CancelConfirm.confirm") || "Sim, cancelar aula"}
                     </Button>
-                    <Button variant="ghost" className="w-full" onClick={() => setIsCancelConfirmOpen(false)}>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full" 
+                      onClick={() => setIsCancelConfirmOpen(false)}
+                      disabled={cancelOverlayState !== "idle"}
+                    >
                       {t("CancelConfirm.back") || "Voltar"}
                     </Button>
                   </div>
