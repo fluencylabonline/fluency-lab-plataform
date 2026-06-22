@@ -159,7 +159,7 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
                 <div>
                   <p className="font-semibold">{payment.subscription?.plan?.name || "Plano"}</p>
                   <p className="text-sm opacity-60">
-                    {t("date")}: {formatIntl.dateTime(new Date(payment.dueDate), { day: '2-digit', month: 'short', year: 'numeric' })}
+                    {t("date")}: {formatIntl.dateTime(new Date(payment.dueDate), { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' })}
                   </p>
                 </div>
               </div>
