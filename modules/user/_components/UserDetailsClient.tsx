@@ -17,7 +17,7 @@ import type { SlotInstanceWithDetails } from "../../scheduling/scheduling.types"
 import type { ContractWithTemplate } from "../../contract/contract.types";
 import { updateUserAction } from "../user.actions";
 import { getContractDownloadUrlAction } from "../../contract/contract.actions";
-import { updateInstallmentAction } from "../../billing/billing.actions";
+import { updateInstallmentAction, generateInstallmentInvoiceAction, resendInstallmentReminderAction } from "../../billing/billing.actions";
 import { PersonalInfoTab } from "./userDetails/PersonalInfoTab";
 import { StudentPaymentTab } from "./userDetails/StudentPaymentTab";
 import { TeacherEarningsTab } from "./userDetails/TeacherEarningsTab";
@@ -145,6 +145,45 @@ export function UserDetailsClient({
       }
     } catch {
       notify.error(t("updateError"));
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleGenerateInvoice = async (id: string) => {
+    setIsUpdating(true);
+    try {
+      const result = await generateInstallmentInvoiceAction({
+        installmentId: id,
+      });
+
+      if (result?.data?.success) {
+        notify.success(t("invoiceGeneratedSuccess") || "Código de pagamento gerado com sucesso!");
+        router.refresh();
+      } else {
+        notify.error(result?.data?.error || "Erro ao gerar código de pagamento.");
+      }
+    } catch {
+      notify.error("Erro ao processar solicitação.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleResendReminder = async (id: string) => {
+    setIsUpdating(true);
+    try {
+      const result = await resendInstallmentReminderAction({
+        installmentId: id,
+      });
+
+      if (result?.data?.success) {
+        notify.success(t("reminderSentSuccess") || "Lembrete enviado com sucesso!");
+      } else {
+        notify.error(result?.data?.error || "Erro ao reenviar lembrete.");
+      }
+    } catch {
+      notify.error("Erro ao processar solicitação.");
     } finally {
       setIsUpdating(false);
     }
@@ -317,6 +356,8 @@ export function UserDetailsClient({
               installmentForm={installmentForm as any}
               onUpdateInstallment={handleUpdateInstallment}
               onMarkAsPaid={handleMarkAsPaid}
+              onGenerateInvoice={handleGenerateInvoice}
+              onResendReminder={handleResendReminder}
             />
           ) : (
             <TeacherEarningsTab

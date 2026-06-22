@@ -1290,5 +1290,91 @@ export const billingService = {
       payerDocument: guardianTaxId || taxId || "",
       receiverDocument,
     };
+  },
+
+  async resendInstallmentReminder(installmentId: string) {
+    const installment = await billingRepository.findInstallmentWithDetails(installmentId);
+    if (!installment) throw new Error("Parcela não encontrada");
+
+    const sub = installment.subscription;
+    const student = sub.student;
+    if (!student) throw new Error("Estudante não encontrado");
+
+    if (installment.status !== "pending" && installment.status !== "overdue") {
+      throw new Error("Apenas parcelas pendentes ou em atraso podem ter lembretes reenviados.");
+    }
+
+    const isUsdPlan = sub.plan?.currency === "USD";
+    const hasBilling = isUsdPlan ? !!installment.stripePaymentIntentId : !!installment.abacatePayBillingId;
+
+    if (!hasBilling) {
+      throw new Error("Gere o código de pagamento antes de reenviar o lembrete.");
+    }
+
+    const amountStr = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(installment.amount / 100);
+
+    // 1. Email Reminder
+    if (student.email) {
+      if (installment.status === "overdue") {
+        await communicationService.sendBillingOverdueEmail(student.email, {
+          studentName: student.name,
+          amount: installment.amount,
+          checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/student/billing`,
+        });
+      } else {
+        await communicationService.sendBillingReminderEmail(student.email, {
+          studentName: student.name,
+          amount: installment.amount,
+          dueDate: installment.dueDate,
+          checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/student/billing`,
+        });
+      }
+    }
+
+    // 2. WhatsApp
+    let cellphone = student.cellphone;
+    if (cellphone) {
+      if (cellphone.includes(":")) cellphone = decrypt(cellphone);
+      cellphone = cellphone.replace(/\D/g, "");
+
+      const payCode = installment.pixPayload;
+
+      if (payCode) {
+        if (installment.status === "overdue") {
+          await communicationService.sendPaymentOverdueWhatsApp({
+            cellphone,
+            studentName: student.name,
+            amount: installment.amount,
+            pixPayload: payCode,
+          });
+        } else {
+          await communicationService.sendPaymentReminderWhatsApp({
+            cellphone,
+            studentName: student.name,
+            amount: installment.amount,
+            dueDate: installment.dueDate,
+            pixPayload: payCode,
+          });
+        }
+      }
+    }
+
+    // 3. Notification (In-App & Push)
+    try {
+      await notificationService.sendNotification({
+        title: installment.status === "overdue" ? "⚠️ Fatura em atraso" : "⏳ Lembrete de pagamento",
+        body: installment.status === "overdue"
+          ? `Atenção: Sua mensalidade de ${amountStr} está atrasada. Regularize para evitar suspensão.`
+          : `Lembrete: Sua fatura de ${amountStr} vence em breve. Evite atrasos!`,
+        targetType: "specific",
+        userIds: [student.id],
+        channels: { inApp: true, push: true },
+        actionUrl: "/student/billing",
+      });
+    } catch (error) {
+      console.error("[BillingService.resendInstallmentReminder] Failed to send notification:", error);
+    }
+
+    return { success: true };
   }
 };

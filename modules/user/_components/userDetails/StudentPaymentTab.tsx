@@ -2,11 +2,13 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { CreditCard, Clock, Edit2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { CreditCard, Clock, Edit2, AlertCircle, CheckCircle2, Copy, QrCode, ExternalLink, Send, RotateCw } from "lucide-react";
 import { format } from "date-fns";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { notify } from "@/components/ui/toaster";
 import { SectionLabel, StatBlock } from "./UserDetailsPrimitives";
 import {
   Vault,
@@ -31,6 +33,8 @@ interface StudentPaymentTabProps {
   installmentForm: UseFormReturn<FieldValues>; // FieldValues is safer than any
   onUpdateInstallment: (id: string, data: { amount?: number }) => Promise<void>;
   onMarkAsPaid: (id: string) => Promise<void>;
+  onGenerateInvoice?: (id: string) => Promise<void>;
+  onResendReminder?: (id: string) => Promise<void>;
 }
 
 
@@ -45,6 +49,8 @@ export function StudentPaymentTab({
   installmentForm,
   onUpdateInstallment,
   onMarkAsPaid,
+  onGenerateInvoice,
+  onResendReminder,
 }: StudentPaymentTabProps) {
   const t = useTranslations("UserManagement");
 
@@ -183,6 +189,133 @@ export function StudentPaymentTab({
                             <p className="text-xs text-muted-foreground leading-relaxed">
                               {t("adminActionsDesc")}
                             </p>
+                          </div>
+
+                          {/* Seção de Detalhes do Pagamento / Gerar Cobrança */}
+                          <div className="flex flex-col gap-4 pt-4 border-t border-border/50">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                              {t("paymentDetails") || "Detalhes do Pagamento"}
+                            </Label>
+
+                            {!inst.abacatePayBillingId && !inst.stripePaymentIntentId ? (
+                              <div className="flex flex-col items-center gap-3 p-4 border border-dashed border-border rounded-md bg-muted/5 text-center">
+                                <QrCode className="w-8 h-8 text-muted-foreground opacity-60" strokeWidth={1.5} />
+                                <div>
+                                  <p className="font-bold text-xs text-foreground">
+                                    {t("noInvoiceGenerated") || "Nenhuma cobrança gerada"}
+                                  </p>
+                                  <p className="text-[11px] text-muted-foreground mt-1">
+                                    {t("noInvoiceGeneratedDesc") || "O link ou código de pagamento ainda não foi criado para esta parcela."}
+                                  </p>
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => onGenerateInvoice?.(inst.id)}
+                                  disabled={isUpdating}
+                                  className="w-full gap-2 font-bold mt-2"
+                                >
+                                  <RotateCw className={`w-3.5 h-3.5 ${isUpdating ? "animate-spin" : ""}`} />
+                                  {t("generatePaymentCode") || "Gerar Código de Pagamento"}
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col gap-4 p-4 border border-border rounded-md bg-muted/5">
+                                {activeSubscription?.plan?.currency === "USD" || inst.pixPayload?.startsWith("http") ? (
+                                  <div className="flex flex-col gap-3">
+                                    <div className="flex items-center gap-2">
+                                      <CreditCard className="w-4 h-4 text-primary" />
+                                      <p className="font-bold text-xs text-foreground">
+                                        {t("stripePaymentLink") || "Link de Pagamento Stripe"}
+                                      </p>
+                                    </div>
+                                    <p className="text-[11px] text-muted-foreground">
+                                      {t("stripeLinkDesc") || "Esta parcela é cobrada em USD via Stripe. Clique abaixo para abrir o checkout ou copiar o link."}
+                                    </p>
+                                    <div className="flex gap-2 mt-1">
+                                      <a
+                                        href={inst.pixPayload || "#"}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex-1 inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-xs font-bold text-primary-foreground hover:bg-primary/95 gap-1.5"
+                                      >
+                                        <ExternalLink className="w-3.5 h-3.5" />
+                                        {t("goToPayment") || "Ir para Pagamento"}
+                                      </a>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={async () => {
+                                          if (inst.pixPayload) {
+                                            try {
+                                              await navigator.clipboard.writeText(inst.pixPayload);
+                                              notify.success(t("pixCopySuccess") || "Link copiado!");
+                                            } catch {
+                                              notify.error(t("copyError") || "Erro ao copiar.");
+                                            }
+                                          }
+                                        }}
+                                      >
+                                        <Copy className="w-3.5 h-3.5" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-col gap-3">
+                                    {inst.pixImage && (
+                                      <div className="flex justify-center bg-white p-2.5 rounded-md border border-border/80 self-center">
+                                        <Image
+                                          src={inst.pixImage}
+                                          alt="QR Code PIX"
+                                          width={110}
+                                          height={110}
+                                          className="mix-blend-multiply"
+                                        />
+                                      </div>
+                                    )}
+                                    <div className="flex flex-col gap-1.5">
+                                      <Label className="text-[10px] font-bold text-muted-foreground uppercase">
+                                        {t("pixCode") || "Código Copia e Cola"}
+                                      </Label>
+                                      <div className="flex gap-2">
+                                        <Input
+                                          readOnly
+                                          className="input text-xs font-mono select-all h-9 flex-1"
+                                          value={inst.pixPayload || ""}
+                                        />
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={async () => {
+                                            if (inst.pixPayload) {
+                                              try {
+                                                await navigator.clipboard.writeText(inst.pixPayload);
+                                                notify.success(t("pixCopySuccess") || "Código copiado!");
+                                              } catch {
+                                                notify.error(t("copyError") || "Erro ao copiar.");
+                                              }
+                                            }
+                                          }}
+                                        >
+                                          <Copy className="w-3.5 h-3.5" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => onResendReminder?.(inst.id)}
+                                  disabled={isUpdating}
+                                  className="w-full gap-2 font-bold mt-2"
+                                >
+                                  <Send className={`w-3.5 h-3.5 ${isUpdating ? "animate-pulse" : ""}`} />
+                                  {t("resendReminderBtn") || "Reenviar Lembrete de Pagamento"}
+                                </Button>
+                              </div>
+                            )}
                           </div>
 
                           <form

@@ -247,3 +247,21 @@ export const changeStudentPlanAction = managerAction
       return { success: false, error: errorMessage };
     }
   });
+
+export const resendInstallmentReminderAction = managerAction
+  .metadata({ name: "resendInstallmentReminder" })
+  .inputSchema(z.object({ installmentId: z.uuid() }))
+  .action(async ({ parsedInput }) => {
+    try {
+      await billingService.resendInstallmentReminder(parsedInput.installmentId);
+      revalidatePath("/student/profile");
+      revalidatePath("/student/billing");
+      revalidatePath("/hub/admin/users");
+      revalidatePath("/hub/manager/users");
+      return { success: true };
+    } catch (error) {
+      console.error("[resendInstallmentReminderAction] Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro ao reenviar lembrete de pagamento";
+      return { success: false, error: errorMessage };
+    }
+  });
