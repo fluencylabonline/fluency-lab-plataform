@@ -549,7 +549,8 @@
     "uploadCapa": "Click to upload cover image",
     "videoLesson": "Video Lesson",
     "videoLinkPlaceholder": "YouTube or Google Drive link...",
-    "videosAndTexts": "{videos} Videos and {texts} Texts"
+    "videosAndTexts": "{videos} Videos and {texts} Texts",
+    "targetRoles": "Target Roles"
   },
   "Dashboard": {
     "academic": {
@@ -1578,6 +1579,7 @@
     "learning": "Learning",
     "lessons": "Lessons",
     "menuDescription": "Navigation Menu",
+    "myLearning": "Tutorials",
     "myProfile": "Profile",
     "mySchedule": "Schedule",
     "notebook": "Notebook",

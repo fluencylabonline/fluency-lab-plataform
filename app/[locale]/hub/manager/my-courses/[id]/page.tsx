@@ -7,17 +7,17 @@ interface CoursePageProps {
   params: Promise<{ id: string; locale: string }>;
 }
 
-export default async function StudentCoursePage({ params }: CoursePageProps) {
+export default async function ManagerCoursePlayerPage({ params }: CoursePageProps) {
   const { id } = await params;
   const user = await getCurrentUser();
 
-  if (!user) {
+  if (!user || user.role !== "manager") {
     redirect("/signin");
   }
 
   const courseData = await courseService.getCourseDetails(user, id, user.id);
-  const studentCourses = await courseService.getUserCourses(user);
-  const currentCourse = studentCourses.find(c => c.id === id);
+  const userCourses = await courseService.getUserCourses(user);
+  const currentCourse = userCourses.find(c => c.id === id);
 
   if (!courseData || !currentCourse) {
     notFound();
@@ -25,7 +25,7 @@ export default async function StudentCoursePage({ params }: CoursePageProps) {
 
   // Ensure user is enrolled
   if (!currentCourse.isEnrolled) {
-    redirect(`/hub/student/courses`);
+    redirect(`/hub/manager/my-courses`);
   }
 
   return (

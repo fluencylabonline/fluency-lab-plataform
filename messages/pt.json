@@ -549,7 +549,8 @@
     "uploadCapa": "Clique para fazer upload da capa",
     "videoLesson": "Vídeo Aula",
     "videoLinkPlaceholder": "Link do YouTube ou Google Drive...",
-    "videosAndTexts": "{videos} Vídeos e {texts} Textos"
+    "videosAndTexts": "{videos} Vídeos e {texts} Textos",
+    "targetRoles": "Público-alvo"
   },
   "Dashboard": {
     "academic": {
@@ -1578,6 +1579,7 @@
     "learning": "Aprendizado",
     "lessons": "Lições",
     "menuDescription": "Menu de Navegação",
+    "myLearning": "Tutoriais",
     "myProfile": "Perfil",
     "mySchedule": "Agenda",
     "notebook": "Caderno",

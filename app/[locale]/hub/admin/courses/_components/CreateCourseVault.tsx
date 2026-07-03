@@ -47,6 +47,13 @@ const languages = [
   { label: "Português", value: "pt" },
 ];
 
+const availableRoles = [
+  { label: "Admin", value: "admin" },
+  { label: "Manager", value: "manager" },
+  { label: "Teacher", value: "teacher" },
+  { label: "Student", value: "student" },
+];
+
 type CreateCourseValues = z.input<typeof insertCourseSchema>;
 
 interface CreateCourseVaultProps {
@@ -69,12 +76,14 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCours
       description: "",
       imageUrl: "",
       duration: "",
+      roles: ["student"],
     },
   });
 
   const { formState: { errors, isSubmitting }, handleSubmit, reset, setValue, watch } = form;
   const selectedLanguage = watch("language");
   const imageUrl = watch("imageUrl");
+  const selectedRoles = watch("roles") || [];
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -214,6 +223,38 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCours
                 />
               </VaultField>
             </div>
+
+            <VaultField
+              label={t('targetRoles') || "Público Alvo (Roles)"}
+              required
+              error={errors.roles?.message}
+            >
+              <div className="flex flex-wrap gap-2">
+                {availableRoles.map((role) => {
+                  const isSelected = selectedRoles.includes(role.value);
+                  return (
+                    <button
+                      type="button"
+                      key={role.value}
+                      onClick={() => {
+                        const newRoles = isSelected
+                          ? selectedRoles.filter(r => r !== role.value)
+                          : [...selectedRoles, role.value];
+                        setValue("roles", newRoles, { shouldValidate: true });
+                      }}
+                      className={cn(
+                        "px-4 py-2 rounded-xl text-sm font-bold transition-all border-2",
+                        isSelected
+                          ? "bg-primary/10 border-primary text-primary"
+                          : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-muted-foreground hover:border-primary/50"
+                      )}
+                    >
+                      {role.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </VaultField>
 
             <VaultField
               label={t("description")}

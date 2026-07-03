@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useStudentCourses } from "@/hooks/data/use-student-courses";
+import { useMyCourses } from "@/hooks/data/use-my-courses";
 import { Header } from "@/components/layout/header";
 import { EmptyResults } from "@/components/ui/empty";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { containerVariants, itemVariants } from "@/lib/animations"
 
-interface StudentCourseClientProps {
+interface MyCoursesClientProps {
   currentUser: {
     name: string;
     email: string;
@@ -23,8 +23,8 @@ interface StudentCourseClientProps {
   };
 }
 
-export function StudentCourseClient({ currentUser }: StudentCourseClientProps) {
-  const { courses, isLoading, mutate } = useStudentCourses();
+export function MyCoursesClient({ currentUser }: MyCoursesClientProps) {
+  const { courses, isLoading, mutate } = useMyCourses();
   const t = useTranslations("Courses");
 
   const handleEnroll = async (courseId: string) => {
@@ -132,7 +132,7 @@ export function StudentCourseClient({ currentUser }: StudentCourseClientProps) {
                     <div className="pt-4 mt-auto">
                       {course.isEnrolled ? (
                         <Link
-                          href={`/hub/student/courses/${course.id}`}
+                          href={`/hub/${currentUser.role === 'student' ? 'student/courses' : `${currentUser.role}/my-courses`}/${course.id}`}
                           className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground h-12 rounded-md font-bold hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
                         >
                           {course.progressPercentage === 0 ? t("startCourse") : t("continueCourse")}

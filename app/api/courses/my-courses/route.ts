@@ -9,10 +9,10 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const courses = await courseService.getStudentCourses(user);
+    const courses = await courseService.getUserCourses(user);
     return NextResponse.json(courses);
   } catch (error) {
-    console.error("[GET /api/student/courses/list] Error:", error);
+    console.error("[GET /api/courses/my-courses] Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

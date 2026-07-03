@@ -8,7 +8,7 @@ import {
   courseQuizSubmissionsTable,
   type CourseProgress,
 } from "./course.schema";
-import { eq, and, asc, desc, sql } from "drizzle-orm";
+import { eq, and, asc, desc, sql, arrayContains } from "drizzle-orm";
 
 export const courseRepository = {
   // Courses
@@ -37,9 +37,10 @@ export const courseRepository = {
     });
   },
 
-  async findStudentCourses(userId: string) {
+  async findUserCourses(userId: string, role: string) {
     // We can use relational query to fetch courses and their enrollment for this user
     return db.query.coursesTable.findMany({
+      where: arrayContains(coursesTable.roles, [role]),
       with: {
         enrollments: {
           where: eq(courseEnrollmentsTable.userId, userId),

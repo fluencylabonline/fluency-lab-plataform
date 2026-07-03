@@ -43,7 +43,7 @@ export const coursesTable = pgTable("courses", {
   imageUrl: text("image_url").notNull(),
   duration: text("duration").notNull(),
   isPublished: boolean("is_published").default(false).notNull(),
-  role: text("role").default("student").notNull(), // access level required
+  roles: text("roles").array().default(["student"]).notNull(), // access levels required
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -164,6 +164,7 @@ export const insertCourseSchema = createInsertSchema(coursesTable, {
   duration: (s) => s.regex(/^\d+h?$/, "A duração deve ser um número ou seguir o formato '10h'"),
   language: (s) => s.min(2, "Selecione um idioma"),
   imageUrl: (s) => s.url("URL da imagem inválida"),
+  roles: z.array(z.string()).min(1, "Selecione pelo menos um papel"),
 });
 
 export const selectCourseSchema = createSelectSchema(coursesTable);

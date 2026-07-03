@@ -5,9 +5,9 @@ import { type StudentCourse } from "@/modules/course/course.types";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export function useStudentCourses() {
+export function useMyCourses() {
   const { data, error, isLoading, mutate } = useSWR<StudentCourse[]>(
-    "/api/student/courses/list",
+    "/api/courses/my-courses",
     fetcher
   );
 

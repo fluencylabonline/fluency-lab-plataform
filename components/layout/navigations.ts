@@ -13,6 +13,7 @@ import { MenuItemType } from "@/components/layout/types";
 import { UserRoles, hasPermission, type UserRoleInfo } from "@/lib/rbac";
 import { FileTextIcon } from "@/components/animated-icons/file-text";
 import { MessageSquareIcon } from "@/components/animated-icons/message-square";
+import { GraduationCapIcon } from "../animated-icons/graduation-cap";
 
 const adminItems: MenuItemType[] = [
     {
@@ -61,6 +62,14 @@ const adminItems: MenuItemType[] = [
         label: "Cursos",
         labelKey: "courses",
         Icon: ClapIcon,
+        iconProps: { size: 20 },
+        permission: "material.view",
+    },
+    {
+        href: "/admin/my-courses",
+        label: "Meu Aprendizado",
+        labelKey: "myLearning",
+        Icon: GraduationCapIcon,
         iconProps: { size: 20 },
         permission: "material.view",
     },
@@ -123,6 +132,14 @@ const teacherItems: MenuItemType[] = [
         label: "Lições",
         labelKey: "lessons",
         Icon: LayoutDashboardIcon,
+        iconProps: { size: 20 },
+        permission: "material.view",
+    },
+    {
+        href: "/teacher/my-courses",
+        label: "Meu Aprendizado",
+        labelKey: "myLearning",
+        Icon: GraduationCapIcon,
         iconProps: { size: 20 },
         permission: "material.view",
     },
@@ -211,6 +228,14 @@ const managerItems: MenuItemType[] = [
         label: "Aprendizado",
         labelKey: "learning",
         Icon: ClapIcon,
+        iconProps: { size: 20 },
+        permission: "material.view",
+    },
+    {
+        href: "/manager/my-courses",
+        label: "Meu Aprendizado",
+        labelKey: "myLearning",
+        Icon: GraduationCapIcon,
         iconProps: { size: 20 },
         permission: "material.view",
     },

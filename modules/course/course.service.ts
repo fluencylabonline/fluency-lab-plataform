@@ -86,11 +86,11 @@ export const courseService = {
   },
 
   // Student Actions
-  async getStudentCourses(user: User) {
+  async getUserCourses(user: User) {
     if (!hasPermission(user, "course.view")) {
       throw new Error("Unauthorized: You do not have permission to view courses.");
     }
-    const courses = await courseRepository.findStudentCourses(user.id);
+    const courses = await courseRepository.findUserCourses(user.id, user.role);
     
     // Map to the extended StudentCourse type
     return courses.map(course => {
@@ -150,7 +150,7 @@ export const courseService = {
         imageUrl: course.imageUrl,
         duration: course.duration,
         isPublished: course.isPublished,
-        role: course.role,
+        roles: course.roles,
         createdAt: course.createdAt,
         updatedAt: course.updatedAt,
       },
