@@ -7,7 +7,7 @@ import {
   Subscription, 
   Installment 
 } from "./billing.schema";
-import { eq, and, lte, isNull, between, sum, ne } from "drizzle-orm";
+import { eq, and, lte, between, sum, ne } from "drizzle-orm";
 
 export const billingRepository = {
   // Audit
@@ -96,14 +96,26 @@ export const billingRepository = {
   async findSubscriptionsForCron(date: Date) {
     // Subscriptions that have an installment due in exactly 7 days
     // and don't have a billing generated yet for that installment
-    return db.select()
-      .from(installmentsTable)
-      .where(and(
-        eq(installmentsTable.status, "pending"),
-        isNull(installmentsTable.abacatePayBillingId),
-        lte(installmentsTable.dueDate, date)
-      ))
-      .limit(100);
+    const installments = await db.query.installmentsTable.findMany({
+      where: (table, { and, eq, lte, isNull }) => and(
+        eq(table.status, "pending"),
+        isNull(table.abacatePayBillingId),
+        isNull(table.stripePaymentIntentId),
+        lte(table.dueDate, date)
+      ),
+      with: {
+        subscription: {
+          with: { student: true }
+        }
+      }
+    });
+
+    return installments.filter(inst => 
+      inst.subscription && 
+      inst.subscription.status === "active" && 
+      inst.subscription.student && 
+      inst.subscription.student.isActive
+    );
   },
   async hasOverduePayments(subscriptionId: string) {
     const overdue = await db.query.installmentsTable.findFirst({
