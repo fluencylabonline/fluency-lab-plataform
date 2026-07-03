@@ -274,7 +274,7 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCours
             >
               <div className="flex items-center gap-4">
                 <div className={cn(
-                  "h-24 w-32 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-muted-foreground transition-all overflow-hidden bg-gray-50 dark:bg-gray-800/50",
+                  "relative h-24 w-32 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-muted-foreground transition-all overflow-hidden bg-gray-50 dark:bg-gray-800/50",
                   imageUrl ? "border-primary/50" : "border-gray-200 dark:border-gray-800"
                 )}>
                   {imageUrl ? (
