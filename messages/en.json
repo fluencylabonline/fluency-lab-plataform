@@ -1513,6 +1513,10 @@
     "global_item": "Global Item",
     "details": "Details"
   },
+  "Procedures": {
+    "title": "Procedures",
+    "description": "Manage and edit standard operating procedures (SOP)."
+  },
   "LearningPath": {
     "dayLabel": "Day {order}",
     "noLessonsMessage": "You don't have any scheduled lessons yet. Please contact your teacher.",
@@ -1584,6 +1588,7 @@
     "mySchedule": "Schedule",
     "notebook": "Notebook",
     "notifications": "Notifications",
+    "procedures": "Procedures",
     "settings": "Settings",
     "students": "Students",
     "tasks": "Tasks",

@@ -3,6 +3,7 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { type JSONContent } from "@tiptap/core";
+import { useEffect } from "react";
 import {
   Bold,
   Italic,
@@ -31,6 +32,12 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
     },
     immediatelyRender: false,
   });
+
+  useEffect(() => {
+    if (editor && editor.isEditable !== editable) {
+      editor.setEditable(editable);
+    }
+  }, [editor, editable]);
 
   if (!editor) return null;
 

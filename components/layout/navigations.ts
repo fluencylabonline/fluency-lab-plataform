@@ -95,6 +95,13 @@ const adminItems: MenuItemType[] = [
         iconProps: { size: 20 },
     },
     {
+        href: "/admin/procedures",
+        label: "Procedimentos",
+        labelKey: "procedures",
+        Icon: FileTextIcon,
+        iconProps: { size: 20 },
+    },
+    {
         href: "/admin/settings",
         label: "Configurações",
         labelKey: "settings",

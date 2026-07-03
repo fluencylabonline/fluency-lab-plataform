@@ -1513,6 +1513,10 @@
     "global_item": "Item Global",
     "details": "Detalhes"
   },
+  "Procedures": {
+    "title": "Procedimentos",
+    "description": "Gerencie e edite os procedimentos operacionais padrão (POP)."
+  },
   "LearningPath": {
     "dayLabel": "Dia {order}",
     "noLessonsMessage": "Você ainda não possui lições programadas. Entre em contato com seu professor.",
@@ -1584,6 +1588,7 @@
     "mySchedule": "Agenda",
     "notebook": "Caderno",
     "notifications": "Notificações",
+    "procedures": "Procedimentos",
     "settings": "Configurações",
     "students": "Alunos",
     "tasks": "Tarefas",

@@ -20,6 +20,7 @@ import * as certificateSchema from "@/modules/certificate/certificate.schema";
 import * as taskSchema from "@/modules/task/task.schema";
 import * as immersionSchema from "@/modules/immersion/immersion.schema";
 import * as audioSchema from "@/modules/audio/audio.schema";
+import * as procedureSchema from "@/modules/procedure/procedure.schema";
 
 // Only inject external ws if global WebSocket is not available (e.g. older local Node environments)
 if (typeof globalThis.WebSocket === "undefined") {
@@ -48,6 +49,7 @@ export const db = drizzle(pool, {
     ...taskSchema,
     ...immersionSchema,
     ...audioSchema,
+    ...procedureSchema,
   },
 });
 
