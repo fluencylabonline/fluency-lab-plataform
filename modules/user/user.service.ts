@@ -26,12 +26,21 @@ export const userService = {
       throw new Error("NOT_INVITED");
     }
 
-    return userRepository.upsert({
+    const user = await userRepository.upsert({
       ...existing,
       ...data,
       id: uid,
       email: existing.email,
     });
+
+    // Ensure Firebase custom claims match the database role
+    try {
+      await adminAuth.setCustomUserClaims(uid, { role: user.role });
+    } catch (error) {
+      console.error(`[syncUser] Failed to sync role to Firebase Auth for user ${uid}:`, error);
+    }
+
+    return user;
   },
 
   async getUser(id: string): Promise<User | undefined> {
@@ -43,7 +52,18 @@ export const userService = {
   },
 
   async updateUser(id: string, data: Partial<NewUser>): Promise<User | undefined> {
-    return userRepository.update(id, data);
+    const updatedUser = await userRepository.update(id, data);
+    
+    // Sync role to Firebase Auth if it was updated
+    if (updatedUser && data.role) {
+      try {
+        await adminAuth.setCustomUserClaims(id, { role: updatedUser.role });
+      } catch (error) {
+        console.error(`[updateUser] Failed to sync role to Firebase Auth for user ${id}:`, error);
+      }
+    }
+    
+    return updatedUser;
   },
 
   async getUserByEmail(email: string): Promise<User | undefined> {
