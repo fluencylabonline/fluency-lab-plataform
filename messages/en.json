@@ -431,6 +431,9 @@
     "title": "Convert Class to Available"
   },
   "Courses": {
+    "changeCover": "Change Cover",
+    "courseTitlePlaceholder": "Course name...",
+    "editContent": "Edit Content",
     "actions": "Actions",
     "confirmDeleteDesc": "Are you sure you want to delete this? This action cannot be undone.",
     "courseContent": "Course Content",

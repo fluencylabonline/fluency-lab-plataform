@@ -7,7 +7,6 @@ import { Calendar, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { redirect } from "next/navigation";
-import { Plus } from "lucide-react";
 
 export default async function RecessActivitiesPage() {
   const user = await getCurrentUser();
@@ -25,13 +24,6 @@ export default async function RecessActivitiesPage() {
         subtitle="Atividades de fallback para garantir o engajamento dos alunos durante suas ausências"
         className="contents"
         backHref="/hub/teacher/schedule"
-        actions={[
-          {
-            label: "Criar atividade",
-            icon: <Plus className="w-4 h-4" />,
-            href: "/hub/teacher/recess/new",
-          },
-        ]}
       />
 
       <main className="flex-1 p-4 md:p-6 container max-w-7xl mx-auto space-y-8">

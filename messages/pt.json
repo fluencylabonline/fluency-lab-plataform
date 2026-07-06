@@ -431,6 +431,9 @@
     "title": "Converter Aula em Disponível"
   },
   "Courses": {
+    "changeCover": "Alterar Capa",
+    "courseTitlePlaceholder": "Nome do curso...",
+    "editContent": "Editar Conteúdo",
     "actions": "Ações",
     "confirmDeleteDesc": "Tem certeza de que deseja excluir isso? Esta ação não pode ser desfeita.",
     "courseContent": "Conteúdo do Curso",
