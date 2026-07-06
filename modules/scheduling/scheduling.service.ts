@@ -475,6 +475,10 @@ export const schedulingService = {
     classId: string,
     status: typeof slotInstances.status.enumValues[number]
   ) {
+    if (status.startsWith("canceled-")) {
+      return this.cancelClass(user, classId, status);
+    }
+
     // RBAC: Admin/Manager can change to any status.
     const isAdmin = hasPermission(user, "class.update.any");
     const slot = await schedulingRepository.findById(classId);
