@@ -7,7 +7,7 @@ import {
   recessRequestsTable
 } from "./scheduling.schema";
 import { usersTable } from "@/modules/user/user.schema";
-import { eq, and, lte, gte, isNull, inArray, between, ne, isNotNull, asc, desc } from "drizzle-orm";
+import { eq, and, lte, gte, lt, gt, isNull, inArray, between, ne, isNotNull, asc, desc } from "drizzle-orm";
 import {
   NewRecurrenceRule,
   NewStudentCredit,
@@ -169,8 +169,8 @@ export const schedulingRepository = {
     const client = dbClient || db;
     const filters = [
       eq(slotInstances.teacherId, teacherId),
-      lte(slotInstances.startAt, endAt),
-      gte(slotInstances.endAt, startAt),
+      lt(slotInstances.startAt, endAt),
+      gt(slotInstances.endAt, startAt),
     ];
 
     if (excludeId) {
