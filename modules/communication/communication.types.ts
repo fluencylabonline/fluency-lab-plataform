@@ -116,6 +116,7 @@ export interface WhatsAppConversation {
   lastMessageContent: string | null;
   lastMessageAt: Date | string | null;
   unreadCount: number;
+  isArchived: boolean;
   createdAt: Date | string;
   updatedAt: Date | string;
 }

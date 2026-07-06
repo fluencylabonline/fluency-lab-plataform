@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { WhatsAppMessage } from "../communication.types";
+import { WhatsAppMessage, WhatsAppTemplate } from "../communication.types";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { MessageCircle, Check, CheckCheck, FileText, Download, X, Film } from "lucide-react";
@@ -16,9 +16,10 @@ interface MediaMetadata {
 
 interface MessageBubbleProps {
   msg: WhatsAppMessage;
+  templates?: WhatsAppTemplate[];
 }
 
-export function MessageBubble({ msg }: MessageBubbleProps) {
+export function MessageBubble({ msg, templates = [] }: MessageBubbleProps) {
   const isOut = msg.direction === "outbound";
   const isTemplate = msg.content?.startsWith("[Template:");
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -169,7 +170,22 @@ export function MessageBubble({ msg }: MessageBubbleProps) {
               <MessageCircle className="w-3 h-3" />
               Template
             </div>
-            <p className="font-mono text-xs opacity-90 leading-snug">{msg.content}</p>
+            <p className="text-[13px] opacity-90 leading-snug whitespace-pre-wrap">
+              {(() => {
+                if (isTemplate && templates.length > 0) {
+                  const match = msg.content?.match(/\[Template:\s*(.+?)\]/);
+                  if (match && match[1]) {
+                    const templateName = match[1];
+                    const template = templates.find((t) => t.name === templateName);
+                    if (template) {
+                      const bodyComp = template.components.find((c) => c.type === "BODY");
+                      return bodyComp?.text || msg.content;
+                    }
+                  }
+                }
+                return msg.content;
+              })()}
+            </p>
           </div>
         ) : (
           renderMediaContent()

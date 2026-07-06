@@ -58,8 +58,8 @@ export const communicationRepository = {
     return message;
   },
 
-  async getConversations() {
-    return db
+  async getConversations(includeArchived: boolean = false) {
+    let query = db
       .select({
         id: whatsappConversationsTable.id,
         waId: whatsappConversationsTable.waId,
@@ -69,13 +69,18 @@ export const communicationRepository = {
         lastMessageContent: whatsappConversationsTable.lastMessageContent,
         lastMessageAt: whatsappConversationsTable.lastMessageAt,
         unreadCount: whatsappConversationsTable.unreadCount,
+        isArchived: whatsappConversationsTable.isArchived,
         createdAt: whatsappConversationsTable.createdAt,
         updatedAt: whatsappConversationsTable.updatedAt,
         studentName: usersTable.name,
       })
       .from(whatsappConversationsTable)
       .leftJoin(usersTable, eq(whatsappConversationsTable.studentId, usersTable.id))
-      .orderBy(desc(whatsappConversationsTable.lastMessageAt));
+      .$dynamic();
+      
+    query = query.where(eq(whatsappConversationsTable.isArchived, includeArchived));
+
+    return query.orderBy(desc(whatsappConversationsTable.lastMessageAt));
   },
 
   async getMessages(conversationId: string, limit = 50) {

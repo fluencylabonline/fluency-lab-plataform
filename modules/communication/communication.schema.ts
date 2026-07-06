@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { pgTable, text, timestamp, integer, uuid, jsonb, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer, uuid, jsonb, pgEnum, boolean } from "drizzle-orm/pg-core";
 import { usersTable } from "../user/user.schema";
 
 export const whatsappMessageDirectionEnum = pgEnum("whatsapp_message_direction", ["inbound", "outbound"]);
@@ -14,6 +14,7 @@ export const whatsappConversationsTable = pgTable("whatsapp_conversations", {
   lastMessageContent: text("last_message_content"),
   lastMessageAt: timestamp("last_message_at"),
   unreadCount: integer("unread_count").notNull().default(0),
+  isArchived: boolean("is_archived").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .notNull()

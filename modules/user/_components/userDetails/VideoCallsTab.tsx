@@ -87,11 +87,11 @@ export function VideoCallsTab({ callHistory }: VideoCallsTabProps) {
                     <div key={call.id} className="item p-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-sm font-medium">
-                          <Video className="w-4 h-4 text-primary" />
-                          <span>{format(new Date(call.startedAt), "HH:mm")}</span>
+                          <Video className="w-4 h-4 text-primary  mr-2" />
+                          <span>{format(new Date(call.startedAt), "dd/MM - HH:mm")}</span>
                         </div>
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="w-3 h-3" />
+                          <Clock className="w-3 h-3 mr-2" />
                           <span>{formatDuration(call.durationSeconds)}</span>
                         </div>
                       </div>
@@ -122,7 +122,7 @@ export function VideoCallsTab({ callHistory }: VideoCallsTabProps) {
                                 size="sm"
                                 className="w-full h-8 text-xs gap-2"
                               >
-                                <FileText className="w-3 h-3" />
+                                <FileText className="w-3 h-3  mr-2" />
                                 Ver Transcrição
                               </Button>
                             </VaultTrigger>

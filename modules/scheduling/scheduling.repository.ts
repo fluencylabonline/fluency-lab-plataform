@@ -191,6 +191,24 @@ export const schedulingRepository = {
     });
   },
 
+  async findTeacherOverdueClasses(teacherId: string, thresholdTime: Date) {
+    return db.query.slotInstances.findMany({
+      where: and(
+        eq(slotInstances.teacherId, teacherId),
+        eq(slotInstances.status, "scheduled"),
+        lte(slotInstances.endAt, thresholdTime)
+      ),
+      orderBy: [asc(slotInstances.startAt)],
+      with: {
+        student: {
+          columns: {
+            name: true,
+          }
+        }
+      }
+    });
+  },
+
   async updateStatusBulk(ids: string[], status: typeof slotInstances.status.enumValues[number]) {
     if (ids.length === 0) return;
     await db.update(slotInstances)

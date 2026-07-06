@@ -32,8 +32,17 @@ export const deleteWhatsAppTemplateAction = managerAction
 
 export const getWhatsAppConversationsAction = managerAction
   .metadata({ name: "getWhatsAppConversations" })
-  .action(async () => {
-    return await communicationService.getConversations();
+  .schema(z.object({ includeArchived: z.boolean().optional().default(false) }).optional())
+  .action(async ({ parsedInput }) => {
+    return await communicationService.getConversations(parsedInput?.includeArchived ?? false);
+  });
+
+export const archiveWhatsAppConversationAction = managerAction
+  .metadata({ name: "archiveWhatsAppConversation" })
+  .schema(z.object({ conversationId: z.string(), isArchived: z.boolean() }))
+  .action(async ({ parsedInput }) => {
+    await communicationService.archiveConversation(parsedInput.conversationId, parsedInput.isArchived);
+    return { success: true };
   });
 
 export const getWhatsAppMessagesAction = managerAction

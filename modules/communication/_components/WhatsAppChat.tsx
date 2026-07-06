@@ -2,13 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import useSWR from "swr";
-import {
-  getWhatsAppConversationsAction,
-  getWhatsAppMessagesAction,
-  sendWhatsAppTextMessageAction,
-  markWhatsAppConversationAsReadAction
-} from "@/modules/communication/communication.actions";
-import { WhatsAppConversation, WhatsAppMessage, WhatsAppLabel } from "@/modules/communication/communication.types";
+import { getWhatsAppTemplatesAction, getWhatsAppConversationsAction, getWhatsAppMessagesAction, sendWhatsAppTextMessageAction, markWhatsAppConversationAsReadAction } from "@/modules/communication/communication.actions";
+import { WhatsAppConversation, WhatsAppMessage, WhatsAppLabel, WhatsAppTemplate } from "@/modules/communication/communication.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar } from "./Avatar";
@@ -103,6 +98,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
   const [messageText, setMessageText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewArchived, setViewArchived] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
@@ -130,12 +126,21 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
   }, [availableLabels]);
 
   const { data: conversations, mutate: mutateConvs, isLoading: isLoadingConvs } = useSWR(
-    "whatsapp-conversations",
+    `whatsapp-conversations-${viewArchived}`,
     async () => {
-      const result = await getWhatsAppConversationsAction();
+      const result = await getWhatsAppConversationsAction({ includeArchived: viewArchived });
       return (result?.data as unknown as WhatsAppConversation[]) || [];
     },
     { refreshInterval: 5000 }
+  );
+
+  const { data: templates } = useSWR(
+    "whatsapp-templates",
+    async () => {
+      const result = await getWhatsAppTemplatesAction();
+      return (result?.data as unknown as WhatsAppTemplate[]) || [];
+    },
+    { revalidateOnFocus: false }
   );
 
   const { data: messages, mutate: mutateMessages, isLoading: isLoadingMessages } = useSWR(
@@ -247,6 +252,28 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
               placeholder="Buscar conversa ou etiqueta…"
               className="pl-9 h-9 text-[13px] bg-muted/40 border-border/40 rounded-xl focus-visible:ring-primary/30 placeholder:text-muted-foreground/60"
             />
+          </div>
+          
+          {/* Tabs */}
+          <div className="flex items-center gap-2 mt-2 bg-muted/30 p-1 rounded-lg border border-border/40">
+            <button
+              onClick={() => { setViewArchived(false); setSelectedConv(null); }}
+              className={cn(
+                "flex-1 py-1.5 text-xs font-semibold rounded-md transition-all",
+                !viewArchived ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Ativas
+            </button>
+            <button
+              onClick={() => { setViewArchived(true); setSelectedConv(null); }}
+              className={cn(
+                "flex-1 py-1.5 text-xs font-semibold rounded-md transition-all",
+                viewArchived ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Arquivadas
+            </button>
           </div>
         </div>
 
@@ -367,7 +394,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                       return (
                         <div key={msg.id} className="animate-in fade-in slide-in-from-bottom-1 duration-150">
                           {showDate && <TimestampPill date={new Date(msg.createdAt)} />}
-                          <MessageBubble msg={msg} />
+                          <MessageBubble msg={msg} templates={templates} />
                         </div>
                       );
                     })

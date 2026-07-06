@@ -812,8 +812,8 @@ export class CommunicationService {
     return response;
   }
 
-  async getConversations() {
-    return communicationRepository.getConversations();
+  async getConversations(includeArchived: boolean = false) {
+    return communicationRepository.getConversations(includeArchived);
   }
 
   async getMessages(conversationId: string) {
@@ -830,6 +830,10 @@ export class CommunicationService {
 
   async updateLabels(conversationId: string, labels: unknown[]) {
     return communicationRepository.updateConversation(conversationId, { labels });
+  }
+
+  async archiveConversation(conversationId: string, isArchived: boolean) {
+    return communicationRepository.updateConversation(conversationId, { isArchived });
   }
 
   /**

@@ -15,10 +15,11 @@ import {
 } from "@/components/ui/vault";
 import {
   updateWhatsAppContactNameAction,
-  updateWhatsAppConversationLabelsAction
+  updateWhatsAppConversationLabelsAction,
+  archiveWhatsAppConversationAction
 } from "@/modules/communication/communication.actions";
 import { notify } from "@/components/ui/toaster";
-import { Loader2, Copy, Tag, Plus, X } from "lucide-react";
+import { Loader2, Copy, Tag, Plus, X, Archive, ArchiveRestore } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const LABEL_COLORS: Record<string, { bg: string; text: string; border: string; hex: string }> = {
@@ -146,6 +147,27 @@ export function DetailsVault({
     setNewLabelColor("blue");
     setIsCreatingLabel(false);
     notify.success("Etiqueta criada!");
+  };
+
+  const handleArchive = async () => {
+    try {
+      const isArchived = !selectedConv.isArchived;
+      const result = await archiveWhatsAppConversationAction({
+        conversationId: selectedConv.id,
+        isArchived,
+      });
+
+      if (result?.data?.success) {
+        notify.success(isArchived ? "Conversa arquivada" : "Conversa desarquivada");
+        onOpenChange(false);
+        setSelectedConv(null as unknown as WhatsAppConversation);
+        mutateConvs();
+      } else {
+        notify.error("Erro ao arquivar conversa");
+      }
+    } catch {
+      notify.error("Erro técnico");
+    }
   };
 
   return (
@@ -320,6 +342,27 @@ export function DetailsVault({
                 );
               })}
             </div>
+          </div>
+
+          {/* Actions */}
+          <div className="pt-4 pb-2 border-t border-border/40">
+            <Button
+              variant="outline"
+              className="w-full h-10 text-[13px] font-semibold border-border/40 hover:bg-muted transition-colors flex items-center justify-center gap-2"
+              onClick={handleArchive}
+            >
+              {selectedConv.isArchived ? (
+                <>
+                  <ArchiveRestore className="w-4 h-4 text-muted-foreground" />
+                  Desarquivar Conversa
+                </>
+              ) : (
+                <>
+                  <Archive className="w-4 h-4 text-muted-foreground" />
+                  Arquivar Conversa
+                </>
+              )}
+            </Button>
           </div>
 
         </VaultBody>

@@ -1183,6 +1183,11 @@ export const schedulingService = {
 
     return totalSent;
   },
+  async getTeacherPendingPastClasses(teacherId: string) {
+    const now = new Date();
+    return schedulingRepository.findTeacherOverdueClasses(teacherId, now);
+  },
+
   async getTeacherCompletedClasses(teacherId: string, start: Date, end: Date) {
     return schedulingRepository.findCompletedByTeacherInRange(teacherId, start, end);
   },
