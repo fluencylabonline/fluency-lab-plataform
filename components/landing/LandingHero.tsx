@@ -53,7 +53,7 @@ export function LandingHero({ user }: { user: User | null }) {
 
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
-              href={`https://wa.me/5511999999999?text=${encodeURIComponent(
+              href={`https://wa.me/5549936180727?text=${encodeURIComponent(
                 "Olá! Vi o site da Fluency Lab e gostaria de saber mais sobre as aulas personalizadas."
               )}`}
               target="_blank"

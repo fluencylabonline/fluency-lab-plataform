@@ -30,7 +30,8 @@ import {
   addMinutes,
   endOfMonth,
   startOfMonth,
-  differenceInCalendarDays
+  differenceInCalendarDays,
+  addDays
 } from "date-fns";
 import { notificationService } from "@/modules/notification/notification.service";
 import { NewSlotInstance } from "./scheduling.types";
@@ -64,14 +65,36 @@ function getLocalMidnight(date: Date, timeZone: string = "America/Sao_Paulo"): D
 function formatLocalTime(date: Date, formatStr: string = "HH:mm", timeZone: string = "America/Sao_Paulo"): string {
   const parts = getLocalDateParts(date, timeZone);
   const pad = (n: number) => String(n).padStart(2, "0");
-  if (formatStr === "dd/MM HH:mm") {
-    return `${pad(parts.day)}/${pad(parts.month + 1)} ${pad(parts.hour)}:${pad(parts.minute)}`;
+  if (formatStr === "dd/MM") {
+    return `${pad(parts.day)}/${pad(parts.month + 1)}`;
+  }
+  if (formatStr === "dd/MM/yyyy") {
+    return `${pad(parts.day)}/${pad(parts.month + 1)}/${parts.year}`;
   }
   if (formatStr === "dd/MM/yyyy HH:mm") {
     return `${pad(parts.day)}/${pad(parts.month + 1)}/${parts.year} ${pad(parts.hour)}:${pad(parts.minute)}`;
   }
+  if (formatStr === "dd/MM HH:mm") {
+    return `${pad(parts.day)}/${pad(parts.month + 1)} ${pad(parts.hour)}:${pad(parts.minute)}`;
+  }
   // Default to HH:mm
   return `${pad(parts.hour)}:${pad(parts.minute)}`;
+}
+
+function getLocalDayOfWeek(date: Date, locale: string = "pt-BR", timeZone: string = "America/Sao_Paulo"): string {
+  const formatter = new Intl.DateTimeFormat(locale, {
+    timeZone,
+    weekday: "long"
+  });
+  return formatter.format(date);
+}
+
+function pluralizeDayOfWeek(day: string): string {
+  // Ex: "segunda-feira" -> "segundas-feiras", "sábado" -> "sábados", "domingo" -> "domingos"
+  if (day.includes("-feira")) {
+    return day.replace("-feira", "s-feiras");
+  }
+  return `${day}s`;
 }
 
 function localToUtc(year: number, month: number, day: number, hour: number, minute: number, timeZone: string = "America/Sao_Paulo"): Date {
@@ -1033,7 +1056,8 @@ export const schedulingService = {
     user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
     ruleId: string,
     newStartTime: string, // "HH:mm"
-    newEndTime: string    // "HH:mm"
+    newEndTime: string,   // "HH:mm"
+    newStartDate?: string | null
   ) {
     // 1. Fetch the rule and verify it exists
     const rule = await schedulingRepository.findRuleById(ruleId);
@@ -1074,9 +1098,20 @@ export const schedulingService = {
       throw new Error("Nenhuma aula futura encontrada para esta recorrência.");
     }
 
+    const originalFirstSlot = futureSlots[0];
+    let offsetDays = 0;
+    if (newStartDate) {
+      const targetStart = new Date(newStartDate);
+      const targetMidnight = getLocalMidnight(targetStart);
+      const originalMidnight = getLocalMidnight(originalFirstSlot.startAt);
+      const diffMs = targetMidnight.getTime() - originalMidnight.getTime();
+      offsetDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+    }
+
     // 5. Pre-flight conflict check: verify the new time doesn't conflict on ANY future date
     for (const slot of futureSlots) {
-      const parts = getLocalDateParts(slot.startAt);
+      const slotDateWithOffset = addDays(slot.startAt, offsetDays);
+      const parts = getLocalDateParts(slotDateWithOffset);
       const newStartAt = localToUtc(parts.year, parts.month, parts.day, newStartHour, newStartMin);
       const newEndAt   = localToUtc(parts.year, parts.month, parts.day, newEndHour,   newEndMin);
 
@@ -1100,7 +1135,8 @@ export const schedulingService = {
     // 6. All clear — execute inside a single atomic transaction
     await db.transaction(async (tx) => {
       for (const slot of futureSlots) {
-        const parts = getLocalDateParts(slot.startAt);
+        const slotDateWithOffset = addDays(slot.startAt, offsetDays);
+        const parts = getLocalDateParts(slotDateWithOffset);
         const newStartAt = localToUtc(parts.year, parts.month, parts.day, newStartHour, newStartMin);
         const newEndAt   = localToUtc(parts.year, parts.month, parts.day, newEndHour,   newEndMin);
 
@@ -1116,18 +1152,27 @@ export const schedulingService = {
           .where(eq(slotInstances.id, slot.id));
       }
 
-      // Update the recurrence rule template so future materializations use the new time
+      // Update the recurrence rule template so future materializations use the new time and startDate (aligned to day of week)
+      const updatedRuleStartDate = addDays(new Date(rule.startDate), offsetDays);
+      const ruleUpdates: Partial<typeof recurrenceRules.$inferSelect> = {
+        startTime: newStartTime,
+        endTime:   newEndTime,
+        startDate: updatedRuleStartDate,
+        updatedAt: new Date(),
+      };
+
       await tx.update(recurrenceRules)
-        .set({
-          startTime: newStartTime,
-          endTime:   newEndTime,
-          updatedAt: new Date(),
-        })
+        .set(ruleUpdates)
         .where(eq(recurrenceRules.id, ruleId));
     });
 
     // 7. Fire-and-forget notifications (outside the transaction)
-    const representativeSlot = futureSlots[0];
+    const representativeSlot = originalFirstSlot;
+    const repDateWithOffset = addDays(representativeSlot.startAt, offsetDays);
+    const repParts = getLocalDateParts(repDateWithOffset);
+    const newRepStart = localToUtc(repParts.year, repParts.month, repParts.day, newStartHour, newStartMin);
+    const newRepEnd = localToUtc(repParts.year, repParts.month, repParts.day, newEndHour, newEndMin);
+
     setTimeout(() => {
       schedulingService.notifySlotTimeChange(
         {
@@ -1136,21 +1181,9 @@ export const schedulingService = {
           startAt: representativeSlot.startAt,
           endAt:   representativeSlot.endAt,
         },
-        localToUtc(
-          getLocalDateParts(representativeSlot.startAt).year,
-          getLocalDateParts(representativeSlot.startAt).month,
-          getLocalDateParts(representativeSlot.startAt).day,
-          newStartHour,
-          newStartMin
-        ),
-        localToUtc(
-          getLocalDateParts(representativeSlot.endAt).year,
-          getLocalDateParts(representativeSlot.endAt).month,
-          getLocalDateParts(representativeSlot.endAt).day,
-          newEndHour,
-          newEndMin
-        ),
-        "future" // tells notifySlotTimeChange to use the recurring-change message format
+        newRepStart,
+        newRepEnd,
+        "future"
       ).catch((err) => console.error("[retimeRecurrence] notifySlotTimeChange failed:", err));
     }, 0);
 
@@ -1171,9 +1204,21 @@ export const schedulingService = {
     const teacher = await userService.getUserById(slot.teacherId);
     const teacherName = teacher?.name || "Professor";
 
-    const body = scope === "single"
-      ? `A aula de ${originalTimeStr} foi remarcada para ${newTimeStr}.`
-      : `As próximas aulas recorrentes foram alteradas para o horário das ${newTimeStr} às ${formatLocalTime(newEndAt, "HH:mm")}.`;
+    let body = "";
+    if (scope === "single") {
+      body = `A aula de ${originalTimeStr} foi remarcada para ${newTimeStr}.`;
+    } else {
+      const originalDayOfWeek = getLocalDayOfWeek(slot.startAt);
+      const newDayOfWeek = getLocalDayOfWeek(newStartAt);
+      const startDateStr = formatLocalTime(newStartAt, "dd/MM/yyyy");
+      const newPlural = pluralizeDayOfWeek(newDayOfWeek);
+
+      if (originalDayOfWeek !== newDayOfWeek) {
+        body = `As próximas aulas recorrentes de ${originalDayOfWeek} foram alteradas para as ${newPlural}, das ${newTimeStr} às ${formatLocalTime(newEndAt, "HH:mm")} a partir da data ${startDateStr}.`;
+      } else {
+        body = `As próximas aulas recorrentes foram alteradas para o horário das ${newTimeStr} às ${formatLocalTime(newEndAt, "HH:mm")} a partir da data ${startDateStr}.`;
+      }
+    }
 
     const targetUserIds = [slot.teacherId];
     if (slot.studentId) {

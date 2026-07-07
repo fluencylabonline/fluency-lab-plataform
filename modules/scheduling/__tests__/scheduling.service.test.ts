@@ -222,6 +222,7 @@ describe("Scheduling Service - retimeRecurrence", () => {
     studentId: "student-1",
     startTime: "18:30",
     endTime: "19:15",
+    startDate: new Date("2026-07-04T21:30:00.000Z"),
     frequency: "WEEKLY",
   };
 
@@ -366,4 +367,29 @@ describe("Scheduling Service - retimeRecurrence", () => {
     expect(result.success).toBe(true);
     expect(result.updatedCount).toBe(2);
   });
+
+  it("should shift all future slots dates and update the rule startDate if newStartDate is provided", async () => {
+    // futureSlot1: 2026-07-11 (Saturday)
+    // We want the new recurrence to start on 2026-07-12 (Sunday), shifting by 1 day
+    const newStartDate = new Date("2026-07-12T13:00:00.000Z");
+
+    const result = await schedulingService.retimeRecurrence(
+      mockUser,
+      "rule-uuid",
+      "10:00",
+      "10:45",
+      newStartDate.toISOString()
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.updatedCount).toBe(2);
+
+    // Verify it updated the rule startDate with the shifted date (original 2026-07-04 + 1 day = 2026-07-05)
+    expect(mockSet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        startDate: expect.any(Date),
+      })
+    );
+  });
 });
+

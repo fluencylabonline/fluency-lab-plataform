@@ -106,7 +106,11 @@ export function SlotDetailsVault({
   const [isSearchingLessons, setIsSearchingLessons] = useState(false);
   const [editScope] = useState<"single">("single");
   const [showRetimeVault, setShowRetimeVault] = useState(false);
-  const [retimeForm, setRetimeForm] = useState({ newStartTime: "", newEndTime: "" });
+  const [retimeForm, setRetimeForm] = useState({
+    newStartDate: new Date(),
+    newStartTime: "",
+    newEndTime: "",
+  });
   const [isRetiming, setIsRetiming] = useState(false);
 
   // Sync form when event changes or editing starts
@@ -224,6 +228,7 @@ export function SlotDetailsVault({
   const openRetimeVault = () => {
     setShowEditScope(false);
     setRetimeForm({
+      newStartDate: new Date(event!.start),
       newStartTime: format(event!.start, "HH:mm"),
       newEndTime: format(event!.end || event!.start, "HH:mm"),
     });
@@ -827,7 +832,7 @@ export function SlotDetailsVault({
             <div className="flex flex-col items-center">
               <VaultTitle>Mudar Horário da Recorrência</VaultTitle>
               <VaultDescription>
-                Defina o novo horário para todas as aulas futuras desta
+                Defina a nova data de início e horário para todas as aulas futuras desta
                 recorrência. As aulas passadas serão preservadas.
               </VaultDescription>
             </div>
@@ -835,6 +840,23 @@ export function SlotDetailsVault({
 
           <VaultBody>
             <div className="space-y-6">
+              {/* Date picker for recurrence start / day change */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                  <CalendarIcon className="w-3 h-3" />
+                  Próxima Aula (Nova Data de Início)
+                </label>
+                <CalendarVault
+                  date={retimeForm.newStartDate}
+                  onSelect={(date) =>
+                    date && setRetimeForm((prev) => ({ ...prev, newStartDate: date }))
+                  }
+                  placeholder="Selecione a data de início"
+                  label="Nova Data de Início"
+                  className="h-10 bg-white/5 border-white/10 rounded-md"
+                />
+              </div>
+
               {/* Time inputs */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -888,7 +910,7 @@ export function SlotDetailsVault({
                 <Repeat className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                 <div>
                   <p className="text-[11px] text-primary/80 leading-relaxed font-medium">
-                    Esta ação mudará o horário de{" "}
+                    Esta ação mudará o dia/horário de{" "}
                     <strong>todas as aulas futuras</strong> desta recorrência.
                     Os lembretes serão re-agendados automaticamente.
                   </p>
@@ -924,21 +946,22 @@ export function SlotDetailsVault({
                     ruleId: event.ruleId as string,
                     newStartTime: retimeForm.newStartTime,
                     newEndTime: retimeForm.newEndTime,
+                    newStartDate: retimeForm.newStartDate.toISOString(),
                   });
                   if (result?.data?.success) {
                     notify.success(
-                      `Horário atualizado para ${result.data.updatedCount} aulas futuras!`
+                      `Horário e dia atualizados para ${result.data.updatedCount} aulas futuras!`
                     );
                     setShowRetimeVault(false);
                     onOpenChange(false);
                     onSuccess();
                   } else {
                     notify.error(
-                      result?.data?.error || "Erro ao atualizar o horário."
+                      result?.data?.error || "Erro ao atualizar a recorrência."
                     );
                   }
                 } catch {
-                  notify.error("Erro ao atualizar o horário.");
+                  notify.error("Erro ao atualizar a recorrência.");
                 } finally {
                   setIsRetiming(false);
                 }

@@ -258,7 +258,8 @@ export const retimeRecurrenceAction = protectedAction
         ctx.user,
         parsedInput.ruleId,
         parsedInput.newStartTime,
-        parsedInput.newEndTime
+        parsedInput.newEndTime,
+        parsedInput.newStartDate
       );
       revalidatePath("/");
       return { success: true, updatedCount: result.updatedCount };

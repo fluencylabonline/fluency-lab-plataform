@@ -239,6 +239,7 @@ export const retimeRecurrenceSchema = z.object({
   ruleId: z.string().uuid(),
   newStartTime: z.string().regex(timeRegex, "Formato inválido (HH:mm)"),
   newEndTime: z.string().regex(timeRegex, "Formato inválido (HH:mm)"),
+  newStartDate: z.string().datetime().optional().nullable(),
 });
 
 export type RetimeRecurrenceValues = z.infer<typeof retimeRecurrenceSchema>;
