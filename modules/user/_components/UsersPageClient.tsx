@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, Mail, Shield, Sparkles, Skull } from "lucide-react";
+import { Plus, Mail, Shield, Sparkles, Skull, Users } from "lucide-react";
 import { CreateUserVault } from "./CreateUserVault";
 import { Header } from "@/components/layout/header";
 import { hasPermission, Role, UserRoles } from "@/lib/rbac";
@@ -26,9 +26,15 @@ interface UsersPageClientProps {
   initialData: AdminUserDTO[];
   currentUser: User;
   basePath: string;
+  studentTeachersMap?: Record<string, string[]>;
 }
 
-export function UsersPageClient({ initialData, currentUser, basePath }: UsersPageClientProps) {
+export function UsersPageClient({
+  initialData,
+  currentUser,
+  basePath,
+  studentTeachersMap,
+}: UsersPageClientProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("student");
@@ -145,6 +151,12 @@ export function UsersPageClient({ initialData, currentUser, basePath }: UsersPag
                           </>
                         )}
                       </span>
+                      {user.role === "student" && studentTeachersMap?.[user.id] && studentTeachersMap[user.id].length > 0 && (
+                        <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1.5">
+                          <Users className="w-3.5 h-3.5 text-muted-foreground/70" />
+                          <span className="truncate max-w-60">Prof: {studentTeachersMap[user.id].join(", ")}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
                   

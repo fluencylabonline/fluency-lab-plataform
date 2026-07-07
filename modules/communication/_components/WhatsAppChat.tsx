@@ -103,6 +103,15 @@ function EmptyChatState() {
   );
 }
 
+interface WhatsAppQuickReply {
+  id?: string;
+  shortcut?: string;
+  title?: string;
+  content?: string;
+  createdAt?: Date | string;
+  isNew?: boolean;
+}
+
 interface WhatsAppChatProps {
   currentUser: SettingsUserDTO;
 }
@@ -111,7 +120,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
   // Sidebar tab state
   const [activeTab, setActiveTab] = useState<"active" | "archived" | "replies">("active");
   const [selectedConv, setSelectedConv] = useState<WhatsAppConversation | null>(null);
-  const [selectedQuickReply, setSelectedQuickReply] = useState<any | null>(null);
+  const [selectedQuickReply, setSelectedQuickReply] = useState<WhatsAppQuickReply | null>(null);
   
   const [messageText, setMessageText] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -134,10 +143,14 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
 
   // New Chat fields
   const [newChatPhone, setNewChatPhone] = useState("");
-  const [newChatStudentId, setNewChatStudentId] = useState<string | null>(null);
   const [newChatStudentName, setNewChatStudentName] = useState("");
   const [studentSearchQuery, setStudentSearchQuery] = useState("");
-  const [studentSearchResults, setStudentSearchResults] = useState<any[]>([]);
+  const [studentSearchResults, setStudentSearchResults] = useState<{
+    id: string;
+    name: string;
+    phone?: string | null;
+    photoUrl?: string | null;
+  }[]>([]);
   const [isSearchingStudents, setIsSearchingStudents] = useState(false);
 
   // Selected template & parameters
@@ -198,7 +211,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
     "whatsapp-quick-replies",
     async () => {
       const result = await getWhatsAppQuickRepliesAction();
-      return (result?.data as any[]) || [];
+      return (result?.data as WhatsAppQuickReply[]) || [];
     }
   );
 
@@ -304,7 +317,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
   };
 
   const getTemplateParamsCount = (template: WhatsAppTemplate) => {
-    const bodyComp = template.components.find((c: any) => c.type === "BODY" || c.type === "body");
+    const bodyComp = template.components.find((c) => c.type === "BODY" || (c.type as string) === "body");
     if (!bodyComp?.text) return 0;
     const matches = bodyComp.text.match(/\{\{\d+\}\}/g) || [];
     return new Set(matches).size;
@@ -338,7 +351,6 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
         setSelectedTemplate(null);
         setTemplateParams([]);
         setNewChatPhone("");
-        setNewChatStudentId(null);
         setNewChatStudentName("");
         
         mutateConvs();
@@ -348,7 +360,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
           // If initiating a new chat, try to auto-select it
           setTimeout(() => {
             mutateConvs().then((updatedList) => {
-              const match = updatedList?.find((c: any) => c.waId === phone);
+              const match = updatedList?.find((c) => c.waId === phone);
               if (match) handleSelectConv(match);
             });
           }, 800);
@@ -418,10 +430,10 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
     );
   });
 
-  const filteredQuickReplies = quickReplies?.filter((qr: any) => {
+  const filteredQuickReplies = quickReplies?.filter((qr) => {
     if (!searchTerm) return true;
     const q = searchTerm.toLowerCase();
-    return qr.shortcut.toLowerCase().includes(q) || qr.title.toLowerCase().includes(q);
+    return qr.shortcut?.toLowerCase().includes(q) || qr.title?.toLowerCase().includes(q);
   });
 
   const showSidebar = !isMobile || (!selectedConv && !selectedQuickReply);
@@ -530,7 +542,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                   <span className="text-xs">Nenhuma resposta encontrada.</span>
                 </div>
               ) : (
-                filteredQuickReplies?.map((qr: any) => (
+                filteredQuickReplies?.map((qr) => (
                   <button
                     key={qr.id}
                     onClick={() => { setSelectedQuickReply(qr); setSelectedConv(null); }}
@@ -541,7 +553,11 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                   >
                     <div className="flex justify-between items-center w-full">
                       <span className="text-xs font-extrabold text-primary">{qr.shortcut}</span>
-                      <span className="text-[10px] text-muted-foreground">{format(new Date(qr.createdAt), "dd/MM/yy")}</span>
+                      {qr.createdAt && (
+                        <span className="text-[10px] text-muted-foreground">
+                          {format(new Date(qr.createdAt), "dd/MM/yy")}
+                        </span>
+                      )}
                     </div>
                     <span className="text-xs font-bold text-foreground truncate w-full">{qr.title}</span>
                     <span className="text-[11px] text-muted-foreground truncate w-full">{qr.content}</span>
@@ -598,7 +614,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleDeleteQuickReply(selectedQuickReply.id)}
+                  onClick={() => selectedQuickReply.id && handleDeleteQuickReply(selectedQuickReply.id)}
                   className="text-red-500 hover:text-red-600 hover:bg-red-500/10 h-8 rounded-lg font-semibold"
                 >
                   <Trash2 className="w-4 h-4 mr-1.5" /> Excluir
@@ -617,7 +633,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                     placeholder="Ex: /boasvindas"
                     className="h-10 text-xs rounded-xl focus-visible:ring-primary/20 bg-muted/20 border-border/30"
                   />
-                  <p className="text-[10px] text-muted-foreground">Deve começar com "/" seguido de letras, sem espaços.</p>
+                  <p className="text-[10px] text-muted-foreground">Deve começar com &quot;/&quot; seguido de letras, sem espaços.</p>
                 </div>
 
                 <div className="space-y-1.5">
@@ -777,7 +793,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
               {showSlashPopup && (
                 <div className="absolute bottom-16 left-4 right-4 bg-background border border-border/50 rounded-xl shadow-xl max-h-40 overflow-y-auto z-[9999] divide-y divide-border/10">
                   {quickReplies
-                    ?.filter(qr => qr.shortcut.toLowerCase().includes(slashQuery))
+                    ?.filter(qr => qr.shortcut && qr.shortcut.toLowerCase().includes(slashQuery))
                     .map(qr => (
                       <button
                         key={qr.id}
@@ -811,7 +827,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                         key={qr.id}
                         type="button"
                         onClick={() => {
-                          setMessageText(qr.content);
+                          setMessageText(qr.content || "");
                           setShowQuickRepliesPopover(false);
                           inputRef.current?.focus();
                         }}
@@ -951,7 +967,6 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                       key={student.id}
                       type="button"
                       onClick={() => {
-                        setNewChatStudentId(student.id);
                         setNewChatStudentName(student.name);
                         // Strip + and spaces from phone
                         const cleanPhone = student.phone ? student.phone.replace(/[^0-9]/g, "") : "";
@@ -994,13 +1009,13 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
               <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Escolher Template</label>
               <select
                 onChange={(e) => {
-                  const t = approvedTemplates.find((temp: any) => temp.name === e.target.value);
+                  const t = approvedTemplates.find((temp) => temp.name === e.target.value);
                   setSelectedTemplate(t || null);
                 }}
                 className="w-full h-10 px-3 text-xs bg-muted/20 border border-border/30 rounded-xl text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 select-none"
               >
                 <option value="">Selecione um template aprovado...</option>
-                {approvedTemplates.map((t: any) => (
+                {approvedTemplates.map((t) => (
                   <option key={t.id} value={t.name}>{t.name} ({t.category})</option>
                 ))}
               </select>
@@ -1010,7 +1025,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
               <div className="space-y-3 p-3 bg-muted/20 rounded-xl border border-border/20">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Conteúdo do Template:</span>
                 <p className="text-xs bg-[#ffffff] dark:bg-[#182229] border border-border/10 p-3 rounded-lg leading-relaxed whitespace-pre-wrap">
-                  {selectedTemplate.components.find((c: any) => c.type === "BODY" || c.type === "body")?.text}
+                  {selectedTemplate.components.find((c) => c.type === "BODY" || (c.type as string) === "body")?.text}
                 </p>
 
                 {/* Parameters inputs */}
@@ -1066,13 +1081,13 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
               <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Escolher Template</label>
               <select
                 onChange={(e) => {
-                  const t = approvedTemplates.find((temp: any) => temp.name === e.target.value);
+                  const t = approvedTemplates.find((temp) => temp.name === e.target.value);
                   setSelectedTemplate(t || null);
                 }}
                 className="w-full h-10 px-3 text-xs bg-muted/20 border border-border/30 rounded-xl text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 select-none"
               >
                 <option value="">Selecione um template aprovado...</option>
-                {approvedTemplates.map((t: any) => (
+                {approvedTemplates.map((t) => (
                   <option key={t.id} value={t.name}>{t.name} ({t.category})</option>
                 ))}
               </select>
@@ -1082,7 +1097,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
               <div className="space-y-3 p-3 bg-muted/20 rounded-xl border border-border/20">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Conteúdo do Template:</span>
                 <p className="text-xs bg-[#ffffff] dark:bg-[#182229] border border-border/10 p-3 rounded-lg leading-relaxed whitespace-pre-wrap">
-                  {selectedTemplate.components.find((c: any) => c.type === "BODY" || c.type === "body")?.text}
+                  {selectedTemplate.components.find((c) => c.type === "BODY" || (c.type as string) === "body")?.text}
                 </p>
 
                 {/* Parameters inputs */}

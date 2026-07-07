@@ -121,8 +121,8 @@ export const createWhatsAppQuickReplyAction = managerAction
     try {
       const result = await communicationService.createQuickReply(parsedInput);
       return { success: true, data: result, error: null as string | null };
-    } catch (err: any) {
-      return { success: false, data: null, error: err.message as string | null };
+    } catch (err) {
+      return { success: false, data: null, error: err instanceof Error ? err.message : "Erro desconhecido" };
     }
   });
 

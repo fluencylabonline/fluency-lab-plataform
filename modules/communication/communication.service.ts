@@ -746,11 +746,11 @@ export class CommunicationService {
         const templates = await this.getWhatsAppTemplates();
         const template = templates.find(t => t.name === templateName);
         if (template) {
-          const bodyComp = template.components.find((c: any) => c.type === "BODY" || c.type === "body");
+          const bodyComp = template.components.find((c) => c.type === "BODY" || (c.type as string) === "body");
           if (bodyComp?.text) {
             let interpolated = bodyComp.text;
-            const bodyParams = components?.find((c: any) => c.type === "body" || c.type === "BODY")?.parameters || [];
-            bodyParams.forEach((param: any, idx: number) => {
+            const bodyParams = components?.find((c) => c.type === "body" || (c.type as string) === "BODY")?.parameters || [];
+            bodyParams.forEach((param, idx: number) => {
               interpolated = interpolated.replace(new RegExp(`\\{\\{${idx + 1}\\}\\}`, 'g'), param.text || '');
             });
             textToSave = interpolated;

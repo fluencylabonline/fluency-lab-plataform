@@ -16,6 +16,26 @@ interface MediaMetadata {
   voice?: boolean;
 }
 
+interface WhatsAppMessageMetadata {
+  components?: {
+    type?: string;
+    parameters?: {
+      type?: string;
+      text?: string;
+      action?: {
+        order_details?: {
+          payment_settings?: {
+            type: string;
+            pix_dynamic_code?: {
+              code: string;
+            };
+          }[];
+        };
+      };
+    }[];
+  }[];
+}
+
 interface MessageBubbleProps {
   msg: WhatsAppMessage;
   templates?: WhatsAppTemplate[];
@@ -35,10 +55,11 @@ export function MessageBubble({ msg, templates = [] }: MessageBubbleProps) {
   const caption = meta.caption;
   const filename = meta.filename;
 
-  const getPixPayload = (content: string | null, metadata: any): string | null => {
+  const getPixPayload = (content: string | null, metadata: unknown): string | null => {
     if (content?.startsWith("000201")) return content;
     if (metadata && typeof metadata === "object") {
-      const comps = metadata.components || [];
+      const metaObj = metadata as WhatsAppMessageMetadata;
+      const comps = metaObj.components || [];
       for (const comp of comps) {
         const params = comp.parameters || [];
         for (const param of params) {
@@ -226,10 +247,10 @@ export function MessageBubble({ msg, templates = [] }: MessageBubbleProps) {
                       const bodyComp = template.components.find((c) => c.type === "BODY");
                       if (bodyComp?.text) {
                         let interpolated = bodyComp.text;
-                        const metadataComps = (msg.metadata as any)?.components || [];
-                        const bodyParams = metadataComps.find((c: any) => c.type === "body" || c.type === "BODY")?.parameters || [];
+                        const metadataComps = (msg.metadata as WhatsAppMessageMetadata)?.components || [];
+                        const bodyParams = metadataComps.find((c) => c.type === "body" || c.type === "BODY")?.parameters || [];
                         if (bodyParams.length > 0) {
-                          bodyParams.forEach((param: any, idx: number) => {
+                          bodyParams.forEach((param, idx: number) => {
                             interpolated = interpolated.replace(new RegExp(`\\{\\{${idx + 1}\\}\\}`, 'g'), param.text || '');
                           });
                           return interpolated;

@@ -70,7 +70,12 @@ export function DetailsVault({
 
   // Student association state
   const [studentSearchQuery, setStudentSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<{
+    id: string;
+    name: string;
+    email: string;
+    photoUrl: string | null;
+  }[]>([]);
   const [isSearchingStudents, setIsSearchingStudents] = useState(false);
   const [isLinking, setIsLinking] = useState(false);
 

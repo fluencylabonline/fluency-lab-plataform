@@ -1647,14 +1647,26 @@ export const schedulingService = {
     return schedulingRepository.findByTeacherInRange(teacherId, start, end);
   },
   async getStudentClassesInRange(studentId: string, start: Date, end: Date) {
-    return db.query.slotInstances.findMany({
+    const slots = await db.query.slotInstances.findMany({
       where: and(
         eq(slotInstances.studentId, studentId),
         gte(slotInstances.startAt, start),
         lt(slotInstances.startAt, end)
       ),
+      with: {
+        teacher: {
+          columns: {
+            name: true,
+          }
+        }
+      },
       orderBy: [asc(slotInstances.startAt)],
     });
+
+    return slots.map(slot => ({
+      ...slot,
+      teacherName: slot.teacher?.name || null
+    }));
   },
 
   async cancelFutureClassesForStudent(studentId: string) {
@@ -2080,6 +2092,22 @@ export const schedulingService = {
 
   async findNextClassForStudent(studentId: string) {
     return schedulingRepository.findNextClassForStudent(studentId);
+  },
+
+  async getStudentTeachersMap(): Promise<Record<string, string[]>> {
+    const rules = await schedulingRepository.findAllRules();
+    const map: Record<string, string[]> = {};
+    for (const rule of rules) {
+      if (rule.studentId && rule.teacherId) {
+        if (!map[rule.studentId]) {
+          map[rule.studentId] = [];
+        }
+        if (!map[rule.studentId].includes(rule.teacherId)) {
+          map[rule.studentId].push(rule.teacherId);
+        }
+      }
+    }
+    return map;
   },
 };
 

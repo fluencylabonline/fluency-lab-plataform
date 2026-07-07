@@ -83,7 +83,7 @@ export function ClassCard({
           <div className="space-y-1.5 pt-1">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <User className="h-3.5 w-3.5" />
-              <span className="truncate">Prof. {slot.teacherName}</span>
+              <span className="truncate">Prof. {slot.teacherName || slot.teacher?.name || "Professor"}</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <BookOpen className="h-3.5 w-3.5" />
