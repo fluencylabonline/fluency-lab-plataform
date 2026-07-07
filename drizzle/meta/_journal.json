@@ -85,6 +85,13 @@
       "when": 1781410068995,
       "tag": "0011_handy_synch",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1783393047250,
+      "tag": "0012_add_quick_replies",
+      "breakpoints": true
     }
   ]
 }

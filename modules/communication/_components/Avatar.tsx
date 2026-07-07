@@ -4,9 +4,22 @@ interface AvatarProps {
   seed: string;
   name?: string | null;
   size?: number;
+  photoUrl?: string | null;
 }
 
-export function Avatar({ seed, name, size = 40 }: AvatarProps) {
+export function Avatar({ seed, name, size = 40, photoUrl }: AvatarProps) {
+  if (photoUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={photoUrl}
+        alt={name || "Avatar"}
+        className="shrink-0 rounded-full object-cover border border-border/10 select-none"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
+
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
     hash = seed.charCodeAt(i) + ((hash << 5) - hash);

@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { whatsappConversationsTable, whatsappMessagesTable } from "./communication.schema";
+import { whatsappConversationsTable, whatsappMessagesTable, whatsappQuickRepliesTable } from "./communication.schema";
 import { usersTable } from "../user/user.schema";
 import { eq, desc } from "drizzle-orm";
 
@@ -73,6 +73,7 @@ export const communicationRepository = {
         createdAt: whatsappConversationsTable.createdAt,
         updatedAt: whatsappConversationsTable.updatedAt,
         studentName: usersTable.name,
+        photoUrl: usersTable.photoUrl,
       })
       .from(whatsappConversationsTable)
       .leftJoin(usersTable, eq(whatsappConversationsTable.studentId, usersTable.id))
@@ -96,5 +97,20 @@ export const communicationRepository = {
       .update(whatsappConversationsTable)
       .set({ unreadCount: 0 })
       .where(eq(whatsappConversationsTable.id, conversationId));
+  },
+
+  async getQuickReplies() {
+    return db.query.whatsappQuickRepliesTable.findMany({
+      orderBy: (table, { asc }) => [asc(table.shortcut)],
+    });
+  },
+
+  async createQuickReply(data: typeof whatsappQuickRepliesTable.$inferInsert) {
+    const [reply] = await db.insert(whatsappQuickRepliesTable).values(data).returning();
+    return reply;
+  },
+
+  async deleteQuickReply(id: string) {
+    await db.delete(whatsappQuickRepliesTable).where(eq(whatsappQuickRepliesTable.id, id));
   }
 };

@@ -2,6 +2,7 @@ import { resend } from "@/lib/resend";
 import { env } from "@/env";
 import { communicationRepository } from "./communication.repository";
 import { decrypt } from "@/lib/cryptography";
+import { whatsappConversationsTable } from "./communication.schema";
 
 
 import { render } from "@react-email/render";
@@ -739,6 +740,26 @@ export class CommunicationService {
     });
 
     if (response?.messages?.[0]?.id) {
+      // Tentar interpolar o conteúdo para salvar de forma amigável no banco
+      let textToSave = `[Template: ${templateName}]`;
+      try {
+        const templates = await this.getWhatsAppTemplates();
+        const template = templates.find(t => t.name === templateName);
+        if (template) {
+          const bodyComp = template.components.find((c: any) => c.type === "BODY" || c.type === "body");
+          if (bodyComp?.text) {
+            let interpolated = bodyComp.text;
+            const bodyParams = components?.find((c: any) => c.type === "body" || c.type === "BODY")?.parameters || [];
+            bodyParams.forEach((param: any, idx: number) => {
+              interpolated = interpolated.replace(new RegExp(`\\{\\{${idx + 1}\\}\\}`, 'g'), param.text || '');
+            });
+            textToSave = interpolated;
+          }
+        }
+      } catch (err) {
+        console.error("[sendWhatsAppTemplate] Error interpolating template text:", err);
+      }
+
       // Persistir no banco
       let conversation = await communicationRepository.findConversationByWaId(formattedPhone);
       if (!conversation) {
@@ -746,12 +767,12 @@ export class CommunicationService {
         conversation = await communicationRepository.createConversation({
           waId: formattedPhone,
           studentId: user?.id,
-          lastMessageContent: `[Template: ${templateName}]`,
+          lastMessageContent: textToSave,
           lastMessageAt: new Date(),
         });
       } else {
         await communicationRepository.updateConversation(conversation.id, {
-          lastMessageContent: `[Template: ${templateName}]`,
+          lastMessageContent: textToSave,
           lastMessageAt: new Date(),
         });
       }
@@ -759,10 +780,11 @@ export class CommunicationService {
       await communicationRepository.saveMessage({
         id: response.messages[0].id,
         conversationId: conversation.id,
-        content: `[Template: ${templateName}]`,
+        content: textToSave,
         type: "template",
         direction: "outbound",
         status: "sent",
+        metadata: { components, templateName, languageCode }, // Salva metadados
       });
     }
 
@@ -1043,6 +1065,22 @@ export class CommunicationService {
       console.error("[CommunicationService.getWhatsAppMedia] Error:", error);
       return null;
     }
+  }
+
+  async getQuickReplies() {
+    return communicationRepository.getQuickReplies();
+  }
+
+  async createQuickReply(data: { shortcut: string; title: string; content: string }) {
+    return communicationRepository.createQuickReply(data);
+  }
+
+  async deleteQuickReply(id: string) {
+    return communicationRepository.deleteQuickReply(id);
+  }
+
+  async updateConversation(id: string, data: Partial<typeof whatsappConversationsTable.$inferInsert>) {
+    return communicationRepository.updateConversation(id, data);
   }
 }
 

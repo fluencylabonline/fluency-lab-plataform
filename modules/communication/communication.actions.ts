@@ -3,7 +3,7 @@
 import { managerAction } from "@/lib/safe-action";
 import { z } from "zod";
 import { communicationService } from "./communication.service";
-import { createWhatsAppTemplateSchema } from "./communication.schema";
+import { createWhatsAppTemplateSchema, createWhatsAppQuickReplySchema } from "./communication.schema";
 import { revalidatePath } from "next/cache";
 
 export const getWhatsAppTemplatesAction = managerAction
@@ -93,6 +93,45 @@ export const sendWhatsAppTemplateAction = managerAction
   }))
   .action(async ({ parsedInput }) => {
     return await communicationService.sendWhatsAppTemplate(parsedInput);
+  });
+
+export const associateWhatsAppStudentAction = managerAction
+  .metadata({ name: "associateWhatsAppStudent" })
+  .schema(z.object({
+    conversationId: z.string(),
+    studentId: z.string().nullable(),
+  }))
+  .action(async ({ parsedInput }) => {
+    await communicationService.updateConversation(parsedInput.conversationId, {
+      studentId: parsedInput.studentId,
+    });
+    return { success: true };
+  });
+
+export const getWhatsAppQuickRepliesAction = managerAction
+  .metadata({ name: "getWhatsAppQuickReplies" })
+  .action(async () => {
+    return await communicationService.getQuickReplies();
+  });
+
+export const createWhatsAppQuickReplyAction = managerAction
+  .metadata({ name: "createWhatsAppQuickReply" })
+  .schema(createWhatsAppQuickReplySchema)
+  .action(async ({ parsedInput }) => {
+    try {
+      const result = await communicationService.createQuickReply(parsedInput);
+      return { success: true, data: result, error: null as string | null };
+    } catch (err: any) {
+      return { success: false, data: null, error: err.message as string | null };
+    }
+  });
+
+export const deleteWhatsAppQuickReplyAction = managerAction
+  .metadata({ name: "deleteWhatsAppQuickReply" })
+  .schema(z.object({ id: z.string() }))
+  .action(async ({ parsedInput }) => {
+    await communicationService.deleteQuickReply(parsedInput.id);
+    return { success: true };
   });
 
 

@@ -5,6 +5,8 @@ import { WhatsAppMessage, WhatsAppTemplate } from "../communication.types";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { MessageCircle, Check, CheckCheck, FileText, Download, X, Film } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import { notify } from "@/components/ui/toaster";
 
 interface MediaMetadata {
   mediaId?: string;
@@ -24,6 +26,8 @@ export function MessageBubble({ msg, templates = [] }: MessageBubbleProps) {
   const isTemplate = msg.content?.startsWith("[Template:");
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
+  const [copiedPix, setCopiedPix] = useState(false);
+
   // Safe parsing of metadata JSON
   const meta = (msg.metadata as MediaMetadata) || {};
   const mediaId = meta.mediaId;
@@ -31,8 +35,49 @@ export function MessageBubble({ msg, templates = [] }: MessageBubbleProps) {
   const caption = meta.caption;
   const filename = meta.filename;
 
+  const getPixPayload = (content: string | null, metadata: any): string | null => {
+    if (content?.startsWith("000201")) return content;
+    if (metadata && typeof metadata === "object") {
+      const comps = metadata.components || [];
+      for (const comp of comps) {
+        const params = comp.parameters || [];
+        for (const param of params) {
+          if (typeof param.text === "string" && param.text.startsWith("000201")) {
+            return param.text;
+          }
+          if (param.type === "action" && param.action?.order_details?.payment_settings) {
+            const settings = param.action.order_details.payment_settings;
+            for (const s of settings) {
+              if (s.type === "pix_dynamic_code" && s.pix_dynamic_code?.code) {
+                return s.pix_dynamic_code.code;
+               }
+            }
+          }
+        }
+      }
+    }
+    if (content) {
+      const match = content.match(/000201[a-zA-Z0-9_\-\.\=\+\/\s]+/);
+      if (match) return match[0];
+    }
+    return null;
+  };
+
+  const pixPayload = getPixPayload(msg.content, msg.metadata);
+
   const renderMediaContent = () => {
-    if (!mediaId) return <p className="whitespace-pre-line">{msg.content}</p>;
+    if (!mediaId) {
+      const isPix = msg.content?.startsWith("000201");
+      if (isPix) {
+        return (
+          <div className="space-y-2.5">
+            <p className="font-semibold text-emerald-600 dark:text-emerald-400">Pagamento Pix Recebido/Enviado</p>
+            <p className="text-xs text-muted-foreground select-all break-all">{msg.content}</p>
+          </div>
+        );
+      }
+      return <p className="whitespace-pre-line">{msg.content}</p>;
+    }
 
     switch (msg.type) {
       case "image":
@@ -172,14 +217,29 @@ export function MessageBubble({ msg, templates = [] }: MessageBubbleProps) {
             </div>
             <p className="text-[13px] opacity-90 leading-snug whitespace-pre-wrap">
               {(() => {
-                if (isTemplate && templates.length > 0) {
+                if (isTemplate) {
                   const match = msg.content?.match(/\[Template:\s*(.+?)\]/);
                   if (match && match[1]) {
                     const templateName = match[1];
                     const template = templates.find((t) => t.name === templateName);
                     if (template) {
                       const bodyComp = template.components.find((c) => c.type === "BODY");
-                      return bodyComp?.text || msg.content;
+                      if (bodyComp?.text) {
+                        let interpolated = bodyComp.text;
+                        const metadataComps = (msg.metadata as any)?.components || [];
+                        const bodyParams = metadataComps.find((c: any) => c.type === "body" || c.type === "BODY")?.parameters || [];
+                        if (bodyParams.length > 0) {
+                          bodyParams.forEach((param: any, idx: number) => {
+                            interpolated = interpolated.replace(new RegExp(`\\{\\{${idx + 1}\\}\\}`, 'g'), param.text || '');
+                          });
+                          return interpolated;
+                        }
+                        return bodyComp.text;
+                      }
+                      return msg.content;
+                    } else {
+                      // Template não encontrado
+                      return "⚠️ [Template não disponível]";
                     }
                   }
                 }
@@ -189,6 +249,26 @@ export function MessageBubble({ msg, templates = [] }: MessageBubbleProps) {
           </div>
         ) : (
           renderMediaContent()
+        )}
+
+        {pixPayload && (
+          <div className="mt-3 p-3 bg-[#ffffff] dark:bg-[#182229] rounded-xl border border-emerald-500/20 dark:border-border/30 space-y-2.5 max-w-[200px] mx-auto animate-in fade-in slide-in-from-top-1 text-center">
+            <span className="text-[9px] uppercase font-extrabold text-emerald-600 dark:text-emerald-400 tracking-wider block">⚡ QR Code Pix</span>
+            <div className="flex justify-center bg-white p-2 rounded-lg border border-border/10">
+              <QRCodeSVG value={pixPayload} size={110} />
+            </div>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(pixPayload);
+                setCopiedPix(true);
+                notify.success("Código Pix copiado!");
+                setTimeout(() => setCopiedPix(false), 2000);
+              }}
+              className="w-full h-8 flex items-center justify-center gap-1.5 text-[11px] font-bold rounded-lg bg-[#00a884] hover:bg-[#008f72] text-white transition-all active:scale-[0.98]"
+            >
+              {copiedPix ? "Copiado!" : "Copiar Pix"}
+            </button>
+          </div>
         )}
 
         <div

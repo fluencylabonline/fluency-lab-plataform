@@ -35,6 +35,14 @@ export const whatsappMessagesTable = pgTable("whatsapp_messages", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const whatsappQuickRepliesTable = pgTable("whatsapp_quick_replies", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  shortcut: text("shortcut").notNull().unique(), // ex: "/boasvindas"
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const createWhatsAppTemplateSchema = z.object({
   name: z.string().min(1).regex(/^[a-z0-9_]+$/, "O nome deve conter apenas letras minúsculas, números e sublinhados"),
   category: z.enum(["AUTHENTICATION", "MARKETING", "UTILITY"]),
@@ -43,5 +51,15 @@ export const createWhatsAppTemplateSchema = z.object({
   bodyText: z.string().min(1, "O conteúdo é obrigatório").optional(),
 });
 
+export const createWhatsAppQuickReplySchema = z.object({
+  shortcut: z.string().min(1, "O atalho é obrigatório").regex(/^\/[a-zA-Z0-9_\-]+$/, "O atalho deve começar com '/' seguido de letras ou números, sem espaços"),
+  title: z.string().min(1, "O título é obrigatório"),
+  content: z.string().min(1, "O conteúdo é obrigatório"),
+});
+
 export type CreateWhatsAppTemplateValues = z.input<typeof createWhatsAppTemplateSchema>;
+export type CreateWhatsAppQuickReplyValues = z.input<typeof createWhatsAppQuickReplySchema>;
+export type WhatsAppQuickReply = typeof whatsappQuickRepliesTable.$inferSelect;
+export type NewWhatsAppQuickReply = typeof whatsappQuickRepliesTable.$inferInsert;
+
 

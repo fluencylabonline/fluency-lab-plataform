@@ -111,6 +111,7 @@ export interface WhatsAppConversation {
   waId: string;
   studentId: string | null;
   studentName?: string | null;
+  photoUrl?: string | null; // <-- Added
   contactName?: string | null;
   labels?: WhatsAppLabel[] | null;
   lastMessageContent: string | null;

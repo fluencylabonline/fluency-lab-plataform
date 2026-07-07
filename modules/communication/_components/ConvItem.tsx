@@ -32,7 +32,7 @@ export function ConvItem({ conv, isSelected, onClick }: ConvItemProps) {
         isSelected && "bg-primary/8 border-l-[3px] border-l-primary"
       )}
     >
-      <Avatar seed={conv.waId} name={displayName} size={44} />
+      <Avatar seed={conv.waId} photoUrl={conv.photoUrl} name={displayName} size={44} />
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-baseline mb-0.5">
           <span
