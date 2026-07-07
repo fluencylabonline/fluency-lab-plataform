@@ -3,7 +3,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { usersTable } from "../user/user.schema";
-import { slotInstances, recurrenceRules, studentCredits } from "../scheduling/scheduling.schema";
+import { slotInstances } from "../scheduling/scheduling.schema";
 
 export const payoutStatusEnum = pgEnum("payout_status", ["pending", "completed", "failed"]);
 
@@ -22,6 +22,8 @@ export const payoutsTable = pgTable("payouts", {
   externalId: varchar("external_id", { length: 255 }).notNull().unique(),
   
   description: varchar("description", { length: 255 }),
+  receiptUrl: text("receipt_url"),
+  invoiceUrl: text("invoice_url"),
   metadata: jsonb("metadata").$type<{
     classIds: string[];
     teacherName: string;
@@ -41,23 +43,4 @@ export const payoutsRelations = relations(payoutsTable, ({ one, many }) => ({
     references: [usersTable.id],
   }),
   classes: many(slotInstances),
-}));
-
-export const slotInstancesRelationsPayout = relations(slotInstances, ({ one }) => ({
-  payout: one(payoutsTable, {
-    fields: [slotInstances.payoutId],
-    references: [payoutsTable.id],
-  }),
-  student: one(usersTable, {
-    fields: [slotInstances.studentId],
-    references: [usersTable.id],
-  }),
-  rule: one(recurrenceRules, {
-    fields: [slotInstances.ruleId],
-    references: [recurrenceRules.id],
-  }),
-  credit: one(studentCredits, {
-    fields: [slotInstances.creditId],
-    references: [studentCredits.id],
-  }),
 }));

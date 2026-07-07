@@ -56,6 +56,16 @@ export type SlotInstanceWithDetails = SlotInstance & {
   teacher?: {
     name: string | null;
   } | null;
+  payout?: {
+    id: string;
+    amount: number;
+    month: number;
+    year: number;
+    status: "pending" | "completed" | "failed";
+    createdAt: Date;
+    receiptUrl?: string | null;
+    invoiceUrl?: string | null;
+  } | null;
   // Compatibility fields often attached in services or expected by legacy UI
   teacherName?: string | null;
 };

@@ -25,6 +25,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { notify } from "@/components/ui/toaster";
 import { resendTeacherPayoutEmailAction, getTeacherProjectionsAction } from "@/modules/payout/payout.actions";
+import { PayoutDetailsVault } from "@/modules/payout/_components/PayoutDetailsVault";
+import { Badge } from "@/components/ui/badge";
 
 interface Payout {
   id: string;
@@ -32,8 +34,21 @@ interface Payout {
   month: number;
   year: number;
   status: "pending" | "completed" | "failed";
-  createdAt: Date;
+  createdAt: Date | string;
   description: string | null;
+  pixKey: string;
+  pixKeyType: string;
+  externalId: string;
+  receiptUrl?: string | null;
+  invoiceUrl?: string | null;
+  classes?: Array<{
+    id: string;
+    startAt: Date | string;
+    teacherHourlyRate: number | null;
+    student?: {
+      name: string | null;
+    } | null;
+  }>;
 }
 
 interface Projections {
@@ -82,6 +97,61 @@ function ResendReceiptButton({ payoutId }: { payoutId: string }) {
       ) : null}
       {t("sendReceipt")}
     </Button>
+  );
+}
+
+function PayoutRow({ payout, teacherId, formatValue, months, t }: { payout: Payout; teacherId: string; formatValue: (val: number) => string; months: string[]; t: (key: string) => string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
+  return (
+    <PayoutDetailsVault
+      payout={payout}
+      teacherId={teacherId}
+      isAdmin={false}
+      onSuccess={handleRefresh}
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      trigger={
+        <div 
+          onClick={() => setIsOpen(true)}
+          className="item p-4 m-2 flex items-center justify-between hover:bg-muted/30 transition-colors cursor-pointer"
+        >
+          <div className="flex items-center gap-4">
+            <div className={cn(
+              "p-2 rounded-full",
+              payout.status === "completed" ? "bg-green-500/10 text-green-500" : "bg-yellow-500/10 text-yellow-500"
+            )}>
+              <DollarSign className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="font-bold text-sm text-foreground">{formatValue(payout.amount)}</p>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
+                {months[payout.month]} / {payout.year} • {format(new Date(payout.createdAt), "dd MMM yyyy")}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {payout.status === "completed" && (
+              <ResendReceiptButton payoutId={payout.id} />
+            )}
+            <Badge 
+              variant="secondary" 
+              className={cn(
+                "text-[8px] font-black uppercase tracking-widest px-2 h-4 border-none",
+                payout.status === "completed" ? "bg-green-500/10 text-green-500" : "bg-yellow-500/10 text-yellow-500"
+              )}
+            >
+              {payout.status === "completed" ? t("paid") || "Pago" : t("pending") || "Pendente"}
+            </Badge>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </div>
+        </div>
+      }
+    />
   );
 }
 
@@ -223,34 +293,14 @@ export function PayoutSummary({ history, projections: initialProjections, teache
             </div>
           ) : (
             filteredHistory.map((payout) => (
-              <div key={payout.id} className="item p-4 m-2 flex items-center justify-between hover:bg-muted/30 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className={cn(
-                    "p-2 rounded-full",
-                    payout.status === "completed" ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"
-                  )}>
-                    <DollarSign className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="font-semibold">{formatValue(payout.amount)}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {months[payout.month]} / {payout.year} • {format(new Date(payout.createdAt), "dd MMM yyyy")}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  {payout.status === "completed" && (
-                    <ResendReceiptButton payoutId={payout.id} />
-                  )}
-                  <span className={cn(
-                    "text-[10px] uppercase font-bold px-2 py-0.5 rounded-full",
-                    payout.status === "completed" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
-                  )}>
-                    {payout.status === "completed" ? t("paid") || "Pago" : t("pending") || "Pendente"}
-                  </span>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </div>
-              </div>
+              <PayoutRow 
+                key={payout.id} 
+                payout={payout} 
+                teacherId={teacherId} 
+                formatValue={formatValue} 
+                months={months} 
+                t={t} 
+              />
             ))
           )}
         </div>

@@ -132,3 +132,68 @@ export const getTeacherProjectionsAction = protectedAction
       return { success: false, error: (error as Error).message };
     }
   });
+
+export const getTeacherPayoutHistoryAction = protectedAction
+  .schema(z.object({
+    teacherId: z.string(),
+  }))
+  .metadata({ name: "getTeacherPayoutHistoryAction" })
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      if (ctx.user.role !== "admin" && ctx.user.role !== "manager" && ctx.user.id !== parsedInput.teacherId) {
+        throw new Error("Acesso negado.");
+      }
+
+      const history = await payoutService.getTeacherPayoutHistory(parsedInput.teacherId);
+      return { success: true, data: history };
+    } catch (error) {
+      console.error("[getTeacherPayoutHistoryAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const updatePayoutReceiptAction = permissionAction("class.update.any")
+  .schema(z.object({
+    payoutId: z.string().uuid(),
+    receiptUrl: z.string().url(),
+  }))
+  .metadata({ name: "updatePayoutReceiptAction" })
+  .action(async ({ parsedInput }) => {
+    try {
+      const payout = await payoutService.updatePayoutReceipt(parsedInput.payoutId, parsedInput.receiptUrl);
+      revalidatePath("/");
+      return { success: true, data: payout };
+    } catch (error) {
+      console.error("[updatePayoutReceiptAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const updatePayoutInvoiceAction = protectedAction
+  .schema(z.object({
+    payoutId: z.string().uuid(),
+    invoiceUrl: z.string().url(),
+  }))
+  .metadata({ name: "updatePayoutInvoiceAction" })
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const payout = await db.query.payoutsTable.findFirst({
+        where: eq(payoutsTable.id, parsedInput.payoutId),
+      });
+
+      if (!payout) {
+        throw new Error("Pagamento não encontrado.");
+      }
+
+      if (ctx.user.role !== "admin" && ctx.user.role !== "manager" && ctx.user.id !== payout.teacherId) {
+        throw new Error("Acesso negado.");
+      }
+
+      const updatedPayout = await payoutService.updatePayoutInvoice(parsedInput.payoutId, parsedInput.invoiceUrl);
+      revalidatePath("/");
+      return { success: true, data: updatedPayout };
+    } catch (error) {
+      console.error("[updatePayoutInvoiceAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });

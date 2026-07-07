@@ -279,7 +279,8 @@ export const schedulingRepository = {
             assignedPlanId: true,
             isActive: true,
           }
-        }
+        },
+        payout: true
       },
       orderBy: [slotInstances.startAt],
     });

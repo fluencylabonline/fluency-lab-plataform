@@ -63,6 +63,17 @@ export const payoutRepository = {
   async findPayoutsByTeacher(teacherId: string) {
     return db.query.payoutsTable.findMany({
       where: eq(payoutsTable.teacherId, teacherId),
+      with: {
+        classes: {
+          with: {
+            student: {
+              columns: {
+                name: true,
+              }
+            }
+          }
+        }
+      },
       orderBy: [desc(payoutsTable.createdAt)],
     });
   }

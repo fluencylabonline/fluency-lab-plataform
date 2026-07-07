@@ -5,6 +5,7 @@ import { relations } from "drizzle-orm";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { usersTable } from "../user/user.schema";
+import { payoutsTable } from "../payout/payout.schema";
 
 // ================= ENUMS =================
 export const slotTypeEnum = pgEnum("slot_type", ["NORMAL", "REPOSICAO", "RECESS_FALLBACK"]);
@@ -162,6 +163,10 @@ export const slotInstancesRelations = relations(slotInstances, ({ one }) => ({
   teacher: one(usersTable, {
     fields: [slotInstances.teacherId],
     references: [usersTable.id],
+  }),
+  payout: one(payoutsTable, {
+    fields: [slotInstances.payoutId],
+    references: [payoutsTable.id],
   }),
 }));
 

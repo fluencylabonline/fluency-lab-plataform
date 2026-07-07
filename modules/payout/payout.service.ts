@@ -238,5 +238,17 @@ export const payoutService = {
     });
 
     return payout;
+  },
+
+  async updatePayoutReceipt(payoutId: string, receiptUrl: string) {
+    return payoutRepository.updatePayout(payoutId, {
+      receiptUrl,
+    });
+  },
+
+  async updatePayoutInvoice(payoutId: string, invoiceUrl: string) {
+    return payoutRepository.updatePayout(payoutId, {
+      invoiceUrl,
+    });
   }
 };
