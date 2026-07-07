@@ -7,6 +7,7 @@ import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { PwaWelcomeScreen } from "@/components/landing/PwaWelcomeScreen";
 import { User } from "@/modules/user/user.schema";
+import { SystemSettings } from "@/modules/settings/settings.schema";
 
 // Seções below-the-fold: carregadas apenas após o hero ser exibido
 const ComparisonSection = dynamic(
@@ -26,7 +27,7 @@ const Footer = dynamic(
   { ssr: false }
 );
 
-export function LandingView({ user }: { user: User | null }) {
+export function LandingView({ user, settings }: { user: User | null; settings: SystemSettings }) {
   const { isStandalone } = useDevice();
   const [videoSrc, setVideoSrc] = useState<string>("");
 
@@ -65,7 +66,7 @@ export function LandingView({ user }: { user: User | null }) {
             <div className="relative z-3 flex flex-col flex-1">
               <LandingNavbar user={user} />
               <div id="about" />
-              <LandingHero user={user} />
+              <LandingHero user={user} settings={settings} />
             </div>
           </div>
 
@@ -81,7 +82,7 @@ export function LandingView({ user }: { user: User | null }) {
             <HowItWorks />
           </div>
 
-          <Footer />
+          <Footer settings={settings} />
         </div>
       ) : (
         <PwaWelcomeScreen />

@@ -10,11 +10,12 @@ import { EditorScreen } from "./screens/EditScreen";
 import { PlacementScreen } from "./screens/PlacementScreen";
 
 import { User } from "@/modules/user/user.schema";
+import { SystemSettings } from "@/modules/settings/settings.schema";
 import { CalendarDaysIcon } from "../animated-icons/calendar";
 import { PhoneMockup } from "./PhoneMockup";
 import Link from "next/link";
 
-export function LandingHero({ user }: { user: User | null }) {
+export function LandingHero({ user, settings }: { user: User | null; settings: SystemSettings }) {
   const t = useTranslations("LandingPage");
   const [currentScreen, setCurrentScreen] = useState<
     "home" | "path" | "editor" | "placement"
@@ -53,8 +54,8 @@ export function LandingHero({ user }: { user: User | null }) {
 
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
-              href={`https://wa.me/5549936180727?text=${encodeURIComponent(
-                "Olá! Vi o site da Fluency Lab e gostaria de saber mais sobre as aulas personalizadas."
+              href={`https://wa.me/${settings.whatsappNumber}?text=${encodeURIComponent(
+                settings.whatsappMessage
               )}`}
               target="_blank"
               rel="noopener noreferrer"

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { SettingsPageContent } from "@/modules/user/_components/SettingsPageContent";
 import type { NotificationPrefs } from "@/modules/user/user.schema";
 import { getTranslations } from "next-intl/server";
+import { settingsService } from "@/modules/settings/settings.service";
 
 export default async function AdminSettingsPage() {
   const sessionUser = await getCurrentUser();
@@ -23,9 +24,10 @@ export default async function AdminSettingsPage() {
     whatsapp: true,
   };
 
-  const [hasPassword, firebaseUser] = await Promise.all([
+  const [hasPassword, firebaseUser, systemSettings] = await Promise.all([
     checkUserHasPassword(sessionUser.id),
     adminAuth.getUser(sessionUser.id),
+    settingsService.getSettings(),
   ]);
 
   const emailVerified = firebaseUser.emailVerified;
@@ -37,6 +39,7 @@ export default async function AdminSettingsPage() {
         emailVerified,
         initialNotificationPrefs: prefs,
         hasPassword,
+        systemSettings,
       }}
     />
   );

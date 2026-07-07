@@ -5,12 +5,14 @@ import { SecuritySettings } from "./SecuritySettings";
 import { AccountSettings } from "./AccountSettings";
 import { AppearanceSettings } from "@/modules/appearance/_components/AppearanceSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Palette, Bell, User, Shield, Smartphone, HelpCircle } from "lucide-react";
+import { Palette, Bell, User, Shield, Smartphone, HelpCircle, Globe } from "lucide-react";
 import { AppSettings } from "./AppSettings";
 import type { NotificationPrefs, SettingsUserDTO } from "@/modules/user/user.schema";
 import { useTranslations } from "next-intl";
 import { StudentHelpWizard } from "@/app/[locale]/hub/student/_components/StudentHelpWizard";
 import { useWizard } from "@/hooks/ui/use-wizard";
+import { PlatformSettings } from "./PlatformSettings";
+import type { SystemSettings } from "@/modules/settings/settings.schema";
 
 interface SettingsPageContentProps {
   initialData: {
@@ -18,6 +20,7 @@ interface SettingsPageContentProps {
     emailVerified: boolean;
     initialNotificationPrefs: NotificationPrefs;
     hasPassword: boolean;
+    systemSettings?: SystemSettings;
   };
 }
 
@@ -88,6 +91,15 @@ export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
                 <Smartphone className="w-4 h-4" />
                 {t("app")}
               </TabsTrigger>
+              {initialData.user.role === "admin" && (
+                <TabsTrigger 
+                  value="platform" 
+                  className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-md border-none transition-all flex items-center gap-2"
+                >
+                  <Globe className="w-4 h-4" />
+                  Plataforma
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
 
@@ -118,6 +130,14 @@ export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
           <TabsContent value="app" className="mt-0">
             <AppSettings />
           </TabsContent>
+
+          {initialData.user.role === "admin" && (
+            <TabsContent value="platform" className="mt-0">
+              {initialData.systemSettings && (
+                <PlatformSettings initialSettings={initialData.systemSettings} />
+              )}
+            </TabsContent>
+          )}
         </Tabs>
       </div>
 
