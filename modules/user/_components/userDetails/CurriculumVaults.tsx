@@ -11,7 +11,10 @@ import {
   CalendarDays,
   History,
   AlertTriangle,
-  ArrowRight
+  ArrowRight,
+  ArrowLeftRight,
+  CheckCircle2,
+  XCircle
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -82,6 +85,16 @@ interface CurriculumVaultsProps {
   availableRules: RecurrenceRule[];
   onConfirmAllocate: (ruleId: string) => void;
   onConfirmDeallocate: (ruleId: string) => void;
+
+  // Transfer Teacher
+  transferRule: RecurrenceRule | null;
+  setTransferRule: (rule: RecurrenceRule | null) => void;
+  transferCompatible: boolean | null;
+  setTransferCompatible: (v: boolean | null) => void;
+  transferChecking: boolean;
+  onOpenTransfer: (rule: RecurrenceRule) => void;
+  onCheckCompatibility: (newTeacherId: string) => void;
+  onConfirmTransfer: (newTeacherId: string, force: boolean) => void;
 }
 
 
@@ -110,12 +123,24 @@ export function CurriculumVaults({
   availableRules,
   onConfirmAllocate,
   onConfirmDeallocate,
+  transferRule,
+  setTransferRule,
+  transferCompatible,
+  setTransferCompatible,
+  transferChecking,
+  onOpenTransfer,
+  onCheckCompatibility,
+  onConfirmTransfer,
 }: CurriculumVaultsProps) {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
   const [deallocatingId, setDeallocatingId] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+
+  // Transfer step: "select-teacher" | "confirm"
+  const [transferStep, setTransferStep] = useState<"select-teacher" | "confirm">("select-teacher");
+  const [transferTeacherId, setTransferTeacherId] = useState<string | null>(null);
 
   // States for Plan Assignment Step Logic
   const [assignStep, setAssignStep] = useState<"selection" | "confirm-replace" | "select-start-class">("selection");
@@ -145,13 +170,15 @@ export function CurriculumVaults({
 
   // Reset selection when vaults are closed
   React.useEffect(() => {
-    const isAnyVaultOpen = !!swapSlot || !!lessonSlot || showAssignPlan || showManageSchedule || showPlanHistory || !!deallocatingId;
+    const isAnyVaultOpen = !!swapSlot || !!lessonSlot || showAssignPlan || showManageSchedule || showPlanHistory || !!deallocatingId || !!transferRule;
     if (!isAnyVaultOpen) {
       resetSelection();
       setAssignStep("selection");
       setStartClassId(null);
+      setTransferStep("select-teacher");
+      setTransferTeacherId(null);
     }
-  }, [swapSlot, lessonSlot, showAssignPlan, showManageSchedule, showPlanHistory, deallocatingId]);
+  }, [swapSlot, lessonSlot, showAssignPlan, showManageSchedule, showPlanHistory, deallocatingId, transferRule]);
 
 
   return (
@@ -464,14 +491,29 @@ export function CurriculumVaults({
                           </span>
                           <span className="text-xs text-muted-foreground capitalize">Freq: {rule.frequency}</span>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => setDeallocatingId(rule.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Transferir para outro professor"
+                            className="text-primary hover:text-primary hover:bg-primary/10"
+                            onClick={() => {
+                              setTransferStep("select-teacher");
+                              setTransferTeacherId(null);
+                              onOpenTransfer(rule);
+                            }}
+                          >
+                            <ArrowLeftRight className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => setDeallocatingId(rule.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -565,6 +607,146 @@ export function CurriculumVaults({
             >
               Confirmar Remoção
             </VaultPrimaryButton>
+          </VaultFooter>
+        </VaultContent>
+      </Vault>
+
+      {/* 7. Transfer Teacher Vault */}
+      <Vault open={!!transferRule} onOpenChange={(open) => {
+        if (!open) {
+          setTransferRule(null);
+          setTransferCompatible(null);
+          setTransferStep("select-teacher");
+          setTransferTeacherId(null);
+        }
+      }}>
+        <VaultContent noPadding>
+          <VaultHeader className="px-6 pt-6">
+            <VaultTitle>
+              {transferStep === "select-teacher" && "Transferir para outro professor"}
+              {transferStep === "confirm" && transferCompatible === true && "Horário compatível encontrado"}
+              {transferStep === "confirm" && transferCompatible === false && "Professor sem horário disponível"}
+            </VaultTitle>
+            <VaultDescription>
+              {transferStep === "select-teacher" && (
+                transferRule
+                  ? `Selecione o novo professor para o horário de ${transferRule.startTime}–${transferRule.endTime}.`
+                  : "Selecione o novo professor."
+              )}
+              {transferStep === "confirm" && transferCompatible === true && "O professor selecionado tem este horário disponível. As aulas futuras serão substituídas."}
+              {transferStep === "confirm" && transferCompatible === false && "O professor selecionado não tem este horário cadastrado. Um novo slot será criado para ele."}
+            </VaultDescription>
+          </VaultHeader>
+
+          <VaultBody className="max-h-[60vh] overflow-y-auto">
+            {transferStep === "select-teacher" && (
+              <Command className="border-none">
+                <CommandInput placeholder="Buscar professor..." />
+                <CommandList className="max-h-[300px]">
+                  <CommandEmpty>Nenhum professor encontrado.</CommandEmpty>
+                  <CommandGroup heading="Selecione o novo professor">
+                    {teachers.map((teacher) => (
+                      <CommandItem
+                        key={teacher.id}
+                        value={teacher.id}
+                        onSelect={() => setTransferTeacherId(teacher.id)}
+                        className={cn(
+                          "flex items-center justify-between py-3",
+                          transferTeacherId === teacher.id && "bg-primary/10"
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                          <span>{teacher.name}</span>
+                        </div>
+                        {transferTeacherId === teacher.id && <Check className="h-4 w-4 text-primary" />}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            )}
+
+            {transferStep === "confirm" && (
+              <div className="px-6 py-4 space-y-4">
+                {/* Compatible banner */}
+                {transferCompatible === true && (
+                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex gap-3 items-start">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <p className="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed">
+                      O professor tem um horário livre compatível ({transferRule?.startTime}–{transferRule?.endTime}). As aulas futuras do aluno serão migradas automaticamente.
+                    </p>
+                  </div>
+                )}
+
+                {/* Incompatible banner */}
+                {transferCompatible === false && (
+                  <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg flex gap-3 items-start">
+                    <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+                      O professor <strong>não possui</strong> o horário {transferRule?.startTime}–{transferRule?.endTime} disponível. Ao confirmar, um novo slot recorrente será criado para ele e as aulas futuras serão geradas a partir de hoje.
+                    </p>
+                  </div>
+                )}
+
+                <div className="p-3 bg-accent/20 rounded-lg border">
+                  <p className="text-xs text-muted-foreground mb-1">Novo professor</p>
+                  <p className="text-sm font-semibold">
+                    {teachers.find(t => t.id === transferTeacherId)?.name || "—"}
+                  </p>
+                </div>
+
+                <div className="p-3 bg-accent/20 rounded-lg border">
+                  <p className="text-xs text-muted-foreground mb-1">Horário transferido</p>
+                  <p className="text-sm font-semibold capitalize">
+                    {transferRule && format(new Date(transferRule.startDate), "EEEE", { locale: ptBR })} • {transferRule?.startTime}–{transferRule?.endTime}
+                  </p>
+                </div>
+              </div>
+            )}
+          </VaultBody>
+
+          <VaultFooter className="px-6 pb-6">
+            {transferStep === "select-teacher" && (
+              <>
+                <VaultSecondaryButton onClick={() => {
+                  setTransferRule(null);
+                  setTransferCompatible(null);
+                }}>Cancelar</VaultSecondaryButton>
+                <VaultPrimaryButton
+                  disabled={!transferTeacherId || transferChecking}
+                  onClick={async () => {
+                    if (!transferTeacherId) return;
+                    await onCheckCompatibility(transferTeacherId);
+                    setTransferStep("confirm");
+                  }}
+                >
+                  {transferChecking ? "Verificando..." : <>Verificar <ArrowRight className="ml-2 h-4 w-4" /></>}
+                </VaultPrimaryButton>
+              </>
+            )}
+
+            {transferStep === "confirm" && (
+              <>
+                <VaultSecondaryButton onClick={() => setTransferStep("select-teacher")}>
+                  Voltar
+                </VaultSecondaryButton>
+                <VaultPrimaryButton
+                  disabled={isUpdating}
+                  onClick={() => {
+                    if (transferTeacherId) {
+                      onConfirmTransfer(transferTeacherId, transferCompatible === false);
+                    }
+                  }}
+                >
+                  {transferCompatible === false ? (
+                    <><XCircle className="mr-2 h-4 w-4" /> Forçar Transferência</>
+                  ) : (
+                    <><CheckCircle2 className="mr-2 h-4 w-4" /> Confirmar Transferência</>
+                  )}
+                </VaultPrimaryButton>
+              </>
+            )}
           </VaultFooter>
         </VaultContent>
       </Vault>

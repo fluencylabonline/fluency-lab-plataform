@@ -297,6 +297,179 @@ export const schedulingService = {
     });
   },
 
+  /**
+   * Checks whether the target teacher has a free (unassigned) recurrence rule
+   * that matches the same startTime, endTime and day-of-week as the given rule.
+   * Pure read — no side-effects.
+   */
+  async checkTeacherCompatibility(
+    ruleId: string,
+    newTeacherId: string
+  ): Promise<{ compatible: boolean; compatibleRuleId?: string }> {
+    const rule = await schedulingRepository.findRuleById(ruleId);
+    if (!rule) throw new Error("Regra de recorrência não encontrada.");
+
+    const dayOfWeek = new Date(rule.startDate).getDay();
+    const compatibleRule = await schedulingRepository.findCompatibleRule(
+      newTeacherId,
+      rule.startTime,
+      rule.endTime,
+      dayOfWeek
+    );
+
+    if (compatibleRule) {
+      return { compatible: true, compatibleRuleId: compatibleRule.id };
+    }
+
+    return { compatible: false };
+  },
+
+  /**
+   * Transfers a student from one teacher to another.
+   *
+   * - Past classes are untouched (only future `scheduled` slots affected).
+   * - Standalone slots without a ruleId are ignored.
+   * - Case A (compatible): reuses an existing free rule of the new teacher.
+   * - Case B (forced): creates a new recurrence rule for the new teacher.
+   * - Sends only in-app notifications to both teachers and the student.
+   */
+  async transferStudentToTeacher(
+    user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
+    ruleId: string,
+    newTeacherId: string,
+    studentId: string,
+    force: boolean
+  ) {
+    if (!hasPermission(user, "class.update.any")) {
+      throw new Error("Unauthorized: Only Admin or Manager can transfer students.");
+    }
+
+    const now = new Date();
+
+    const rule = await schedulingRepository.findRuleById(ruleId);
+    if (!rule) throw new Error("Regra de recorrência não encontrada.");
+    if (rule.studentId !== studentId) throw new Error("Aluno não está vinculado a esta regra.");
+
+    const newTeacher = await userService.getUserById(newTeacherId);
+    if (!newTeacher) throw new Error("Novo professor não encontrado.");
+
+    const student = await userService.getUserById(studentId);
+    if (!student) throw new Error("Aluno não encontrado.");
+
+    // --- Determine compatibility ---
+    const dayOfWeek = new Date(rule.startDate).getDay();
+    const compatibleRule = await schedulingRepository.findCompatibleRule(
+      newTeacherId,
+      rule.startTime,
+      rule.endTime,
+      dayOfWeek
+    );
+
+    if (!compatibleRule && !force) {
+      throw new Error("INCOMPATIBLE: O professor não tem esse horário disponível. Use force=true para forçar a transferência.");
+    }
+
+    // --- Fetch future scheduled slots for this student/rule ---
+    const futureSlots = await schedulingRepository.findFutureStudentSlotsByRule(ruleId, studentId, now);
+
+    await db.transaction(async (tx) => {
+      // ── Step 1: Release old rule ────────────────────────────────────────
+      await tx.update(recurrenceRules)
+        .set({ studentId: null, updatedAt: now })
+        .where(eq(recurrenceRules.id, ruleId));
+
+      // ── Step 2: Revert future slots of old rule to available ────────────
+      if (futureSlots.length > 0) {
+        const futureSlotIds = futureSlots.map((s) => s.id);
+        await tx.update(slotInstances)
+          .set({ studentId: null, status: "available", updatedAt: now })
+          .where(inArray(slotInstances.id, futureSlotIds));
+      }
+
+      if (compatibleRule) {
+        // ── Case A: Assign student to existing compatible rule ─────────────
+        await tx.update(recurrenceRules)
+          .set({ studentId, updatedAt: now })
+          .where(eq(recurrenceRules.id, compatibleRule.id));
+
+        // Update all future available slots of the compatible rule to scheduled
+        await tx.update(slotInstances)
+          .set({ studentId, status: "scheduled", updatedAt: now })
+          .where(
+            and(
+              eq(slotInstances.ruleId, compatibleRule.id),
+              eq(slotInstances.status, "available"),
+              gte(slotInstances.startAt, now)
+            )
+          );
+
+        // Materialize any missing future slots for the compatible rule
+        await this.materializeSlotsUntilDate(
+          compatibleRule.id,
+          addMonths(now, 12),
+          tx,
+          studentId,
+          now
+        );
+      } else {
+        // ── Case B: Force — create new recurrence rule for new teacher ────
+        const [newRule] = await tx.insert(recurrenceRules).values({
+          teacherId: newTeacherId,
+          studentId,
+          type: rule.type,
+          frequency: rule.frequency,
+          startTime: rule.startTime,
+          endTime: rule.endTime,
+          startDate: now,
+          endDate: rule.endDate,
+        }).returning();
+
+        // Materialize future slots for the new rule with student assigned
+        await this.materializeSlotsUntilDate(
+          newRule.id,
+          addMonths(now, 12),
+          tx,
+          studentId,
+          now
+        );
+      }
+    });
+
+    // ── In-app notifications (no push, no email) ──────────────────────────
+    const oldTeacher = await userService.getUserById(rule.teacherId);
+    const timeLabel = `${rule.startTime}–${rule.endTime}`;
+
+    await notificationService.sendNotification({
+      title: "Aluno transferido",
+      body: `O aluno ${student.name || "sem nome"} foi transferido para outro professor no horário de ${timeLabel}.`,
+      targetType: "specific",
+      userIds: [rule.teacherId],
+      channels: { inApp: true, push: false },
+    });
+
+    await notificationService.sendNotification({
+      title: "Novo aluno alocado",
+      body: `O aluno ${student.name || "sem nome"} foi transferido para o seu horário de ${timeLabel}.`,
+      targetType: "specific",
+      userIds: [newTeacherId],
+      channels: { inApp: true, push: false },
+    });
+
+    await notificationService.sendNotification({
+      title: "Horário atualizado",
+      body: `Seu horário de ${timeLabel} foi atribuído ao professor ${newTeacher.name || "novo professor"}.`,
+      targetType: "specific",
+      userIds: [studentId],
+      channels: { inApp: true, push: false },
+    });
+
+    console.info(
+      `[transferStudentToTeacher] Student ${studentId} transferred from teacher ${rule.teacherId}${oldTeacher ? ` (${oldTeacher.name})` : ""} to ${newTeacherId} (${newTeacher.name}). Compatible: ${!!compatibleRule}`
+    );
+
+    return { success: true };
+  },
+
   async materializeSlotsUntilDate(
     ruleId: string,
     horizon: Date,

@@ -638,3 +638,55 @@ export const rescheduleAction = protectedAction
       return { success: false, error: (error as Error).message } as { success: boolean; error: string };
     }
   });
+
+/**
+ * Read-only: checks whether the target teacher has a free compatible slot
+ * for the given recurrence rule. Returns { compatible, compatibleRuleId? }.
+ */
+export const checkTeacherCompatibilityAction = permissionAction("class.update.any")
+  .metadata({ name: "checkTeacherCompatibility" })
+  .inputSchema(z.object({
+    ruleId: z.string().uuid(),
+    newTeacherId: z.string(),
+  }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const result = await schedulingService.checkTeacherCompatibility(
+        parsedInput.ruleId,
+        parsedInput.newTeacherId
+      );
+      return { success: true, ...result };
+    } catch (error) {
+      console.error("[checkTeacherCompatibilityAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+/**
+ * Executes the student-teacher transfer for a given recurrence rule.
+ * Set force=true to proceed even when no compatible slot exists on the new teacher.
+ */
+export const transferStudentTeacherAction = permissionAction("class.update.any")
+  .metadata({ name: "transferStudentTeacher" })
+  .inputSchema(z.object({
+    ruleId: z.string().uuid(),
+    newTeacherId: z.string(),
+    studentId: z.string(),
+    force: z.boolean().default(false),
+  }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      await schedulingService.transferStudentToTeacher(
+        ctx.user,
+        parsedInput.ruleId,
+        parsedInput.newTeacherId,
+        parsedInput.studentId,
+        parsedInput.force
+      );
+      revalidatePath("/");
+      return { success: true };
+    } catch (error) {
+      console.error("[transferStudentTeacherAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });

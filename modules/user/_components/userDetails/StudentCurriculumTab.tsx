@@ -26,7 +26,9 @@ import {
   getAvailableRulesAction,
   getStudentRulesAction,
   allocateStudentAction,
-  deallocateStudentAction
+  deallocateStudentAction,
+  checkTeacherCompatibilityAction,
+  transferStudentTeacherAction
 } from "@/modules/scheduling/scheduling.actions";
 import {
   assignPlanAction,
@@ -74,6 +76,11 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
   const [showManageSchedule, setShowManageSchedule] = useState(false);
   const [availableRules, setAvailableRules] = useState<RecurrenceRule[]>([]);
   const [studentRules, setStudentRules] = useState<RecurrenceRule[]>([]);
+
+  // Transfer teacher
+  const [transferRule, setTransferRule] = useState<RecurrenceRule | null>(null);
+  const [transferCompatible, setTransferCompatible] = useState<boolean | null>(null);
+  const [transferChecking, setTransferChecking] = useState(false);
 
   // Plan History
   const [showPlanHistory, setShowPlanHistory] = useState(false);
@@ -245,6 +252,49 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
     setIsUpdating(false);
   };
 
+  const handleOpenTransfer = async (rule: RecurrenceRule) => {
+    setTransferRule(rule);
+    setTransferCompatible(null);
+  };
+
+  const handleCheckCompatibility = async (newTeacherId: string) => {
+    if (!transferRule) return;
+    setTransferChecking(true);
+    const result = await checkTeacherCompatibilityAction({
+      ruleId: transferRule.id,
+      newTeacherId,
+    });
+    const data = result?.data;
+    if (data?.success) {
+      setTransferCompatible((data as { compatible?: boolean }).compatible ?? false);
+    } else {
+      notify.error((data as { error?: string })?.error || "Erro ao verificar compatibilidade");
+    }
+    setTransferChecking(false);
+  };
+
+  const handleConfirmTransfer = async (newTeacherId: string, force: boolean) => {
+    if (!transferRule) return;
+    setIsUpdating(true);
+    const result = await transferStudentTeacherAction({
+      ruleId: transferRule.id,
+      newTeacherId,
+      studentId,
+      force,
+    });
+    if (result?.data?.success) {
+      notify.success("Aluno transferido com sucesso!");
+      setTransferRule(null);
+      setTransferCompatible(null);
+      fetchRules();
+      fetchSchedule();
+    } else {
+      const errorMsg = (result?.data as { error?: string })?.error || "Erro ao transferir aluno";
+      notify.error(errorMsg);
+    }
+    setIsUpdating(false);
+  };
+
   const handleAssignPlan = async (planId: string, startClassId?: string) => {
     setIsUpdating(true);
     const result = await assignPlanAction({
@@ -402,6 +452,14 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
         availableRules={availableRules}
         onConfirmAllocate={handleAllocate}
         onConfirmDeallocate={handleDeallocate}
+        transferRule={transferRule}
+        setTransferRule={setTransferRule}
+        transferCompatible={transferCompatible}
+        setTransferCompatible={setTransferCompatible}
+        transferChecking={transferChecking}
+        onOpenTransfer={handleOpenTransfer}
+        onCheckCompatibility={handleCheckCompatibility}
+        onConfirmTransfer={handleConfirmTransfer}
       />
 
       <ManageCreditsVault

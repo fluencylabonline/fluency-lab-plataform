@@ -248,3 +248,12 @@ export const retimeRecurrenceSchema = z.object({
 });
 
 export type RetimeRecurrenceValues = z.infer<typeof retimeRecurrenceSchema>;
+
+export const transferStudentTeacherSchema = z.object({
+  ruleId: z.string().uuid(),        // Recurrence rule atual do aluno
+  newTeacherId: z.string(),         // Novo professor destino
+  studentId: z.string(),            // Aluno a ser transferido
+  force: z.boolean().default(false), // Se true, força mesmo sem slot compatível
+});
+
+export type TransferStudentTeacherValues = z.input<typeof transferStudentTeacherSchema>;

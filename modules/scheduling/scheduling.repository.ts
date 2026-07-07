@@ -415,5 +415,42 @@ export const schedulingRepository = {
       orderBy: [desc(slotInstances.startAt)],
     });
   },
-};
 
+  /**
+   * Finds a free (no studentId) recurrence rule for a teacher that matches
+   * the given startTime, endTime and day-of-week of the startDate reference.
+   */
+  async findCompatibleRule(
+    teacherId: string,
+    startTime: string,
+    endTime: string,
+    dayOfWeek: number // 0 = Sunday, 1 = Monday, …, 6 = Saturday
+  ) {
+    const rules = await db.query.recurrenceRules.findMany({
+      where: and(
+        eq(recurrenceRules.teacherId, teacherId),
+        eq(recurrenceRules.startTime, startTime),
+        eq(recurrenceRules.endTime, endTime),
+        isNull(recurrenceRules.studentId)
+      ),
+    });
+
+    // Filter by day-of-week derived from startDate
+    return rules.find((r) => new Date(r.startDate).getDay() === dayOfWeek) ?? null;
+  },
+
+  /**
+   * Returns all FUTURE scheduled slot instances for a student tied to a specific rule.
+   */
+  async findFutureStudentSlotsByRule(ruleId: string, studentId: string, from: Date) {
+    return db.query.slotInstances.findMany({
+      where: and(
+        eq(slotInstances.ruleId, ruleId),
+        eq(slotInstances.studentId, studentId),
+        eq(slotInstances.status, "scheduled"),
+        gte(slotInstances.startAt, from)
+      ),
+      orderBy: [asc(slotInstances.startAt)],
+    });
+  },
+};
