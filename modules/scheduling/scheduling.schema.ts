@@ -232,3 +232,13 @@ export const createRecurrenceRuleSchema = z.object({
 });
 
 export type CreateRecurrenceRuleValues = z.input<typeof createRecurrenceRuleSchema>;
+
+const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+
+export const retimeRecurrenceSchema = z.object({
+  ruleId: z.string().uuid(),
+  newStartTime: z.string().regex(timeRegex, "Formato inválido (HH:mm)"),
+  newEndTime: z.string().regex(timeRegex, "Formato inválido (HH:mm)"),
+});
+
+export type RetimeRecurrenceValues = z.infer<typeof retimeRecurrenceSchema>;

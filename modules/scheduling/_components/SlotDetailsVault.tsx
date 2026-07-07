@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import {
   Clock,
   User as UserIcon,
@@ -26,6 +26,7 @@ import {
   deleteSlotAction,
   updateSlotAction,
   checkSlotConflictAction,
+  retimeRecurrenceAction,
 } from "@/modules/scheduling/scheduling.actions";
 import { getLessonsAction } from "@/modules/curriculum/curriculum.actions";
 import { CalendarEvent } from "@/components/ui/calendar-view";
@@ -49,6 +50,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { CalendarVault } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { LessonSummary } from "@/modules/curriculum/curriculum.types";
 
@@ -84,6 +86,7 @@ export function SlotDetailsVault({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [editForm, setEditForm] = useState({
+    editDate: new Date(),
     startTime: "",
     endTime: "",
     lessonTitle: "",
@@ -101,12 +104,16 @@ export function SlotDetailsVault({
   const [lessonsSearch, setLessonsSearch] = useState("");
   const [lessonsResults, setLessonsResults] = useState<LessonSummary[]>([]);
   const [isSearchingLessons, setIsSearchingLessons] = useState(false);
-  const [editScope, setEditScope] = useState<"single" | "future">("single");
+  const [editScope] = useState<"single">("single");
+  const [showRetimeVault, setShowRetimeVault] = useState(false);
+  const [retimeForm, setRetimeForm] = useState({ newStartTime: "", newEndTime: "" });
+  const [isRetiming, setIsRetiming] = useState(false);
 
   // Sync form when event changes or editing starts
   useEffect(() => {
     if (event && isOpen) {
       setEditForm({
+        editDate: new Date(event.start),
         startTime: format(event.start, "HH:mm"),
         endTime: format(event.end || event.start, "HH:mm"),
         lessonTitle: event.location || "",
@@ -160,11 +167,12 @@ export function SlotDetailsVault({
     const checkConflict = async () => {
       setIsCheckingConflict(true);
       try {
-        const start = new Date(event.start);
+        // Use editDate as the base date (supports day changes in single scope)
+        const start = new Date(editForm.editDate);
         const [sH, sM] = editForm.startTime.split(":").map(Number);
         start.setHours(sH, sM, 0, 0);
 
-        const end = new Date(event.start);
+        const end = new Date(editForm.editDate);
         const [eH, eM] = editForm.endTime.split(":").map(Number);
         end.setHours(eH, eM, 0, 0);
 
@@ -198,21 +206,28 @@ export function SlotDetailsVault({
 
     const timer = setTimeout(checkConflict, 500);
     return () => clearTimeout(timer);
-  }, [editForm.startTime, editForm.endTime, event, teacherId, isEditing]);
+  }, [editForm.startTime, editForm.endTime, editForm.editDate, event, teacherId, isEditing]);
 
   const handleEditClick = () => {
     if (event?.isRecurring) {
       setShowEditScope(true);
     } else {
-      setEditScope("single");
       setIsEditing(true);
     }
   };
 
-  const requestEdit = (scope: "single" | "future") => {
+  const requestEdit = () => {
     setShowEditScope(false);
-    setEditScope(scope);
     setIsEditing(true);
+  };
+
+  const openRetimeVault = () => {
+    setShowEditScope(false);
+    setRetimeForm({
+      newStartTime: format(event!.start, "HH:mm"),
+      newEndTime: format(event!.end || event!.start, "HH:mm"),
+    });
+    setShowRetimeVault(true);
   };
 
   const requestDelete = (scope: "single" | "future") => {
@@ -255,11 +270,17 @@ export function SlotDetailsVault({
       // confirmDialog.type === "edit"
       setIsUpdating(true);
       try {
-        const start = new Date(event.start);
+        // For single scope: use editDate (allows day changes).
+        // For future scope: keep the original day but apply the new time.
+        const baseDate = confirmDialog.scope === "single"
+          ? new Date(editForm.editDate)
+          : new Date(event.start);
+
+        const start = new Date(baseDate);
         const [sH, sM] = editForm.startTime.split(":").map(Number);
         start.setHours(sH, sM, 0, 0);
 
-        const end = new Date(event.start);
+        const end = new Date(baseDate);
         const [eH, eM] = editForm.endTime.split(":").map(Number);
         end.setHours(eH, eM, 0, 0);
 
@@ -559,6 +580,30 @@ export function SlotDetailsVault({
                     </div>
                   ) : null}
 
+                  {/* Date picker: only shown in single scope — future scope keeps dates per-occurrence */}
+                  {editScope === "single" && (
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                        <CalendarIcon className="w-3 h-3" />
+                        Data da Aula
+                      </label>
+                      <CalendarVault
+                        date={editForm.editDate}
+                        onSelect={(date) =>
+                          date && setEditForm((prev) => ({ ...prev, editDate: date }))
+                        }
+                        placeholder="Selecione uma data"
+                        label="Data da Aula"
+                        className="h-10 bg-white/5 border-white/10 rounded-md"
+                      />
+                      {!isSameDay(editForm.editDate, new Date(event!.start)) && (
+                        <p className="text-[10px] text-amber-400 font-medium">
+                          ⚡ Data alterada — lembretes serão re-agendados para o novo dia.
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
@@ -739,7 +784,7 @@ export function SlotDetailsVault({
           <VaultBody>
             <div className="space-y-4">
               <button
-                onClick={() => requestEdit("single")}
+                onClick={() => requestEdit()}
                 disabled={isUpdating}
                 className="w-full p-4 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 text-left transition-all"
               >
@@ -751,21 +796,163 @@ export function SlotDetailsVault({
                 </p>
               </button>
 
-              <button
-                onClick={() => requestEdit("future")}
-                disabled={isUpdating}
-                className="w-full p-4 rounded-md border border-primary/20 bg-primary/5 hover:bg-primary/10 text-left transition-all"
-              >
-                <h4 className="text-sm font-bold text-primary">
-                  Esta e todas as próximas
-                </h4>
-                <p className="text-xs text-primary/60 mt-1">
-                  Atualiza a regra de recorrência, afetando todas as aulas
-                  futuras.
-                </p>
-              </button>
+              {!!event?.ruleId && (
+                <button
+                  onClick={openRetimeVault}
+                  disabled={isUpdating}
+                  className="w-full p-4 rounded-md border border-primary/20 bg-primary/5 hover:bg-primary/10 text-left transition-all"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Repeat className="w-4 h-4 text-primary" />
+                    <h4 className="text-sm font-bold text-primary">
+                      Mudar horário de todas as futuras
+                    </h4>
+                  </div>
+                  <p className="text-xs text-primary/60">
+                    Altera o HH:mm de todas as aulas futuras desta recorrência.
+                    As aulas passadas são preservadas.
+                  </p>
+                </button>
+              )}
             </div>
           </VaultBody>
+        </VaultContent>
+      </Vault>
+
+      {/* Retime Recurrence Vault */}
+      <Vault open={showRetimeVault} onClose={() => setShowRetimeVault(false)}>
+        <VaultContent>
+          <VaultHeader>
+            <VaultIcon type="edit" />
+            <div className="flex flex-col items-center">
+              <VaultTitle>Mudar Horário da Recorrência</VaultTitle>
+              <VaultDescription>
+                Defina o novo horário para todas as aulas futuras desta
+                recorrência. As aulas passadas serão preservadas.
+              </VaultDescription>
+            </div>
+          </VaultHeader>
+
+          <VaultBody>
+            <div className="space-y-6">
+              {/* Time inputs */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    Novo Início
+                  </label>
+                  <input
+                    type="time"
+                    value={retimeForm.newStartTime}
+                    onChange={(e) =>
+                      setRetimeForm((prev) => ({
+                        ...prev,
+                        newStartTime: e.target.value,
+                      }))
+                    }
+                    className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-sm text-text focus:outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    Novo Término
+                  </label>
+                  <input
+                    type="time"
+                    value={retimeForm.newEndTime}
+                    onChange={(e) =>
+                      setRetimeForm((prev) => ({
+                        ...prev,
+                        newEndTime: e.target.value,
+                      }))
+                    }
+                    className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-sm text-text focus:outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Invalid time warning */}
+              {retimeForm.newEndTime &&
+                retimeForm.newStartTime &&
+                retimeForm.newEndTime <= retimeForm.newStartTime && (
+                  <div className="p-2 rounded bg-amber-500/10 border border-amber-500/20 flex items-start gap-2 animate-in fade-in slide-in-from-top-1">
+                    <AlertCircle className="w-3 h-3 text-amber-500 mt-0.5 shrink-0" />
+                    <p className="text-[10px] text-amber-500 leading-tight font-medium">
+                      Horário inválido: O término deve ser após o início.
+                    </p>
+                  </div>
+                )}
+
+              {/* Scope warning */}
+              <div className="p-4 rounded-md bg-primary/5 border border-primary/10 flex items-start gap-3">
+                <Repeat className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-[11px] text-primary/80 leading-relaxed font-medium">
+                    Esta ação mudará o horário de{" "}
+                    <strong>todas as aulas futuras</strong> desta recorrência.
+                    Os lembretes serão re-agendados automaticamente.
+                  </p>
+                  <p className="text-[10px] text-primary/50 mt-1 leading-relaxed">
+                    Se houver conflito em qualquer data futura, a operação será
+                    cancelada e você receberá a data do conflito.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </VaultBody>
+
+          <VaultFooter>
+            <VaultSecondaryButton
+              onClick={() => setShowRetimeVault(false)}
+              disabled={isRetiming}
+            >
+              Cancelar
+            </VaultSecondaryButton>
+            <VaultPrimaryButton
+              onClick={async () => {
+                if (!event?.ruleId) return;
+                if (
+                  !retimeForm.newStartTime ||
+                  !retimeForm.newEndTime ||
+                  retimeForm.newEndTime <= retimeForm.newStartTime
+                )
+                  return;
+
+                setIsRetiming(true);
+                try {
+                  const result = await retimeRecurrenceAction({
+                    ruleId: event.ruleId as string,
+                    newStartTime: retimeForm.newStartTime,
+                    newEndTime: retimeForm.newEndTime,
+                  });
+                  if (result?.data?.success) {
+                    notify.success(
+                      `Horário atualizado para ${result.data.updatedCount} aulas futuras!`
+                    );
+                    setShowRetimeVault(false);
+                    onOpenChange(false);
+                    onSuccess();
+                  } else {
+                    notify.error(
+                      result?.data?.error || "Erro ao atualizar o horário."
+                    );
+                  }
+                } catch {
+                  notify.error("Erro ao atualizar o horário.");
+                } finally {
+                  setIsRetiming(false);
+                }
+              }}
+              disabled={
+                isRetiming ||
+                !retimeForm.newStartTime ||
+                !retimeForm.newEndTime ||
+                retimeForm.newEndTime <= retimeForm.newStartTime
+              }
+            >
+              {isRetiming ? "Atualizando..." : "Confirmar Mudança"}
+            </VaultPrimaryButton>
+          </VaultFooter>
         </VaultContent>
       </Vault>
 

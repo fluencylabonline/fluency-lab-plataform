@@ -9,7 +9,8 @@ import {
   grantCreditSchema,
   cancelClassSchema,
   rescheduleWithCreditSchema,
-  createRecurrenceRuleSchema
+  createRecurrenceRuleSchema,
+  retimeRecurrenceSchema
 } from "./scheduling.schema";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -244,6 +245,25 @@ export const updateSlotAction = protectedAction
       return { success: true };
     } catch (error) {
       console.error("[updateSlotAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const retimeRecurrenceAction = protectedAction
+  .metadata({ name: "retimeRecurrence" })
+  .inputSchema(retimeRecurrenceSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const result = await schedulingService.retimeRecurrence(
+        ctx.user,
+        parsedInput.ruleId,
+        parsedInput.newStartTime,
+        parsedInput.newEndTime
+      );
+      revalidatePath("/");
+      return { success: true, updatedCount: result.updatedCount };
+    } catch (error) {
+      console.error("[retimeRecurrenceAction] Error:", error);
       return { success: false, error: (error as Error).message };
     }
   });

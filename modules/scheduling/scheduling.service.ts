@@ -852,7 +852,7 @@ export const schedulingService = {
       throw new Error("Unauthorized to update this slot");
     }
 
-    return await db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
       // 1. Time Validation
       if (data.startAt && data.endAt) {
         const start = new Date(data.startAt);
@@ -908,6 +908,22 @@ export const schedulingService = {
         };
         if (planId !== undefined) singleUpdate.planId = planId;
         if (planName !== undefined) singleUpdate.planName = planName;
+
+        // If the calendar day changed, reset reminder flags so the cron job
+        // can send fresh reminders for the new date.
+        if (data.startAt) {
+          const originalDay = getLocalDateParts(slot.startAt);
+          const newDay = getLocalDateParts(new Date(data.startAt));
+          const dayChanged =
+            originalDay.year !== newDay.year ||
+            originalDay.month !== newDay.month ||
+            originalDay.day !== newDay.day;
+
+          if (dayChanged) {
+            singleUpdate.reminder24hSent = false;
+            singleUpdate.reminder1hSent = false;
+          }
+        }
 
         await tx.update(slotInstances)
           .set(singleUpdate)
@@ -988,6 +1004,207 @@ export const schedulingService = {
       }
 
       return { success: true };
+    });
+
+    if (result.success && (data.startAt || data.endAt)) {
+      schedulingService.notifySlotTimeChange(
+        slot,
+        data.startAt ? new Date(data.startAt) : slot.startAt,
+        data.endAt ? new Date(data.endAt) : slot.endAt,
+        scope
+      ).catch((err) => console.error("notifySlotTimeChange failed:", err));
+    }
+
+    return result;
+  },
+
+  /**
+   * Retime all future "scheduled" slots of a specific recurrence rule to a new HH:mm.
+   * This is an atomic operation: if any future slot conflicts with another class at the
+   * new time, the entire operation is rejected with the conflicting date info.
+   *
+   * - Only the teacher owner of the rule (or admin/manager) may perform this.
+   * - Only future slots (startAt >= now) with status "scheduled" are affected.
+   * - Past slots are preserved as-is.
+   * - Other recurrence rules (even same teacher+student) are NOT touched.
+   * - After success, sends a push notification to student, teacher, admin and manager.
+   */
+  async retimeRecurrence(
+    user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
+    ruleId: string,
+    newStartTime: string, // "HH:mm"
+    newEndTime: string    // "HH:mm"
+  ) {
+    // 1. Fetch the rule and verify it exists
+    const rule = await schedulingRepository.findRuleById(ruleId);
+    if (!rule) throw new Error("Regra de recorrência não encontrada.");
+
+    // 2. ABAC: only the teacher who owns the rule, or admin/manager, may retime it
+    const isAdmin = hasPermission(user, "class.update.any");
+    const isOwnerTeacher = user.role === "teacher" && rule.teacherId === user.id;
+    if (!isAdmin && !isOwnerTeacher) {
+      throw new Error("Sem permissão para alterar esta recorrência.");
+    }
+
+    // 3. Parse and validate the new time window
+    const [newStartHour, newStartMin] = newStartTime.split(":").map(Number);
+    const [newEndHour, newEndMin] = newEndTime.split(":").map(Number);
+    if (
+      newEndHour * 60 + newEndMin <= newStartHour * 60 + newStartMin
+    ) {
+      throw new Error("Horário inválido: o término deve ser após o início.");
+    }
+
+    const now = new Date();
+
+    // 4. Fetch all future "scheduled" slots for this rule
+    const futureSlots = await db
+      .select()
+      .from(slotInstances)
+      .where(
+        and(
+          eq(slotInstances.ruleId, ruleId),
+          eq(slotInstances.status, "scheduled"),
+          gte(slotInstances.startAt, now)
+        )
+      )
+      .orderBy(asc(slotInstances.startAt));
+
+    if (futureSlots.length === 0) {
+      throw new Error("Nenhuma aula futura encontrada para esta recorrência.");
+    }
+
+    // 5. Pre-flight conflict check: verify the new time doesn't conflict on ANY future date
+    for (const slot of futureSlots) {
+      const parts = getLocalDateParts(slot.startAt);
+      const newStartAt = localToUtc(parts.year, parts.month, parts.day, newStartHour, newStartMin);
+      const newEndAt   = localToUtc(parts.year, parts.month, parts.day, newEndHour,   newEndMin);
+
+      const conflict = await schedulingRepository.findOverlappingSlot(
+        rule.teacherId,
+        newStartAt,
+        newEndAt,
+        slot.id  // exclude the slot itself
+      );
+
+      if (conflict) {
+        const conflictDateStr  = format(newStartAt, "dd/MM/yyyy");
+        const conflictStartStr = format(conflict.startAt, "HH:mm");
+        const conflictEndStr   = format(conflict.endAt,   "HH:mm");
+        throw new Error(
+          `Conflito detectado em ${conflictDateStr}: o professor já tem uma aula das ${conflictStartStr} às ${conflictEndStr} neste horário.`
+        );
+      }
+    }
+
+    // 6. All clear — execute inside a single atomic transaction
+    await db.transaction(async (tx) => {
+      for (const slot of futureSlots) {
+        const parts = getLocalDateParts(slot.startAt);
+        const newStartAt = localToUtc(parts.year, parts.month, parts.day, newStartHour, newStartMin);
+        const newEndAt   = localToUtc(parts.year, parts.month, parts.day, newEndHour,   newEndMin);
+
+        await tx.update(slotInstances)
+          .set({
+            startAt: newStartAt,
+            endAt:   newEndAt,
+            // Reset reminders so the cron sends fresh alerts for the new time
+            reminder24hSent: false,
+            reminder1hSent:  false,
+            updatedAt: new Date(),
+          })
+          .where(eq(slotInstances.id, slot.id));
+      }
+
+      // Update the recurrence rule template so future materializations use the new time
+      await tx.update(recurrenceRules)
+        .set({
+          startTime: newStartTime,
+          endTime:   newEndTime,
+          updatedAt: new Date(),
+        })
+        .where(eq(recurrenceRules.id, ruleId));
+    });
+
+    // 7. Fire-and-forget notifications (outside the transaction)
+    const representativeSlot = futureSlots[0];
+    setTimeout(() => {
+      schedulingService.notifySlotTimeChange(
+        {
+          teacherId: rule.teacherId,
+          studentId: rule.studentId ?? null,
+          startAt: representativeSlot.startAt,
+          endAt:   representativeSlot.endAt,
+        },
+        localToUtc(
+          getLocalDateParts(representativeSlot.startAt).year,
+          getLocalDateParts(representativeSlot.startAt).month,
+          getLocalDateParts(representativeSlot.startAt).day,
+          newStartHour,
+          newStartMin
+        ),
+        localToUtc(
+          getLocalDateParts(representativeSlot.endAt).year,
+          getLocalDateParts(representativeSlot.endAt).month,
+          getLocalDateParts(representativeSlot.endAt).day,
+          newEndHour,
+          newEndMin
+        ),
+        "future" // tells notifySlotTimeChange to use the recurring-change message format
+      ).catch((err) => console.error("[retimeRecurrence] notifySlotTimeChange failed:", err));
+    }, 0);
+
+    return { success: true, updatedCount: futureSlots.length };
+  },
+
+  async notifySlotTimeChange(
+    slot: { teacherId: string; studentId: string | null; startAt: Date; endAt: Date },
+    newStartAt: Date,
+    newEndAt: Date,
+    scope: "single" | "future"
+  ) {
+    const originalTimeStr = `${formatLocalTime(slot.startAt, "dd/MM")} às ${formatLocalTime(slot.startAt, "HH:mm")}`;
+    const newTimeStr = scope === "single"
+      ? `${formatLocalTime(newStartAt, "dd/MM")} às ${formatLocalTime(newStartAt, "HH:mm")}`
+      : `${formatLocalTime(newStartAt, "HH:mm")}`;
+
+    const teacher = await userService.getUserById(slot.teacherId);
+    const teacherName = teacher?.name || "Professor";
+
+    const body = scope === "single"
+      ? `A aula de ${originalTimeStr} foi remarcada para ${newTimeStr}.`
+      : `As próximas aulas recorrentes foram alteradas para o horário das ${newTimeStr} às ${formatLocalTime(newEndAt, "HH:mm")}.`;
+
+    const targetUserIds = [slot.teacherId];
+    if (slot.studentId) {
+      targetUserIds.push(slot.studentId);
+    }
+
+    // 1. Send push to Student and Teacher
+    await notificationService.sendNotification({
+      title: "Horário de Aula Alterado",
+      body,
+      targetType: "specific",
+      userIds: targetUserIds,
+      channels: { inApp: true, push: true },
+    });
+
+    // 2. Send push to Admin
+    await notificationService.sendNotification({
+      title: "Horário de Aula Alterado",
+      body: `A aula do prof. ${teacherName} foi alterada. ${body}`,
+      targetType: "role",
+      targetRole: "admin",
+      channels: { inApp: true, push: true },
+    });
+
+    // 3. Send push to Manager
+    await notificationService.sendNotification({
+      title: "Horário de Aula Alterado",
+      body: `A aula do prof. ${teacherName} foi alterada. ${body}`,
+      targetType: "role",
+      targetRole: "manager",
+      channels: { inApp: true, push: true },
     });
   },
 
