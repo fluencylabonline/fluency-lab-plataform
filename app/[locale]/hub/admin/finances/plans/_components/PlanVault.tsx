@@ -15,9 +15,10 @@ import {
   VaultField,
   VaultInput,
   VaultPrimaryButton,
-  VaultSecondaryButton,
-  VaultIcon
+  VaultSecondaryButton
 } from "@/components/ui/vault";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import {
   createPlanSchema,
   Plan
@@ -91,6 +92,11 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
     defaultValue: "BRL",
   });
 
+  const watchedPrice = useWatch({
+    control: form.control,
+    name: "price",
+  });
+
   useEffect(() => {
     if (plan && open) {
       reset({
@@ -117,16 +123,38 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
     }
   }, [plan, reset, open]);
 
-  const [affectedStudents, setAffectedStudents] = useState<AffectedStudent[] | null>(null);
-  const [pendingValues, setPendingValues] = useState<ApiPlanValues | null>(null);
-  const [isCheckingPrice, setIsCheckingPrice] = useState(false);
+  const [affectedStudentsInline, setAffectedStudentsInline] = useState<AffectedStudent[] | null>(null);
+  const [isLoadingAffected, setIsLoadingAffected] = useState(false);
 
   useEffect(() => {
-    if (!open) {
-      setAffectedStudents(null);
-      setPendingValues(null);
+    if (!open || !isEditing || !plan) {
+      setAffectedStudentsInline(null);
+      return;
     }
-  }, [open]);
+
+    const priceCents = watchedPrice && !isNaN(Number(watchedPrice)) ? Math.round(Number(watchedPrice) * 100) : 0;
+    if (priceCents === plan.price || !priceCents) {
+      setAffectedStudentsInline(null);
+      return;
+    }
+
+    const fetchAffected = async () => {
+      setIsLoadingAffected(true);
+      try {
+        const affected = await getAffectedStudentsAction({ planId: plan.id });
+        if (affected?.data?.success && affected.data.students) {
+          setAffectedStudentsInline(affected.data.students);
+        }
+      } catch (error) {
+        console.error("Error checking affected students:", error);
+      } finally {
+        setIsLoadingAffected(false);
+      }
+    };
+
+    const timer = setTimeout(fetchAffected, 300);
+    return () => clearTimeout(timer);
+  }, [watchedPrice, plan, isEditing, open]);
 
   const executeSubmit = async (apiValues: ApiPlanValues) => {
     let result;
@@ -150,49 +178,17 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
     }
   };
 
-  const onSubmit: SubmitHandler<PlanFormValues> = async (values) => {
-    // Convert from currency units back to cents
-    const apiValues = {
-      ...values,
-      price: Math.round(values.price * 100),
-    };
-
-    if (isEditing && plan && apiValues.price !== plan.price) {
-      setIsCheckingPrice(true);
-      try {
-        const affected = await getAffectedStudentsAction({ planId: plan.id });
-        if (affected?.data?.success && affected.data.students && affected.data.students.length > 0) {
-          setAffectedStudents(affected.data.students);
-          setPendingValues(apiValues);
-          return;
-        }
-      } catch (error) {
-        console.error("Error checking affected students:", error);
-      } finally {
-        setIsCheckingPrice(false);
-      }
-    }
-
-    await executeSubmit(apiValues);
-  };
-
-  const handleConfirmPriceChange = async () => {
-    if (!pendingValues || !plan) return;
+  const downloadCSVReport = (students: AffectedStudent[], apiValues?: ApiPlanValues) => {
+    if (!plan) return;
     
-    // Trigger CSV download
-    downloadCSVReport(affectedStudents || []);
-
-    await executeSubmit(pendingValues);
-    setAffectedStudents(null);
-    setPendingValues(null);
-  };
-
-  const downloadCSVReport = (students: AffectedStudent[]) => {
-    if (!plan || !pendingValues) return;
+    const targetValues = apiValues || { 
+      price: watchedPrice && !isNaN(Number(watchedPrice)) ? Math.round(Number(watchedPrice) * 100) : plan.price, 
+      currency: getValues("currency") || "BRL" 
+    };
     
     const oldPriceFormatted = (plan.price / 100).toFixed(2);
-    const newPriceFormatted = (pendingValues.price / 100).toFixed(2);
-    const currencySymbol = pendingValues.currency === "USD" ? "USD" : "BRL";
+    const newPriceFormatted = (targetValues.price / 100).toFixed(2);
+    const currencySymbol = targetValues.currency === "USD" ? "USD" : "BRL";
 
     // CSV Headers
     let csvContent = "\uFEFF"; // Add BOM for Excel UTF-8 compatibility
@@ -212,6 +208,21 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const onSubmit: SubmitHandler<PlanFormValues> = async (values) => {
+    // Convert from currency units back to cents
+    const apiValues = {
+      ...values,
+      price: Math.round(values.price * 100),
+    };
+
+    if (isEditing && plan && apiValues.price !== plan.price && affectedStudentsInline && affectedStudentsInline.length > 0) {
+      // Trigger CSV download automatically on submit
+      downloadCSVReport(affectedStudentsInline, apiValues);
+    }
+
+    await executeSubmit(apiValues);
   };
 
   return (
@@ -336,7 +347,7 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
                 <VaultInput {...register("description")} />
               </VaultField>
 
-              {isEditing && (
+              {isEditing && watchedPrice !== undefined && !isNaN(Number(watchedPrice)) && Math.round(Number(watchedPrice) * 100) !== plan.price && (
                 <div className="flex flex-col gap-4 mt-2">
                   <div className="card p-4 border border-amber-200 dark:border-amber-900/30 bg-amber-50/50 dark:bg-amber-950/10 text-amber-800 dark:text-amber-300 text-xs rounded-md leading-relaxed flex flex-col gap-2">
                     <p className="font-semibold flex items-center gap-1.5 text-sm text-amber-900 dark:text-amber-200">
@@ -345,6 +356,42 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
                     <p>
                       Alterar o preço mensal deste plano irá reajustar automaticamente todas as parcelas futuras pendentes de todos os alunos associados a ele. As parcelas passadas que já foram pagas continuarão intactas para fins contábeis e de auditoria. Um e-mail de aviso previsto em contrato será enviado aos alunos afetados.
                     </p>
+
+                    {isLoadingAffected ? (
+                      <div className="flex items-center gap-2 text-xs text-amber-800/80 dark:text-amber-300/80 mt-2">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Buscando alunos afetados...</span>
+                      </div>
+                    ) : affectedStudentsInline && affectedStudentsInline.length > 0 ? (
+                      <div className="mt-2 space-y-2">
+                        <div className="text-xs font-semibold text-amber-900 dark:text-amber-200 flex justify-between items-center">
+                          <span>Alunos afetados ({affectedStudentsInline.length}):</span>
+                          <Button 
+                            type="button" 
+                            variant="link" 
+                            className="h-auto p-0 text-[10px] uppercase font-bold text-primary hover:text-primary/80"
+                            onClick={() => downloadCSVReport(affectedStudentsInline)}
+                          >
+                            Baixar CSV
+                          </Button>
+                        </div>
+                        <div className="max-h-32 overflow-y-auto divide-y divide-amber-200/50 dark:divide-amber-900/30 border border-amber-200 dark:border-amber-900/30 rounded-lg bg-background/50">
+                          {affectedStudentsInline.map((student) => (
+                            <div key={student.studentId} className="p-2 flex justify-between items-center text-[11px] text-amber-900 dark:text-amber-200">
+                              <div>
+                                <span className="font-bold">{student.name}</span>
+                                <span className="text-muted-foreground ml-1">({student.email})</span>
+                              </div>
+                              <div className="text-right text-[10px] text-muted-foreground">
+                                {student.startDate ? new Date(student.startDate).toLocaleDateString("pt-BR") : "-"}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : affectedStudentsInline && affectedStudentsInline.length === 0 ? (
+                      <p className="text-xs text-amber-800/80 dark:text-amber-300/80 mt-1">Nenhum aluno ativo será afetado por esta alteração.</p>
+                    ) : null}
                   </div>
 
                   <VaultField
@@ -370,61 +417,12 @@ export function PlanVault({ open, onOpenChange, plan, onSuccess, languages }: Pl
               </VaultSecondaryButton>
               <VaultPrimaryButton
                 type="submit"
-                disabled={isSubmitting || isCheckingPrice}
+                disabled={isSubmitting || isLoadingAffected}
               >
-                {isSubmitting || isCheckingPrice ? (t("saving") || "Salvando...") : (t("save") || "Salvar Plano")}
+                {isSubmitting ? (t("saving") || "Salvando...") : (t("save") || "Salvar Plano")}
               </VaultPrimaryButton>
             </VaultFooter>
           </VaultForm>
-        </VaultContent>
-      </Vault>
-
-      {/* Modal de Confirmação de Reajuste */}
-      <Vault open={!!affectedStudents} onOpenChange={(open) => !open && setAffectedStudents(null)}>
-        <VaultContent className="max-w-2xl">
-          <VaultHeader>
-            <VaultIcon type="info" />
-            <VaultTitle>Confirmar Reajuste de Mensalidade</VaultTitle>
-            <VaultDescription>
-              A alteração do preço mensal do plano de <strong>{selectedCurrency === "USD" ? "US$" : "R$"} {(plan?.price || 0) / 100}</strong> para <strong>{selectedCurrency === "USD" ? "US$" : "R$"} {(pendingValues?.price || 0) / 100}</strong> afetará {affectedStudents?.length} alunos ativos.
-            </VaultDescription>
-          </VaultHeader>
-          <VaultBody>
-            <div className="text-sm font-semibold mb-3">Estudantes Afetados:</div>
-            <div className="max-h-60 overflow-y-auto divide-y divide-border border border-border rounded-xl bg-muted/20">
-              {affectedStudents?.map((student) => (
-                <div key={student.studentId} className="p-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-xs">
-                  <div>
-                    <div className="font-bold text-foreground">{student.name}</div>
-                    <div className="text-muted-foreground">{student.email}</div>
-                  </div>
-                  <div className="text-right flex flex-col md:items-end">
-                    <div>
-                      Contrato: <span className="font-semibold text-foreground">
-                        {student.startDate ? new Date(student.startDate).toLocaleDateString("pt-BR") : "-"}
-                      </span> até <span className="font-semibold text-foreground">
-                        {student.endDate ? new Date(student.endDate).toLocaleDateString("pt-BR") : "-"}
-                      </span>
-                    </div>
-                    <div className="mt-1 text-[10px]">
-                      Mensalidade: <span className="text-muted-foreground line-through">{selectedCurrency === "USD" ? "US$" : "R$"} {(plan?.price || 0) / 100}</span> &rarr; <span className="font-bold text-primary">{selectedCurrency === "USD" ? "US$" : "R$"} {(pendingValues?.price || 0) / 100}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground mt-4 leading-relaxed bg-amber-50 dark:bg-amber-950/20 p-3 rounded-lg border border-amber-200 dark:border-amber-900/30 text-amber-800 dark:text-amber-300">
-              Ao confirmar, o preço do plano será atualizado e o sistema reajustará automaticamente todas as faturas futuras pendentes destes alunos. Um relatório CSV contendo a lista dos alunos afetados e seus dados de contrato será baixado automaticamente.
-            </p>
-          </VaultBody>
-          <VaultFooter>
-            <VaultSecondaryButton onClick={() => setAffectedStudents(null)}>
-              Cancelar
-            </VaultSecondaryButton>
-            <VaultPrimaryButton onClick={handleConfirmPriceChange} disabled={isSubmitting}>
-              {isSubmitting ? "Salvando..." : "Confirmar e Baixar Relatório"}
-            </VaultPrimaryButton>
-          </VaultFooter>
         </VaultContent>
       </Vault>
     </>

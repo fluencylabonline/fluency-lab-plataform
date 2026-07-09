@@ -29,7 +29,7 @@ export function PendingClassesWarning({ pendingClasses }: PendingClassesWarningP
             </div>
             
             <p className="text-sm text-muted-foreground leading-relaxed">
-                Você tem <strong>{pendingClasses.length}</strong> aula(s) que já ocorreu(ram) mas ainda está(ão) com o status de &quot;Agendada&quot;.
+                Você tem <strong className="pr-1">{pendingClasses.length}</strong> aula(s) que já ocorreu(ram) mas ainda está(ão) com o status de &quot;Agendada&quot;.
                 Você precisa atualizar o status dessas aulas, senão o seu pagamento pode ser comprometido.
             </p>
             

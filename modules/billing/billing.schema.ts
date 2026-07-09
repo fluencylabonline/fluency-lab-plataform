@@ -18,6 +18,7 @@ export const plansTable = pgTable("plans", {
   language: text("language"),
   classesPerWeek: integer("classes_per_week"),
   isActive: boolean("is_active").notNull().default(true),
+  isDeleted: boolean("is_deleted").notNull().default(false),
   currency: text("currency").notNull().default("BRL"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")

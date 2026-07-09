@@ -144,7 +144,7 @@ export function MyCoursesClient({ currentUser }: MyCoursesClientProps) {
                           className="w-full h-12 rounded-md font-bold gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
                         >
                           {t("enroll")}
-                          <CheckCircle className="h-4 w-4" />
+                          <CheckCircle className="h-4 w-4 ml-2" />
                         </Button>
                       )}
                     </div>

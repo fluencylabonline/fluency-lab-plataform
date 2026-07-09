@@ -19,10 +19,15 @@ export const billingRepository = {
     return db.query.plansTable.findFirst({ where: eq(plansTable.id, id) });
   },
   async listActivePlans() {
-    return db.select().from(plansTable).where(eq(plansTable.isActive, true));
+    return db.select().from(plansTable).where(
+      and(
+        eq(plansTable.isActive, true),
+        eq(plansTable.isDeleted, false)
+      )
+    );
   },
   async listAllPlans() {
-    return db.select().from(plansTable);
+    return db.select().from(plansTable).where(eq(plansTable.isDeleted, false));
   },
   async createPlan(data: typeof plansTable.$inferInsert) {
     const [plan] = await db.insert(plansTable).values(data).returning();

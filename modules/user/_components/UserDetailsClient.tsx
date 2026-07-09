@@ -244,7 +244,7 @@ export function UserDetailsClient({
                 <AvatarFallback>{userInitials}</AvatarFallback>
               </Avatar>
               <div className="ml-3">
-                <p className="capitalize text-2xl font-bold">{user.name}</p>
+                <p className="capitalize text-2xl font-bold min-w-full">{user.name}</p>
                 <p className="text-sm text-muted-foreground">{user.email}</p>
               </div>
             </div>

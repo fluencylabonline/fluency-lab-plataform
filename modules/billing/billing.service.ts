@@ -141,11 +141,25 @@ export const billingService = {
   },
 
   async deletePlan(planId: string) {
-    const subscriptionsCount = await billingRepository.countSubscriptionsByPlanId(planId);
-    if (subscriptionsCount > 0) {
-      throw new Error("Não é possível excluir o plano pois ele já possui matrículas associadas.");
+    // 1. Fetch all subscriptions for this plan
+    const subscriptions = await db.query.subscriptionsTable.findMany({
+      where: eq(subscriptionsTable.planId, planId),
+      with: {
+        student: true
+      }
+    });
+
+    // 2. Filter for ACTIVE subscriptions of ACTIVE students
+    const activeSubs = subscriptions.filter(sub => 
+      sub.status === "active" && sub.student?.isActive !== false
+    );
+
+    if (activeSubs.length > 0) {
+      throw new Error("Não é possível excluir o plano pois ele já possui matrículas ativas.");
     }
-    await billingRepository.deletePlan(planId);
+
+    // 3. Since there are no active subscriptions for active students, we soft-delete it
+    await billingRepository.updatePlan(planId, { isDeleted: true, isActive: false });
   },
 
   async getAffectedStudents(planId: string) {
