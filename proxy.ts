@@ -77,7 +77,7 @@ export async function proxy(request: NextRequest) {
       normalizedPath.startsWith(page),
     );
     const isPublicPage =
-      ["/", "/privacy", "/terms", "/certificate", "/create-password", "/reset-password", "/offline"].includes(
+      ["/", "/privacy", "/terms", "/certificate", "/create-password", "/reset-password", "/offline", "/download"].includes(
         normalizedPath,
       ) || normalizedPath.startsWith("/verify");
 

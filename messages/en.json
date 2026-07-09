@@ -3197,5 +3197,20 @@
     "toastSuccess": "Camera and Microphone are working!",
     "toastBlocked": "Access blocked. Follow the instructions below to reset permissions.",
     "toastFailed": "Test failed: {error}"
+  },
+  "Download": {
+    "title": "Install FluencyLab",
+    "subtitle": "Get the best learning experience by adding our platform to your home screen",
+    "installButton": "Install Application",
+    "iosTitle": "Instructions for iPhone and iPad (Safari)",
+    "iosStep1": "Click on the Share button (icon with upward arrow in the bottom bar)",
+    "iosStep2": "Scroll down the list and click 'Add to Home Screen'",
+    "iosStep3": "Confirm by clicking 'Add' in the top-right corner",
+    "androidTitle": "Instructions for Android (Chrome)",
+    "androidStep1": "Open Chrome's menu by clicking the three dots in the top-right corner",
+    "androidStep2": "Click 'Add to Home screen' or 'Install app'",
+    "androidStep3": "Confirm installation in the dialog box",
+    "alreadyInstalled": "The app is already installed!",
+    "backToPlatform": "Back to Platform"
   }
 }
