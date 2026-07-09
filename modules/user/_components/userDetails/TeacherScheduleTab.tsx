@@ -10,18 +10,22 @@ import {
   XCircle,
   AlertCircle,
   BookOpen,
-  Plus
+  Plus,
+  Search
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { notify } from "@/components/ui/toaster";
 import { getTeacherScheduleAction } from "@/modules/scheduling/scheduling.actions";
 import { CalendarView, CalendarEvent } from "@/components/ui/calendar-view";
+import { WeeklyCalendarView } from "@/components/ui/weekly-calendar-view";
 import { CreateSlotVault } from "@/modules/scheduling/_components/CreateSlotVault";
 import { SlotDetailsVault } from "@/modules/scheduling/_components/SlotDetailsVault";
 import { cn } from "@/lib/utils";
 import { SlotInstanceWithDetails } from "@/modules/scheduling/scheduling.types";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface TeacherScheduleTabProps {
   teacherId: string;
@@ -48,6 +52,10 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [isCreateVaultOpen, setIsCreateVaultOpen] = useState(false);
+
+  const [searchStudent, setSearchStudent] = useState("");
+  const [classTypeFilter, setClassTypeFilter] = useState("ALL");
+  const [viewMode, setViewMode] = useState<"monthly" | "weekly">("weekly");
 
   const fetchedMonths = useRef<Set<string>>(new Set());
 
@@ -117,27 +125,47 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
     fetchSchedule(now.getMonth(), now.getFullYear(), 6);
   };
 
-  const calendarEvents: CalendarEvent[] = useMemo(() => schedule.map(slot => ({
-    id: slot.id,
-    title: slot.student?.name || t("noStudent"),
-    studentName: slot.student?.name || undefined,
-    start: new Date(slot.startAt),
-    end: new Date(slot.endAt),
-    status: slot.status,
-    type: slot.type || "NORMAL",
-    isRecurring: !!slot.ruleId,
-    ruleStartDate: slot.rule?.startDate ? new Date(slot.rule.startDate) : undefined,
-    ruleEndDate: slot.rule?.endDate ? new Date(slot.rule.endDate) : null,
-    location: (slot.lessonTitle || slot.planName) || undefined,
-    lessonTitle: slot.lessonTitle || undefined,
-    lessonId: slot.lessonId || undefined,
-    planId: slot.planId || undefined,
-    planName: slot.planName || undefined,
-    studentId: slot.studentId || undefined,
-    assignedPlanId: slot.student?.assignedPlanId || undefined,
-    isActive: slot.student?.isActive ?? undefined,
-    rescheduledFrom: slot.rescheduledFrom || undefined
-  })), [schedule, t]);
+  const calendarEvents: CalendarEvent[] = useMemo(() => {
+    let filtered = schedule;
+
+    if (searchStudent) {
+      const lowerSearch = searchStudent.toLowerCase();
+      filtered = filtered.filter(slot => 
+        slot.student?.name?.toLowerCase().includes(lowerSearch)
+      );
+    }
+
+    if (classTypeFilter !== "ALL") {
+      filtered = filtered.filter(slot => {
+        const type = slot.type || "NORMAL";
+        if (classTypeFilter === "REPLACEMENT") return type === "REPOSICAO";
+        if (classTypeFilter === "REGULAR") return type !== "REPOSICAO";
+        return true;
+      });
+    }
+
+    return filtered.map(slot => ({
+      id: slot.id,
+      title: slot.student?.name || t("noStudent") || "Sem Aluno",
+      studentName: slot.student?.name || undefined,
+      start: new Date(slot.startAt),
+      end: new Date(slot.endAt),
+      status: slot.status,
+      type: slot.type || "NORMAL",
+      isRecurring: !!slot.ruleId,
+      ruleStartDate: slot.rule?.startDate ? new Date(slot.rule.startDate) : undefined,
+      ruleEndDate: slot.rule?.endDate ? new Date(slot.rule.endDate) : null,
+      location: (slot.lessonTitle || slot.planName) || undefined,
+      lessonTitle: slot.lessonTitle || undefined,
+      lessonId: slot.lessonId || undefined,
+      planId: slot.planId || undefined,
+      planName: slot.planName || undefined,
+      studentId: slot.studentId || undefined,
+      assignedPlanId: slot.student?.assignedPlanId || undefined,
+      isActive: slot.student?.isActive ?? undefined,
+      rescheduledFrom: slot.rescheduledFrom || undefined
+    }));
+  }, [schedule, t, searchStudent, classTypeFilter]);
 
   const renderEventCard = useCallback((event: CalendarEvent) => (
     <div key={event.id} className="p-4 rounded-md border border-white/10 bg-muted space-y-3 hover:border-primary/50 transition-all duration-300 group">
@@ -198,25 +226,80 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
     );
   }
 
+  const CreateButton = (
+    <Button
+      onClick={() => setIsCreateVaultOpen(true)}
+      className="rounded-md gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-8 lg:h-9 text-[10px] uppercase tracking-widest px-4"
+    >
+      <Plus className="w-3 h-3 lg:w-4 lg:h-4" />
+      <span className="hidden sm:inline">Novo Horário</span>
+      <span className="sm:hidden">Novo</span>
+    </Button>
+  );
+
   return (
-    <>
-      <CalendarView
-        events={calendarEvents}
-        onMonthChange={handleMonthChange}
-        onEventClick={handleEventClick}
-        renderEventCard={renderEventCard}
-        isLoading={isFetching || isInitialLoading}
-        headerActions={
-          <Button
-            onClick={() => setIsCreateVaultOpen(true)}
-            className="rounded-md gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-8 lg:h-9 text-[10px] uppercase tracking-widest px-4"
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row items-center gap-4 bg-muted/50 p-4 rounded-md border border-white/5">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input 
+            placeholder="Buscar aluno..." 
+            value={searchStudent}
+            onChange={(e) => setSearchStudent(e.target.value)}
+            className="pl-9 h-9 text-xs"
+          />
+        </div>
+        <div className="w-full sm:w-[200px]">
+          <Select value={classTypeFilter} onValueChange={setClassTypeFilter}>
+            <SelectTrigger className="h-9 text-xs">
+              <SelectValue placeholder="Tipo de aula" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Todas as aulas</SelectItem>
+              <SelectItem value="REGULAR">Aulas Regulares</SelectItem>
+              <SelectItem value="REPLACEMENT">Aulas de Reposição</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-2 bg-background p-1 rounded-md border border-white/5 w-full sm:w-auto">
+          <Button 
+            variant={viewMode === "weekly" ? "secondary" : "ghost"} 
+            size="sm" 
+            onClick={() => setViewMode("weekly")}
+            className="h-7 text-[10px] uppercase tracking-widest font-bold flex-1 sm:flex-none"
           >
-            <Plus className="w-3 h-3 lg:w-4 lg:h-4" />
-            <span className="hidden sm:inline">Novo Horário</span>
-            <span className="sm:hidden">Novo</span>
+            Semanal
           </Button>
-        }
-      />
+          <Button 
+            variant={viewMode === "monthly" ? "secondary" : "ghost"} 
+            size="sm" 
+            onClick={() => setViewMode("monthly")}
+            className="h-7 text-[10px] uppercase tracking-widest font-bold flex-1 sm:flex-none"
+          >
+            Mensal
+          </Button>
+        </div>
+      </div>
+
+      {viewMode === "weekly" ? (
+        <WeeklyCalendarView
+          events={calendarEvents}
+          onWeekChange={handleMonthChange}
+          onEventClick={handleEventClick}
+          renderEventCard={renderEventCard}
+          isLoading={isFetching || isInitialLoading}
+          headerActions={CreateButton}
+        />
+      ) : (
+        <CalendarView
+          events={calendarEvents}
+          onMonthChange={handleMonthChange}
+          onEventClick={handleEventClick}
+          renderEventCard={renderEventCard}
+          isLoading={isFetching || isInitialLoading}
+          headerActions={CreateButton}
+        />
+      )}
 
       <CreateSlotVault
         teacherId={teacherId}
@@ -232,6 +315,6 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
         onOpenChange={setIsVaultOpen}
         onSuccess={handleActionSuccess}
       />
-    </>
+    </div>
   );
 }
