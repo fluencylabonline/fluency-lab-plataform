@@ -36,6 +36,33 @@ export const updatePlanAction = adminAction
     }
   });
 
+export const deletePlanAction = adminAction
+  .metadata({ name: "deletePlan" })
+  .inputSchema(z.object({ id: z.string().uuid() }))
+  .action(async ({ parsedInput }) => {
+    try {
+      await billingService.deletePlan(parsedInput.id);
+      revalidatePath("/admin/finances/plans");
+      return { success: true };
+    } catch (error) {
+      console.error("[deletePlanAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const getAffectedStudentsAction = adminAction
+  .metadata({ name: "getAffectedStudents" })
+  .inputSchema(z.object({ planId: z.string().uuid() }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const students = await billingService.getAffectedStudents(parsedInput.planId);
+      return { success: true, students };
+    } catch (error) {
+      console.error("[getAffectedStudentsAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
 export const togglePlanStatusAction = adminAction
   .metadata({ name: "togglePlanStatus" })
   .inputSchema(z.object({ id: z.string(), isActive: z.boolean() }))

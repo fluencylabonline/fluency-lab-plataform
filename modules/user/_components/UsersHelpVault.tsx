@@ -4,11 +4,9 @@ import {
   Vault,
   VaultBody,
   VaultContent,
-  VaultFooter,
   VaultHeader,
   VaultTitle,
   VaultDescription,
-  VaultSecondaryButton,
   VaultIcon,
 } from "@/components/ui/vault";
 import { useParams } from "next/navigation";
@@ -111,12 +109,6 @@ export function UsersHelpVault({ open, onOpenChange }: UsersHelpVaultProps) {
             </div>
           </div>
         </VaultBody>
-
-        <VaultFooter className="mt-4">
-          <VaultSecondaryButton onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
-            {isEn ? "Close" : "Fechar"}
-          </VaultSecondaryButton>
-        </VaultFooter>
       </VaultContent>
     </Vault>
   );

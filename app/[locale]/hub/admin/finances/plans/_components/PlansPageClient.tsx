@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
-import { Plus, Edit2, Calendar, Clock } from "lucide-react";
+import { Plus, Edit2, Calendar, Clock, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Plan } from "@/modules/billing/billing.schema";
@@ -10,9 +10,20 @@ import { formatCurrency } from "@/utils/format";
 import { Badge } from "@/components/ui/badge";
 import { PlanVault } from "./PlanVault";
 
-import { togglePlanStatusAction } from "@/modules/billing/billing.actions";
+import { togglePlanStatusAction, deletePlanAction } from "@/modules/billing/billing.actions";
 import { notify } from "@/components/ui/toaster";
 import { Loader2 } from "lucide-react";
+import {
+  Vault,
+  VaultContent,
+  VaultHeader,
+  VaultTitle,
+  VaultDescription,
+  VaultFooter,
+  VaultIcon,
+  VaultPrimaryButton,
+  VaultSecondaryButton,
+} from "@/components/ui/vault";
 
 interface PlansPageClientProps {
   initialPlans: Plan[];
@@ -30,6 +41,8 @@ export function PlansPageClient({ initialPlans, languages, user }: PlansPageClie
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<Plan | undefined>(undefined);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [planToDelete, setPlanToDelete] = useState<Plan | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const t = useTranslations("Billing");
 
@@ -55,6 +68,26 @@ export function PlansPageClient({ initialPlans, languages, user }: PlansPageClie
       }
     } finally {
       setTogglingId(null);
+    }
+  };
+
+  const handleDeletePlan = async () => {
+    if (!planToDelete) return;
+    setIsDeleting(true);
+    try {
+      const result = await deletePlanAction({ id: planToDelete.id });
+      if (result?.data?.success) {
+        setPlans((currentPlans) => currentPlans.filter((p) => p.id !== planToDelete.id));
+        notify.success(t("planDeleted") || "Plano excluído com sucesso!");
+        setPlanToDelete(null);
+      } else {
+        notify.error(result?.data?.error || t("planDeleteError") || "Não é possível excluir o plano pois possui matrículas associadas.");
+      }
+    } catch (error) {
+      console.error(error);
+      notify.error(t("planDeleteError") || "Ocorreu um erro ao excluir o plano.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -143,6 +176,14 @@ export function PlansPageClient({ initialPlans, languages, user }: PlansPageClie
                       >
                         <Edit2 className="w-3.5 h-3.5" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10"
+                        onClick={() => setPlanToDelete(plan)}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
                     </div>
                   </div>
 
@@ -197,6 +238,31 @@ export function PlansPageClient({ initialPlans, languages, user }: PlansPageClie
         onSuccess={handleSuccess}
         languages={languages}
       />
+
+      {/* Modal de Confirmação de Exclusão */}
+      <Vault open={!!planToDelete} onOpenChange={(open) => !open && setPlanToDelete(null)}>
+        <VaultContent>
+          <VaultHeader>
+            <VaultIcon type="delete" />
+            <VaultTitle>{t("deletePlan") || "Excluir Plano"}</VaultTitle>
+            <VaultDescription>
+              {t("deletePlanWarning") || "Tem certeza que deseja excluir o plano"} &quot;<strong>{planToDelete?.name}</strong>&quot;? {t("deletePlanWarningDetail") || "Esta ação não poderá ser desfeita e só funcionará se o plano não estiver associado a nenhum aluno."}
+            </VaultDescription>
+          </VaultHeader>
+          <VaultFooter>
+            <VaultSecondaryButton onClick={() => setPlanToDelete(null)}>
+              {t("cancel") || "Cancelar"}
+            </VaultSecondaryButton>
+            <VaultPrimaryButton
+              variant="destructive"
+              onClick={handleDeletePlan}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (t("deleting") || "Excluindo...") : (t("delete") || "Excluir")}
+            </VaultPrimaryButton>
+          </VaultFooter>
+        </VaultContent>
+      </Vault>
     </div>
   );
 }

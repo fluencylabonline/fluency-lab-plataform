@@ -140,6 +140,32 @@ export const billingService = {
     return billingRepository.updatePlan(id, fieldsToUpdate);
   },
 
+  async deletePlan(planId: string) {
+    const subscriptionsCount = await billingRepository.countSubscriptionsByPlanId(planId);
+    if (subscriptionsCount > 0) {
+      throw new Error("Não é possível excluir o plano pois ele já possui matrículas associadas.");
+    }
+    await billingRepository.deletePlan(planId);
+  },
+
+  async getAffectedStudents(planId: string) {
+    const activeSubs = await db.query.subscriptionsTable.findMany({
+      where: and(
+        eq(subscriptionsTable.planId, planId),
+        eq(subscriptionsTable.status, "active")
+      ),
+      with: { student: true }
+    });
+
+    return activeSubs.map(sub => ({
+      studentId: sub.studentId,
+      name: sub.student?.name || "Sem Nome",
+      email: sub.student?.email || "Sem Email",
+      startDate: sub.startDate,
+      endDate: sub.endDate,
+    }));
+  },
+
   // 2. Create Student Subscription
   async createSubscription(studentId: string, planId: string, dueDay: number) {
     const plan = await billingRepository.findPlanById(planId);

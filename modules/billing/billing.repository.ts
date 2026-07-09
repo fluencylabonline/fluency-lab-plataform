@@ -7,7 +7,7 @@ import {
   Subscription, 
   Installment 
 } from "./billing.schema";
-import { eq, and, lte, between, sum, ne } from "drizzle-orm";
+import { eq, and, lte, between, sum, ne, count } from "drizzle-orm";
 
 export const billingRepository = {
   // Audit
@@ -31,6 +31,16 @@ export const billingRepository = {
   async updatePlan(id: string, data: Partial<typeof plansTable.$inferSelect>) {
     const [plan] = await db.update(plansTable).set(data).where(eq(plansTable.id, id)).returning();
     return plan;
+  },
+  async deletePlan(id: string) {
+    await db.delete(plansTable).where(eq(plansTable.id, id));
+  },
+  async countSubscriptionsByPlanId(planId: string) {
+    const [result] = await db
+      .select({ count: count() })
+      .from(subscriptionsTable)
+      .where(eq(subscriptionsTable.planId, planId));
+    return result?.count || 0;
   },
 
   // Subscriptions
