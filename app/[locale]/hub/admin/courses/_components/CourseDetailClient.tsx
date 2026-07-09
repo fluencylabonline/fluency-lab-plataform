@@ -87,6 +87,13 @@ const languages = [
   { label: "Português", value: "pt" },
 ];
 
+const availableRoles = [
+  { label: "Admin", value: "admin" },
+  { label: "Manager", value: "manager" },
+  { label: "Teacher", value: "teacher" },
+  { label: "Student", value: "student" },
+];
+
 interface CourseDetailClientProps {
   courseData: {
     course: Course;
@@ -314,11 +321,13 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
       language: course.language,
       imageUrl: course.imageUrl,
       duration: course.duration,
+      roles: course.roles,
     },
   });
 
   const { formState: { isDirty, isSubmitting }, handleSubmit, watch, setValue } = form;
   const currentImageUrl = watch("imageUrl");
+  const selectedRoles = watch("roles") || [];
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -559,6 +568,38 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
                     <Input {...form.register("duration")} placeholder={t('durationPlaceholder') || "Ex: 20h"} />
                   </Field>
                 </div>
+
+                <Field
+                  label={t('targetRoles') || "Público Alvo (Roles)"}
+                  required
+                  error={form.formState.errors.roles?.message}
+                >
+                  <div className="flex flex-wrap gap-2">
+                    {availableRoles.map((role) => {
+                      const isSelected = selectedRoles.includes(role.value);
+                      return (
+                        <button
+                          type="button"
+                          key={role.value}
+                          onClick={() => {
+                            const newRoles = isSelected
+                              ? selectedRoles.filter(r => r !== role.value)
+                              : [...selectedRoles, role.value];
+                            setValue("roles", newRoles, { shouldDirty: true, shouldValidate: true });
+                          }}
+                          className={cn(
+                            "px-4 py-2 rounded-xl text-sm font-bold transition-all border-2",
+                            isSelected
+                              ? "bg-primary/10 border-primary text-primary"
+                              : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-muted-foreground hover:border-primary/50"
+                          )}
+                        >
+                          {role.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </Field>
 
                 <div className="pt-4 flex items-center gap-3">
                   <Button
