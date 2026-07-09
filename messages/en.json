@@ -325,7 +325,14 @@
     "save": "Save Plan",
     "saving": "Saving...",
     "statusUpdated": "Status updated!",
-    "statusUpdateError": "Error updating status"
+    "statusUpdateError": "Error updating status",
+    "deletePlan": "Delete Plan",
+    "deletePlanWarning": "Are you sure you want to delete the plan",
+    "deletePlanWarningDetail": "This action cannot be undone and will only work if the plan is not associated with any student.",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "planDeleted": "Plan deleted successfully!",
+    "planDeleteError": "Cannot delete the plan because it has associated enrollments."
   },
   "Certificates": {
     "description": "O certificado será gerado automaticamente com base no progresso do aluno (aulas completadas e último nivelamento).",

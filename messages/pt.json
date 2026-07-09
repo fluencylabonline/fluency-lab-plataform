@@ -325,7 +325,14 @@
     "save": "Salvar Plano",
     "saving": "Salvando...",
     "statusUpdated": "Status atualizado!",
-    "statusUpdateError": "Erro ao atualizar status"
+    "statusUpdateError": "Erro ao atualizar status",
+    "deletePlan": "Excluir Plano",
+    "deletePlanWarning": "Tem certeza que deseja excluir o plano",
+    "deletePlanWarningDetail": "Esta ação não poderá ser desfeita e só funcionará se o plano não estiver associado a nenhum aluno.",
+    "delete": "Excluir",
+    "deleting": "Excluindo...",
+    "planDeleted": "Plano excluído com sucesso!",
+    "planDeleteError": "Não é possível excluir o plano pois possui matrículas associadas."
   },
   "Certificates": {
     "description": "O certificado será gerado automaticamente com base no progresso do aluno (aulas completadas e último nivelamento).",
