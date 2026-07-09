@@ -31,12 +31,13 @@ import {
 import { createUserSchema, type CreateUserValues } from "@/modules/user/user.schema";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
-import { Check, Plus, X, Loader2 } from "lucide-react";
+import { Check, Plus, X, Loader2, CreditCard, Info } from "lucide-react";
 import { CalendarVault } from "@/components/ui/calendar";
 import { getPlansAction } from "@/modules/billing/billing.actions";
 import { getLanguagesAction } from "@/modules/curriculum/curriculum.actions";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import type { Plan } from "@/modules/billing/billing.schema";
 
 interface CreateUserVaultProps {
   open: boolean;
@@ -62,7 +63,7 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
     },
   });
 
-  const [plans, setPlans] = useState<{ id: string, name: string, language?: string | null }[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [availableLanguages, setAvailableLanguages] = useState<{ code: string, name: string }[]>([]);
 
   useEffect(() => {
@@ -309,6 +310,96 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
                     )}
                   </div>
                 </VaultField>
+
+                {classesStartDate && (
+                  <div className="mt-4 p-4 rounded-md border border-gray-200/50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-white/5 space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                      <CreditCard className="w-4 h-4 text-primary shrink-0" />
+                      <span>Simulação de Faturamento</span>
+                    </div>
+
+                    {!assignedPlanId ? (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5 animate-pulse">
+                        <Info className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                        Aguardando plano de aulas para calcular valor proporcional.
+                      </p>
+                    ) : (
+                      (() => {
+                        const plan = plans.find(p => p.id === assignedPlanId);
+                        if (!plan) return null;
+
+                        const dateObj = new Date(classesStartDate + "T12:00:00");
+                        const currentDay = dateObj.getDate();
+
+                        let remainingClasses = 4;
+                        let isProRata = false;
+
+                        if (currentDay >= 20) {
+                          remainingClasses = 1;
+                          isProRata = true;
+                        } else if (currentDay >= 15) {
+                          remainingClasses = 2;
+                          isProRata = true;
+                        } else if (currentDay >= 6) {
+                          remainingClasses = 3;
+                          isProRata = true;
+                        } else {
+                          remainingClasses = 4;
+                          isProRata = false;
+                        }
+
+                        const price = plan.price;
+                        const proRataAmount = Math.round((price / 4) * remainingClasses);
+
+                        let calculatedDueDate: Date;
+                        if (currentDay >= 20) {
+                          calculatedDueDate = new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0);
+                        } else {
+                          calculatedDueDate = new Date(dateObj);
+                          calculatedDueDate.setDate(calculatedDueDate.getDate() + 10);
+                        }
+
+                        const formatCurrency = (val: number, cur: string) => {
+                          const value = val / 100;
+                          return cur === "USD"
+                            ? `US$ ${value.toFixed(2)}`
+                            : `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+                        };
+
+                        const formattedDueDate = `${String(calculatedDueDate.getDate()).padStart(2, "0")}/${String(calculatedDueDate.getMonth() + 1).padStart(2, "0")}/${calculatedDueDate.getFullYear()}`;
+
+                        return (
+                          <div className="space-y-2.5 text-xs">
+                            <div className="flex justify-between text-muted-foreground">
+                              <span>Mensalidade Cheia:</span>
+                              <span className="font-medium text-foreground">
+                                {formatCurrency(price, plan.currency || "BRL")}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-muted-foreground">
+                              <span>Primeiro Pagamento ({isProRata ? `Proporcional: ${remainingClasses}/4 semanas` : "Integral"}):</span>
+                              <span className="font-semibold text-primary">
+                                {formatCurrency(proRataAmount, plan.currency || "BRL")}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-muted-foreground">
+                              <span>Vencimento do 1º Pagamento:</span>
+                              <span className="font-medium text-foreground">
+                                {formattedDueDate}
+                              </span>
+                            </div>
+
+                            {isProRata && (
+                              <div className="mt-2 p-2.5 rounded-md bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-[11px] leading-relaxed">
+                                Cálculo Pró-rata ativo. O valor proporcional é calculado dividindo a mensalidade em 4 partes (semanas) e cobrando apenas as semanas restantes a partir da data de início das aulas (dia {currentDay}). Isso se aplica independentemente do plano ter 2, 3 ou mais aulas semanais.
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()
+                    )}
+                  </div>
+                )}
               </>
             )}
           </VaultBody>

@@ -2,9 +2,10 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, Mail, Shield, Sparkles, Skull, Users } from "lucide-react";
+import { Plus, Mail, Shield, Sparkles, Skull, Users, HelpCircle } from "lucide-react";
 import { CreateUserVault } from "./CreateUserVault";
-import { Header } from "@/components/layout/header";
+import { UsersHelpVault } from "./UsersHelpVault";
+import { Header, type HeaderAction } from "@/components/layout/header";
 import { hasPermission, Role, UserRoles } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
 import type { User, AdminUserDTO } from "@/modules/user/user.schema";
@@ -36,6 +37,7 @@ export function UsersPageClient({
   studentTeachersMap,
 }: UsersPageClientProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("student");
   const [statusFilter, setStatusFilter] = useState<string>("active");
@@ -69,11 +71,18 @@ export function UsersPageClient({
         subtitle={t("createUserDescription")}
         user={currentUser}
         onSearchChange={setSearch}
-        actions={hasPermission(currentUser, "user.create") ? [{
-          label: t("createUser"),
-          icon: <Plus className="w-4 h-4" />,
-          onClick: () => setIsOpen(true)
-        }] : undefined}
+        actions={([
+          {
+            label: "Ajuda",
+            icon: <HelpCircle className="w-4 h-4 text-muted-foreground hover:text-foreground" />,
+            onClick: () => setIsHelpOpen(true)
+          },
+          hasPermission(currentUser, "user.create") ? {
+            label: t("createUser"),
+            icon: <Plus className="w-4 h-4" />,
+            onClick: () => setIsOpen(true)
+          } : null
+        ] as (HeaderAction | null)[]).filter((action): action is HeaderAction => action !== null)}
         className="contents"
       />
 
@@ -180,6 +189,7 @@ export function UsersPageClient({
       </main>
 
       <CreateUserVault open={isOpen} onOpenChange={setIsOpen} />
+      <UsersHelpVault open={isHelpOpen} onOpenChange={setIsHelpOpen} />
     </div>
   );
 }
