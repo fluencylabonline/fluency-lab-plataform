@@ -44,14 +44,14 @@ export default async function RecessActivitiesPage() {
             </div>
           </div>
           <Link
-            href="/hub/teacher/my-schedule"
+            href="/hub/teacher/recess/new"
             className={buttonVariants({
               variant: "default",
               className:
                 "gap-2 h-11 px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all",
             })}
           >
-            Comunicar Agora
+            Criar uma lição
           </Link>
         </div>
 
