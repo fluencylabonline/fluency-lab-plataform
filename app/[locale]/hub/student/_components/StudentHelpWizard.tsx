@@ -209,6 +209,37 @@ export function StudentHelpWizard({
                     <div className="size-1.5 rounded-full bg-rose-500 mt-1.5 shrink-0" />
                     <span>{t.rich("schedule.steps.policy.item2", richStrong)}</span>
                   </li>
+                  <li className="flex gap-2">
+                    <div className="size-1.5 rounded-full bg-rose-500 mt-1.5 shrink-0" />
+                    <span>{t.rich("schedule.steps.policy.item3", richStrong)}</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <div className="size-1.5 rounded-full bg-rose-500 mt-1.5 shrink-0" />
+                    <span>{t.rich("schedule.steps.policy.item4", richStrong)}</span>
+                  </li>
+                </ul>
+              </div>
+            ),
+          },
+          {
+            id: "schedule_noshow",
+            title: t("schedule.steps.noshow.title"),
+            description: t("schedule.steps.noshow.description"),
+            icon: Clock,
+            headerBg: "bg-amber-500/10",
+            iconColor: "text-amber-500",
+            content: (
+              <div className="space-y-4 text-sm leading-relaxed text-muted-foreground text-left">
+                <p>{t("schedule.steps.noshow.content1")}</p>
+                <ul className="space-y-2">
+                  <li className="flex gap-2">
+                    <div className="size-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                    <span>{t.rich("schedule.steps.noshow.item1", richStrong)}</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <div className="size-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                    <span>{t.rich("schedule.steps.noshow.item2", richStrong)}</span>
+                  </li>
                 </ul>
               </div>
             ),

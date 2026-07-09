@@ -2012,6 +2012,25 @@ export const schedulingService = {
       throw new Error("Original class not found or not owned by student");
     }
 
+    // --- Mod 1: Only scheduled or canceled-teacher classes can be rescheduled ---
+    const reschedulableStatuses = ["scheduled", "canceled-teacher"];
+    if (!reschedulableStatuses.includes(originalSlot.status)) {
+      throw new Error("Esta aula não pode ser remarcada.");
+    }
+
+    // --- Mod 2: 4h notice rule (only applies to scheduled classes) ---
+    if (originalSlot.status === "scheduled") {
+      const hoursUntilClass = differenceInHours(originalSlot.startAt, new Date());
+      if (hoursUntilClass < 4) {
+        throw new Error("Não é possível remarcar com menos de 4h de antecedência. Você pode apenas cancelar a aula.");
+      }
+    }
+
+    // --- Mod 3: canceled-teacher requires credit, not monthly quota ---
+    if (originalSlot.status === "canceled-teacher" && !creditId) {
+      throw new Error("Para remarcar uma aula cancelada pelo professor, use o crédito de reposição recebido.");
+    }
+
     const targetSlot = await schedulingRepository.findById(newSlotId);
     if (!targetSlot || targetSlot.status !== "available") {
       throw new Error("Target slot is no longer available");
@@ -2025,7 +2044,7 @@ export const schedulingService = {
         throw new Error("Invalid or expired credit");
       }
     } else {
-      // Check Monthly Quota
+      // Monthly Quota check — only for "scheduled" classes (not canceled-teacher)
       const now = new Date();
       const stats = await this.getStudentRescheduleStats(studentId, now.getMonth(), now.getFullYear());
       if (stats.count >= stats.limit) {
@@ -2041,7 +2060,7 @@ export const schedulingService = {
           .where(eq(studentCredits.id, creditId));
       }
 
-      // 2. If original is still scheduled, cancel it
+      // 2. If original is still scheduled, cancel it (keep canceled-teacher as-is)
       if (originalSlot.status === "scheduled") {
         await tx.update(slotInstances)
           .set({ status: "canceled-student", updatedAt: new Date() })
@@ -2056,6 +2075,7 @@ export const schedulingService = {
           reason: "Rescheduled by student",
         });
       }
+      // Note: canceled-teacher status is preserved on the original slot
 
       // 3. Update target slot
       await tx.update(slotInstances)

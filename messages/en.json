@@ -2160,6 +2160,12 @@
     "Error": {
       "generic": "An error occurred. Please try again."
     },
+    "Policy": {
+      "noShow": "No-Show classes cannot be rescheduled.",
+      "canceledStudent": "Classes canceled by you cannot be rescheduled.",
+      "canceledTeacher": "This class was canceled by the teacher. Use your makeup credit to reschedule it.",
+      "within4h": "Less than 4 hours until this class. Rescheduling is no longer possible. Canceling will be recorded as No-Show."
+    },
     "Reschedule": {
       "confirm": "Confirm Reschedule",
       "confirmFinal": "Confirm and Save",
@@ -3061,10 +3067,19 @@
         },
         "policy": {
           "title": "Rescheduling Rules",
-          "description": "Monthly limits and deadlines to cancel without losing your credit.",
-          "content1": "We value the time of both our tutors and students:",
-          "item1": "<strongNode>Reschedule Limits:</strongNode> The sidebar shows how many reschedules you still have available for the current month.",
-          "item2": "<strongNode>Advance Notice:</strongNode> Cancellations made at the last minute (less than 4 hours before class) are considered no-shows and the credit is consumed."
+          "description": "Understand which classes can be rescheduled, deadlines, and limits.",
+          "content1": "We value the time of both our tutors and students. Please read carefully:",
+          "item1": "<strongNode>Which classes can I reschedule?</strongNode> Only scheduled (blue) or teacher-canceled (red) classes. No-Show classes or classes you canceled cannot be rescheduled.",
+          "item2": "<strongNode>4-hour rule:</strongNode> You can only reschedule scheduled classes with at least 4 hours' notice. With less than 4h, you can only cancel — and it will be recorded as No-Show.",
+          "item3": "<strongNode>Monthly Quota:</strongNode> When rescheduling a scheduled class, 1 of your 2 monthly reschedules is consumed (non-cumulative).",
+          "item4": "<strongNode>Teacher Cancellation:</strongNode> If the teacher cancels your class, you receive a makeup credit. Use it to reschedule — it does not consume your monthly quota."
+        },
+        "noshow": {
+          "title": "What is No-Show?",
+          "description": "When a class is marked as No-Show and what it means.",
+          "content1": "No-Show occurs when the student doesn't attend the class or cancels too late:",
+          "item1": "<strongNode>Late Cancellation:</strongNode> If you cancel less than 4 hours before class, it is automatically recorded as No-Show.",
+          "item2": "<strongNode>No Rescheduling:</strongNode> No-Show classes cannot be rescheduled afterwards. The credit is lost."
         }
       }
     },

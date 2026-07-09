@@ -4,14 +4,14 @@ import { useState, useMemo } from "react";
 import { CalendarView, type CalendarEvent } from "@/components/ui/calendar-view";
 import { useTranslations, useLocale } from "next-intl";
 import { CreditsSummary } from "./CreditsSummary";
-import { format } from "date-fns";
+import { format, differenceInHours } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import { useIsMobile } from "@/hooks/ui/use-device";
 import { Badge } from "@/components/ui/badge";
 import { Vault, VaultHeader, VaultTitle, VaultBody, VaultContent } from "@/components/ui/vault";
 import { VaultLoadingOverlay } from "@/components/ui/vault-loading-overlay";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, Clock, Ticket, HelpCircle } from "lucide-react";
+import { Calendar, User, Clock, Ticket, HelpCircle, AlertCircle, Info } from "lucide-react";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
 import { useWizard } from "@/hooks/ui/use-wizard";
 import { cancelClassAction } from "@/modules/scheduling/scheduling.actions";
@@ -204,24 +204,79 @@ export function ScheduleCalendar({ initialClasses, balance, rescheduleStats }: S
                       </div>
                     </div>
 
-                    {selectedEvent.status === "scheduled" && (
-                      <div className="flex flex-col gap-3 pt-4 border-t">
-                        <Button variant="outline" onClick={() => {
-                          setIsDetailOpen(false);
-                          setIsRescheduleOpen(true);
-                        }}>
-                          {t("Actions.reschedule") || "Reagendar Aula"}
-                        </Button>
-
-                        <Button variant="destructive" onClick={() => setIsCancelConfirmOpen(true)}>
-                          {t("Actions.cancel") || "Cancelar Aula"}
-                        </Button>
-
-                        <p className="text-[10px] text-muted-foreground text-center">
-                          {t("Details.cancelPolicy") || "Cancelamentos feitos com menos de 4h de antecedência serão considerados No-Show."}
+                    {/* --- Contextual policy text per status (Mod 6) --- */}
+                    {selectedEvent.status === "no-show" && (
+                      <div className="flex items-start gap-2 p-3 rounded-md bg-amber-500/10 border border-amber-500/20">
+                        <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                        <p className="text-xs text-amber-700 dark:text-amber-400">
+                          {t("Policy.noShow") || "Aulas marcadas como No-Show não podem ser remarcadas."}
                         </p>
                       </div>
                     )}
+
+                    {selectedEvent.status === "canceled-student" && (
+                      <div className="flex items-start gap-2 p-3 rounded-md bg-muted/50 border">
+                        <Info className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                        <p className="text-xs text-muted-foreground">
+                          {t("Policy.canceledStudent") || "Aulas canceladas por você não podem ser remarcadas."}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* --- Actions for reschedulable statuses (Mods 4 & 5) --- */}
+                    {(selectedEvent.status === "scheduled" || selectedEvent.status === "canceled-teacher") && (() => {
+                      const hoursUntil = differenceInHours(new Date(selectedEvent.startAt), new Date());
+                      const isWithin4h = selectedEvent.status === "scheduled" && hoursUntil < 4;
+
+                      return (
+                        <div className="flex flex-col gap-3 pt-4 border-t">
+                          {/* Contextual info banner */}
+                          {selectedEvent.status === "canceled-teacher" && (
+                            <div className="flex items-start gap-2 p-3 rounded-md bg-red-500/10 border border-red-500/20">
+                              <Info className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                              <p className="text-xs text-red-700 dark:text-red-400">
+                                {t("Policy.canceledTeacher") || "Esta aula foi cancelada pelo professor. Use seu crédito de reposição para remarcá-la."}
+                              </p>
+                            </div>
+                          )}
+
+                          {isWithin4h && (
+                            <div className="flex items-start gap-2 p-3 rounded-md bg-amber-500/10 border border-amber-500/20">
+                              <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                              <p className="text-xs text-amber-700 dark:text-amber-400">
+                                {t("Policy.within4h") || "Faltam menos de 4h para esta aula. Não é mais possível remarcar. Cancelar será registrado como No-Show."}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Reschedule button: disabled if <4h for scheduled */}
+                          <Button
+                            variant="outline"
+                            disabled={isWithin4h}
+                            onClick={() => {
+                              setIsDetailOpen(false);
+                              setIsRescheduleOpen(true);
+                            }}
+                          >
+                            {t("Actions.reschedule") || "Reagendar Aula"}
+                          </Button>
+
+                          {/* Cancel button: only for scheduled (canceled-teacher is already canceled) */}
+                          {selectedEvent.status === "scheduled" && (
+                            <Button variant="destructive" onClick={() => setIsCancelConfirmOpen(true)}>
+                              {t("Actions.cancel") || "Cancelar Aula"}
+                            </Button>
+                          )}
+
+                          {/* General policy note */}
+                          {selectedEvent.status === "scheduled" && !isWithin4h && (
+                            <p className="text-[10px] text-muted-foreground text-center">
+                              {t("Details.cancelPolicy") || "Cancelamentos feitos com menos de 4h de antecedência serão considerados No-Show."}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </VaultBody>

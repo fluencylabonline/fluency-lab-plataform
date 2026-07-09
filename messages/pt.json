@@ -2160,6 +2160,12 @@
     "Error": {
       "generic": "Ocorreu um erro. Tente novamente."
     },
+    "Policy": {
+      "noShow": "Aulas marcadas como No-Show não podem ser remarcadas.",
+      "canceledStudent": "Aulas canceladas por você não podem ser remarcadas.",
+      "canceledTeacher": "Esta aula foi cancelada pelo professor. Use seu crédito de reposição para remarcá-la.",
+      "within4h": "Faltam menos de 4h para esta aula. Não é mais possível remarcar. Cancelar será registrado como No-Show."
+    },
     "Reschedule": {
       "confirm": "Confirmar Reagendamento",
       "confirmFinal": "Confirmar e Salvar",
@@ -3060,10 +3066,19 @@
         },
         "policy": {
           "title": "Regras de Remarcação",
-          "description": "Limites mensais e prazos para cancelar sem perder o crédito.",
-          "content1": "Prezamos pelo tempo de nossos tutores e alunos:",
-          "item1": "<strongNode>Limite de Remarcações:</strongNode> O painel lateral mostra quantas remarcações você ainda tem disponíveis para o mês atual.",
-          "item2": "<strongNode>Prazo de Antecedência:</strongNode> Cancelamentos feitos em cima da hora (menos de 4 horas antes) são considerados falta (No-Show) e o crédito é consumido."
+          "description": "Entenda quais aulas podem ser remarcadas, prazos e limites.",
+          "content1": "Prezamos pelo tempo de nossos tutores e alunos. Leia com atenção:",
+          "item1": "<strongNode>Quais aulas posso remarcar?</strongNode> Apenas aulas agendadas (azul) ou canceladas pelo professor (vermelho). Aulas marcadas como No-Show, ou que você cancelou, não podem ser remarcadas.",
+          "item2": "<strongNode>Prazo de 4 horas:</strongNode> Você só pode remarcar aulas agendadas com pelo menos 4 horas de antecedência. Com menos de 4h, você só pode cancelar — e o cancelamento será registrado como No-Show.",
+          "item3": "<strongNode>Cota Mensal:</strongNode> Ao remarcar uma aula agendada, será consumido 1 dos seus 2 reagendamentos mensais (não acumulativo).",
+          "item4": "<strongNode>Cancelamento do Professor:</strongNode> Se o professor cancelar sua aula, você recebe um crédito de reposição. Use-o para remarcar — ele não consome sua cota mensal."
+        },
+        "noshow": {
+          "title": "O que é No-Show?",
+          "description": "Quando uma aula é marcada como No-Show e o que isso significa.",
+          "content1": "No-Show acontece quando o aluno não comparece à aula ou cancela muito em cima da hora:",
+          "item1": "<strongNode>Cancelamento Tardio:</strongNode> Se você cancelar com menos de 4 horas antes da aula, ela é automaticamente registrada como No-Show.",
+          "item2": "<strongNode>Sem Remarcação:</strongNode> Aulas marcadas como No-Show não podem ser remarcadas depois. O crédito é perdido."
         }
       }
     },
