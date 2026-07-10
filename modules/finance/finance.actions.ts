@@ -116,9 +116,11 @@ export const getTransactionsAction = protectedAction
   .metadata({ name: "getTransactions" })
   .schema(z.object({
     type: z.enum(["income", "expense"]).optional(),
-    status: z.enum(["pending", "paid", "cancelled"]).optional(),
+    status: z.enum(["pending", "paid", "cancelled", "all"]).optional(),
     year: z.number().optional(),
     month: z.number().optional(),
+    startDate: z.date().or(z.string().pipe(z.coerce.date())).optional(),
+    endDate: z.date().or(z.string().pipe(z.coerce.date())).optional(),
     source: z.enum(["all", "student_payments", "teacher_payouts", "manual_income", "manual_expenses"]).optional(),
   }))
   .action(async ({ parsedInput, ctx }) => {
@@ -127,10 +129,10 @@ export const getTransactionsAction = protectedAction
     }
 
     try {
-      let start: Date | undefined;
-      let end: Date | undefined;
+      let start: Date | undefined = parsedInput.startDate;
+      let end: Date | undefined = parsedInput.endDate;
 
-      if (parsedInput.year !== undefined) {
+      if (!start && !end && parsedInput.year !== undefined) {
         if (parsedInput.month !== undefined) {
           start = new Date(parsedInput.year, parsedInput.month, 1);
           end = new Date(parsedInput.year, parsedInput.month + 1, 0, 23, 59, 59);
@@ -142,14 +144,15 @@ export const getTransactionsAction = protectedAction
 
       const transactions = await financeService.getTransactions({
         type: parsedInput.type,
-        status: parsedInput.status,
+        status: parsedInput.status === "all" ? undefined : parsedInput.status,
         start,
         end,
         source: parsedInput.source,
       });
 
       return { success: true, data: transactions };
-    } catch {
+    } catch (error) {
+      console.error("[getTransactionsAction] Error:", error);
       return { success: false, error: "Falha ao buscar transações" };
     }
   });

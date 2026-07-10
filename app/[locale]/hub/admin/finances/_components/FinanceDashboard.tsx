@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FiscalConfigVault } from "./FiscalConfigVault";
+import { ExportFinancesVault } from "./ExportFinancesVault";
 import { ForecastCards } from "./ForecastCards";
 import { MetricsCards } from "./MetricsCards";
 import { NewTransactionVault } from "./NewTransactionVault";
@@ -167,6 +168,7 @@ export function FinanceDashboard({
             initialConfig={initialFiscalConfig}
             year={currentYear}
           />
+          <ExportFinancesVault />
 
           <Link href={"/hub/admin/finances/forecast"}>
             <Button>Previsões</Button>

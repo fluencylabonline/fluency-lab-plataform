@@ -19,6 +19,23 @@
   },
   "AdminFinances": {
     "allMonths": "All months",
+    "export": {
+      "trigger": "Export",
+      "title": "Export Financial Data",
+      "periodType": "Period Type",
+      "fullYear": "Full Year",
+      "customPeriod": "Custom Period",
+      "year": "Reference Year",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "source": "Transaction Source",
+      "status": "Status",
+      "submit": "Export (Excel)",
+      "cancel": "Cancel",
+      "loading": "Exporting...",
+      "success": "Data exported successfully!",
+      "error": "Error exporting data."
+    },
     "capacity": {
       "availableSlots": "Available Slots",
       "averageTicket": "Average Ticket (Monthly)",

@@ -19,6 +19,23 @@
   },
   "AdminFinances": {
     "allMonths": "Todos os meses",
+    "export": {
+      "trigger": "Exportar",
+      "title": "Exportar Dados Financeiros",
+      "periodType": "Tipo de Período",
+      "fullYear": "Ano Inteiro",
+      "customPeriod": "Período Personalizado",
+      "year": "Ano de Referência",
+      "startDate": "Data Inicial",
+      "endDate": "Data Final",
+      "source": "Origem das Transações",
+      "status": "Status",
+      "submit": "Exportar (Excel)",
+      "cancel": "Cancelar",
+      "loading": "Exportando...",
+      "success": "Dados exportados com sucesso!",
+      "error": "Erro ao exportar dados."
+    },
     "capacity": {
       "availableSlots": "Vagas Restantes",
       "averageTicket": "Ticket Médio (Mensal)",
