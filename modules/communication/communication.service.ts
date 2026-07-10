@@ -719,6 +719,88 @@ export class CommunicationService {
   }
 
   /**
+   * Envia confirmação de agendamento de aula para o aluno via WhatsApp.
+   */
+  async sendStudentClassScheduledWhatsApp(
+    cellphone: string,
+    explicitLocale: "pt" | "en",
+    data: {
+      classesStartDate: Date;
+      teacherName: string;
+      ruleDayName: string;
+      ruleTime: string;
+    }
+  ) {
+    try {
+      const languageCode = explicitLocale === "en" ? "en" : "pt_BR";
+      
+      const dateStr = explicitLocale === "pt"
+        ? data.classesStartDate.toLocaleDateString("pt-BR")
+        : data.classesStartDate.toLocaleDateString("en-US");
+
+      return await this.sendWhatsAppTemplate({
+        to: cellphone,
+        templateName: "class_scheduled_student_v1",
+        languageCode,
+        components: [
+          {
+            type: "body",
+            parameters: [
+              { type: "text", text: dateStr },
+              { type: "text", text: data.teacherName },
+              { type: "text", text: data.ruleDayName },
+              { type: "text", text: data.ruleTime },
+            ]
+          }
+        ]
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendStudentClassScheduledWhatsApp] Error:", error);
+    }
+  }
+
+  /**
+   * Envia alerta de novo aluno alocado para o professor via WhatsApp.
+   */
+  async sendTeacherNewStudentWhatsApp(
+    cellphone: string,
+    explicitLocale: "pt" | "en",
+    data: {
+      studentName: string;
+      guardianName: string;
+      guardianPhone: string;
+      studentPhone: string;
+      firstClassDateTime: string;
+      studentId: string;
+    }
+  ) {
+    try {
+      const languageCode = explicitLocale === "en" ? "en" : "pt_BR";
+
+      return await this.sendWhatsAppTemplate({
+        to: cellphone,
+        templateName: "new_student_teacher_v1",
+        languageCode,
+        components: [
+          {
+            type: "body",
+            parameters: [
+              { type: "text", text: data.studentName },
+              { type: "text", text: data.guardianName },
+              { type: "text", text: data.guardianPhone },
+              { type: "text", text: data.studentPhone },
+              { type: "text", text: data.firstClassDateTime },
+              { type: "text", text: data.studentId },
+            ]
+          }
+        ]
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendTeacherNewStudentWhatsApp] Error:", error);
+    }
+  }
+
+  /**
    * Método base para envio de templates do WhatsApp.
    */
   async sendWhatsAppTemplate(options: SendWhatsAppTemplateOptions): Promise<WhatsAppResponse | null> {

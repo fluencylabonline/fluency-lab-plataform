@@ -50,6 +50,7 @@ export const usersTable = pgTable("users", {
   guardianName: text("guardian_name"),
   guardianTaxId: text("guardian_tax_id"), // Encriptado no Service
   guardianRelationship: text("guardian_relationship"),
+  guardianCellphone: text("guardian_cellphone"), // Encriptado no Service
 
   // Audit
   lastLoginAt: timestamp("last_login_at"), //TODO: Não está sendo usado
@@ -217,6 +218,7 @@ export const onboardingAddressSchema = z.object({
     name: z.string().min(2),
     taxId: z.string().min(1),
     relationship: z.string().min(1),
+    cellphone: z.string().min(1),
   }).optional(),
 });
 

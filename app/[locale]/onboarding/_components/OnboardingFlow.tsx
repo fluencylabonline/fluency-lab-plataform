@@ -29,6 +29,7 @@ export interface OnboardingData extends Partial<User> {
         name?: string;
         taxId?: string;
         relationship?: string;
+        cellphone?: string;
     };
 }
 

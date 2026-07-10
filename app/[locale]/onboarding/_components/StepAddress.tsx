@@ -34,6 +34,7 @@ const addressFormSchema = z.object({
     guardianName: z.string().optional(),
     guardianTaxId: z.string().optional(),
     guardianRelationship: z.string().optional(),
+    guardianCellphone: z.string().optional(),
 }).superRefine((data, ctx) => {
     // 1. Validação de Tax ID (CPF ou SSN/Foreign)
     const isBR = data.nationality === "brazilian";
@@ -118,6 +119,7 @@ export function StepAddress({
             guardianName: initial.guardianData?.name || initial.guardianName || "",
             guardianTaxId: initial.guardianData?.taxId || initial.guardianTaxId || "",
             guardianRelationship: initial.guardianData?.relationship || initial.guardianRelationship || "",
+            guardianCellphone: initial.guardianData?.cellphone || initial.guardianCellphone || "",
         },
     });
 
@@ -143,6 +145,7 @@ export function StepAddress({
                     name: data.guardianName!,
                     taxId: data.guardianTaxId!,
                     relationship: data.guardianRelationship!,
+                    cellphone: data.guardianCellphone!,
                 }
                 : undefined,
         };
@@ -328,16 +331,30 @@ export function StepAddress({
                         </Field>
                     </div>
 
-                    <Field
-                        label={t("guardian.relationship")}
-                        error={errors.guardianRelationship?.message}
-                    >
-                        <input
-                            {...register("guardianRelationship")}
-                            placeholder={t("guardian.relationshipPlaceholder")}
-                            className={inputClass}
-                        />
-                    </Field>
+                    <div className="grid grid-cols-2 gap-3">
+                        <Field
+                            label={t("guardian.relationship")}
+                            error={errors.guardianRelationship?.message}
+                        >
+                            <input
+                                {...register("guardianRelationship")}
+                                placeholder={t("guardian.relationshipPlaceholder")}
+                                className={inputClass}
+                            />
+                        </Field>
+
+                        <Field
+                            label={t("guardian.cellphone") || "Celular do Responsável"}
+                            error={errors.guardianCellphone?.message}
+                        >
+                            <input
+                                {...register("guardianCellphone")}
+                                placeholder="+55 (11) 99999-9999"
+                                className={inputClass}
+                                inputMode="tel"
+                            />
+                        </Field>
+                    </div>
                 </div>
             )}
 

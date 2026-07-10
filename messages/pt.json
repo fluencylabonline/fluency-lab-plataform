@@ -1717,6 +1717,7 @@
       "relationship": "Parentesco",
       "relationshipPlaceholder": "Ex: Pai, Mãe, Tutor",
       "taxId": "CPF do Responsável",
+      "cellphone": "Celular do Responsável",
       "title": "Dados do Responsável"
     },
     "name": "Nome Completo",
@@ -2475,6 +2476,11 @@
     "weekly": "Semanal"
   },
   "UserManagement": {
+    "birthDate": "Data de Nascimento",
+    "guardianName": "Nome do Responsável",
+    "guardianTaxId": "CPF do Responsável",
+    "guardianRelationship": "Grau de Parentesco",
+    "guardianCellphone": "Celular do Responsável",
     "accountActions": "Ações de Conta",
     "invoiceGeneratedSuccess": "Código de pagamento gerado com sucesso!",
     "reminderSentSuccess": "Lembrete enviado com sucesso!",

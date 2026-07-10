@@ -201,7 +201,7 @@ export function CurriculumVaults({
                   {teachers.map((teacher) => (
                     <CommandItem
                       key={teacher.id}
-                      value={teacher.id}
+                      value={`${teacher.id} ${teacher.name}`.toLowerCase()}
                       onSelect={() => setSelectedId(teacher.id)}
                       className={cn(
                         "flex items-center justify-between py-3",
@@ -251,7 +251,7 @@ export function CurriculumVaults({
                   {lessons.map((lesson) => (
                     <CommandItem
                       key={lesson.id}
-                      value={lesson.id}
+                      value={`${lesson.id} ${lesson.title}`.toLowerCase()}
                       onSelect={() => {
                         setSelectedId(lesson.id);
                         setSelectedTitle(lesson.title);
@@ -328,7 +328,7 @@ export function CurriculumVaults({
                         {plans.map((plan) => (
                           <CommandItem
                             key={plan.id}
-                            value={plan.id}
+                            value={`${plan.id} ${plan.name} ${plan.description || ""}`.toLowerCase()}
                             onSelect={() => setSelectedId(plan.id)}
                             className={cn(
                               "flex items-center justify-between py-3",
@@ -371,7 +371,7 @@ export function CurriculumVaults({
                         {upcomingClasses.map((slot) => (
                           <CommandItem
                             key={slot.id}
-                            value={slot.id}
+                            value={`${slot.id} ${format(new Date(slot.startAt), "dd/MM 'às' HH:mm", { locale: ptBR })} ${slot.lessonTitle || ""}`.toLowerCase()}
                             onSelect={() => setStartClassId(slot.id)}
                             className={cn(
                               "flex items-center justify-between py-3",
@@ -545,10 +545,11 @@ export function CurriculumVaults({
                     <CommandGroup>
                       {availableRules.map((rule) => {
                         const teacher = teachers.find(t => t.id === rule.teacherId);
+                        const weekdayStr = format(new Date(rule.startDate), "EEEE", { locale: ptBR });
                         return (
                           <CommandItem
                             key={rule.id}
-                            value={rule.id}
+                            value={`${rule.id} ${weekdayStr} ${rule.startTime} ${rule.endTime} ${teacher?.name || ""}`.toLowerCase()}
                             onSelect={() => setSelectedId(rule.id)}
                             className={cn(
                               "flex items-center justify-between py-3",
@@ -648,7 +649,7 @@ export function CurriculumVaults({
                     {teachers.map((teacher) => (
                       <CommandItem
                         key={teacher.id}
-                        value={teacher.id}
+                        value={`${teacher.id} ${teacher.name}`.toLowerCase()}
                         onSelect={() => setTransferTeacherId(teacher.id)}
                         className={cn(
                           "flex items-center justify-between py-3",

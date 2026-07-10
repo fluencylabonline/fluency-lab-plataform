@@ -361,7 +361,7 @@ export const revealSensitiveDataAction = adminAction
   .inputSchema(
     z.object({
       userId: z.string(),
-      field: z.enum(["cellphone", "taxId", "businessTaxId", "pixKey"]),
+      field: z.enum(["cellphone", "taxId", "businessTaxId", "pixKey", "guardianTaxId", "guardianCellphone"]),
       password: z.string().optional(),
     })
   )

@@ -80,6 +80,7 @@ export const onboardingAddressAction = protectedAction
       updateData.guardianName = guardianData.name;
       updateData.guardianTaxId = encrypt(guardianData.taxId);
       updateData.guardianRelationship = guardianData.relationship;
+      updateData.guardianCellphone = encrypt(guardianData.cellphone);
     }
 
     await userService.updateUser(ctx.user.id, updateData);

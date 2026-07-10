@@ -58,7 +58,7 @@ export function PersonalInfoTab({
   const tRoles = useTranslations("UserRoles");
 
   const [revealingField, setRevealingField] = React.useState<
-    "cellphone" | "taxId" | "businessTaxId" | "pixKey" | null
+    "cellphone" | "taxId" | "businessTaxId" | "pixKey" | "guardianTaxId" | "guardianCellphone" | null
   >(null);
   const [adminPassword, setAdminPassword] = React.useState("");
   const [isRevealing, setIsRevealing] = React.useState(false);
@@ -140,7 +140,7 @@ export function PersonalInfoTab({
   };
 
   const openRevealVault = (
-    field: "cellphone" | "taxId" | "businessTaxId" | "pixKey",
+    field: "cellphone" | "taxId" | "businessTaxId" | "pixKey" | "guardianTaxId" | "guardianCellphone",
   ) => {
     if (revealedValues[field]) return; // Already revealed
     setRevealingField(field);
@@ -246,6 +246,57 @@ export function PersonalInfoTab({
           <DataRow label={t("preferredLanguage")}>
             {user.locale === "pt" ? "Português (Brasil)" : "English (US)"}
           </DataRow>
+          {user.birthDate && (
+            <DataRow label={t("birthDate")}>
+              <span>{format(new Date(user.birthDate), "dd/MM/yyyy")}</span>
+            </DataRow>
+          )}
+          {user.guardianName && (
+            <>
+              <DataRow label={t("guardianName")}>
+                <span>{user.guardianName}</span>
+              </DataRow>
+              {user.guardianRelationship && (
+                <DataRow label={t("guardianRelationship")}>
+                  <span>{user.guardianRelationship}</span>
+                </DataRow>
+              )}
+              {user.guardianTaxId && (
+                <DataRow label={t("guardianTaxId")}>
+                  <div
+                    className={`flex items-center gap-2 group ${isAdmin && !revealedValues.guardianTaxId ? "cursor-pointer" : ""}`}
+                    onClick={() => isAdmin && openRevealVault("guardianTaxId")}
+                  >
+                    <span className={revealedValues.guardianTaxId ? "font-mono text-xs" : ""}>
+                      {revealedValues.guardianTaxId
+                        ? revealedValues.guardianTaxId
+                        : `•••.•••.${user.guardianTaxId?.slice(-4, -2)}-${user.guardianTaxId?.slice(-2)}`}
+                    </span>
+                    {isAdmin && !revealedValues.guardianTaxId && (
+                      <Eye className="w-3 h-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                    )}
+                  </div>
+                </DataRow>
+              )}
+              {user.guardianCellphone && (
+                <DataRow label={t("guardianCellphone")}>
+                  <div
+                    className={`flex items-center gap-2 group ${isAdmin && !revealedValues.guardianCellphone ? "cursor-pointer" : ""}`}
+                    onClick={() => isAdmin && openRevealVault("guardianCellphone")}
+                  >
+                    <span className={revealedValues.guardianCellphone ? "font-mono text-xs" : ""}>
+                      {revealedValues.guardianCellphone
+                        ? revealedValues.guardianCellphone
+                        : `(••) •••••-${user.guardianCellphone?.slice(-4)}`}
+                    </span>
+                    {isAdmin && !revealedValues.guardianCellphone && (
+                      <Eye className="w-3 h-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                    )}
+                  </div>
+                </DataRow>
+              )}
+            </>
+          )}
           {user.taxId && (
             <DataRow label={t("taxId")}>
               <div

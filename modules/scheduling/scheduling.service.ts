@@ -17,6 +17,7 @@ import { planLessons } from "@/modules/learning/learning.schema";
 import { communicationService } from "@/modules/communication/communication.service";
 import { userService } from "@/modules/user/user.service";
 import { env } from "@/env";
+import { decrypt } from "@/lib/cryptography";
 import {
   addWeeks,
   addMonths,
@@ -172,6 +173,67 @@ export const schedulingService = {
 
   // --- Student Allocation ---
   // --- Student Allocation ---
+  // --- WhatsApp Notifications ---
+  async sendAllocationWhatsAppNotifications(
+    student: User,
+    rule: typeof recurrenceRules.$inferSelect,
+    startDate: Date
+  ) {
+    try {
+      const teacher = await userService.getUserById(rule.teacherId);
+      if (!teacher) return;
+
+      const studentPhone = student.cellphone ? (student.cellphone.includes(":") ? decrypt(student.cellphone) : student.cellphone) : "";
+      const teacherPhone = teacher.cellphone ? (teacher.cellphone.includes(":") ? decrypt(teacher.cellphone) : teacher.cellphone) : "";
+      const guardianPhone = student.guardianCellphone ? (student.guardianCellphone.includes(":") ? decrypt(student.guardianCellphone) : student.guardianCellphone) : "";
+
+      const weekdaysPt = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+      const weekdaysEn = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      
+      const dayOfWeekNum = new Date(rule.startDate).getDay();
+      const ruleDayPt = weekdaysPt[dayOfWeekNum] || "";
+      const ruleDayEn = weekdaysEn[dayOfWeekNum] || "";
+
+      if (studentPhone) {
+        const studentLocale = student.locale === "en" ? "en" : "pt";
+        const ruleDayName = studentLocale === "en" ? ruleDayEn : ruleDayPt;
+        await communicationService.sendStudentClassScheduledWhatsApp(studentPhone, studentLocale, {
+          classesStartDate: startDate,
+          teacherName: teacher.name || "",
+          ruleDayName,
+          ruleTime: rule.startTime,
+        });
+      }
+
+      if (teacherPhone) {
+        const teacherLocale = teacher.locale === "en" ? "en" : "pt";
+        const isMinor = student.birthDate ? (new Date().getFullYear() - new Date(student.birthDate).getFullYear()) < 18 : false;
+        
+        let guardianName = teacherLocale === "en" ? "Adult (18+)" : "Maior de idade";
+        let guardianPhoneVal = teacherLocale === "en" ? "Adult (18+)" : "Maior de idade";
+        
+        if (isMinor && student.guardianName) {
+          guardianName = student.guardianName;
+          guardianPhoneVal = guardianPhone || "-";
+        }
+
+        const firstClassDateTime = `${startDate.toLocaleDateString(teacherLocale === "en" ? "en-US" : "pt-BR")} ${teacherLocale === "en" ? "at" : "às"} ${rule.startTime}`;
+
+        await communicationService.sendTeacherNewStudentWhatsApp(teacherPhone, teacherLocale, {
+          studentName: student.name || "",
+          guardianName,
+          guardianPhone: guardianPhoneVal,
+          studentPhone: studentPhone || "-",
+          firstClassDateTime,
+          studentId: student.id,
+        });
+      }
+    } catch (error) {
+      console.error("[sendAllocationWhatsAppNotifications] Error:", error);
+    }
+  },
+
+  // --- Student Allocation ---
   async allocateStudentToRule(
     user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
     ruleId: string,
@@ -214,7 +276,7 @@ export const schedulingService = {
       ? new Date(student.classesStartDate)
       : now;
 
-    return await db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
       // 2. Update the rule template
       await tx.update(recurrenceRules)
         .set({ studentId })
@@ -260,6 +322,14 @@ export const schedulingService = {
 
       return { success: true };
     });
+
+    if (result.success) {
+      this.sendAllocationWhatsAppNotifications(student, rule, startAllocationFrom).catch((err) =>
+        console.error("[allocateStudentToRule] WhatsApp notification error:", err)
+      );
+    }
+
+    return result;
   },
 
   async deallocateStudentFromRule(
@@ -372,6 +442,8 @@ export const schedulingService = {
     // --- Fetch future scheduled slots for this student/rule ---
     const futureSlots = await schedulingRepository.findFutureStudentSlotsByRule(ruleId, studentId, now);
 
+    let targetRule: typeof recurrenceRules.$inferSelect | null = null;
+
     await db.transaction(async (tx) => {
       // ── Step 1: Release old rule ────────────────────────────────────────
       await tx.update(recurrenceRules)
@@ -411,6 +483,7 @@ export const schedulingService = {
           studentId,
           now
         );
+        targetRule = compatibleRule;
       } else {
         // ── Case B: Force — create new recurrence rule for new teacher ────
         const [newRule] = await tx.insert(recurrenceRules).values({
@@ -432,6 +505,7 @@ export const schedulingService = {
           studentId,
           now
         );
+        targetRule = newRule;
       }
     });
 
@@ -466,6 +540,12 @@ export const schedulingService = {
     console.info(
       `[transferStudentToTeacher] Student ${studentId} transferred from teacher ${rule.teacherId}${oldTeacher ? ` (${oldTeacher.name})` : ""} to ${newTeacherId} (${newTeacher.name}). Compatible: ${!!compatibleRule}`
     );
+
+    if (targetRule) {
+      this.sendAllocationWhatsAppNotifications(student, targetRule, now).catch((err) =>
+        console.error("[transferStudentToTeacher] WhatsApp notification error:", err)
+      );
+    }
 
     return { success: true };
   },
