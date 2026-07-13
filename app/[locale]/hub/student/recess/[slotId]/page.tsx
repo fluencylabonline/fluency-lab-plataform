@@ -47,7 +47,7 @@ export default async function RecessActivityPage({ params }: RecessPageProps) {
     title: lesson.title,
     difficulty: lesson.difficulty,
     contentJson: lesson.contentJson,
-    quizData: lesson.quizData as any,
+    quizData: lesson.quizData,
   };
 
   return (

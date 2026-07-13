@@ -763,6 +763,17 @@ export const schedulingService = {
     const slot = await schedulingRepository.findById(slotId);
     if (!slot) throw new Error("Slot instance not found");
 
+    if (slot.status === "teacher-recess") {
+      await db.update(slotInstances)
+        .set({
+          fallbackLessonId: lessonId,
+          fallbackLessonTitle: lessonTitle,
+          updatedAt: new Date()
+        })
+        .where(eq(slotInstances.id, slotId));
+      return { success: true };
+    }
+
     const planInfo = await linkLessonToActivePlan(slot.studentId, lessonId, slot.startAt);
 
     await db.update(slotInstances)

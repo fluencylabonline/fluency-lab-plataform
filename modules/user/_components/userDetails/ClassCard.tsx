@@ -53,6 +53,7 @@ export function ClassCard({
     "canceled-admin": { label: "Canc. Admin", color: "bg-gray-500/10 text-gray-500 border-gray-500/20", icon: XCircle },
     "no-show": { label: "No Show", color: "bg-amber-500/10 text-amber-500 border-amber-500/20", icon: AlertCircle },
     overdue: { label: "Expirada", color: "bg-purple-500/10 text-purple-500 border-purple-500/20", icon: Clock },
+    "teacher-recess": { label: "Recesso", color: "bg-purple-500/10 text-purple-500 border-purple-500/20", icon: Clock },
   };
 
   const config = statusConfig[slot.status] || statusConfig.scheduled;
@@ -88,8 +89,11 @@ export function ClassCard({
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <BookOpen className="h-3.5 w-3.5" />
               <span className="truncate">
-                {slot.planName || "Sem plano"}
-                {slot.lessonTitle ? ` • ${slot.lessonTitle}` : " (Sem lição)"}
+                {slot.status === "teacher-recess" ? (
+                  slot.fallbackLessonTitle ? `Fallback: ${slot.fallbackLessonTitle}` : "Sem lição de fallback"
+                ) : (
+                  `${slot.planName || "Sem plano"}${slot.lessonTitle ? ` • ${slot.lessonTitle}` : " (Sem lição)"}`
+                )}
               </span>
             </div>
           </div>

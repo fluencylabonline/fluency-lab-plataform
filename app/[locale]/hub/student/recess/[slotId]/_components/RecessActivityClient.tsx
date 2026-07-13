@@ -8,14 +8,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { BookOpen, HelpCircle, CheckCircle2, ArrowRight, RefreshCw, Calendar, User } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
-
-interface QuizQuestion {
-  question: string;
-  options: string[];
-  correctAnswer: string; // ou string dependendo do schema
-  correctIndex?: number;
-  explanation?: string;
-}
+import { type JSONContent } from "@tiptap/core";
+import { type QuizData } from "@/modules/curriculum/curriculum.types";
 
 interface RecessActivityClientProps {
   slot: {
@@ -28,11 +22,8 @@ interface RecessActivityClientProps {
     id: string;
     title: string;
     difficulty: string;
-    contentJson?: any;
-    quizData?: {
-      questions: QuizQuestion[];
-      passingScore?: number;
-    } | null;
+    contentJson?: JSONContent | null;
+    quizData?: QuizData | null;
   };
   locale: string;
 }
@@ -193,7 +184,7 @@ export function RecessActivityClient({ slot, lesson, locale }: RecessActivityCli
                 </div>
 
                 <p className="text-sm font-semibold leading-relaxed">
-                  {questions[currentQuestionIndex].question}
+                  {questions[currentQuestionIndex].text}
                 </p>
 
                 <div className="space-y-2 pt-2">
