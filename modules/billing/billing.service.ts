@@ -298,7 +298,7 @@ export const billingService = {
       return existingSub;
     }
 
-    const startDate = new Date();
+    const startDate = student.classesStartDate ? new Date(student.classesStartDate) : new Date();
     const endDate = addMonths(startDate, plan.durationMonths);
 
     const subscription = await db.transaction(async (tx) => {
@@ -354,7 +354,7 @@ export const billingService = {
       // 2. Generate subsequent installments (full price)
       for (let i = 2; i <= plan.durationMonths; i++) {
         // Subsequent charges always on the chosen dueDay of the following months
-        const dueDate = setDate(addMonths(now, i - 1), dueDay);
+        const dueDate = setDate(addMonths(billingBaseDate, i - 1), dueDay);
 
         installments.push({
           subscriptionId: sub.id,
