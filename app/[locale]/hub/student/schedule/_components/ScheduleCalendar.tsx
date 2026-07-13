@@ -223,6 +223,41 @@ export function ScheduleCalendar({ initialClasses, balance, rescheduleStats }: S
                       </div>
                     )}
 
+                    {/* --- Teacher Recess Block --- */}
+                    {selectedEvent.status === "teacher-recess" && (
+                      <div className="flex flex-col gap-3 pt-4 border-t">
+                        <div className="flex items-start gap-2 p-3 rounded-md bg-purple-500/10 border border-purple-500/20">
+                          <Info className="w-4 h-4 text-purple-500 mt-0.5 shrink-0" />
+                          <div className="flex flex-col gap-1">
+                            <p className="text-xs font-medium text-purple-700 dark:text-purple-400">
+                              {t("Policy.teacherRecess") || "Seu professor está de recesso neste dia."}
+                            </p>
+                            {(selectedEvent as ScheduledClass & { fallbackLessonId?: string | null; fallbackLessonTitle?: string | null }).fallbackLessonId && (
+                              <p className="text-xs text-purple-600 dark:text-purple-300">
+                                {t("Policy.teacherRecessFallback") || "Uma atividade alternativa foi disponibilizada para você."}
+                              </p>
+                            )}
+                            {!(selectedEvent as ScheduledClass & { fallbackLessonId?: string | null }).fallbackLessonId && (
+                              <p className="text-xs text-purple-600 dark:text-purple-300">
+                                {t("Policy.teacherRecessNoFallback") || "O administrador irá definir uma atividade alternativa em breve."}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        {(selectedEvent as ScheduledClass & { fallbackLessonId?: string | null }).fallbackLessonId && (
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setIsDetailOpen(false);
+                              router.push(`/hub/student/recess/${selectedEvent.id}`);
+                            }}
+                          >
+                            {t("Actions.viewRecessActivity") || "Ver Atividade de Recesso"}
+                          </Button>
+                        )}
+                      </div>
+                    )}
+
                     {/* --- Actions for reschedulable statuses (Mods 4 & 5) --- */}
                     {(selectedEvent.status === "scheduled" || selectedEvent.status === "canceled-teacher") && (() => {
                       const hoursUntil = differenceInHours(new Date(selectedEvent.startAt), new Date());

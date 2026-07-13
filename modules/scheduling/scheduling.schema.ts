@@ -8,7 +8,7 @@ import { usersTable } from "../user/user.schema";
 import { payoutsTable } from "../payout/payout.schema";
 
 // ================= ENUMS =================
-export const slotTypeEnum = pgEnum("slot_type", ["NORMAL", "REPOSICAO", "RECESS_FALLBACK"]);
+export const slotTypeEnum = pgEnum("slot_type", ["NORMAL", "REPOSICAO"]);
 
 export const recurrenceFreqEnum = pgEnum("recurrence_freq", ["NONE", "WEEKLY", "BIWEEKLY", "MONTHLY"]);
 
@@ -106,6 +106,10 @@ export const slotInstances = pgTable("slot_instances", {
   payoutId: uuid("payout_id"),
 
   notes: text("notes"),
+
+  // Recess Fallback Content (linkado quando o slot entra em teacher-recess)
+  fallbackLessonId: varchar("fallback_lesson_id", { length: 128 }),
+  fallbackLessonTitle: varchar("fallback_lesson_title", { length: 255 }),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

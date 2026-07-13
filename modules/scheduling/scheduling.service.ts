@@ -16,6 +16,7 @@ import { learningService } from "@/modules/learning/learning.service";
 import { planLessons } from "@/modules/learning/learning.schema";
 import { communicationService } from "@/modules/communication/communication.service";
 import { userService } from "@/modules/user/user.service";
+import { curriculumService } from "@/modules/curriculum/curriculum.service";
 import { env } from "@/env";
 import { decrypt } from "@/lib/cryptography";
 import {
@@ -293,6 +294,23 @@ export const schedulingService = {
           and(
             eq(slotInstances.ruleId, ruleId),
             eq(slotInstances.status, "available"),
+            gte(slotInstances.startAt, startAllocationFrom),
+            lt(slotInstances.startAt, horizon)
+          )
+        );
+
+      // 3b. Assign student to teacher-recess slots too (student keeps teacher-recess status)
+      // This ensures the student can see that their slot exists but prof is on recess
+      await tx.update(slotInstances)
+        .set({
+          studentId,
+          updatedAt: now
+          // status stays 'teacher-recess' intentionally
+        })
+        .where(
+          and(
+            eq(slotInstances.ruleId, ruleId),
+            eq(slotInstances.status, "teacher-recess"),
             gte(slotInstances.startAt, startAllocationFrom),
             lt(slotInstances.startAt, horizon)
           )
@@ -593,12 +611,27 @@ export const schedulingService = {
           if (!exists && !conflict) {
             const shouldAssignStudent = overrideStudentId && (!startAllocationFrom || !isBefore(startAt, startAllocationFrom));
 
+            // Check if teacher has a registered recess covering this date
+            const recesses = await schedulingRepository.findRecessesByTeacher(rule.teacherId);
+            const isTeacherRecess = recesses.some(r =>
+              startAt >= r.startDate && startAt <= r.endDate
+            );
+
+            let slotStatus: typeof slotInstances.status.enumValues[number];
+            if (isTeacherRecess) {
+              slotStatus = "teacher-recess";
+            } else if (shouldAssignStudent) {
+              slotStatus = "scheduled";
+            } else {
+              slotStatus = "available";
+            }
+
             await schedulingRepository.createSlotInstance({
               ruleId: rule.id,
               teacherId: rule.teacherId,
               studentId: shouldAssignStudent ? overrideStudentId : null,
               type: rule.type,
-              status: shouldAssignStudent ? "scheduled" : "available",
+              status: slotStatus,
               startAt,
               endAt,
             });
@@ -803,6 +836,11 @@ export const schedulingService = {
   ) {
     const slot = await schedulingRepository.findById(classId);
     if (!slot) throw new Error("Slot not found");
+
+    // Bloquear cancelamento de aulas em período de recesso
+    if (slot.status === "teacher-recess") {
+      throw new Error("Esta aula está em período de recesso do professor e não pode ser cancelada.");
+    }
 
     // RBAC Check
     const isAdmin = hasPermission(user, "class.update.any");
@@ -1561,12 +1599,19 @@ export const schedulingService = {
           const conflict = await schedulingRepository.findOverlappingSlot(rule.teacherId, startAt, endAt);
 
           if (!exists && !conflict) {
+            // 3. Check if teacher has a registered recess covering this date
+            const recesses = await schedulingRepository.findRecessesByTeacher(rule.teacherId);
+            const isTeacherRecess = recesses.some(r =>
+              startAt >= r.startDate && startAt <= r.endDate
+            );
+
+            const baseStatus = rule.studentId ? "scheduled" : "available";
             await schedulingRepository.createSlotInstance({
               ruleId: rule.id,
               teacherId: rule.teacherId,
               studentId: rule.studentId, // Inherit current allocation
               type: rule.type,
-              status: rule.studentId ? "scheduled" : "available",
+              status: isTeacherRecess ? "teacher-recess" : baseStatus,
               startAt,
               endAt,
             });
@@ -1895,7 +1940,7 @@ export const schedulingService = {
 
   async registerRecess(
     user: User, 
-    data: { startDate: Date; endDate: Date; fallbackConfig: Record<string, { lessonId: string; message?: string }> }
+    data: { startDate: Date; endDate: Date; fallbackConfig: Record<string, { lessonId: string; lessonTitle?: string; message?: string }> }
   ) {
     const { startDate, endDate, fallbackConfig } = data;
     
@@ -1925,31 +1970,37 @@ export const schedulingService = {
       const affectedClasses = await schedulingRepository.findByTeacherInRange(user.id, startDate, endDate);
 
       for (const cls of affectedClasses) {
-        if (!cls.studentId) continue;
-        
         const config = fallbackConfig[cls.id];
-        
-        // 3. Clone current class as fallback
-        await tx.insert(slotInstances).values({
-          teacherId: cls.teacherId,
-          studentId: cls.studentId,
-          ruleId: cls.ruleId,
-          startAt: cls.startAt,
-          endAt: cls.endAt,
-          status: "scheduled",
-          type: "RECESS_FALLBACK",
-          lessonId: config?.lessonId,
-          notes: `Atividade de recesso: ${config?.message || ""}`,
-        });
+        let lessonTitle: string | null = null;
+        if (config?.lessonId) {
+          const lesson = await curriculumService.findLessonById(config.lessonId);
+          lessonTitle = lesson?.title || null;
+        }
 
-        // 4. Mark original class as 'teacher-recess'
+        // 3. Marcar o slot in-place como teacher-recess e linkar o conteúdo de fallback
         await tx.update(slotInstances)
-          .set({ 
+          .set({
             status: "teacher-recess",
+            fallbackLessonId: config?.lessonId ?? null,
+            fallbackLessonTitle: lessonTitle,
+            notes: config?.message ? `Atividade de recesso: ${config.message}` : null,
             updatedAt: new Date()
           })
           .where(eq(slotInstances.id, cls.id));
       }
+
+      // 4. Marcar slots disponíveis (sem aluno) no período também como teacher-recess
+      // para que admins não consigam alocar novos alunos neles
+      await tx.update(slotInstances)
+        .set({ status: "teacher-recess", updatedAt: new Date() })
+        .where(
+          and(
+            eq(slotInstances.teacherId, user.id),
+            eq(slotInstances.status, "available"),
+            gte(slotInstances.startAt, startDate),
+            lt(slotInstances.startAt, endDate)
+          )
+        );
 
       // 5. Notify Managers
       await notificationService.sendNotification({
@@ -2208,6 +2259,22 @@ export const schedulingService = {
       }
     }
     return map;
+  },
+
+  async getSlotById(user: User, slotId: string) {
+    const slot = await schedulingRepository.findById(slotId);
+    if (!slot) return null;
+
+    // RBAC: Admin/Manager can see any slot. Teacher can see if they are the teacher. Student if they are the student.
+    const isAdmin = hasPermission(user, "class.update.any");
+    const isTeacher = user.role === "teacher" && slot.teacherId === user.id;
+    const isStudent = user.role === "student" && slot.studentId === user.id;
+
+    if (!isAdmin && !isTeacher && !isStudent) {
+      throw new Error("Unauthorized access to this slot.");
+    }
+
+    return slot;
   },
 };
 
