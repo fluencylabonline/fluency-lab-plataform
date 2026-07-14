@@ -28,10 +28,10 @@ import {
     DropdownMenuTrigger,
     DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { DeleteLessonVault } from "./DeleteLessonVault";
 import { useTransition } from "react";
-import { cloneLessonAction } from "@/modules/curriculum/curriculum.actions";
+import { cloneLessonAction, updateLessonAction } from "@/modules/curriculum/curriculum.actions";
 import { notify } from "@/components/ui/toaster";
 import { LessonSummary } from "@/modules/curriculum/curriculum.types";
 
@@ -41,6 +41,7 @@ interface LessonCardProps {
 
 export function LessonCard({ lesson }: LessonCardProps) {
     const t = useTranslations("Learning");
+    const router = useRouter();
     const [isPending, startTransition] = useTransition();
 
     const statusColors: Record<string, string> = {
@@ -68,6 +69,25 @@ export function LessonCard({ lesson }: LessonCardProps) {
                 notify.success(t("lesson_cloned_success") || "Lesson cloned!");
             } else {
                 notify.error(result?.serverError || "Error cloning lesson");
+            }
+        });
+    };
+
+    const handleToggleRecess = () => {
+        startTransition(async () => {
+            const result = await updateLessonAction({
+                id: lesson.id,
+                isRecessActivity: !lesson.isRecessActivity
+            });
+            if (result?.data?.success) {
+                notify.success(
+                    lesson.isRecessActivity
+                        ? "Lição definida como currículo regular."
+                        : "Lição marcada como Fallback de Recesso!"
+                );
+                router.refresh();
+            } else {
+                notify.error(result?.serverError || "Erro ao atualizar lição");
             }
         });
     };
@@ -111,6 +131,11 @@ export function LessonCard({ lesson }: LessonCardProps) {
                                 <Languages className="w-3 h-3 mr-1" />
                                 {lesson.language?.name || "N/A"}
                             </Badge>
+                            {lesson.isRecessActivity && (
+                                <Badge variant="outline" className="h-5 px-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[10px] uppercase tracking-wider font-bold">
+                                    Fallback Recesso
+                                </Badge>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -133,6 +158,17 @@ export function LessonCard({ lesson }: LessonCardProps) {
                         >
                             <Copy className="w-4 h-4 mr-2" />
                             {t("clone_lesson") || "Clone Version"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={handleToggleRecess}
+                            disabled={isPending}
+                            className="cursor-pointer py-2.5 rounded-lg"
+                        >
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            {lesson.isRecessActivity
+                                ? "Desmarcar como Recesso"
+                                : "Marcar como Recesso"
+                            }
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DeleteLessonVault

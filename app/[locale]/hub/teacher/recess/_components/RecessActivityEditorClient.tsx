@@ -42,9 +42,16 @@ type ActivityFormValues = z.infer<typeof activityFormSchema>;
 interface RecessActivityEditorClientProps {
   initialActivity?: Lesson | null;
   languages: Language[];
+  backHref?: string;
+  onSaveRedirect?: string;
 }
 
-export function RecessActivityEditorClient({ initialActivity, languages }: RecessActivityEditorClientProps) {
+export function RecessActivityEditorClient({ 
+  initialActivity, 
+  languages,
+  backHref = "/hub/teacher/recess",
+  onSaveRedirect = "/hub/teacher/recess"
+}: RecessActivityEditorClientProps) {
   const t = useTranslations("Recess");
   const tCommon = useTranslations("Common");
   const router = useRouter();
@@ -81,7 +88,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
 
     if (response?.data?.success) {
       notify.success(initialActivity ? (t('activityUpdated') || "Atividade atualizada!") : (t('activityCreated') || "Atividade criada!"));
-      router.push("/hub/teacher/recess");
+      router.push(onSaveRedirect);
       router.refresh();
     } else {
       notify.error(response?.data?.error || response?.serverError || (tCommon('error') || "Erro ao salvar atividade"));
@@ -103,7 +110,7 @@ export function RecessActivityEditorClient({ initialActivity, languages }: Reces
       <Header
         title={initialActivity ? (t('editActivity') || "Editar Atividade") : (t('newRecessActivity') || "Nova Atividade de Recesso")}
         subtitle={t('recessActivitySubtitle') || "As atividades de recesso são lições de fallback para seus alunos"}
-        backHref="/hub/teacher/recess"
+        backHref={backHref}
         className="contents"
       />
       

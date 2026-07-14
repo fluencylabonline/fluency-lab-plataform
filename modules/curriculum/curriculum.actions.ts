@@ -15,6 +15,7 @@ const createLessonSchema = z.object({
   difficulty: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]),
   languageId: z.uuid(),
   nativeLanguageId: z.uuid(),
+  isRecessActivity: z.boolean().optional(),
 });
 
 const attachMediaSchema = z.object({
@@ -75,6 +76,7 @@ const updateLessonActionSchema = z.object({
   analysisResultJson: z.unknown().optional(),
   qualityAnalysisJson: z.unknown().optional(),
   status: z.enum(["draft", "transcribing", "analyzing", "processing_items", "reviewing", "reviewing_quiz", "ready", "error"]).optional(),
+  isRecessActivity: z.boolean().optional(),
 });
 
 const cloneLessonSchema = z.object({
@@ -127,6 +129,7 @@ export const updateLessonAction = managerAction
       qualityAnalysisJson: parsedInput.qualityAnalysisJson as QualityResult,
     });
     revalidatePath(`/hub/manager/learning/lessons/${parsedInput.id}`);
+    revalidatePath("/hub/manager/learning/lessons");
     return { success: true };
   });
 
@@ -472,6 +475,7 @@ export const upsertRecessActivityAction = protectedAction
         teacherId: ctx.user.id,
       });
       revalidatePath("/hub/teacher/recess");
+      revalidatePath("/hub/manager/learning/lessons");
       return { success: true, data: result };
     } catch (error) {
       console.error("[upsertRecessActivityAction] Error:", error);

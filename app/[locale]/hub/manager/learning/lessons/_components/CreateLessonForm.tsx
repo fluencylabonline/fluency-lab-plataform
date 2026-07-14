@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
@@ -20,6 +20,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Loader2, ArrowRight } from "lucide-react";
 import { CEFRLevel } from "@/modules/curriculum/curriculum.types";
 
@@ -29,6 +30,7 @@ const createLessonSchema = z.object({
     difficulty: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]),
     languageId: z.string().uuid({ message: "Please select a language" }),
     nativeLanguageId: z.string().uuid({ message: "Please select a native language" }),
+    isRecessActivity: z.boolean().optional(),
 });
 
 type CreateLessonValues = z.infer<typeof createLessonSchema>;
@@ -51,6 +53,7 @@ export function CreateLessonForm({ languages }: CreateLessonFormProps) {
             difficulty: undefined,
             languageId: "",
             nativeLanguageId: "",
+            isRecessActivity: false,
         },
     });
 
@@ -146,6 +149,27 @@ export function CreateLessonForm({ languages }: CreateLessonFormProps) {
                         </SelectContent>
                     </Select>
                 </VaultField>
+            </div>
+            
+            <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30">
+                <div className="space-y-0.5">
+                    <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                        {t("recess_activity") || "Atividade de Recesso"}
+                    </span>
+                    <div className="text-xs text-muted-foreground">
+                        {t("recess_activity_desc") || "Marcar esta lição como conteúdo de fallback para recesso de professores."}
+                    </div>
+                </div>
+                <Controller
+                    control={form.control}
+                    name="isRecessActivity"
+                    render={({ field }) => (
+                        <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                        />
+                    )}
+                />
             </div>
 
             <div className="pt-4">

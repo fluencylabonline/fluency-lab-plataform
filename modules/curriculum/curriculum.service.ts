@@ -9,9 +9,10 @@ export const curriculumService = {
   /**
    * Step 1: Creates a new lesson record.
    */
-  async createLesson(data: { title: string, difficulty: CEFRLevel, languageId: string, nativeLanguageId: string }) {
+  async createLesson(data: { title: string, difficulty: CEFRLevel, languageId: string, nativeLanguageId: string, isRecessActivity?: boolean }) {
     const lesson = await curriculumRepository.createLesson({
       ...data,
+      isRecessActivity: data.isRecessActivity ?? false,
       status: "draft",
       creationStep: 1
     });

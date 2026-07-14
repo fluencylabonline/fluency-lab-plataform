@@ -91,8 +91,8 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
 
   // SWR for activities
   const { data: recessActivities, isLoading: isLoadingActivities } = useSWR(
-    isOpen ? ["recess-activities", teacherId] : null,
-    () => getRecessActivitiesAction({ teacherId }).then(res => res?.data?.data || [])
+    isOpen ? ["recess-activities"] : null,
+    () => getRecessActivitiesAction({}).then(res => res?.data?.data || [])
   );
 
   // SWR for existing recesses

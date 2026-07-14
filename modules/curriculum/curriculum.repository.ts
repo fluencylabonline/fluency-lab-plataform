@@ -254,12 +254,16 @@ export const curriculumRepository = {
     });
   },
   async findRecessActivities(teacherId?: string): Promise<LessonSummary[]> {
+    const filters = [
+      eq(lessons.isRecessActivity, true),
+      eq(lessons.status, "ready"),
+      isNull(lessons.deletedAt)
+    ];
+    if (teacherId) {
+      filters.push(eq(lessons.teacherId, teacherId));
+    }
     return await db.query.lessons.findMany({
-      where: and(
-        eq(lessons.isRecessActivity, true),
-        eq(lessons.status, "ready"),
-        teacherId ? eq(lessons.teacherId, teacherId) : isNull(lessons.teacherId)
-      ),
+      where: and(...filters),
       with: {
         language: true,
         nativeLanguage: true,

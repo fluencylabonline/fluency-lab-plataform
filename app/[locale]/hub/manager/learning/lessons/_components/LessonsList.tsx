@@ -30,15 +30,20 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
     const t = useTranslations("Learning");
     const [statusFilter, setStatusFilter] = useState<string>("all");
     const [languageFilter, setLanguageFilter] = useState<string>("all");
+    const [recessFilter, setRecessFilter] = useState<string>("all");
 
     const filteredLessons = useMemo(() => {
         return initialLessons.filter((lesson) => {
             const matchesSearch = lesson.title.toLowerCase().includes(searchQuery.toLowerCase());
             const matchesStatus = statusFilter === "all" || lesson.status === statusFilter;
             const matchesLanguage = languageFilter === "all" || lesson.languageId === languageFilter;
-            return matchesSearch && matchesStatus && matchesLanguage;
+            const matchesRecess = 
+                recessFilter === "all" || 
+                (recessFilter === "recess" && lesson.isRecessActivity) || 
+                (recessFilter === "regular" && !lesson.isRecessActivity);
+            return matchesSearch && matchesStatus && matchesLanguage && matchesRecess;
         });
-    }, [initialLessons, searchQuery, statusFilter, languageFilter]);
+    }, [initialLessons, searchQuery, statusFilter, languageFilter, recessFilter]);
 
     const statuses = [
         "draft",
@@ -105,6 +110,21 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
                                         {lang.name}
                                     </SelectItem>
                                 ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md">
+                        <Filter className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-muted-foreground">{t("filter_type") || "Tipo"}:</span>
+                        <Select value={recessFilter} onValueChange={setRecessFilter}>
+                            <SelectTrigger className="border-none bg-transparent h-auto p-0 focus:ring-0 shadow-none text-sm font-bold">
+                                <SelectValue placeholder={t("all_types") || "Todos os Tipos"} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">{t("all_types") || "Todos os Tipos"}</SelectItem>
+                                <SelectItem value="regular">{t("regular_lessons") || "Lições Regulares"}</SelectItem>
+                                <SelectItem value="recess">{t("recess_lessons") || "Lições de Recesso (Fallback)"}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

@@ -180,7 +180,8 @@ export function CurriculumVaults({
     }
   }, [swapSlot, lessonSlot, showAssignPlan, showManageSchedule, showPlanHistory, deallocatingId, transferRule]);
 
-
+  const regularLessons = lessons.filter(l => !l.isRecessActivity);
+  const recessLessons = lessons.filter(l => l.isRecessActivity);
   return (
     <>
       {/* 1. Swap Teacher Vault */}
@@ -247,28 +248,61 @@ export function CurriculumVaults({
               <CommandInput placeholder="Buscar lição por título..." />
               <CommandList className="max-h-[300px]">
                 <CommandEmpty>Nenhuma lição encontrada.</CommandEmpty>
-                <CommandGroup>
-                  {lessons.map((lesson) => (
-                    <CommandItem
-                      key={lesson.id}
-                      value={`${lesson.id} ${lesson.title}`.toLowerCase()}
-                      onSelect={() => {
-                        setSelectedId(lesson.id);
-                        setSelectedTitle(lesson.title);
-                      }}
-                      className={cn(
-                        "flex items-center justify-between py-3",
-                        selectedId === lesson.id && "bg-primary/10"
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <BookOpen className="h-4 w-4 text-muted-foreground" />
-                        <span>{lesson.title}</span>
-                      </div>
-                      {selectedId === lesson.id && <Check className="h-4 w-4 text-primary" />}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+                
+                {regularLessons.length > 0 && (
+                  <CommandGroup heading="Lições Regulares">
+                    {regularLessons.map((lesson) => (
+                      <CommandItem
+                        key={lesson.id}
+                        value={`${lesson.id} ${lesson.title}`.toLowerCase()}
+                        onSelect={() => {
+                          setSelectedId(lesson.id);
+                          setSelectedTitle(lesson.title);
+                        }}
+                        className={cn(
+                          "flex items-center justify-between py-3",
+                          selectedId === lesson.id && "bg-primary/10"
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <BookOpen className="h-4 w-4 text-muted-foreground" />
+                          <span>{lesson.title}</span>
+                        </div>
+                        {selectedId === lesson.id && <Check className="h-4 w-4 text-primary" />}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                )}
+
+                {recessLessons.length > 0 && (
+                  <CommandGroup heading="Lições de Recesso (Fallback)">
+                    {recessLessons.map((lesson) => (
+                      <CommandItem
+                        key={lesson.id}
+                        value={`${lesson.id} ${lesson.title} recesso fallback`.toLowerCase()}
+                        onSelect={() => {
+                          setSelectedId(lesson.id);
+                          setSelectedTitle(lesson.title);
+                        }}
+                        className={cn(
+                          "flex items-center justify-between py-3",
+                          selectedId === lesson.id && "bg-primary/10"
+                        )}
+                      >
+                        <div className="flex items-center justify-between w-full pr-2">
+                          <div className="flex items-center gap-3">
+                            <BookOpen className="h-4 w-4 text-muted-foreground" />
+                            <span>{lesson.title}</span>
+                          </div>
+                          <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[9px] uppercase font-bold tracking-wider px-1.5 h-4 shrink-0">
+                            Recesso
+                          </Badge>
+                        </div>
+                        {selectedId === lesson.id && <Check className="h-4 w-4 text-primary shrink-0" />}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                )}
               </CommandList>
             </Command>
           </VaultBody>
