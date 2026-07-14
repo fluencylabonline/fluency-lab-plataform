@@ -11,7 +11,8 @@ import {
   AlertCircle,
   BookOpen,
   Plus,
-  Search
+  Search,
+  CalendarDays
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,7 @@ import { CalendarView, CalendarEvent } from "@/components/ui/calendar-view";
 import { WeeklyCalendarView } from "@/components/ui/weekly-calendar-view";
 import { CreateSlotVault } from "@/modules/scheduling/_components/CreateSlotVault";
 import { SlotDetailsVault } from "@/modules/scheduling/_components/SlotDetailsVault";
+import { TeacherRecessesVault } from "./TeacherRecessesVault";
 import { cn } from "@/lib/utils";
 import { SlotInstanceWithDetails } from "@/modules/scheduling/scheduling.types";
 import { Button } from "@/components/ui/button";
@@ -52,6 +54,7 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [isCreateVaultOpen, setIsCreateVaultOpen] = useState(false);
+  const [isRecessesVaultOpen, setIsRecessesVaultOpen] = useState(false);
 
   const [searchStudent, setSearchStudent] = useState("");
   const [classTypeFilter, setClassTypeFilter] = useState("ALL");
@@ -226,15 +229,25 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
     );
   }
 
-  const CreateButton = (
-    <Button
-      onClick={() => setIsCreateVaultOpen(true)}
-      className="rounded-md gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-8 lg:h-9 text-[10px] uppercase tracking-widest px-4"
-    >
-      <Plus className="w-3 h-3 lg:w-4 lg:h-4" />
-      <span className="hidden sm:inline">Novo Horário</span>
-      <span className="sm:hidden">Novo</span>
-    </Button>
+  const HeaderActions = (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        onClick={() => setIsRecessesVaultOpen(true)}
+        className="rounded-md gap-2 border-white/10 hover:bg-white/5 text-muted-foreground font-bold h-8 lg:h-9 text-[10px] uppercase tracking-widest px-4"
+      >
+        <CalendarDays className="w-3.5 h-3.5" />
+        <span>Recessos</span>
+      </Button>
+      <Button
+        onClick={() => setIsCreateVaultOpen(true)}
+        className="rounded-md gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-8 lg:h-9 text-[10px] uppercase tracking-widest px-4"
+      >
+        <Plus className="w-3 h-3 lg:w-4 lg:h-4" />
+        <span className="hidden sm:inline">Novo Horário</span>
+        <span className="sm:hidden">Novo</span>
+      </Button>
+    </div>
   );
 
   return (
@@ -288,7 +301,7 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
           onEventClick={handleEventClick}
           renderEventCard={renderEventCard}
           isLoading={isFetching || isInitialLoading}
-          headerActions={CreateButton}
+          headerActions={HeaderActions}
         />
       ) : (
         <CalendarView
@@ -297,7 +310,7 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
           onEventClick={handleEventClick}
           renderEventCard={renderEventCard}
           isLoading={isFetching || isInitialLoading}
-          headerActions={CreateButton}
+          headerActions={HeaderActions}
         />
       )}
 
@@ -314,6 +327,12 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
         isOpen={isVaultOpen}
         onOpenChange={setIsVaultOpen}
         onSuccess={handleActionSuccess}
+      />
+
+      <TeacherRecessesVault
+        teacherId={teacherId}
+        open={isRecessesVaultOpen}
+        onOpenChange={setIsRecessesVaultOpen}
       />
     </div>
   );
