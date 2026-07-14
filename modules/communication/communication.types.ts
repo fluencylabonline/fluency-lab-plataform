@@ -63,7 +63,7 @@ export interface WhatsAppResponse {
 export interface WhatsAppRequestBody {
   messaging_product: "whatsapp";
   to: string;
-  type: "template" | "text"; // Expandir se necessário
+  type: "template" | "text" | "image" | "document" | "audio" | "video";
   template?: {
     name: string;
     language: { code: string };
@@ -72,6 +72,10 @@ export interface WhatsAppRequestBody {
   text?: {
     body: string;
   };
+  image?: { link: string };
+  document?: { link: string; filename?: string };
+  audio?: { link: string };
+  video?: { link: string };
 }
 
 export interface WhatsAppMetaComponent {

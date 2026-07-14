@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import useSWR from "swr";
+import { useSearchParams } from "next/navigation";
+import { rtdb, storage } from "@/lib/firebase";
+import { ref as dbRef, onValue } from "firebase/database";
+import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
   getWhatsAppTemplatesAction,
   getWhatsAppConversationsAction,
@@ -11,7 +15,8 @@ import {
   sendWhatsAppTemplateAction,
   getWhatsAppQuickRepliesAction,
   createWhatsAppQuickReplyAction,
-  deleteWhatsAppQuickReplyAction
+  deleteWhatsAppQuickReplyAction,
+  sendWhatsAppMediaAction
 } from "@/modules/communication/communication.actions";
 import { searchStudentsAction } from "@/modules/user/user.actions";
 import { WhatsAppConversation, WhatsAppMessage, WhatsAppLabel, WhatsAppTemplate } from "@/modules/communication/communication.types";
@@ -41,7 +46,8 @@ import {
   BookOpen,
   Trash2,
   Sparkles,
-  MessageSquare
+  MessageSquare,
+  Paperclip
 } from "lucide-react";
 import { format } from "date-fns";
 import { notify } from "@/components/ui/toaster";
@@ -49,6 +55,16 @@ import { useIsMobile } from "@/hooks/ui/use-device";
 import { cn } from "@/lib/utils";
 import { UserMenu } from "@/components/layout/user-menu";
 import { SettingsUserDTO } from "@/modules/user/user.schema";
+
+const WHATSAPP_TEMPLATES_WHITELIST = [
+  "payment_reminder_v4",
+  "payment_reminder_v5",
+  "payment_overdue_v4",
+  "payment_overdue_v5",
+  "welcome_first",
+  "talk_to_person",
+  "class_scheduled_student_v1",
+];
 
 const LABEL_COLORS: Record<string, { bg: string; text: string; border: string; hex: string }> = {
   blue: { bg: "bg-blue-500/10 dark:bg-blue-500/15", text: "text-blue-600 dark:text-blue-400", border: "border-blue-500/20", hex: "#0070f3" },
@@ -117,6 +133,9 @@ interface WhatsAppChatProps {
 }
 
 export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
+  const searchParams = useSearchParams();
+  const convIdParam = searchParams.get("convId");
+
   // Sidebar tab state
   const [activeTab, setActiveTab] = useState<"active" | "archived" | "replies">("active");
   const [selectedConv, setSelectedConv] = useState<WhatsAppConversation | null>(null);
@@ -124,6 +143,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
   
   const [messageText, setMessageText] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewArchived, setViewArchived] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -230,6 +250,46 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
     }
   }, [messages]);
 
+  // Real-time synchronization for conversations list
+  useEffect(() => {
+    const signalRef = dbRef(rtdb, "whatsapp_sync_signal/conversations");
+    const unsubscribe = onValue(signalRef, () => {
+      mutateConvs();
+    });
+    return () => unsubscribe();
+  }, [mutateConvs]);
+
+  // Real-time synchronization for current active conversation's messages
+  useEffect(() => {
+    if (!selectedConv?.id) return;
+    const signalRef = dbRef(rtdb, `whatsapp_sync_signal/messages/${selectedConv.id}`);
+    const unsubscribe = onValue(signalRef, () => {
+      mutateMessages();
+      mutateConvs();
+    });
+    return () => unsubscribe();
+  }, [selectedConv?.id, mutateMessages, mutateConvs]);
+
+  const handleSelectConv = useCallback(async (conv: WhatsAppConversation) => {
+    setSelectedConv(conv);
+    setSelectedQuickReply(null);
+    if (conv.unreadCount > 0) {
+      await markWhatsAppConversationAsReadAction({ conversationId: conv.id });
+      mutateConvs();
+    }
+    setTimeout(() => inputRef.current?.focus(), 80);
+  }, [mutateConvs]);
+
+  // Deep linking to automatically select conversation from URL search params
+  useEffect(() => {
+    if (convIdParam && conversations && conversations.length > 0) {
+      const match = conversations.find((c: WhatsAppConversation) => c.id === convIdParam);
+      if (match && selectedConv?.id !== match.id) {
+        handleSelectConv(match);
+      }
+    }
+  }, [convIdParam, conversations, selectedConv, handleSelectConv]);
+
   // Sync details input when contact is switched
   useEffect(() => {
     if (!selectedConv) {
@@ -255,19 +315,49 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
     }
   }, [selectedTemplate, selectedConv]);
 
-  const handleSelectConv = async (conv: WhatsAppConversation) => {
-    setSelectedConv(conv);
-    setSelectedQuickReply(null);
-    if (conv.unreadCount > 0) {
-      await markWhatsAppConversationAsReadAction({ conversationId: conv.id });
-      mutateConvs();
-    }
-    setTimeout(() => inputRef.current?.focus(), 80);
-  };
+
 
   const handleBack = () => {
     setSelectedConv(null);
     setSelectedQuickReply(null);
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0 || !selectedConv) return;
+    const file = e.target.files[0];
+    setIsUploadingMedia(true);
+
+    try {
+      let type: "image" | "audio" | "video" | "document" = "document";
+      if (file.type.startsWith("image/")) type = "image";
+      else if (file.type.startsWith("audio/")) type = "audio";
+      else if (file.type.startsWith("video/")) type = "video";
+
+      const storageRefObj = storageRef(storage, `whatsapp_attachments/${selectedConv.id}/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRefObj, file);
+      const mediaUrl = await getDownloadURL(storageRefObj);
+
+      const result = await sendWhatsAppMediaAction({
+        to: selectedConv.waId,
+        type,
+        mediaUrl,
+        filename: file.name
+      });
+
+      if (result?.data) {
+        notify.success("Arquivo enviado!");
+        mutateMessages();
+        mutateConvs();
+      } else {
+        notify.error("Erro ao enviar arquivo.");
+      }
+    } catch (err) {
+      console.error("Erro no upload de anexo:", err);
+      notify.error("Falha ao subir arquivo.");
+    } finally {
+      setIsUploadingMedia(false);
+      e.target.value = "";
+    }
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -443,7 +533,9 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
     ? selectedConv.studentName || selectedConv.contactName || `+${selectedConv.waId}`
     : "";
 
-  const approvedTemplates = templates?.filter(t => t.status === "APPROVED") || [];
+  const approvedTemplates = templates?.filter(t => 
+    t.status === "APPROVED" && WHATSAPP_TEMPLATES_WHITELIST.includes(t.name)
+  ) || [];
 
   return (
     <div className="flex h-full w-full overflow-hidden select-none">
@@ -857,6 +949,32 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                   <Zap className="w-5 h-5 fill-amber-500" />
                 </Button>
 
+                {/* Attachment button */}
+                <div className="relative shrink-0">
+                  <input
+                    type="file"
+                    id="whatsapp-media-upload"
+                    className="hidden"
+                    onChange={handleFileChange}
+                    disabled={isUploadingMedia}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => document.getElementById("whatsapp-media-upload")?.click()}
+                    className="h-10 w-10 rounded-full hover:bg-muted-foreground/10 text-primary"
+                    disabled={isUploadingMedia}
+                    title="Enviar Foto/Áudio/Documento"
+                  >
+                    {isUploadingMedia ? (
+                      <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                    ) : (
+                      <Paperclip className="w-5 h-5" />
+                    )}
+                  </Button>
+                </div>
+
                 {/* Templates picker button */}
                 <Button
                   type="button"
@@ -1009,14 +1127,15 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
               <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Escolher Template</label>
               <select
                 onChange={(e) => {
-                  const t = approvedTemplates.find((temp) => temp.name === e.target.value);
+                  const [name, lang] = e.target.value.split(":");
+                  const t = approvedTemplates.find((temp) => temp.name === name && temp.language === lang);
                   setSelectedTemplate(t || null);
                 }}
                 className="w-full h-10 px-3 text-xs bg-muted/20 border border-border/30 rounded-xl text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 select-none"
               >
                 <option value="">Selecione um template aprovado...</option>
                 {approvedTemplates.map((t) => (
-                  <option key={t.id} value={t.name}>{t.name} ({t.category})</option>
+                  <option key={t.id} value={`${t.name}:${t.language}`}>{t.name} ({t.language})</option>
                 ))}
               </select>
             </div>
@@ -1081,14 +1200,15 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
               <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Escolher Template</label>
               <select
                 onChange={(e) => {
-                  const t = approvedTemplates.find((temp) => temp.name === e.target.value);
+                  const [name, lang] = e.target.value.split(":");
+                  const t = approvedTemplates.find((temp) => temp.name === name && temp.language === lang);
                   setSelectedTemplate(t || null);
                 }}
                 className="w-full h-10 px-3 text-xs bg-muted/20 border border-border/30 rounded-xl text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 select-none"
               >
                 <option value="">Selecione um template aprovado...</option>
                 {approvedTemplates.map((t) => (
-                  <option key={t.id} value={t.name}>{t.name} ({t.category})</option>
+                  <option key={t.id} value={`${t.name}:${t.language}`}>{t.name} ({t.language})</option>
                 ))}
               </select>
             </div>

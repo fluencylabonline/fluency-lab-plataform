@@ -5,6 +5,11 @@ import crypto from "node:crypto";
 import { type NotificationPrefs } from "@/modules/user/user.schema";
 import { userService } from "@/modules/user/user.service";
 import { notificationService } from "@/modules/notification/notification.service";
+import { adminRtdb } from "@/lib/firebase-admin";
+import { db } from "@/lib/db";
+import { eq } from "drizzle-orm";
+import { usersTable } from "@/modules/user/user.schema";
+import { whatsappMessagesTable } from "@/modules/communication/communication.schema";
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -63,12 +68,26 @@ export async function POST(req: NextRequest) {
     if (!value) return NextResponse.json({ success: true });
 
     // 1. Processar Status de Mensagens (Entregue, Lida, etc)
-    /* if (value.statuses) {
-      for (const _status of value.statuses) {
-        // TODO: Atualizar status no banco se necessário
-        // communicationRepository.updateMessageStatus(status.id, status.status);
+    if (value.statuses) {
+      for (const status of value.statuses) {
+        const messageId = status.id;
+        const messageStatus = status.status; // sent, delivered, read, failed
+        await communicationRepository.updateMessageStatus(messageId, messageStatus);
+        
+        // Find conversation of this message to signal update
+        const message = await db.query.whatsappMessagesTable.findFirst({
+          where: eq(whatsappMessagesTable.id, messageId)
+        });
+        if (message) {
+          try {
+            await adminRtdb.ref(`whatsapp_sync_signal/messages/${message.conversationId}`).set(Date.now());
+            await adminRtdb.ref(`whatsapp_sync_signal/conversations`).set(Date.now());
+          } catch (rtdbErr) {
+            console.error("[WhatsApp Webhook] Error sending RTDB sync signal for status update:", rtdbErr);
+          }
+        }
       }
-    } */
+    }
 
     // 2. Processar Novas Mensagens
     if (value.messages) {
@@ -164,6 +183,14 @@ export async function POST(req: NextRequest) {
           createdAt: timestamp,
         });
 
+        // RTDB Signal for real-time update
+        try {
+          await adminRtdb.ref(`whatsapp_sync_signal/messages/${conversation.id}`).set(Date.now());
+          await adminRtdb.ref(`whatsapp_sync_signal/conversations`).set(Date.now());
+        } catch (rtdbErr) {
+          console.error("[WhatsApp Webhook] Error sending RTDB sync signal for new message:", rtdbErr);
+        }
+
         // Enviar notificações push e in-app para admins e managers
         try {
           const adminsAndManagers = await userService.getActiveAdminsAndManagers();
@@ -190,11 +217,23 @@ export async function POST(req: NextRequest) {
 
           const bodyText = `${msg.from}: ${content.substring(0, 60)}${content.length > 60 ? "..." : ""}`;
 
+          let studentPhotoUrl: string | undefined = undefined;
+          if (conversation.studentId) {
+            const student = await db.query.usersTable.findFirst({
+              where: eq(usersTable.id, conversation.studentId),
+              columns: { photoUrl: true }
+            });
+            if (student?.photoUrl) {
+              studentPhotoUrl = student.photoUrl;
+            }
+          }
+
           if (notifiedAdmins.length > 0) {
             await notificationService.sendNotification({
               title: "Nova mensagem no WhatsApp",
               body: bodyText,
-              actionUrl: "/hub/admin/conversas",
+              actionUrl: `/hub/admin/conversas?convId=${conversation.id}`,
+              icon: studentPhotoUrl,
               targetType: "specific",
               userIds: notifiedAdmins,
               channels: {
@@ -208,7 +247,8 @@ export async function POST(req: NextRequest) {
             await notificationService.sendNotification({
               title: "Nova mensagem no WhatsApp",
               body: bodyText,
-              actionUrl: "/hub/manager/conversas",
+              actionUrl: `/hub/manager/conversas?convId=${conversation.id}`,
+              icon: studentPhotoUrl,
               targetType: "specific",
               userIds: notifiedManagers,
               channels: {

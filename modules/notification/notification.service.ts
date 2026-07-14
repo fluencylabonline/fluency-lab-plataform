@@ -12,7 +12,7 @@ webpush.setVapidDetails(
 
 export const notificationService = {
   async sendNotification(params: SendNotificationValues) {
-    const { title, body, actionUrl, targetType, targetRole, userIds, channels } = params;
+    const { title, body, actionUrl, targetType, targetRole, userIds, channels, icon } = params;
 
     let targetUserIds: string[] = [];
 
@@ -50,6 +50,7 @@ export const notificationService = {
               title,
               body,
               url: actionUrl || "/",
+              icon: icon || undefined,
             })
           );
         } catch (error: unknown) {

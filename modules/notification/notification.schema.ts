@@ -46,6 +46,7 @@ export const sendNotificationSchema = z.object({
   title: z.string().min(1, "Notification.validation.titleRequired"),
   body: z.string().min(1, "Notification.validation.bodyRequired"),
   actionUrl: z.string().optional(),
+  icon: z.string().optional(),
   targetType: z.enum(["all", "role", "specific"]),
   targetRole: z.enum(["admin", "teacher", "student", "manager"]).optional(),
   userIds: z.array(z.string()).optional(),

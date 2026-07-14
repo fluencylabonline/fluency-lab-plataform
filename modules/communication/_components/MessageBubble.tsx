@@ -10,6 +10,7 @@ import { notify } from "@/components/ui/toaster";
 
 interface MediaMetadata {
   mediaId?: string;
+  mediaUrl?: string;
   mimeType?: string;
   caption?: string;
   filename?: string;
@@ -87,7 +88,7 @@ export function MessageBubble({ msg, templates = [] }: MessageBubbleProps) {
   const pixPayload = getPixPayload(msg.content, msg.metadata);
 
   const renderMediaContent = () => {
-    if (!mediaId) {
+    if (msg.type === "text" || msg.type === "template") {
       const isPix = msg.content?.startsWith("000201");
       if (isPix) {
         return (
@@ -100,6 +101,8 @@ export function MessageBubble({ msg, templates = [] }: MessageBubbleProps) {
       return <p className="whitespace-pre-line">{msg.content}</p>;
     }
 
+    const sourceUrl = meta.mediaUrl || `/api/communication/media/${mediaId}`;
+
     switch (msg.type) {
       case "image":
         return (
@@ -110,7 +113,7 @@ export function MessageBubble({ msg, templates = [] }: MessageBubbleProps) {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={`/api/communication/media/${mediaId}`}
+                src={sourceUrl}
                 alt={caption || "Imagem do WhatsApp"}
                 className="w-full h-auto max-h-[260px] object-cover transition-all hover:scale-[1.02] duration-300"
                 loading="lazy"
@@ -132,7 +135,7 @@ export function MessageBubble({ msg, templates = [] }: MessageBubbleProps) {
                 </button>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={`/api/communication/media/${mediaId}`}
+                  src={sourceUrl}
                   alt={caption || "Imagem ampliada"}
                   className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-200"
                 />
@@ -153,7 +156,7 @@ export function MessageBubble({ msg, templates = [] }: MessageBubbleProps) {
               {meta.voice ? "🎙️ Mensagem de Voz" : "🎵 Arquivo de Áudio"}
             </span>
             <audio
-              src={`/api/communication/media/${mediaId}`}
+              src={sourceUrl}
               controls
               className="w-full h-8 accent-primary"
             />
@@ -164,7 +167,7 @@ export function MessageBubble({ msg, templates = [] }: MessageBubbleProps) {
         return (
           <div className="min-w-[240px] md:min-w-[290px]">
             <a
-              href={`/api/communication/media/${mediaId}`}
+              href={sourceUrl}
               download={filename || "documento"}
               target="_blank"
               rel="noopener noreferrer"
@@ -192,10 +195,10 @@ export function MessageBubble({ msg, templates = [] }: MessageBubbleProps) {
           <div className="space-y-2 max-w-[340px]">
             <div className="rounded-xl overflow-hidden border border-border/10 bg-muted/20">
               <video
-                src={`/api/communication/media/${mediaId}`}
+                src={sourceUrl}
                 controls
                 className="w-full max-h-[240px] object-cover"
-                poster={`/api/communication/media/${mediaId}#t=0.5`}
+                poster={`${sourceUrl}#t=0.5`}
               />
             </div>
             {caption && <p className="whitespace-pre-line mt-1 text-[13.5px] leading-relaxed">{caption}</p>}
@@ -300,9 +303,17 @@ export function MessageBubble({ msg, templates = [] }: MessageBubbleProps) {
         >
           {format(new Date(msg.createdAt), "HH:mm")}
           {isOut && (
-            msg.status === "read"
-              ? <CheckCheck className="w-3.5 h-3.5 text-[#53bdeb]" />
-              : <Check className="w-3.5 h-3.5 opacity-60" />
+            msg.status === "read" ? (
+              <CheckCheck className="w-3.5 h-3.5 text-[#53bdeb]" />
+            ) : msg.status === "delivered" ? (
+              <CheckCheck className="w-3.5 h-3.5 text-muted-foreground opacity-80" />
+            ) : msg.status === "sent" ? (
+              <Check className="w-3.5 h-3.5 text-muted-foreground opacity-60" />
+            ) : msg.status === "failed" ? (
+              <span className="text-red-500 text-[10px] font-bold">Falhou</span>
+            ) : (
+              <Check className="w-3.5 h-3.5 text-muted-foreground opacity-30 animate-pulse" />
+            )
           )}
         </div>
       </div>

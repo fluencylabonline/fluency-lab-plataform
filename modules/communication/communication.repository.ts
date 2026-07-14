@@ -99,6 +99,30 @@ export const communicationRepository = {
       .where(eq(whatsappConversationsTable.id, conversationId));
   },
 
+  async updateMessageStatus(messageId: string, status: "sent" | "delivered" | "read" | "failed") {
+    await db
+      .update(whatsappMessagesTable)
+      .set({ status })
+      .where(eq(whatsappMessagesTable.id, messageId));
+  },
+
+  async updateContactName(conversationId: string, contactName: string) {
+    await db
+      .update(whatsappConversationsTable)
+      .set({ contactName, updatedAt: new Date() })
+      .where(eq(whatsappConversationsTable.id, conversationId));
+  },
+
+  async findStudentsByPhone(phone: string) {
+    // Busca todos os estudantes com o telefone (removendo código do país se necessário)
+    return db.query.usersTable.findMany({
+      where: (table, { or, eq, like }) => or(
+        eq(table.cellphone, phone),
+        like(table.cellphone, `%${phone.slice(2)}%`)
+      ),
+    });
+  },
+
   async getQuickReplies() {
     return db.query.whatsappQuickRepliesTable.findMany({
       orderBy: (table, { asc }) => [asc(table.shortcut)],

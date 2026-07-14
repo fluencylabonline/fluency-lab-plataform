@@ -3,6 +3,7 @@ import { env } from "@/env";
 import { communicationRepository } from "./communication.repository";
 import { decrypt } from "@/lib/cryptography";
 import { whatsappConversationsTable } from "./communication.schema";
+import { adminRtdb } from "@/lib/firebase-admin";
 
 
 import { render } from "@react-email/render";
@@ -868,6 +869,14 @@ export class CommunicationService {
         status: "sent",
         metadata: { components, templateName, languageCode }, // Salva metadados
       });
+
+      // RTDB Signal for real-time update
+      try {
+        await adminRtdb.ref(`whatsapp_sync_signal/messages/${conversation.id}`).set(Date.now());
+        await adminRtdb.ref(`whatsapp_sync_signal/conversations`).set(Date.now());
+      } catch (rtdbErr) {
+        console.error("[sendWhatsAppTemplate] RTDB sync signal error:", rtdbErr);
+      }
     }
 
     return response;
@@ -911,6 +920,88 @@ export class CommunicationService {
         direction: "outbound",
         status: "sent",
       });
+
+      // RTDB Signal for real-time update
+      try {
+        await adminRtdb.ref(`whatsapp_sync_signal/messages/${conversation.id}`).set(Date.now());
+        await adminRtdb.ref(`whatsapp_sync_signal/conversations`).set(Date.now());
+      } catch (rtdbErr) {
+        console.error("[sendWhatsAppTextMessage] RTDB sync signal error:", rtdbErr);
+      }
+    }
+
+    return response;
+  }
+
+  /**
+   * Envia uma mensagem de mídia (imagem, áudio, vídeo, documento).
+   */
+  async sendWhatsAppMedia(
+    to: string,
+    type: "image" | "audio" | "document" | "video",
+    mediaUrl: string,
+    filename?: string
+  ): Promise<WhatsAppResponse | null> {
+    const formattedPhone = this.getCleanPhone(to);
+
+    const body: WhatsAppRequestBody = {
+      messaging_product: "whatsapp",
+      to: formattedPhone,
+      type,
+    };
+
+    if (type === "document") {
+      body.document = { link: mediaUrl, filename };
+    } else if (type === "image") {
+      body.image = { link: mediaUrl };
+    } else if (type === "audio") {
+      body.audio = { link: mediaUrl };
+    } else if (type === "video") {
+      body.video = { link: mediaUrl };
+    }
+
+    const response = await this.sendWhatsAppRequest(body);
+
+    if (response?.messages?.[0]?.id) {
+      let conversation = await communicationRepository.findConversationByWaId(formattedPhone);
+      let content = "";
+      if (type === "image") content = "📷 Foto";
+      else if (type === "audio") content = "🎙️ Áudio";
+      else if (type === "video") content = "🎥 Vídeo";
+      else if (type === "document") content = filename ? `📄 ${filename}` : "📄 Documento";
+
+      if (!conversation) {
+        const user = await communicationRepository.findUserByPhone(formattedPhone);
+        conversation = await communicationRepository.createConversation({
+          waId: formattedPhone,
+          studentId: user?.id,
+          lastMessageContent: content,
+          lastMessageAt: new Date(),
+        });
+      } else {
+        await communicationRepository.updateConversation(conversation.id, {
+          lastMessageContent: content,
+          lastMessageAt: new Date(),
+        });
+      }
+
+      await communicationRepository.saveMessage({
+        id: response.messages[0].id,
+        conversationId: conversation.id,
+        content: content,
+        type: type,
+        direction: "outbound",
+        status: "sent",
+        metadata: { mediaUrl, mediaId: null, mimeType: type === "image" ? "image/jpeg" : type === "audio" ? "audio/ogg" : "application/octet-stream", filename },
+      });
+
+      // RTDB Signal for real-time update
+      try {
+        await adminRtdb.ref(`whatsapp_sync_signal/messages/${conversation.id}`).set(Date.now());
+        await adminRtdb.ref(`whatsapp_sync_signal/conversations`).set(Date.now());
+      } catch (rtdbErr) {
+        console.error("[sendWhatsAppMedia] RTDB sync signal error:", rtdbErr);
+      }
     }
 
     return response;
@@ -1163,6 +1254,10 @@ export class CommunicationService {
 
   async updateConversation(id: string, data: Partial<typeof whatsappConversationsTable.$inferInsert>) {
     return communicationRepository.updateConversation(id, data);
+  }
+
+  async findStudentsByPhone(phone: string) {
+    return communicationRepository.findStudentsByPhone(phone);
   }
 }
 

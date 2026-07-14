@@ -17,7 +17,8 @@ import {
   updateWhatsAppContactNameAction,
   updateWhatsAppConversationLabelsAction,
   archiveWhatsAppConversationAction,
-  associateWhatsAppStudentAction
+  associateWhatsAppStudentAction,
+  findStudentsByWhatsAppPhoneAction
 } from "@/modules/communication/communication.actions";
 import { searchStudentsAction } from "@/modules/user/user.actions";
 import { notify } from "@/components/ui/toaster";
@@ -78,6 +79,29 @@ export function DetailsVault({
   }[]>([]);
   const [isSearchingStudents, setIsSearchingStudents] = useState(false);
   const [isLinking, setIsLinking] = useState(false);
+  const [associatedStudents, setAssociatedStudents] = useState<{
+    id: string;
+    name: string | null;
+    email: string | null;
+    photoUrl: string | null;
+  }[]>([]);
+  const [isLoadingAssociated, setIsLoadingAssociated] = useState(false);
+
+  useEffect(() => {
+    if (open && selectedConv?.waId) {
+      setIsLoadingAssociated(true);
+      findStudentsByWhatsAppPhoneAction({ phone: selectedConv.waId })
+        .then((res) => {
+          if (res?.data?.success && res.data.data) {
+            setAssociatedStudents(res.data.data);
+          } else {
+            setAssociatedStudents([]);
+          }
+        })
+        .catch(() => setAssociatedStudents([]))
+        .finally(() => setIsLoadingAssociated(false));
+    }
+  }, [open, selectedConv?.waId]);
 
   const handleSearchStudents = async (query: string) => {
     if (query.trim().length < 2) {
@@ -370,6 +394,30 @@ export function DetailsVault({
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+          </div>
+
+          {/* Alunos associados a este número */}
+          <div className="space-y-2 pb-4 border-b border-border/40">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Alunos com este Telefone</h4>
+            {isLoadingAssociated ? (
+              <div className="flex justify-center py-2">
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+              </div>
+            ) : associatedStudents.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground italic">Nenhum aluno cadastrado com este telefone.</p>
+            ) : (
+              <div className="space-y-1.5">
+                {associatedStudents.map((student) => (
+                  <div key={student.id} className="flex items-center gap-2 p-2 bg-muted/10 border border-border/10 rounded-lg">
+                    <Avatar seed={student.id} photoUrl={student.photoUrl} name={student.name} size={28} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-foreground truncate">{student.name}</p>
+                      <p className="text-[9px] text-muted-foreground truncate">{student.email}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

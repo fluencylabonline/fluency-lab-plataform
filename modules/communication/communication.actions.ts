@@ -134,4 +134,33 @@ export const deleteWhatsAppQuickReplyAction = managerAction
     return { success: true };
   });
 
+export const sendWhatsAppMediaAction = managerAction
+  .metadata({ name: "sendWhatsAppMedia" })
+  .schema(z.object({
+    to: z.string(),
+    type: z.enum(["image", "audio", "document", "video"]),
+    mediaUrl: z.string(),
+    filename: z.string().optional()
+  }))
+  .action(async ({ parsedInput }) => {
+    return await communicationService.sendWhatsAppMedia(
+      parsedInput.to,
+      parsedInput.type,
+      parsedInput.mediaUrl,
+      parsedInput.filename
+    );
+  });
+
+export const findStudentsByWhatsAppPhoneAction = managerAction
+  .metadata({ name: "findStudentsByWhatsAppPhone" })
+  .schema(z.object({ phone: z.string() }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const students = await communicationService.findStudentsByPhone(parsedInput.phone);
+      return { success: true, data: students };
+    } catch (err) {
+      return { success: false, data: null, error: err instanceof Error ? err.message : "Erro ao buscar alunos" };
+    }
+  });
+
 
