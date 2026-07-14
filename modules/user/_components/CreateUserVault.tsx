@@ -173,7 +173,7 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
             >
               <VaultInput
                 {...form.register("cellphone")}
-                placeholder="Ex: +55 11 99999-9999"
+                placeholder="Ex: 5511999999999"
               />
             </VaultField>
 

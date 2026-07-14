@@ -163,7 +163,13 @@ export function StudentProfileSurvey({
     const result = await finalizeProfileAction({ profileId });
     if (result?.data?.success) {
       notify.success("Perfil finalizado com sucesso!");
-      onComplete?.(profileId);
+      localStorage.removeItem(`survey_${profileId}`);
+      localStorage.removeItem(`survey_new`);
+      if (onComplete) {
+        onComplete(profileId);
+      } else {
+        router.push(basePath);
+      }
     } else {
       notify.error(result?.data?.error || "Erro ao finalizar perfil");
     }
@@ -657,6 +663,7 @@ export function StudentProfileSurvey({
       <Header
         title="Montar Perfil do Aluno"
         showSubHeader={false}
+        backHref={basePath}
       />
 
       <main className="flex-1 container max-w-2xl py-8 pb-32">
