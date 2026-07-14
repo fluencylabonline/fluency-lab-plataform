@@ -8,8 +8,7 @@ import {
   VaultDescription,
   VaultBody,
   VaultFooter,
-  VaultPrimaryButton,
-  VaultSecondaryButton,
+  VaultPrimaryButton
 } from "@/components/ui/vault";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -102,9 +101,6 @@ export function EmailDetailsVault({ open, onOpenChange, email, onReply }: EmailD
         </VaultBody>
 
         <VaultFooter>
-          <VaultSecondaryButton onClick={() => onOpenChange(false)}>
-            Fechar
-          </VaultSecondaryButton>
           {email.direction === "inbound" && onReply && (
             <VaultPrimaryButton
               onClick={() => {

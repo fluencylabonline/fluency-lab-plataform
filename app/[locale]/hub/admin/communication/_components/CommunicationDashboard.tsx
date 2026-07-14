@@ -166,14 +166,7 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, initi
               <Bell className="w-4 h-4 mr-2" />
               Enviar Notificação
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setIsWabaOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Template WhatsApp
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setIsSendWaOpen(true)}>
-              <MessageSquare className="w-4 h-4 mr-2" />
-              Nova Conversa WhatsApp
-            </DropdownMenuItem>
+            
             <DropdownMenuItem onClick={() => {
               setReplyToEmail(null);
               setIsEmailOpen(true);
@@ -285,7 +278,7 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, initi
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                       <h4 className="font-medium text-sm truncate">{item.title}</h4>
-                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                      <span className="text-[10px] text-muted-foreground whitespace-nowrap" suppressHydrationWarning>
                         {format(new Date(item.createdAt), "dd MMM, HH:mm", { locale: ptBR })}
                       </span>
                     </div>
@@ -415,7 +408,7 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, initi
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                       <h4 className="font-medium text-sm truncate mr-2">{item.subject}</h4>
-                      <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
+                      <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0" suppressHydrationWarning>
                         {format(new Date(item.createdAt), "dd MMM, HH:mm", { locale: ptBR })}
                       </span>
                     </div>
@@ -427,7 +420,7 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, initi
                         </span>
                       ) : (
                         <span>
-                          Para: <span className="font-mono">{item.to.join(", ")}</span>
+                          Para: <span className="font-mono">{Array.isArray(item.to) ? item.to.join(", ") : String(item.to)}</span>
                           {item.studentName && <span className="text-primary font-medium ml-1">({item.studentName})</span>}
                         </span>
                       )}
@@ -483,8 +476,10 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, initi
 
       <SendNotificationVault open={isNotifyOpen} onOpenChange={setIsNotifyOpen} />
       <CreateWhatsAppTemplateVault open={isWabaOpen} onOpenChange={setIsWabaOpen} />
+      
       <SendWhatsAppMessageVault open={isSendWaOpen} onOpenChange={setIsSendWaOpen} templates={templates} />
       <SendEmailVault open={isEmailOpen} onOpenChange={setIsEmailOpen} replyTo={replyToEmail} />
+      
       <EmailDetailsVault
         open={isEmailDetailsOpen}
         onOpenChange={setIsEmailDetailsOpen}
