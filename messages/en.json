@@ -903,7 +903,10 @@
         "payNowBanner": "Pay Now",
         "overdueVaultTitle": "Settle your account",
         "overdueVaultDesc": "We detected an outstanding balance on your plan. Please make the payment below to avoid temporary suspension of your classes and other platform features.",
-        "invoiceGeneratedSuccess": "Payment code generated successfully!"
+        "invoiceGeneratedSuccess": "Payment code generated successfully!",
+        "regeneratePayment": "Update PIX Code",
+        "regenerating": "Generating new code...",
+        "regenerateSuccess": "New PIX code generated successfully!"
       },
       "ProgressHero": {
         "classes": "Classes",
@@ -2505,6 +2508,8 @@
     "guardianCellphone": "Guardian Cellphone",
     "accountActions": "Account Actions",
     "invoiceGeneratedSuccess": "Payment code generated successfully!",
+    "regenerateInvoice": "Regenerate",
+    "regenerateInvoiceSuccess": "New PIX charge generated successfully!",
     "reminderSentSuccess": "Reminder sent successfully!",
     "paymentDetails": "Payment Details",
     "noInvoiceGenerated": "No invoice generated",

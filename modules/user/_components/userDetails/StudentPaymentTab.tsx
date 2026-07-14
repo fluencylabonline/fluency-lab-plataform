@@ -33,7 +33,7 @@ interface StudentPaymentTabProps {
   installmentForm: UseFormReturn<FieldValues>; // FieldValues is safer than any
   onUpdateInstallment: (id: string, data: { amount?: number }) => Promise<void>;
   onMarkAsPaid: (id: string) => Promise<void>;
-  onGenerateInvoice?: (id: string) => Promise<void>;
+  onGenerateInvoice?: (id: string, options?: { force?: boolean }) => Promise<void>;
   onResendReminder?: (id: string) => Promise<void>;
 }
 
@@ -302,6 +302,21 @@ export function StudentPaymentTab({
                                       </div>
                                     </div>
                                   </div>
+                                )}
+
+                                {/* Regenerate expired PIX — only for BRL overdue/cancelled */}
+                                {(inst.status === "overdue" || inst.status === "cancelled") &&
+                                  activeSubscription?.plan?.currency !== "USD" && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => onGenerateInvoice?.(inst.id, { force: true })}
+                                      disabled={isUpdating}
+                                      className="w-full gap-2 font-bold mt-2 border-amber-400/60 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/10"
+                                    >
+                                      <RotateCw className={`w-3.5 h-3.5 ${isUpdating ? "animate-spin" : ""}`} />
+                                      {t("regenerateInvoice") || "Gerar Novamente"}
+                                    </Button>
                                 )}
 
                                 <Button

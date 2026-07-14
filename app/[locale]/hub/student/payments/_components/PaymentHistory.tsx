@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { containerVariants, itemVariants } from "@/lib/animations";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { syncInstallmentPaymentAction } from "@/modules/billing/billing.actions";
+import { syncInstallmentPaymentAction, generateInstallmentInvoiceAction } from "@/modules/billing/billing.actions";
 import Image from "next/image";
 
 export interface PaymentRecord {
@@ -38,6 +38,7 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
   const formatIntl = useFormatter();
   const [expandedPaymentId, setExpandedPaymentId] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState<string | null>(null);
+  const [isRegenerating, setIsRegenerating] = useState<string | null>(null);
 
   const formatCurrency = (val: number, currency: string = "BRL") =>
     formatIntl.number(val / 100, {
@@ -112,6 +113,33 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
       );
     } finally {
       setIsVerifying(null);
+    }
+  };
+
+  const handleRegeneratePayment = async (installmentId: string) => {
+    setIsRegenerating(installmentId);
+    try {
+      const result = await generateInstallmentInvoiceAction({
+        installmentId,
+        force: true,
+      });
+
+      if (result?.data?.success) {
+        notify.success(
+          tProfile("regenerateSuccess") || "Novo código PIX gerado com sucesso!"
+        );
+        router.refresh();
+        setExpandedPaymentId(null);
+      } else {
+        notify.error(
+          result?.data?.error || "Erro ao atualizar código de pagamento."
+        );
+      }
+    } catch (error) {
+      console.error("Error regenerating payment:", error);
+      notify.error("Erro ao processar solicitação.");
+    } finally {
+      setIsRegenerating(null);
     }
   };
 
@@ -282,6 +310,30 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
                               ? tProfile("verifying") || "Verificando..."
                               : tProfile("verifyPayment") || "Já paguei, verificar pagamento"}
                           </Button>
+
+                          {/* Regenerate expired PIX — only for overdue BRL */}
+                          {payment.status === "overdue" && payment.subscription?.plan?.currency !== "USD" && (
+                            <Button
+                              size="default"
+                              variant="outline"
+                              className="w-full sm:w-auto gap-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/10 hover:bg-amber-100 dark:hover:bg-amber-900/20 text-amber-700 dark:text-amber-400 shadow-sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRegeneratePayment(payment.id);
+                              }}
+                              disabled={isRegenerating === payment.id}
+                            >
+                              <RotateCw
+                                className={cn(
+                                  "w-4 h-4 mr-2",
+                                  isRegenerating === payment.id && "animate-spin",
+                                )}
+                              />
+                              {isRegenerating === payment.id
+                                ? tProfile("regenerating") || "Gerando..."
+                                : tProfile("regeneratePayment") || "Atualizar Código PIX"}
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </>

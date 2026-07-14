@@ -236,7 +236,7 @@ export const syncInstallmentPaymentAction = protectedAction
 
 export const generateInstallmentInvoiceAction = protectedAction
   .metadata({ name: "generateInstallmentInvoice" })
-  .inputSchema(z.object({ installmentId: z.uuid() }))
+  .inputSchema(z.object({ installmentId: z.uuid(), force: z.boolean().optional() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
       const installment = await billingService.getInstallmentById(parsedInput.installmentId);
@@ -247,10 +247,12 @@ export const generateInstallmentInvoiceAction = protectedAction
         throw new Error("UNAUTHORIZED");
       }
 
-      await billingService.generateInvoiceForInstallment(parsedInput.installmentId);
+      await billingService.generateInvoiceForInstallment(parsedInput.installmentId, parsedInput.force ?? false);
 
       revalidatePath("/student/profile");
       revalidatePath("/student/billing");
+      revalidatePath("/hub/admin/users");
+      revalidatePath("/hub/manager/users");
       return { success: true };
     } catch (error) {
       console.error("[generateInstallmentInvoiceAction] Error:", error);
@@ -258,6 +260,7 @@ export const generateInstallmentInvoiceAction = protectedAction
       return { success: false, error: errorMessage };
     }
   });
+
 
 export const changeStudentPlanAction = managerAction
   .metadata({ name: "changeStudentPlan" })

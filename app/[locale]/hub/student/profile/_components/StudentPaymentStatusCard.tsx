@@ -108,13 +108,18 @@ export function StudentPaymentStatusCard({
 
     setIsGenerating(true);
     try {
+      // If the installment is overdue, it means the PIX likely expired — force regeneration
+      const shouldForce = isOverdue;
       const result = await generateInstallmentInvoiceAction({
         installmentId: subscription.currentInstallment.id,
+        force: shouldForce,
       });
 
       if (result?.data?.success) {
         notify.success(
-          t("invoiceGeneratedSuccess") || "Código de pagamento gerado com sucesso!",
+          shouldForce
+            ? t("regenerateSuccess") || "Novo código PIX gerado com sucesso!"
+            : t("invoiceGeneratedSuccess") || "Código de pagamento gerado com sucesso!",
         );
         window.location.reload();
       } else {
@@ -130,6 +135,7 @@ export function StudentPaymentStatusCard({
       setIsGenerating(false);
     }
   };
+
 
   const getDaysUntilDue = () => {
     if (!subscription?.currentInstallment?.dueDate) return null;
@@ -390,6 +396,27 @@ export function StudentPaymentStatusCard({
                               "Já paguei, verificar pagamento"}
                         </Button>
 
+                        {/* Regenerate expired PIX — only when overdue */}
+                        {isOverdue && (
+                          <Button
+                            size="default"
+                            variant="outline"
+                            className="w-full gap-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/10 hover:bg-amber-100 dark:hover:bg-amber-900/20 text-amber-700 dark:text-amber-400 shadow-sm"
+                            onClick={handleGenerateInvoice}
+                            disabled={isGenerating}
+                          >
+                            <RotateCw
+                              className={cn(
+                                "w-4 h-4 mr-2",
+                                isGenerating && "animate-spin",
+                              )}
+                            />
+                            {isGenerating
+                              ? t("regenerating") || "Gerando..."
+                              : t("regeneratePayment") || "Atualizar Código PIX"}
+                          </Button>
+                        )}
+
                         <Button
                           size="default"
                           variant="ghost"
@@ -404,6 +431,7 @@ export function StudentPaymentStatusCard({
                           </a>
                         </Button>
                       </div>
+
                     </div>
                   </div>
                 )

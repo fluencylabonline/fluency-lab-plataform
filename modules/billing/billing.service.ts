@@ -450,7 +450,8 @@ export const billingService = {
   },
 
   // Helper to generate the actual AbacatePay or Stripe billing for an installment
-  async generateInvoiceForInstallment(installmentId: string) {
+  // force=true: skip idempotency guard for BRL plans and regenerate a new PIX charge
+  async generateInvoiceForInstallment(installmentId: string, force = false) {
     const installment = await this.getInstallmentById(installmentId);
     if (!installment) return;
 
@@ -529,7 +530,21 @@ export const billingService = {
     }
 
     // Brazilian Flow (AbacatePay)
-    if (installment.abacatePayBillingId || !sub.plan.abacatePayProductId) return;
+    // Normal flow: skip if billing already exists (idempotency)
+    // Force flow: clear old expired billing fields so a fresh charge is created
+    if (!force && (installment.abacatePayBillingId || !sub.plan.abacatePayProductId)) return;
+    if (force && !sub.plan.abacatePayProductId) return;
+
+    // If forcing, clear the old expired PIX data upfront
+    if (force && installment.abacatePayBillingId) {
+      await billingRepository.updateInstallment(installment.id, {
+        abacatePayBillingId: null,
+        pixPayload: null,
+        pixImage: null,
+        status: "pending",
+      });
+    }
+
 
     // Ensure student has required data for Transparent PIX and decrypt it
     let taxId = student.taxId;

@@ -903,7 +903,10 @@
         "payNowBanner": "Pagar Agora",
         "overdueVaultTitle": "Regularize seu acesso",
         "overdueVaultDesc": "Detectamos que você possui uma mensalidade em atraso. Efetue o pagamento abaixo para evitar o bloqueio temporário das aulas e demais recursos da plataforma.",
-        "invoiceGeneratedSuccess": "Código de pagamento gerado com sucesso!"
+        "invoiceGeneratedSuccess": "Código de pagamento gerado com sucesso!",
+        "regeneratePayment": "Atualizar Código PIX",
+        "regenerating": "Gerando novo código...",
+        "regenerateSuccess": "Novo código PIX gerado com sucesso!"
       },
       "ProgressHero": {
         "classes": "Aulas",
@@ -2619,6 +2622,8 @@
     "noStudent": "Sem Aluno",
     "payment": "Pagamentos",
     "paymentConfirmed": "Pagamento confirmado com sucesso!",
+    "regenerateInvoice": "Gerar Novamente",
+    "regenerateInvoiceSuccess": "Nova cobrança PIX gerada com sucesso!",
     "payoutConfirmation": "Confirmação de Pagamento",
     "payoutConfirmationDesc": "Ao confirmar, o valor será transferido imediatamente via PIX para a chave cadastrada do professor. Um relatório detalhado será enviado por e-mail.",
     "payoutReview": "Revisão de Pagamento",

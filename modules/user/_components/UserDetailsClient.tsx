@@ -150,15 +150,20 @@ export function UserDetailsClient({
     }
   };
 
-  const handleGenerateInvoice = async (id: string) => {
+  const handleGenerateInvoice = async (id: string, options?: { force?: boolean }) => {
     setIsUpdating(true);
     try {
       const result = await generateInstallmentInvoiceAction({
         installmentId: id,
+        force: options?.force,
       });
 
       if (result?.data?.success) {
-        notify.success(t("invoiceGeneratedSuccess") || "Código de pagamento gerado com sucesso!");
+        notify.success(
+          options?.force
+            ? t("regenerateInvoiceSuccess") || "Nova cobrança gerada com sucesso!"
+            : t("invoiceGeneratedSuccess") || "Código de pagamento gerado com sucesso!"
+        );
         router.refresh();
       } else {
         notify.error(result?.data?.error || "Erro ao gerar código de pagamento.");
@@ -169,6 +174,7 @@ export function UserDetailsClient({
       setIsUpdating(false);
     }
   };
+
 
   const handleResendReminder = async (id: string) => {
     setIsUpdating(true);
