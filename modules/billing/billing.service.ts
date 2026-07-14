@@ -468,7 +468,7 @@ export const billingService = {
 
       console.log("[Stripe Checkout] Generating Checkout Session for student:", student.email);
       try {
-        const baseUrl = env.NEXT_PUBLIC_APP_URL || "https://fluencylab.live";
+        const baseUrl = env.NEXT_PUBLIC_APP_URL || "https://fluencylab.me";
         const redirectPath = installment.orderIndex === 1 ? "/onboarding" : "/hub/student/payments";
         const successUrl = `${baseUrl}${redirectPath}?success=true`;
         const cancelUrl = `${baseUrl}${redirectPath}?cancelled=true`;
