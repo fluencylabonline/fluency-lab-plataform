@@ -137,7 +137,7 @@ export function CoursePlayerClient({ courseData, enrollment, currentUser }: Cour
 
         <aside
           className={cn(
-            "absolute inset-y-0 left-0 z-10 w-80 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-transform lg:relative lg:translate-x-0",
+            "absolute inset-y-0 left-0 z-50 w-80 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-transform lg:relative lg:translate-x-0",
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
