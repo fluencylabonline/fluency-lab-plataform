@@ -255,7 +255,7 @@ export const selectLearningPlanSchema = createSelectSchema(learningPlans);
 
 export const step1Schema = z.object({
   fullName: z.string().min(3, "Nome muito curto"),
-  birthDate: z.string().or(z.date()),
+  approximateAge: z.string().min(1, "Informe a idade aproximada"),
   isMinor: z.boolean().default(false),
   guardianName: z.string().optional(),
   guardianContact: z.string().optional(),
@@ -265,12 +265,14 @@ export const step1Schema = z.object({
 export const step2Schema = z.object({
   languageOfInterest: z.string().uuid("Selecione um idioma").optional(),
   previousStudy: z.boolean(),
+  previousStudyDetails: z.string().optional(),
   studyDuration: z.enum(["less_than_6m", "6m_to_2y", "more_than_2y"]).optional(),
   selfAssessedLevel: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]),
 });
 
 export const step3Schema = z.object({
   mainGoals: z.array(z.string()).min(1, "Selecione pelo menos um objetivo"),
+  customGoal: z.string().optional(),
   targetDeadline: z.string().optional(),
   deadlineReason: z.string().optional(),
   specificMotivation: z.string().optional(),

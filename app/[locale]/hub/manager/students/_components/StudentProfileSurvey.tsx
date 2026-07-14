@@ -69,10 +69,10 @@ export function StudentProfileSurvey({
   const methods = useForm<StudentProfileSurveyInput>({
     resolver: zodResolver(studentProfileSurveySchema),
     defaultValues: initialData || {
-      step1: { fullName: "", occupation: "", isMinor: false, birthDate: new Date().toISOString().split('T')[0] } as StudentProfileSurveyInput["step1"],
-      step2: { selfAssessedLevel: "A1", previousStudy: false } as StudentProfileSurveyInput["step2"],
-      step3: { mainGoals: [], commitmentLevel: 5 } as StudentProfileSurveyInput["step3"],
-      step4: { weeklyFrequency: 2, dailyStudyTime: "none" } as StudentProfileSurveyInput["step4"],
+      step1: { fullName: "", occupation: "", approximateAge: "", isMinor: false } as StudentProfileSurveyInput["step1"],
+      step2: { selfAssessedLevel: "A1", previousStudy: false, previousStudyDetails: "" } as StudentProfileSurveyInput["step2"],
+      step3: { mainGoals: [], customGoal: "", commitmentLevel: 2 } as StudentProfileSurveyInput["step3"],
+      step4: { weeklyFrequency: 1, dailyStudyTime: "none" } as StudentProfileSurveyInput["step4"],
       step5: { professionalArea: "", technicalVocabNeeded: false, usageType: "balanced", employmentStatus: "employed" } as StudentProfileSurveyInput["step5"],
       step6: { conversationTopics: "" } as StudentProfileSurveyInput["step6"],
       step7: { preferredMethods: [], activityPreferences: {} } as StudentProfileSurveyInput["step7"],
@@ -168,7 +168,11 @@ export function StudentProfileSurvey({
       if (onComplete) {
         onComplete(profileId);
       } else {
-        router.push(basePath);
+        if (studentId) {
+          router.push(`/hub/manager/users/${studentId}`);
+        } else {
+          router.push(basePath);
+        }
       }
     } else {
       notify.error(result?.data?.error || "Erro ao finalizar perfil");
@@ -219,13 +223,27 @@ export function StudentProfileSurvey({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Nascimento</Label>
-              <Input type="date" {...methods.register("step1.birthDate")} className="h-11 border-border/60 focus-visible:ring-1 focus-visible:ring-primary/40 bg-background/60" />
+              <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Idade Aproximada</Label>
+              <Input {...methods.register("step1.approximateAge")} placeholder="Ex: 25" className="h-11 border-border/60 focus-visible:ring-1 focus-visible:ring-primary/40 bg-background/60" />
             </div>
             <div className="grid gap-2">
               <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Ocupação</Label>
               <Input {...methods.register("step1.occupation")} placeholder="Ex: Engenheiro..." className="h-11 border-border/60 focus-visible:ring-1 focus-visible:ring-primary/40 bg-background/60" />
             </div>
+          </div>
+          <div className="flex items-center gap-3 p-4 bg-muted/40 rounded-md border border-border/40">
+            <Controller
+              name="step1.isMinor"
+              control={methods.control}
+              render={({ field }) => (
+                <Checkbox
+                  id="isMinor"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              )}
+            />
+            <Label htmlFor="isMinor" className="text-sm cursor-pointer leading-snug">O aluno é menor de idade?</Label>
           </div>
         </div>
       )
@@ -263,19 +281,32 @@ export function StudentProfileSurvey({
               )}
             />
           </div>
-          <div className="flex items-center gap-3 p-4 bg-muted/40 rounded-md border border-border/40">
-            <Controller
-              name="step2.previousStudy"
-              control={methods.control}
-              render={({ field }) => (
-                <Checkbox
-                  id="previousStudy"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3 p-4 bg-muted/40 rounded-md border border-border/40">
+              <Controller
+                name="step2.previousStudy"
+                control={methods.control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="previousStudy"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+              <Label htmlFor="previousStudy" className="text-sm cursor-pointer leading-snug">O aluno já estudou este idioma antes?</Label>
+            </div>
+            
+            {methods.watch("step2.previousStudy") && (
+              <div className="grid gap-2 animate-in fade-in slide-in-from-top-2 duration-300 mt-2">
+                <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Detalhes do estudo anterior</Label>
+                <Textarea 
+                  {...methods.register("step2.previousStudyDetails")} 
+                  placeholder="Por quanto tempo estudou? Como foi a experiência?" 
+                  className="border-border/60 focus-visible:ring-1 focus-visible:ring-primary/40 bg-background/60 resize-none min-h-[80px]"
                 />
-              )}
-            />
-            <Label htmlFor="previousStudy" className="text-sm cursor-pointer leading-snug">O aluno já estudou este idioma antes?</Label>
+              </div>
+            )}
           </div>
         </div>
       )
@@ -295,7 +326,8 @@ export function StudentProfileSurvey({
               { id: "work", label: "Trabalho", emoji: "💼" },
               { id: "exams", label: "Certificações", emoji: "📜" },
               { id: "hobby", label: "Hobby", emoji: "🎯" },
-              { id: "moving", label: "Morar Fora", emoji: "🌍" }
+              { id: "moving", label: "Morar Fora", emoji: "🌍" },
+              { id: "other", label: "Outro", emoji: "✨" }
             ].map(goal => (
               <Controller
                 key={goal.id}
@@ -326,6 +358,16 @@ export function StudentProfileSurvey({
               />
             ))}
           </div>
+          {methods.watch("step3.mainGoals")?.includes("other") && (
+            <div className="grid gap-2 animate-in fade-in slide-in-from-top-2 duration-300 mt-2">
+              <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Qual outro objetivo?</Label>
+              <Input 
+                {...methods.register("step3.customGoal")} 
+                placeholder="Descreva o objetivo do aluno..." 
+                className="h-11 border-border/60 focus-visible:ring-1 focus-visible:ring-primary/40 bg-background/60"
+              />
+            </div>
+          )}
         </div>
       )
     },
@@ -392,40 +434,95 @@ export function StudentProfileSurvey({
       dot: "bg-cyan-500",
       content: (
         <div className="space-y-5">
-          <div className="grid gap-2">
-            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('professionalArea') || "Área profissional"}</Label>
-            <Input {...methods.register("step5.professionalArea")} placeholder="Ex: Tecnologia..." className="h-11 border-border/60 focus-visible:ring-1 focus-visible:ring-primary/40 bg-background/60" />
-          </div>
-          <div className="grid gap-3">
-            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('usageAtWork') || "Uso do idioma no trabalho"}</Label>
-            <Controller
-              name="step5.usageType"
-              control={methods.control}
-              render={({ field }) => (
-                <div className="flex gap-2.5 flex-wrap">
-                  {[
-                    { id: "writing", label: "Escrita" },
-                    { id: "speaking", label: "Fala" },
-                    { id: "balanced", label: "Equilibrado" }
-                  ].map(opt => (
-                    <button
-                      type="button"
-                      key={opt.id}
-                      onClick={() => field.onChange(opt.id)}
-                      className={cn(
-                        "px-5 py-2.5 rounded-full border text-sm font-medium transition-all duration-150",
-                        field.value === opt.id
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border/50 bg-background/60 text-muted-foreground hover:border-primary/40"
-                      )}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            />
-          </div>
+          {methods.watch("step1.isMinor") ? (
+            <div className="p-5 bg-muted/40 rounded-md text-sm text-muted-foreground text-center border border-border/50">
+              O aluno foi marcado como menor de idade. As informações profissionais não são obrigatórias e podem ser ignoradas.
+            </div>
+          ) : (
+            <>
+              <div className="grid gap-2">
+                <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('professionalArea') || "Área profissional"}</Label>
+                <Input {...methods.register("step5.professionalArea")} placeholder="Ex: Tecnologia..." className="h-11 border-border/60 focus-visible:ring-1 focus-visible:ring-primary/40 bg-background/60" />
+              </div>
+              
+              <div className="grid gap-3">
+                <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Situação de Emprego</Label>
+                <Controller
+                  name="step5.employmentStatus"
+                  control={methods.control}
+                  render={({ field }) => (
+                    <div className="flex gap-2.5 flex-wrap">
+                      {[
+                        { id: "employed", label: "Empregado" },
+                        { id: "seeking", label: "Buscando Emprego" },
+                        { id: "student", label: "Estudante/Outro" }
+                      ].map(opt => (
+                        <button
+                          type="button"
+                          key={opt.id}
+                          onClick={() => field.onChange(opt.id)}
+                          className={cn(
+                            "px-5 py-2.5 rounded-full border text-sm font-medium transition-all duration-150",
+                            field.value === opt.id
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border/50 bg-background/60 text-muted-foreground hover:border-primary/40"
+                          )}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                />
+              </div>
+
+              <div className="grid gap-3">
+                <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('usageAtWork') || "Uso do idioma no trabalho"}</Label>
+                <Controller
+                  name="step5.usageType"
+                  control={methods.control}
+                  render={({ field }) => (
+                    <div className="flex gap-2.5 flex-wrap">
+                      {[
+                        { id: "writing", label: "Escrita" },
+                        { id: "speaking", label: "Fala" },
+                        { id: "balanced", label: "Equilibrado" }
+                      ].map(opt => (
+                        <button
+                          type="button"
+                          key={opt.id}
+                          onClick={() => field.onChange(opt.id)}
+                          className={cn(
+                            "px-5 py-2.5 rounded-full border text-sm font-medium transition-all duration-150",
+                            field.value === opt.id
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border/50 bg-background/60 text-muted-foreground hover:border-primary/40"
+                          )}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                />
+              </div>
+
+              <div className="flex items-center gap-3 p-4 bg-muted/40 rounded-md border border-border/40">
+                <Controller
+                  name="step5.technicalVocabNeeded"
+                  control={methods.control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="techVocab"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
+                />
+                <Label htmlFor="techVocab" className="text-sm cursor-pointer leading-snug">Precisa de vocabulário técnico específico?</Label>
+              </div>
+            </>
+          )}
         </div>
       )
     },
@@ -498,6 +595,29 @@ export function StudentProfileSurvey({
                 }}
               />
             ))}
+          </div>
+          
+          <div className="pt-4 border-t border-border/40 space-y-4">
+            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Preferência de Atividades (1 a 5)</Label>
+            <div className="grid gap-4 bg-muted/20 p-4 rounded-md border border-border/30">
+               {['Conversação', 'Escuta', 'Leitura', 'Gramática', 'Dinâmicas'].map(activity => (
+                 <div key={activity} className="flex items-center justify-between gap-4">
+                   <Label className="text-sm font-medium w-1/3">{activity}</Label>
+                   <Controller
+                     name={`step7.activityPreferences.${activity}`}
+                     control={methods.control}
+                     render={({ field }) => (
+                       <input 
+                         type="range" min="1" max="5" step="1" 
+                         value={field.value || 3} 
+                         onChange={e => field.onChange(parseInt(e.target.value))} 
+                         className="flex-1 accent-primary" 
+                       />
+                     )}
+                   />
+                 </div>
+               ))}
+            </div>
           </div>
         </div>
       )
@@ -583,45 +703,150 @@ export function StudentProfileSurvey({
       accent: "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400",
       dot: "bg-zinc-500",
       content: (
-        <div className="space-y-4">
-          <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('preferredPace') || "Ritmo de aula preferido"}</Label>
-          <Controller
-            name="step9.learningPace"
-            control={methods.control}
-            render={({ field }) => (
-              <div className="grid gap-3">
-                {[
-                  { id: "intense", label: "Intenso e Focado", sub: "Máximo aproveitamento, mínima distração", icon: "⚡" },
-                  { id: "moderate", label: "Moderado e Constante", sub: "Ritmo estável com variação de atividades", icon: "🎯" },
-                  { id: "relaxed", label: "Relaxado e sem Pressão", sub: "Aprendizado leve e sem cobranças", icon: "🌿" }
-                ].map(opt => (
-                  <button
-                    type="button"
-                    key={opt.id}
-                    onClick={() => field.onChange(opt.id)}
-                    className={cn(
-                      "flex items-center gap-4 px-5 py-4 rounded-md border-2 text-left transition-all duration-150",
-                      field.value === opt.id
-                        ? "border-primary/60 bg-primary/5"
-                        : "border-border/40 bg-background/60 hover:border-primary/30 hover:bg-muted/30"
-                    )}
-                  >
-                    <span className="text-2xl">{opt.icon}</span>
-                    <div>
-                      <p className={cn("font-semibold text-sm", field.value === opt.id ? "text-foreground" : "text-muted-foreground")}>{opt.label}</p>
-                      <p className="text-xs text-muted-foreground/60 mt-0.5">{opt.sub}</p>
-                    </div>
-                    <div className={cn(
-                      "ml-auto size-5 rounded-full border-2 flex items-center justify-center shrink-0",
-                      field.value === opt.id ? "border-primary" : "border-muted-foreground/30"
-                    )}>
-                      {field.value === opt.id && <div className="size-2.5 rounded-full bg-primary" />}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          />
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Expectativas das Aulas</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { id: "conversation_focus", label: "Conversação" },
+                { id: "grammar_focus", label: "Gramática" },
+                { id: "exam_prep", label: "Provas" },
+                { id: "business", label: "Negócios" }
+              ].map(opt => (
+                <Controller
+                  key={opt.id}
+                  name="step9.classExpectations"
+                  control={methods.control}
+                  render={({ field }) => {
+                     const checked = field.value?.includes(opt.id);
+                     return (
+                       <button 
+                          type="button" 
+                          onClick={() => {
+                             const curr = field.value || [];
+                             if(checked) field.onChange(curr.filter((x:string) => x !== opt.id));
+                             else field.onChange([...curr, opt.id]);
+                          }}
+                          className={cn(
+                            "px-4 py-2.5 rounded-md border text-sm font-medium transition-all duration-150",
+                            checked
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border/50 bg-background/60 text-muted-foreground hover:border-primary/40"
+                          )}
+                       >
+                         {opt.label}
+                       </button>
+                     )
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('preferredPace') || "Ritmo de aula preferido"}</Label>
+            <Controller
+              name="step9.learningPace"
+              control={methods.control}
+              render={({ field }) => (
+                <div className="grid gap-3">
+                  {[
+                    { id: "intense", label: "Intenso e Focado", sub: "Máximo aproveitamento, mínima distração", icon: "⚡" },
+                    { id: "moderate", label: "Moderado e Constante", sub: "Ritmo estável com variação de atividades", icon: "🎯" },
+                    { id: "relaxed", label: "Relaxado e sem Pressão", sub: "Aprendizado leve e sem cobranças", icon: "🌿" }
+                  ].map(opt => (
+                    <button
+                      type="button"
+                      key={opt.id}
+                      onClick={() => field.onChange(opt.id)}
+                      className={cn(
+                        "flex items-center gap-4 px-5 py-4 rounded-md border-2 text-left transition-all duration-150",
+                        field.value === opt.id
+                          ? "border-primary/60 bg-primary/5"
+                          : "border-border/40 bg-background/60 hover:border-primary/30 hover:bg-muted/30"
+                      )}
+                    >
+                      <span className="text-2xl">{opt.icon}</span>
+                      <div>
+                        <p className={cn("font-semibold text-sm", field.value === opt.id ? "text-foreground" : "text-muted-foreground")}>{opt.label}</p>
+                        <p className="text-xs text-muted-foreground/60 mt-0.5">{opt.sub}</p>
+                      </div>
+                      <div className={cn(
+                        "ml-auto size-5 rounded-full border-2 flex items-center justify-center shrink-0",
+                        field.value === opt.id ? "border-primary" : "border-muted-foreground/30"
+                      )}>
+                        {field.value === opt.id && <div className="size-2.5 rounded-full bg-primary" />}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Objetivo de Sotaque</Label>
+              <Controller
+                name="step9.accentGoal"
+                control={methods.control}
+                render={({ field }) => (
+                  <div className="flex flex-col gap-2.5">
+                     {[
+                       { id: "intelligible", label: "Compreensível" },
+                       { id: "natural", label: "Nativo (Natural)" }
+                     ].map(opt => (
+                        <button 
+                          type="button" 
+                          key={opt.id}
+                          onClick={() => field.onChange(opt.id)}
+                          className={cn(
+                            "px-4 py-2.5 rounded-md border text-sm font-medium transition-all duration-150",
+                            field.value === opt.id
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border/50 bg-background/60 text-muted-foreground hover:border-primary/40"
+                          )}
+                        >
+                          {opt.label}
+                        </button>
+                     ))}
+                  </div>
+                )}
+              />
+            </div>
+
+            <div className="space-y-4">
+              <Label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Estilo de Correção</Label>
+              <Controller
+                name="step9.correctionStyle"
+                control={methods.control}
+                render={({ field }) => (
+                  <div className="flex flex-col gap-2.5">
+                     {[
+                       { id: "immediate", label: "Imediata" },
+                       { id: "important_only", label: "Erros Graves" },
+                       { id: "end_of_lesson", label: "No Fim da Aula" },
+                       { id: "gentle", label: "Sutil/Guiada" }
+                     ].map(opt => (
+                        <button 
+                          type="button" 
+                          key={opt.id}
+                          onClick={() => field.onChange(opt.id)}
+                          className={cn(
+                            "px-4 py-2.5 rounded-md border text-sm font-medium transition-all duration-150",
+                            field.value === opt.id
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border/50 bg-background/60 text-muted-foreground hover:border-primary/40"
+                          )}
+                        >
+                          {opt.label}
+                        </button>
+                     ))}
+                  </div>
+                )}
+              />
+            </div>
+          </div>
         </div>
       )
     },
