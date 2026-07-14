@@ -21,7 +21,7 @@ interface ConvItemProps {
 }
 
 export function ConvItem({ conv, isSelected, onClick }: ConvItemProps) {
-  const displayName = conv.studentName || conv.contactName || `+${conv.waId}`;
+  const displayName = conv.contactName || conv.studentName || `+${conv.waId}`;
 
   return (
     <button

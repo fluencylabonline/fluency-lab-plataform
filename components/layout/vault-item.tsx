@@ -46,9 +46,14 @@ export default function VaultItem({
         <motion.div
           animate={isActive ? { scale: [1, 1.2, 1] } : {}}
           transition={{ duration: 0.3 }}
-          className="w-6 h-6 flex items-center justify-center text-primary"
+          className="relative w-6 h-6 flex items-center justify-center text-primary"
         >
           {iconNode}
+          {item.badgeCount && item.badgeCount > 0 ? (
+            <div className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[8px] font-extrabold text-white ring-1 ring-background animate-in zoom-in duration-200">
+              {item.badgeCount > 9 ? "9+" : item.badgeCount}
+            </div>
+          ) : null}
         </motion.div>
         <AnimatePresence>
           {isActive && (

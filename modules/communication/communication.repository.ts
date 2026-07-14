@@ -188,6 +188,16 @@ export const communicationRepository = {
         updatedAt: new Date(),
       })
       .where(eq(emailsTable.resendId, resendId));
+  },
+
+  async getTotalUnreadCount() {
+    const list = await db.query.whatsappConversationsTable.findMany({
+      columns: {
+        unreadCount: true,
+      },
+      where: (table, { eq }) => eq(table.isArchived, false),
+    });
+    return list.reduce((sum, item) => sum + item.unreadCount, 0);
   }
 };
 

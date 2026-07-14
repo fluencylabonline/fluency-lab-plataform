@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 import { motion } from "framer-motion";
@@ -13,6 +13,10 @@ import { SidebarTrigger } from "./sidebar-trigger";
 import { ArrowUp } from "lucide-react";
 import Logo from "@/public/brand/logo.png";
 import Image from "next/image";
+import useSWR from "swr";
+import { getWhatsAppUnreadCountAction } from "@/modules/communication/communication.actions";
+import { rtdb } from "@/lib/firebase";
+import { ref as dbRef, onValue } from "firebase/database";
 
 export interface SidebarProps {
     items: MenuItemType[];
@@ -22,10 +26,38 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
     const pathname = usePathname();
     const isCollapsed = useCollapsedStore((state) => state.isCollapsed);
 
+    const { data: unreadData, mutate: mutateUnread } = useSWR(
+        "whatsapp-unread-count",
+        async () => {
+            const res = await getWhatsAppUnreadCountAction();
+            return res?.data?.count || 0;
+        }
+    );
+
+    useEffect(() => {
+        const signalRef = dbRef(rtdb, "whatsapp_sync_signal/conversations");
+        const unsubscribe = onValue(signalRef, () => {
+            mutateUnread();
+        });
+        return () => unsubscribe();
+    }, [mutateUnread]);
+
+    const itemsWithBadges = useMemo(() => {
+        return items.map(item => {
+            if (item.labelKey === "chat" || item.href.endsWith("/conversas")) {
+                return {
+                    ...item,
+                    badgeCount: unreadData || 0
+                };
+            }
+            return item;
+        });
+    }, [items, unreadData]);
+
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const mobileItems = useMemo(
-        () => items.filter((item) => !item.subItems),
-        [items],
+        () => itemsWithBadges.filter((item) => !item.subItems),
+        [itemsWithBadges],
     );
 
 
@@ -65,7 +97,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
                             <SidebarTrigger />
                         </div>
 
-                        {items.filter(item => item.labelKey !== "settings").map((item, index) => (
+                        {itemsWithBadges.filter(item => item.labelKey !== "settings").map((item, index) => (
                             <motion.div
                                 key={item.href}
                                 initial={{ opacity: 0, x: -10 }}
@@ -77,12 +109,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
                         ))}
 
                         <div className="mt-auto flex flex-col gap-2 mb-4">
-                            {items.filter(item => item.labelKey === "settings").map((item, index) => (
+                            {itemsWithBadges.filter(item => item.labelKey === "settings").map((item, index) => (
                                 <motion.div
                                     key={item.href}
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: (items.length - 1 + index) * 0.05 }}
+                                    transition={{ delay: (itemsWithBadges.length - 1 + index) * 0.05 }}
                                 >
                                     <SidebarItem item={item} isCollapsed={isCollapsed} />
                                 </motion.div>
@@ -118,7 +150,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
             <VaultBar
                 open={isMobileMenuOpen}
                 onOpenChange={setIsMobileMenuOpen}
-                items={items}
+                items={itemsWithBadges}
             />
         </>
     );

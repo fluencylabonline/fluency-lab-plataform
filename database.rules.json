@@ -41,6 +41,14 @@
         ".read": "auth != null",
         ".write": "auth != null && (!data.exists() || data.child('lastUpdatedBy').val() == auth.uid || newData.child('lastUpdatedBy').val() == auth.uid)"
       }
+    },
+    "whatsapp_sync_signal": {
+      ".read": "auth != null && (auth.token.role == 'admin' || auth.token.role == 'manager')",
+      ".write": "false"
+    },
+    "email_sync_signal": {
+      ".read": "auth != null && (auth.token.role == 'admin' || auth.token.role == 'manager')",
+      ".write": "false"
     }
   }
 }

@@ -181,5 +181,16 @@ export const getEmailsAction = managerAction
     return await communicationService.getEmails();
   });
 
+export const getWhatsAppUnreadCountAction = managerAction
+  .metadata({ name: "getWhatsAppUnreadCount" })
+  .action(async () => {
+    try {
+      const count = await communicationService.getTotalUnreadCount();
+      return { success: true, count };
+    } catch {
+      return { success: false, count: 0 };
+    }
+  });
+
 
 

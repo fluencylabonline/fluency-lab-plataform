@@ -1371,6 +1371,10 @@ export class CommunicationService {
       throw error;
     }
   }
+
+  async getTotalUnreadCount() {
+    return communicationRepository.getTotalUnreadCount();
+  }
 }
 
 

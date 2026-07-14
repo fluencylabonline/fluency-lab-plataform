@@ -530,7 +530,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
   const showChat = !isMobile || !!selectedConv || !!selectedQuickReply;
 
   const currentDisplayName = selectedConv
-    ? selectedConv.studentName || selectedConv.contactName || `+${selectedConv.waId}`
+    ? selectedConv.contactName || selectedConv.studentName || `+${selectedConv.waId}`
     : "";
 
   const approvedTemplates = templates?.filter(t => 
