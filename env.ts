@@ -5,6 +5,7 @@ export const env = createEnv({
   server: {
     // Resend
     RESEND_API_KEY: z.string().min(1),
+    RESEND_WEBHOOK_SECRET: z.string().optional(),
 
     // Database
     DATABASE_URL: z.string().url(),
@@ -83,6 +84,7 @@ export const env = createEnv({
   runtimeEnv: {
     // Server
     RESEND_API_KEY: process.env.RESEND_API_KEY,
+    RESEND_WEBHOOK_SECRET: process.env.RESEND_WEBHOOK_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
     FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
     FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL,

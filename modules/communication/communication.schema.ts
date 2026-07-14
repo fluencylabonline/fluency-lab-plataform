@@ -62,4 +62,35 @@ export type CreateWhatsAppQuickReplyValues = z.input<typeof createWhatsAppQuickR
 export type WhatsAppQuickReply = typeof whatsappQuickRepliesTable.$inferSelect;
 export type NewWhatsAppQuickReply = typeof whatsappQuickRepliesTable.$inferInsert;
 
+export const emailDirectionEnum = pgEnum("email_direction", ["inbound", "outbound"]);
+
+export const emailsTable = pgTable("emails", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  resendId: text("resend_id").unique(),
+  from: text("from").notNull(),
+  to: jsonb("to").notNull(),
+  subject: text("subject").notNull(),
+  html: text("html"),
+  text: text("text"),
+  direction: emailDirectionEnum("direction").notNull(),
+  status: text("status").notNull().default("sent"),
+  studentId: text("student_id").references(() => usersTable.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+  metadata: jsonb("metadata"),
+});
+
+export const sendAdminEmailSchema = z.object({
+  to: z.string().email("E-mail do destinatário inválido"),
+  subject: z.string().min(1, "O assunto é obrigatório"),
+  body: z.string().min(1, "O conteúdo é obrigatório"),
+});
+
+export type SendAdminEmailValues = z.input<typeof sendAdminEmailSchema>;
+export type EmailMessage = typeof emailsTable.$inferSelect;
+
+
 

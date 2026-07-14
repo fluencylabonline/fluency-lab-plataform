@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Plus, Bell, MessageSquare, History, CheckCircle2, Clock, XCircle, RotateCcw, Trash2 } from "lucide-react";
+import { Plus, Bell, MessageSquare, History, CheckCircle2, Clock, XCircle, RotateCcw, Trash2, Mail, ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { Header, HeaderAction } from "@/components/layout/header";
 import { useIsMobile } from "@/hooks/ui/use-device";
 import {
@@ -22,9 +22,13 @@ import { CreateWhatsAppTemplateVault } from "./CreateWhatsAppTemplateVault";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
-import { getWhatsAppTemplatesAction, deleteWhatsAppTemplateAction } from "@/modules/communication/communication.actions";
+import { getWhatsAppTemplatesAction, deleteWhatsAppTemplateAction, getEmailsAction } from "@/modules/communication/communication.actions";
 import { notify } from "@/components/ui/toaster";
 import { SendWhatsAppMessageVault } from "@/app/[locale]/hub/admin/communication/_components/SendWhatsAppMessageVault";
+import { SendEmailVault } from "./SendEmailVault";
+import { EmailDetailsVault, EmailMessageDetail } from "./EmailDetailsVault";
+import { rtdb } from "@/lib/firebase";
+import { ref as dbRef, onValue } from "firebase/database";
 import { 
   Vault, 
   VaultContent, 
@@ -41,6 +45,7 @@ import {
 interface CommunicationDashboardProps {
   initialTemplates: WhatsAppTemplate[];
   initialHistory: NotificationHistoryItem[];
+  initialEmails: EmailMessageDetail[];
   user: {
     name: string | null;
     email: string | null;
@@ -49,7 +54,7 @@ interface CommunicationDashboardProps {
   };
 }
 
-export function CommunicationDashboard({ initialTemplates, initialHistory, user }: CommunicationDashboardProps) {
+export function CommunicationDashboard({ initialTemplates, initialHistory, initialEmails, user }: CommunicationDashboardProps) {
   const [isNotifyOpen, setIsNotifyOpen] = useState(false);
   const [isWabaOpen, setIsWabaOpen] = useState(false);
   const [isSendWaOpen, setIsSendWaOpen] = useState(false);
@@ -57,12 +62,29 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, user 
   const [showDeleteVault, setShowDeleteVault] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
 
+  // Email States
+  const [emails, setEmails] = useState<EmailMessageDetail[]>(initialEmails);
+  const [isEmailOpen, setIsEmailOpen] = useState(false);
+  const [isEmailDetailsOpen, setIsEmailDetailsOpen] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState<EmailMessageDetail | null>(null);
+  const [replyToEmail, setReplyToEmail] = useState<{ email: string; subject: string } | null>(null);
+
+  // Pagination for notifications
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(initialHistory.length / itemsPerPage);
   const paginatedHistory = initialHistory.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
+  );
+
+  // Pagination for emails
+  const [emailPage, setEmailPage] = useState(1);
+  const emailsPerPage = 10;
+  const totalEmailPages = Math.ceil(emails.length / emailsPerPage);
+  const paginatedEmails = emails.slice(
+    (emailPage - 1) * emailsPerPage,
+    emailPage * emailsPerPage
   );
 
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -81,6 +103,27 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, user 
       setIsRefreshing(false);
     }
   };
+
+  const handleRefreshEmails = async () => {
+    try {
+      const result = await getEmailsAction();
+      if (result?.data) {
+        setEmails(result.data as EmailMessageDetail[]);
+      }
+    } catch {
+      console.error("Erro ao atualizar e-mails");
+    }
+  };
+
+  // Sync Emails in Real-time using Firebase RTDB
+  useEffect(() => {
+    const signalRef = dbRef(rtdb, "email_sync_signal");
+    const unsubscribe = onValue(signalRef, () => {
+      handleRefreshEmails();
+    });
+    return () => unsubscribe();
+  }, []);
+
 
   const handleDeleteTemplate = (name: string) => {
     setTemplateToDelete(name);
@@ -131,6 +174,13 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, user 
               <MessageSquare className="w-4 h-4 mr-2" />
               Nova Conversa WhatsApp
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => {
+              setReplyToEmail(null);
+              setIsEmailOpen(true);
+            }}>
+              <Mail className="w-4 h-4 mr-2" />
+              Enviar E-mail (Resend)
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
@@ -172,6 +222,22 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, user 
           Nova Conversa
         </Button>
       )
+    },
+    {
+      component: (
+        <Button
+          onClick={() => {
+            setReplyToEmail(null);
+            setIsEmailOpen(true);
+          }}
+          variant="outline"
+          size="sm"
+          className="bg-primary/10 text-primary hover:bg-primary/20 border-primary/20"
+          leftIcon={<Mail className="w-4 h-4" />}
+        >
+          Enviar E-mail
+        </Button>
+      )
     }
   ];
 
@@ -196,6 +262,10 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, user 
               <TabsTrigger value="whatsapp" className="flex items-center gap-2">
                 <MessageSquare className="w-4 h-4" />
                 WhatsApp Business
+              </TabsTrigger>
+              <TabsTrigger value="emails" className="flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                E-mails
               </TabsTrigger>
             </TabsList>
           </div>
@@ -322,12 +392,108 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, user 
             )}
           </div>
         </TabsContent>
+
+        <TabsContent value="emails" className="space-y-4">
+          <div className="grid gap-3">
+            {emails.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                Nenhum e-mail enviado ou recebido recentemente.
+              </div>
+            ) : (
+              paginatedEmails.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => {
+                    setSelectedEmail(item);
+                    setIsEmailDetailsOpen(true);
+                  }}
+                  className="card p-4 flex items-start gap-4 cursor-pointer hover:bg-muted/30 transition-colors"
+                >
+                  <div className="p-2 bg-primary/10 rounded-full shrink-0">
+                    <Mail className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-medium text-sm truncate mr-2">{item.subject}</h4>
+                      <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
+                        {format(new Date(item.createdAt), "dd MMM, HH:mm", { locale: ptBR })}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                      {item.direction === "inbound" ? (
+                        <span>
+                          De: <span className="font-mono">{item.from}</span>
+                          {item.studentName && <span className="text-primary font-medium ml-1">({item.studentName})</span>}
+                        </span>
+                      ) : (
+                        <span>
+                          Para: <span className="font-mono">{item.to.join(", ")}</span>
+                          {item.studentName && <span className="text-primary font-medium ml-1">({item.studentName})</span>}
+                        </span>
+                      )}
+                    </p>
+                    <div className="mt-2 flex items-center gap-2">
+                      {item.direction === "inbound" ? (
+                        <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[9px] px-1.5 h-4 flex items-center gap-0.5 font-bold">
+                          <ArrowDownLeft className="w-2.5 h-2.5" /> Recebido
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 text-[9px] px-1.5 h-4 flex items-center gap-0.5 font-bold">
+                          <ArrowUpRight className="w-2.5 h-2.5" /> Enviado
+                        </Badge>
+                      )}
+                      <Badge variant="outline" className="text-[9px] px-1.5 h-4 uppercase font-semibold">
+                        {item.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {totalEmailPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t">
+              <p className="text-xs text-muted-foreground">
+                Página {emailPage} de {totalEmailPages}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="xs"
+                  onClick={() => setEmailPage(p => Math.max(1, p - 1))}
+                  disabled={emailPage === 1}
+                >
+                  Anterior
+                </Button>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  onClick={() => setEmailPage(p => Math.min(totalEmailPages, p + 1))}
+                  disabled={emailPage === totalEmailPages}
+                >
+                  Próximo
+                </Button>
+              </div>
+            </div>
+          )}
+        </TabsContent>
         </Tabs>
       </main>
 
       <SendNotificationVault open={isNotifyOpen} onOpenChange={setIsNotifyOpen} />
       <CreateWhatsAppTemplateVault open={isWabaOpen} onOpenChange={setIsWabaOpen} />
       <SendWhatsAppMessageVault open={isSendWaOpen} onOpenChange={setIsSendWaOpen} templates={templates} />
+      <SendEmailVault open={isEmailOpen} onOpenChange={setIsEmailOpen} replyTo={replyToEmail} />
+      <EmailDetailsVault
+        open={isEmailDetailsOpen}
+        onOpenChange={setIsEmailDetailsOpen}
+        email={selectedEmail}
+        onReply={(emailAddress, subject) => {
+          setReplyToEmail({ email: emailAddress, subject });
+          setIsEmailOpen(true);
+        }}
+      />
 
       <Vault open={showDeleteVault} onOpenChange={setShowDeleteVault}>
         <VaultContent>

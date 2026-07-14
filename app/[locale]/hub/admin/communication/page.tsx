@@ -10,15 +10,17 @@ export default async function AdminCommunicationPage() {
     redirect("/signin");
   }
 
-  const [templates, history] = await Promise.all([
+  const [templates, history, emails] = await Promise.all([
     communicationService.getWhatsAppTemplates(),
     notificationService.getGlobalHistory(),
+    communicationService.getEmails(),
   ]);
 
   return (
     <CommunicationDashboard
       initialTemplates={templates}
       initialHistory={history}
+      initialEmails={emails}
       user={user}
     />
   );

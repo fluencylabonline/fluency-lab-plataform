@@ -3,7 +3,7 @@
 import { managerAction } from "@/lib/safe-action";
 import { z } from "zod";
 import { communicationService } from "./communication.service";
-import { createWhatsAppTemplateSchema, createWhatsAppQuickReplySchema } from "./communication.schema";
+import { createWhatsAppTemplateSchema, createWhatsAppQuickReplySchema, sendAdminEmailSchema } from "./communication.schema";
 import { revalidatePath } from "next/cache";
 
 export const getWhatsAppTemplatesAction = managerAction
@@ -162,5 +162,24 @@ export const findStudentsByWhatsAppPhoneAction = managerAction
       return { success: false, data: null, error: err instanceof Error ? err.message : "Erro ao buscar alunos" };
     }
   });
+
+export const sendAdminEmailAction = managerAction
+  .metadata({ name: "sendAdminEmail" })
+  .schema(sendAdminEmailSchema)
+  .action(async ({ parsedInput }) => {
+    try {
+      const result = await communicationService.sendAdminEmail(parsedInput);
+      return { success: true, data: result.data, error: null as string | null };
+    } catch (err) {
+      return { success: false, data: null, error: err instanceof Error ? err.message : "Erro ao enviar e-mail" };
+    }
+  });
+
+export const getEmailsAction = managerAction
+  .metadata({ name: "getEmails" })
+  .action(async () => {
+    return await communicationService.getEmails();
+  });
+
 
 

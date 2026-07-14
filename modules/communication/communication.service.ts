@@ -1259,6 +1259,118 @@ export class CommunicationService {
   async findStudentsByPhone(phone: string) {
     return communicationRepository.findStudentsByPhone(phone);
   }
+
+  async sendAdminEmail(data: { to: string; subject: string; body: string }) {
+    try {
+      const student = await communicationRepository.findUserByEmail(data.to);
+      const htmlContent = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #333;">
+          ${data.body.split("\n").map(p => p.trim() ? `<p>${p}</p>` : "<br>").join("")}
+        </div>
+      `;
+
+      const resendRes = await resend.emails.send({
+        from: this.defaultFrom,
+        to: data.to,
+        subject: data.subject,
+        html: htmlContent,
+      });
+
+      if (resendRes.error) {
+        throw new Error(resendRes.error.message || "Erro ao enviar e-mail via Resend API");
+      }
+
+      const resendId = resendRes.data?.id || null;
+
+      // Save to database
+      const emailRecord = await communicationRepository.saveEmailRecord({
+        resendId,
+        from: this.defaultFrom,
+        to: [data.to],
+        subject: data.subject,
+        html: htmlContent,
+        text: data.body,
+        direction: "outbound",
+        status: "sent",
+        studentId: student?.id || null,
+      });
+
+      // Firebase Sync Signal
+      try {
+        await adminRtdb.ref("email_sync_signal").set(Date.now());
+      } catch (err) {
+        console.error("[CommunicationService.sendAdminEmail] Error setting sync signal:", err);
+      }
+
+      return { success: true, data: emailRecord };
+    } catch (error) {
+      console.error("[CommunicationService.sendAdminEmail] Error:", error);
+      throw error;
+    }
+  }
+
+  async getEmails() {
+    return communicationRepository.getEmailsList();
+  }
+
+  async processInboundEmailWebhook(webhookData: { email_id: string; [key: string]: unknown }) {
+    try {
+      const emailId = webhookData.email_id;
+      if (!emailId) {
+        throw new Error("No email_id provided in webhook data");
+      }
+
+      // Fetch email contents via Receiving API
+      const res = await resend.emails.receiving.get(emailId);
+      if (res.error) {
+        throw new Error(res.error.message || "Error fetching inbound email content");
+      }
+
+      const email = res.data;
+      if (!email) {
+        throw new Error("Inbound email not found in Resend");
+      }
+
+      const fromAddress = email.from;
+      // Extract clean email address from "Name <email@domain>" format
+      const cleanFrom = fromAddress.includes("<")
+        ? fromAddress.split("<")[1].split(">")[0].trim()
+        : fromAddress.trim();
+
+      const student = await communicationRepository.findUserByEmail(cleanFrom);
+
+      const toAddresses = Array.isArray(email.to) ? email.to : [email.to];
+
+      // Save record in our DB
+      const record = await communicationRepository.saveEmailRecord({
+        resendId: emailId,
+        from: fromAddress,
+        to: toAddresses,
+        subject: email.subject || "(Sem Assunto)",
+        html: email.html || null,
+        text: email.text || null,
+        direction: "inbound",
+        status: "received",
+        studentId: student?.id || null,
+        metadata: {
+          headers: email.headers,
+          attachments: email.attachments,
+        },
+      });
+
+      // Firebase Sync Signal
+      try {
+        await adminRtdb.ref("email_sync_signal").set(Date.now());
+      } catch (err) {
+        console.error("[CommunicationService.processInboundEmailWebhook] Error setting sync signal:", err);
+      }
+
+      return { success: true, data: record };
+    } catch (error) {
+      console.error("[CommunicationService.processInboundEmailWebhook] Error:", error);
+      throw error;
+    }
+  }
 }
 
 

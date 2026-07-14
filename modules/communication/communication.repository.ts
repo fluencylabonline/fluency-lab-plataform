@@ -1,7 +1,9 @@
 import { db } from "@/lib/db";
-import { whatsappConversationsTable, whatsappMessagesTable, whatsappQuickRepliesTable } from "./communication.schema";
+import { whatsappConversationsTable, whatsappMessagesTable, whatsappQuickRepliesTable, emailsTable } from "./communication.schema";
 import { usersTable } from "../user/user.schema";
 import { eq, desc } from "drizzle-orm";
+import { EmailMessage } from "./communication.types";
+
 
 export const communicationRepository = {
   async findConversationByWaId(waId: string) {
@@ -136,5 +138,56 @@ export const communicationRepository = {
 
   async deleteQuickReply(id: string) {
     await db.delete(whatsappQuickRepliesTable).where(eq(whatsappQuickRepliesTable.id, id));
+  },
+
+  async saveEmailRecord(data: typeof emailsTable.$inferInsert) {
+    const [record] = await db.insert(emailsTable).values(data).returning();
+    return record;
+  },
+
+  async getEmailsList(limit = 50): Promise<EmailMessage[]> {
+    const list = await db
+      .select({
+        id: emailsTable.id,
+        resendId: emailsTable.resendId,
+        from: emailsTable.from,
+        to: emailsTable.to,
+        subject: emailsTable.subject,
+        html: emailsTable.html,
+        text: emailsTable.text,
+        direction: emailsTable.direction,
+        status: emailsTable.status,
+        studentId: emailsTable.studentId,
+        createdAt: emailsTable.createdAt,
+        updatedAt: emailsTable.updatedAt,
+        metadata: emailsTable.metadata,
+        studentName: usersTable.name,
+        studentPhotoUrl: usersTable.photoUrl,
+        studentEmail: usersTable.email,
+      })
+      .from(emailsTable)
+      .leftJoin(usersTable, eq(emailsTable.studentId, usersTable.id))
+      .orderBy(desc(emailsTable.createdAt))
+      .limit(limit);
+
+    return list as unknown as EmailMessage[];
+  },
+
+  async findEmailByResendId(resendId: string) {
+    return db.query.emailsTable.findFirst({
+      where: eq(emailsTable.resendId, resendId),
+    });
+  },
+
+  async updateEmailStatus(resendId: string, status: string, metadata?: unknown) {
+    await db
+      .update(emailsTable)
+      .set({
+        status,
+        ...(metadata ? { metadata } : {}),
+        updatedAt: new Date(),
+      })
+      .where(eq(emailsTable.resendId, resendId));
   }
 };
+

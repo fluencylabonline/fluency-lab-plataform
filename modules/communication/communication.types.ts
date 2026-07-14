@@ -137,3 +137,22 @@ export interface WhatsAppMessage {
   createdAt: Date | string;
 }
 
+export interface EmailMessage {
+  id: string;
+  resendId: string | null;
+  from: string;
+  to: string[];
+  subject: string;
+  html: string | null;
+  text: string | null;
+  direction: "inbound" | "outbound";
+  status: string;
+  studentId: string | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  metadata: unknown;
+  studentName?: string | null;
+  studentPhotoUrl?: string | null;
+  studentEmail?: string | null;
+}
+
