@@ -251,7 +251,7 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
                         <span className="whitespace-nowrap">{t("nav.continue") || "Continuar"}</span>
                         <Avatar className="w-6 h-6">
                           <AvatarImage src={user.photoUrl || undefined} />
-                          <AvatarFallback>{user.name[0]}</AvatarFallback>
+                          <AvatarFallback name={user.name}>{user.name[0]}</AvatarFallback>
                         </Avatar>
                       </>
                     ) : (
@@ -307,7 +307,7 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
               </span>
               <Avatar className="w-6 h-6">
                 <AvatarImage src={user.photoUrl || undefined} />
-                <AvatarFallback>{user.name[0]}</AvatarFallback>
+                <AvatarFallback name={user.name}>{user.name[0]}</AvatarFallback>
               </Avatar>
             </>
           ) : (
@@ -364,7 +364,7 @@ export function LandingNavbar({ user }: LandingNavbarProps) {
                     <span>{t("nav.continue") || "Continuar"}</span>
                     <Avatar className="w-6 h-6">
                       <AvatarImage src={user.photoUrl || undefined} />
-                      <AvatarFallback>{user.name[0]}</AvatarFallback>
+                      <AvatarFallback name={user.name}>{user.name[0]}</AvatarFallback>
                     </Avatar>
                   </>
                 ) : (

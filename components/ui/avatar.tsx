@@ -45,7 +45,7 @@ const AvatarFallback = React.forwardRef<
     React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback> & {
         name?: string;
     }
->(({ className, name, ...props }, ref) => {
+>(({ className, name, children, ...props }, ref) => {
     const [src, setSrc] = React.useState<string | null>(null);
 
     React.useEffect(() => {
@@ -67,9 +67,11 @@ const AvatarFallback = React.forwardRef<
             {src ? (
                 <Image src={src} alt="Avatar" width={100} height={100} className="object-cover" priority loading="eager" />
             ) : (
-                <span className="text-muted-foreground uppercase font-medium">
-                    {name?.charAt(0) || "?"}
-                </span>
+                children || (
+                    <span className="text-muted-foreground uppercase font-medium">
+                        {name?.charAt(0) || "?"}
+                    </span>
+                )
             )}
         </AvatarPrimitive.Fallback>
     );

@@ -247,7 +247,7 @@ export function UserDetailsClient({
             <div className="flex items-center">
               <Avatar className="h-12 w-12">
                 <AvatarImage src={userAvatar} />
-                <AvatarFallback>{userInitials}</AvatarFallback>
+                <AvatarFallback name={user.name}>{userInitials}</AvatarFallback>
               </Avatar>
               <div className="ml-3">
                 <p className="capitalize text-2xl font-bold min-w-full">{user.name}</p>

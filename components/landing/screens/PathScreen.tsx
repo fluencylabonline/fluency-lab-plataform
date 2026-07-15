@@ -67,7 +67,7 @@ export function PathScreen({ user }: { user: User | null }) {
           <div className="flex items-center gap-3">
             <Avatar className="w-8 h-8">
               <AvatarImage src={user?.photoUrl || undefined} />
-              <AvatarFallback>{user?.name?.[0] || "U"}</AvatarFallback>
+              <AvatarFallback name={user?.name || "U"}>{user?.name?.[0] || "U"}</AvatarFallback>
             </Avatar>
             <div>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">

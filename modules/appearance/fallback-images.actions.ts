@@ -1,12 +1,45 @@
-"use server";
-import fs from "fs";
-import path from "path";
+const FALLBACK_IMAGES = [
+  "/fallback-images/mock (1).jpeg",
+  "/fallback-images/mock (1).jpg",
+  "/fallback-images/mock (2).jpg",
+  "/fallback-images/mock (3).jpg",
+  "/fallback-images/mock (4).jpg",
+  "/fallback-images/mock (5).jpg",
+  "/fallback-images/mock (6).jpg",
+  "/fallback-images/mock (7).jpg",
+  "/fallback-images/mock (8).jpg",
+  "/fallback-images/mock (9).jpg",
+  "/fallback-images/mock (10).jpg",
+  "/fallback-images/mock (11).jpg",
+  "/fallback-images/mock (12).jpg",
+  "/fallback-images/mock (13).jpg",
+  "/fallback-images/mock (14).jpg",
+  "/fallback-images/mock (15).jpg",
+  "/fallback-images/mock (16).jpg",
+  "/fallback-images/mock (17).jpg",
+  "/fallback-images/mock (18).jpg",
+  "/fallback-images/mock (19).jpg",
+  "/fallback-images/mock (20).jpg",
+  "/fallback-images/mock (21).jpg",
+  "/fallback-images/mock (22).jpg",
+  "/fallback-images/mock (23).jpg",
+  "/fallback-images/mock (24).jpg",
+  "/fallback-images/mock (25).jpg",
+  "/fallback-images/mock (26).jpg",
+  "/fallback-images/mock (27).jpg",
+  "/fallback-images/mock (28).jpg",
+  "/fallback-images/mock (29).jpg",
+  "/fallback-images/mock (30).jpg",
+  "/fallback-images/mock (31).jpg",
+  "/fallback-images/mock (32).jpg",
+  "/fallback-images/mock (33).jpg",
+  "/fallback-images/mock (34).jpg",
+  "/fallback-images/mock (35).jpg",
+  "/fallback-images/mock (36).jpg",
+  "/fallback-images/mock (37).jpg",
+  "/fallback-images/mock (38).jpg",
+];
 
 export async function getFallbackImages() {
-  const dir = path.join(process.cwd(), "public/fallback-images");
-  if (!fs.existsSync(dir)) return [];
-  const files = await fs.promises.readdir(dir);
-  return files
-    .filter((f) => /\.(jpg|jpeg|png|webp|svg)$/i.test(f))
-    .map((f) => `/fallback-images/${f}`);
+  return FALLBACK_IMAGES;
 }

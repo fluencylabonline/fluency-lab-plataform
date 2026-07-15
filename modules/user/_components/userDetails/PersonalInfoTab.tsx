@@ -155,7 +155,7 @@ export function PersonalInfoTab({
         <div className="flex items-center gap-4 p-6 border-b border-border/50 bg-muted/5">
           <Avatar className="h-14 w-14 rounded-md border-2 border-background ring-1 ring-border shrink-0 shadow-sm">
             <AvatarImage src={user.photoUrl || ""} alt={user.name} />
-            <AvatarFallback className="rounded-md text-sm font-black bg-primary/5 text-primary">
+            <AvatarFallback name={user.name} className="rounded-md text-sm font-black bg-primary/5 text-primary">
               {user.name.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>

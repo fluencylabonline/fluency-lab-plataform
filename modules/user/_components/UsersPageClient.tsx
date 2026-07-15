@@ -141,7 +141,7 @@ export function UsersPageClient({
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 border">
                       <AvatarImage src={user.photoUrl || ""} alt={user.name} />
-                      <AvatarFallback className="bg-primary/5 text-primary">
+                      <AvatarFallback name={user.name} className="bg-primary/5 text-primary">
                         {user.name.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>

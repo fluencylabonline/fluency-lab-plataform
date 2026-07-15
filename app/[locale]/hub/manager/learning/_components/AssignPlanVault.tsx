@@ -127,7 +127,7 @@ export function AssignPlanVault({ templateId, open, onOpenChange }: AssignPlanVa
                                                 >
                                                     <Avatar className="size-10">
                                                         <AvatarImage src={student.photoUrl || undefined} />
-                                                        <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                                                        <AvatarFallback name={student.name} className="bg-primary/10 text-primary font-bold">
                                                             {student.name.substring(0, 2).toUpperCase()}
                                                         </AvatarFallback>
                                                     </Avatar>
@@ -169,7 +169,7 @@ export function AssignPlanVault({ templateId, open, onOpenChange }: AssignPlanVa
                                     <div className="flex items-center gap-4">
                                         <Avatar className="size-12 border-2 border-white dark:border-gray-900 shadow-sm transition-transform group-hover:scale-105">
                                             <AvatarImage src={selectedStudent.photoUrl || undefined} />
-                                            <AvatarFallback className="bg-primary/20 text-primary font-black">
+                                            <AvatarFallback name={selectedStudent.name} className="bg-primary/20 text-primary font-black">
                                                 {selectedStudent.name.substring(0, 2).toUpperCase()}
                                             </AvatarFallback>
                                         </Avatar>

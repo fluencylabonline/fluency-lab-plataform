@@ -126,7 +126,7 @@ export function ProceduresList({ initialData }: ProceduresListProps) {
                 <div className="flex items-center gap-2">
                   <Avatar className="h-5 w-5">
                     <AvatarImage src={procedure.author?.photoUrl || ""} />
-                    <AvatarFallback>{procedure.author?.name?.charAt(0) || "U"}</AvatarFallback>
+                    <AvatarFallback name={procedure.author?.name || "U"}>{procedure.author?.name?.charAt(0) || "U"}</AvatarFallback>
                   </Avatar>
                   <span className="truncate max-w-[100px]">{procedure.author?.name || "Usuário"}</span>
                 </div>

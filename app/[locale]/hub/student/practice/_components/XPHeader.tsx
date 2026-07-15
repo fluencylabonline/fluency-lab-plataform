@@ -78,7 +78,7 @@ export function XPHeader({ user }: XPHeaderProps) {
         <div className="flex items-center gap-4">
           <Avatar className="w-16 h-16 border-4 border-background shadow-sm">
             <AvatarImage src={user.photoUrl || undefined} />
-            <AvatarFallback className="bg-primary text-primary-foreground font-black text-xl">
+            <AvatarFallback name={user.name} className="bg-primary text-primary-foreground font-black text-xl">
               {user.name.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>

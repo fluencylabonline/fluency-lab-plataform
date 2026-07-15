@@ -73,7 +73,7 @@ export function AccountSettings({ initialData }: AccountSettingsProps) {
           <div className="relative group">
             <Avatar className="w-24 h-24 border-2 border-background ring-2 ring-muted group-hover:ring-primary/50 transition-all">
               <AvatarImage src={user.photoUrl || ""} />
-              <AvatarFallback className="text-2xl bg-primary/10 text-primary">
+              <AvatarFallback name={user.name} className="text-2xl bg-primary/10 text-primary">
                 {user.name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
