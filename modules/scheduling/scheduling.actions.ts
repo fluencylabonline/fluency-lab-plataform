@@ -15,7 +15,6 @@ import {
 } from "./scheduling.schema";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { startOfDay, endOfDay } from "date-fns";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { schedulingRepository } from "./scheduling.repository";
 
@@ -526,9 +525,7 @@ export const getRecessImpactAction = protectedAction
   .action(async ({ parsedInput, ctx }) => {
     try {
       const targetTeacherId = parsedInput.teacherId || ctx.user.id;
-      const start = startOfDay(parsedInput.startDate);
-      const end = endOfDay(parsedInput.endDate);
-      const impact = await schedulingService.getRecessImpact(targetTeacherId, start, end);
+      const impact = await schedulingService.getRecessImpact(targetTeacherId, parsedInput.startDate, parsedInput.endDate);
       return { success: true, data: impact };
     } catch (error) {
       console.error("[getRecessImpactAction] Error:", error);
@@ -546,9 +543,7 @@ export const validateRecessSLAAction = protectedAction
   .action(async ({ parsedInput, ctx }) => {
     try {
       const targetTeacherId = parsedInput.teacherId || ctx.user.id;
-      const start = startOfDay(parsedInput.startDate);
-      const end = endOfDay(parsedInput.endDate);
-      const result = await schedulingService.validateRecessSLA(targetTeacherId, start, end);
+      const result = await schedulingService.validateRecessSLA(targetTeacherId, parsedInput.startDate, parsedInput.endDate);
       return result; // result already has { success, data/error }
     } catch (error) {
       console.error("[validateRecessSLAAction] Error:", error);
@@ -584,12 +579,10 @@ export const confirmRecessAction = protectedAction
   }))
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const start = startOfDay(parsedInput.startDate);
-      const end = endOfDay(parsedInput.endDate);
       await schedulingService.registerRecess(ctx.user, {
         ...parsedInput,
-        startDate: start,
-        endDate: end
+        startDate: parsedInput.startDate,
+        endDate: parsedInput.endDate
       });
       revalidatePath("/");
       return { success: true };

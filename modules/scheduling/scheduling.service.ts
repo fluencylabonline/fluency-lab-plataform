@@ -64,6 +64,11 @@ function getLocalMidnight(date: Date, timeZone: string = "America/Sao_Paulo"): D
   return localToUtc(parts.year, parts.month, parts.day, 0, 0, timeZone);
 }
 
+function getLocalEndOfDay(date: Date, timeZone: string = "America/Sao_Paulo"): Date {
+  const midnight = getLocalMidnight(date, timeZone);
+  return new Date(midnight.getTime() + 24 * 60 * 60 * 1000 - 1);
+}
+
 function formatLocalTime(date: Date, formatStr: string = "HH:mm", timeZone: string = "America/Sao_Paulo"): string {
   const parts = getLocalDateParts(date, timeZone);
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -1897,8 +1902,8 @@ export const schedulingService = {
   },
 
   async getRecessImpact(teacherId: string, startDate: Date, endDate: Date) {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = getLocalMidnight(startDate);
+    const end = getLocalEndOfDay(endDate);
     const classes = await schedulingRepository.findByTeacherInRange(teacherId, start, end);
     const scheduledClasses = classes.filter(cls => cls.status === "scheduled" && cls.studentId);
     
@@ -1937,8 +1942,8 @@ export const schedulingService = {
   },
 
   async validateRecessSLA(teacherId: string, startDate: Date, endDate: Date) {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = getLocalMidnight(startDate);
+    const end = getLocalEndOfDay(endDate);
     const now = new Date();
     
     // 1. Check for Overlaps
@@ -1976,7 +1981,9 @@ export const schedulingService = {
     user: User, 
     data: { startDate: Date; endDate: Date; fallbackConfig: Record<string, { lessonId: string; lessonTitle?: string; message?: string }> }
   ) {
-    const { startDate, endDate, fallbackConfig } = data;
+    const startDate = getLocalMidnight(data.startDate);
+    const endDate = getLocalEndOfDay(data.endDate);
+    const { fallbackConfig } = data;
     
     // Re-validate overlap at registration
     const existingRecesses = await schedulingRepository.findRecessesByTeacher(user.id);
