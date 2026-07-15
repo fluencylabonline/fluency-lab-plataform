@@ -181,6 +181,17 @@ export const updateInstallmentAction = adminAction
         });
       }
 
+      const installment = await billingService.getInstallmentById(id);
+      if (installment) {
+        const subscription = await billingRepository.findSubscriptionById(installment.subscriptionId);
+        if (subscription) {
+          revalidatePath(`/hub/admin/users/${subscription.studentId}`);
+          revalidatePath(`/hub/manager/users/${subscription.studentId}`);
+        }
+      }
+
+      revalidatePath("/hub/student/profile");
+      revalidatePath("/hub/student/payments");
       revalidatePath("/hub/admin/users");
       revalidatePath("/hub/manager/users");
       return { success: true };
@@ -222,8 +233,8 @@ export const syncInstallmentPaymentAction = protectedAction
     try {
       const result = await billingService.syncInstallmentStatus(parsedInput.installmentId, ctx.user.id);
       
-      revalidatePath("/student/profile");
-      revalidatePath("/student/billing");
+      revalidatePath("/hub/student/profile");
+      revalidatePath("/hub/student/payments");
       revalidatePath("/onboarding");
       
       return { success: true, status: result.status };
@@ -249,8 +260,13 @@ export const generateInstallmentInvoiceAction = protectedAction
 
       await billingService.generateInvoiceForInstallment(parsedInput.installmentId, parsedInput.force ?? false);
 
-      revalidatePath("/student/profile");
-      revalidatePath("/student/billing");
+      if (subscription) {
+        revalidatePath(`/hub/admin/users/${subscription.studentId}`);
+        revalidatePath(`/hub/manager/users/${subscription.studentId}`);
+      }
+
+      revalidatePath("/hub/student/profile");
+      revalidatePath("/hub/student/payments");
       revalidatePath("/hub/admin/users");
       revalidatePath("/hub/manager/users");
       return { success: true };
@@ -284,8 +300,17 @@ export const resendInstallmentReminderAction = managerAction
   .action(async ({ parsedInput }) => {
     try {
       await billingService.resendInstallmentReminder(parsedInput.installmentId);
-      revalidatePath("/student/profile");
-      revalidatePath("/student/billing");
+      const installment = await billingService.getInstallmentById(parsedInput.installmentId);
+      if (installment) {
+        const subscription = await billingRepository.findSubscriptionById(installment.subscriptionId);
+        if (subscription) {
+          revalidatePath(`/hub/admin/users/${subscription.studentId}`);
+          revalidatePath(`/hub/manager/users/${subscription.studentId}`);
+        }
+      }
+
+      revalidatePath("/hub/student/profile");
+      revalidatePath("/hub/student/payments");
       revalidatePath("/hub/admin/users");
       revalidatePath("/hub/manager/users");
       return { success: true };

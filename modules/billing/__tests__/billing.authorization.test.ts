@@ -21,7 +21,14 @@ vi.mock("../billing.service", () => ({
     updateInstallment: vi.fn().mockResolvedValue({ success: true }),
     createPlan: vi.fn().mockResolvedValue({ id: "plan-123" }),
     updatePlan: vi.fn().mockResolvedValue({ id: "plan-123" }),
+    getInstallmentById: vi.fn().mockResolvedValue({ id: "inst-123", subscriptionId: "sub-123", status: "pending", amount: 1000 }),
     findInstallmentById: vi.fn().mockResolvedValue({ id: "inst-123", status: "pending", amount: 1000 }),
+  },
+}));
+
+vi.mock("../billing.repository", () => ({
+  billingRepository: {
+    findSubscriptionById: vi.fn().mockResolvedValue({ studentId: "student-123" }),
   },
 }));
 

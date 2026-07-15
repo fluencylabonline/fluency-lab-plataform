@@ -900,7 +900,7 @@ export const billingService = {
       const newStatus = "cancelled";
       if (installment.status !== newStatus) {
         await billingRepository.updateInstallment(installmentId, { status: newStatus });
-        revalidatePath("/student/billing");
+        revalidatePath("/hub/student/payments");
       }
       return { status: newStatus };
     }
@@ -1005,8 +1005,8 @@ export const billingService = {
 
     console.log("[AbacatePay Webhook] Installment successfully updated to PAID in DB:", installmentId);
     revalidatePath("/onboarding");
-    revalidatePath("/student/billing");
-    revalidatePath("/admin/finances");
+    revalidatePath("/hub/student/payments");
+    revalidatePath("/hub/admin/finances");
 
     // Create Audit Log
     await billingRepository.createAuditLog({
@@ -1153,7 +1153,7 @@ export const billingService = {
         studentName: student.name,
         amount: inst.amount,
         dueDate: inst.dueDate,
-        checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/student/billing`,
+        checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/hub/student/payments`,
       });
 
       // Push & In-App
@@ -1163,7 +1163,7 @@ export const billingService = {
         targetType: "specific",
         userIds: [student.id],
         channels: { inApp: true, push: true },
-        actionUrl: "/student/billing",
+        actionUrl: "/hub/student/payments",
       });
 
       // WhatsApp
@@ -1196,7 +1196,7 @@ export const billingService = {
       await communicationService.sendBillingDueDateEmail(student.email, {
         studentName: student.name,
         amount: inst.amount,
-        checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/student/billing`,
+        checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/hub/student/payments`,
       });
 
       await notificationService.sendNotification({
@@ -1205,7 +1205,7 @@ export const billingService = {
         targetType: "specific",
         userIds: [student.id],
         channels: { inApp: true, push: true },
-        actionUrl: "/student/billing",
+        actionUrl: "/hub/student/payments",
       });
 
       await billingRepository.updateInstallment(inst.id, { notifiedDueAt: new Date() });
@@ -1233,7 +1233,7 @@ export const billingService = {
       await communicationService.sendBillingOverdueEmail(student.email, {
         studentName: student.name,
         amount: inst.amount,
-        checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/student/billing`,
+        checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/hub/student/payments`,
       });
 
       await notificationService.sendNotification({
@@ -1242,7 +1242,7 @@ export const billingService = {
         targetType: "specific",
         userIds: [student.id],
         channels: { inApp: true, push: true },
-        actionUrl: "/student/billing",
+        actionUrl: "/hub/student/payments",
       });
 
       // WhatsApp
@@ -1435,14 +1435,14 @@ export const billingService = {
         await communicationService.sendBillingOverdueEmail(student.email, {
           studentName: student.name,
           amount: installment.amount,
-          checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/student/billing`,
+          checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/hub/student/payments`,
         });
       } else {
         await communicationService.sendBillingReminderEmail(student.email, {
           studentName: student.name,
           amount: installment.amount,
           dueDate: installment.dueDate,
-          checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/student/billing`,
+          checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/hub/student/payments`,
         });
       }
     }
@@ -1485,7 +1485,7 @@ export const billingService = {
         targetType: "specific",
         userIds: [student.id],
         channels: { inApp: true, push: true },
-        actionUrl: "/student/billing",
+        actionUrl: "/hub/student/payments",
       });
     } catch (error) {
       console.error("[BillingService.resendInstallmentReminder] Failed to send notification:", error);
