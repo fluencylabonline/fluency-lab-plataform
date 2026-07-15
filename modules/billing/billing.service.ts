@@ -464,7 +464,7 @@ export const billingService = {
     const isUsdPlan = sub.plan.currency === "USD";
 
     if (isUsdPlan) {
-      if (installment.stripePaymentIntentId) return;
+      if (!force && installment.stripePaymentIntentId) return;
 
       console.log("[Stripe Checkout] Generating Checkout Session for student:", student.email);
       try {
@@ -591,9 +591,18 @@ export const billingService = {
       subscriptionId: sub.id,
     };
 
+    const now = new Date();
+    const dueDate = new Date(installment.dueDate);
+    dueDate.setHours(23, 59, 59, 999);
+
+    const diffSeconds = Math.floor((dueDate.getTime() - now.getTime()) / 1000);
+    const minExpiresIn = 3600 * 24 * 7; // 7 days
+    const expiresIn = diffSeconds > minExpiresIn ? diffSeconds : minExpiresIn;
+
     const pix = await createPixCharge({
       amount: installment.amount,
       description: `Mensalidade ${sub?.plan?.name || "Plano"} - ${installment.orderIndex}/${sub?.plan?.durationMonths || ""}`.slice(0, 30),
+      expiresIn,
       customer: {
         name,
         email: student.email,
@@ -1270,6 +1279,58 @@ export const billingService = {
     actor?: { id: string; name: string }
   ) {
     const previous = await billingRepository.findInstallmentById(id);
+    if (!previous) throw new Error("Parcela não encontrada");
+
+    const amountChanged = data.amount !== undefined && data.amount !== previous.amount;
+    const hasBilling = !!(previous.abacatePayBillingId || previous.stripePaymentIntentId);
+
+    if (amountChanged && hasBilling) {
+      const sub = await billingRepository.findSubscriptionById(previous.subscriptionId);
+      const isUsd = sub?.plan?.currency === "USD";
+
+      // 1. Cancelar fatura antiga no Stripe (se USD)
+      if (isUsd && previous.stripePaymentIntentId?.startsWith("cs_")) {
+        try {
+          await stripe.checkout.sessions.expire(previous.stripePaymentIntentId);
+        } catch (err) {
+          console.warn("[BillingService] Stripe session expiration failed:", err);
+        }
+      }
+
+      // 2. Limpar os dados antigos da fatura no banco e definir o novo valor
+      await billingRepository.updateInstallment(id, {
+        amount: data.amount,
+        abacatePayBillingId: null,
+        stripePaymentIntentId: null,
+        pixPayload: null,
+        pixImage: null,
+        status: "pending",
+      });
+
+      // 3. Registrar log de auditoria
+      if (actor) {
+        await billingRepository.createAuditLog({
+          installmentId: id,
+          actorId: actor.id,
+          actorName: actor.name,
+          previousStatus: previous.status,
+          newStatus: "pending",
+          previousAmount: previous.amount,
+          newAmount: data.amount!,
+          reason: "Atualização de valor com re-faturamento pelo admin",
+        });
+      }
+
+      // 4. Gerar e enviar nova fatura imediatamente com o valor atualizado e expiresIn recalculado
+      try {
+        await this.generateInvoiceForInstallment(id, true);
+      } catch (err) {
+        console.error("[BillingService] Failed to regenerate invoice after amount update:", err);
+      }
+
+      return;
+    }
+
     await billingRepository.updateInstallment(id, data);
 
     if (actor && previous) {

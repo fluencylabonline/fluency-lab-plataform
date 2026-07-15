@@ -314,7 +314,7 @@ export function StudentPaymentTab({
                                       disabled={isUpdating}
                                       className="w-full gap-2 font-bold mt-2 border-amber-400/60 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/10"
                                     >
-                                      <RotateCw className={`w-3.5 h-3.5 ${isUpdating ? "animate-spin" : ""}`} />
+                                      <RotateCw className={`w-3.5 h-3.5 mr-2 ${isUpdating ? "animate-spin" : ""}`} />
                                       {t("regenerateInvoice") || "Gerar Novamente"}
                                     </Button>
                                 )}
@@ -326,7 +326,7 @@ export function StudentPaymentTab({
                                   disabled={isUpdating}
                                   className="w-full gap-2 font-bold mt-2"
                                 >
-                                  <Send className={`w-3.5 h-3.5 ${isUpdating ? "animate-pulse" : ""}`} />
+                                  <Send className={`w-3.5 h-3.5 mr-2 ${isUpdating ? "animate-pulse" : ""}`} />
                                   {t("resendReminderBtn") || "Reenviar Lembrete de Pagamento"}
                                 </Button>
                               </div>

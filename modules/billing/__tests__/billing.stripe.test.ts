@@ -15,6 +15,7 @@ vi.mock("@/lib/stripe", () => ({
     checkout: {
       sessions: {
         retrieve: vi.fn(),
+        expire: vi.fn(),
       },
     },
   },
@@ -33,6 +34,8 @@ vi.mock("../billing.repository", () => ({
   billingRepository: {
     updateInstallment: vi.fn(),
     findSubscriptionById: vi.fn(),
+    findInstallmentById: vi.fn(),
+    createAuditLog: vi.fn(),
   },
 }));
 
@@ -171,6 +174,142 @@ describe("Billing Gateway Dispatcher (Stripe Checkout vs AbacatePay)", () => {
       pixPayload: "abacate_pix_copy_paste_payload",
       pixImage: "abacate_qr_code_base64_data",
       status: "pending",
+    });
+  });
+
+  describe("Amount Update and Dynamic Expiration", () => {
+    it("SHOULD expire Stripe session and regenerate invoice when amount changes for USD plans", async () => {
+      const installmentMock = {
+        id: INSTALLMENT_ID,
+        subscriptionId: SUB_ID,
+        amount: 10000,
+        status: "pending",
+        dueDate: new Date(Date.now() + 3600 * 24 * 10 * 1000), // 10 days in future
+        stripePaymentIntentId: "cs_old_stripe" as string | null,
+        pixPayload: null as string | null,
+        pixImage: null as string | null,
+        abacatePayBillingId: null as string | null,
+      };
+
+      vi.mocked(billingRepository.findInstallmentById).mockResolvedValue(
+        installmentMock as unknown as Awaited<ReturnType<typeof billingRepository.findInstallmentById>>
+      );
+
+      vi.spyOn(billingService, "getInstallmentById").mockImplementation(async () => {
+        return installmentMock as unknown as Awaited<ReturnType<typeof billingService.getInstallmentById>>;
+      });
+
+      vi.mocked(billingRepository.updateInstallment).mockImplementation(async (id, data) => {
+        Object.assign(installmentMock, data);
+      });
+
+      vi.mocked(billingRepository.findSubscriptionById).mockResolvedValue({
+        id: SUB_ID,
+        studentId: STUDENT_ID,
+        status: "active",
+        plan: {
+          name: "Premium USD",
+          durationMonths: 12,
+          currency: "USD",
+        },
+      } as unknown as Awaited<ReturnType<typeof billingRepository.findSubscriptionById>>);
+
+      vi.mocked(userService.getUser).mockResolvedValue({
+        id: STUDENT_ID,
+        email: "student@example.com",
+        name: "Test Student",
+        cellphone: "123456",
+      } as unknown as Awaited<ReturnType<typeof userService.getUser>>);
+
+      const { stripe } = await import("@/lib/stripe");
+      vi.mocked(createStripeCheckoutSession).mockResolvedValue({
+        id: "cs_new_stripe",
+        url: "https://newcheckout.stripe.com",
+      } as unknown as Awaited<ReturnType<typeof createStripeCheckoutSession>>);
+
+      await billingService.updateInstallment(INSTALLMENT_ID, { amount: 15000 }, { id: "admin-1", name: "Admin" });
+
+      // Should expire the old Stripe Checkout Session
+      expect(stripe.checkout.sessions.expire).toHaveBeenCalledWith("cs_old_stripe");
+
+      // Should clean DB billing fields and save new amount
+      expect(installmentMock.amount).toBe(15000);
+      expect(installmentMock.stripePaymentIntentId).toBe("cs_new_stripe");
+      expect(installmentMock.pixPayload).toBe("https://newcheckout.stripe.com");
+
+      // Should create audit log
+      expect(billingRepository.createAuditLog).toHaveBeenCalled();
+    });
+
+    it("SHOULD pass dynamic expiration corresponding to dueDate in createPixCharge", async () => {
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 15); // 15 days in the future
+
+      const installmentMock = {
+        id: INSTALLMENT_ID,
+        subscriptionId: SUB_ID,
+        amount: 12000,
+        status: "pending",
+        dueDate: futureDate,
+        abacatePayBillingId: "ch_old_abacate" as string | null,
+        pixPayload: null as string | null,
+        pixImage: null as string | null,
+        stripePaymentIntentId: null as string | null,
+      };
+
+      vi.mocked(billingRepository.findInstallmentById).mockResolvedValue(
+        installmentMock as unknown as Awaited<ReturnType<typeof billingRepository.findInstallmentById>>
+      );
+
+      vi.spyOn(billingService, "getInstallmentById").mockImplementation(async () => {
+        return installmentMock as unknown as Awaited<ReturnType<typeof billingService.getInstallmentById>>;
+      });
+
+      vi.mocked(billingRepository.updateInstallment).mockImplementation(async (id, data) => {
+        Object.assign(installmentMock, data);
+      });
+
+      vi.mocked(billingRepository.findSubscriptionById).mockResolvedValue({
+        id: SUB_ID,
+        studentId: STUDENT_ID,
+        status: "active",
+        plan: {
+          name: "Plan BRL",
+          durationMonths: 6,
+          abacatePayProductId: "prod-brl",
+          currency: "BRL",
+        },
+      } as unknown as Awaited<ReturnType<typeof billingRepository.findSubscriptionById>>);
+
+      vi.mocked(userService.getUser).mockResolvedValue({
+        id: STUDENT_ID,
+        email: "student@example.com",
+        name: "Test Student",
+        taxId: "12345678901",
+        cellphone: "123456",
+        abacatePayCustomerId: "cust-1",
+      } as unknown as Awaited<ReturnType<typeof userService.getUser>>);
+
+      vi.mocked(createPixCharge).mockResolvedValue({
+        id: "ch_new_abacate",
+        brCode: "new_pix_code",
+        brCodeBase64: "new_pix_image",
+      } as unknown as Awaited<ReturnType<typeof createPixCharge>>);
+
+      await billingService.updateInstallment(INSTALLMENT_ID, { amount: 14000 }, { id: "admin-1", name: "Admin" });
+
+      // Should call createPixCharge with dynamic expiresIn and updated amount
+      expect(createPixCharge).toHaveBeenCalledWith(
+        expect.objectContaining({
+          amount: 14000,
+          expiresIn: expect.any(Number),
+        })
+      );
+
+      // Verify the value is approximately 15 days (greater than min 7 days)
+      const callArgs = vi.mocked(createPixCharge).mock.calls[0][0];
+      expect(callArgs.expiresIn).toBeGreaterThan(3600 * 24 * 14); // Greater than 14 days
+      expect(callArgs.expiresIn).toBeLessThan(3600 * 24 * 16); // Less than 16 days
     });
   });
 });
