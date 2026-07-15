@@ -109,6 +109,62 @@ export function TeacherScheduleClient({
     setEvents((prev) => [...prev, ...newOptimisticEvents]);
   };
 
+  const handleOptimisticCreateBatch = (rules: {
+    startDate: Date;
+    startTime: string;
+    endTime: string;
+    type: string;
+    frequency: string;
+    endDate?: Date | null;
+  }[]) => {
+    const newOptimisticEvents: CalendarEvent[] = [];
+
+    rules.forEach((data, ruleIndex) => {
+      const startHour = parseInt(data.startTime.split(":")[0]);
+      const startMin = parseInt(data.startTime.split(":")[1]);
+      const endHour = parseInt(data.endTime.split(":")[0]);
+      const endMin = parseInt(data.endTime.split(":")[1]);
+
+      const baseDate = new Date(data.startDate);
+      const limit = data.frequency === "NONE" ? 1 : 12;
+      const current = new Date(baseDate);
+
+      for (let i = 0; i < limit; i++) {
+        if (data.endDate && current > new Date(data.endDate)) {
+          break;
+        }
+
+        const start = new Date(current);
+        start.setHours(startHour, startMin, 0, 0);
+
+        const end = new Date(current);
+        end.setHours(endHour, endMin, 0, 0);
+
+        newOptimisticEvents.push({
+          id: `optimistic-${Date.now()}-${ruleIndex}-${i}`,
+          title: data.type === "REPOSICAO" ? "Reposição" : "Disponível",
+          start,
+          end,
+          status: "available",
+          type: data.type === "REPOSICAO" ? "replacement" : "normal",
+          isOptimistic: true,
+        });
+
+        if (data.frequency === "WEEKLY") {
+          current.setDate(current.getDate() + 7);
+        } else if (data.frequency === "BIWEEKLY") {
+          current.setDate(current.getDate() + 14);
+        } else if (data.frequency === "MONTHLY") {
+          current.setMonth(current.getMonth() + 1);
+        } else {
+          break;
+        }
+      }
+    });
+
+    setEvents((prev) => [...prev, ...newOptimisticEvents]);
+  };
+
   const handleOptimisticCancel = () => {
     setEvents((prev) => prev.filter((e) => !e.isOptimistic));
   };
@@ -205,6 +261,7 @@ export function TeacherScheduleClient({
         onSuccess={handleRefresh}
         initialDate={selectedDate}
         onOptimisticCreate={handleOptimisticCreate}
+        onOptimisticCreateBatch={handleOptimisticCreateBatch}
         onOptimisticCancel={handleOptimisticCancel}
       />
 

@@ -172,6 +172,28 @@ export const schedulingService = {
     return rule;
   },
 
+  async createRulesBatch(
+    user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
+    rulesData: (typeof recurrenceRules.$inferInsert)[]
+  ) {
+    for (const data of rulesData) {
+      if (!hasPermission(user, "class.update.any") && user.id !== data.teacherId) {
+        throw new Error("Unauthorized: You can only create rules for yourself or if you are an Admin/Manager");
+      }
+    }
+
+    return await db.transaction(async (tx) => {
+      const createdRules = [];
+      for (const data of rulesData) {
+        const [rule] = await tx.insert(recurrenceRules).values(data).returning();
+        // Auto-materialize first 24 weeks (6 months) within the transaction
+        await this.materializeFutureSlots(rule.id, 24, tx);
+        createdRules.push(rule);
+      }
+      return createdRules;
+    });
+  },
+
   // --- Student Allocation ---
   // --- Student Allocation ---
   // --- WhatsApp Notifications ---
@@ -1568,8 +1590,9 @@ export const schedulingService = {
     return totalGenerated;
   },
 
-  async materializeFutureSlots(ruleId: string, weeksAhead: number = 4) {
-    const rule = await schedulingRepository.findRuleById(ruleId);
+  async materializeFutureSlots(ruleId: string, weeksAhead: number = 4, tx?: DbClient) {
+    const dbClient = tx || db;
+    const rule = await schedulingRepository.findRuleById(ruleId, dbClient);
     if (!rule) throw new Error("Rule not found");
 
     const now = new Date();
@@ -1604,10 +1627,10 @@ export const schedulingService = {
       if (isAfter(startAt, now)) {
         if (!isRecessPeriod(startAt)) {
           // 1. Check for specific materialized slot
-          const exists = await schedulingRepository.findSlotByRuleAndDate(ruleId, startAt);
+          const exists = await schedulingRepository.findSlotByRuleAndDate(ruleId, startAt, dbClient);
 
           // 2. Check for ANY overlapping slot for this teacher (Conflict Prevention)
-          const conflict = await schedulingRepository.findOverlappingSlot(rule.teacherId, startAt, endAt);
+          const conflict = await schedulingRepository.findOverlappingSlot(rule.teacherId, startAt, endAt, undefined, dbClient);
 
           if (!exists && !conflict) {
             // 3. Check if teacher has a registered recess covering this date
@@ -1625,7 +1648,7 @@ export const schedulingService = {
               status: isTeacherRecess ? "teacher-recess" : baseStatus,
               startAt,
               endAt,
-            });
+            }, dbClient);
             generatedCount++;
           }
         }

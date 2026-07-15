@@ -103,8 +103,9 @@ export const schedulingRepository = {
       .returning();
   },
 
-  async createSlotInstance(data: NewSlotInstance) {
-    return db.insert(slotInstances).values(data).returning();
+  async createSlotInstance(data: NewSlotInstance, dbClient?: DbClient) {
+    const client = dbClient || db;
+    return client.insert(slotInstances).values(data).returning();
   },
 
   // --- Recurrence Rules ---

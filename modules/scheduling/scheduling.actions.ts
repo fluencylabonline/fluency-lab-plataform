@@ -10,7 +10,8 @@ import {
   cancelClassSchema,
   rescheduleWithCreditSchema,
   createRecurrenceRuleSchema,
-  retimeRecurrenceSchema
+  retimeRecurrenceSchema,
+  createRecurrenceRulesBatchSchema
 } from "./scheduling.schema";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -32,6 +33,55 @@ export const createRecurrenceRuleAction = protectedAction
       return { success: true };
     } catch (error) {
       console.error("[createRecurrenceRuleAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const createRecurrenceRulesBatchAction = protectedAction
+  .metadata({ name: "createRecurrenceRulesBatch" })
+  .inputSchema(createRecurrenceRulesBatchSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      await schedulingService.createRulesBatch(ctx.user, parsedInput.rules);
+      revalidatePath("/");
+      return { success: true };
+    } catch (error) {
+      console.error("[createRecurrenceRulesBatchAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const checkSlotsConflictBatchAction = protectedAction
+  .metadata({ name: "checkSlotsConflictBatch" })
+  .inputSchema(z.object({
+    teacherId: z.string(),
+    slots: z.array(z.object({
+      startAt: z.string().datetime(),
+      endAt: z.string().datetime(),
+    })),
+  }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const results = [];
+      for (const slot of parsedInput.slots) {
+        const conflict = await schedulingRepository.findOverlappingSlot(
+          parsedInput.teacherId,
+          new Date(slot.startAt),
+          new Date(slot.endAt)
+        );
+        results.push({
+          startAt: slot.startAt,
+          endAt: slot.endAt,
+          hasConflict: !!conflict,
+          conflict: conflict ? {
+            startAt: conflict.startAt,
+            endAt: conflict.endAt,
+          } : null
+        });
+      }
+      return { success: true, results };
+    } catch (error) {
+      console.error("[checkSlotsConflictBatchAction] Error:", error);
       return { success: false, error: (error as Error).message };
     }
   });
