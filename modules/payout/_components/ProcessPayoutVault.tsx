@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Vault, VaultContent, VaultHeader, VaultTitle, VaultTrigger } from "@/components/ui/vault";
 import { Button } from "@/components/ui/button";
@@ -37,8 +37,6 @@ export function ProcessPayoutVault({
   const [password, setPassword] = useState("");
   const [needsPassword, setNeedsPassword] = useState(true);
 
-
-
   const fetchUnpaid = useCallback(async () => {
     setIsLoading(true);
     const result = await getTeacherUnpaidClassesAction({ teacherId, month, year });
@@ -67,7 +65,6 @@ export function ProcessPayoutVault({
   const total = classes.reduce((sum, cls) => sum + (cls.teacherHourlyRate || 0), 0);
 
   const handleProcess = async () => {
-
 
     if (!password) {
       notify.error("Senha administrativa obrigatória");
