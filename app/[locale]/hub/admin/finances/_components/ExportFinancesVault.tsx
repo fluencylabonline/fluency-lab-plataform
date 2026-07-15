@@ -214,7 +214,7 @@ export function ExportFinancesVault() {
     <Vault open={open} onOpenChange={setOpen}>
       <VaultTrigger asChild>
         <Button variant="outline" className="flex items-center gap-2">
-          <Download size={18} />
+          <Download size={18} className="mr-2" />
           <span>{t("trigger")}</span>
         </Button>
       </VaultTrigger>

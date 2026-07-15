@@ -163,20 +163,26 @@ export function FinanceDashboard({
           </Select>
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <FiscalConfigVault
-            initialConfig={initialFiscalConfig}
-            year={currentYear}
-          />
-          <ExportFinancesVault />
+        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-none">
+          <div className="shrink-0">
+            <FiscalConfigVault
+              initialConfig={initialFiscalConfig}
+              year={currentYear}
+            />
+          </div>
+          <div className="shrink-0">
+            <ExportFinancesVault />
+          </div>
 
-          <Link href={"/hub/admin/finances/forecast"}>
+          <Link href={"/hub/admin/finances/forecast"} className="shrink-0">
             <Button>Previsões</Button>
           </Link>
-          <Link href={"/hub/admin/finances/plans"}>
+          <Link href={"/hub/admin/finances/plans"} className="shrink-0">
             <Button>Pacotes</Button>
           </Link>
-          <NewTransactionVault />
+          <div className="shrink-0">
+            <NewTransactionVault />
+          </div>
         </div>
       </div>
 
