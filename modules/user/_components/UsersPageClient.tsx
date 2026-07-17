@@ -47,6 +47,8 @@ export function UsersPageClient({
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("student");
   const [statusFilter, setStatusFilter] = useState<string>("active");
+  const [contractFilter, setContractFilter] = useState<string>("all");
+  const [paymentFilter, setPaymentFilter] = useState<string>("all");
 
   const t = useTranslations("UserManagement");
   const tNav = useTranslations("Navigation");
@@ -65,9 +67,31 @@ export function UsersPageClient({
       const statusValue = user.isActive ? "active" : "inactive";
       const matchesStatus = statusFilter === "all" || statusValue === statusFilter;
 
-      return matchesSearch && matchesRole && matchesStatus;
+      // Contract filter (mostly relevant for students)
+      let matchesContract = true;
+      if (contractFilter !== "all") {
+        const hasContract = !!studentContractsMap?.[user.id];
+        if (contractFilter === "signed") {
+          matchesContract = hasContract;
+        } else if (contractFilter === "unsigned") {
+          matchesContract = !hasContract;
+        }
+      }
+
+      // Payment filter (mostly relevant for students)
+      let matchesPayment = true;
+      if (paymentFilter !== "all") {
+        const paymentStatus = studentPaymentsMap?.[user.id] || "none";
+        if (paymentFilter === "paid") {
+          matchesPayment = paymentStatus === "paid";
+        } else if (paymentFilter === "unpaid") {
+          matchesPayment = paymentStatus === "unpaid";
+        }
+      }
+
+      return matchesSearch && matchesRole && matchesStatus && matchesContract && matchesPayment;
     });
-  }, [initialData, search, roleFilter, statusFilter]);
+  }, [initialData, search, roleFilter, statusFilter, contractFilter, paymentFilter, studentContractsMap, studentPaymentsMap]);
 
 
   return (
@@ -122,6 +146,32 @@ export function UsersPageClient({
             </Select>
           </div>
 
+          <div className="w-full md:w-48">
+            <Select value={contractFilter} onValueChange={setContractFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Contrato" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Contratos</SelectItem>
+                <SelectItem value="signed">Contrato Ativo</SelectItem>
+                <SelectItem value="unsigned">Sem Contrato</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="w-full md:w-48">
+            <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Pagamento" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Pagamentos</SelectItem>
+                <SelectItem value="paid">Pago (Mês)</SelectItem>
+                <SelectItem value="unpaid">Pendente (Mês)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="flex-1" />
 
           <RoleGuard roles={[UserRoles.ADMIN, UserRoles.MANAGER]}>
@@ -158,7 +208,7 @@ export function UsersPageClient({
                       <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                         {user.isActive ? (<>
                           <Mail className="w-3 h-3" />
-                          <span className="text-truncate max-w-60">{user.email}</span>
+                          <span className="text-truncate max-w-60 flex-wrap">{user.email}</span>
                         </>) : (
                           <>
                             <Skull className="w-3 h-3" />
