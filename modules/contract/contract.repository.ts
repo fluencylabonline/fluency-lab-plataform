@@ -201,6 +201,15 @@ export const contractRepository = {
     });
   },
 
+  async findAllActiveContracts() {
+    return db.query.contractInstancesTable.findMany({
+      where: eq(contractInstancesTable.status, "signed"),
+      columns: {
+        userId: true,
+      },
+    });
+  },
+
   async findAllTemplates() {
     return db.query.contractTemplatesTable.findMany({
       orderBy: [desc(contractTemplatesTable.createdAt)],

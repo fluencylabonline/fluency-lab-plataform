@@ -4,7 +4,7 @@ import { createStripeCheckoutSession, stripe } from "@/lib/stripe";
 import { userService } from "../user/user.service";
 import { communicationService } from "../communication/communication.service";
 import { notificationService } from "../notification/notification.service";
-import { addMonths, startOfDay, setDate, addDays, endOfDay, endOfMonth, getDate } from "date-fns";
+import { addMonths, startOfDay, setDate, addDays, endOfDay, endOfMonth, startOfMonth, getDate } from "date-fns";
 import { env } from "@/env";
 import { db } from "@/lib/db";
 import { Installment, installmentsTable, Subscription, abacatePayWebhookSchema, abacatePayMetadataSchema, subscriptionsTable } from "./billing.schema";
@@ -816,6 +816,27 @@ export const billingService = {
       } : null,
       lastPaymentDate: lastPaidInstallment?.paidAt || null,
     };
+  },
+
+  async getCurrentMonthPaymentStatusMap(): Promise<Record<string, "paid" | "unpaid" | "none">> {
+    const start = startOfMonth(new Date());
+    const end = endOfMonth(new Date());
+    const installments = await billingRepository.findInstallmentsInDateRangeNoStatus(start, end);
+    const map: Record<string, "paid" | "unpaid" | "none"> = {};
+
+    for (const inst of installments) {
+      if (!inst.subscription) continue;
+      const studentId = inst.subscription.studentId;
+      
+      const isPaid = inst.status === "paid";
+      
+      if (!map[studentId]) {
+        map[studentId] = isPaid ? "paid" : "unpaid";
+      } else if (map[studentId] === "paid" && !isPaid) {
+        map[studentId] = "unpaid";
+      }
+    }
+    return map;
   },
 
   async syncInstallmentStatus(installmentId: string, userId: string) {

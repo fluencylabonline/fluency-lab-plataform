@@ -596,6 +596,15 @@ export const contractService = {
     return contractRepository.findActiveContractByUserId(userId);
   },
 
+  async getActiveContractsMap(): Promise<Record<string, boolean>> {
+    const instances = await contractRepository.findAllActiveContracts();
+    const map: Record<string, boolean> = {};
+    for (const inst of instances) {
+      map[inst.userId] = true;
+    }
+    return map;
+  },
+
   async getLatestContract(userId: string) {
     const contracts = await contractRepository.findUserInstances(userId);
     if (contracts.length === 0) return null;

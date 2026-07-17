@@ -2286,6 +2286,17 @@ export const schedulingService = {
     return schedulingRepository.findNextClassForStudent(studentId);
   },
 
+  async getAllStudentsNextClassMap(): Promise<Record<string, string>> {
+    const slots = await schedulingRepository.findAllFutureScheduledSlots();
+    const map: Record<string, string> = {};
+    for (const slot of slots) {
+      if (slot.studentId && !map[slot.studentId]) {
+        map[slot.studentId] = slot.startAt.toISOString();
+      }
+    }
+    return map;
+  },
+
   async getStudentTeachersMap(): Promise<Record<string, string[]>> {
     const rules = await schedulingRepository.findAllRules();
     const map: Record<string, string[]> = {};

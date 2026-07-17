@@ -4,6 +4,8 @@ import { UsersPageClient } from "../../../../../modules/user/_components/UsersPa
 import { hasPermission } from "@/lib/rbac";
 import { userService } from "@/modules/user/user.service";
 import { schedulingService } from "@/modules/scheduling/scheduling.service";
+import { contractService } from "@/modules/contract/contract.service";
+import { billingService } from "@/modules/billing/billing.service";
 
 export default async function AdminUsersPage() {
   const user = await getCurrentUser();
@@ -24,12 +26,21 @@ export default async function AdminUsersPage() {
       .filter((name): name is string => !!name);
   }
 
+  const [studentContractsMap, studentPaymentsMap, studentNextClassesMap] = await Promise.all([
+    contractService.getActiveContractsMap(),
+    billingService.getCurrentMonthPaymentStatusMap(),
+    schedulingService.getAllStudentsNextClassMap(),
+  ]);
+
   return (
     <UsersPageClient
       initialData={users}
       currentUser={user}
       basePath="/hub/admin/users"
       studentTeachersMap={studentTeachersMap}
+      studentContractsMap={studentContractsMap}
+      studentPaymentsMap={studentPaymentsMap}
+      studentNextClassesMap={studentNextClassesMap}
     />
   );
 }

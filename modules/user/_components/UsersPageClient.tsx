@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, Mail, Shield, Sparkles, Skull, Users, HelpCircle } from "lucide-react";
+import { Plus, Mail, Shield, Sparkles, Skull, Users, HelpCircle, FileText, CreditCard, Calendar } from "lucide-react";
 import { CreateUserVault } from "./CreateUserVault";
 import { UsersHelpVault } from "./UsersHelpVault";
 import { Header, type HeaderAction } from "@/components/layout/header";
@@ -28,6 +28,9 @@ interface UsersPageClientProps {
   currentUser: User;
   basePath: string;
   studentTeachersMap?: Record<string, string[]>;
+  studentContractsMap?: Record<string, boolean>;
+  studentPaymentsMap?: Record<string, "paid" | "unpaid" | "none">;
+  studentNextClassesMap?: Record<string, string>;
 }
 
 export function UsersPageClient({
@@ -35,6 +38,9 @@ export function UsersPageClient({
   currentUser,
   basePath,
   studentTeachersMap,
+  studentContractsMap,
+  studentPaymentsMap,
+  studentNextClassesMap,
 }: UsersPageClientProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
@@ -170,6 +176,49 @@ export function UsersPageClient({
                   </div>
                   
                 </div>
+
+                {user.role === "student" && (
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {/* Contract status */}
+                    {studentContractsMap?.[user.id] ? (
+                      <Badge variant="outline" className="text-[10px] py-0.5 px-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 flex items-center gap-1 font-semibold">
+                        <FileText className="w-3 h-3" /> Contrato Ativo
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px] py-0.5 px-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 flex items-center gap-1 font-semibold">
+                        <FileText className="w-3 h-3" /> Sem Contrato
+                      </Badge>
+                    )}
+
+                    {/* Payment status */}
+                    {studentPaymentsMap?.[user.id] === "paid" && (
+                      <Badge variant="outline" className="text-[10px] py-0.5 px-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 flex items-center gap-1 font-semibold">
+                        <CreditCard className="w-3 h-3" /> Pago (Mês)
+                      </Badge>
+                    )}
+                    {studentPaymentsMap?.[user.id] === "unpaid" && (
+                      <Badge variant="outline" className="text-[10px] py-0.5 px-2 bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 flex items-center gap-1 font-semibold">
+                        <CreditCard className="w-3 h-3" /> Pendente (Mês)
+                      </Badge>
+                    )}
+
+                    {/* Next Class */}
+                    {studentNextClassesMap?.[user.id] ? (() => {
+                      const date = new Date(studentNextClassesMap[user.id]);
+                      const dateStr = date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+                      const timeStr = date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+                      return (
+                        <Badge variant="outline" className="text-[10px] py-0.5 px-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 flex items-center gap-1 font-semibold">
+                          <Calendar className="w-3 h-3" /> {dateStr} às {timeStr}
+                        </Badge>
+                      );
+                    })() : (
+                      <Badge variant="outline" className="text-[10px] py-0.5 px-2 bg-muted/40 text-muted-foreground border-border/50 flex items-center gap-1 font-normal">
+                        <Calendar className="w-3 h-3" /> Sem Aula Agendada
+                      </Badge>
+                    )}
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between pt-2 border-t mt-auto">
                   <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">

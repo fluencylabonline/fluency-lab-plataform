@@ -169,6 +169,15 @@ export const billingRepository = {
     });
   },
 
+  async findInstallmentsInDateRangeNoStatus(start: Date, end: Date) {
+    return db.query.installmentsTable.findMany({
+      where: between(installmentsTable.dueDate, start, end),
+      with: {
+        subscription: true
+      }
+    });
+  },
+
   async findPendingInstallmentsBeforeDate(maxDate: Date) {
     return db.query.installmentsTable.findMany({
       where: and(

@@ -358,6 +358,16 @@ export const schedulingRepository = {
 
     return result[0] || null;
   },
+  
+  async findAllFutureScheduledSlots() {
+    return db.query.slotInstances.findMany({
+      where: and(
+        eq(slotInstances.status, "scheduled"),
+        gte(slotInstances.startAt, new Date())
+      ),
+      orderBy: [asc(slotInstances.startAt)],
+    });
+  },
 
   async findByStudentAndTeacherInRange(studentId: string, teacherId: string, start: Date, end: Date) {
     return db.query.slotInstances.findMany({
