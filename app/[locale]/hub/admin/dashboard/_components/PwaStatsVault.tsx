@@ -16,6 +16,8 @@ import { PwaStats } from "@/modules/dashboard/dashboard.types";
 import Image from "next/image";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { sendPwaSuggestionAction } from "@/modules/notification/notification.actions";
+import { notify } from "@/components/ui/toaster";
 
 interface PwaStatsVaultProps {
   data: PwaStats;
@@ -24,6 +26,24 @@ interface PwaStatsVaultProps {
 export function PwaStatsVault({ data }: PwaStatsVaultProps) {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "installed" | "not_installed">("all");
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+
+  const handleSendSuggestion = async (studentId: string) => {
+    setLoadingId(studentId);
+    try {
+      const result = await sendPwaSuggestionAction({ studentId });
+      if (result?.data?.success) {
+        notify.success("Sugestão enviada com sucesso!");
+      } else {
+        notify.error(result?.serverError || "Erro ao enviar sugestão.");
+      }
+    } catch (err) {
+      console.error(err);
+      notify.error("Erro inesperado ao enviar sugestão.");
+    } finally {
+      setLoadingId(null);
+    }
+  };
 
   const installRate = data.total > 0 ? Math.round((data.installed / data.total) * 100) : 0;
 
@@ -166,9 +186,18 @@ export function PwaStatsVault({ data }: PwaStatsVaultProps) {
                       Instalado
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1 bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs font-medium border border-border/50">
-                      <XCircle className="w-3 h-3" />
-                      Não instalado
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleSendSuggestion(student.id)}
+                        disabled={loadingId === student.id}
+                        className="px-2.5 py-1 text-[10px] font-semibold rounded-lg bg-violet-500 hover:bg-violet-600 text-white transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed border-none outline-none"
+                      >
+                        {loadingId === student.id ? "Enviando..." : "Sugerir PWA"}
+                      </button>
+                      <div className="flex items-center gap-1 bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs font-medium border border-border/50">
+                        <XCircle className="w-3 h-3" />
+                        Não instalado
+                      </div>
                     </div>
                   )}
                 </div>

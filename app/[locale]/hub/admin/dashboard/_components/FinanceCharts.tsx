@@ -158,7 +158,7 @@ export function FinanceCharts({ data, pendingIncome }: FinanceChartsProps) {
       <div className="px-6 pb-6 pt-5">
         <div className="flex flex-col lg:flex-row gap-5">
           {/* KPI summaries */}
-          <div className="flex flex-row lg:flex-col gap-3 lg:w-48 lg:shrink-0">
+          <div className="flex flex-row flex-wrap lg:flex-col gap-3 lg:w-48 lg:shrink-0">
             {summaries.map((s) => (
               <div key={s.label} className={cn("flex-1 lg:flex-none rounded-md px-3.5 py-3 space-y-1.5", s.bg)}>
                 <div className="flex items-center justify-between">

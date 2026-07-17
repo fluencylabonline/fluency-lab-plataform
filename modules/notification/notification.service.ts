@@ -2,6 +2,9 @@ import webpush from "web-push";
 import { env } from "@/env";
 import { notificationRepository } from "./notification.repository";
 import { SendNotificationValues } from "./notification.schema";
+import { db } from "@/lib/db";
+import { usersTable } from "../user/user.schema";
+import { eq } from "drizzle-orm";
 
 // Initialize web-push
 webpush.setVapidDetails(
@@ -68,6 +71,41 @@ export const notificationService = {
       // but for a small system we can.
       await Promise.allSettled(pushPromises);
     }
+  },
+
+  async sendPwaSuggestion(studentId: string) {
+    const [student] = await db
+      .select({
+        name: usersTable.name,
+        locale: usersTable.locale,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.id, studentId))
+      .limit(1);
+
+    if (!student) {
+      throw new Error("Student not found");
+    }
+
+    const locale = student.locale || "pt";
+    const firstName = student.name.split(" ")[0] || student.name;
+
+    const title = locale === "pt" ? "Instale o FluencyLab" : "Install FluencyLab";
+    const body = locale === "pt"
+      ? `Olá ${firstName}! Adicione nossa plataforma à sua tela inicial para uma experiência mais fluida.`
+      : `Hello ${firstName}! Add our platform to your home screen for a more fluid experience.`;
+
+    await this.sendNotification({
+      title,
+      body,
+      actionUrl: `/${locale}/download`,
+      targetType: "specific",
+      userIds: [studentId],
+      channels: {
+        push: true,
+        inApp: true,
+      },
+    });
   },
 
   async subscribeUser(userId: string, subscription: { endpoint: string; keys: { p256dh: string; auth: string } }) {

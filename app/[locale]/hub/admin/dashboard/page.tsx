@@ -9,15 +9,44 @@ import { FinanceCharts } from "./_components/FinanceCharts";
 import { AcademicStats } from "./_components/AcademicStats";
 import { OnboardingFunnel } from "./_components/OnboardingFunnel";
 import { PwaStatsVault } from "./_components/PwaStatsVault";
+import { PeriodFilter } from "./_components/PeriodFilter";
+import { TodayClassesVault } from "./_components/TodayClassesVault";
 
-export default async function AdminDashboardPage() {
+interface PageProps {
+  searchParams: Promise<{ period?: string }>;
+}
+
+export default async function AdminDashboardPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const period = params.period === "day" || params.period === "week" || params.period === "month"
+    ? params.period
+    : "month";
+
   const user = await getCurrentUser();
   if (!user || !hasPermission(user, "class.view.all")) {
     redirect("/signin");
   }
 
-  const data = await dashboardService.getAdminOverview();
+  const data = await dashboardService.getAdminOverview(period);
   const t = await getTranslations("Dashboard");
+
+  const mrrTitle = period === "day"
+    ? "Receita do Dia"
+    : period === "week"
+      ? "Receita da Semana"
+      : t("stats.mrr");
+
+  const todayClassesTitle = period === "day"
+    ? t("stats.todayClasses")
+    : period === "week"
+      ? "Aulas na Semana"
+      : "Aulas no Mês";
+
+  const studentGrowthTitle = period === "day"
+    ? "Novos Alunos (Hoje)"
+    : period === "week"
+      ? "Novos Alunos (Semana)"
+      : t("stats.studentGrowth");
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -31,14 +60,20 @@ export default async function AdminDashboardPage() {
       <main className="container max-w-7xl pb-12 pt-2 flex flex-col gap-8">
         {/* Section: KPIs */}
         <section className="flex flex-col gap-3">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60 px-0.5">
-            {t("sections.overview")}
-          </h2>
+          <div className="flex items-center justify-between gap-4 px-0.5">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60">
+              {t("sections.overview")}
+            </h2>
+            <PeriodFilter />
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            <StatCard data={{ ...data.stats.mrr, title: t("stats.mrr") }} />
+            <StatCard data={{ ...data.stats.mrr, title: mrrTitle }} />
             <StatCard data={{ ...data.stats.activeStudents, title: t("stats.activeStudents") }} />
-            <StatCard data={{ ...data.stats.todayClasses, title: t("stats.todayClasses") }} />
-            <StatCard data={{ ...data.stats.studentGrowth, title: t("stats.studentGrowth") }} />
+            <TodayClassesVault
+              cardData={{ ...data.stats.todayClasses, title: todayClassesTitle }}
+              classes={data.todayClassesList}
+            />
+            <StatCard data={{ ...data.stats.studentGrowth, title: studentGrowthTitle }} />
             <PwaStatsVault data={data.pwa} />
           </div>
         </section>

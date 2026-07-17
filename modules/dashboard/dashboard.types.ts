@@ -5,6 +5,7 @@ export interface StatCardData {
   trend?: "up" | "down" | "neutral";
   icon?: string;
   format?: "currency" | "number" | "percentage";
+  comparisonLabel?: string;
 }
 
 export interface PwaStudent {
@@ -28,10 +29,18 @@ export interface MonthlyFinance {
   expense: number;
 }
 
+export interface OnboardingStudent {
+  id: string;
+  name: string;
+  email: string;
+  photoUrl: string | null;
+}
+
 export interface OnboardingStepStats {
   step: number;
   count: number;
   label: string;
+  students: OnboardingStudent[];
 }
 
 export interface PopularCourse {
@@ -45,6 +54,21 @@ export interface AttendanceStats {
   noShow: number;
   canceledStudent: number;
   canceledTeacher: number;
+}
+
+export interface TodayClass {
+  id: string;
+  studentId: string | null;
+  studentName: string | null;
+  studentPhotoUrl: string | null;
+  teacherId: string;
+  teacherName: string;
+  teacherPhotoUrl: string | null;
+  startAt: Date;
+  endAt: Date;
+  status: string;
+  type: string;
+  lessonTitle: string | null;
 }
 
 export interface AdminDashboardOverview {
@@ -65,4 +89,5 @@ export interface AdminDashboardOverview {
     pendingCredits: number;
   };
   pwa: PwaStats;
+  todayClassesList: TodayClass[];
 }

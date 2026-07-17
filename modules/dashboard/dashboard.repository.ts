@@ -3,7 +3,7 @@ import { usersTable } from "../user/user.schema";
 import { transactionsTable } from "../finance/finance.schema";
 import { slotInstances } from "../scheduling/scheduling.schema";
 import { coursesTable, courseEnrollmentsTable } from "../course/course.schema";
-import { eq, and, gte, lte, sql, count, sum, desc, inArray } from "drizzle-orm";
+import { eq, and, gte, lte, sql, count, sum, desc, inArray, aliasedTable } from "drizzle-orm";
 import { startOfMonth, subMonths, format } from "date-fns";
 import { installmentsTable } from "../billing/billing.schema";
 import { payoutsTable } from "../payout/payout.schema";
@@ -199,6 +199,20 @@ export const dashboardRepository = {
     return result[0]?.value ?? 0;
   },
 
+  async countClasses(startDate: Date, endDate: Date) {
+    const result = await db
+      .select({ value: count() })
+      .from(slotInstances)
+      .where(
+        and(
+          gte(slotInstances.startAt, startDate),
+          lte(slotInstances.startAt, endDate),
+          eq(slotInstances.status, "scheduled")
+        )
+      );
+    return result[0]?.value ?? 0;
+  },
+
   async getAttendanceStats() {
     const result = await db
       .select({
@@ -223,6 +237,56 @@ export const dashboardRepository = {
       .orderBy(usersTable.onboardingStep);
 
     return result;
+  },
+
+  async getOnboardingStudents() {
+    return db
+      .select({
+        id: usersTable.id,
+        name: usersTable.name,
+        email: usersTable.email,
+        photoUrl: usersTable.photoUrl,
+        onboardingStep: usersTable.onboardingStep,
+      })
+      .from(usersTable)
+      .where(and(eq(usersTable.role, "student"), eq(usersTable.isActive, true)));
+  },
+
+  async getTodayClassesList() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const students = aliasedTable(usersTable, "students");
+    const teachers = aliasedTable(usersTable, "teachers");
+
+    return db
+      .select({
+        id: slotInstances.id,
+        studentId: slotInstances.studentId,
+        studentName: students.name,
+        studentPhotoUrl: students.photoUrl,
+        teacherId: slotInstances.teacherId,
+        teacherName: teachers.name,
+        teacherPhotoUrl: teachers.photoUrl,
+        startAt: slotInstances.startAt,
+        endAt: slotInstances.endAt,
+        status: slotInstances.status,
+        type: slotInstances.type,
+        lessonTitle: slotInstances.lessonTitle,
+      })
+      .from(slotInstances)
+      .leftJoin(students, eq(slotInstances.studentId, students.id))
+      .leftJoin(teachers, eq(slotInstances.teacherId, teachers.id))
+      .where(
+        and(
+          gte(slotInstances.startAt, today),
+          lte(slotInstances.startAt, tomorrow),
+          eq(slotInstances.status, "scheduled")
+        )
+      )
+      .orderBy(slotInstances.startAt);
   },
 
   async getPopularCourses(limit = 5) {
@@ -250,6 +314,7 @@ export const dashboardRepository = {
         photoUrl: usersTable.photoUrl,
         pwaInstalled: usersTable.pwaInstalled,
         pwaInstalledAt: usersTable.pwaInstalledAt,
+        locale: usersTable.locale,
       })
       .from(usersTable)
       .where(and(eq(usersTable.role, "student"), eq(usersTable.isActive, true)))

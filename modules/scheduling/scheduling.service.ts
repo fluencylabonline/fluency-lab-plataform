@@ -347,10 +347,23 @@ export const schedulingService = {
       // We pass studentId to ensure newly created slots are correctly attributed
       await this.materializeSlotsUntilDate(ruleId, horizon, tx, studentId, startAllocationFrom);
 
+      // Find the first scheduled slot
+      const firstScheduledSlot = await tx.query.slotInstances.findFirst({
+        where: and(
+          eq(slotInstances.ruleId, ruleId),
+          eq(slotInstances.studentId, studentId),
+          eq(slotInstances.status, "scheduled"),
+          gte(slotInstances.startAt, startAllocationFrom)
+        ),
+        orderBy: [asc(slotInstances.startAt)],
+      });
+
+      const firstClassDate = firstScheduledSlot ? firstScheduledSlot.startAt : startAllocationFrom;
+
       // Notification
       await notificationService.sendNotification({
         title: "Novo Horário Agendado",
-        body: `Você foi alocado para um novo horário recorrente iniciando em ${format(startAllocationFrom, "dd/MM")}.`,
+        body: `Você foi alocado para um novo horário recorrente iniciando em ${format(firstClassDate, "dd/MM")}.`,
         targetType: "specific",
         userIds: [studentId],
         channels: { inApp: true, push: true },
@@ -365,11 +378,12 @@ export const schedulingService = {
         channels: { inApp: true, push: true },
       });
 
-      return { success: true };
+      return { success: true, firstClassDate };
     });
 
     if (result.success) {
-      this.sendAllocationWhatsAppNotifications(student, rule, startAllocationFrom).catch((err) =>
+      const firstClassDate = result.firstClassDate || startAllocationFrom;
+      this.sendAllocationWhatsAppNotifications(student, rule, firstClassDate).catch((err) =>
         console.error("[allocateStudentToRule] WhatsApp notification error:", err)
       );
     }

@@ -25,6 +25,15 @@ export const sendNotificationAction = adminAction
     return { success: true };
   });
 
+export const sendPwaSuggestionAction = adminAction
+  .schema(z.object({ studentId: z.string() }))
+  .metadata({ name: "sendPwaSuggestionAction" })
+  .action(async ({ parsedInput }) => {
+    await notificationService.sendPwaSuggestion(parsedInput.studentId);
+    revalidatePath("/hub/admin/dashboard");
+    return { success: true };
+  });
+
 export const markNotificationAsReadAction = protectedAction
   .schema(z.object({
     id: z.string()

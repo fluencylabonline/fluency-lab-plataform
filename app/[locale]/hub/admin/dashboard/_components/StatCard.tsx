@@ -80,7 +80,7 @@ export function StatCard({ data }: StatCardProps) {
               {data.change! > 0 ? "+" : ""}{data.change?.toFixed(1)}%
             </span>
             <span className="text-xs text-muted-foreground/60">
-              {t("vsLastMonth")}
+              {data.comparisonLabel || t("vsLastMonth")}
             </span>
           </div>
         )}

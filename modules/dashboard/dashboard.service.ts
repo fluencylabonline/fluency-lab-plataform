@@ -1,29 +1,63 @@
 import { dashboardRepository } from "./dashboard.repository";
-import { AdminDashboardOverview, MonthlyFinance, OnboardingStepStats } from "./dashboard.types";
-import { startOfMonth, endOfMonth, subMonths } from "date-fns";
+import { AdminDashboardOverview, MonthlyFinance, OnboardingStepStats, OnboardingStudent } from "./dashboard.types";
+import {
+  startOfMonth,
+  endOfMonth,
+  subMonths,
+  startOfWeek,
+  endOfWeek,
+  subWeeks,
+  startOfDay,
+  endOfDay,
+  subDays
+} from "date-fns";
 
 export const dashboardService = {
-  async getAdminOverview(): Promise<AdminDashboardOverview> {
+  async getAdminOverview(period: "day" | "week" | "month" = "month"): Promise<AdminDashboardOverview> {
     const now = new Date();
-    const currentMonthStart = startOfMonth(now);
-    const lastMonthStart = startOfMonth(subMonths(now, 1));
-    const lastMonthEnd = endOfMonth(subMonths(now, 1));
+    let currentStart: Date;
+    let currentEnd: Date;
+    let lastStart: Date;
+    let lastEnd: Date;
+    let comparisonLabel = "";
+
+    if (period === "day") {
+      currentStart = startOfDay(now);
+      currentEnd = endOfDay(now);
+      lastStart = startOfDay(subDays(now, 1));
+      lastEnd = endOfDay(subDays(now, 1));
+      comparisonLabel = "vs. ontem";
+    } else if (period === "week") {
+      currentStart = startOfWeek(now, { weekStartsOn: 1 });
+      currentEnd = now;
+      lastStart = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
+      lastEnd = endOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
+      comparisonLabel = "vs. sem. anterior";
+    } else {
+      currentStart = startOfMonth(now);
+      currentEnd = now;
+      lastStart = startOfMonth(subMonths(now, 1));
+      lastEnd = endOfMonth(subMonths(now, 1));
+      comparisonLabel = "vs. mês anterior";
+    }
 
     // 1. Core Stats
     const [
       activeStudents,
-      mrrCurrent,
-      mrrLast,
-      todayClasses,
+      revenueCurrent,
+      revenueLast,
+      classesCurrent,
+      classesLast,
       newStudentsCurrent,
       newStudentsLast
     ] = await Promise.all([
       dashboardRepository.countActiveStudents(),
-      dashboardRepository.getMonthlyRevenue(currentMonthStart, now),
-      dashboardRepository.getMonthlyRevenue(lastMonthStart, lastMonthEnd),
-      dashboardRepository.getTodayClassesCount(),
-      dashboardRepository.countNewStudents(currentMonthStart, now),
-      dashboardRepository.countNewStudents(lastMonthStart, lastMonthEnd),
+      dashboardRepository.getMonthlyRevenue(currentStart, currentEnd),
+      dashboardRepository.getMonthlyRevenue(lastStart, lastEnd),
+      dashboardRepository.countClasses(currentStart, currentEnd),
+      dashboardRepository.countClasses(lastStart, lastEnd),
+      dashboardRepository.countNewStudents(currentStart, currentEnd),
+      dashboardRepository.countNewStudents(lastStart, lastEnd),
     ]);
 
     // 2. Finance Data
@@ -39,11 +73,12 @@ export const dashboardService = {
     }));
 
     // 3. Academic & Engagement
-    const [attendanceRaw, funnelRaw, popularCourses, pwaStats] = await Promise.all([
+    const [attendanceRaw, onboardingStudents, popularCourses, pwaStats, todayClassesList] = await Promise.all([
       dashboardRepository.getAttendanceStats(),
-      dashboardRepository.getOnboardingFunnel(),
+      dashboardRepository.getOnboardingStudents(),
       dashboardRepository.getPopularCourses(5),
       dashboardRepository.getPwaStats(),
+      dashboardRepository.getTodayClassesList(),
     ]);
 
     const attendance = {
@@ -62,19 +97,42 @@ export const dashboardService = {
       }
     });
 
-    const onboardingFunnel: OnboardingStepStats[] = funnelRaw.map(row => ({
-      step: row.step,
-      count: row.count,
-      label: `Step ${row.step}`, // Can be mapped to specific names later
-    }));
+    // 4. Map Onboarding Funnel: group students by their onboarding step
+    const stepsMap = new Map<number, { step: number; count: number; label: string; students: OnboardingStudent[] }>();
+    const stepsLabels = ["Boas-vindas", "Documentos", "Pagamento", "Contrato", "Concluído"];
+    for (let i = 1; i <= 5; i++) {
+      stepsMap.set(i, {
+        step: i,
+        count: 0,
+        label: stepsLabels[i - 1] || `Etapa ${i}`,
+        students: []
+      });
+    }
+
+    onboardingStudents.forEach(student => {
+      const stepNum = student.onboardingStep || 1;
+      const stepData = stepsMap.get(stepNum);
+      if (stepData) {
+        stepData.count += 1;
+        stepData.students.push({
+          id: student.id,
+          name: student.name,
+          email: student.email,
+          photoUrl: student.photoUrl
+        });
+      }
+    });
+
+    const onboardingFunnel: OnboardingStepStats[] = Array.from(stepsMap.values());
 
     return {
       stats: {
         mrr: {
           title: "Dashboard.stats.mrr",
-          value: mrrCurrent / 100,
-          change: mrrLast > 0 ? ((mrrCurrent - mrrLast) / mrrLast) * 100 : 0,
-          trend: mrrCurrent >= mrrLast ? "up" : "down",
+          value: revenueCurrent / 100,
+          change: revenueLast > 0 ? ((revenueCurrent - revenueLast) / revenueLast) * 100 : 0,
+          trend: revenueCurrent >= revenueLast ? "up" : "down",
+          comparisonLabel,
           format: "currency"
         },
         activeStudents: {
@@ -84,7 +142,10 @@ export const dashboardService = {
         },
         todayClasses: {
           title: "Dashboard.stats.todayClasses",
-          value: todayClasses,
+          value: classesCurrent,
+          change: classesLast > 0 ? ((classesCurrent - classesLast) / classesLast) * 100 : 0,
+          trend: classesCurrent >= classesLast ? "up" : "down",
+          comparisonLabel,
           format: "number"
         },
         studentGrowth: {
@@ -92,6 +153,7 @@ export const dashboardService = {
           value: newStudentsCurrent,
           change: newStudentsLast > 0 ? ((newStudentsCurrent - newStudentsLast) / newStudentsLast) * 100 : 0,
           trend: newStudentsCurrent >= newStudentsLast ? "up" : "down",
+          comparisonLabel,
           format: "number"
         }
       },
@@ -107,9 +169,15 @@ export const dashboardService = {
           title: c.title,
           enrollments: c.enrollments
         })),
-        pendingCredits: 0, // TODO: Implement credits count in repository if needed
+        pendingCredits: 0,
       },
       pwa: pwaStats,
+      todayClassesList: todayClassesList.map(c => ({
+        ...c,
+        teacherName: c.teacherName || "Sem Nome",
+        startAt: new Date(c.startAt),
+        endAt: new Date(c.endAt)
+      })),
     };
   }
 };
