@@ -205,7 +205,10 @@ export function FinanceDashboard({
               <h3 className="subtitle">{t("transactions.title")}</h3>
             </div>
             <div className="p-0">
-              <TransactionsTable transactions={initialTransactions} />
+              <TransactionsTable
+                key={`${currentMonth}-${currentYear}-${currentStatus}-${currentSource}`}
+                transactions={initialTransactions}
+              />
             </div>
           </div>
         </div>

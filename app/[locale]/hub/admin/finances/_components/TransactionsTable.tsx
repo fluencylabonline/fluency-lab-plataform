@@ -10,11 +10,12 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useTranslations, useFormatter } from "next-intl";
-import { ArrowDownCircle, ArrowUpCircle, Tag, Paperclip, CreditCard, Banknote, QrCode, Building2, Wallet } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Tag, Paperclip, CreditCard, Banknote, QrCode, Building2, Wallet, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EmptyResults } from "@/components/ui/empty";
 import { useState } from "react";
 import { EditTransactionVault } from "./EditTransactionVault";
+import { Button } from "@/components/ui/button";
 import { Transaction } from "@/modules/finance/finance.schema";
 import { UnifiedTransaction } from "@/modules/finance/finance.types";
 
@@ -26,6 +27,8 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
   const t = useTranslations("AdminFinances.transactions");
   const format = useFormatter();
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   if (transactions.length === 0) {
     return (
@@ -37,6 +40,11 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
       </div>
     );
   }
+
+  const totalPages = Math.ceil(transactions.length / itemsPerPage);
+  const activePage = Math.min(currentPage, Math.max(1, totalPages));
+  const startIndex = (activePage - 1) * itemsPerPage;
+  const paginatedTransactions = transactions.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <>
@@ -53,7 +61,7 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {transactions.map((tx) => (
+          {paginatedTransactions.map((tx) => (
             <TableRow 
               key={tx.id} 
               className={cn(
@@ -137,6 +145,46 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
           ))}
         </TableBody>
       </Table>
+      
+      {totalPages > 1 && (
+        <div className="border-t border-border px-6 py-4 flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">
+            {startIndex + 1}–{Math.min(startIndex + itemsPerPage, transactions.length)}{" "}
+            <span className="text-muted-foreground/50">/ {transactions.length}</span>
+          </p>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={activePage === 1}
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={activePage === page ? "secondary" : "ghost"}
+                size="icon"
+                className="h-7 w-7 text-xs"
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </Button>
+            ))}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={activePage === totalPages}
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
       
       {selectedTransaction && (
         <EditTransactionVault 

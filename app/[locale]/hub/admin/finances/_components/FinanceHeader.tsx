@@ -25,6 +25,7 @@ export function FinanceHeader({ title, subtitle }: FinanceHeaderProps) {
           icon: <HelpCircle className="w-4 h-4" />,
           onClick: () => setHelpOpen(true)
         }]}
+        className="contents"
       />
       <FinanceHelpWizard open={helpOpen} onOpenChange={setHelpOpen} />
     </>
