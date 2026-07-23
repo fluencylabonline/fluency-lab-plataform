@@ -383,6 +383,11 @@ export const MyUILayout = ({
                 enabledIcon={Camera}
                 disabledIcon={CameraOff}
               />
+              {userRole === "teacher" && (
+                <div className="md:flex hidden items-center justify-center">
+                  <ScreenShareButton />
+                </div>
+              )}
               <ControlButton
                 onClick={togglePiP}
                 isEnabled={true}
@@ -413,10 +418,12 @@ export const MyUILayout = ({
                         <Minimize2 size={16} />
                         <span className="text-sm font-medium">Minimizar</span>
                       </button>
-                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors w-full relative overflow-hidden">
-                        <ScreenShareButton />
-                        <span className="text-sm font-medium">Compartilhar</span>
-                      </div>
+                      {userRole === "teacher" && (
+                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors w-full relative overflow-hidden">
+                          <ScreenShareButton />
+                          <span className="text-sm font-medium">Compartilhar</span>
+                        </div>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -438,100 +445,110 @@ export const MyUILayout = ({
       <AnimatePresence>
         {!isPiP && callComponent}
         {isPiP && (
-          <motion.div
-            drag
-            dragMomentum={false}
-            dragConstraints={constraintsRef}
-            onClick={() => setShowPiPControls(!showPiPControls)}
-            initial={{ opacity: 0, scale: 0.8, y: 50 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className={cn(
-              "pointer-events-auto fixed rounded-2xl overflow-hidden bg-black border border-white/10 flex flex-col",
-              isMobile
-                ? "top-4 right-4 h-[13vh] aspect-video"
-                : "bottom-8 right-8 w-80 aspect-video",
-            )}
-          >
-            <div className="flex-1 relative bg-slate-900 overflow-hidden">
-              <StatusIndicators isPip />
+          <StreamTheme>
+            <motion.div
+              drag
+              dragMomentum={false}
+              dragConstraints={constraintsRef}
+              onClick={() => setShowPiPControls(!showPiPControls)}
+              initial={{ opacity: 0, scale: 0.8, y: 50 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className={cn(
+                "pointer-events-auto fixed rounded-2xl overflow-hidden bg-black border border-white/10 flex flex-col",
+                isMobile
+                  ? "top-4 right-4 h-[13vh] aspect-video"
+                  : "bottom-8 right-8 w-80 aspect-video",
+              )}
+            >
+              <div className="flex-1 relative bg-slate-900 overflow-hidden">
+                <StatusIndicators isPip />
 
-              <AnimatePresence>
-                {isSpeakingWhileMuted && (
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-black/60 p-2 rounded-full animate-pulse border border-yellow-500/50">
-                    <MicOff className="text-yellow-500" size={24} />
-                  </div>
-                )}
-              </AnimatePresence>
-
-              <ParticipantsGrid
-                variant="pip"
-                remoteParticipants={remoteParticipants}
-                localParticipant={localParticipant}
-              />
-
-              <AnimatePresence>
-                {showPiPControls && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-black/40 z-10 flex flex-col justify-between p-2 pointer-events-none"
-                  >
-                    <div className="flex justify-end">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          togglePiP();
-                        }}
-                        className="text-white hover:text-indigo-400 bg-black/50 rounded-full p-1.5 pointer-events-auto transition-colors"
-                      >
-                        <Maximize2 size={16} />
-                      </button>
+                <AnimatePresence>
+                  {isSpeakingWhileMuted && (
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-black/60 p-2 rounded-full animate-pulse border border-yellow-500/50">
+                      <MicOff className="text-yellow-500" size={24} />
                     </div>
-                    <div className="flex justify-center gap-2 pointer-events-auto">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleToggleAudio();
-                        }}
-                        className={cn(
-                          "p-2 rounded-full",
-                          !isMicEnabled
-                            ? "bg-slate-800 text-white"
-                            : "bg-red-500 text-white",
+                  )}
+                </AnimatePresence>
+
+                <ParticipantsGrid
+                  variant="pip"
+                  remoteParticipants={remoteParticipants}
+                  localParticipant={localParticipant}
+                />
+
+                <AnimatePresence>
+                  {showPiPControls && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute inset-0 bg-black/40 z-10 flex flex-col justify-between p-2 pointer-events-none"
+                    >
+                      <div className="flex justify-end">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            togglePiP();
+                          }}
+                          className="text-white hover:text-indigo-400 bg-black/50 rounded-full p-1.5 pointer-events-auto transition-colors"
+                        >
+                          <Maximize2 size={16} />
+                        </button>
+                      </div>
+                      <div className="flex justify-center items-center gap-2 pointer-events-auto">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleAudio();
+                          }}
+                          className={cn(
+                            "p-2 rounded-full",
+                            !isMicEnabled
+                              ? "bg-slate-800 text-white"
+                              : "bg-red-500 text-white",
+                          )}
+                        >
+                          {!isMicEnabled ? (
+                            <Mic size={14} />
+                          ) : (
+                            <MicOff size={14} />
+                          )}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleVideo();
+                          }}
+                          className={cn(
+                            "p-2 rounded-full",
+                            !isCamEnabled
+                              ? "bg-slate-800 text-white"
+                              : "bg-red-500 text-white",
+                          )}
+                        >
+                          {!isCamEnabled ? (
+                            <Camera size={14} />
+                          ) : (
+                            <CameraOff size={14} />
+                          )}
+                        </button>
+                        {userRole === "teacher" && (
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center justify-center scale-90"
+                          >
+                            <ScreenShareButton />
+                          </div>
                         )}
-                      >
-                        {!isMicEnabled ? (
-                          <Mic size={14} />
-                        ) : (
-                          <MicOff size={14} />
-                        )}
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleToggleVideo();
-                        }}
-                        className={cn(
-                          "p-2 rounded-full",
-                          !isCamEnabled
-                            ? "bg-slate-800 text-white"
-                            : "bg-red-500 text-white",
-                        )}
-                      >
-                        {!isCamEnabled ? (
-                          <Camera size={14} />
-                        ) : (
-                          <CameraOff size={14} />
-                        )}
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          </StreamTheme>
         )}
       </AnimatePresence>
     </div>
