@@ -37,6 +37,13 @@ import {
 } from "date-fns";
 import { notificationService } from "@/modules/notification/notification.service";
 import { NewSlotInstance } from "./scheduling.types";
+
+// Regras de negócio para recesso do professor: aviso mínimo de 30 dias corridos
+// (inclui fins de semana, já que os alunos também têm aulas aos sábados/domingos)
+// e duração máxima de 15 dias corridos consecutivos.
+const RECESS_MIN_ADVANCE_DAYS = 30;
+const RECESS_MAX_DURATION_DAYS = 15;
+
 function getLocalDateParts(date: Date, timeZone: string = "America/Sao_Paulo") {
   const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone,
@@ -2015,8 +2022,27 @@ export const schedulingService = {
     const start = getLocalMidnight(startDate);
     const end = getLocalEndOfDay(endDate);
     const now = new Date();
-    
-    // 1. Check for Overlaps
+
+    const daysAdvance = differenceInCalendarDays(start, now);
+    const duration = differenceInCalendarDays(end, start) + 1; // dias corridos, inclusive (início e fim contam)
+
+    // 1. Aviso mínimo de 30 dias corridos (inclui fins de semana)
+    if (daysAdvance < RECESS_MIN_ADVANCE_DAYS) {
+      return {
+        success: false,
+        error: `O recesso precisa ser marcado com pelo menos ${RECESS_MIN_ADVANCE_DAYS} dias de antecedência. Faltam apenas ${daysAdvance} dia(s).`
+      };
+    }
+
+    // 2. Duração máxima de 15 dias corridos consecutivos
+    if (duration > RECESS_MAX_DURATION_DAYS) {
+      return {
+        success: false,
+        error: `O recesso não pode durar mais de ${RECESS_MAX_DURATION_DAYS} dias corridos. O período selecionado tem ${duration} dias.`
+      };
+    }
+
+    // 3. Check for Overlaps
     const existingRecesses = await schedulingRepository.findRecessesByTeacher(teacherId);
     const hasOverlap = existingRecesses.some(r => {
       return (start <= r.endDate && end >= r.startDate);
@@ -2029,16 +2055,11 @@ export const schedulingService = {
       };
     }
 
-    const daysAdvance = differenceInCalendarDays(start, now);
-    const duration = differenceInCalendarDays(end, start);
-    
     return {
       success: true,
       data: {
-        isAutomatic: daysAdvance >= 20 && duration <= 15,
         daysAdvance,
         duration,
-        requiresReview: daysAdvance < 20
       }
     };
   },
@@ -2136,6 +2157,18 @@ export const schedulingService = {
     const startDate = getLocalMidnight(data.startDate);
     const endDate = getLocalEndOfDay(data.endDate);
     const { fallbackConfig } = data;
+    const now = new Date();
+
+    // Re-validate mandatory rules at registration (never trust only the client-side preview)
+    const daysAdvance = differenceInCalendarDays(startDate, now);
+    if (daysAdvance < RECESS_MIN_ADVANCE_DAYS) {
+      throw new Error(`O recesso precisa ser marcado com pelo menos ${RECESS_MIN_ADVANCE_DAYS} dias de antecedência. Faltam apenas ${daysAdvance} dia(s).`);
+    }
+
+    const duration = differenceInCalendarDays(endDate, startDate) + 1;
+    if (duration > RECESS_MAX_DURATION_DAYS) {
+      throw new Error(`O recesso não pode durar mais de ${RECESS_MAX_DURATION_DAYS} dias corridos. O período selecionado tem ${duration} dias.`);
+    }
 
     // Re-validate overlap at registration
     const existingRecesses = await schedulingRepository.findRecessesByTeacher(user.id);
@@ -2148,10 +2181,19 @@ export const schedulingService = {
     const classesInRange = await schedulingRepository.findByTeacherInRange(user.id, startDate, endDate);
     const scheduledWithStudent = classesInRange.filter(cls => cls.status === "scheduled" && cls.studentId);
 
+    // Precisa haver ao menos uma atividade de recesso disponível na biblioteca compartilhada
+    // (não precisa ser uma lição criada por este professor — qualquer atividade da biblioteca serve)
+    if (scheduledWithStudent.length > 0) {
+      const recessActivities = await curriculumService.getRecessActivities();
+      if (recessActivities.length === 0) {
+        throw new Error("Ainda não existe nenhuma atividade de recesso cadastrada na biblioteca. Vá em Recesso > Atividades, crie uma lição e depois selecione-a nas aulas afetadas antes de confirmar.");
+      }
+    }
+
     // Toda aula com aluno agendado precisa de uma lição de fallback definida
     const missingFallback = scheduledWithStudent.some(cls => !fallbackConfig[cls.id]?.lessonId);
     if (missingFallback) {
-      throw new Error("Defina uma lição de fallback para todas as aulas afetadas antes de confirmar o recesso.");
+      throw new Error("Existem aulas afetadas sem atividade de recesso selecionada. Crie as atividades necessárias em Recesso > Atividades e selecione uma para cada aula afetada antes de confirmar.");
     }
 
     // Resolve os títulos das lições uma única vez (cacheado por lessonId)
@@ -2164,17 +2206,15 @@ export const schedulingService = {
       }
     }
 
-    const now = new Date();
-    const daysAdvance = differenceInCalendarDays(startDate, now);
-    const isAutomatic = daysAdvance >= 20;
-
     const request = await db.transaction(async (tx) => {
       // 1. Create Recess Request
+      // Chegando aqui, o pedido já passou pelas regras obrigatórias (antecedência,
+      // duração e fallback), então é sempre aprovado — não há mais revisão manual.
       const [request] = await tx.insert(recessRequestsTable).values({
         teacherId: user.id,
         startDate,
         endDate,
-        isValidated: isAutomatic,
+        isValidated: true,
         fallbackConfig,
       }).returning();
 
@@ -2208,10 +2248,10 @@ export const schedulingService = {
           )
         );
 
-      // 5. Notify Managers
+      // 5. Notify Managers (para que possam providenciar cobertura com outro professor se necessário)
       await notificationService.sendNotification({
-        title: isAutomatic ? "Novo Recesso Agendado" : "Nova Solicitação de Recesso (Revisão)",
-        body: `O professor ${user.name} agendou recesso de ${format(startDate, "dd/MM")} a ${format(endDate, "dd/MM")}.`,
+        title: "Novo Recesso Agendado",
+        body: `O professor ${user.name} agendou recesso de ${format(startDate, "dd/MM")} a ${format(endDate, "dd/MM")}. Verifique se é necessário providenciar outro professor para os alunos afetados.`,
         targetType: "role",
         targetRole: "manager",
         channels: { inApp: true },

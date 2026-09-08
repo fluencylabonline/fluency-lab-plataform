@@ -39,11 +39,12 @@ interface CommunicateRecessVaultProps {
 type Step = "dates" | "impact" | "fallback" | "review" | "success";
 
 interface SLAResult {
-  isAutomatic: boolean;
   daysAdvance: number;
   duration: number;
-  requiresReview: boolean;
 }
+
+const RECESS_MIN_ADVANCE_DAYS = 30;
+const RECESS_MAX_DURATION_DAYS = 15;
 
 interface StudentImpact {
   id: string;
@@ -81,8 +82,8 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<Step>("dates");
   const [date, setDate] = useState<DateRange | undefined>({
-    from: addDays(new Date(), 21), // Default to 21 days ahead for SLA
-    to: addDays(new Date(), 28),
+    from: addDays(new Date(), RECESS_MIN_ADVANCE_DAYS + 1),
+    to: addDays(new Date(), RECESS_MIN_ADVANCE_DAYS + 8),
   });
 
   const [isPending, startTransition] = useTransition();
@@ -114,6 +115,11 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
   const hasOverlap = date?.from && date?.to && existingRecesses.some(r => {
     return (date.from! <= r.endDate && date.to! >= r.startDate);
   });
+
+  const daysAdvance = date?.from ? differenceInCalendarDays(date.from, new Date()) : 0;
+  const duration = date?.from && date?.to ? differenceInCalendarDays(date.to, date.from) + 1 : 0;
+  const hasRuleViolation = Boolean(date?.from && date?.to) &&
+    (daysAdvance < RECESS_MIN_ADVANCE_DAYS || duration > RECESS_MAX_DURATION_DAYS);
 
   const handleNextToImpact = () => {
     if (!date?.from || !date?.to) {
@@ -218,7 +224,7 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
                 <VaultIcon type="calendar" />
                 <VaultTitle>{t('recessPeriod') || "Período de Recesso"}</VaultTitle>
                 <VaultDescription>
-                  {t('recessPeriodDesc') || "Selecione as datas de início e fim. O sistema validará automaticamente seu SLA de 20 dias de aviso prévio."}
+                  {t('recessPeriodDesc') || `Selecione as datas de início e fim. É preciso avisar com pelo menos ${RECESS_MIN_ADVANCE_DAYS} dias de antecedência e o período não pode passar de ${RECESS_MAX_DURATION_DAYS} dias corridos.`}
                 </VaultDescription>
               </VaultHeader>
               <VaultBody className="flex flex-col items-center">
@@ -229,7 +235,7 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
                   numberOfMonths={1}
                   locale={ptBR}
                   disabled={[
-                    { before: addDays(new Date(), 1) },
+                    { before: addDays(new Date(), RECESS_MIN_ADVANCE_DAYS) },
                     ...existingRecesses.map(r => ({ from: r.startDate, to: r.endDate }))
                   ]}
                   className="rounded-md border shadow-sm scale-110 my-4"
@@ -249,57 +255,43 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
                   </div>
                 )}
 
-                {date?.from && (
+                {date?.from && date?.to && (
                   <div className="w-full mt-4">
-                    {(() => {
-                      const daysAdvance = differenceInCalendarDays(date.from, new Date());
-                      const duration = date.to ? differenceInCalendarDays(date.to, date.from) : 0;
-                      const isAutomatic = daysAdvance >= 20 && duration <= 15;
-
-                      if (hasOverlap) {
-                        return (
-                          <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-md flex gap-3 items-center">
-                            <AlertCircle className="w-4 h-4 text-red-500" />
-                            <p className="text-[10px] text-red-600 font-bold">
-                              {t('overlapDetected') || "Sobreposição detectada: Você já tem um recesso neste período."}
-                            </p>
-                          </div>
-                        );
-                      }
-
-                      if (isAutomatic) {
-                        return (
-                          <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-md flex gap-3 items-center">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                            <p className="text-[10px] text-emerald-600 font-medium">
-                              {t('withinSLA') || "Dentro do prazo: Seu recesso será validado automaticamente."}
-                            </p>
-                          </div>
-                        );
-                      }
-
-                      return (
-                        <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-md flex gap-3 items-center">
-                          <AlertCircle className="w-4 h-4 text-amber-500" />
-                          <div className="flex flex-col">
-                            <p className="text-[10px] text-amber-600 font-bold">
-                              {t('manualReviewWarning') || "Atenção: Requer revisão manual"}
-                            </p>
-                            <p className="text-[9px] text-amber-600/80">
-                              {daysAdvance < 20 && "• Aviso prévio inferior a 20 dias"}
-                              {daysAdvance < 20 && duration > 15 && <br />}
-                              {duration > 15 && "• Duração superior a 15 dias"}
-                            </p>
-                          </div>
+                    {hasOverlap ? (
+                      <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-md flex gap-3 items-center">
+                        <AlertCircle className="w-4 h-4 text-red-500" />
+                        <p className="text-[10px] text-red-600 font-bold">
+                          {t('overlapDetected') || "Sobreposição detectada: Você já tem um recesso neste período."}
+                        </p>
+                      </div>
+                    ) : hasRuleViolation ? (
+                      <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-md flex gap-3 items-center">
+                        <AlertCircle className="w-4 h-4 text-red-500" />
+                        <div className="flex flex-col">
+                          <p className="text-[10px] text-red-600 font-bold">
+                            {t('rulesViolated') || "Não é possível agendar este período"}
+                          </p>
+                          <p className="text-[9px] text-red-600/80">
+                            {daysAdvance < RECESS_MIN_ADVANCE_DAYS && (t('advanceTooShort', { days: RECESS_MIN_ADVANCE_DAYS }) || `• Aviso prévio precisa ser de pelo menos ${RECESS_MIN_ADVANCE_DAYS} dias corridos`)}
+                            {daysAdvance < RECESS_MIN_ADVANCE_DAYS && duration > RECESS_MAX_DURATION_DAYS && <br />}
+                            {duration > RECESS_MAX_DURATION_DAYS && (t('durationTooLong', { days: RECESS_MAX_DURATION_DAYS }) || `• Duração não pode passar de ${RECESS_MAX_DURATION_DAYS} dias corridos`)}
+                          </p>
                         </div>
-                      );
-                    })()}
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-md flex gap-3 items-center">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        <p className="text-[10px] text-emerald-600 font-medium">
+                          {t('withinSLA') || "Dentro das regras: seu recesso será agendado direto."}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </VaultBody>
               <VaultFooter>
                 <VaultSecondaryButton onClick={() => setIsOpen(false)}>{tCommon('cancel') || "Cancelar"}</VaultSecondaryButton>
-                <VaultPrimaryButton onClick={handleNextToImpact} disabled={!date?.from || !date?.to || isPending || hasOverlap}>
+                <VaultPrimaryButton onClick={handleNextToImpact} disabled={!date?.from || !date?.to || isPending || hasOverlap || hasRuleViolation}>
                   {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : (t('verifyImpact') || "Verificar Impacto")}
                 </VaultPrimaryButton>
               </VaultFooter>
@@ -309,12 +301,10 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
           {step === "impact" && (
             <motion.div key="step-impact" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
               <VaultHeader>
-                <VaultIcon type={slaResult?.isAutomatic ? "success" : "warning"} />
+                <VaultIcon type="success" />
                 <VaultTitle>{t('recessImpact') || "Impacto do Recesso"}</VaultTitle>
                 <VaultDescription>
-                  {slaResult?.isAutomatic
-                    ? (t('impactSLAOk') || "Seu pedido atende aos requisitos de SLA e será validado automaticamente.")
-                    : (t('impactSLANok') || "Atenção: Seu pedido não atende ao SLA padrão e precisará de revisão manual.")}
+                  {t('impactSLAOk') || "Seu pedido atende às regras de aviso prévio e duração e será agendado direto."}
                 </VaultDescription>
               </VaultHeader>
               <VaultBody className="space-y-4">
@@ -335,13 +325,13 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
                   </div>
                 </div>
 
-                {!slaResult?.isAutomatic && (
-                  <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-md flex gap-3">
-                    <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+                {impactData && impactData.totalClasses > 0 && (!recessActivities || recessActivities.length === 0) && !isLoadingActivities && (
+                  <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-md flex gap-3">
+                    <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-500 shrink-0 mt-0.5" />
                     <div className="space-y-1">
-                      <p className="text-sm font-bold text-amber-900 dark:text-amber-400">{t('insufficientNotice') || "Aviso Prévio Insuficiente"}</p>
-                      <p className="text-xs text-amber-800 dark:text-amber-500 leading-relaxed">
-                        {t('daysLeftNotice', { days: slaResult?.daysAdvance || 0 }) || `Faltam ${slaResult?.daysAdvance || 0} dias para o início. O contrato prevê 20 dias para validação automática.`}
+                      <p className="text-sm font-bold text-red-900 dark:text-red-400">{t('noActivitiesTitle') || "Nenhuma atividade de recesso disponível"}</p>
+                      <p className="text-xs text-red-800 dark:text-red-500 leading-relaxed">
+                        {t('noActivitiesDesc') || "A biblioteca de atividades de recesso está vazia. Vá em Recesso > Atividades e crie uma lição (não precisa ser sua — qualquer atividade da biblioteca serve para outros professores também) antes de continuar."}
                       </p>
                     </div>
                   </div>
@@ -368,7 +358,10 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
                 <VaultSecondaryButton onClick={() => setStep("dates")} className="gap-2">
                   <ArrowLeft className="w-4 h-4" /> {tCommon('back') || "Voltar"}
                 </VaultSecondaryButton>
-                <VaultPrimaryButton onClick={() => setStep("fallback")}>
+                <VaultPrimaryButton
+                  onClick={() => setStep("fallback")}
+                  disabled={Boolean(impactData && impactData.totalClasses > 0 && (!recessActivities || recessActivities.length === 0))}
+                >
                   {t('configActivities') || "Configurar Atividades"} <ChevronRight className="w-4 h-4" />
                 </VaultPrimaryButton>
               </VaultFooter>
@@ -463,7 +456,7 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle2 className="w-5 h-5 text-primary" />
-                    <span className="text-sm font-medium">{t('managersNotified') || "Managers notificados"}</span>
+                    <span className="text-sm font-medium">{t('managersNotified') || "Managers notificados para providenciar cobertura, se necessário"}</span>
                   </div>
                 </div>
               </VaultBody>

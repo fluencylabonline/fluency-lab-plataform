@@ -38,8 +38,9 @@ export default async function RecessActivitiesPage() {
                 Comunique seu Recesso
               </h3>
               <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-                Planejando um descanso? Informe as datas com 20 dias de
-                antecedência para garantir a validação automática do seu SLA.
+                Planejando um descanso? Informe as datas com pelo menos 30 dias
+                de antecedência. O recesso não pode durar mais de 15 dias
+                corridos.
               </p>
             </div>
           </div>
@@ -62,7 +63,8 @@ export default async function RecessActivitiesPage() {
             <span className="font-bold">Atenção:</span> Para cada aluno afetado,
             você deve selecionar uma atividade de fallback desta biblioteca.
             Atividades globais estão disponíveis, mas você pode criar as suas
-            próprias.
+            próprias. Sem uma atividade selecionada para cada aula afetada, o
+            recesso não pode ser confirmado.
           </p>
         </div>
 

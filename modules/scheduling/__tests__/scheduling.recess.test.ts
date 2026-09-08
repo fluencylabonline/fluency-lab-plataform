@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { addDays } from "date-fns";
 
 const { fakeTx, dbTransactionMock, dbQueryMock } = vi.hoisted(() => {
   const fakeTx: any = {
@@ -42,7 +43,7 @@ vi.mock("@/modules/user/user.service", () => ({
 vi.mock("@/modules/curriculum/curriculum.service", () => ({
   curriculumService: {
     findLessonById: vi.fn(),
-    getRecessActivities: vi.fn().mockResolvedValue([]),
+    getRecessActivities: vi.fn().mockResolvedValue([{ id: "activity-1", title: "Atividade" }]),
   },
 }));
 
@@ -226,17 +227,25 @@ describe("Scheduling Service - notifyNewlyAllocatedStudentOfRecess", () => {
 // registerRecess
 // ---------------------------------------------------------------------------
 describe("Scheduling Service - registerRecess", () => {
+  // 31+ days ahead keeps every test comfortably past the 30-day minimum notice,
+  // and a 5-day span stays well under the 15-day maximum duration.
+  const baseData = {
+    startDate: addDays(new Date(), 31),
+    endDate: addDays(new Date(), 35),
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     (schedulingRepository.findRecessesByTeacher as any).mockResolvedValue([]);
+    (curriculumService.getRecessActivities as any).mockResolvedValue([{ id: "activity-1", title: "Atividade" }]);
     fakeTx.insert.mockReturnValue({
       values: vi.fn().mockReturnValue({
         returning: vi.fn().mockResolvedValue([
           {
             id: "recess-1",
             teacherId: "teacher-1",
-            startDate: new Date("2026-08-31T00:00:00.000Z"),
-            endDate: new Date("2026-09-07T00:00:00.000Z"),
+            startDate: baseData.startDate,
+            endDate: baseData.endDate,
             isValidated: true,
             fallbackConfig: {},
           },
@@ -246,10 +255,61 @@ describe("Scheduling Service - registerRecess", () => {
     fakeTx.update.mockImplementation(() => makeUpdateChain());
   });
 
-  const baseData = {
-    startDate: new Date("2026-08-31T00:00:00.000Z"),
-    endDate: new Date("2026-09-07T00:00:00.000Z"),
-  };
+  it("throws when the recess is scheduled with less than 30 days of advance notice", async () => {
+    (schedulingRepository.findByTeacherInRange as any).mockResolvedValue([]);
+
+    await expect(
+      schedulingService.registerRecess(teacher, {
+        startDate: addDays(new Date(), 10),
+        endDate: addDays(new Date(), 12),
+        fallbackConfig: {},
+      })
+    ).rejects.toThrow("pelo menos 30 dias de antecedência");
+
+    expect(dbTransactionMock).not.toHaveBeenCalled();
+  });
+
+  it("throws when the recess spans more than 15 consecutive days", async () => {
+    (schedulingRepository.findByTeacherInRange as any).mockResolvedValue([]);
+
+    await expect(
+      schedulingService.registerRecess(teacher, {
+        startDate: addDays(new Date(), 31),
+        endDate: addDays(new Date(), 50),
+        fallbackConfig: {},
+      })
+    ).rejects.toThrow("não pode durar mais de 15 dias");
+
+    expect(dbTransactionMock).not.toHaveBeenCalled();
+  });
+
+  it("throws when there are affected classes but the shared recess activity library is empty", async () => {
+    (schedulingRepository.findByTeacherInRange as any).mockResolvedValue([
+      { id: "class-1", status: "scheduled", studentId: "student-1", startAt: new Date(), endAt: new Date() },
+    ]);
+    (curriculumService.getRecessActivities as any).mockResolvedValue([]);
+
+    await expect(
+      schedulingService.registerRecess(teacher, { ...baseData, fallbackConfig: {} })
+    ).rejects.toThrow("Ainda não existe nenhuma atividade de recesso cadastrada");
+
+    expect(dbTransactionMock).not.toHaveBeenCalled();
+  });
+
+  it("does not require the teacher's own lessons — any activity from the shared library is a valid fallback", async () => {
+    (schedulingRepository.findByTeacherInRange as any).mockResolvedValue([
+      { id: "class-1", status: "scheduled", studentId: "student-1", startAt: new Date(), endAt: new Date() },
+    ]);
+    // getRecessActivities() is called with no teacherId — the shared library, not "teacher-1"'s own lessons
+    (curriculumService.findLessonById as any).mockResolvedValue({ id: "lesson-from-another-teacher", title: "Lição de outro professor" });
+
+    await schedulingService.registerRecess(teacher, {
+      ...baseData,
+      fallbackConfig: { "class-1": { lessonId: "lesson-from-another-teacher" } },
+    });
+
+    expect(curriculumService.getRecessActivities).toHaveBeenCalledWith();
+  });
 
   it("throws when a scheduled class with a student has no fallback lesson configured", async () => {
     (schedulingRepository.findByTeacherInRange as any).mockResolvedValue([
@@ -258,7 +318,7 @@ describe("Scheduling Service - registerRecess", () => {
 
     await expect(
       schedulingService.registerRecess(teacher, { ...baseData, fallbackConfig: {} })
-    ).rejects.toThrow("Defina uma lição de fallback");
+    ).rejects.toThrow("sem atividade de recesso selecionada");
 
     expect(dbTransactionMock).not.toHaveBeenCalled();
   });
@@ -273,7 +333,7 @@ describe("Scheduling Service - registerRecess", () => {
         ...baseData,
         fallbackConfig: { "class-1": { lessonId: "" } },
       })
-    ).rejects.toThrow("Defina uma lição de fallback");
+    ).rejects.toThrow("sem atividade de recesso selecionada");
   });
 
   it("does not require fallback for classes without a student (available slots)", async () => {

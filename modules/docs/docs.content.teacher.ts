@@ -162,7 +162,7 @@ export const TEACHER_DOCS: DocSection[] = [
         title: "Recesso e ausências programadas",
         summary: "Como comunicar férias e deixar atividades para os alunos.",
         route: "/hub/teacher/recess",
-        keywords: ["recesso", "férias", "ausência", "descanso", "sla", "20 dias", "atividade"],
+        keywords: ["recesso", "férias", "ausência", "descanso", "sla", "30 dias", "15 dias", "atividade"],
         blocks: [
           {
             type: "p",
@@ -171,12 +171,16 @@ export const TEACHER_DOCS: DocSection[] = [
           {
             type: "note",
             variant: "warning",
-            title: "Avise com 20 dias de antecedência",
-            text: "Comunicar o recesso com pelo menos **20 dias** garante a validação automática do seu SLA. Em cima da hora, o pedido passa a depender de análise da coordenação.",
+            title: "Avise com 30 dias de antecedência e no máximo 15 dias seguidos",
+            text: "O recesso só pode ser marcado com pelo menos **30 dias corridos** de antecedência (contando fins de semana) e não pode durar mais que **15 dias corridos**. Fora dessas regras o sistema bloqueia o agendamento — não existe mais análise manual de exceção.",
           },
           {
             type: "p",
-            text: "Na **Biblioteca de Recesso** você monta atividades que os alunos fazem sozinhos durante sua ausência — assim eles não perdem o ritmo e o período não vira um buraco na trilha de aprendizado.",
+            text: "Antes de confirmar, é preciso selecionar uma atividade de recesso para cada aula afetada — o sistema não deixa concluir o agendamento sem isso. A atividade não precisa ser sua: você pode usar qualquer lição já existente na **Biblioteca de Recesso**, criada por você ou por outro professor.",
+          },
+          {
+            type: "p",
+            text: "Alunos afetados e a coordenação são sempre avisados assim que o recesso é confirmado, para que a equipe possa providenciar outro professor se for o caso.",
           },
         ],
       },
