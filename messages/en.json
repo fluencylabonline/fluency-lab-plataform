@@ -2191,7 +2191,12 @@
     "verifyImpact": "Verificar Impacto",
     "waitingManualApproval": "Aguardando aprovação manual dos managers",
     "withinSLA": "Dentro do prazo: Seu recesso será validado automaticamente.",
-    "yourRecesses": "Seus Recessos"
+    "yourRecesses": "Seus Recessos",
+    "rulesViolated": "This period cannot be scheduled",
+    "advanceTooShort": "Notice must be given at least {days} days in advance",
+    "durationTooLong": "Duration cannot exceed {days} days",
+    "noActivitiesTitle": "No recess activities available",
+    "noActivitiesDesc": "The recess activity library is empty. Go to Recess > Activities and create a lesson (it doesn't have to be yours — any activity in the library works for other teachers too) before continuing."
   },
   "ReplayConfirmVault": {
     "cancel": "Cancel",

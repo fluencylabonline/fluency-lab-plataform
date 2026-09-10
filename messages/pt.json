@@ -2191,7 +2191,12 @@
     "verifyImpact": "Verificar Impacto",
     "waitingManualApproval": "Aguardando aprovação manual dos managers",
     "withinSLA": "Dentro do prazo: Seu recesso será validado automaticamente.",
-    "yourRecesses": "Seus Recessos"
+    "yourRecesses": "Seus Recessos",
+    "rulesViolated": "Não é possível agendar este período",
+    "advanceTooShort": "Aviso prévio precisa ser de pelo menos {days} dias corridos",
+    "durationTooLong": "Duração não pode passar de {days} dias corridos",
+    "noActivitiesTitle": "Nenhuma atividade de recesso disponível",
+    "noActivitiesDesc": "A biblioteca de atividades de recesso está vazia. Vá em Recesso > Atividades e crie uma lição (não precisa ser sua — qualquer atividade da biblioteca serve para outros professores também) antes de continuar."
   },
   "ReplayConfirmVault": {
     "cancel": "Cancelar",

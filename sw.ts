@@ -260,6 +260,9 @@ const customCache: RuntimeCaching[] = [
           maxAgeSeconds: 24 * 60 * 60, // 24 hours
         }),
       ],
+      // Without a timeout, a hung/slow network leaves the request pending
+      // indefinitely instead of falling back to the cached page quickly.
+      networkTimeoutSeconds: 10,
     }),
   },
   // 18. Other local GETs (NetworkFirst)
