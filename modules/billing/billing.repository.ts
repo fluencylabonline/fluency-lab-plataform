@@ -7,7 +7,7 @@ import {
   Subscription, 
   Installment 
 } from "./billing.schema";
-import { eq, and, lte, between, sum, ne, count } from "drizzle-orm";
+import { eq, and, lte, between, sum, ne, count, inArray } from "drizzle-orm";
 
 export const billingRepository = {
   // Audit
@@ -194,24 +194,30 @@ export const billingRepository = {
 
   async sumInstallments(filters: { status: "paid" | "pending"; start: Date; end: Date }) {
     const dateField = filters.status === "paid" ? installmentsTable.paidAt : installmentsTable.dueDate;
-    
+    const statusCondition = filters.status === "pending"
+      ? inArray(installmentsTable.status, ["pending", "overdue"])
+      : eq(installmentsTable.status, "paid");
+
     const [result] = await db
       .select({ total: sum(installmentsTable.amount) })
       .from(installmentsTable)
       .where(and(
-        eq(installmentsTable.status, filters.status),
+        statusCondition,
         between(dateField, filters.start, filters.end)
       ));
-    
+
     return Number(result?.total || 0);
   },
 
   async findInstallmentsDetails(filters: { status: "paid" | "pending"; start: Date; end: Date }) {
     const dateField = filters.status === "paid" ? installmentsTable.paidAt : installmentsTable.dueDate;
-    
+    const statusCondition = filters.status === "pending"
+      ? inArray(installmentsTable.status, ["pending", "overdue"])
+      : eq(installmentsTable.status, "paid");
+
     return db.query.installmentsTable.findMany({
       where: and(
-        eq(installmentsTable.status, filters.status),
+        statusCondition,
         between(dateField, filters.start, filters.end)
       ),
       with: {

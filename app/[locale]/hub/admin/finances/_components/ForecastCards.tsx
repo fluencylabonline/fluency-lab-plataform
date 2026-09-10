@@ -1,5 +1,5 @@
 import { useTranslations, useFormatter } from "next-intl";
-import { TrendingUp, Calendar, ArrowRight, Info, Users, Cpu } from "lucide-react";
+import { TrendingUp, Calendar, ArrowRight, Info, Users } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -19,10 +19,6 @@ interface ForecastCardsProps {
       projectedAmount: number;
       completedOrNoShowAmount: number;
       scheduledAmount: number;
-    };
-    aiExpenseProjection?: {
-      estimatedCost: number;
-      source: "usage" | "estimate";
     };
   };
   month: number | "all";
@@ -97,19 +93,6 @@ export function ForecastCards({ forecast, month, year }: ForecastCardsProps) {
             <span className="text-xl font-bold">{format.number((forecast.teacherPayoutProjection?.projectedAmount ?? 0) / 100, { style: 'currency', currency: 'BRL' })}</span>
             <p className="text-[11px] text-muted-foreground mt-1">
               {t("teacherPayoutProjectionSubtitle", { count: forecast.teacherPayoutProjection?.classCount ?? 0 })}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/30 border border-border/50">
-          <div className="p-2 rounded-md bg-amber-500/10 text-amber-600">
-            <Cpu size={20} />
-          </div>
-          <div className="flex flex-col gap-0.5 flex-1">
-            <span className="text-xs text-muted-foreground font-medium uppercase">{t("aiExpenseProjection")}</span>
-            <span className="text-xl font-bold">{format.number((forecast.aiExpenseProjection?.estimatedCost ?? 0) / 100, { style: 'currency', currency: 'BRL' })}</span>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              {forecast.aiExpenseProjection?.source === "usage" ? t("aiExpenseProjectionUsage") : t("aiExpenseProjectionEstimate")}
             </p>
           </div>
         </div>

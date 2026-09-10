@@ -19,6 +19,17 @@
   },
   "AdminFinances": {
     "allMonths": "Todos os meses",
+    "actionsMenu": {
+      "label": "Mais ações",
+      "forecastLink": "Previsões",
+      "plansLink": "Pacotes"
+    },
+    "sections": {
+      "performanceMonthly": "Desempenho do Mês",
+      "performanceAnnual": "Desempenho do Ano",
+      "fiscal": "Fiscal",
+      "gatewayBalances": "Saldos em Gateway"
+    },
     "export": {
       "trigger": "Exportar",
       "title": "Exportar Dados Financeiros",
@@ -80,9 +91,6 @@
       "pendingRevenue": "Receita Projetada",
       "teacherPayoutProjection": "Previsão de Repasse",
       "teacherPayoutProjectionSubtitle": "{count} aula(s) no período",
-      "aiExpenseProjection": "Custo com IA",
-      "aiExpenseProjectionUsage": "Estimado a partir do uso real do provedor",
-      "aiExpenseProjectionEstimate": "Estimado com base no volume de tokens",
       "plan": "Plano",
       "student": "Estudante",
       "title": "Projeções",
@@ -107,16 +115,20 @@
     "metrics": {
       "expenses": "Despesas Totais",
       "expensesMonthly": "Despesa Mensal",
+      "expensesAnnual": "Despesa Anual",
       "extraExpenses": "Despesas Avulsas",
       "extraRevenue": "Receitas Avulsas",
       "installments": "Parcelas",
       "irpfDue": "IRPF Estimado",
-      "irpfTooltip": "Cálculo baseado no lucro tributável (Receita - Despesas Dedutíveis - Isenção MEI).",
+      "irpfTooltip": "Cálculo baseado no lucro tributável (Receita - Isenção MEI), aplicado à tabela progressiva do IRPF.",
+      "irpfAnnualCaption": "Referente ao ano {year}",
       "monthlyTotal": "Total do Mês",
+      "annualTotal": "Total do Ano",
       "netProfit": "Lucro Líquido",
+      "netProfitAnnual": "Lucro Líquido Anual",
       "revenue": "Receita Total",
       "revenueMonthly": "Receita Mensal",
-      "aiCosts": "Custos com IA",
+      "revenueAnnual": "Receita Anual",
       "teacherPayouts": "Pagto Professores",
       "totalPeriod": "Total do Período"
     },

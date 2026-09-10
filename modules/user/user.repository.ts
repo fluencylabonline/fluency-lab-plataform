@@ -32,7 +32,9 @@ export const userRepository = {
       .onConflictDoUpdate({
         target: usersTable.email,
         set: {
-          id: user.id, // This allows claiming/swapping UIDs
+          // Never overwrite `id` of an existing row: dozens of FKs across the schema
+          // reference users.id with ON UPDATE NO ACTION, so swapping it here fails
+          // (or silently orphans data) whenever a Firebase UID changes for the same email.
           name: user.name,
           photoUrl: user.photoUrl,
           googleLinked: user.googleLinked,

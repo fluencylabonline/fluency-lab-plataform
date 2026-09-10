@@ -4,31 +4,32 @@ import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAction } from "next-safe-action/hooks";
 import { useTranslations } from "next-intl";
-import { Settings, Plus, Trash2 } from "lucide-react";
-import { 
-  Vault, 
-  VaultBody, 
-  VaultContent, 
-  VaultField, 
-  VaultFooter, 
-  VaultForm, 
-  VaultHeader, 
-  VaultInput, 
-  VaultPrimaryButton, 
-  VaultSecondaryButton, 
-  VaultTitle, 
-  VaultTrigger 
+import { Plus, Trash2 } from "lucide-react";
+import {
+  Vault,
+  VaultBody,
+  VaultContent,
+  VaultField,
+  VaultFooter,
+  VaultForm,
+  VaultHeader,
+  VaultInput,
+  VaultPrimaryButton,
+  VaultSecondaryButton,
+  VaultTitle
 } from "@/components/ui/vault";
 import { upsertFiscalConfigSchema, type UpsertFiscalConfigValues, type FiscalConfig } from "@/modules/finance/finance.schema";
 import { upsertFiscalConfigAction, getFiscalConfigAction } from "@/modules/finance/finance.actions";
 import { notify } from "@/components/ui/toaster";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 interface FiscalConfigVaultProps {
   initialConfig: FiscalConfig | null;
   year: number;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 const ANNUAL_IRPF_DEFAULTS = [
@@ -39,15 +40,14 @@ const ANNUAL_IRPF_DEFAULTS = [
   { min: 5597617, max: null, rate: 27.5, deduction: 1086068 },
 ];
 
-export function FiscalConfigVault({ initialConfig, year }: FiscalConfigVaultProps) {
+export function FiscalConfigVault({ initialConfig, year, open, onOpenChange }: FiscalConfigVaultProps) {
   const t = useTranslations("AdminFinances.fiscalConfig");
-  const [open, setOpen] = useState(false);
 
   const { execute: saveConfig, status: saveStatus } = useAction(upsertFiscalConfigAction, {
     onSuccess: (result) => {
       if (result.data?.success) {
         notify.success(t("success"));
-        setOpen(false);
+        onOpenChange(false);
       } else {
         notify.error(result.data?.error || t("error"));
       }
@@ -104,14 +104,7 @@ export function FiscalConfigVault({ initialConfig, year }: FiscalConfigVaultProp
   };
 
   return (
-    <Vault open={open} onOpenChange={setOpen}>
-      <VaultTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
-          <Settings size={18} className="mr-2"/>
-          <span className="hidden md:block">{t("trigger")}</span>
-        </Button>
-      </VaultTrigger>
-
+    <Vault open={open} onOpenChange={onOpenChange}>
       <VaultContent className="sm:max-w-2xl">
         <VaultHeader>
           <VaultTitle>{t("title")}</VaultTitle>
@@ -225,7 +218,7 @@ export function FiscalConfigVault({ initialConfig, year }: FiscalConfigVaultProp
             </div>
 
             <VaultFooter className="mt-6">
-              <VaultSecondaryButton type="button" onClick={() => setOpen(false)}>
+              <VaultSecondaryButton type="button" onClick={() => onOpenChange(false)}>
                 {t("cancel")}
               </VaultSecondaryButton>
               <VaultPrimaryButton type="submit" disabled={saveStatus === "executing" || fetchStatus === "executing"}>

@@ -16,7 +16,6 @@ import {
   VaultForm,
   VaultHeader,
   VaultTitle,
-  VaultTrigger,
   VaultPrimaryButton,
   VaultSecondaryButton,
   VaultInput,
@@ -28,7 +27,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { notify } from "@/components/ui/toaster";
 import { getTransactionsAction } from "@/modules/finance/finance.actions";
 
@@ -51,13 +49,17 @@ const exportFormSchema = z.object({
 
 type ExportFormValues = z.infer<typeof exportFormSchema>;
 
-export function ExportFinancesVault() {
+interface ExportFinancesVaultProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function ExportFinancesVault({ open, onOpenChange }: ExportFinancesVaultProps) {
   const t = useTranslations("AdminFinances.export");
   const tCommon = useTranslations("Common");
   const tSource = useTranslations("AdminFinances.sources");
   const tStatus = useTranslations("AdminFinances.status");
 
-  const [open, setOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
 
   const yearOptions = useMemo(() => {
@@ -201,7 +203,7 @@ export function ExportFinancesVault() {
       URL.revokeObjectURL(downloadUrl);
 
       notify.success(t("success"));
-      setOpen(false);
+      onOpenChange(false);
     } catch (error) {
       console.error("[ExportFinances] Export error:", error);
       notify.error(t("error"));
@@ -211,14 +213,7 @@ export function ExportFinancesVault() {
   };
 
   return (
-    <Vault open={open} onOpenChange={setOpen}>
-      <VaultTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
-          <Download size={18} className="mr-2" />
-          <span>{t("trigger")}</span>
-        </Button>
-      </VaultTrigger>
-
+    <Vault open={open} onOpenChange={onOpenChange}>
       <VaultContent className="max-w-md">
         <VaultHeader>
           <VaultTitle>{t("title")}</VaultTitle>
@@ -352,7 +347,7 @@ export function ExportFinancesVault() {
             <VaultFooter className="mt-6">
               <VaultSecondaryButton
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={() => onOpenChange(false)}
                 disabled={generating}
               >
                 {tCommon("cancel")}

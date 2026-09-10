@@ -44,20 +44,18 @@ export const loginAction = actionClient
       const decodedToken = await adminAuth.verifyIdToken(idToken);
       const { uid, email } = decodedToken;
 
+      let user;
       try {
         const sanitizedData: Partial<NewUser> = { email: email! };
         if (profileData.name) sanitizedData.name = profileData.name;
         if (profileData.photoUrl) sanitizedData.photoUrl = profileData.photoUrl;
         if (typeof profileData.googleLinked === "boolean") sanitizedData.googleLinked = profileData.googleLinked;
 
-        await userService.syncUser(uid, sanitizedData);
+        user = await userService.syncUser(uid, sanitizedData);
       } catch (error) {
         if ((error as Error).message === "NOT_INVITED") return { success: false, error: "notInvited" };
         throw error;
       }
-
-      // Check if MFA is enabled for this user
-      const user = await userService.getUserById(uid);
 
       if (user && !user.isActive) {
         return { success: false, error: "accountSuspended" };

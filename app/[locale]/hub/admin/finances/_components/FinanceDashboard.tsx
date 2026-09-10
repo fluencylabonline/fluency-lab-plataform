@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -10,10 +10,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { FiscalConfigVault } from "./FiscalConfigVault";
 import { ExportFinancesVault } from "./ExportFinancesVault";
 import { ForecastCards } from "./ForecastCards";
 import { MetricsCards } from "./MetricsCards";
+import { FiscalSummaryCard } from "./FiscalSummaryCard";
+import { SectionHeader } from "./SectionHeader";
 import { NewTransactionVault } from "./NewTransactionVault";
 import { TransactionsTable } from "./TransactionsTable";
 import { FiscalConfig } from "@/modules/finance/finance.schema";
@@ -28,6 +38,7 @@ import { MEICapacityCard } from "./MEICapacityCard";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { GatewayBalancesCard } from "./GatewayBalancesCard";
+import { MoreHorizontal, Settings, Download, TrendingUp, Package } from "lucide-react";
 
 interface FinanceDashboardProps {
   initialMetrics: FinanceMetrics;
@@ -64,6 +75,9 @@ export function FinanceDashboard({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const [fiscalConfigOpen, setFiscalConfigOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+
   const monthLabels = useMemo(
     () => [
       t("months.january"),
@@ -93,8 +107,10 @@ export function FinanceDashboard({
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const isAllMonths = currentMonth === "all";
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       {/* Filters & Actions */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card p-4 rounded-md border border-border shadow-xs md:sticky md:top-12 md:mt-4 md:z-30">
         <div className="flex flex-wrap items-center gap-2">
@@ -163,74 +179,107 @@ export function FinanceDashboard({
           </Select>
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-none">
-          <div className="shrink-0">
-            <FiscalConfigVault
-              initialConfig={initialFiscalConfig}
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                <MoreHorizontal size={18} />
+                <span className="hidden md:block">{t("actionsMenu.label")}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>{t("actionsMenu.label")}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setFiscalConfigOpen(true)}>
+                <Settings className="w-4 h-4 mr-2" />
+                {t("fiscalConfig.trigger")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setExportOpen(true)}>
+                <Download className="w-4 h-4 mr-2" />
+                {t("export.trigger")}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/hub/admin/finances/forecast">
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  {t("actionsMenu.forecastLink")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/hub/admin/finances/plans">
+                  <Package className="w-4 h-4 mr-2" />
+                  {t("actionsMenu.plansLink")}
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <NewTransactionVault />
+        </div>
+      </div>
+
+      <FiscalConfigVault
+        open={fiscalConfigOpen}
+        onOpenChange={setFiscalConfigOpen}
+        initialConfig={initialFiscalConfig}
+        year={currentYear}
+      />
+      <ExportFinancesVault open={exportOpen} onOpenChange={setExportOpen} />
+
+      {/* Desempenho (Mensal ou Anual) */}
+      <section className="flex flex-col gap-4">
+        <SectionHeader title={isAllMonths ? t("sections.performanceAnnual") : t("sections.performanceMonthly")} />
+        <MetricsCards
+          monthlyBreakdown={initialMonthlyBreakdown}
+          currentMonth={currentMonth}
+        />
+      </section>
+
+      {/* Fiscal (sempre anual, independente do filtro de mês) */}
+      <section className="flex flex-col gap-4">
+        <SectionHeader title={t("sections.fiscal")} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FiscalSummaryCard irpfDue={initialMetrics.fiscal.irpfDue} year={currentYear} />
+          <MEICapacityCard capacity={initialMEICapacity} />
+        </div>
+      </section>
+
+      {/* Saldos em Gateway */}
+      <section className="flex flex-col gap-4">
+        <SectionHeader title={t("sections.gatewayBalances")} />
+        <GatewayBalancesCard balances={initialGatewayBalances} />
+      </section>
+
+      {/* Previsto */}
+      <section className="flex flex-col gap-4">
+        <div className="card border-border">
+          <div className="p-6">
+            <SectionHeader title={t("forecast.title")} />
+          </div>
+          <div className="p-6 pt-0">
+            <ForecastCards
+              forecast={initialForecast}
+              month={currentMonth}
               year={currentYear}
             />
           </div>
-          <div className="shrink-0">
-            <ExportFinancesVault />
-          </div>
+        </div>
+      </section>
 
-          <Link href={"/hub/admin/finances/forecast"} className="shrink-0">
-            <Button>Previsões</Button>
-          </Link>
-          <Link href={"/hub/admin/finances/plans"} className="shrink-0">
-            <Button>Pacotes</Button>
-          </Link>
-          <div className="shrink-0">
-            <NewTransactionVault />
+      {/* Histórico de Transações */}
+      <section className="flex flex-col gap-4">
+        <div className="card border-border">
+          <div className="p-6">
+            <SectionHeader title={t("transactions.title")} />
+          </div>
+          <div className="p-0">
+            <TransactionsTable
+              key={`${currentMonth}-${currentYear}-${currentStatus}-${currentSource}`}
+              transactions={initialTransactions}
+            />
           </div>
         </div>
-      </div>
-
-      {/* Metrics Section */}
-      <MetricsCards
-        metrics={initialMetrics}
-        monthlyBreakdown={initialMonthlyBreakdown}
-        currentMonth={currentMonth}
-      />
-
-      {/* Gateway Balances Section */}
-      <GatewayBalancesCard balances={initialGatewayBalances} />
-
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Transactions Section */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
-          <div className="card border-border">
-            <div className="p-6 flex flex-row items-center justify-between">
-              <h3 className="subtitle">{t("transactions.title")}</h3>
-            </div>
-            <div className="p-0">
-              <TransactionsTable
-                key={`${currentMonth}-${currentYear}-${currentStatus}-${currentSource}`}
-                transactions={initialTransactions}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Forecast Section */}
-        <div className="flex flex-col gap-6">
-          <div className="card border-border">
-            <div className="p-6">
-              <h3 className="subtitle">{t("forecast.title")}</h3>
-            </div>
-            <div className="p-6 pt-0 flex flex-col gap-4">
-              <ForecastCards
-                forecast={initialForecast}
-                month={currentMonth}
-                year={currentYear}
-              />
-            </div>
-          </div>
-
-          <MEICapacityCard capacity={initialMEICapacity} />
-        </div>
-      </div>
+      </section>
     </div>
   );
 }

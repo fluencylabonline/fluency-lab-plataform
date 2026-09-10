@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
 import { installmentsTable } from "../billing/billing.schema";
 import { payoutsTable } from "../payout/payout.schema";
 import { transactionsTable } from "./finance.schema";
-import { and, between, eq, inArray, sql } from "drizzle-orm";
+import { and, between, eq, inArray, isNull, sql } from "drizzle-orm";
 import { stripe } from "@/lib/stripe";
 import { env } from "@/env";
 import { UnifiedTransaction, TeacherPayoutProjection, AIExpenseProjection } from "./finance.types";
@@ -115,7 +115,7 @@ export const financeService = {
     const meiExemptPercentage = config?.meiExemptPercentage ?? 32;
 
     const exemptProfit = Math.round(totalRevenue * (meiExemptPercentage / 100));
-    const taxableProfit = Math.max(0, totalRevenue - totalDeductible - exemptProfit);
+    const taxableProfit = Math.max(0, totalRevenue - exemptProfit);
 
     let irpfDue = 0;
     if (config?.irpfRanges) {
@@ -176,7 +176,8 @@ export const financeService = {
       db.query.slotInstances.findMany({
         where: and(
           between(slotInstances.startAt, start, end),
-          inArray(slotInstances.status, ["scheduled", "completed", "no-show"])
+          inArray(slotInstances.status, ["scheduled", "completed", "no-show"]),
+          isNull(slotInstances.payoutId)
         ),
         with: {
           teacher: {
@@ -496,7 +497,10 @@ export const financeService = {
         const message = error instanceof Error ? error.message : "Erro ao consultar saldo Stripe";
         console.warn("[financeService.getGatewayBalances] Stripe error:", message);
         stripeStatus = "error";
-        stripeErrorMessage = message;
+        const lowerMessage = message.toLowerCase();
+        stripeErrorMessage = lowerMessage.includes("expired") || lowerMessage.includes("invalid")
+          ? "Chave de API inválida ou expirada"
+          : "Não foi possível consultar o saldo Stripe no momento";
       }
     }
 
@@ -530,12 +534,12 @@ export const financeService = {
             const errorBody = await res.text();
             console.warn(`[financeService.getGatewayBalances] AbacatePay error HTTP ${res.status}:`, errorBody);
             abacateStatus = "error";
-            abacateErrorMessage = `Erro HTTP ${res.status} ao consultar saldo`;
+            abacateErrorMessage = "Não foi possível consultar o saldo AbacatePay no momento";
           }
         } catch (error) {
           console.warn("[financeService.getGatewayBalances] AbacatePay error:", error);
           abacateStatus = "error";
-          abacateErrorMessage = error instanceof Error ? error.message : "Erro ao consultar saldo AbacatePay";
+          abacateErrorMessage = "Não foi possível consultar o saldo AbacatePay no momento";
         }
       }
     }

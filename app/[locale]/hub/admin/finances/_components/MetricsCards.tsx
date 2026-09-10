@@ -1,32 +1,54 @@
 "use client";
 
 import { useTranslations, useFormatter } from "next-intl";
-import { ArrowUpCircle, ArrowDownCircle, Wallet, LandmarkIcon, Info } from "lucide-react";
+import { ArrowUpCircle, ArrowDownCircle, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { FinanceMetrics, MonthlyBreakdownItem } from "@/modules/finance/finance.types";
+import { MonthlyBreakdownItem } from "@/modules/finance/finance.types";
 
 interface MetricsCardsProps {
-  metrics: FinanceMetrics;
   monthlyBreakdown: MonthlyBreakdownItem[];
   currentMonth: number | "all";
 }
 
-export function MetricsCards({ metrics, monthlyBreakdown, currentMonth }: MetricsCardsProps) {
+function aggregateAllMonths(monthlyBreakdown: MonthlyBreakdownItem[]): MonthlyBreakdownItem | null {
+  if (monthlyBreakdown.length === 0) return null;
+  return monthlyBreakdown.reduce<MonthlyBreakdownItem>((acc, item) => ({
+    month: item.month,
+    revenue: acc.revenue + item.revenue,
+    installments: acc.installments + item.installments,
+    extraRevenue: acc.extraRevenue + item.extraRevenue,
+    expenses: acc.expenses + item.expenses,
+    teacherPayouts: acc.teacherPayouts + item.teacherPayouts,
+    extraExpenses: acc.extraExpenses + item.extraExpenses,
+    aiCost: acc.aiCost + item.aiCost,
+    netProfit: acc.netProfit + item.netProfit,
+  }), {
+    month: 0,
+    revenue: 0,
+    installments: 0,
+    extraRevenue: 0,
+    expenses: 0,
+    teacherPayouts: 0,
+    extraExpenses: 0,
+    aiCost: 0,
+    netProfit: 0,
+  });
+}
+
+export function MetricsCards({ monthlyBreakdown, currentMonth }: MetricsCardsProps) {
   const t = useTranslations("AdminFinances.metrics");
   const format = useFormatter();
 
-  const selectedMonthIndex = currentMonth === "all" ? new Date().getMonth() : currentMonth;
-  const currentMonthData = monthlyBreakdown[selectedMonthIndex] ?? null;
+  const isAllMonths = currentMonth === "all";
+  const currentMonthData = isAllMonths
+    ? aggregateAllMonths(monthlyBreakdown)
+    : (monthlyBreakdown[currentMonth] ?? null);
+
+  const totalLabel = isAllMonths ? t("annualTotal") : t("monthlyTotal");
 
   const cards = [
     {
-      title: t("revenueMonthly"),
+      title: isAllMonths ? t("revenueAnnual") : t("revenueMonthly"),
       value: currentMonthData?.revenue ?? 0,
       icon: ArrowUpCircle,
       color: "text-emerald-500",
@@ -34,46 +56,37 @@ export function MetricsCards({ metrics, monthlyBreakdown, currentMonth }: Metric
       details: [
         { label: t("installments"), value: currentMonthData?.installments ?? 0 },
         { label: t("extraRevenue"), value: currentMonthData?.extraRevenue ?? 0 },
-        { label: t("monthlyTotal"), value: currentMonthData?.revenue ?? 0, isTotal: true },
+        { label: totalLabel, value: currentMonthData?.revenue ?? 0, isTotal: true },
       ],
     },
     {
-      title: t("expensesMonthly"),
+      title: isAllMonths ? t("expensesAnnual") : t("expensesMonthly"),
       value: currentMonthData?.expenses ?? 0,
       icon: ArrowDownCircle,
       color: "text-rose-500",
       bgColor: "bg-rose-500/10",
       details: [
         { label: t("teacherPayouts"), value: currentMonthData?.teacherPayouts ?? 0 },
-        { label: t("aiCosts"), value: currentMonthData?.aiCost ?? 0 },
         { label: t("extraExpenses"), value: currentMonthData?.extraExpenses ?? 0 },
-        { label: t("monthlyTotal"), value: currentMonthData?.expenses ?? 0, isTotal: true },
+        { label: totalLabel, value: currentMonthData?.expenses ?? 0, isTotal: true },
       ],
     },
     {
-      title: t("netProfit"),
+      title: isAllMonths ? t("netProfitAnnual") : t("netProfit"),
       value: currentMonthData?.netProfit ?? 0,
       icon: Wallet,
       color: (currentMonthData?.netProfit ?? 0) >= 0 ? "text-blue-500" : "text-amber-500",
       bgColor: (currentMonthData?.netProfit ?? 0) >= 0 ? "bg-blue-500/10" : "bg-amber-500/10",
       details: currentMonthData ? [
-        { label: t("revenueMonthly"), value: currentMonthData.revenue },
-        { label: t("expensesMonthly"), value: currentMonthData.expenses },
-        { label: t("monthlyTotal"), value: currentMonthData.netProfit, isTotal: true }
+        { label: isAllMonths ? t("revenueAnnual") : t("revenueMonthly"), value: currentMonthData.revenue },
+        { label: isAllMonths ? t("expensesAnnual") : t("expensesMonthly"), value: currentMonthData.expenses },
+        { label: totalLabel, value: currentMonthData.netProfit, isTotal: true }
       ] : [],
-    },
-    {
-      title: t("irpfDue"),
-      value: metrics.fiscal.irpfDue,
-      icon: LandmarkIcon,
-      color: "text-purple-500",
-      bgColor: "bg-purple-500/10",
-      tooltip: t("irpfTooltip"),
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {cards.map((card, i) => (
         <div key={i} className="card border-border overflow-hidden">
           <div className="p-5 flex flex-col gap-3">
@@ -81,18 +94,6 @@ export function MetricsCards({ metrics, monthlyBreakdown, currentMonth }: Metric
               <div className={cn("p-2 rounded-lg", card.bgColor)}>
                 <card.icon className={cn("size-5", card.color)} />
               </div>
-              {card.tooltip && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Info className="size-4 text-muted-foreground opacity-50 hover:opacity-100 transition-opacity" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="max-w-[200px] text-xs">{card.tooltip}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
             </div>
 
             <div className="flex flex-col">
@@ -107,8 +108,8 @@ export function MetricsCards({ metrics, monthlyBreakdown, currentMonth }: Metric
             {card.details && (
               <div className="flex flex-col gap-1.5 pt-2 border-t border-border/50">
                 {card.details.map((detail: { label: string; value: number; isTotal?: boolean }, j) => (
-                  <div 
-                    key={j} 
+                  <div
+                    key={j}
                     className={cn(
                       "flex justify-between text-[11px]",
                       detail.isTotal ? "pt-1.5 mt-1 border-t border-dashed border-border font-bold text-foreground" : ""

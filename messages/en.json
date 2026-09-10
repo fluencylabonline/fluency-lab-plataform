@@ -19,6 +19,17 @@
   },
   "AdminFinances": {
     "allMonths": "All months",
+    "actionsMenu": {
+      "label": "More actions",
+      "forecastLink": "Forecast",
+      "plansLink": "Plans"
+    },
+    "sections": {
+      "performanceMonthly": "Monthly Performance",
+      "performanceAnnual": "Annual Performance",
+      "fiscal": "Fiscal",
+      "gatewayBalances": "Gateway Balances"
+    },
     "export": {
       "trigger": "Export",
       "title": "Export Financial Data",
@@ -80,9 +91,6 @@
       "pendingRevenue": "Projected Revenue",
       "teacherPayoutProjection": "Payout Forecast",
       "teacherPayoutProjectionSubtitle": "{count} class(es) in the period",
-      "aiExpenseProjection": "AI Cost",
-      "aiExpenseProjectionUsage": "Estimated from provider usage",
-      "aiExpenseProjectionEstimate": "Estimated from token volume",
       "plan": "Plan",
       "student": "Student",
       "title": "Projections",
@@ -107,16 +115,20 @@
     "metrics": {
       "expenses": "Total Expenses",
       "expensesMonthly": "Monthly Expenses",
+      "expensesAnnual": "Annual Expenses",
       "extraExpenses": "Extra Expenses",
       "extraRevenue": "Extra Revenue",
       "installments": "Installments",
       "irpfDue": "Estimated Income Tax",
-      "irpfTooltip": "Calculation based on taxable profit (Revenue - Deductible Expenses - MEI Exemption).",
+      "irpfTooltip": "Calculation based on taxable profit (Revenue - MEI Exemption), applied to the progressive income tax table.",
+      "irpfAnnualCaption": "For fiscal year {year}",
       "monthlyTotal": "Monthly Total",
+      "annualTotal": "Yearly Total",
       "netProfit": "Net Profit",
+      "netProfitAnnual": "Annual Net Profit",
       "revenue": "Total Revenue",
       "revenueMonthly": "Monthly Revenue",
-      "aiCosts": "AI Costs",
+      "revenueAnnual": "Annual Revenue",
       "teacherPayouts": "Teacher Payouts",
       "totalPeriod": "Total for Period"
     },

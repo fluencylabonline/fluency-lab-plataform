@@ -65,11 +65,15 @@ export function FinanceHelpWizard({ open, onOpenChange }: FinanceHelpWizardProps
           <ul className="space-y-2">
             <li className="flex gap-2">
               <div className="size-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-              <span><strong>Visão Anual:</strong> Selecione &quot;Todos os meses&quot; para ver o acumulado do ano e o IRPF total.</span>
+              <span><strong>Visão Anual:</strong> Selecione &quot;Todos os meses&quot; para ver os cards de Receita, Despesa e Lucro somados no ano inteiro.</span>
             </li>
             <li className="flex gap-2">
               <div className="size-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-              <span><strong>Métrica Mensal:</strong> Ao selecionar um mês, os cards de métricas ganham uma linha extra destacada com o <strong>Total do Mês</strong>.</span>
+              <span><strong>Métrica Mensal:</strong> Ao selecionar um mês, os cards de métricas mostram apenas os valores daquele mês, com o <strong>Total do Mês</strong> destacado.</span>
+            </li>
+            <li className="flex gap-2">
+              <div className="size-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+              <span><strong>Seção Fiscal:</strong> O card de IRPF Estimado é sempre anual, independente do filtro de mês selecionado.</span>
             </li>
           </ul>
         </div>
@@ -133,13 +137,18 @@ export function FinanceHelpWizard({ open, onOpenChange }: FinanceHelpWizardProps
       content: (
         <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
           <p>
-            O card de <strong>IRPF Estimado</strong> usa 3 fatores:
+            O card de <strong>IRPF Estimado</strong>, na seção Fiscal, usa 2 fatores e é sempre calculado
+            sobre o ano inteiro (independente do mês filtrado no dashboard):
           </p>
           <ol className="list-decimal pl-5 space-y-1">
-            <li><strong>Isenção MEI:</strong> 32% da sua receita é livre de imposto por lei.</li>
-            <li><strong>Despesas Dedutíveis:</strong> Pagamentos de professores e custos marcados como &quot;dedutíveis&quot; abatem o imposto.</li>
-            <li><strong>Tabela Progressiva:</strong> O sistema aplica as alíquotas oficiais sobre o lucro tributável anual.</li>
+            <li><strong>Isenção MEI:</strong> o percentual configurado da sua receita anual é livre de imposto por lei.</li>
+            <li><strong>Tabela Progressiva:</strong> o sistema aplica as alíquotas oficiais sobre o lucro tributável restante.</li>
           </ol>
+          <p className="text-xs">
+            Pagamentos de professores e despesas marcadas como &quot;dedutíveis&quot; continuam sendo
+            registrados e exibidos separadamente para fins contábeis, mas não são abatidos uma segunda
+            vez do IRPF estimado (a isenção do MEI já cobre isso).
+          </p>
           <p className="text-xs font-medium text-blue-600 bg-blue-50 dark:bg-blue-50/10 p-2 rounded-lg border border-blue-100">
             Dica: Use o botão &quot;Configuração Fiscal&quot; para atualizar as tabelas do governo anualmente.
           </p>
