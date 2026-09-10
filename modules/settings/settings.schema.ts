@@ -5,7 +5,7 @@ import { z } from "zod";
 
 export const systemSettingsTable = pgTable("system_settings", {
   id: text("id").primaryKey().default("default"),
-  whatsappNumber: text("whatsapp_number").notNull().default("5549936180727"),
+  whatsappNumber: text("whatsapp_number").notNull().default("554936180727"),
   whatsappMessage: text(
     "whatsapp_message"
   ).notNull().default(
@@ -37,7 +37,7 @@ export const selectSystemSettingsSchema = createSelectSchema(systemSettingsTable
 export const updateSystemSettingsSchema = z.object({
   whatsappNumber: z
     .string()
-    .min(10, "Número do WhatsApp inválido (ex: 5549936180727)"),
+    .min(10, "Número do WhatsApp inválido (ex: 554936180727)"),
   whatsappMessage: z.string().min(1, "Mensagem do WhatsApp é obrigatória"),
   supportEmail: z.string().email("E-mail de suporte inválido"),
   contactText: z.string().min(1, "Mensagem de contato é obrigatória"),

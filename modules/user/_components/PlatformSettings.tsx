@@ -90,7 +90,7 @@ export function PlatformSettings({ initialSettings }: PlatformSettingsProps) {
                 type="text"
                 {...register("whatsappNumber")}
                 className="pl-9 h-11"
-                placeholder="5549936180727"
+                placeholder="554936180727"
               />
             </div>
             {errors.whatsappNumber && (

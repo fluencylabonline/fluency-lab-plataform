@@ -59,7 +59,7 @@ interface DocsAskPanelProps {
    * mesmo texto dispare de novo.
    */
   submitCount: number;
-  /** Número do WhatsApp da coordenação, em dígitos (ex.: 5549936180727). */
+  /** Número do WhatsApp da coordenação, em dígitos (ex.: 554936180727). */
   whatsappNumber: string | null;
   onOpenArticle: (section: DocSection, article: DocArticle) => void;
 }
