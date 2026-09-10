@@ -47,9 +47,12 @@ export const archiveWhatsAppConversationAction = managerAction
 
 export const getWhatsAppMessagesAction = managerAction
   .metadata({ name: "getWhatsAppMessages" })
-  .schema(z.object({ conversationId: z.string() }))
+  .schema(z.object({ conversationId: z.string(), before: z.string().datetime().optional() }))
   .action(async ({ parsedInput }) => {
-    return await communicationService.getMessages(parsedInput.conversationId);
+    return await communicationService.getMessages(
+      parsedInput.conversationId,
+      parsedInput.before ? new Date(parsedInput.before) : undefined
+    );
   });
 
 export const sendWhatsAppTextMessageAction = managerAction

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { createPortal } from "react-dom";
 import { WhatsAppMessage, WhatsAppTemplate } from "../communication.types";
 import { format } from "date-fns";
@@ -45,7 +45,7 @@ interface MessageBubbleProps {
   onResendSuccess?: () => void;
 }
 
-export function MessageBubble({ msg, templates = [], onResendSuccess }: MessageBubbleProps) {
+function MessageBubbleComponent({ msg, templates = [], onResendSuccess }: MessageBubbleProps) {
   const isOut = msg.direction === "outbound";
   const isTemplate = msg.content?.startsWith("[Template:");
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -386,3 +386,19 @@ export function MessageBubble({ msg, templates = [], onResendSuccess }: MessageB
     </div>
   );
 }
+
+// `onResendSuccess` is a fresh closure on every parent render, and `templates`
+// only changes when the templates SWR cache re-fetches — comparing the fields
+// that actually change a message's appearance avoids re-rendering the whole
+// message list on every conversation/messages poll.
+function areMessageBubblePropsEqual(prev: MessageBubbleProps, next: MessageBubbleProps) {
+  return (
+    prev.msg.id === next.msg.id &&
+    prev.msg.status === next.msg.status &&
+    prev.msg.content === next.msg.content &&
+    prev.msg.createdAt === next.msg.createdAt &&
+    prev.templates === next.templates
+  );
+}
+
+export const MessageBubble = memo(MessageBubbleComponent, areMessageBubblePropsEqual);

@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { whatsappConversationsTable, whatsappMessagesTable, whatsappQuickRepliesTable, emailsTable, whatsappConversationStudentsTable } from "./communication.schema";
 import { usersTable } from "../user/user.schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, lt, sql } from "drizzle-orm";
 import { EmailMessage } from "./communication.types";
 
 
@@ -96,12 +96,25 @@ export const communicationRepository = {
       .where(eq(whatsappConversationsTable.id, id));
   },
 
+  // Increments unreadCount atomically at the SQL level to avoid lost updates
+  // when concurrent webhook deliveries read-then-write the same conversation.
+  async incrementUnreadCountAndTouch(id: string, data: { lastMessageContent?: string; lastMessageAt?: Date }) {
+    await db
+      .update(whatsappConversationsTable)
+      .set({
+        ...data,
+        unreadCount: sql`${whatsappConversationsTable.unreadCount} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(whatsappConversationsTable.id, id));
+  },
+
   async saveMessage(data: typeof whatsappMessagesTable.$inferInsert) {
     const [message] = await db.insert(whatsappMessagesTable).values(data).returning();
     return message;
   },
 
-  async getConversations(includeArchived: boolean = false) {
+  async getConversations(includeArchived: boolean = false, limit = 200) {
     let query = db
       .select({
         id: whatsappConversationsTable.id,
@@ -124,12 +137,14 @@ export const communicationRepository = {
       
     query = query.where(eq(whatsappConversationsTable.isArchived, includeArchived));
 
-    return query.orderBy(desc(whatsappConversationsTable.lastMessageAt));
+    return query.orderBy(desc(whatsappConversationsTable.lastMessageAt)).limit(limit);
   },
 
-  async getMessages(conversationId: string, limit = 50) {
+  async getMessages(conversationId: string, limit = 50, before?: Date) {
     return db.query.whatsappMessagesTable.findMany({
-      where: eq(whatsappMessagesTable.conversationId, conversationId),
+      where: before
+        ? and(eq(whatsappMessagesTable.conversationId, conversationId), lt(whatsappMessagesTable.createdAt, before))
+        : eq(whatsappMessagesTable.conversationId, conversationId),
       orderBy: [desc(whatsappMessagesTable.createdAt)],
       limit,
     });

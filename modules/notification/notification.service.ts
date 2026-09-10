@@ -119,6 +119,15 @@ export const notificationService = {
     return notificationRepository.saveSubscription(userId, subscription);
   },
 
+  // Returns the subset of userIds that have no active push subscription registered,
+  // so callers can fall back to another channel (e.g. e-mail) for them.
+  async getUserIdsWithoutActiveSubscription(userIds: string[]) {
+    if (userIds.length === 0) return [];
+    const subs = await notificationRepository.findSubscriptionsByUserIds(userIds);
+    const subscribedIds = new Set(subs.map((s) => s.userId));
+    return userIds.filter((id) => !subscribedIds.has(id));
+  },
+
   async getUserNotifications(userId: string) {
     return notificationRepository.findByUserId(userId);
   },

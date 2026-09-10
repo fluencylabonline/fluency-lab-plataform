@@ -1194,12 +1194,19 @@ export class CommunicationService {
     return communicationRepository.getConversations(includeArchived);
   }
 
-  async getMessages(conversationId: string) {
-    return communicationRepository.getMessages(conversationId);
+  async getMessages(conversationId: string, before?: Date) {
+    return communicationRepository.getMessages(conversationId, 50, before);
   }
 
   async markAsRead(conversationId: string) {
-    return communicationRepository.markAsRead(conversationId);
+    await communicationRepository.markAsRead(conversationId);
+    // Sync signal so the sidebar unread badge updates immediately instead of
+    // waiting for its own polling cycle.
+    try {
+      await adminRtdb.ref("whatsapp_sync_signal/conversations").set(Date.now());
+    } catch (rtdbErr) {
+      console.error("[CommunicationService.markAsRead] RTDB sync signal error:", rtdbErr);
+    }
   }
 
   async updateContactName(conversationId: string, name: string) {
@@ -1489,6 +1496,36 @@ export class CommunicationService {
     } catch (error) {
       console.error("[CommunicationService.sendAdminEmail] Error:", error);
       throw error;
+    }
+  }
+
+  /**
+   * Fallback: envia um e-mail avisando sobre uma mensagem de WhatsApp perdida
+   * quando o destinatário não possui nenhuma subscription de push ativa.
+   * Isso evita que uma notificação fique 100% invisível para o operador.
+   */
+  async sendWhatsAppMissedMessageEmail(
+    to: string,
+    data: { senderLabel: string; preview: string; actionUrl: string }
+  ) {
+    try {
+      const htmlContent = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #333;">
+          <p>Você tem uma nova mensagem de WhatsApp de <strong>${data.senderLabel}</strong> que ainda não foi lida na plataforma:</p>
+          <p style="background:#f5f5f5; padding:12px 16px; border-radius:8px; font-style: italic;">${data.preview}</p>
+          <p><a href="${data.actionUrl}" style="color:#00a884; font-weight:bold;">Abrir conversa na plataforma</a></p>
+          <p style="font-size:12px; color:#888;">Você está recebendo este e-mail porque não há um dispositivo com notificações push ativas no momento.</p>
+        </div>
+      `;
+
+      await resend.emails.send({
+        from: this.defaultFrom,
+        to,
+        subject: `Nova mensagem no WhatsApp de ${data.senderLabel}`,
+        html: htmlContent,
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendWhatsAppMissedMessageEmail] Error:", error);
     }
   }
 

@@ -218,7 +218,10 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
       const result = await getWhatsAppConversationsAction({ includeArchived: viewArchived });
       return (result?.data as unknown as WhatsAppConversation[]) || [];
     },
-    { refreshInterval: 5000 }
+    // O RTDB (whatsapp_sync_signal/conversations) já dispara mutateConvs() em
+    // tempo real a cada mudança; este intervalo é só uma rede de segurança caso
+    // o listener em tempo real perca algum evento.
+    { refreshInterval: 60000 }
   );
 
   const { data: templates } = useSWR(
@@ -251,7 +254,6 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
     selectedConv ? `whatsapp-messages-${selectedConv.id}` : null,
     async () => {
       const result = await getWhatsAppMessagesAction({ conversationId: selectedConv!.id });
-      console.log("[WhatsAppChat SWR messages] conversationId:", selectedConv!.id, "result:", result);
       if (result?.serverError) {
         console.error("[WhatsAppChat SWR messages] Server error:", result.serverError);
         notify.error("Erro ao carregar mensagens: " + result.serverError);
@@ -261,8 +263,66 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
       }
       return (result?.data || []).reverse();
     },
-    { refreshInterval: 3000 }
+    // O RTDB (whatsapp_sync_signal/messages/{id}) já dispara mutateMessages() em
+    // tempo real; este intervalo é só uma rede de segurança de fallback.
+    { refreshInterval: 30000 }
   );
+
+  // Histórico mais antigo, carregado sob demanda (fora do cache do SWR para não
+  // ser sobrescrito pelas revalidações da janela de mensagens recentes acima).
+  const [olderMessages, setOlderMessages] = useState<WhatsAppMessage[]>([]);
+  const [hasMoreOlderMessages, setHasMoreOlderMessages] = useState(true);
+  const [isLoadingOlderMessages, setIsLoadingOlderMessages] = useState(false);
+
+  useEffect(() => {
+    setOlderMessages([]);
+    setHasMoreOlderMessages(true);
+  }, [selectedConv?.id]);
+
+  // If the initial "latest messages" page already came back with fewer than a
+  // full page, there's nothing older to fetch — skip the extra round trip.
+  useEffect(() => {
+    if (olderMessages.length === 0 && messages && messages.length < 50) {
+      setHasMoreOlderMessages(false);
+    }
+  }, [messages, olderMessages.length]);
+
+  const combinedMessages = [...olderMessages, ...(messages || [])];
+
+  // Preserves scroll position when older messages are prepended above the
+  // current viewport, instead of jumping the user's view around.
+  const prevScrollHeightBeforeLoadOlderRef = useRef<number | null>(null);
+
+  const handleLoadOlderMessages = async () => {
+    if (!selectedConv || isLoadingOlderMessages || !hasMoreOlderMessages) return;
+    const oldest = combinedMessages[0];
+    if (!oldest?.createdAt) return;
+
+    prevScrollHeightBeforeLoadOlderRef.current = scrollRef.current?.scrollHeight ?? null;
+    setIsLoadingOlderMessages(true);
+    try {
+      const result = await getWhatsAppMessagesAction({
+        conversationId: selectedConv.id,
+        before: new Date(oldest.createdAt).toISOString(),
+      });
+      const olderPage = (result?.data || []).reverse();
+      setOlderMessages((prev) => [...olderPage, ...prev]);
+      setHasMoreOlderMessages(olderPage.length === 50);
+    } catch (err) {
+      console.error("[WhatsAppChat] Error loading older messages:", err);
+      notify.error("Erro ao carregar mensagens anteriores.");
+    } finally {
+      setIsLoadingOlderMessages(false);
+    }
+  };
+
+  useEffect(() => {
+    if (prevScrollHeightBeforeLoadOlderRef.current !== null && scrollRef.current) {
+      const newScrollHeight = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTop = newScrollHeight - prevScrollHeightBeforeLoadOlderRef.current;
+      prevScrollHeightBeforeLoadOlderRef.current = null;
+    }
+  }, [olderMessages]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -289,6 +349,30 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
     });
     return () => unsubscribe();
   }, [selectedConv?.id, mutateMessages, mutateConvs]);
+
+  // Notification sound: fires only for genuinely new inbound WhatsApp messages
+  // (not our own outbound sends or read/delivery status updates), regardless
+  // of which conversation is currently open, so an operator always hears it.
+  const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
+  const hasSkippedInitialSoundSignalRef = useRef(false);
+  useEffect(() => {
+    notificationAudioRef.current = new Audio("/sounds/pop.mp3");
+  }, []);
+  useEffect(() => {
+    const signalRef = dbRef(rtdb, "whatsapp_sync_signal/new_inbound_message");
+    const unsubscribe = onValue(signalRef, () => {
+      // onValue fires immediately on subscribe with the last stored value;
+      // skip that first callback so we don't play a sound on page load.
+      if (!hasSkippedInitialSoundSignalRef.current) {
+        hasSkippedInitialSoundSignalRef.current = true;
+        return;
+      }
+      notificationAudioRef.current?.play().catch(() => {
+        // Ignored: browsers may block autoplay before the user interacts with the page.
+      });
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleSelectConv = useCallback(async (conv: WhatsAppConversation) => {
     setSelectedConv(conv);
@@ -927,8 +1011,24 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                       <Loader2 className="w-6 h-6 animate-spin text-primary/50" />
                     </div>
                   ) : (
-                    messages?.map((msg: WhatsAppMessage, idx: number) => {
-                      const prev = messages[idx - 1];
+                    <>
+                      {hasMoreOlderMessages && combinedMessages.length > 0 && (
+                        <div className="flex justify-center pb-2">
+                          <button
+                            type="button"
+                            onClick={handleLoadOlderMessages}
+                            disabled={isLoadingOlderMessages}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-background/80 hover:bg-background border border-border/30 text-muted-foreground hover:text-foreground transition-all disabled:opacity-50"
+                          >
+                            {isLoadingOlderMessages ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : null}
+                            {isLoadingOlderMessages ? "Carregando..." : "Carregar mensagens anteriores"}
+                          </button>
+                        </div>
+                      )}
+                      {combinedMessages.map((msg: WhatsAppMessage, idx: number) => {
+                      const prev = combinedMessages[idx - 1];
                       let showDate = false;
                       //eslint-disable-next-line @typescript-eslint/no-explicit-any
                       const msgDateRaw = msg.createdAt || (msg as any).created_at;
@@ -969,7 +1069,8 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                           />
                         </div>
                       );
-                    })
+                    })}
+                    </>
                   )}
                 </div>
               </div>

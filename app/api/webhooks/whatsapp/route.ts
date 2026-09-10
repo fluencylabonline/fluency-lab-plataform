@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { env } from "@/env";
 import { communicationRepository } from "@/modules/communication/communication.repository";
+import { communicationService } from "@/modules/communication/communication.service";
 import crypto from "node:crypto";
 import { type NotificationPrefs } from "@/modules/user/user.schema";
 import { userService } from "@/modules/user/user.service";
@@ -91,6 +92,25 @@ export async function POST(req: NextRequest) {
 
     // 2. Processar Novas Mensagens
     if (value.messages) {
+      // Resolvido uma única vez por payload: a lista de admins/managers ativos
+      // não muda entre mensagens do mesmo webhook, então evitamos refazer essa
+      // query a cada iteração do loop.
+      const adminsAndManagers = await userService.getActiveAdminsAndManagers();
+      const notifiedAdmins: { id: string; email: string | null }[] = [];
+      const notifiedManagers: { id: string; email: string | null }[] = [];
+
+      for (const u of adminsAndManagers) {
+        const prefs = (u.notificationPrefs as NotificationPrefs) || {};
+        if (prefs.whatsapp === false) continue;
+        if (u.pushNotificationsEnabled === false) continue;
+
+        if (u.role === "admin") {
+          notifiedAdmins.push({ id: u.id, email: u.email });
+        } else if (u.role === "manager") {
+          notifiedManagers.push({ id: u.id, email: u.email });
+        }
+      }
+
       for (const msg of value.messages) {
         const waId = msg.from;
         const messageId = msg.id;
@@ -164,10 +184,12 @@ export async function POST(req: NextRequest) {
             lastMessageAt: timestamp,
           });
         } else {
-          await communicationRepository.updateConversation(conversation.id, {
+          // Incremento atômico no SQL: evita perder contagens de não lidas quando
+          // múltiplas mensagens chegam em paralelo para a mesma conversa (o padrão
+          // anterior de "ler valor -> escrever valor+1" tinha uma race condition).
+          await communicationRepository.incrementUnreadCountAndTouch(conversation.id, {
             lastMessageContent: content,
             lastMessageAt: timestamp,
-            unreadCount: conversation.unreadCount + 1,
           });
         }
 
@@ -187,34 +209,19 @@ export async function POST(req: NextRequest) {
         try {
           await adminRtdb.ref(`whatsapp_sync_signal/messages/${conversation.id}`).set(Date.now());
           await adminRtdb.ref(`whatsapp_sync_signal/conversations`).set(Date.now());
+          // Sinal dedicado para mensagens realmente novas e recebidas (não sinaliza
+          // envios próprios nem atualizações de status), usado para tocar o som de
+          // notificação na UI independentemente da conversa selecionada.
+          await adminRtdb.ref(`whatsapp_sync_signal/new_inbound_message`).set({
+            timestamp: Date.now(),
+            conversationId: conversation.id,
+          });
         } catch (rtdbErr) {
           console.error("[WhatsApp Webhook] Error sending RTDB sync signal for new message:", rtdbErr);
         }
 
         // Enviar notificações push e in-app para admins e managers
         try {
-          const adminsAndManagers = await userService.getActiveAdminsAndManagers();
-
-          const notifiedAdmins: string[] = [];
-          const notifiedManagers: string[] = [];
-
-          for (const u of adminsAndManagers) {
-            // Obter preferências de notificação
-            const prefs = (u.notificationPrefs as NotificationPrefs) || {};
-            
-            // Se desativou notificações do chat, não envia
-            if (prefs.whatsapp === false) continue;
-            
-            // Verificar se as notificações globais de push estão habilitadas
-            if (u.pushNotificationsEnabled === false) continue;
-
-            if (u.role === "admin") {
-              notifiedAdmins.push(u.id);
-            } else if (u.role === "manager") {
-              notifiedManagers.push(u.id);
-            }
-          }
-
           const bodyText = `${msg.from}: ${content.substring(0, 60)}${content.length > 60 ? "..." : ""}`;
 
           let studentPhotoUrl: string | undefined = undefined;
@@ -235,10 +242,12 @@ export async function POST(req: NextRequest) {
               actionUrl: `/hub/admin/conversas?convId=${conversation.id}`,
               icon: studentPhotoUrl,
               targetType: "specific",
-              userIds: notifiedAdmins,
+              userIds: notifiedAdmins.map((a) => a.id),
               channels: {
                 push: true,
-                inApp: false,
+                // Sempre registra in-app também: se o push falhar/expirar, ainda
+                // sobra um registro persistente (sino de notificações) para o admin.
+                inApp: true,
               },
             });
           }
@@ -250,12 +259,37 @@ export async function POST(req: NextRequest) {
               actionUrl: `/hub/manager/conversas?convId=${conversation.id}`,
               icon: studentPhotoUrl,
               targetType: "specific",
-              userIds: notifiedManagers,
+              userIds: notifiedManagers.map((m) => m.id),
               channels: {
                 push: true,
                 inApp: true,
               },
             });
+          }
+
+          // Fallback por e-mail: quem não tem nenhuma subscription de push ativa
+          // ainda recebe um aviso, em vez de só descobrir a mensagem ao abrir a
+          // plataforma manualmente.
+          const allNotified = [...notifiedAdmins, ...notifiedManagers];
+          if (allNotified.length > 0) {
+            const idsWithoutPush = await notificationService.getUserIdsWithoutActiveSubscription(
+              allNotified.map((u) => u.id)
+            );
+            if (idsWithoutPush.length > 0) {
+              const emailTargets = allNotified.filter(
+                (u) => idsWithoutPush.includes(u.id) && u.email
+              );
+              const actionUrl = `${env.NEXT_PUBLIC_APP_URL}/hub/admin/conversas?convId=${conversation.id}`;
+              await Promise.allSettled(
+                emailTargets.map((u) =>
+                  communicationService.sendWhatsAppMissedMessageEmail(u.email as string, {
+                    senderLabel: `+${msg.from}`,
+                    preview: content,
+                    actionUrl,
+                  })
+                )
+              );
+            }
           }
         } catch (pushErr) {
           console.error("[WhatsApp Webhook] Erro ao enviar notificações:", pushErr);

@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { WhatsAppConversation, WhatsAppLabel } from "../communication.types";
 import { Avatar } from "./Avatar";
 import { format } from "date-fns";
@@ -20,7 +21,7 @@ interface ConvItemProps {
   onClick: () => void;
 }
 
-export function ConvItem({ conv, isSelected, onClick }: ConvItemProps) {
+function ConvItemComponent({ conv, isSelected, onClick }: ConvItemProps) {
   const displayName = conv.contactName || conv.studentName || `+${conv.waId}`;
 
   return (
@@ -89,3 +90,22 @@ export function ConvItem({ conv, isSelected, onClick }: ConvItemProps) {
     </button>
   );
 }
+
+// `onClick` is recreated on every parent render (inline arrow), so we compare
+// only the fields that actually affect what's rendered instead of using the
+// default shallow-prop comparison — otherwise memoization would have no effect.
+function areConvItemPropsEqual(prev: ConvItemProps, next: ConvItemProps) {
+  return (
+    prev.isSelected === next.isSelected &&
+    prev.conv.id === next.conv.id &&
+    prev.conv.unreadCount === next.conv.unreadCount &&
+    prev.conv.lastMessageContent === next.conv.lastMessageContent &&
+    prev.conv.lastMessageAt === next.conv.lastMessageAt &&
+    prev.conv.contactName === next.conv.contactName &&
+    prev.conv.studentName === next.conv.studentName &&
+    prev.conv.photoUrl === next.conv.photoUrl &&
+    JSON.stringify(prev.conv.labels) === JSON.stringify(next.conv.labels)
+  );
+}
+
+export const ConvItem = memo(ConvItemComponent, areConvItemPropsEqual);
