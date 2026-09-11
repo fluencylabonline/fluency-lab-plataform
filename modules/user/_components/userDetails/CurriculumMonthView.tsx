@@ -3,12 +3,15 @@
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { SlotInstanceWithDetails } from "@/modules/scheduling/scheduling.types";
+import type { CallSession } from "@/modules/call/call.schema";
 import { ClassCard } from "./ClassCard";
 
+export type SlotWithCallSession = SlotInstanceWithDetails & { callSession?: CallSession };
 
 interface CurriculumMonthViewProps {
-  slots: SlotInstanceWithDetails[];
+  slots: SlotWithCallSession[];
   isAdmin: boolean;
+  canViewRecordings: boolean;
   onUpdateStatus: (slotId: string, status: SlotInstanceWithDetails["status"]) => void;
   onSwapTeacher: (slot: SlotInstanceWithDetails) => void;
   onUpdateLesson: (slot: SlotInstanceWithDetails) => void;
@@ -18,12 +21,13 @@ interface CurriculumMonthViewProps {
 export function CurriculumMonthView({
   slots,
   isAdmin,
+  canViewRecordings,
   onUpdateStatus,
   onSwapTeacher,
   onUpdateLesson
 }: CurriculumMonthViewProps) {
   // Group slots by month
-  const groupedSlots = slots.reduce((acc: Record<string, SlotInstanceWithDetails[]>, slot) => {
+  const groupedSlots = slots.reduce((acc: Record<string, SlotWithCallSession[]>, slot) => {
     const monthKey = format(new Date(slot.startAt), "yyyy-MM");
     if (!acc[monthKey]) acc[monthKey] = [];
     acc[monthKey].push(slot);
@@ -63,6 +67,8 @@ export function CurriculumMonthView({
                   key={slot.id}
                   slot={slot}
                   isAdmin={isAdmin}
+                  callSession={slot.callSession}
+                  canViewRecordings={canViewRecordings}
                   onUpdateStatus={onUpdateStatus}
                   onSwapTeacher={onSwapTeacher}
                   onUpdateLesson={onUpdateLesson}

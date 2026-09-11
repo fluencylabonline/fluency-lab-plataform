@@ -13,7 +13,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { format, addMonths, subMonths } from "date-fns";
+import { format, addMonths, subMonths, isSameMonth, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { Button } from "@/components/ui/button";
@@ -42,10 +42,14 @@ import { getLessonsAction } from "@/modules/curriculum/curriculum.actions";
 import { CurriculumMonthView } from "./CurriculumMonthView";
 import { CurriculumVaults } from "./CurriculumVaults";
 import { ManageCreditsVault } from "./ManageCreditsVault";
-import { CallSessionsSection } from "./CallSessionsSection";
+import { CallMediaControls } from "./CallMediaControls";
+import { matchCallSessionsToSlots } from "./matchCallSessions";
+import { SectionLabel } from "./UserDetailsPrimitives";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Shimmer } from "@shimmer-from-structure/react";
+import { Video } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { SlotInstanceWithDetails, RecurrenceRule } from "@/modules/scheduling/scheduling.types";
 import { User } from "@/modules/user/user.schema";
@@ -60,6 +64,7 @@ interface StudentCurriculumTabProps {
 }
 
 export function StudentCurriculumTab({ studentId, isAdmin, callHistory = [] }: StudentCurriculumTabProps) {
+  const t = useTranslations("UserManagement");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [slots, setSlots] = useState<SlotInstanceWithDetails[]>([]);
   const router = useRouter();
@@ -322,6 +327,15 @@ export function StudentCurriculumTab({ studentId, isAdmin, callHistory = [] }: S
     .filter(s => s.status === "scheduled" && new Date(s.startAt) > new Date())
     .sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
 
+  // Pair each scheduled slot with the Stream call that happened around its
+  // scheduled time, so the class card can show the transcript/recording of
+  // that specific class instead of a separate, disconnected list.
+  const callsThisMonth = callHistory.filter((call) => {
+    const startedAt = call.startedAt instanceof Date ? call.startedAt : parseISO(call.startedAt as unknown as string);
+    return isSameMonth(startedAt, currentDate);
+  });
+  const { slotsWithCalls, orphanCalls } = matchCallSessionsToSlots(slots, callsThisMonth);
+
   return (
     <div className="space-y-6">
       {/* 0. Student Overall Progress Dashboard */}
@@ -417,23 +431,41 @@ export function StudentCurriculumTab({ studentId, isAdmin, callHistory = [] }: S
         </div>
       )}
 
-      {/* Grid of Classes with Shimmer */}
+      {/* Grid of Classes with Shimmer — each card already includes that
+          class's transcript/recording when a matching call was found */}
       <Shimmer loading={isLoading} templateProps={{ slots: mockSlots }}>
         <CurriculumMonthView
-          slots={slots}
+          slots={slotsWithCalls}
           isAdmin={isAdmin}
+          canViewRecordings={isAdmin}
           onUpdateStatus={handleUpdateStatus}
           onSwapTeacher={setSwapSlot}
           onUpdateLesson={setLessonSlot}
         />
       </Shimmer>
 
-      {/* Call sessions for the month currently in view — transcripts + recordings */}
-      <CallSessionsSection
-        callHistory={callHistory}
-        monthDate={currentDate}
-        canViewRecordings={isAdmin}
-      />
+      {/* Calls that didn't line up with any scheduled slot (e.g. an ad-hoc
+          call outside the curriculum grid) still surface here so their
+          transcript/recording isn't silently lost. */}
+      {orphanCalls.length > 0 && (
+        <div>
+          <SectionLabel>{t("otherCallSessions")}</SectionLabel>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {orphanCalls.map((call) => {
+              const startedAt = call.startedAt instanceof Date ? call.startedAt : parseISO(call.startedAt as unknown as string);
+              return (
+                <div key={call.id} className="card p-4 flex flex-col gap-3">
+                  <div className="flex items-center gap-2 text-sm font-bold">
+                    <Video className="h-4 w-4 text-primary shrink-0" />
+                    <span>{format(startedAt, "dd/MM · HH:mm")}</span>
+                  </div>
+                  <CallMediaControls callSession={call} canViewRecordings={isAdmin} />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Vaults */}
       <CurriculumVaults

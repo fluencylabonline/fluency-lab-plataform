@@ -28,6 +28,8 @@ import {
 import { cn } from "@/lib/utils";
 
 import { SlotInstanceWithDetails } from "@/modules/scheduling/scheduling.types";
+import type { CallSession } from "@/modules/call/call.schema";
+import { CallMediaControls } from "./CallMediaControls";
 
 interface ClassCardProps {
   slot: SlotInstanceWithDetails;
@@ -35,6 +37,10 @@ interface ClassCardProps {
   onUpdateStatus: (slotId: string, status: SlotInstanceWithDetails["status"]) => void;
   onSwapTeacher: (slot: SlotInstanceWithDetails) => void;
   onUpdateLesson: (slot: SlotInstanceWithDetails) => void;
+  /** The video call session matched to this class, when one took place. */
+  callSession?: CallSession;
+  /** Recordings are admin-only; managers still get transcripts. */
+  canViewRecordings?: boolean;
 }
 
 
@@ -43,7 +49,9 @@ export function ClassCard({
   isAdmin,
   onUpdateStatus,
   onSwapTeacher,
-  onUpdateLesson
+  onUpdateLesson,
+  callSession,
+  canViewRecordings = false,
 }: ClassCardProps) {
   const statusConfig: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
     scheduled: { label: "Agendada", color: "bg-blue-500/10 text-blue-500 border-blue-500/20", icon: Calendar },
@@ -129,6 +137,10 @@ export function ClassCard({
           </DropdownMenu>
         )}
       </div>
+
+      {callSession && (
+        <CallMediaControls callSession={callSession} canViewRecordings={canViewRecordings} />
+      )}
     </div>
   );
 }
