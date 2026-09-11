@@ -1592,6 +1592,9 @@ export const schedulingService = {
     const teacher = await userService.getUserById(slot.teacherId);
     const teacherName = teacher?.name || "Professor";
 
+    const student = slot.studentId ? await userService.getUserById(slot.studentId) : null;
+    const studentName = student?.name || "Aluno";
+
     let body = "";
     if (scope === "single") {
       body = `A aula de ${originalTimeStr} foi remarcada para ${newTimeStr}.`;
@@ -1622,10 +1625,14 @@ export const schedulingService = {
       channels: { inApp: true, push: true },
     });
 
+    const adminBody = slot.studentId
+      ? `Aula de ${studentName} com o prof. ${teacherName} foi alterada. ${body}`
+      : `A aula do prof. ${teacherName} foi alterada. ${body}`;
+
     // 2. Send push to Admin
     await notificationService.sendNotification({
       title: "Horário de Aula Alterado",
-      body: `A aula do prof. ${teacherName} foi alterada. ${body}`,
+      body: adminBody,
       targetType: "role",
       targetRole: "admin",
       category: "upcomingClasses",
@@ -1635,7 +1642,7 @@ export const schedulingService = {
     // 3. Send push to Manager
     await notificationService.sendNotification({
       title: "Horário de Aula Alterado",
-      body: `A aula do prof. ${teacherName} foi alterada. ${body}`,
+      body: adminBody,
       targetType: "role",
       targetRole: "manager",
       category: "upcomingClasses",
