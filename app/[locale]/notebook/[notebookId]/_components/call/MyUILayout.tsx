@@ -137,6 +137,30 @@ export const MyUILayout = ({
     }
   }, [callingState, isTranscribing, call, isEnding]);
 
+  // FAILSAFE: recording is requested as auto-on when joining, but force it if it
+  // hasn't started shortly after. Only the teacher attempts it, so both sides
+  // don't race to start the same recording. If auto-on works, isRecording flips
+  // and the cleanup cancels this before any extra API call is made.
+  useEffect(() => {
+    if (
+      callingState !== CallingState.JOINED ||
+      userRole !== "teacher" ||
+      isRecording ||
+      !call ||
+      isEnding
+    ) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      call.startRecording().catch((err) => {
+        console.log("[MyUILayout] Auto-start recording attempt:", err);
+      });
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, [callingState, isRecording, call, isEnding, userRole]);
+
   // Chrome background throttling: rejoin if tab becomes visible again
   useEffect(() => {
     if (
@@ -203,6 +227,9 @@ export const MyUILayout = ({
           settings_override: {
             limits: { max_duration_seconds: 3600 },
             transcription: { mode: "auto-on" },
+            // 480p keeps the recording in Stream's SD billing tier, which is
+            // enough to review a class and well within the free credit.
+            recording: { mode: "auto-on", quality: "480p" },
           },
           custom: { studentId, notebookId },
         },

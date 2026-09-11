@@ -106,8 +106,8 @@ export async function proxy(request: NextRequest) {
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     font-src 'self' data: https://fonts.gstatic.com;
     img-src 'self' data: blob: https://firebasestorage.googleapis.com https://images.unsplash.com https://i.ytimg.com https://lh3.googleusercontent.com https://*.stream-io-video.com https://*.stream-io-api.com https://user-images.githubusercontent.com;
-    connect-src 'self' ${isDev ? "http://localhost:3000 ws://localhost:3000" : ""} https://*.firebaseio.com wss://*.firebaseio.com https://firebasestorage.googleapis.com https://*.googleapis.com https://apis.google.com https://fonts.gstatic.com https://*.stream-io-api.com wss://*.stream-io-api.com wss://*.getstream.io https://api.abacatepay.com https://lrclib.net https://*.stream-io-video.com wss://*.stream-io-video.com https://lh3.googleusercontent.com https://images.unsplash.com https://i.ytimg.com https://viacep.com.br;
-    media-src 'self' blob: https://firebasestorage.googleapis.com;
+    connect-src 'self' ${isDev ? "http://localhost:3000 ws://localhost:3000" : ""} https://*.firebaseio.com wss://*.firebaseio.com https://firebasestorage.googleapis.com https://*.googleapis.com https://apis.google.com https://fonts.gstatic.com https://*.stream-io-api.com wss://*.stream-io-api.com wss://*.getstream.io https://*.stream-io-cdn.com https://api.abacatepay.com https://lrclib.net https://*.stream-io-video.com wss://*.stream-io-video.com https://lh3.googleusercontent.com https://images.unsplash.com https://i.ytimg.com https://viacep.com.br;
+    media-src 'self' blob: https://firebasestorage.googleapis.com https://*.stream-io-cdn.com https://*.stream-io-video.com;
     frame-src https://www.youtube.com https://drive.google.com https://accounts.google.com https://fluency-lab-plataform.firebaseapp.com https://fluencylabplataform.firebaseapp.com https://fluencylabplataform.web.app https://*.firebaseio.com;
     object-src 'none';
     worker-src 'self' blob:;

@@ -8,6 +8,8 @@ import {
   generateStreamTokenSchema,
   leaveCallSchema,
   syncCallTranscriptionSchema,
+  getCallRecordingsSchema,
+  type CallRecordingSummary,
 } from "./call.schema";
 import { revalidatePath } from "next/cache";
 
@@ -150,4 +152,31 @@ export const syncCallTranscriptionAction = protectedAction
       success,
       error: success ? undefined : "Transcrição ainda não disponível no GetStream.",
     };
+  });
+
+/**
+ * getCallRecordingsAction — Fetches the Stream recordings of a call on demand.
+ *
+ * Recordings live on Stream for a limited retention window and are served from
+ * signed URLs, so they are resolved per request instead of being persisted.
+ *
+ * RBAC: Admin only — managers can read transcriptions but not watch recordings.
+ */
+export const getCallRecordingsAction = protectedAction
+  .metadata({ name: "getCallRecordings" })
+  .schema(getCallRecordingsSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const { user } = ctx;
+
+    if (user.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+
+    try {
+      const recordings = await callService.listCallRecordings(parsedInput.streamCallId);
+      return { success: true, recordings };
+    } catch (error) {
+      console.error("[getCallRecordings] Error:", error);
+      return { success: false, recordings: [] as CallRecordingSummary[] };
+    }
   });

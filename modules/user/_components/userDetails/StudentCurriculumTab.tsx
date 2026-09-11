@@ -42,6 +42,7 @@ import { getLessonsAction } from "@/modules/curriculum/curriculum.actions";
 import { CurriculumMonthView } from "./CurriculumMonthView";
 import { CurriculumVaults } from "./CurriculumVaults";
 import { ManageCreditsVault } from "./ManageCreditsVault";
+import { CallSessionsSection } from "./CallSessionsSection";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Shimmer } from "@shimmer-from-structure/react";
@@ -50,13 +51,15 @@ import { SlotInstanceWithDetails, RecurrenceRule } from "@/modules/scheduling/sc
 import { User } from "@/modules/user/user.schema";
 import { LearningPlan, LearningPlanWithLessons, StudentCurriculumGap } from "@/modules/learning/learning.types";
 import { LessonSummary } from "@/modules/curriculum/curriculum.types";
+import type { CallSession } from "@/modules/call/call.schema";
 
 interface StudentCurriculumTabProps {
   studentId: string;
   isAdmin: boolean;
+  callHistory?: CallSession[];
 }
 
-export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTabProps) {
+export function StudentCurriculumTab({ studentId, isAdmin, callHistory = [] }: StudentCurriculumTabProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [slots, setSlots] = useState<SlotInstanceWithDetails[]>([]);
   const router = useRouter();
@@ -424,6 +427,13 @@ export function StudentCurriculumTab({ studentId, isAdmin }: StudentCurriculumTa
           onUpdateLesson={setLessonSlot}
         />
       </Shimmer>
+
+      {/* Call sessions for the month currently in view — transcripts + recordings */}
+      <CallSessionsSection
+        callHistory={callHistory}
+        monthDate={currentDate}
+        canViewRecordings={isAdmin}
+      />
 
       {/* Vaults */}
       <CurriculumVaults

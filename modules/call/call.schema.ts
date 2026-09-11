@@ -87,12 +87,27 @@ export const syncCallTranscriptionSchema = z.object({
   streamCallId: z.string().min(1, "Stream Call ID is required"),
 });
 
+/**
+ * Schema for fetching the Stream recordings of a call.
+ */
+export const getCallRecordingsSchema = z.object({
+  streamCallId: z.string().min(1, "Stream Call ID is required"),
+});
+
 // --- Types ---
 export type StartCallValues = z.input<typeof startCallSchema>;
 export type EndCallValues = z.input<typeof endCallSchema>;
 export type GenerateStreamTokenValues = z.input<typeof generateStreamTokenSchema>;
 export type LeaveCallValues = z.input<typeof leaveCallSchema>;
 export type SyncCallTranscriptionValues = z.input<typeof syncCallTranscriptionSchema>;
+export type GetCallRecordingsValues = z.input<typeof getCallRecordingsSchema>;
+
+export interface CallRecordingSummary {
+  filename: string;
+  url: string;
+  startTime: Date;
+  endTime: Date;
+}
 
 export type CallSession = typeof callSessionsTable.$inferSelect;
 export type NewCallSession = typeof callSessionsTable.$inferInsert;

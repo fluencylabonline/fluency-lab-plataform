@@ -24,13 +24,15 @@ import { TeacherEarningsTab } from "./userDetails/TeacherEarningsTab";
 import { ContractsTab } from "./userDetails/ContractsTab";
 import { TeacherScheduleTab } from "./userDetails/TeacherScheduleTab";
 import { StudentCurriculumTab } from "./userDetails/StudentCurriculumTab";
-import { VideoCallsTab } from "./userDetails/VideoCallsTab";
 import { ActionsTab } from "./userDetails/ActionsTab";
 import { CertificateTab } from "./userDetails/CertificateTab";
 import { StudentPlanTab } from "./userDetails/StudentPlanTab";
 import { TeacherStudentsTab, type TeacherStudentItem } from "./userDetails/TeacherStudentsTab";
 import { Header } from "@/components/layout/header";
 import type { CallSession } from "../../call/call.schema";
+
+const tabTriggerClass =
+  "shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4";
 
 const rateSchema = z.object({
   rate: z.number().min(0),
@@ -296,95 +298,49 @@ export function UserDetailsClient({
 
           <TabsList className="mt-0 py-4 flex w-full justify-start overflow-x-auto flex-nowrap scrollbar-hide h-full bg-transparent border-none">
 
-            <TabsTrigger
-              value="personal"
-              className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
-            >
-              {t("personalInfo")}
+            <TabsTrigger value="personal" className={tabTriggerClass}>
+              {t("profile")}
             </TabsTrigger>
 
             {(user.role === "student" || user.role === "teacher") && (
-              <TabsTrigger
-                value="payment"
-                className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
-              >
+              <TabsTrigger value="payment" className={tabTriggerClass}>
                 {user.role === "student" ? t("payment") : t("earningsStatement")}
               </TabsTrigger>
             )}
-            {user.role === "teacher" ||  user.role === "student" && (
-            <TabsTrigger
-              value="contracts"
-              className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
-            >
-              {t("contracts")}
-            </TabsTrigger>)}
+
+            {(user.role === "teacher" || user.role === "student") && (
+              <TabsTrigger value="contracts" className={tabTriggerClass}>
+                {user.role === "student" ? t("contractAndPlan") : t("contracts")}
+              </TabsTrigger>
+            )}
 
             {user.role === "teacher" && (
-              <TabsTrigger
-                value="schedule"
-                className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
-              >
+              <TabsTrigger value="schedule" className={tabTriggerClass}>
                 {t("schedule")}
               </TabsTrigger>
             )}
 
             {user.role === "teacher" && (
-              <TabsTrigger
-                value="students"
-                className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
-              >
+              <TabsTrigger value="students" className={tabTriggerClass}>
                 {t("students")}
               </TabsTrigger>
             )}
 
             {user.role === "student" && (
-              <TabsTrigger
-                value="curriculum"
-                className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
-              >
-                Currículo
-              </TabsTrigger>
-            )}
-
-            {user.role === "student" && (
-              <TabsTrigger
-                value="video-calls"
-                className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
-              >
-                Aulas
-              </TabsTrigger>
-            )}
-
-            {isAdmin && (
-              <TabsTrigger
-                value="actions"
-                className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
-              >
-                {t("actions")}
+              <TabsTrigger value="curriculum" className={tabTriggerClass}>
+                {t("classesAndCurriculum")}
               </TabsTrigger>
             )}
 
             {user.role === "student" && (isAdmin || currentUser.role === "manager") && (
-              <TabsTrigger
-                value="certificate"
-                className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
-              >
-                Certificado
-              </TabsTrigger>
-            )}
-
-            {user.role === "student" && (isAdmin || currentUser.role === "manager") && (
-              <TabsTrigger
-                value="plan"
-                className="shrink-0 data-[state=active]:bg-transparent! data-[state=active]:shadow-none! data-[state=active]:text-primary! data-[state=active]:border-none! focus-visible:ring-0 focus-visible:ring-offset-0 py-4"
-              >
-                Plano
+              <TabsTrigger value="certificate" className={tabTriggerClass}>
+                {t("certificate")}
               </TabsTrigger>
             )}
           </TabsList>
         </div>
 
-        <TabsContent value="personal" className="mt-4">
+        <TabsContent value="personal" className="mt-4 flex flex-col gap-8">
           <PersonalInfoTab
             user={user}
             isAdmin={isAdmin}
@@ -393,6 +349,27 @@ export function UserDetailsClient({
             rateForm={rateForm as any}
             onUpdateRate={handleUpdateRate}
           />
+
+          {isAdmin && (
+            <ActionsTab
+              userId={user.id}
+              userName={user.name || ""}
+              userEmail={user.email}
+              userLocale={(user.locale || "pt") as "pt" | "en"}
+              userRole={user.role}
+              isActive={user.isActive ?? true}
+              activeSubscription={activeSubscription}
+              installments={installments}
+              cancellationPending={user.cancellationPending}
+              cancellationPixCode={user.cancellationPixCode}
+              cancellationPixImage={user.cancellationPixImage}
+              cancellationAmount={user.cancellationAmount}
+              onResendCancellationFee={handleResendCancellationFee}
+              onMarkCancellationFeeAsPaid={handleMarkCancellationFeeAsPaid}
+              adminPassword={adminPassword}
+              setAdminPassword={setAdminPassword}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="payment" className="mt-4">
@@ -428,7 +405,15 @@ export function UserDetailsClient({
           )}
         </TabsContent>
 
-        <TabsContent value="contracts" className="mt-4">
+        <TabsContent value="contracts" className="mt-4 flex flex-col gap-8">
+          {user.role === "student" && (isAdmin || currentUser.role === "manager") && (
+            <StudentPlanTab
+              user={user}
+              activeSubscription={activeSubscription}
+              isAdmin={isAdmin || currentUser.role === "manager"}
+            />
+          )}
+
           <ContractsTab
             contracts={contracts}
             onViewContract={handleViewContract}
@@ -451,35 +436,10 @@ export function UserDetailsClient({
 
         {user.role === "student" && (
           <TabsContent value="curriculum" className="mt-4">
-            <StudentCurriculumTab studentId={user.id} isAdmin={isAdmin} />
-          </TabsContent>
-        )}
-
-        {user.role === "student" && (
-          <TabsContent value="video-calls" className="mt-4">
-            <VideoCallsTab callHistory={callHistory} />
-          </TabsContent>
-        )}
-
-        {isAdmin && (
-          <TabsContent value="actions" className="mt-4">
-            <ActionsTab
-              userId={user.id}
-              userName={user.name || ""}
-              userEmail={user.email}
-              userLocale={(user.locale || "pt") as "pt" | "en"}
-              userRole={user.role}
-              isActive={user.isActive ?? true}
-              activeSubscription={activeSubscription}
-              installments={installments}
-              cancellationPending={user.cancellationPending}
-              cancellationPixCode={user.cancellationPixCode}
-              cancellationPixImage={user.cancellationPixImage}
-              cancellationAmount={user.cancellationAmount}
-              onResendCancellationFee={handleResendCancellationFee}
-              onMarkCancellationFeeAsPaid={handleMarkCancellationFeeAsPaid}
-              adminPassword={adminPassword}
-              setAdminPassword={setAdminPassword}
+            <StudentCurriculumTab
+              studentId={user.id}
+              isAdmin={isAdmin}
+              callHistory={callHistory}
             />
           </TabsContent>
         )}
@@ -487,16 +447,6 @@ export function UserDetailsClient({
         {user.role === "student" && (isAdmin || currentUser.role === "manager") && (
           <TabsContent value="certificate" className="mt-4">
             <CertificateTab user={user} />
-          </TabsContent>
-        )}
-
-        {user.role === "student" && (isAdmin || currentUser.role === "manager") && (
-          <TabsContent value="plan" className="mt-4">
-            <StudentPlanTab
-              user={user}
-              activeSubscription={activeSubscription}
-              isAdmin={isAdmin || currentUser.role === "manager"}
-            />
           </TabsContent>
         )}
       </Tabs>

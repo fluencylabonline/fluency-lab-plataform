@@ -221,6 +221,25 @@ async function getStudentCallHistory(studentId: string) {
   return callRepository.listByStudent(studentId);
 }
 
+/**
+ * Lists the Stream recordings of a call.
+ *
+ * Stream keeps recordings for a limited retention window and serves them from
+ * signed URLs, so they are fetched on demand instead of being stored locally.
+ */
+async function listCallRecordings(streamCallId: string) {
+  const client = new StreamClient(env.NEXT_PUBLIC_STREAM_API_KEY, env.STREAM_SECRET);
+  const call = client.video.call("default", streamCallId);
+  const res = await call.listRecordings();
+
+  return (res.recordings ?? []).map((recording) => ({
+    filename: recording.filename,
+    url: recording.url,
+    startTime: recording.start_time,
+    endTime: recording.end_time,
+  }));
+}
+
 export const callService = {
   startCall,
   endCall,
@@ -229,5 +248,6 @@ export const callService = {
   handleTranscriptionWebhook,
   syncCallTranscription,
   getStudentCallHistory,
+  listCallRecordings,
   getCallByStreamId: async (streamCallId: string) => callRepository.findByStreamId(streamCallId),
 };
