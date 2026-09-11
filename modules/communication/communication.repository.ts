@@ -73,6 +73,7 @@ export const communicationRepository = {
   async createConversation(data: {
     waId: string;
     studentId?: string | null;
+    contactName?: string | null;
     lastMessageContent?: string;
     lastMessageAt?: Date;
   }) {

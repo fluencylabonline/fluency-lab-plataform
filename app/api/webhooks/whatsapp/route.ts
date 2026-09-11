@@ -12,6 +12,16 @@ import { eq } from "drizzle-orm";
 import { usersTable } from "@/modules/user/user.schema";
 import { whatsappMessagesTable } from "@/modules/communication/communication.schema";
 
+/** Renders a wa_id as a readable phone number, e.g. 5549936182324 → +55 (49) 93618-2324. */
+function formatWaId(waId: string): string {
+  const brazilian = waId.match(/^55(\d{2})(\d{4,5})(\d{4})$/);
+  if (brazilian) {
+    const [, areaCode, prefix, suffix] = brazilian;
+    return `+55 (${areaCode}) ${prefix}-${suffix}`;
+  }
+  return `+${waId}`;
+}
+
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
   const mode = searchParams.get("hub.mode");
@@ -92,6 +102,15 @@ export async function POST(req: NextRequest) {
 
     // 2. Processar Novas Mensagens
     if (value.messages) {
+      // A Meta envia o nome do perfil do WhatsApp junto do payload, o que dá um
+      // nome legível mesmo para números que não estão vinculados a um aluno.
+      const profileNamesByWaId = new Map<string, string>();
+      for (const contact of value.contacts ?? []) {
+        if (contact?.wa_id && contact?.profile?.name) {
+          profileNamesByWaId.set(contact.wa_id, contact.profile.name);
+        }
+      }
+
       // Resolvido uma única vez por payload: a lista de admins/managers ativos
       // não muda entre mensagens do mesmo webhook, então evitamos refazer essa
       // query a cada iteração do loop.
@@ -172,6 +191,8 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        const profileName = profileNamesByWaId.get(waId);
+
         // Encontrar ou criar conversa
         let conversation = await communicationRepository.findConversationByWaId(waId);
 
@@ -180,10 +201,18 @@ export async function POST(req: NextRequest) {
           conversation = await communicationRepository.createConversation({
             waId,
             studentId: user?.id,
+            contactName: profileName,
             lastMessageContent: content,
             lastMessageAt: timestamp,
           });
         } else {
+          // Preenche o nome do contato na primeira vez que a Meta o informa, sem
+          // sobrescrever um nome que o atendente tenha definido manualmente.
+          if (!conversation.contactName && profileName) {
+            await communicationRepository.updateContactName(conversation.id, profileName);
+            conversation = { ...conversation, contactName: profileName };
+          }
+
           // Incremento atômico no SQL: evita perder contagens de não lidas quando
           // múltiplas mensagens chegam em paralelo para a mesma conversa (o padrão
           // anterior de "ler valor -> escrever valor+1" tinha uma race condition).
@@ -222,22 +251,26 @@ export async function POST(req: NextRequest) {
 
         // Enviar notificações push e in-app para admins e managers
         try {
-          const bodyText = `${msg.from}: ${content.substring(0, 60)}${content.length > 60 ? "..." : ""}`;
-
-          let studentPhotoUrl: string | undefined = undefined;
+          let student: { name: string; photoUrl: string | null } | undefined = undefined;
           if (conversation.studentId) {
-            const student = await db.query.usersTable.findFirst({
+            student = await db.query.usersTable.findFirst({
               where: eq(usersTable.id, conversation.studentId),
-              columns: { photoUrl: true }
+              columns: { name: true, photoUrl: true }
             });
-            if (student?.photoUrl) {
-              studentPhotoUrl = student.photoUrl;
-            }
           }
+
+          // Nome mais útil disponível: o que o atendente definiu manualmente, o
+          // cadastro do aluno, o perfil do WhatsApp e, por último, o telefone.
+          const displayName =
+            conversation.contactName || student?.name || profileName || formatWaId(waId);
+
+          const bodyText = `${content.substring(0, 80)}${content.length > 80 ? "..." : ""}`;
+          const notificationTitle = `WhatsApp · ${displayName}`;
+          const studentPhotoUrl = student?.photoUrl || undefined;
 
           if (notifiedAdmins.length > 0) {
             await notificationService.sendNotification({
-              title: "Nova mensagem no WhatsApp",
+              title: notificationTitle,
               body: bodyText,
               actionUrl: `/hub/admin/conversas?convId=${conversation.id}`,
               icon: studentPhotoUrl,
@@ -254,7 +287,7 @@ export async function POST(req: NextRequest) {
 
           if (notifiedManagers.length > 0) {
             await notificationService.sendNotification({
-              title: "Nova mensagem no WhatsApp",
+              title: notificationTitle,
               body: bodyText,
               actionUrl: `/hub/manager/conversas?convId=${conversation.id}`,
               icon: studentPhotoUrl,
@@ -283,7 +316,7 @@ export async function POST(req: NextRequest) {
               await Promise.allSettled(
                 emailTargets.map((u) =>
                   communicationService.sendWhatsAppMissedMessageEmail(u.email as string, {
-                    senderLabel: `+${msg.from}`,
+                    senderLabel: displayName,
                     preview: content,
                     actionUrl,
                   })
