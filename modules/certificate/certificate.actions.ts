@@ -1,6 +1,6 @@
 "use server";
 
-import { managerAction, protectedAction } from "@/lib/safe-action";
+import { managerAction } from "@/lib/safe-action";
 import { z } from "zod";
 import { certificateService } from "./certificate.service";
 import { issueCertificateSchema } from "./certificate.types";
@@ -34,7 +34,7 @@ export const issueCertificateAction = managerAction
     }
   });
 
-export const getStudentCertificatesAction = protectedAction
+export const getStudentCertificatesAction = managerAction
   .metadata({ name: "getStudentCertificates" })
   .inputSchema(z.object({ studentId: z.string() }))
   .action(async ({ parsedInput }) => {
