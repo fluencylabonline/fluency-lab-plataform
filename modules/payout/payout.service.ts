@@ -5,8 +5,7 @@ import { sendPix } from "@/lib/abacate-pay";
 import { resend } from "@/lib/resend";
 import TeacherPayoutEmail from "../communication/templates/TeacherPayoutEmail";
 import { db } from "@/lib/db";
-import { and, between, eq } from "drizzle-orm";
-import { slotInstances } from "../scheduling/scheduling.schema";
+import { eq } from "drizzle-orm";
 import { payoutsTable } from "./payout.schema";
 import { env } from "@/env";
 
@@ -148,12 +147,22 @@ export const payoutService = {
       end = new Date(targetYear, targetMonth + 1, 0, 23, 59, 59);
     }
 
-    // 1. Pending (Completed but unpaid classes in the target range)
-    const unpaidStart = targetYear === today.getFullYear() ? new Date(2000, 0, 1) : start;
-    const unpaidClasses = await payoutRepository.findUnpaidClassesByTeacher(teacherId, unpaidStart, end);
+    // 1. Pending: every completed/no-show class not yet linked to a payout.
+    // This is a running balance owed to the teacher, so it always reflects the
+    // full backlog regardless of the month/year filter selected in the UI.
+    const unpaidClasses = await payoutRepository.findUnpaidClassesByTeacher(teacherId, new Date(2000, 0, 1), today);
     const pendingAmount = unpaidClasses.reduce((sum, cls) => sum + (cls.teacherHourlyRate ?? teacher.teacherHourlyRate), 0);
 
-    // 2. Projected (Scheduled in the future for the target range)
+    // Split the backlog into "this month" vs "older than this month" so the UI can
+    // flag overdue amounts separately from the normal, still-open current month.
+    const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const currentMonthClasses = unpaidClasses.filter(cls => new Date(cls.startAt) >= currentMonthStart);
+    const previousMonthsClasses = unpaidClasses.filter(cls => new Date(cls.startAt) < currentMonthStart);
+    const currentMonthAmount = currentMonthClasses.reduce((sum, cls) => sum + (cls.teacherHourlyRate ?? teacher.teacherHourlyRate), 0);
+    const previousMonthsAmount = previousMonthsClasses.reduce((sum, cls) => sum + (cls.teacherHourlyRate ?? teacher.teacherHourlyRate), 0);
+
+    // 2. Projected: classes already scheduled within the selected period that
+    // haven't happened yet. Only meaningful for periods that still have time left.
     let futureStart = start;
     if (targetMonth === -1) {
       if (targetYear === today.getFullYear()) {
@@ -169,22 +178,35 @@ export const payoutService = {
       }
     }
 
-    let projectedAmount = 0;
+    let scheduledClasses: Awaited<ReturnType<typeof payoutRepository.findScheduledClassesByTeacher>> = [];
     if (futureStart < end) {
-      const futureClasses = await db.query.slotInstances.findMany({
-        where: and(
-          eq(slotInstances.teacherId, teacherId),
-          eq(slotInstances.status, "scheduled"),
-          between(slotInstances.startAt, futureStart, end)
-        )
-      });
-      projectedAmount = futureClasses.reduce((sum, cls) => sum + (cls.teacherHourlyRate ?? teacher.teacherHourlyRate), 0);
+      scheduledClasses = await payoutRepository.findScheduledClassesByTeacher(teacherId, futureStart, end);
     }
+    const projectedAmount = scheduledClasses.reduce((sum, cls) => sum + (cls.teacherHourlyRate ?? teacher.teacherHourlyRate), 0);
+
+    const toBreakdown = (cls: { id: string; startAt: Date; teacherHourlyRate: number | null; student?: { name: string | null } | null }) => ({
+      id: cls.id,
+      startAt: cls.startAt,
+      studentName: cls.student?.name ?? null,
+      amount: cls.teacherHourlyRate ?? teacher.teacherHourlyRate,
+    });
 
     return {
-      pendingAmount,
-      projectedAmount,
-      totalMonth: pendingAmount + projectedAmount
+      pending: {
+        amount: pendingAmount,
+        count: unpaidClasses.length,
+        classes: unpaidClasses.map(toBreakdown),
+        currentMonthAmount,
+        currentMonthCount: currentMonthClasses.length,
+        previousMonthsAmount,
+        previousMonthsCount: previousMonthsClasses.length,
+      },
+      projected: {
+        amount: projectedAmount,
+        count: scheduledClasses.length,
+        classes: scheduledClasses.map(toBreakdown),
+      },
+      total: pendingAmount + projectedAmount,
     };
   },
 

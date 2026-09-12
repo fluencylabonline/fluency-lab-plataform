@@ -75,13 +75,14 @@ export default function ProfileLoading() {
             {/* Right Column: Financial History */}
             <div className="lg:col-span-2 space-y-6">
               {/* Projections Dashboard Shimmer */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="card p-4 border-l-4 border-l-blue-500">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="w-9 h-9 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
                     <div className="h-4 w-20 bg-zinc-200 dark:bg-zinc-800 rounded" />
                   </div>
                   <div className="h-8 w-24 bg-zinc-200 dark:bg-zinc-800 rounded mb-2" />
+                  <div className="h-4 w-28 bg-zinc-200 dark:bg-zinc-800 rounded-full mb-2" />
                   <div className="h-3 w-40 bg-zinc-200 dark:bg-zinc-800 rounded" />
                 </div>
 
@@ -91,17 +92,18 @@ export default function ProfileLoading() {
                     <div className="h-4 w-24 bg-zinc-200 dark:bg-zinc-800 rounded" />
                   </div>
                   <div className="h-8 w-24 bg-zinc-200 dark:bg-zinc-800 rounded mb-2" />
+                  <div className="h-4 w-28 bg-zinc-200 dark:bg-zinc-800 rounded-full mb-2" />
                   <div className="h-3 w-40 bg-zinc-200 dark:bg-zinc-800 rounded" />
                 </div>
+              </div>
 
-                <div className="card p-4 border-l-4 border-l-green-500">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-9 h-9 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
-                    <div className="h-4 w-24 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
-                  </div>
-                  <div className="h-8 w-24 bg-zinc-200 dark:bg-zinc-800 rounded mb-2" />
-                  <div className="h-3.5 w-20 bg-zinc-200 dark:bg-zinc-800 rounded" />
+              <div className="card p-4 border-l-4 border-l-green-500">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-9 h-9 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                  <div className="h-4 w-24 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
                 </div>
+                <div className="h-8 w-48 bg-zinc-200 dark:bg-zinc-800 rounded mb-2" />
+                <div className="h-3.5 w-32 bg-zinc-200 dark:bg-zinc-800 rounded" />
               </div>
 
               {/* History Table Shimmer */}

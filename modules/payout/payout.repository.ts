@@ -41,6 +41,24 @@ export const payoutRepository = {
     });
   },
 
+  async findScheduledClassesByTeacher(teacherId: string, start: Date, end: Date) {
+    return db.query.slotInstances.findMany({
+      where: and(
+        eq(slotInstances.teacherId, teacherId),
+        eq(slotInstances.status, "scheduled"),
+        between(slotInstances.startAt, start, end)
+      ),
+      with: {
+        student: {
+          columns: {
+            name: true,
+          }
+        }
+      },
+      orderBy: [slotInstances.startAt],
+    });
+  },
+
   async linkClassesToPayout(classIds: string[], payoutId: string) {
     if (classIds.length === 0) return;
     await db.update(slotInstances)
