@@ -18,37 +18,39 @@ interface FloatCallButtonProps {
 /**
  * FloatCallButton — Floating video call trigger button.
  *
- * Refactored from the original implementation:
- * - REMOVED: useSession() / next-auth
- * - REMOVED: useCallContext() (global Context)
- * - REMOVED: startCall() via fetch — now uses startCallAction (Server Action)
- * - ADDED: props-based role/student data (already available from RSC parent)
- * - ADDED: loading state while action is in flight
- *
- * Teacher: clicking starts a call → populates useCallStore → VideoCall renders
- * Student: button appears only when a call is active → clicking joins the call
- *          (student joins through the VideoCall component, not this button)
+ * Teacher: clicking starts a call → populates useCallStore → VideoCall renders.
+ * Student: normally the call panel (GlobalVideoCall) shows up on its own via
+ *          the Firestore listener. But if they dismissed it (canceled the
+ *          join screen, or left an in-progress call by mistake / lost
+ *          connection), this button becomes their "entrar na aula" — the
+ *          panel is hidden, not the call itself, so clicking just re-shows it.
  */
 export function FloatCallButton({
   studentId,
   notebookId,
   userRole,
 }: FloatCallButtonProps) {
-  const { callState } = useCallStore();
+  const { callState, isPanelHidden, showPanel } = useCallStore();
   const [isHovered, setIsHovered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const isTeacher = userRole === "teacher" || userRole === "admin";
   const hasActiveCall = !!callState?.callId;
 
-  // Students don't use this button to join — the VideoCall component renders automatically
-  // when the Firestore listener fires. We hide it for students.
-  if (!isTeacher) return null;
-
-  // Teacher: hide button once the call is already active (VideoCall panel is visible)
-  if (hasActiveCall) return null;
+  if (isTeacher) {
+    // Hide once a call is already active (the call panel is visible).
+    if (hasActiveCall) return null;
+  } else {
+    // Nothing to join, or the panel is already visible — no button needed.
+    if (!hasActiveCall || !isPanelHidden) return null;
+  }
 
   const handleClick = async () => {
+    if (!isTeacher) {
+      showPanel();
+      return;
+    }
+
     if (isLoading || !studentId) return;
 
     setIsLoading(true);
@@ -56,7 +58,11 @@ export function FloatCallButton({
       const result = await startCallAction({ studentId, notebookId });
 
       if (result?.data?.callState) {
-        useCallStore.getState().setCallState(result.data.callState);
+        useCallStore.getState().setCallState({
+          ...result.data.callState,
+          studentId,
+          notebookId,
+        });
       }
     } catch (error) {
       console.error("[FloatCallButton] Failed to start call:", error);
@@ -64,6 +70,10 @@ export function FloatCallButton({
       setIsLoading(false);
     }
   };
+
+  const label = isTeacher
+    ? (isLoading ? "Iniciando..." : "Iniciar aula")
+    : "Entrar na aula";
 
   return (
     <motion.div
@@ -108,7 +118,7 @@ export function FloatCallButton({
           }}
           className="whitespace-nowrap text-sm font-semibold"
         >
-          {isLoading ? "Iniciando..." : "Iniciar aula"}
+          {label}
         </motion.span>
       </motion.button>
     </motion.div>

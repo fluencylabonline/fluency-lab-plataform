@@ -1,5 +1,5 @@
 import { StreamClient } from "@stream-io/node-sdk";
-import type { CallState } from "./call.types";
+import type { StreamCallCredentials } from "./call.types";
 import { env } from "@/env";
 import { callRepository } from "./call.repository";
 
@@ -11,7 +11,7 @@ async function startCall(
   teacherId: string,
   studentId: string,
   notebookId: string
-): Promise<CallState> {
+): Promise<StreamCallCredentials> {
   const { adminDb } = await import("@/lib/firebase-admin");
 
   // Unique session ID
@@ -72,15 +72,6 @@ async function endCall(
   if (notebookId) {
     console.log(`[callService] Call ${callId} ended on notebook ${notebookId}`);
   }
-}
-
-async function studentLeaveCall(studentId: string): Promise<void> {
-  const { adminDb } = await import("@/lib/firebase-admin");
-
-  await adminDb.collection("users").doc(studentId).set(
-    { callId: null, notebookId: null },
-    { merge: true }
-  );
 }
 
 async function generateStreamToken(userId: string): Promise<string> {
@@ -243,7 +234,6 @@ async function listCallRecordings(streamCallId: string) {
 export const callService = {
   startCall,
   endCall,
-  studentLeaveCall,
   generateStreamToken,
   handleTranscriptionWebhook,
   syncCallTranscription,

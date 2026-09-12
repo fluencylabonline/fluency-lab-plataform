@@ -8,6 +8,8 @@ import { PwaHandler } from "./pwa-handler";
 import { OfflineBanner } from "./offline-banner";
 import { NotificationPermissionVault } from "@/modules/notification/_components/NotificationPermissionVault";
 import { PwaVault } from "@/modules/pwa/_components/PwaVault";
+import { GlobalVideoCall } from "@/modules/call/_components/GlobalVideoCall";
+import { ActiveCallIndicator } from "@/modules/call/_components/ActiveCallIndicator";
 import { ThemeColorUpdater } from "./theme-color-updater";
 import { PwaSplash } from "./pwa-splash";
 import { SWRConfig } from "swr";
@@ -62,6 +64,8 @@ export function Providers({ children, locale, messages, themeMode, nonce }: Prov
         <PwaSplash />
         <NotificationPermissionVault />
         <PwaVault />
+        <GlobalVideoCall />
+        <ActiveCallIndicator />
         <CookieConsent />
       </NextIntlClientProvider>
     </ThemeProvider>

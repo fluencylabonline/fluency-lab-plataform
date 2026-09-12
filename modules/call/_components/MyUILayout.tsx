@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { usePathname } from "next/navigation";
 import {
   CallingState,
   StreamTheme,
@@ -12,14 +13,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ParticipantsGrid } from "./ParticipantsGrid";
 import { JoinUI } from "./JoinUI";
 import { ControlButton } from "./ControlButton";
-import {
-  showJoinedCallToast,
-  showLeftCallToast,
-  showEndedCallToast,
-} from "./CallToasts";
 import { getGlassContainerClasses } from "./StreamUtils";
 import { useCallStore } from "@/hooks/data/use-call-store";
-import { endCallAction, leaveCallAction } from "@/modules/call/call.actions";
+import { endCallAction } from "@/modules/call/call.actions";
 import { useIsMobile } from "@/hooks/ui/use-device";
 import {
   Camera,
@@ -36,28 +32,20 @@ import {
 import { cn } from "@/lib/utils";
 
 interface MyUILayoutProps {
-  /** Current user's Firebase UID */
-  userId: string;
   /** Current user's display name */
   userName: string;
   /** Current user's role — determines which controls are shown */
   userRole: "teacher" | "student" | string;
-  /** The student on this notebook — needed for call cleanup */
-  studentId: string;
-  /** Current notebook ID — attached to call metadata */
-  notebookId: string;
 }
 
-export const MyUILayout = ({
-  userId,
-  userName,
-  userRole,
-  studentId,
-  notebookId,
-}: MyUILayoutProps) => {
+export const MyUILayout = ({ userName, userRole }: MyUILayoutProps) => {
   const call = useCall();
-  const { callState, clearCall } = useCallStore();
+  const { callState, clearCall, hidePanel } = useCallStore();
   const isMobile = useIsMobile();
+  const pathname = usePathname();
+
+  const studentId = callState?.studentId ?? "";
+  const notebookId = callState?.notebookId ?? "";
 
   const [isEnding, setIsEnding] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -66,6 +54,7 @@ export const MyUILayout = ({
   const [hasJoined, setHasJoined] = useState(false);
   const constraintsRef = useRef<HTMLDivElement>(null);
   const isJoiningRef = useRef(false);
+  const lastAwayRef = useRef<boolean | null>(null);
 
   const {
     useCallCallingState,
@@ -99,6 +88,7 @@ export const MyUILayout = ({
       <AnimatePresence>
         {isTranscribing && (
           <motion.div
+            key="cc"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
@@ -106,17 +96,6 @@ export const MyUILayout = ({
           >
             <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
             <span>CC</span>
-          </motion.div>
-        )}
-        {isRecording && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="flex items-center gap-1 bg-red-600/90 text-white px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-sm border border-white/10"
-          >
-            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-            <span>REC</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -207,6 +186,19 @@ export const MyUILayout = ({
       document.removeEventListener("visibilitychange", onVisibilityChange);
   }, [call, callState?.callId, callingState, hasJoined, isEnding]);
 
+  // Mobile: auto-minimize to PiP when navigating away from the call's own
+  // notebook page (so the docked panel doesn't block the rest of the app),
+  // and auto-restore when navigating back to it. Only reacts on the
+  // transition edge so it doesn't fight a manual toggle mid-navigation.
+  useEffect(() => {
+    if (!isMobile || !notebookId) return;
+
+    const isAway = !pathname?.includes(`/notebook/${notebookId}`);
+    if (lastAwayRef.current === isAway) return;
+    lastAwayRef.current = isAway;
+    setIsPiP(isAway);
+  }, [pathname, isMobile, notebookId]);
+
   // --- Handlers ---
 
   const handleJoinCall = async () => {
@@ -242,7 +234,6 @@ export const MyUILayout = ({
         // Non-fatal — FAILSAFE useEffect above will retry
       }
 
-      showJoinedCallToast();
     } catch (error) {
       console.error("[MyUILayout] Join error:", error);
       setHasJoined(false);
@@ -264,7 +255,6 @@ export const MyUILayout = ({
       });
       clearCall();
       setHasJoined(false);
-      showEndedCallToast();
     } catch (error) {
       console.error("[MyUILayout] End call error:", error);
     } finally {
@@ -272,17 +262,18 @@ export const MyUILayout = ({
     }
   };
 
-  /** Student leaves the call without ending it for the teacher */
+  /**
+   * Student leaves the call without ending it for the teacher. The call
+   * stays active (Firestore signal untouched) so they can rejoin later —
+   * only the panel is hidden, not the call itself.
+   */
   const handleStudentLeaveCall = async () => {
     if (!call) return;
     try {
       setIsEnding(true);
       await call.leave();
-      // Server Action clears callId from Firestore so the listener won't re-fire
-      await leaveCallAction({ studentId: userId });
-      clearCall();
+      hidePanel();
       setHasJoined(false);
-      showLeftCallToast();
     } catch (error) {
       console.error("[MyUILayout] Leave call error:", error);
     } finally {
@@ -349,10 +340,8 @@ export const MyUILayout = ({
       <JoinUI
         userRole={userRole}
         userName={userName}
-        studentId={studentId}
         onJoin={handleJoinCall}
         joinLabel={userRole === "teacher" ? "Iniciar Aula" : "Entrar na Aula"}
-        notebookId={notebookId}
       />
     );
   }

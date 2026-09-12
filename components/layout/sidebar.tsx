@@ -10,6 +10,7 @@ import { VaultBar } from "./vaultbar";
 import { MenuItemType } from "@/components/layout/types";
 import { useCollapsedStore } from "./collapsed-store";
 import { SidebarTrigger } from "./sidebar-trigger";
+import { ActiveCallSidebarItem } from "@/modules/call/_components/ActiveCallSidebarItem";
 import { ArrowUp } from "lucide-react";
 import Logo from "@/public/brand/logo.png";
 import Image from "next/image";
@@ -120,6 +121,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
                                     <SidebarItem item={item} isCollapsed={isCollapsed} />
                                 </motion.div>
                             ))}
+                            <ActiveCallSidebarItem isCollapsed={isCollapsed} />
                         </div>
                     </motion.nav>
                 </motion.div>

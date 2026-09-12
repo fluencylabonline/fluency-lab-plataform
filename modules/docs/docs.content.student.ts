@@ -339,6 +339,34 @@ export const STUDENT_DOCS: DocSection[] = [
         ],
       },
       {
+        id: "aluno-chamada",
+        title: "Chamada de vídeo com o professor",
+        summary: "Como a chamada aparece, o compartilhamento de tela e o que fazer se você sair sem querer.",
+        keywords: ["chamada", "videochamada", "vídeo", "entrar na aula", "compartilhar tela", "cancelei"],
+        blocks: [
+          {
+            type: "p",
+            text: "Quando seu professor inicia a aula, um painel de chamada aparece automaticamente para você — na página do caderno ou em qualquer outra tela em que você estiver navegando na plataforma. Clique em **Entrar na Aula** para participar.",
+          },
+          {
+            type: "note",
+            variant: "info",
+            title: "Pode continuar navegando",
+            text: "Precisa checar o calendário ou outra parte da plataforma no meio da aula? Pode navegar à vontade — a chamada continua ativa num painel flutuante, sem cair.",
+          },
+          {
+            type: "p",
+            text: "**Compartilhamento de tela:** quando o professor compartilha a tela, aparece um botão **Expandir** sobre o conteúdo — clique para ver em tamanho grande.",
+          },
+          {
+            type: "note",
+            variant: "success",
+            title: "Cancelou sem querer ou caiu a internet?",
+            text: "A aula não termina por isso. Enquanto o professor não encerrar, você consegue entrar de novo a qualquer momento: procure o aviso **Chamada ativa — entrar** na barra lateral (ou o ícone flutuante, se estiver pelo celular).",
+          },
+        ],
+      },
+      {
         id: "aluno-cursos",
         title: "Cursos em vídeo",
         summary: "Conteúdo gravado para estudar no seu ritmo.",
@@ -540,6 +568,12 @@ export const STUDENT_DOCS: DocSection[] = [
             type: "note",
             variant: "info",
             text: "Se nada resolver na hora da aula, avise seu professor pelo WhatsApp da escola para tentar receber alguma ajuda.",
+          },
+          {
+            type: "note",
+            variant: "success",
+            title: "Saiu sem querer? Dá para voltar",
+            text: "Se você cancelou a tela de entrada por engano ou a conexão caiu no meio da aula, a chamada continua ativa — procure o aviso **Chamada ativa — entrar** na barra lateral (ou o ícone flutuante no celular) para voltar, sem precisar que o professor reinicie nada.",
           },
         ],
       },

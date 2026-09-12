@@ -6,7 +6,6 @@ import {
   startCallSchema,
   endCallSchema,
   generateStreamTokenSchema,
-  leaveCallSchema,
   syncCallTranscriptionSchema,
   getCallRecordingsSchema,
   type CallRecordingSummary,
@@ -16,7 +15,7 @@ import { revalidatePath } from "next/cache";
 /**
  * startCallAction — Teacher initiates a call from the notebook.
  *
- * Returns CallState ({ callId, streamToken, apiKey }) which the client
+ * Returns StreamCallCredentials ({ callId, streamToken, apiKey }) which the client
  * uses to initialize the StreamVideoClient. No secrets exposed.
  *
  * RBAC: only teachers (and admins) can start calls.
@@ -67,32 +66,6 @@ export const endCallAction = protectedAction
       parsedInput.studentId,
       parsedInput.notebookId
     );
-
-    return { success: true };
-  });
-
-/**
- * leaveCallAction — Student leaves the call voluntarily.
- *
- * Does NOT end the call for the teacher. Only clears the student's
- * own Firestore callId so they stop receiving the call signal.
- */
-export const leaveCallAction = protectedAction
-  .metadata({ name: "leaveCall" })
-  .schema(leaveCallSchema)
-  .action(async ({ parsedInput, ctx }) => {
-    const { user } = ctx;
-
-    if (user.role !== "student") {
-      throw new Error("Only students can leave calls (teachers use endCall)");
-    }
-
-    // Security: A student can only leave their own call state
-    if (user.id !== parsedInput.studentId) {
-      throw new Error("Cannot leave a call for another student");
-    }
-
-    await callService.studentLeaveCall(parsedInput.studentId);
 
     return { success: true };
   });

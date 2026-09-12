@@ -32,9 +32,6 @@ import { Indent } from "@/components/tiptap-extension/indent-extension";
 
 // --- Call Feature ---
 import { FloatCallButton } from "./call/FloatCallButton";
-import { VideoCall } from "./call/VideoCall";
-import { useCallStore } from "@/hooks/data/use-call-store";
-import { useStudentCallListener } from "@/hooks/data/use-student-call-listener";
 
 // --- Hooks & Components ---
 import { useNotebookSession } from "../_hooks/use-notebook-session";
@@ -65,8 +62,6 @@ interface NotebookEditorProps {
   userName: string;
   userRole: string;
   userColor: string;
-  /** Optional: used by Stream SDK for avatar rendering */
-  userPhotoUrl?: string | null;
   user: {
     name: string | null;
     email: string | null;
@@ -82,7 +77,6 @@ export function NotebookEditor({
   userName,
   userRole,
   userColor,
-  userPhotoUrl,
   user,
 }: NotebookEditorProps) {
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -108,13 +102,7 @@ export function NotebookEditor({
     (globalThis as Record<string, unknown>).__notebookId = notebookId;
   }, [userId, userRole, studentId, notebookId]);
 
-  // 3. Video Call Logic
-  // Students: listen for incoming calls via Firestore onSnapshot (scoped to this page only)
-  // Teachers: this hook is a no-op (enabled = false)
-  useStudentCallListener(userId, userRole === "student");
-  const { callState } = useCallStore();
-
-  // 4. Image Upload Handler
+  // 3. Image Upload Handler
   const handleNotebookImageUpload = useCallback(
     async (file: File, onProgress?: (event: { progress: number }) => void) => {
       const fileName = `${Date.now()}-${file.name}`;
@@ -150,7 +138,7 @@ export function NotebookEditor({
     [notebookId, userId],
   );
 
-  // 5. Editor Instance
+  // 4. Editor Instance
   const editor = useEditor(
     {
       immediatelyRender: false,
@@ -219,7 +207,7 @@ export function NotebookEditor({
     [ydoc, awareness],
   );
 
-  // 6. UI Helpers
+  // 5. UI Helpers
   const toolbarRect = useRefRect(toolbarRef);
   const rect = useCursorVisibility({
     editor,
@@ -258,17 +246,6 @@ export function NotebookEditor({
         notebookId={notebookId}
         userRole={userRole}
       />
-
-      {callState && (
-        <VideoCall
-          userId={userId}
-          userName={userName}
-          userRole={userRole}
-          userPhotoUrl={userPhotoUrl}
-          studentId={studentId}
-          notebookId={notebookId}
-        />
-      )}
     </div>
   );
 }

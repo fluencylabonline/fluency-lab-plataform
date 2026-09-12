@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
 import { notebookService } from "@/modules/notebook/notebook.service";
 import { NotebookEditor } from "./_components/NotebookEditor";
+import { UserStoreInitializer } from "@/modules/user/_components/UserStoreInitializer";
 import { Metadata } from "next";
 
 interface NotebookPageProps {
@@ -58,15 +59,17 @@ export default async function NotebookPage({ params }: NotebookPageProps) {
   }
 
   return (
-    <NotebookEditor
-      notebookId={notebookId}
-      studentId={notebook.studentId}
-      userId={user.id}
-      userName={user.name}
-      userRole={user.role}
-      userColor={colorFromString(user.id)}
-      userPhotoUrl={user.photoUrl}
-      user={user}
-    />
+    <>
+      <UserStoreInitializer user={user} />
+      <NotebookEditor
+        notebookId={notebookId}
+        studentId={notebook.studentId}
+        userId={user.id}
+        userName={user.name}
+        userRole={user.role}
+        userColor={colorFromString(user.id)}
+        user={user}
+      />
+    </>
   );
 }

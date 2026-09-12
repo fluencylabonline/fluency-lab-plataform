@@ -15,7 +15,8 @@ import { generateStreamTokenAction } from "@/modules/call/call.actions";
  * 1. Fetching a Stream token via Server Action (token generation stays server-side)
  * 2. Populating the Zustand call store
  *
- * Scope: Only mounted when role === 'student' AND on the notebook page.
+ * Scope: Mounted globally (in GlobalVideoCall) for any user with role === 'student',
+ * independent of the current route — so a call can be received from anywhere in the app.
  * Cleanup: Clears the call state when the snapshot returns callId: null.
  *
  * @param userId - The authenticated student's Firebase UID
@@ -36,9 +37,16 @@ export function useStudentCallListener(userId: string, enabled: boolean) {
 
         const data = docSnap.data();
         const callId = data?.callId as string | null | undefined;
+        const notebookId = data?.notebookId as string | null | undefined;
 
         if (callId) {
-          // Teacher has started a call — generate token and populate store
+          // Same call we already know about — skip. Firestore onSnapshot fires
+          // on ANY field change to the user doc, not just callId, so without
+          // this guard an unrelated write would reset isPanelHidden and force
+          // the panel back open after the student dismissed it.
+          if (useCallStore.getState().callState?.callId === callId) return;
+
+          // Teacher has started a (new) call — generate token and populate store
           const result = await generateStreamTokenAction({ userId });
 
           if (result?.data) {
@@ -46,6 +54,8 @@ export function useStudentCallListener(userId: string, enabled: boolean) {
               callId,
               streamToken: result.data.token,
               apiKey: result.data.apiKey,
+              studentId: userId,
+              notebookId: notebookId ?? "",
             });
           }
         } else {

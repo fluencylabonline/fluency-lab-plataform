@@ -19,15 +19,44 @@ import { useCallStore } from "@/hooks/data/use-call-store";
  * @param userId - Authenticated user's Firebase UID (from RSC props)
  * @param userName - Authenticated user's display name (from RSC props)
  * @param userPhotoUrl - Authenticated user's photo URL (optional)
+ * @param userRole - Authenticated user's role — used to pick the right cleanup on tab close
  */
 export function useStreamVideo(
   userId: string,
   userName: string,
-  userPhotoUrl?: string | null
+  userPhotoUrl?: string | null,
+  userRole?: string
 ) {
   const { callState } = useCallStore();
   const [client, setClient] = useState<StreamVideoClient | null>(null);
   const [call, setCall] = useState<ReturnType<StreamVideoClient["call"]> | null>(null);
+
+  // Best-effort cleanup when the tab/browser is closed abruptly: neither the
+  // React unmount cleanup below nor the UI's leave/end handlers run reliably
+  // in that case, which would otherwise leave the call session orphaned
+  // (no endedAt in Neon). Only the teacher's tab close needs this: a
+  // student closing their tab has nothing to clean up server-side anymore —
+  // the call stays active for them to rejoin (see useCallStore.hidePanel).
+  useEffect(() => {
+    if (!callState?.callId || (userRole !== "teacher" && userRole !== "admin")) {
+      return;
+    }
+
+    const handlePageHide = () => {
+      const payload = JSON.stringify({
+        callId: callState.callId,
+        studentId: callState.studentId,
+        notebookId: callState.notebookId,
+      });
+      navigator.sendBeacon?.(
+        "/api/call/leave-beacon",
+        new Blob([payload], { type: "application/json" })
+      );
+    };
+
+    window.addEventListener("pagehide", handlePageHide);
+    return () => window.removeEventListener("pagehide", handlePageHide);
+  }, [callState, userRole]);
 
   useEffect(() => {
     if (!callState?.callId || !callState?.streamToken || !callState?.apiKey) {
@@ -39,12 +68,13 @@ export function useStreamVideo(
 
     const init = async () => {
       try {
+        // No external fallback avatar: getstream.io's random_svg generator isn't
+        // in the CSP img-src allowlist, and the SDK's Avatar component already
+        // falls back to initials when `image` is undefined.
         const user: User = {
           id: userId,
           name: userName,
-          image:
-            userPhotoUrl ||
-            `https://getstream.io/random_svg/?id=${userId}&name=${encodeURIComponent(userName)}`,
+          image: userPhotoUrl || undefined,
         };
 
         const newClient = new StreamVideoClient(callState.apiKey);

@@ -11,8 +11,7 @@ import { useCall } from "@stream-io/video-react-bindings";
 import { Button } from "@/components/ui/button";
 import { useCallStore } from "@/hooks/data/use-call-store";
 import { useIsMobile } from "@/hooks/ui/use-device";
-import { endCallAction, leaveCallAction } from "@/modules/call/call.actions";
-import { showCanceledCallToast } from "./CallToasts";
+import { endCallAction } from "@/modules/call/call.actions";
 import { getGlassContainerClasses } from "./StreamUtils";
 
 interface JoinUIProps {
@@ -20,29 +19,25 @@ interface JoinUIProps {
   userRole: "teacher" | "student" | string;
   /** Current user's display name */
   userName: string;
-  /** The student ID on the notebook (needed for endCall cleanup) */
-  studentId: string;
   /** Called when the user confirms joining */
   onJoin: () => Promise<void>;
   /** Label for the join button */
   joinLabel: string;
-  /** Current notebook ID */
-  notebookId: string;
 }
 
 export const JoinUI: React.FC<JoinUIProps> = ({
   userRole,
   userName,
-  studentId,
   onJoin,
   joinLabel,
-  notebookId,
 }) => {
   const { useCallSession } = useCallStateHooks();
   const sessionCall = useCallSession();
   const call = useCall();
-  const { callState, clearCall } = useCallStore();
+  const { callState, clearCall, hidePanel } = useCallStore();
   const isMobile = useIsMobile();
+  const studentId = callState?.studentId ?? "";
+  const notebookId = callState?.notebookId ?? "";
 
   const uniqueParticipants =
     sessionCall?.participants.filter(
@@ -51,26 +46,26 @@ export const JoinUI: React.FC<JoinUIProps> = ({
     ) || [];
 
   const handleCancel = async () => {
-    try {
-      await call?.endCall();
-    } catch {
-      // Stream call may already be ended — safe to ignore
-    } finally {
+    if (userRole === "teacher") {
       try {
-        if (userRole === "teacher" && callState?.callId) {
-          await endCallAction({
-            studentId,
-            callId: callState.callId,
-            notebookId,
-          });
-        } else if (userRole === "student") {
-          await leaveCallAction({ studentId });
+        await call?.endCall();
+      } catch {
+        // Stream call may already be ended — safe to ignore
+      }
+      try {
+        if (callState?.callId) {
+          await endCallAction({ studentId, callId: callState.callId, notebookId });
         }
       } catch {
         // Action errors are masked by safe-action
       }
       clearCall();
-      showCanceledCallToast();
+    } else {
+      // Student: canceling before joining shouldn't end the call for the
+      // teacher — just hide the panel so an accidental click (or a dropped
+      // connection) doesn't lock them out. The sidebar card / floating icon
+      // (or this same button on the notebook page) lets them get back in.
+      hidePanel();
     }
   };
 

@@ -233,6 +233,46 @@ export const TEACHER_DOCS: DocSection[] = [
           },
         ],
       },
+      {
+        id: "prof-chamada",
+        title: "Chamada de vídeo com o aluno",
+        summary: "Iniciar, compartilhar tela e navegar sem derrubar a aula.",
+        keywords: ["chamada", "videochamada", "vídeo", "iniciar aula", "compartilhar tela", "gravação", "transcrição"],
+        blocks: [
+          {
+            type: "steps",
+            title: "Como iniciar",
+            items: [
+              "Abra o caderno do aluno e clique no botão flutuante **Iniciar aula**, no canto da tela.",
+              "O aluno recebe o aviso automaticamente e entra pelo botão dele.",
+              "Quando terminar de verdade, clique no botão vermelho de encerrar — isso finaliza a chamada para os dois lados.",
+            ],
+          },
+          {
+            type: "note",
+            variant: "info",
+            title: "A chamada continua ativa se você sair do caderno",
+            text: "Precisa mostrar o conteúdo de uma aula passada? Pode abrir outro caderno ou voltar para o hub — a chamada continua rodando num painel flutuante por cima da tela, sem precisar encerrar e reiniciar em outro lugar.",
+          },
+          {
+            type: "p",
+            text: "**Compartilhamento de tela:** ao compartilhar, o aluno vê um botão **Expandir** sobre o conteúdo compartilhado, que abre em tamanho grande na tela dele — sem mexer no tamanho do seu painel de chamada.",
+          },
+          {
+            type: "note",
+            variant: "success",
+            title: "Se o aluno cancelar ou a internet dele cair",
+            text: "A aula não é perdida. Mesmo que o aluno saia sem querer da tela de entrada ou perca a conexão, a chamada continua ativa até você encerrá-la — ele consegue entrar de novo a qualquer momento pela própria plataforma.",
+          },
+          {
+            type: "bullets",
+            items: [
+              "Gravação e transcrição da aula começam automaticamente ao iniciar — não é preciso ativar nada.",
+              "Se a chamada travar, prefira desligar o vídeo e seguir só com áudio antes de tentar encerrar e reabrir.",
+            ],
+          },
+        ],
+      },
     ],
   },
 
@@ -372,6 +412,11 @@ export const TEACHER_DOCS: DocSection[] = [
               "Prefira Chrome — é o navegador mais estável para a chamada.",
               "Com internet instável, desligue seu vídeo e siga só com áudio.",
             ],
+          },
+          {
+            type: "note",
+            variant: "info",
+            text: "Navegar para outra página não encerra a chamada — ela continua num painel flutuante. Se o aluno sumiu da chamada por engano ou queda de conexão, ele consegue voltar sozinho; você só precisa encerrar de verdade quando a aula tiver acabado.",
           },
         ],
       },
