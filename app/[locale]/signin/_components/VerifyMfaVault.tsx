@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Shield, ArrowRight } from "lucide-react";
 import { 
@@ -32,20 +32,40 @@ export function VerifyMfaVault({ open, onOpenChange, onSuccess, rememberMe = fal
 
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
+  // evita disparar a verificação duas vezes para o mesmo código
+  const verifiedCodeRef = useRef<string | null>(null);
 
-  const handleVerify = async () => {
-    if (code.length !== 6) return;
+  const handleVerify = useCallback(async (value: string) => {
+    if (value.length !== 6) return;
 
+    verifiedCodeRef.current = value;
     setLoading(true);
-    const result = await verifyMfaLoginAction({ token: code, rememberMe });
+    const result = await verifyMfaLoginAction({ token: value, rememberMe });
     setLoading(false);
 
     if (result?.data?.success) {
       onSuccess(result.data.role);
     } else {
       notify.error(ta(`errors.${result?.data?.error || "error"}`) || tc("error"));
+      setCode("");
+      verifiedCodeRef.current = null;
     }
-  };
+  }, [rememberMe, onSuccess, ta, tc]);
+
+  // verifica automaticamente assim que os 6 dígitos são preenchidos
+  useEffect(() => {
+    if (code.length === 6 && !loading && verifiedCodeRef.current !== code) {
+      handleVerify(code);
+    }
+  }, [code, loading, handleVerify]);
+
+  // limpa o estado ao fechar/reabrir o vault
+  useEffect(() => {
+    if (!open) {
+      setCode("");
+      verifiedCodeRef.current = null;
+    }
+  }, [open]);
 
   return (
     <Vault open={open} onOpenChange={onOpenChange}>
@@ -82,7 +102,7 @@ export function VerifyMfaVault({ open, onOpenChange, onSuccess, rememberMe = fal
             </div>
 
             <VaultPrimaryButton 
-              onClick={handleVerify} 
+              onClick={() => handleVerify(code)} 
               disabled={loading || code.length !== 6} 
               className="w-full"
             >
