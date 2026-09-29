@@ -1,23 +1,27 @@
 "use client";
 
 import DOMPurify from "dompurify";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { signContractAction, getPendingContractAction } from "@/modules/contract/contract.actions";
 import { notify } from "@/components/ui/toaster";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Loader2, ArrowLeft, CheckCircle2, Download, ArrowRight, FileText, LayoutList } from "lucide-react";
+import { Loader2, ArrowLeft, CheckCircle2, Download, ArrowRight, FileText, LayoutList, AlertTriangle, RefreshCw } from "lucide-react";
 import { injectTemplateData } from "@/modules/contract/contract.service.utils";
 import type { User } from "@/modules/user/user.schema";
 import type { ContractInstance, ContractTemplate } from "@/modules/contract/contract.schema";
+import type { ContractSchoolInfo } from "@/modules/contract/contract.types";
 
 export function StepContract({
     onNext,
     onBack,
     user,
+    schoolInfo,
 }: {
     onNext: () => void;
     onBack: () => void;
+    /** Dados da escola do banco — o preview precisa bater com o documento assinado. */
+    schoolInfo: ContractSchoolInfo | null;
     user: User & {
         guardianData?: {
             name?: string;
@@ -27,31 +31,20 @@ export function StepContract({
     };
 }) {
     const t = useTranslations("Onboarding");
+    const locale = useLocale();
     const [loading, setLoading] = useState(false);
     const [contractLoading, setContractLoading] = useState(true);
     const [contract, setContract] = useState<(ContractInstance & { template?: ContractTemplate }) | null>(null);
     const [signed, setSigned] = useState(false);
     const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<"summary" | "full">("summary");
+    // Incrementado pelo botão de nova tentativa para refazer a busca do contrato.
+    const [reloadKey, setReloadKey] = useState(0);
 
     const isTeacher = user.role === "teacher";
-    const summaryData = isTeacher
-        ? [
-            { title: "Relação Comercial", desc: "Prestação de serviços autônomos como MEI (Pessoa Jurídica). Sem exclusividade e sem vínculo de emprego." },
-            { title: "Remuneração por Aula", desc: "Pagamento mensal por hora-aula executada, efetuado até o 10º dia útil mediante emissão de Nota Fiscal (NFS-e)." },
-            { title: "Disponibilidade Mínima (SLA)", desc: "Manutenção de cadastro ativo vinculada a manter pelo menos 2 horários regulares e 2 de reposição semanais." },
-            { title: "Recessos e Ausências", desc: "Parada geral de 4 semanas no fim do ano (sem faturamento). Folgas individuais planejadas com 30 dias de aviso." },
-            { title: "Rescisão Contratual", desc: "Aviso prévio mínimo de 30 dias para encerramento imotivado por qualquer uma das partes." }
-          ]
-        : [
-            { title: "Aulas e Frequência", desc: "Videoconferências online. Falta sem aviso prévio de 24h ou falhas na sua internet contam como aula realizada." },
-            { title: "Remarcações de Aulas", desc: "Limite de 2 remarcações por mês com antecedência mínima de 24h. Reposição garantida se o professor desmarcar." },
-            { title: "Mensalidades e Reajustes", desc: "Pagamento entre os dias 1º e 10 de cada mês (proporcional no 1º mês). Reajuste anual calculado no mês de julho." },
-            { title: "Recesso de Fim de Ano", desc: "Sem aulas por 4 semanas (fim de dezembro e início de janeiro). Mensalidades mantidas, com opção de conteúdo extra." },
-            { title: "Troca de Professor", desc: "Direito de alteração do docente pela escola a qualquer momento para garantir a evolução e qualidade pedagógica." },
-            { title: "Gravação das Aulas", desc: "Aulas gravadas para auditoria de qualidade e segurança interna. Proibida gravação externa e distribuição do material." },
-            { title: "Rescisão e Multa", desc: "Multa compensatória de 50% de uma mensalidade caso cancele antes do fim dos meses de vigência." }
-          ];
+    const summaryData = t.raw(
+        isTeacher ? "contract.summaryTeacher" : "contract.summaryStudent"
+    ) as { title: string; desc: string }[];
 
     const guardian = user.guardianName
         ? {
@@ -76,11 +69,22 @@ export function StepContract({
                     setSigned(true);
                     setDownloadUrl(result.data?.downloadUrl || null);
                 }
+            } else {
+                // Caso típico: não há template de contrato ativo para a região
+                // do aluno. `contract` fica nulo e a UI mostra o bloco de erro
+                // com nova tentativa, em vez de uma linha de erro solta.
+                setContract(null);
             }
+
             setContractLoading(false);
         };
         fetchContract();
-    }, []);
+    }, [reloadKey]);
+
+    const handleRetry = () => {
+        setContractLoading(true);
+        setReloadKey((key) => key + 1);
+    };
 
     const onSign = async () => {
         if (!contract) return;
@@ -105,9 +109,9 @@ export function StepContract({
         if (signResult?.data?.success) {
             setSigned(true);
             setDownloadUrl(signResult.data?.downloadUrl || null);
-            notify.success(t("contract.success") || "Contrato assinado!");
+            notify.success(t("contract.success"));
         } else {
-            notify.error(signResult?.data?.error || "Erro ao assinar contrato");
+            notify.error(signResult?.data?.error || t("contract.signError"));
         }
     };
 
@@ -135,10 +139,10 @@ export function StepContract({
 
                 <div className="space-y-1.5">
                     <p className="text-xl font-semibold text-emerald-300">
-                        {t("contract.success") || "Contrato assinado!"}
+                        {t("contract.success")}
                     </p>
                     <p className="text-sm text-slate-500">
-                        {t("contract.signedSuccessDesc") || "Sua assinatura foi processada e registrada com sucesso."}
+                        {t("contract.signedSuccessDesc")}
                     </p>
                 </div>
 
@@ -151,14 +155,14 @@ export function StepContract({
                             className="flex h-11 w-full items-center justify-center gap-2 rounded-md border border-white/8 text-sm text-slate-400 transition-all hover:border-white/[0.14] hover:text-slate-200"
                         >
                             <Download className="h-4 w-4" />
-                            {t("contract.downloadPdf") || "Baixar contrato (PDF)"}
+                            {t("contract.downloadPdf")}
                         </a>
                     )}
                     <button
                         onClick={onNext}
                         className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500"
                     >
-                        {t("steps.next") || "Próximo"}
+                        {t("steps.next")}
                         <ArrowRight className="h-4 w-4" />
                     </button>
                 </div>
@@ -178,12 +182,12 @@ export function StepContract({
             },
             guardian,
             school: {
-                name: "FluencyLab",
-                legalName: "FluencyLab LTDA",
-                taxId: "00.000.000/0001-00",
-                representativeName: "Diretoria",
+                name: schoolInfo?.name ?? "",
+                legalName: schoolInfo?.legalName ?? "",
+                taxId: schoolInfo?.taxId ?? "",
+                representativeName: schoolInfo?.representativeName ?? "",
             },
-            date: new Date().toLocaleDateString("pt-BR"),
+            date: new Date().toLocaleDateString(locale === "en" ? "en-US" : "pt-BR"),
             contract: {
                 durationMonths: contract.durationMonths,
             },
@@ -210,7 +214,7 @@ export function StepContract({
                             }`}
                         >
                             <LayoutList className="h-3.5 w-3.5" />
-                            {t("contract.summaryTab") || "Resumo dos Termos"}
+                            {t("contract.summaryTab")}
                         </button>
                         <button
                             type="button"
@@ -222,7 +226,7 @@ export function StepContract({
                             }`}
                         >
                             <FileText className="h-3.5 w-3.5" />
-                            {t("contract.fullTab") || "Contrato Completo"}
+                            {t("contract.fullTab")}
                         </button>
                     </div>
 
@@ -231,7 +235,7 @@ export function StepContract({
                         {activeTab === "summary" ? (
                             <div className="flex-1 px-6 py-5 overflow-y-auto max-h-[380px] [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] space-y-4">
                                 <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-2">
-                                    {t("contract.summaryTitle") || "Principais regras do seu contrato"}
+                                    {t("contract.summaryTitle")}
                                 </p>
                                 <div className="space-y-3">
                                     {summaryData.map((item, idx) => (
@@ -271,9 +275,27 @@ export function StepContract({
                     </div>
                 </div>
             ) : (
-                <p className="text-sm text-red-400/80">
-                    {t("contract.loadError") || "Erro ao carregar contrato. Entre em contato com o suporte."}
-                </p>
+                <div className="flex flex-col items-center gap-5 rounded-md border border-amber-500/20 bg-amber-500/[0.07] px-6 py-8 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/10">
+                        <AlertTriangle className="h-6 w-6 text-amber-400" />
+                    </div>
+                    <div className="space-y-1.5">
+                        <p className="text-base font-semibold text-amber-300">
+                            {t("contract.loadErrorTitle")}
+                        </p>
+                        <p className="max-w-sm text-sm leading-relaxed text-amber-500/80">
+                            {t("contract.loadErrorDesc")}
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleRetry}
+                        className="flex h-10 items-center justify-center gap-2 rounded-md border border-amber-500/30 px-5 text-sm font-medium text-amber-300 transition-all hover:bg-amber-500/10"
+                    >
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        {t("contract.retry")}
+                    </button>
+                </div>
             )}
 
             {/* Navigation */}
@@ -285,20 +307,22 @@ export function StepContract({
                     className="flex h-11 flex-1 items-center justify-center gap-2 rounded-md border border-white/8 text-sm text-slate-500 transition-all hover:border-white/[0.14] hover:text-slate-300 disabled:opacity-40"
                 >
                     <ArrowLeft className="h-4 w-4" />
-                    {t("steps.back") || "Voltar"}
+                    {t("steps.back")}
                 </button>
 
-                <button
-                    onClick={onSign}
-                    disabled={loading || !contract}
-                    className="flex h-11 flex-2 items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
-                >
-                    {loading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                        t("contract.signButton")
-                    )}
-                </button>
+                {contract && (
+                    <button
+                        onClick={onSign}
+                        disabled={loading}
+                        className="flex h-11 flex-2 items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500 disabled:opacity-40"
+                    >
+                        {loading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            t("contract.signButton")
+                        )}
+                    </button>
+                )}
             </div>
         </div>
     );

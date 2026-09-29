@@ -17,9 +17,11 @@ import { cn } from "@/lib/utils";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { OnboardingData } from "./OnboardingFlow";
+import type { ContractSchoolInfo } from "@/modules/contract/contract.types";
 
 interface TeacherOnboardingFlowProps {
     user: User;
+    schoolInfo: ContractSchoolInfo | null;
 }
 
 const inputClass = cn(
@@ -31,7 +33,7 @@ const inputClass = cn(
     "[color-scheme:dark]"
 );
 
-export function TeacherOnboardingFlow({ user }: TeacherOnboardingFlowProps) {
+export function TeacherOnboardingFlow({ user, schoolInfo }: TeacherOnboardingFlowProps) {
     const t = useTranslations("Onboarding");
     const [currentStep, setCurrentStep] = useState(user.onboardingStep || 1);
     const [onboardingData, setOnboardingData] = useState<OnboardingData>(user);
@@ -145,7 +147,7 @@ export function TeacherOnboardingFlow({ user }: TeacherOnboardingFlowProps) {
                                     {currentStep === 1 && <TeacherStepWelcome onNext={nextStep} initialData={onboardingData} inputClass={inputClass} />}
                                     {currentStep === 2 && <TeacherStepDocuments onNext={nextStep} onBack={prevStep} initialData={onboardingData} inputClass={inputClass} />}
                                     {currentStep === 3 && <TeacherStepPayment onNext={nextStep} onBack={prevStep} initialData={onboardingData} inputClass={inputClass} />}
-                                    {currentStep === 4 && <StepContract onNext={nextStep} onBack={prevStep} user={onboardingData as User} />}
+                                    {currentStep === 4 && <StepContract onNext={nextStep} onBack={prevStep} user={onboardingData as User} schoolInfo={schoolInfo} />}
                                     {currentStep === 5 && <TeacherStepAvailability onNext={nextStep} onBack={prevStep} initialData={onboardingData} inputClass={inputClass} />}
                                     {currentStep === 6 && <TeacherStepBestPractices />}
                                 </div>

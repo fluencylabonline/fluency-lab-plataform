@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { onboardingAddressAction, updateOnboardingNationalityAction } from "@/modules/onboarding/onboarding.actions";
 import { notify } from "@/components/ui/toaster";
 import { useRouter, usePathname } from "@/i18n/navigation";
@@ -21,17 +21,34 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-const createAddressFormSchema = (isMinor: boolean) =>
+/**
+ * Mensagens já resolvidas pelo `t()` do componente. O schema é criado em tempo
+ * de render, então recebe os textos prontos em vez de chaves de tradução.
+ */
+interface AddressMessages {
+    required: string;
+    taxIdInvalid: string;
+    taxIdInvalidForeign: string;
+    zipCodeInvalid: string;
+    zipCodeInvalidForeign: string;
+    guardianNameRequired: string;
+    guardianTaxIdRequired: string;
+    guardianTaxIdInvalid: string;
+    guardianRelationshipRequired: string;
+    guardianCellphoneRequired: string;
+}
+
+const createAddressFormSchema = (isMinor: boolean, m: AddressMessages) =>
     z.object({
         nationality: z.string().min(1),
-        taxId: z.string().min(1, "Campo obrigatório"),
-        cellphone: z.string().min(1, "Campo obrigatório"),
-        zipCode: z.string().min(1, "Campo obrigatório"),
-        street: z.string().min(1, "Campo obrigatório"),
-        number: z.string().min(1, "Campo obrigatório"),
-        neighborhood: z.string().min(1, "Campo obrigatório"),
-        city: z.string().min(1, "Campo obrigatório"),
-        state: z.string().min(1, "Campo obrigatório"),
+        taxId: z.string().min(1, m.required),
+        cellphone: z.string().min(1, m.required),
+        zipCode: z.string().min(1, m.required),
+        street: z.string().min(1, m.required),
+        number: z.string().min(1, m.required),
+        neighborhood: z.string().min(1, m.required),
+        city: z.string().min(1, m.required),
+        state: z.string().min(1, m.required),
         guardianName: z.string().optional(),
         guardianTaxId: z.string().optional(),
         guardianRelationship: z.string().optional(),
@@ -42,7 +59,7 @@ const createAddressFormSchema = (isMinor: boolean) =>
         if (!isValidTaxId(data.taxId, isBR ? "BR" : "US", "individual")) {
             ctx.addIssue({
                 code: "custom",
-                message: isBR ? "CPF inválido" : "Tax ID inválido",
+                message: isBR ? m.taxIdInvalid : m.taxIdInvalidForeign,
                 path: ["taxId"],
             });
         }
@@ -52,7 +69,7 @@ const createAddressFormSchema = (isMinor: boolean) =>
         if (!isZipValid) {
             ctx.addIssue({
                 code: "custom",
-                message: isBR ? "CEP inválido" : "ZIP Code inválido",
+                message: isBR ? m.zipCodeInvalid : m.zipCodeInvalidForeign,
                 path: ["zipCode"],
             });
         }
@@ -62,7 +79,7 @@ const createAddressFormSchema = (isMinor: boolean) =>
             if (!data.guardianName || data.guardianName.trim().length < 2) {
                 ctx.addIssue({
                     code: "custom",
-                    message: "Nome do responsável é obrigatório",
+                    message: m.guardianNameRequired,
                     path: ["guardianName"],
                 });
             }
@@ -70,13 +87,13 @@ const createAddressFormSchema = (isMinor: boolean) =>
             if (!data.guardianTaxId || data.guardianTaxId.trim().length === 0) {
                 ctx.addIssue({
                     code: "custom",
-                    message: "CPF do responsável é obrigatório",
+                    message: m.guardianTaxIdRequired,
                     path: ["guardianTaxId"],
                 });
             } else if (!isValidTaxId(data.guardianTaxId, "BR", "individual")) {
                 ctx.addIssue({
                     code: "custom",
-                    message: "CPF do responsável inválido",
+                    message: m.guardianTaxIdInvalid,
                     path: ["guardianTaxId"],
                 });
             }
@@ -84,7 +101,7 @@ const createAddressFormSchema = (isMinor: boolean) =>
             if (!data.guardianRelationship || data.guardianRelationship.trim().length === 0) {
                 ctx.addIssue({
                     code: "custom",
-                    message: "Parentesco do responsável é obrigatório (ex: Mãe, Pai)",
+                    message: m.guardianRelationshipRequired,
                     path: ["guardianRelationship"],
                 });
             }
@@ -92,7 +109,7 @@ const createAddressFormSchema = (isMinor: boolean) =>
             if (!data.guardianCellphone || data.guardianCellphone.trim().length === 0) {
                 ctx.addIssue({
                     code: "custom",
-                    message: "Celular do responsável é obrigatório",
+                    message: m.guardianCellphoneRequired,
                     path: ["guardianCellphone"],
                 });
             }
@@ -132,13 +149,32 @@ export function StepAddress({
     inputClass?: string;
 }) {
     const t = useTranslations("Onboarding");
+    const locale = useLocale();
     const router = useRouter();
     const pathname = usePathname();
     const [loading, setLoading] = useState(false);
     const [isFetchingZip, setIsFetchingZip] = useState(false);
 
     const minor = checkIsMinor(initialData.birthDate);
-    const addressSchema = useMemo(() => createAddressFormSchema(minor), [minor]);
+    const messages = useMemo<AddressMessages>(
+        () => ({
+            required: t("validation.required"),
+            taxIdInvalid: t("validation.taxIdInvalid"),
+            taxIdInvalidForeign: t("validation.taxIdInvalidForeign"),
+            zipCodeInvalid: t("validation.zipCodeInvalid"),
+            zipCodeInvalidForeign: t("validation.zipCodeInvalidForeign"),
+            guardianNameRequired: t("validation.guardianNameRequired"),
+            guardianTaxIdRequired: t("validation.guardianTaxIdRequired"),
+            guardianTaxIdInvalid: t("validation.guardianTaxIdInvalid"),
+            guardianRelationshipRequired: t("validation.guardianRelationshipRequired"),
+            guardianCellphoneRequired: t("validation.guardianCellphoneRequired"),
+        }),
+        [t]
+    );
+    const addressSchema = useMemo(
+        () => createAddressFormSchema(minor, messages),
+        [minor, messages]
+    );
 
     const initial = initialData;
     const {
@@ -194,16 +230,27 @@ export function StepAddress({
         };
 
         const result = await onboardingAddressAction(payload);
-        setLoading(false);
 
         if (result?.data?.success) {
+            // O idioma acompanha a nacionalidade, mas a troca só acontece aqui:
+            // fazer isso enquanto o aluno digita recarregaria a página e
+            // apagaria o formulário. A etapa já está salva no servidor, então a
+            // navegação retoma no passo seguinte, já no novo idioma.
+            const targetLocale = data.nationality === "foreign" ? "en" : "pt";
+            if (targetLocale !== locale) {
+                router.replace(pathname, { locale: targetLocale });
+                return;
+            }
+
+            setLoading(false);
             onNext(payload as unknown as Partial<User>);
         } else {
+            setLoading(false);
             const errorMsg =
                 result?.data?.error ||
-                (result?.validationErrors ? "Por favor, preencha todos os campos do responsável e do endereço corretamente." : null) ||
+                (result?.validationErrors ? t("validation.fillAllFields") : null) ||
                 result?.serverError ||
-                "Não foi possível salvar os dados. Verifique as informações e tente novamente.";
+                t("validation.saveError");
             notify.error(errorMsg);
         }
     };
@@ -252,12 +299,12 @@ export function StepAddress({
                     <Select
                         value={nationality}
                         onValueChange={async (value) => {
-                            setValue("nationality", value);
-                            try {
-                                await updateOnboardingNationalityAction({ nationality: value });
-                                router.replace(pathname, { locale: value === "foreign" ? "en" : "pt" });
-                            } catch (error) {
-                                console.error("Failed to update nationality:", error);
+                            setValue("nationality", value, { shouldValidate: true });
+                            // Persiste para que a região do contrato seja inferida
+                            // corretamente. O idioma só muda ao avançar de etapa.
+                            const result = await updateOnboardingNationalityAction({ nationality: value });
+                            if (!result?.data?.success) {
+                                console.error("Failed to update nationality:", result?.serverError);
                             }
                         }}
                     >
@@ -392,7 +439,7 @@ export function StepAddress({
                         </Field>
 
                         <Field
-                            label={t("guardian.cellphone") || "Celular do Responsável"}
+                            label={t("guardian.cellphone")}
                             error={errors.guardianCellphone?.message}
                         >
                             <input
@@ -415,7 +462,7 @@ export function StepAddress({
                     className="flex h-11 flex-1 items-center justify-center gap-2 rounded-md border border-white/[0.08] text-sm text-slate-500 transition-all hover:border-white/[0.14] hover:text-slate-300 disabled:opacity-40"
                 >
                     <ArrowLeft className="h-4 w-4" />
-                    {t("steps.back") || "Voltar"}
+                    {t("steps.back")}
                 </button>
 
                 <button
@@ -427,7 +474,7 @@ export function StepAddress({
                         <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                         <>
-                            {t("steps.next") || "Próximo"}
+                            {t("steps.next")}
                             <ArrowRight className="h-4 w-4" />
                         </>
                     )}

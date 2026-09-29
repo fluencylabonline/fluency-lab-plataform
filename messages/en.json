@@ -1786,7 +1786,63 @@
       "loadError": "Error loading contract. Please contact support.",
       "summaryTab": "Summary of Terms",
       "fullTab": "Full Contract",
-      "summaryTitle": "Key rules of your contract"
+      "summaryTitle": "Key rules of your contract",
+      "loadErrorTitle": "We couldn't load your contract",
+      "loadErrorDesc": "This usually happens when there is no active contract template for your profile yet. Contact support so we can release your signature.",
+      "retry": "Try again",
+      "signError": "We couldn't sign the contract. Please try again.",
+      "summaryStudent": [
+        {
+          "title": "Classes and Attendance",
+          "desc": "Online video calls. Missing a class without 4h notice, or failures on your own internet, count as a class taken."
+        },
+        {
+          "title": "Rescheduling",
+          "desc": "Up to 2 reschedules per calendar month (non-cumulative) with at least 4h notice. 15-minute grace period for lateness, after which the class counts as taken. A make-up class is guaranteed whenever the teacher cancels, with a 30-day credit validity."
+        },
+        {
+          "title": "Tuition and Adjustments",
+          "desc": "Payment between the 1st and the 15th of each month (pro-rated in the 1st month). Annual adjustment calculated in July."
+        },
+        {
+          "title": "Year-End Recess",
+          "desc": "No classes for 4 weeks (late December and early January). Tuition is maintained, with optional extra content."
+        },
+        {
+          "title": "Teacher Changes",
+          "desc": "The school may change your teacher at any time to ensure your progress and teaching quality."
+        },
+        {
+          "title": "Class Recording",
+          "desc": "Classes are recorded for quality auditing and internal security. External recording and sharing of the material is forbidden."
+        },
+        {
+          "title": "Termination and Penalty",
+          "desc": "A compensatory penalty of 50% of one monthly payment applies if you cancel before the end of the contract term."
+        }
+      ],
+      "summaryTeacher": [
+        {
+          "title": "Business Relationship",
+          "desc": "Independent contractor services as a legal entity (MEI). No exclusivity and no employment relationship."
+        },
+        {
+          "title": "Payment per Class",
+          "desc": "Monthly payment per class-hour taught, made by the 10th business day upon issuing an invoice (NFS-e)."
+        },
+        {
+          "title": "Minimum Availability (SLA)",
+          "desc": "Keeping an active profile requires at least 2 regular and 2 make-up time slots per week."
+        },
+        {
+          "title": "Recess and Absences",
+          "desc": "A general 4-week stop at the end of the year (no billing). Individual time off planned with 30 days notice."
+        },
+        {
+          "title": "Contract Termination",
+          "desc": "At least 30 days notice for termination without cause by either party."
+        }
+      ]
     },
     "finish": {
       "appDesc": "Install our PWA to receive class notifications and practice anywhere.",
@@ -1795,12 +1851,20 @@
       "description": "Your onboarding is complete! You now have full access to the platform.",
       "environmentDesc": "For better performance, use headphones and be in a quiet place.",
       "environmentTitle": "Quiet Environment",
-      "groupDesc": "You will receive the WhatsApp link by email. Join to interact with your tutor.",
-      "groupTitle": "Class Group",
       "punctualityDesc": "Our classes are short and productive. Try to join 2 minutes early.",
       "punctualityTitle": "Punctuality",
       "subtitle": "Follow these best practices to accelerate your fluency.",
-      "title": "You're ready to fly!"
+      "title": "You're ready to fly!",
+      "noticesTitle": "Important notices",
+      "recessTitle": "Year-end recess",
+      "recessDesc": "During the last two weeks of December and the first two weeks of January we are on recess: there are no live classes with a teacher. Recorded classes remain available on the platform.",
+      "teacherLeaveTitle": "Teacher time off",
+      "teacherLeaveDesc": "Each teacher may take up to 30 days of leave per year, with a maximum of 15 consecutive days. These classes are not made up, but your teacher leaves activities so you can keep studying.",
+      "installOnPhone": "Install on your phone",
+      "installOnPhoneDesc": "Point your camera here to download the app and get reminders.",
+      "installApp": "Install App",
+      "downloadApp": "Download App",
+      "finishError": "We couldn't complete your onboarding. Please try again."
     },
     "guardian": {
       "name": "Guardian Name",
@@ -1812,22 +1876,22 @@
     },
     "name": "Full Name",
     "payment": {
-      "confirmDate": "Confirmar Data",
-      "copied": "Copiado!",
+      "confirmDate": "Confirm Date",
+      "copied": "Copied!",
       "copyPaste": "Código Copia e Cola",
       "description": "Set up your due date and confirm your study plan.",
       "dueDay": "Due Day",
-      "expiresAt": "Vencimento em",
+      "expiresAt": "Due on",
       "firstPayment": "First Payment (Pro-rata)",
-      "invoiceGenerated": "Cobrança Gerada!",
-      "paidSubtitle": "Sua primeira mensalidade foi confirmada. Agora você pode prosseguir para o contrato.",
-      "paidTitle": "Pagamento Recebido!",
-      "payLaterWarning": "Você pode pagar agora ou depois. O acesso será liberado assim que o sistema identificar o pagamento.",
-      "payNowTitle": "Pagar com PIX",
+      "invoiceGenerated": "Invoice generated!",
+      "paidSubtitle": "Your first monthly payment is confirmed. You can now move on to the contract.",
+      "paidTitle": "Payment received!",
+      "payLaterWarning": "You can pay now or later. Access is released as soon as the payment is identified.",
+      "payNowTitle": "Pay with PIX",
       "planSummary": "Plan Summary",
       "prorataWarning": "Your first monthly payment has been pro-rated based on your start date ({classesStartDate}). Since you are starting after the standard beginning of the month, you will only pay for the remaining classes, with the first payment due on {dueDate}.",
       "subtitle": "Confirm your plan and choose the best due day.",
-      "successTitle": "Pagamento Confirmado!",
+      "successTitle": "Payment confirmed!",
       "title": "Choose how you want to evolve.",
       "totalValue": "Monthly Value",
       "payLaterBtn": "Pay later / Next",
@@ -1837,7 +1901,13 @@
       "payWithCreditCard": "Pay with Credit Card",
       "stripeCheckoutTitle": "Secure Stripe Checkout",
       "stripeCheckoutDesc": "Click the button below to securely complete your subscription payment using an international credit card.",
-      "payNowBtn": "Pay Now"
+      "payNowBtn": "Pay Now",
+      "classesPerWeek": "{count} classes/week",
+      "dueOn": "Due on",
+      "linkExpiresOn": "Link expires on",
+      "dueDayNote": "The day you pick applies from your 2nd monthly payment on. The first one is due on {dueDate}.",
+      "nextChargesFrom": "Following monthly payments from {date}",
+      "invoiceError": "We couldn't generate your invoice. Please try again."
     },
     "steps": {
       "back": "Back",
@@ -1851,7 +1921,8 @@
     },
     "support": {
       "contact": "Contact us",
-      "help": "Need help?"
+      "help": "Need help?",
+      "whatsappMessage": "Hi! I'm the student {name} ({email}) and I'm having trouble/an error on the \"{step}\" step of my FluencyLab onboarding. I need support."
     },
     "teacher": {
       "availabilityDesc": "Define your initial availability to start scheduling.",
@@ -1906,7 +1977,16 @@
       "streetRequired": "Street is required",
       "taxIdRequired": "Document is required",
       "zipCodeRequired": "ZIP code is required",
-      "termsRequired": "You must accept the Terms of Use and Privacy Policy to continue."
+      "termsRequired": "You must accept the Terms of Use and Privacy Policy to continue.",
+      "required": "This field is required",
+      "taxIdInvalid": "Invalid CPF",
+      "taxIdInvalidForeign": "Invalid document number",
+      "zipCodeInvalid": "Invalid ZIP code",
+      "zipCodeInvalidForeign": "Invalid postal code",
+      "guardianTaxIdInvalid": "Invalid guardian CPF",
+      "guardianCellphoneRequired": "Guardian cellphone is required",
+      "saveError": "We couldn't save your data. Please check the information and try again.",
+      "fillAllFields": "Please fill in all guardian and address fields correctly."
     },
     "welcome": {
       "birthDate": "Birth Date",
@@ -1927,7 +2007,9 @@
       "privacyLink": "Privacy Policy",
       "guardianConsent": "I declare that I am a minor and have consent from my parents or guardians for the processing of my data.",
       "guardianRequiredHint": "Consent required for minors under 18 years old",
-      "next": "Continue"
+      "next": "Continue",
+      "namePlaceholder": "e.g. Maria Gabi Silva",
+      "nicknamePlaceholder": "e.g. Gabi"
     }
   },
   "PathScreen": {

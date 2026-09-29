@@ -17,25 +17,17 @@ import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 import type { SchoolSettings } from "@/modules/contract/contract.schema";
+import type { OnboardingProfile } from "@/modules/onboarding/onboarding.types";
+import type { ContractSchoolInfo } from "@/modules/contract/contract.types";
 
-export interface OnboardingData extends Partial<User> {
-    zipCode?: string;
-    street?: string;
-    number?: string;
-    neighborhood?: string;
-    city?: string;
-    state?: string;
-    guardianData?: {
-        name?: string;
-        taxId?: string;
-        relationship?: string;
-        cellphone?: string;
-    };
-}
+export type OnboardingData = OnboardingProfile;
 
 interface OnboardingFlowProps {
     user: User;
+    /** Perfil com PII descriptografada — ver userService.getOnboardingProfile. */
+    initialProfile: OnboardingProfile;
     schoolSettings: SchoolSettings | null;
+    schoolInfo: ContractSchoolInfo | null;
 }
 
 const inputClass = cn(
@@ -47,17 +39,17 @@ const inputClass = cn(
     "[color-scheme:dark]"
 );
 
-export function OnboardingFlow({ user, schoolSettings }: OnboardingFlowProps) {
+export function OnboardingFlow({ user, initialProfile, schoolSettings, schoolInfo }: OnboardingFlowProps) {
     const t = useTranslations("Onboarding");
     const [currentStep, setCurrentStep] = useState(user.onboardingStep || 1);
-    const [onboardingData, setOnboardingData] = useState<OnboardingData>(user);
+    const [onboardingData, setOnboardingData] = useState<OnboardingData>(initialProfile);
 
     const steps = [
         { id: 1, title: t("steps.welcome") },
         { id: 2, title: t("steps.documents") },
         { id: 3, title: t("steps.payment") },
         { id: 4, title: t("steps.contract") },
-        { id: 5, title: t("steps.finish") || "Finalizar" },
+        { id: 5, title: t("steps.finish") },
     ];
 
     const supportPhone = schoolSettings?.supportPhone;
@@ -67,10 +59,11 @@ export function OnboardingFlow({ user, schoolSettings }: OnboardingFlowProps) {
         if (cleanPhone.length === 10 || cleanPhone.length === 11) {
             cleanPhone = `55${cleanPhone}`;
         }
-        const studentName = user.name || "";
-        const studentEmail = user.email || "";
-        const currentStepName = steps[currentStep - 1]?.title || "Onboarding";
-        const text = `Olá! Sou o(a) aluno(a) ${studentName} (${studentEmail}) e estou com dificuldades/erro na etapa "${currentStepName}" do meu onboarding na FluencyLab. Preciso de suporte.`;
+        const text = t("support.whatsappMessage", {
+            name: user.name || "",
+            email: user.email || "",
+            step: steps[currentStep - 1]?.title || "Onboarding",
+        });
         whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
     }
 
@@ -145,7 +138,7 @@ export function OnboardingFlow({ user, schoolSettings }: OnboardingFlowProps) {
 
                 <div className="hidden md:flex flex-col items-end gap-2">
                     <span className="hidden text-slate-400 text-sm font-medium">
-                        {t("steps.progress") || "Progresso"}: {Math.round(progress)}%
+                        {t("steps.progress")}: {Math.round(progress)}%
                     </span>
                     <div className="w-48 h-1.5 bg-slate-200 dark:bg-slate-900 rounded-full overflow-hidden">
                         <motion.div
@@ -257,6 +250,7 @@ export function OnboardingFlow({ user, schoolSettings }: OnboardingFlowProps) {
                                             onNext={nextStep}
                                             onBack={prevStep}
                                             user={onboardingData as User}
+                                            schoolInfo={schoolInfo}
                                         />
                                     )}
                                     {currentStep === 5 && (
@@ -266,7 +260,7 @@ export function OnboardingFlow({ user, schoolSettings }: OnboardingFlowProps) {
 
                                 <div className="mt-8 flex justify-center">
                                     <p className="text-slate-500 text-sm">
-                                        {t("support.help") || "Precisa de ajuda?"}{" "}
+                                        {t("support.help")}{" "}
                                         {whatsappUrl ? (
                                             <a
                                                 href={whatsappUrl}
@@ -274,11 +268,11 @@ export function OnboardingFlow({ user, schoolSettings }: OnboardingFlowProps) {
                                                 rel="noopener noreferrer"
                                                 className="text-primary font-bold hover:underline"
                                             >
-                                                {t("support.contact") || "Fale conosco"}
+                                                {t("support.contact")}
                                             </a>
                                         ) : (
                                             <button className="text-primary font-bold hover:underline">
-                                                {t("support.contact") || "Fale conosco"}
+                                                {t("support.contact")}
                                             </button>
                                         )}
                                     </p>

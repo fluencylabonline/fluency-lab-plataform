@@ -1,6 +1,7 @@
 import { userRepository } from "./user.repository";
 import { adminAuth, adminStorage } from "@/lib/firebase-admin";
 import type { User, NewUser, NotificationPrefs, SettingsUserDTO, AdminUserDTO } from "./user.schema";
+import type { OnboardingProfile } from "@/modules/onboarding/onboarding.types";
 import { env } from "@/env";
 import { communicationService } from "@/modules/communication/communication.service";
 import { abacate } from "@/lib/abacate-pay";
@@ -49,6 +50,63 @@ export const userService = {
 
   async getUserById(id: string): Promise<User | undefined> {
     return userRepository.findById(id);
+  },
+
+  /**
+   * Monta o perfil usado pelos formulários do onboarding.
+   *
+   * O usuário cru do banco não serve: `taxId`, `cellphone` e `address` estão
+   * criptografados, e o endereço é um JSON — se forem passados direto aos
+   * inputs, o aluno vê ciphertext ao voltar uma etapa. Aqui a PII é
+   * descriptografada e o endereço achatado nos campos do formulário.
+   */
+  async getOnboardingProfile(id: string): Promise<OnboardingProfile | undefined> {
+    const user = await userRepository.findById(id);
+    if (!user) return undefined;
+
+    const reveal = (value: string | null | undefined): string | undefined => {
+      if (!value) return undefined;
+      return value.includes(":") ? decrypt(value) : value;
+    };
+
+    let address: Partial<OnboardingProfile> = {};
+    const rawAddress = reveal(user.address);
+    if (rawAddress) {
+      try {
+        const parsed = JSON.parse(rawAddress) as Record<string, string>;
+        address = {
+          zipCode: parsed.zipCode,
+          street: parsed.street,
+          number: parsed.number,
+          neighborhood: parsed.neighborhood,
+          city: parsed.city,
+          state: parsed.state,
+        };
+      } catch {
+        console.error(`[getOnboardingProfile] Endereço ilegível para o usuário ${id}`);
+      }
+    }
+
+    const guardianName = reveal(user.guardianName);
+    const guardianData = guardianName
+      ? {
+          name: guardianName,
+          taxId: reveal(user.guardianTaxId),
+          relationship: user.guardianRelationship ?? undefined,
+          cellphone: reveal(user.guardianCellphone),
+        }
+      : undefined;
+
+    return {
+      ...user,
+      taxId: reveal(user.taxId) ?? null,
+      cellphone: reveal(user.cellphone) ?? null,
+      guardianName: guardianName ?? null,
+      guardianTaxId: reveal(user.guardianTaxId) ?? null,
+      guardianCellphone: reveal(user.guardianCellphone) ?? null,
+      ...address,
+      guardianData,
+    };
   },
 
   async updateUser(id: string, data: Partial<NewUser>): Promise<User | undefined> {

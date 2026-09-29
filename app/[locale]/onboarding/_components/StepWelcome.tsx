@@ -1,3 +1,5 @@
+"use client";
+
 import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
@@ -9,6 +11,7 @@ import { Loader2, ArrowRight, ExternalLink } from "lucide-react";
 import { type OnboardingData } from "./OnboardingFlow";
 import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
+import { isMinor as checkIsMinor } from "@/modules/contract/contract.utils";
 
 interface FieldProps {
     label: string;
@@ -64,8 +67,8 @@ export function StepWelcome({
     const birthDate = useWatch({ control, name: "birthDate" });
     const acceptedTerms = useWatch({ control, name: "acceptedTerms" });
     
-    // Check if user is minor (under 18)
-    const isMinor = birthDate ? (new Date().getFullYear() - new Date(birthDate).getFullYear()) < 18 : false;
+    // Mesma regra usada no StepAddress: idade real, não diferença de ano.
+    const isMinor = checkIsMinor(birthDate);
     const guardianConsent = useWatch({ control, name: "guardianConsent" });
 
     const isComplete = name?.length >= 2 && birthDate && acceptedTerms && (!isMinor || guardianConsent);
@@ -81,7 +84,7 @@ export function StepWelcome({
                 birthDate: new Date(data.birthDate)
             });
         } else {
-            notify.error(result?.data?.error || "Erro ao salvar");
+            notify.error(result?.data?.error || t("validation.saveError"));
         }
     };
 
@@ -105,7 +108,7 @@ export function StepWelcome({
                 >
                     <input
                         {...register("name")}
-                        placeholder="Ex: Maria Gabi Silva"
+                        placeholder={t("stepWelcome.namePlaceholder")}
                         className={inputClass}
                     />
                 </Field>
@@ -116,7 +119,7 @@ export function StepWelcome({
                 >
                     <input
                         {...register("nickname")}
-                        placeholder="Ex: Gabi"
+                        placeholder={t("stepWelcome.nicknamePlaceholder")}
                         className={inputClass}
                     />
                 </Field>

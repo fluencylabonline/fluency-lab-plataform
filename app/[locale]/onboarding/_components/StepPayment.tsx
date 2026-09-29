@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { onboardingPaymentAction } from "@/modules/onboarding/onboarding.actions";
 import { getPlansAction, getInstallmentStatusAction, getActivePaymentAction } from "@/modules/billing/billing.actions";
 import { Button } from "@/components/ui/button";
@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils";
 import type { User } from "@/modules/user/user.schema";
 import { type OnboardingData } from "./OnboardingFlow";
 import type { Plan } from "@/modules/billing/billing.schema";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { addMonths, format, setDate } from "date-fns";
+import { enUS, ptBR } from "date-fns/locale";
 import Image from "next/image";
 
 const DUE_DAYS = ["1", "5", "10", "15"];
@@ -31,6 +31,8 @@ export function StepPayment({
     user: User;
 }) {
     const t = useTranslations("Onboarding");
+    const locale = useLocale();
+    const dateLocale = locale === "en" ? enUS : ptBR;
     const [loading, setLoading] = useState(false);
     const [plansLoading, setPlansLoading] = useState(true);
     const [plan, setPlan] = useState<Plan | null>(null);
@@ -91,7 +93,7 @@ export function StepPayment({
                     setPixData((prev) =>
                         prev ? { ...prev, status: "paid" } : null
                     );
-                    notify.success(t("payment.successTitle") || "Pagamento confirmado!");
+                    notify.success(t("payment.successTitle"));
                     clearInterval(interval);
                 }
             }, 3000);
@@ -99,7 +101,10 @@ export function StepPayment({
         return () => { if (interval) clearInterval(interval); };
     }, [pixData, t]);
 
-    const calculateProRata = (dueDay: number, price: number) => {
+    // Espelha billingService.createSubscription: a 1ª parcela é proporcional e
+    // vence em relação à data de início das aulas — o dia escolhido pelo aluno
+    // só passa a valer da 2ª parcela em diante.
+    const calculateProRata = (price: number) => {
         const today = new Date();
         const classesStart = user.classesStartDate ? new Date(user.classesStartDate) : null;
 
@@ -140,16 +145,16 @@ export function StepPayment({
         if (result?.data?.success && result.data.data) {
             setPixData(result.data.data);
             notify.success(
-                t("payment.invoiceGenerated") || "Cobrança gerada com sucesso!"
+                t("payment.invoiceGenerated")
             );
         } else {
-            notify.error((result?.data as { error?: string })?.error || "Erro ao gerar cobrança");
+            notify.error((result?.data as { error?: string })?.error || t("payment.invoiceError"));
         }
     };
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
-        notify.success(t("payment.copied") || "Código copiado!");
+        notify.success(t("payment.copied"));
     };
 
     const handleCheckPayment = async () => {
@@ -166,12 +171,12 @@ export function StepPayment({
                 setPixData((prev) =>
                     prev ? { ...prev, status: "paid" } : null
                 );
-                notify.success(t("payment.successTitle") || "Pagamento confirmado!");
+                notify.success(t("payment.successTitle"));
             } else {
-                notify.info(t("payment.pendingCheck") || "Pagamento ainda pendente de confirmação. Se você já pagou, aguarde alguns instantes e tente novamente.");
+                notify.info(t("payment.pendingCheck"));
             }
         } else {
-            notify.error(t("payment.errorChecking") || "Erro ao verificar status do pagamento.");
+            notify.error(t("payment.errorChecking"));
         }
     };
 
@@ -184,7 +189,7 @@ export function StepPayment({
     }
 
     const { amount, isProRata } = plan
-        ? calculateProRata(parseInt(selectedDueDay), plan.price)
+        ? calculateProRata(plan.price)
         : { amount: 0, isProRata: false };
 
     const today = new Date();
@@ -205,6 +210,10 @@ export function StepPayment({
         : format(today, "dd/MM/yyyy");
 
     const formattedDueDate = format(calculatedDueDate, "dd/MM/yyyy");
+
+    // 2ª parcela: primeiro mês em que o dia escolhido realmente é aplicado.
+    const nextChargeDate = setDate(addMonths(billingBaseDate, 1), parseInt(selectedDueDay));
+    const formattedNextChargeDate = format(nextChargeDate, "dd/MM/yyyy");
 
     return (
         <div className="space-y-6">
@@ -231,14 +240,14 @@ export function StepPayment({
                                             {plan.name}
                                         </span>
                                         <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-0.5 text-[11px] font-medium text-violet-400">
-                                            {plan.classesPerWeek} aulas/semana
+                                            {t("payment.classesPerWeek", { count: plan.classesPerWeek ?? 0 })}
                                         </span>
                                     </div>
 
                                     <div className="border-t border-white/6 pt-4 space-y-2">
                                         <div className="flex justify-between text-sm">
                                             <span className="text-slate-500">
-                                                {t("payment.totalValue") || "Valor Mensal"}
+                                                {t("payment.totalValue")}
                                             </span>
                                             <span className="text-slate-400">
                                                 {currencySymbol} {(plan.price / 100).toFixed(2)}
@@ -246,7 +255,7 @@ export function StepPayment({
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-sm text-slate-300">
-                                                {t("payment.firstPayment") || "Primeiro Pagamento"}
+                                                {t("payment.firstPayment")}
                                             </span>
                                             <span className="text-base font-semibold text-violet-400">
                                                 {currencySymbol} {(amount / 100).toFixed(2)}
@@ -283,6 +292,16 @@ export function StepPayment({
                             </div>
                         </div>
 
+                        {/* O dia escolhido só vale da 2ª parcela em diante */}
+                        <div className="space-y-1.5 rounded-md border border-white/[0.07] bg-white/3 px-4 py-3">
+                            <p className="text-xs text-slate-400">
+                                {t("payment.dueDayNote", { dueDate: formattedDueDate })}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                                {t("payment.nextChargesFrom", { date: formattedNextChargeDate })}
+                            </p>
+                        </div>
+
                         {/* Pro-rata warning */}
                         {isProRata && (
                             <motion.div
@@ -309,7 +328,7 @@ export function StepPayment({
                                 className="flex h-11 flex-1 items-center justify-center gap-2 rounded-md border border-white/8 text-sm text-slate-500 transition-all hover:border-white/[0.14] hover:text-slate-300 disabled:opacity-40"
                             >
                                 <ArrowLeft className="h-4 w-4" />
-                                {t("steps.back") || "Voltar"}
+                                {t("steps.back")}
                             </button>
                             <Button
                                 onClick={handleConfirmDate}
@@ -319,7 +338,7 @@ export function StepPayment({
                                 {loading ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (
-                                    t("payment.confirmDate") || "Confirmar data"
+                                    t("payment.confirmDate")
                                 )}
                             </Button>
                         </div>
@@ -345,7 +364,7 @@ export function StepPayment({
                                         <div className="flex items-center gap-2.5 border-b border-white/6 px-5 py-3.5">
                                             <CreditCard className="h-4 w-4 text-violet-400" />
                                             <span className="text-sm font-medium text-slate-400">
-                                                {t("payment.payWithCreditCard") || "Pagar com Cartão de Crédito"}
+                                                {t("payment.payWithCreditCard")}
                                             </span>
                                         </div>
 
@@ -357,10 +376,10 @@ export function StepPayment({
 
                                             <div className="space-y-2">
                                                 <h4 className="text-base font-semibold text-slate-200">
-                                                    {t("payment.stripeCheckoutTitle") || "Checkout Seguro via Stripe"}
+                                                    {t("payment.stripeCheckoutTitle")}
                                                 </h4>
                                                 <p className="text-sm text-slate-400 max-w-sm leading-relaxed">
-                                                    {t("payment.stripeCheckoutDesc") || "Clique no botão abaixo para concluir o pagamento de sua assinatura de forma segura usando cartão de crédito internacional."}
+                                                    {t("payment.stripeCheckoutDesc")}
                                                 </p>
                                             </div>
 
@@ -370,7 +389,7 @@ export function StepPayment({
                                                 rel="noopener noreferrer"
                                                 className="flex h-12 w-full max-w-xs items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-semibold text-white transition-all hover:bg-violet-500 hover:scale-[1.01]"
                                             >
-                                                {t("payment.payNowBtn") || "Pagar Agora"}
+                                                {t("payment.payNowBtn")}
                                                 <ArrowRight className="h-4 w-4" />
                                             </a>
 
@@ -378,10 +397,10 @@ export function StepPayment({
                                             <div className="flex items-center gap-2 text-sm text-slate-500">
                                                 <Calendar className="h-3.5 w-3.5" />
                                                 <span>
-                                                    Link expira em{" "}
+                                                    {t("payment.linkExpiresOn")}{" "}
                                                     <strong className="font-medium text-slate-400">
-                                                        {format(new Date(pixData.expiresAt), "dd 'de' MMMM", {
-                                                            locale: ptBR,
+                                                        {format(new Date(pixData.expiresAt), "PPP", {
+                                                            locale: dateLocale,
                                                         })}
                                                     </strong>
                                                 </span>
@@ -397,7 +416,7 @@ export function StepPayment({
                                     <div className="flex items-center gap-2.5 border-b border-white/6 px-5 py-3.5">
                                         <QrCode className="h-4 w-4 text-violet-400" />
                                         <span className="text-sm font-medium text-slate-400">
-                                            {t("payment.payNowTitle") || "Pagar com PIX"}
+                                            {t("payment.payNowTitle")}
                                         </span>
                                     </div>
 
@@ -424,10 +443,10 @@ export function StepPayment({
                                         <div className="flex items-center gap-2 text-sm text-slate-500">
                                             <Calendar className="h-3.5 w-3.5" />
                                             <span>
-                                                Vence em{" "}
+                                                {t("payment.dueOn")}{" "}
                                                 <strong className="font-medium text-slate-400">
-                                                    {format(new Date(pixData.expiresAt), "dd 'de' MMMM", {
-                                                        locale: ptBR,
+                                                    {format(new Date(pixData.expiresAt), "PPP", {
+                                                        locale: dateLocale,
                                                     })}
                                                 </strong>
                                             </span>
@@ -436,7 +455,7 @@ export function StepPayment({
                                         {/* Copy-paste */}
                                         <div className="w-full space-y-2">
                                             <p className="text-[11px] font-medium uppercase tracking-widest text-slate-600">
-                                                {t("payment.copyPaste") || "Copia e Cola"}
+                                                {t("payment.copyPaste")}
                                             </p>
                                             <div className="flex gap-2">
                                                 <div className="flex-1 overflow-hidden rounded-lg border border-white/[0.07] bg-white/3 px-3 py-2.5 font-mono text-[11px] text-slate-600 truncate">
@@ -461,8 +480,7 @@ export function StepPayment({
                         <div className="flex gap-3 rounded-md border border-amber-500/20 bg-amber-500/[0.07] px-4 py-3 text-sm text-amber-500/80">
                             <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
                             <span>
-                                {t("payment.payLaterWarning") ||
-                                    "Você pode pagar agora ou depois. O acesso é liberado assim que o pagamento for identificado."}
+                                {t("payment.payLaterWarning")}
                             </span>
                         </div>
 
@@ -476,14 +494,14 @@ export function StepPayment({
                                 {checkingPayment ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (
-                                    t("payment.checkPaymentBtn") || "Verificar Pagamento"
+                                    t("payment.checkPaymentBtn")
                                 )}
                             </Button>
                             <button
                                 onClick={() => onNext({ dueDay: parseInt(selectedDueDay) })}
                                 className="flex h-11 w-full items-center justify-center gap-2 rounded-md border border-white/8 text-sm font-medium text-slate-400 transition-all hover:border-white/12 hover:text-slate-300 hover:scale-[1.01]"
                             >
-                                {t("payment.payLaterBtn") || "Pagar depois / Próximo"}
+                                {t("payment.payLaterBtn")}
                                 <ArrowRight className="h-4 w-4" />
                             </button>
                         </div>
@@ -506,11 +524,10 @@ export function StepPayment({
                             </div>
                             <div className="space-y-1.5">
                                 <p className="text-base font-semibold text-emerald-300">
-                                    {t("payment.paidTitle") || "Pagamento recebido!"}
+                                    {t("payment.paidTitle")}
                                 </p>
                                 <p className="text-sm text-emerald-500/70">
-                                    {t("payment.paidSubtitle") ||
-                                        "Sua primeira mensalidade foi confirmada. Continue para o contrato."}
+                                    {t("payment.paidSubtitle")}
                                 </p>
                             </div>
                         </div>
@@ -519,7 +536,7 @@ export function StepPayment({
                             onClick={() => onNext({ dueDay: parseInt(selectedDueDay) })}
                             className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-violet-600 text-sm font-medium text-white transition-all hover:bg-violet-500"
                         >
-                            {t("steps.next") || "Próximo"}
+                            {t("steps.next")}
                             <ArrowRight className="h-4 w-4" />
                         </button>
                     </motion.div>

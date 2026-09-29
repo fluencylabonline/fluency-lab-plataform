@@ -9,6 +9,7 @@ import { env } from "@/env";
 import { billingService } from "../billing/billing.service";
 import { addMonths } from "date-fns";
 import { ContractSignatureMetadata, SchoolSettings, ContractInstance } from "./contract.schema";
+import type { ContractSchoolInfo } from "./contract.types";
 import { schedulingService } from "../scheduling/scheduling.service";
 
 interface GuardianData {
@@ -155,7 +156,14 @@ export const contractService = {
         pixKey: decryptedPixKey ?? "",
       },
       guardian: guardianData,
-      school: schoolSettings,
+      school: {
+        ...schoolSettings,
+        // O CNPJ é guardado criptografado; sem isso o contrato assinado
+        // renderizaria o ciphertext no lugar do número.
+        taxId: schoolSettings.taxId.includes(":")
+          ? decrypt(schoolSettings.taxId)
+          : schoolSettings.taxId,
+      },
       date: new Date().toLocaleDateString("pt-BR"),
       contract: {
         durationMonths,
@@ -752,6 +760,26 @@ export const contractService = {
 
   async getSchoolSettings() {
     return contractRepository.getSchoolSettings();
+  },
+
+  /**
+   * Dados da escola que aparecem no corpo do contrato, prontos para o cliente.
+   *
+   * Devolve apenas o que os placeholders `{{school.*}}` consomem — o CPF do
+   * representante e o endereço completo não saem do servidor. O CNPJ vem
+   * descriptografado, para que o preview mostre o mesmo número do documento
+   * que será assinado.
+   */
+  async getContractSchoolInfo(): Promise<ContractSchoolInfo | null> {
+    const settings = await contractRepository.getSchoolSettings();
+    if (!settings) return null;
+
+    return {
+      name: settings.name,
+      legalName: settings.legalName,
+      taxId: settings.taxId.includes(":") ? decrypt(settings.taxId) : settings.taxId,
+      representativeName: settings.representativeName,
+    };
   },
 
   async updateSchoolSettings(id: string | undefined | null, data: Omit<SchoolSettings, "id" | "updatedAt">) {

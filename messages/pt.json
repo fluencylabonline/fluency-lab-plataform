@@ -1786,7 +1786,63 @@
       "loadError": "Erro ao carregar contrato. Entre em contato com o suporte.",
       "summaryTab": "Resumo dos Termos",
       "fullTab": "Contrato Completo",
-      "summaryTitle": "Principais regras do seu contrato"
+      "summaryTitle": "Principais regras do seu contrato",
+      "loadErrorTitle": "Não foi possível carregar seu contrato",
+      "loadErrorDesc": "Isso costuma acontecer quando ainda não existe um modelo de contrato ativo para o seu perfil. Fale com o suporte para liberarmos sua assinatura.",
+      "retry": "Tentar novamente",
+      "signError": "Não foi possível assinar o contrato. Tente novamente.",
+      "summaryStudent": [
+        {
+          "title": "Aulas e Frequência",
+          "desc": "Videoconferências online. Falta sem aviso prévio de 4h ou falhas na sua internet contam como aula realizada."
+        },
+        {
+          "title": "Remarcações de Aulas",
+          "desc": "Limite de 2 remarcações por mês civil (não cumulativas) com antecedência mínima de 4h. Tolerância de 15min de atraso; depois disso a aula conta como dada. Reposição garantida se o professor desmarcar, crédito válido por 30 dias."
+        },
+        {
+          "title": "Mensalidades e Reajustes",
+          "desc": "Pagamento entre os dias 1 e 15 de cada mês (proporcional no 1º mês). Reajuste anual calculado no mês de julho."
+        },
+        {
+          "title": "Recesso de Fim de Ano",
+          "desc": "Sem aulas por 4 semanas (fim de dezembro e início de janeiro). Mensalidades mantidas, com opção de conteúdo extra."
+        },
+        {
+          "title": "Troca de Professor",
+          "desc": "Direito de alteração do docente pela escola a qualquer momento para garantir a evolução e qualidade pedagógica."
+        },
+        {
+          "title": "Gravação das Aulas",
+          "desc": "Aulas gravadas para auditoria de qualidade e segurança interna. Proibida gravação externa e distribuição do material."
+        },
+        {
+          "title": "Rescisão e Multa",
+          "desc": "Multa compensatória de 50% de uma mensalidade caso cancele antes do fim dos meses de vigência."
+        }
+      ],
+      "summaryTeacher": [
+        {
+          "title": "Relação Comercial",
+          "desc": "Prestação de serviços autônomos como MEI (Pessoa Jurídica). Sem exclusividade e sem vínculo de emprego."
+        },
+        {
+          "title": "Remuneração por Aula",
+          "desc": "Pagamento mensal por hora-aula executada, efetuado até o 10º dia útil mediante emissão de Nota Fiscal (NFS-e)."
+        },
+        {
+          "title": "Disponibilidade Mínima (SLA)",
+          "desc": "Manutenção de cadastro ativo vinculada a manter pelo menos 2 horários regulares e 2 de reposição semanais."
+        },
+        {
+          "title": "Recessos e Ausências",
+          "desc": "Parada geral de 4 semanas no fim do ano (sem faturamento). Folgas individuais planejadas com 30 dias de aviso."
+        },
+        {
+          "title": "Rescisão Contratual",
+          "desc": "Aviso prévio mínimo de 30 dias para encerramento imotivado por qualquer uma das partes."
+        }
+      ]
     },
     "finish": {
       "appDesc": "Instale nosso PWA para receber notificações de aulas e praticar em qualquer lugar.",
@@ -1795,12 +1851,20 @@
       "description": "Seu onboarding foi concluído! Agora você tem acesso total à plataforma.",
       "environmentDesc": "Para melhor aproveitamento, use fones de ouvido e esteja em um local silencioso.",
       "environmentTitle": "Ambiente Calmo",
-      "groupDesc": "Você receberá o link do WhatsApp por e-mail. Participe para interagir com seu tutor.",
-      "groupTitle": "Grupo da Turma",
       "punctualityDesc": "Nossas aulas são curtas e produtivas. Tente entrar 2 minutos antes do horário.",
       "punctualityTitle": "Pontualidade",
       "subtitle": "Siga estas boas práticas para acelerar sua fluência.",
-      "title": "Você está pronto para voar!"
+      "title": "Você está pronto para voar!",
+      "noticesTitle": "Avisos importantes",
+      "recessTitle": "Recesso de fim de ano",
+      "recessDesc": "Nas duas últimas semanas de dezembro e nas duas primeiras de janeiro entramos em recesso: não há aulas ao vivo com professor. As aulas gravadas continuam disponíveis na plataforma.",
+      "teacherLeaveTitle": "Férias do professor",
+      "teacherLeaveDesc": "Cada professor pode tirar até 30 dias de recesso por ano, no máximo 15 dias seguidos. Essas aulas não são repostas, mas o professor deixa atividades para você seguir estudando.",
+      "installOnPhone": "Instalar no celular",
+      "installOnPhoneDesc": "Aponte a câmera para baixar o app e receber lembretes.",
+      "installApp": "Instalar App",
+      "downloadApp": "Baixar App",
+      "finishError": "Não foi possível finalizar seu onboarding. Tente novamente."
     },
     "guardian": {
       "name": "Nome do Responsável",
@@ -1819,15 +1883,15 @@
       "dueDay": "Dia de Vencimento",
       "expiresAt": "Vencimento em",
       "firstPayment": "Primeiro Pagamento (Proporcional)",
-      "invoiceGenerated": "Cobrança Gerada!",
+      "invoiceGenerated": "Cobrança gerada!",
       "paidSubtitle": "Sua primeira mensalidade foi confirmada. Agora você pode prosseguir para o contrato.",
-      "paidTitle": "Pagamento Recebido!",
+      "paidTitle": "Pagamento recebido!",
       "payLaterWarning": "Você pode pagar agora ou depois. O acesso será liberado assim que o sistema identificar o pagamento.",
       "payNowTitle": "Pagar com PIX",
       "planSummary": "Resumo do Plano",
       "prorataWarning": "Sua primeira mensalidade foi calculada proporcionalmente com base na sua data de início ({classesStartDate}). Como você iniciará após o início regular do mês, pagará apenas pelas aulas restantes, com o primeiro vencimento em {dueDate}.",
       "subtitle": "Confirme seu plano e escolha o melhor dia para vencimento.",
-      "successTitle": "Pagamento Confirmado!",
+      "successTitle": "Pagamento confirmado!",
       "title": "Escolha como quer evoluir.",
       "totalValue": "Valor Mensal",
       "payLaterBtn": "Pagar depois / Próximo",
@@ -1837,7 +1901,13 @@
       "payWithCreditCard": "Pagar com Cartão de Crédito",
       "stripeCheckoutTitle": "Checkout Seguro via Stripe",
       "stripeCheckoutDesc": "Clique no botão abaixo para concluir o pagamento de sua assinatura de forma segura usando cartão de crédito internacional.",
-      "payNowBtn": "Pagar Agora"
+      "payNowBtn": "Pagar Agora",
+      "classesPerWeek": "{count} aulas/semana",
+      "dueOn": "Vence em",
+      "linkExpiresOn": "Link expira em",
+      "dueDayNote": "O dia escolhido vale a partir da 2ª mensalidade. A primeira vence em {dueDate}.",
+      "nextChargesFrom": "Próximas mensalidades a partir de {date}",
+      "invoiceError": "Não foi possível gerar a cobrança. Tente novamente."
     },
     "steps": {
       "back": "Voltar",
@@ -1851,7 +1921,8 @@
     },
     "support": {
       "contact": "Fale conosco",
-      "help": "Precisa de ajuda?"
+      "help": "Precisa de ajuda?",
+      "whatsappMessage": "Olá! Sou o(a) aluno(a) {name} ({email}) e estou com dificuldades/erro na etapa \"{step}\" do meu onboarding na FluencyLab. Preciso de suporte."
     },
     "teacher": {
       "availabilityDesc": "Defina seus horários iniciais para começarmos os agendamentos.",
@@ -1906,7 +1977,16 @@
       "streetRequired": "Rua é obrigatória",
       "taxIdRequired": "Documento é obrigatório",
       "zipCodeRequired": "CEP é obrigatório",
-      "termsRequired": "Você precisa aceitar os Termos de Uso e a Política de Privacidade para continuar."
+      "termsRequired": "Você precisa aceitar os Termos de Uso e a Política de Privacidade para continuar.",
+      "required": "Campo obrigatório",
+      "taxIdInvalid": "CPF inválido",
+      "taxIdInvalidForeign": "Documento inválido",
+      "zipCodeInvalid": "CEP inválido",
+      "zipCodeInvalidForeign": "Código postal inválido",
+      "guardianTaxIdInvalid": "CPF do responsável inválido",
+      "guardianCellphoneRequired": "Celular do responsável é obrigatório",
+      "saveError": "Não foi possível salvar os dados. Verifique as informações e tente novamente.",
+      "fillAllFields": "Por favor, preencha todos os campos do responsável e do endereço corretamente."
     },
     "welcome": {
       "birthDate": "Data de Nascimento",
@@ -1927,7 +2007,9 @@
       "privacyLink": "Política de Privacidade",
       "guardianConsent": "Declaro que sou menor de idade e possuo consentimento dos meus pais ou responsáveis para o tratamento dos meus dados.",
       "guardianRequiredHint": "Consentimento obrigatório para menores de 18 anos",
-      "next": "Continuar"
+      "next": "Continuar",
+      "namePlaceholder": "Ex: Maria Gabi Silva",
+      "nicknamePlaceholder": "Ex: Gabi"
     }
   },
   "PathScreen": {
