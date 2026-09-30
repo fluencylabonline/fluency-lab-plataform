@@ -17,7 +17,7 @@ import type { SlotInstanceWithDetails } from "../../scheduling/scheduling.types"
 import type { ContractWithTemplate } from "../../contract/contract.types";
 import { updateUserAction, resendCancellationFeeAction, markCancellationFeePaidAction } from "../user.actions";
 import { regenerateCancellationFeeAction } from "@/modules/billing/billing.actions";
-import { getContractDownloadUrlAction } from "../../contract/contract.actions";
+import { getContractDownloadUrlAction, manualRenewContractAction } from "../../contract/contract.actions";
 import { updateInstallmentAction, generateInstallmentInvoiceAction, resendInstallmentReminderAction } from "../../billing/billing.actions";
 import { PersonalInfoTab } from "./userDetails/PersonalInfoTab";
 import { StudentPaymentTab } from "./userDetails/StudentPaymentTab";
@@ -290,6 +290,23 @@ export function UserDetailsClient({
     }
   };
 
+  const handleRenewContract = async (id: string) => {
+    setLoadingContractId(id);
+    try {
+      const result = await manualRenewContractAction({ instanceId: id });
+      if (result?.data?.success) {
+        notify.success("Contrato renovado com sucesso!");
+        router.refresh();
+      } else {
+        notify.error(result?.data?.error || "Erro ao renovar contrato");
+      }
+    } catch {
+      notify.error("Erro ao processar solicitação");
+    } finally {
+      setLoadingContractId(null);
+    }
+  };
+
   const userInitials = user.name ? user.name.charAt(0).toUpperCase() : "U";
   const userAvatar = user.photoUrl || undefined;
 
@@ -445,6 +462,7 @@ export function UserDetailsClient({
             contracts={contracts}
             onViewContract={handleViewContract}
             onDownloadContract={handleDownloadContract}
+            onRenewContract={handleRenewContract}
             loadingContractId={loadingContractId}
           />
         </TabsContent>

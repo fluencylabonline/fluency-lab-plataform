@@ -212,6 +212,49 @@ export const updateSchoolSettingsAction = adminAction
     }
   });
 
+/**
+ * Ação para o admin/manager renovar manualmente um contrato expirado
+ * de qualquer usuário (cria nova assinatura + novo contrato pendente).
+ */
+export const manualRenewContractAction = adminAction
+  .metadata({ name: "manualRenewContract" })
+  .inputSchema(z.object({ instanceId: z.string().uuid() }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const newInstance = await contractService.renewContract(parsedInput.instanceId, false);
+      revalidatePath("/admin/contracts");
+      revalidatePath("/admin/users");
+      return { success: true, data: newInstance } as { success: boolean; error?: string; data?: ContractInstance };
+    } catch (error) {
+      const err = error as Error;
+      console.error("[manualRenewContractAction] Error:", err.message);
+      return { success: false, error: err.message || "Falha ao renovar o contrato." };
+    }
+  });
+
+/**
+ * Ação para o próprio aluno renovar seu contrato expirado.
+ */
+export const renewMyContractAction = protectedAction
+  .metadata({ name: "renewMyContract" })
+  .inputSchema(z.object({ instanceId: z.string().uuid() }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const instance = await contractRepository.findInstanceById(parsedInput.instanceId);
+      if (!instance) throw new Error("Contrato não encontrado.");
+      if (instance.userId !== ctx.user.id) throw new Error("Sem permissão para renovar este contrato.");
+      if (instance.status !== "expired") throw new Error("Este contrato não está expirado.");
+
+      const newInstance = await contractService.renewContract(parsedInput.instanceId, false);
+      revalidatePath("/student", "layout");
+      return { success: true, data: newInstance } as { success: boolean; error?: string; data?: ContractInstance };
+    } catch (error) {
+      const err = error as Error;
+      console.error("[renewMyContractAction] Error:", err.message);
+      return { success: false, error: err.message || "Falha ao renovar o contrato." };
+    }
+  });
+
 export const activateContractTemplateAction = adminAction
   .metadata({ name: "activateContractTemplate" })
   .inputSchema(z.object({ id: z.string().uuid() }))

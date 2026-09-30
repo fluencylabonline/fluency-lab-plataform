@@ -743,6 +743,7 @@
       "noContract": "Nenhum contrato ativo",
       "noContractDesc": "Você ainda não possui um contrato assinado nesta conta.",
       "pending": "Assinatura Pendente",
+      "renew": "Renovar Contrato",
       "resendEmail": "Receber por E-mail",
       "resendError": "Erro ao enviar e-mail. Tente novamente.",
       "resendSuccess": "Contrato enviado com sucesso para seu e-mail!",
@@ -2914,6 +2915,7 @@
     "update": "Atualizar",
     "updateError": "Erro ao atualizar aula.",
     "userContracts": "Contratos do Usuário",
+    "renewContract": "Renovar",
     "valid": "Válido",
     "validation": {
       "emailInvalid": "E-mail inválido.",

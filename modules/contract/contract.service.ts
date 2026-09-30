@@ -362,6 +362,9 @@ export const contractService = {
       throw new Error("Nenhuma assinatura ativa encontrada para renovação.");
     }
 
+    // 0. Marca o contrato antigo como expirado (está sendo substituído)
+    await contractRepository.updateInstance(oldInstance.id, { status: "expired" });
+
     // 1. Marca a assinatura antiga como concluída ("finished")
     await billingService.updateSubscription(oldSubscription.id, { status: "finished" });
 
@@ -405,6 +408,41 @@ export const contractService = {
     }
 
     return newInstance;
+  },
+
+  /**
+   * Varre contratos assinados vencidos (cron diário).
+   * - Se `autoRenew` estiver ligado, renova automaticamente (auto-assinatura).
+   * - Caso contrário, apenas marca o contrato como "expired" para que o
+   *   aluno/admin renove manualmente.
+   */
+  async processContractRenewals() {
+    const now = new Date();
+    const expiredInstances = await contractRepository.findExpiredSignedInstances(now);
+
+    const result = { renewed: 0, markedExpired: 0, failed: 0 };
+
+    for (const instance of expiredInstances) {
+      try {
+        if (instance.autoRenew) {
+          await this.renewContract(instance.id, true);
+          result.renewed++;
+        } else {
+          await contractRepository.updateInstance(instance.id, { status: "expired" });
+          result.markedExpired++;
+        }
+      } catch (error) {
+        console.error(`[ContractService.processContractRenewals] Falha ao renovar contrato ${instance.id}:`, error);
+        try {
+          await contractRepository.updateInstance(instance.id, { status: "expired" });
+        } catch (innerError) {
+          console.error(`[ContractService.processContractRenewals] Falha ao marcar contrato ${instance.id} como expirado:`, innerError);
+        }
+        result.failed++;
+      }
+    }
+
+    return result;
   },
 
   /**

@@ -743,6 +743,7 @@
       "noContract": "No active contract",
       "noContractDesc": "You don't have a signed contract in this account yet.",
       "pending": "Pending Signature",
+      "renew": "Renew Contract",
       "resendEmail": "Send to Email",
       "resendError": "Error sending email. Please try again.",
       "resendSuccess": "Contract successfully sent to your email!",
@@ -2915,6 +2916,7 @@
     "update": "Update",
     "updateError": "Error updating class.",
     "userContracts": "User Contracts",
+    "renewContract": "Renew",
     "valid": "Valid",
     "validation": {
       "emailInvalid": "Invalid email address.",

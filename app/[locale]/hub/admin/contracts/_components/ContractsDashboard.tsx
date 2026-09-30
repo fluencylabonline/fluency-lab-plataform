@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -38,6 +39,7 @@ import {
   resendContractEmailAction,
   activateContractTemplateAction,
   deleteContractTemplateAction,
+  manualRenewContractAction,
 } from "@/modules/contract/contract.actions";
 import {
   type ContractTemplate,
@@ -93,6 +95,7 @@ export function ContractsDashboard({
   initialSchoolSettings,
 }: ContractsDashboardProps) {
   const t = useTranslations("Contracts");
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   // Local dashboard state for instant UI updates
@@ -225,6 +228,23 @@ export function ContractsDashboard({
     }
   };
 
+  const handleRenewInstance = async (instanceId: string) => {
+    setActionLoadingId(instanceId);
+    try {
+      const result = await manualRenewContractAction({ instanceId });
+      if (result?.data?.success) {
+        notify.success(t("notifications.contractRenewed") || "Contrato renovado com sucesso!");
+        router.refresh();
+      } else {
+        notify.error(result?.data?.error || t("notifications.renewError") || "Erro ao renovar contrato.");
+      }
+    } catch {
+      notify.error(t("notifications.unexpectedError") || "Erro inesperado ao realizar operação.");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
   const handleActivateTemplate = async (templateId: string) => {
     setActionLoadingId(templateId);
     try {
@@ -347,6 +367,7 @@ export function ContractsDashboard({
               actionLoadingId={actionLoadingId}
               onDownload={handleDownloadContract}
               onResendEmail={handleResendEmail}
+              onRenew={handleRenewInstance}
             />
           </TabsContent>
 

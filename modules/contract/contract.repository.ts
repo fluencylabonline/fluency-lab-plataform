@@ -5,7 +5,7 @@ import {
   contractSignaturesMetadataTable,
   schoolSettingsTable 
 } from "./contract.schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, lt } from "drizzle-orm";
 
 /**
  * Repositório de Contratos (FluencyLab)
@@ -197,6 +197,19 @@ export const contractRepository = {
       orderBy: [desc(contractInstancesTable.createdAt)],
       with: {
         template: true,
+      },
+    });
+  },
+
+  async findExpiredSignedInstances(now: Date) {
+    return db.query.contractInstancesTable.findMany({
+      where: and(
+        eq(contractInstancesTable.status, "signed"),
+        lt(contractInstancesTable.expiresAt, now)
+      ),
+      with: {
+        template: true,
+        user: true,
       },
     });
   },
