@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { FileText, Eye, Download, Loader2 } from "lucide-react";
+import { FileText, Eye, Download, Loader2, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { SectionLabel } from "./UserDetailsPrimitives";
@@ -14,6 +14,7 @@ interface ContractsTabProps {
   contracts: ContractWithTemplate[];
   onViewContract: (id: string) => Promise<void>;
   onDownloadContract: (id: string) => Promise<void>;
+  onRenewContract?: (id: string) => Promise<void>;
   loadingContractId: string | null;
 }
 
@@ -21,6 +22,7 @@ export function ContractsTab({
   contracts,
   onViewContract,
   onDownloadContract,
+  onRenewContract,
   loadingContractId,
 }: ContractsTabProps) {
   const t = useTranslations("UserManagement");
@@ -73,24 +75,47 @@ export function ContractsTab({
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              {contract.status === "signed" && (
-                <div className="flex items-center gap-2 mr-2">
-                  {(!contract.expiresAt || new Date(contract.expiresAt) > new Date()) ? (
-                    <Badge variant="outline" className="text-[9px] h-4 font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
-                      {t("valid")}
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-[9px] h-4 font-black uppercase tracking-widest bg-destructive/10 text-destructive border-destructive/20">
-                      {t("expired")}
-                    </Badge>
-                  )}
-                  {contract.expiresAt && (
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest whitespace-nowrap">
-                      {t("validUntil")} {format(new Date(contract.expiresAt), "dd/MM/yyyy")}
-                    </span>
-                  )}
-                </div>
-              )}
+              {(contract.status === "signed" || contract.status === "expired") && (() => {
+                const isExpired =
+                  contract.status === "expired" ||
+                  (contract.expiresAt !== null && new Date(contract.expiresAt) <= new Date());
+                return (
+                  <div className="flex items-center gap-2 mr-2">
+                    {!isExpired ? (
+                      <Badge variant="outline" className="text-[9px] h-4 font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                        {t("valid")}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[9px] h-4 font-black uppercase tracking-widest bg-destructive/10 text-destructive border-destructive/20">
+                        {t("expired")}
+                      </Badge>
+                    )}
+                    {contract.expiresAt && (
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest whitespace-nowrap">
+                        {t("validUntil")} {format(new Date(contract.expiresAt), "dd/MM/yyyy")}
+                      </span>
+                    )}
+                    {isExpired && onRenewContract && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-[10px] font-black uppercase tracking-widest border-primary/30 text-primary hover:bg-primary/5 transition-all"
+                        onClick={() => onRenewContract(contract.id)}
+                        disabled={loadingContractId === contract.id}
+                      >
+                        {loadingContractId === contract.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <>
+                            <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                            {t("renewContract")}
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                );
+              })()}
 
               <Button
                 variant="outline"

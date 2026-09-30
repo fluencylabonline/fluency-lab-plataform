@@ -1,0 +1,43 @@
+name: Contracts Cron
+
+on:
+  schedule:
+    # Run daily at 04:00 AM UTC
+    - cron: "0 4 * * *"
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Contracts Renewal API
+        env:
+          APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ]; then
+            echo "Error: NEXT_PUBLIC_APP_URL secret is not set."
+            exit 1
+          fi
+          if [ -z "$CRON_SECRET" ]; then
+            echo "Error: CRON_SECRET secret is not set."
+            exit 1
+          fi
+
+          BASE_URL="${APP_URL%/}"
+          echo "Triggering Cron at: $BASE_URL/api/cron/contracts"
+
+          RESPONSE=$(curl -sL -w "\nHTTP_STATUS:%{http_code}" -X POST "$BASE_URL/api/cron/contracts" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -H "Content-Type: application/json")
+
+          echo "Response output:"
+          echo "$RESPONSE"
+
+          if [[ "$RESPONSE" == *"HTTP_STATUS:200"* ]]; then
+            echo "Cron executed successfully!"
+          else
+            echo "Cron execution failed!"
+            exit 1
+          fi

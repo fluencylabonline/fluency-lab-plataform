@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -38,6 +39,7 @@ import {
   resendContractEmailAction,
   activateContractTemplateAction,
   deleteContractTemplateAction,
+  manualRenewContractAction,
 } from "@/modules/contract/contract.actions";
 import {
   type ContractTemplate,
@@ -93,11 +95,13 @@ export function ContractsDashboard({
   initialSchoolSettings,
 }: ContractsDashboardProps) {
   const t = useTranslations("Contracts");
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   // Local dashboard state for instant UI updates
   const [templates, setTemplates] = useState<ContractTemplate[]>(initialTemplates);
-  const [instances] = useState<ContractInstanceExtended[]>(initialInstances);
+  // Sem cópia local: `initialInstances` vem do RSC pai e é atualizado via router.refresh().
+  const instances = initialInstances;
   const [schoolSettings, setSchoolSettings] = useState<SchoolSettings | null>(initialSchoolSettings);
 
   // Modals state
@@ -217,6 +221,23 @@ export function ContractsDashboard({
         notify.success(t("notifications.emailSent") || "E-mail com contrato enviado com sucesso.");
       } else {
         notify.error(result?.data?.error || t("notifications.emailError") || "Erro ao reenviar e-mail de contrato.");
+      }
+    } catch {
+      notify.error(t("notifications.unexpectedError") || "Erro inesperado ao realizar operação.");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleRenewInstance = async (instanceId: string) => {
+    setActionLoadingId(instanceId);
+    try {
+      const result = await manualRenewContractAction({ instanceId });
+      if (result?.data?.success) {
+        notify.success(t("notifications.contractRenewed") || "Contrato renovado com sucesso!");
+        router.refresh();
+      } else {
+        notify.error(result?.data?.error || t("notifications.renewError") || "Erro ao renovar contrato.");
       }
     } catch {
       notify.error(t("notifications.unexpectedError") || "Erro inesperado ao realizar operação.");
@@ -347,6 +368,7 @@ export function ContractsDashboard({
               actionLoadingId={actionLoadingId}
               onDownload={handleDownloadContract}
               onResendEmail={handleResendEmail}
+              onRenew={handleRenewInstance}
             />
           </TabsContent>
 

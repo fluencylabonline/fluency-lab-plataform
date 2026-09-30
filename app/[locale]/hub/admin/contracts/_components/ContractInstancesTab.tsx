@@ -8,6 +8,7 @@ import {
   Download,
   Mail,
   ExternalLink,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +35,7 @@ interface ContractInstancesTabProps {
   actionLoadingId: string | null;
   onDownload: (instanceId: string) => void;
   onResendEmail: (instanceId: string) => void;
+  onRenew: (instanceId: string) => void;
 }
 
 export function ContractInstancesTab({
@@ -41,6 +43,7 @@ export function ContractInstancesTab({
   actionLoadingId,
   onDownload,
   onResendEmail,
+  onRenew,
 }: ContractInstancesTabProps) {
   const t = useTranslations("Contracts");
 
@@ -141,6 +144,17 @@ export function ContractInstancesTab({
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {instance.status === "expired" && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onRenew(instance.id)}
+                            isLoading={actionLoadingId === instance.id}
+                            title={t("actions.renew") || "Renovar Contrato"}
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                          </Button>
+                        )}
                         {instance.status === "signed" && instance.pdfUrl && (
                           <>
                             <Button
@@ -247,6 +261,18 @@ export function ContractInstancesTab({
                       <ExternalLink className="w-3.5 h-3.5" />
                       <span>Verificar</span>
                     </a>
+                    {instance.status === "expired" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onRenew(instance.id)}
+                        isLoading={actionLoadingId === instance.id}
+                        className="text-xs h-9"
+                        leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+                      >
+                        Renovar
+                      </Button>
+                    )}
                     {instance.status === "signed" && (
                       <>
                         <Button

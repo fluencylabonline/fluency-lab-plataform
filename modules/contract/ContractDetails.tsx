@@ -13,10 +13,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { notify } from "@/components/ui/toaster";
-import { getContractDownloadUrlAction, resendContractEmailAction, signContractAction } from "@/modules/contract/contract.actions";
+import { getContractDownloadUrlAction, resendContractEmailAction, signContractAction, renewMyContractAction } from "@/modules/contract/contract.actions";
 import { format, differenceInDays } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { RefreshCw } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { ContractWithTemplate } from "@/modules/contract/contract.types";
@@ -33,10 +34,12 @@ interface ContractDetailsProps {
 export function ContractDetails({ contract, user }: ContractDetailsProps) {
   const t = useTranslations("Hub.Contract");
   const { locale } = useParams();
+  const router = useRouter();
   const [currentContract, setCurrentContract] = useState<ContractWithTemplate | null>(contract);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [isSigning, setIsSigning] = useState(false);
+  const [isRenewing, setIsRenewing] = useState(false);
   const [, setIsSignedDirectly] = useState(false);
   const [, setSignedDownloadUrl] = useState<string | null>(null);
 
@@ -142,6 +145,25 @@ export function ContractDetails({ contract, user }: ContractDetailsProps) {
       notify.error("Falha ao assinar contrato. Tente novamente.");
     } finally {
       setIsSigning(false);
+    }
+  };
+
+  const handleRenew = async () => {
+    if (!currentContract) return;
+    setIsRenewing(true);
+    try {
+      const result = await renewMyContractAction({ instanceId: currentContract.id });
+      if (result?.data?.success && result.data.data) {
+        notify.success("Contrato renovado! Assine o novo contrato para continuar.");
+        setCurrentContract(result.data.data as ContractWithTemplate);
+        router.refresh();
+      } else {
+        notify.error(result?.data?.error || "Erro ao renovar o contrato.");
+      }
+    } catch {
+      notify.error("Erro ao renovar o contrato.");
+    } finally {
+      setIsRenewing(false);
     }
   };
 
@@ -355,6 +377,20 @@ export function ContractDetails({ contract, user }: ContractDetailsProps) {
                 </h3>
 
                 <div className="flex flex-col gap-3">
+                  {isExpired && (
+                    <Button
+                      variant="default"
+                      fullWidth
+                      className="bg-violet-600 hover:bg-violet-500 text-white"
+                      leftIcon={<RefreshCw className="w-4 h-4" />}
+                      onClick={handleRenew}
+                      isLoading={isRenewing}
+                      disabled={isRenewing}
+                    >
+                      {t("renew") || "Renovar Contrato"}
+                    </Button>
+                  )}
+
                   <Button
                     variant="outline"
                     fullWidth
