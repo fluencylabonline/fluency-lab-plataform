@@ -278,28 +278,39 @@ export function TourOverlay({ steps, open, onClose }: TourOverlayProps) {
 
         if (isMobile) {
             // Largura já é fixada por `inset-x-4` na className — só a posição
-            // vertical muda. Em vez de exigir que o card caiba inteiro de um
-            // lado (o que falha quando o alvo é quase do tamanho da tela),
-            // escolhe sempre o lado com mais espaço e limita a altura do card
-            // a esse espaço, com scroll interno — assim ele nunca invade o
-            // retângulo do alvo, só fica mais baixo quando o espaço é curto.
-            const spaceBelow = vh - (rect.top + rect.height) - CARD_GAP - VIEWPORT_MARGIN;
-            const spaceAbove = rect.top - CARD_GAP - VIEWPORT_MARGIN;
+            // vertical muda. Usa a borda VISÍVEL do alvo (recortada pela
+            // viewport), não o retângulo inteiro: um alvo mais alto que a
+            // tela (ex.: a lista de pagamentos) tem `rect.top`/`rect.height`
+            // que vão muito além da viewport, e posicionar o card a partir
+            // deles jogava o card para fora da tela — sumia, não sobrepunha.
+            const visibleTop = Math.max(rect.top, 0);
+            const visibleBottom = Math.min(rect.top + rect.height, vh);
 
-            if (spaceBelow >= spaceAbove) {
-                return {
-                    top: rect.top + rect.height + CARD_GAP,
-                    maxHeight: Math.max(spaceBelow, 96),
-                    overflowY: "auto",
-                };
-            }
+            const spaceAbove = visibleTop - CARD_GAP - VIEWPORT_MARGIN * 2;
+            const spaceBelow = vh - visibleBottom - CARD_GAP - VIEWPORT_MARGIN * 2;
 
-            const maxHeight = Math.max(spaceAbove, 96);
-            return {
-                top: Math.max(VIEWPORT_MARGIN, rect.top - CARD_GAP - maxHeight),
-                maxHeight,
-                overflowY: "auto",
-            };
+            // Sempre escolhe o lado com mais espaço e limita a altura do card
+            // a ele, com scroll interno. Quando nenhum lado tem espaço de
+            // verdade (alvo cobre quase a tela toda), o `clamp` final ainda
+            // garante que o card fique inteiro dentro da viewport — o
+            // mínimo de overlap possível é preferível a um card invisível.
+            const minHeight = 96;
+            const below = spaceBelow >= spaceAbove;
+            const maxHeight = Math.min(
+                Math.max(below ? spaceBelow : spaceAbove, minHeight),
+                vh - VIEWPORT_MARGIN * 2,
+            );
+
+            const rawTop = below
+                ? visibleBottom + CARD_GAP
+                : visibleTop - CARD_GAP - maxHeight;
+
+            const top = Math.min(
+                Math.max(rawTop, VIEWPORT_MARGIN),
+                vh - maxHeight - VIEWPORT_MARGIN,
+            );
+
+            return { top, maxHeight, overflowY: "auto" };
         }
 
         const fitsBelow =
