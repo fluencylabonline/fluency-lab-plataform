@@ -16,6 +16,7 @@ import { Vault, VaultContent, VaultHeader, VaultTitle } from "@/components/ui/va
 import { cn } from "@/lib/utils";
 import { SettingsUserDTO } from "@/modules/user/user.schema";
 import { UserMenu } from "@/components/layout/user-menu";
+import { PageHelpButton } from "@/modules/page-help/_components/PageHelpButton";
 
 interface TasksPageClientProps {
   initialProjects: TaskProjectWithStatuses[];
@@ -79,7 +80,7 @@ export function TasksPageClient({ initialProjects, initialTasks, initialInboxSta
               <h1 className="text-lg font-bold truncate">
                 {selectedProject?.name || t("inbox")}
               </h1>
-              <Tabs value={view} onValueChange={(v) => setView(v as "list" | "kanban")} className="hidden sm:block ml-2">
+              <Tabs value={view} onValueChange={(v) => setView(v as "list" | "kanban")} className="hidden sm:block ml-2" data-tour="tasks.views">
                 <TabsList className="h-8">
                   <TabsTrigger value="list" className="gap-2 h-7 px-3">
                     <List className="w-3.5 h-3.5" />
@@ -103,6 +104,7 @@ export function TasksPageClient({ initialProjects, initialTasks, initialInboxSta
                 {view === "list" ? <LayoutGrid className="w-5 h-5" /> : <List className="w-5 h-5" />}
               </Button>
               <Button 
+                data-tour="tasks.new"
                 onClick={(e) => {
                   e.currentTarget.blur();
                   setIsCreateVaultOpen(true);
@@ -112,6 +114,7 @@ export function TasksPageClient({ initialProjects, initialTasks, initialInboxSta
               >
                 <Plus className="w-5 h-5 text-primary" />
               </Button>
+              <PageHelpButton />
               <UserMenu user={currentUser}/>
             </div>
           </div>

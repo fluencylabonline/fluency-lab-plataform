@@ -25,7 +25,7 @@ export function StepperWrapper({ currentStep, onStepClick, className }: StepperW
     return (
         <>
             {/* Desktop Sidebar Stepper */}
-            <div className={cn("hidden md:block h-full px-8 py-6 w-48 border-r border-gray-100 dark:border-gray-800", className)}>
+            <div className={cn("hidden md:block h-full px-8 py-6 w-48 border-r border-gray-100 dark:border-gray-800", className)} data-tour="manager-lesson-editor.stepper">
                 <Stepper
                     steps={steps}
                     currentStep={currentStep}
@@ -36,7 +36,7 @@ export function StepperWrapper({ currentStep, onStepClick, className }: StepperW
             </div>
 
             {/* Mobile Horizontal Stepper */}
-            <div className="md:hidden w-full border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md sticky top-[60px] z-40 py-4 px-4">
+            <div className="md:hidden w-full border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md sticky top-[60px] z-40 py-4 px-4" data-tour="manager-lesson-editor.stepper">
                 <Stepper
                     steps={steps}
                     currentStep={currentStep}

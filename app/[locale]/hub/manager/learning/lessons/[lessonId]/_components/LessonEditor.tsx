@@ -58,7 +58,7 @@ export function LessonEditor({ lesson }: LessonEditorProps) {
                 onStepClick={handleStepClick}
             />
 
-            <div className="flex-1 px-2 py-3">
+            <div className="flex-1 px-2 py-3" data-tour="manager-lesson-editor.content">
                 <StepRenderer
                     activeStep={activeStep}
                     lesson={lesson}

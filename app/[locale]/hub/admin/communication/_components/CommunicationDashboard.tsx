@@ -303,15 +303,15 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, initi
         <Tabs defaultValue="history" className="w-full">
           <div className="flex flex-col gap-4 sm:flex-row items-center justify-between mb-4">
             <TabsList>
-              <TabsTrigger value="history" className="flex items-center gap-2">
+              <TabsTrigger value="history" className="flex items-center gap-2" data-tour="admin-communication.notify">
                 <History className="w-4 h-4" />
                 Notificações
               </TabsTrigger>
-              <TabsTrigger value="whatsapp" className="flex items-center gap-2">
+              <TabsTrigger value="whatsapp" className="flex items-center gap-2" data-tour="admin-communication.templates">
                 <MessageSquare className="w-4 h-4" />
                 WhatsApp Business
               </TabsTrigger>
-              <TabsTrigger value="emails" className="flex items-center gap-2">
+              <TabsTrigger value="emails" className="flex items-center gap-2" data-tour="admin-communication.emails">
                 <Mail className="w-4 h-4" />
                 E-mails
               </TabsTrigger>

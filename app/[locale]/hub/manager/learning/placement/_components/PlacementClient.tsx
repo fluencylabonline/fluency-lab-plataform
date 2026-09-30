@@ -42,7 +42,8 @@ export function PlacementClient({ user, languages, initialStats }: PlacementClie
                 actions={[{
                     label: t("generate_questions") || "Generate Questions",
                     icon: <Plus className="w-5 h-5" />,
-                    onClick: () => setIsWizardOpen(true)
+                    onClick: () => setIsWizardOpen(true),
+                    dataTour: "manager-placement.generate"
                 }]}
                 className="contents"
             />
@@ -50,7 +51,7 @@ export function PlacementClient({ user, languages, initialStats }: PlacementClie
             <div className="container">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div className="flex items-center gap-4">
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1" data-tour="manager-placement.language">
                             <span className="text-xs font-medium text-muted-foreground uppercase">{t("language") || "Language"}</span>
                             <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
                                 <SelectTrigger className="w-[200px]">
@@ -67,7 +68,7 @@ export function PlacementClient({ user, languages, initialStats }: PlacementClie
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-6" data-tour="manager-placement.stats">
                         <div className="flex flex-col items-end">
                             <span className="text-2xl font-bold">{initialStats?.byStatus?.find((s) => s.status === "active")?.count || 0}</span>
                             <span className="text-xs text-muted-foreground uppercase">{t("active_questions") || "Active Questions"}</span>

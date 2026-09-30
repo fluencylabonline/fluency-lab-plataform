@@ -179,7 +179,7 @@ export function FinanceDashboard({
           </Select>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" data-tour="admin-finances.actions">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2">
@@ -236,7 +236,7 @@ export function FinanceDashboard({
       </section>
 
       {/* Fiscal (sempre anual, independente do filtro de mês) */}
-      <section className="flex flex-col gap-4">
+      <section className="flex flex-col gap-4" data-tour="admin-finances.fiscal">
         <SectionHeader title={t("sections.fiscal")} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FiscalSummaryCard irpfDue={initialMetrics.fiscal.irpfDue} year={currentYear} />
@@ -272,7 +272,7 @@ export function FinanceDashboard({
           <div className="p-6">
             <SectionHeader title={t("transactions.title")} />
           </div>
-          <div className="p-0">
+          <div className="p-0" data-tour="admin-finances.table">
             <TransactionsTable
               key={`${currentMonth}-${currentYear}-${currentStatus}-${currentSource}`}
               transactions={initialTransactions}

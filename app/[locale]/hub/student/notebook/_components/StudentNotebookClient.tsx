@@ -8,8 +8,7 @@ import { LearningItem } from "@/modules/curriculum/curriculum.types";
 import {
   Sparkles,
   ChevronRight,
-  BookMarkedIcon,
-  HelpCircle
+  BookMarkedIcon
 } from "lucide-react";
 import { StatsDashboard } from "./StatsDashboard";
 import { LearningPath } from "./LearningPath";
@@ -27,6 +26,7 @@ import {
 import { Notebook } from "@/modules/notebook/notebook.schema";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
 import { useWizard } from "@/hooks/ui/use-wizard";
+import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpProvider";
 
 interface StudentNotebookClientProps {
   stats: StudentLearningStats;
@@ -53,13 +53,15 @@ export function StudentNotebookClient({
   user
 }: StudentNotebookClientProps) {
   const t = useTranslations("NotebookHub");
-  const th = useTranslations("StudentHelpWizard");
   const [notebooksOpen, setNotebooksOpen] = useState(false);
   const {
     isOpen: isHelpOpen,
     setIsOpen: setIsHelpOpen,
     completeWizard: handleCompleteHelp,
   } = useWizard("student-notebook");
+
+  // O (?) do header abre este wizard. Ver .agents/rules/page-help.md
+  useRegisterPageHelp(setIsHelpOpen);
 
   // Lazy initializers read localStorage once on mount — no extra render, no effect needed
   const [wordOfTheDayOpen, setWordOfTheDayOpen] = useState(() => {
@@ -87,27 +89,24 @@ export function StudentNotebookClient({
         className="contents"
         actions={[
           {
-            label: th("common.helpLabel") || "Ajuda",
-            icon: <HelpCircle className="w-4 h-4" />,
-            onClick: () => setIsHelpOpen(true)
-          },
-          {
             label: t("notebooksLabel"),
             icon: <BookMarkedIcon className="w-4 h-4" />,
             onClick: () => setNotebooksOpen(true),
-            className: "lg:hidden"
+            className: "lg:hidden",
+            dataTour: "student-notebook.notebooks-button"
           },
           {
             label: t("wordOfTheDayLabel"),
             icon: <Sparkles className="w-4 h-4" />,
-            onClick: () => setWordOfTheDayOpen(true)
+            onClick: () => setWordOfTheDayOpen(true),
+            dataTour: "student-notebook.wotd"
           }
         ]}
       />
 
       <main className="container">
         {/* Mobile Stats Dashboard (Horizontal) */}
-        <div className="lg:hidden mb-6">
+        <div className="lg:hidden mb-6" data-tour="student-notebook.stats">
           <StatsDashboard
             stats={stats}
             learnedItems={learnedItems}
@@ -118,7 +117,7 @@ export function StudentNotebookClient({
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 items-start">
           {/* Column 1: Notebooks (Desktop only) */}
-          <section className="hidden lg:block lg:col-span-1 h-[calc(100vh-10rem)] sticky top-24 overflow-hidden">
+          <section className="hidden lg:block lg:col-span-1 h-[calc(100vh-10rem)] sticky top-24 overflow-hidden" data-tour="student-notebook.notebooks">
             <NotebooksCard
               initialNotebooks={initialNotebooks}
               studentName={user.name || "Estudante"}
@@ -137,11 +136,13 @@ export function StudentNotebookClient({
               </button>
             </div>
 
-            <LearningPath lessons={roadmap?.lessons || []} />
+            <div data-tour="student-notebook.path">
+              <LearningPath lessons={roadmap?.lessons || []} />
+            </div>
           </section>
 
           {/* Column 3: Stats (Desktop only - Vertical) */}
-          <section className="hidden lg:block lg:col-span-1 h-[calc(100vh-10rem)] sticky top-24">
+          <section className="hidden lg:block lg:col-span-1 h-[calc(100vh-10rem)] sticky top-24" data-tour="student-notebook.stats">
             <StatsDashboard
               stats={stats}
               learnedItems={learnedItems}

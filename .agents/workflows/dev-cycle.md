@@ -198,3 +198,4 @@ feature/xyz
 2. **Nunca rode `db:push:prod` ou `db:migrate:prod` sem ter testado no dev antes.**
 3. **Sempre rode `db:migrate:prod` antes ou logo após o merge** se houver mudança de schema — nunca deixe para depois.
 4. **O `.env.local` local SEMPRE aponta para o banco `dev`.** Só o Vercel (via env vars de produção) usa o banco `production`.
+5. **Mexeu em página? Atualize a ajuda dela antes do PR.** Botão novo ou removido, opção de `Select` alterada, regra de negócio mudada ou página nova → `modules/page-help/content/` nos dois idiomas. Checklist completo em `.agents/rules/page-help.md`.

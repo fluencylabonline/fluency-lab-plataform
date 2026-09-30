@@ -7,9 +7,9 @@ import { EmptyResults } from "@/components/ui/empty";
 import { StudentCard, type StudentWithNextClass } from "./StudentCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { containerVariants, itemVariants } from "@/lib/animations";
-import { HelpCircle } from "lucide-react";
 import { TeacherStudentsWizard } from "./TeacherStudentsWizard";
 import { useWizard } from "@/hooks/ui/use-wizard";
+import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpProvider";
 
 interface StudentsListProps {
   initialData: StudentWithNextClass[];
@@ -33,6 +33,9 @@ export function StudentsList({ initialData, user, title, subtitle }: StudentsLis
     completeWizard: handleCompleteWizard,
   } = useWizard("teacher-students");
 
+  // O (?) do header abre este wizard. Ver .agents/rules/page-help.md
+  useRegisterPageHelp(setWizardOpen);
+
   const filteredStudents = useMemo(() => {
     if (!search) return initialData;
     const lowerSearch = search.toLowerCase();
@@ -51,13 +54,6 @@ export function StudentsList({ initialData, user, title, subtitle }: StudentsLis
         user={user}
         onSearchChange={setSearch}
         className="contents"
-        actions={[
-          {
-            label: "Ajuda",
-            icon: <HelpCircle className="w-4 h-4" />,
-            onClick: () => setWizardOpen(true),
-          },
-        ]}
       />
       <TeacherStudentsWizard
         open={wizardOpen}
@@ -65,7 +61,7 @@ export function StudentsList({ initialData, user, title, subtitle }: StudentsLis
         onComplete={handleCompleteWizard}
       />
 
-      <main className="container">
+      <main className="container" data-tour="teacher-students.list">
         <AnimatePresence mode="popLayout">
           {filteredStudents.length > 0 ? (
             <motion.div

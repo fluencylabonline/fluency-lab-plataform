@@ -75,18 +75,20 @@ export default async function PracticePage({ params }: { params: Promise<{ local
       />
       <main className="container space-y-6">
         {/* Profile Header */}
-        <XPHeader 
-          user={{
-            name: user.name,
-            photoUrl: user.photoUrl,
-            currentXP: user.currentXP || 0,
-            streakCount: user.streakCount || 0,
-            pushNotificationsEnabled: user.pushNotificationsEnabled
-          }}
-        />
+        <div data-tour="student-practice.xp">
+          <XPHeader
+            user={{
+              name: user.name,
+              photoUrl: user.photoUrl,
+              currentXP: user.currentXP || 0,
+              streakCount: user.streakCount || 0,
+              pushNotificationsEnabled: user.pushNotificationsEnabled
+            }}
+          />
+        </div>
 
         <Tabs defaultValue="practice" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1 rounded-md">
+          <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1 rounded-md" data-tour="student-practice.tabs">
             <TabsTrigger value="practice" className="rounded-lg font-bold text-xs">{t('practiceTab')}</TabsTrigger>
             <TabsTrigger value="roadmap" className="rounded-lg font-bold text-xs">{t('roadmapTab')}</TabsTrigger>
             <TabsTrigger value="history" className="rounded-lg font-bold text-xs">{t('historyTab')}</TabsTrigger>
@@ -104,12 +106,14 @@ export default async function PracticePage({ params }: { params: Promise<{ local
               </div>
               
               {activePlan ? (
-                <LearningPath
-                  planId={activePlan.id}
-                  days={days}
-                  todayDay={clampedDay}
-                  userXP={user.currentXP || 0}
-                />
+                <div data-tour="student-practice.path">
+                  <LearningPath
+                    planId={activePlan.id}
+                    days={days}
+                    todayDay={clampedDay}
+                    userXP={user.currentXP || 0}
+                  />
+                </div>
               ) : (
                 <div className="w-full py-12">
                   <EmptyResults

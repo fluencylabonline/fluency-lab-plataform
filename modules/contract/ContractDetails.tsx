@@ -200,6 +200,7 @@ export function ContractDetails({ contract, user }: ContractDetailsProps) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            data-tour="student-contract.status"
             className={cn(
               "card p-6 flex flex-col md:flex-row items-center gap-6",
               isSigned && !isExpiringSoon && "border-teal-100 dark:border-teal-900/30",
@@ -347,6 +348,7 @@ export function ContractDetails({ contract, user }: ContractDetailsProps) {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
                 className="card p-6"
+                data-tour="student-contract.actions"
               >
                 <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-4">
                   {t("actionsTitle") || "Ações disponíveis"}

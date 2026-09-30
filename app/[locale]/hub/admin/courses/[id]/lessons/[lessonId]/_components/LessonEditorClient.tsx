@@ -223,6 +223,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                 <div className="pt-2">
                   <Button
                     type="submit"
+                    data-tour="admin-lesson-editor.save"
                     className="w-full h-12 rounded-md gap-2 font-bold"
                     disabled={(!isDirty && !isCreatingQuiz) || isSubmitting}
                   >
@@ -231,7 +232,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                 </div>
               </form>
 
-              <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
+              <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2" data-tour="admin-lesson-editor.tabs">
                 <button
                   onClick={() => setActiveTab("content")}
                   className={cn(
@@ -326,6 +327,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                   className="space-y-6"
+                  data-tour="admin-lesson-editor.blocks"
                 >
                   {blocks.map((block, index) => (
                     <div key={index} className="card relative group border-slate-200 dark:border-slate-800 p-6 overflow-hidden">

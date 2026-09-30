@@ -3,7 +3,7 @@
 import { useTranslations, useFormatter } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Play, RotateCcw, Clock, Languages, ChevronRight, Loader2, HelpCircle } from "lucide-react";
+import { Trophy, Play, RotateCcw, Clock, Languages, ChevronRight, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { mapEloToCEFR } from "@/lib/adaptive-scoring";
@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/header";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
 import { useWizard } from "@/hooks/ui/use-wizard";
+import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpProvider";
 
 interface PlacementHistoryItem {
   id: number;
@@ -78,7 +79,6 @@ function SectionLabel({ icon, children }: { icon: React.ReactNode; children: Rea
 
 export function PlacementDashboard({ initialData, user }: PlacementDashboardProps) {
   const t = useTranslations("Placement");
-  const th = useTranslations("StudentHelpWizard");
   const format = useFormatter();
   const router = useRouter();
   const [selectedTestResult, setSelectedTestResult] = useState<PlacementResult | null>(null);
@@ -91,13 +91,8 @@ export function PlacementDashboard({ initialData, user }: PlacementDashboardProp
     completeWizard: handleCompleteHelp,
   } = useWizard("student-placement");
 
-  const headerActions = [
-    {
-      icon: <HelpCircle className="h-5 w-5" />,
-      onClick: () => setIsHelpOpen(true),
-      label: th("common.helpLabel") || "Ajuda",
-    },
-  ];
+  // O (?) do header abre este wizard. Ver .agents/rules/page-help.md
+  useRegisterPageHelp(setIsHelpOpen);
 
   const handleViewResult = async (testId: number) => {
     setIsLoadingResult(true);
@@ -139,7 +134,6 @@ export function PlacementDashboard({ initialData, user }: PlacementDashboardProp
         user={user}
         backHref="/hub/student/profile"
         className="contents"
-        actions={headerActions}
       />
       <main className="container">
         <div className="space-y-12">
@@ -239,7 +233,7 @@ export function PlacementDashboard({ initialData, user }: PlacementDashboardProp
       )}
 
       {/* ── Available Languages ── */}
-      <section>
+      <section data-tour="student-placement.start">
         <SectionLabel icon={<Languages className="w-3.5 h-3.5" />}>
           {t("newPlacement") || "New Placement Test"}
         </SectionLabel>
@@ -271,7 +265,7 @@ export function PlacementDashboard({ initialData, user }: PlacementDashboardProp
       </section>
 
       {/* ── History ── */}
-      <section>
+      <section data-tour="student-placement.history">
         <SectionLabel icon={<Trophy className="w-3.5 h-3.5" />}>
           {t("history") || "My Results"}
         </SectionLabel>

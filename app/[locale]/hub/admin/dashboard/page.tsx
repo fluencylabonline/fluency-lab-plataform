@@ -83,7 +83,7 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
           <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60 px-0.5">
             {t("sections.finance")}
           </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-6 gap-4" data-tour="admin-dashboard.finance">
             <FinanceCharts
               data={data.finance.monthlyCashFlow}
               pendingIncome={data.finance.pendingIncome}
@@ -97,13 +97,13 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
             {t("sections.academic")}
           </h2>
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-            <div className="xl:col-span-2">
+            <div className="xl:col-span-2" data-tour="admin-dashboard.academic">
               <AcademicStats
                 attendance={data.academic.attendance}
                 popularCourses={data.academic.popularCourses}
               />
             </div>
-            <div className="xl:col-span-1">
+            <div className="xl:col-span-1" data-tour="admin-dashboard.funnel">
               <OnboardingFunnel data={data.academic.onboardingFunnel} />
             </div>
           </div>

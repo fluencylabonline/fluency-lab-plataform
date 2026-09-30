@@ -98,7 +98,7 @@ export function DocsQuestionsClient({
       />
 
       <main className="container max-w-5xl flex flex-col gap-6 pb-16 pt-4">
-        <div className="card grid grid-cols-1 divide-y divide-border/50 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        <div className="card grid grid-cols-1 divide-y divide-border/50 sm:grid-cols-3 sm:divide-x sm:divide-y-0" data-tour="admin-questions.stats">
           <StatBlock label="Perguntas feitas" value={String(stats.total)} />
           <StatBlock label="Sem resposta na doc" value={String(stats.unanswered)} accent />
           <StatBlock label="Marcadas como ruins" value={String(stats.notHelpful)} />
@@ -142,7 +142,7 @@ export function DocsQuestionsClient({
             description="Assim que alguém usar a IA da Central de Ajuda, as perguntas aparecem aqui."
           />
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2" data-tour="admin-questions.list">
             {groups.map(({ rows, key }) => {
               const first = rows[0];
               const audienceLabel =

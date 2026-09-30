@@ -96,14 +96,15 @@ export function ProfilesPageClient({ initialData, basePath = "/hub/manager/stude
         actions={[{
           label: "Novo Perfil",
           icon: <Sparkles className="h-4 w-4" />,
-          onClick: () => router.push(`${basePath}/new`)
+          onClick: () => router.push(`${basePath}/new`),
+          dataTour: "manager-onboarding.new"
         }]}
         backHref={basePath.split("/students/onboarding")[0] + "/users"}
       />
 
       <div className="container">
         {/* Profiles Grid/List */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2" data-tour="manager-onboarding.list">
           {filteredProfiles.length > 0 ? (
             filteredProfiles.map((profile) => (
               <div

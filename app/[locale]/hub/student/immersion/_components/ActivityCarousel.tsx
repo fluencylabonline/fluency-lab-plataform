@@ -28,7 +28,7 @@ interface ActivityCarouselProps {
 
 export function ActivityCarousel({ items }: ActivityCarouselProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-tour="student-immersion.activities">
       <h3 className="text-lg font-bold text-muted-foreground ml-1">
         Prática
       </h3>

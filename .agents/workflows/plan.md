@@ -24,6 +24,7 @@ O arquivo discovery_arquitetura.md DEVE conter exatamente esta estrutura:
 [ ] Validação Zod nas entradas.
 [ ] RBAC/ABAC (Permissões definidas no Service).
 [ ] Error Masking nas Actions.
+[ ] Ajuda de página atualizada (`modules/page-help/content/` em `pt` e `en`) — obrigatório se a feature cria uma página, ou muda botões, opções de `Select` ou regras visíveis de uma existente. Ver `.agents/rules/page-help.md`.
 
 4. 🛑 PERGUNTAS CRUCIAIS PARA O USUÁRIO (Ação Necessária)
    (Analise o escopo do usuário e faça perguntas indispensáveis e diretas sobre Regras de Negócio, Permissões, Casos de Erro ou UI. O que está faltando para que o código seja à prova de falhas?)

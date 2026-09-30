@@ -95,7 +95,7 @@ export function UserMenu({ user }: UserMenuProps) {
         return (
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full bg-muted/50 ml-1 border border-border">
+                    <Button variant="ghost" size="icon" className="rounded-full bg-muted/50 ml-1 border border-border" data-tour="chrome.account">
                         {AvatarEl}
                     </Button>
                 </DropdownMenuTrigger>
@@ -152,7 +152,7 @@ export function UserMenu({ user }: UserMenuProps) {
     return (
         <Vault>
             <VaultTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full bg-muted/50 ml-1 relative">
+                <Button variant="ghost" size="icon" className="rounded-full bg-muted/50 ml-1 relative" data-tour="chrome.account">
                     {AvatarEl}
                     {unreadCount > 0 && (
                         <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground ring-2 ring-background">

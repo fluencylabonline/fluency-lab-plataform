@@ -40,7 +40,7 @@ export function AddLessonVault({ availableLessons, onAdd, isAdding }: AddLessonV
     return (
         <Vault open={open} onOpenChange={setOpen}>
             <VaultTrigger asChild>
-                <Button className="rounded-2xl gap-2 font-bold px-6">
+                <Button data-tour="manager-path.add" className="rounded-2xl gap-2 font-bold px-6">
                     <Plus className="w-5 h-5" />
                     Add Lesson
                 </Button>

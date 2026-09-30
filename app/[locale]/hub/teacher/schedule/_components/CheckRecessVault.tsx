@@ -124,6 +124,7 @@ export function CheckRecessVault({ teacherId, iconOnly }: CheckRecessVaultProps)
       <VaultTrigger asChild>
         {iconOnly ? (
           <Button 
+            data-tour="teacher-schedule.check-recess"
             variant="ghost" 
             size="icon" 
             className="h-10 w-10 text-muted-foreground hover:text-foreground"
@@ -132,7 +133,7 @@ export function CheckRecessVault({ teacherId, iconOnly }: CheckRecessVaultProps)
             <span className="sr-only">{t('checkRecesses') || "Recessos"}</span>
           </Button>
         ) : (
-          <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5">
+          <Button data-tour="teacher-schedule.check-recess" variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5">
             <Calendar className="w-4 h-4 mr-2 text-primary" />
             {t('checkRecesses') || "Recessos"}
           </Button>

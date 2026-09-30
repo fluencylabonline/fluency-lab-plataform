@@ -36,7 +36,8 @@ export function LessonsPageContent({ user, initialLessons, languages }: LessonsP
                 actions={[{
                     label: t("create_lesson") || "Create Lesson",
                     icon: <Plus className="w-5 h-5" />,
-                    onClick: () => setIsVaultOpen(true)
+                    onClick: () => setIsVaultOpen(true),
+                    dataTour: "manager-lessons.create"
                 }]}
                 className="contents"
             />
@@ -47,7 +48,7 @@ export function LessonsPageContent({ user, initialLessons, languages }: LessonsP
                 onOpenChange={setIsVaultOpen}
             />
 
-            <main className="container">
+            <main className="container" data-tour="manager-lessons.list">
                 <LessonsList
                     initialLessons={initialLessons}
                     languages={languages}

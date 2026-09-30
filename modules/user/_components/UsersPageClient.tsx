@@ -2,9 +2,10 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, Mail, Shield, Sparkles, Skull, Users, HelpCircle, FileText, CreditCard, Calendar } from "lucide-react";
+import { Plus, Mail, Shield, Sparkles, Skull, Users, FileText, CreditCard, Calendar } from "lucide-react";
 import { CreateUserVault } from "./CreateUserVault";
 import { UsersHelpVault } from "./UsersHelpVault";
+import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpProvider";
 import { Header, type HeaderAction } from "@/components/layout/header";
 import { hasPermission, Role, UserRoles } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
@@ -46,6 +47,9 @@ export function UsersPageClient({
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+
+  // O (?) do header abre este vault. Ver .agents/rules/page-help.md
+  useRegisterPageHelp(setIsHelpOpen);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("student");
   const [statusFilter, setStatusFilter] = useState<string>("active");
@@ -112,22 +116,18 @@ export function UsersPageClient({
         user={currentUser}
         onSearchChange={setSearch}
         actions={([
-          {
-            label: "Ajuda",
-            icon: <HelpCircle className="w-4 h-4 text-muted-foreground hover:text-foreground" />,
-            onClick: () => setIsHelpOpen(true)
-          },
           hasPermission(currentUser, "user.create") ? {
             label: t("createUser"),
             icon: <Plus className="w-4 h-4" />,
-            onClick: () => setIsOpen(true)
+            onClick: () => setIsOpen(true),
+            dataTour: "users.create"
           } : null
         ] as (HeaderAction | null)[]).filter((action): action is HeaderAction => action !== null)}
         className="contents"
         showSubHeader={isMobile}
       />
       <main className="container">
-        <div className="flex flex-wrap md:flex-row gap-2 mb-4">
+        <div className="flex flex-wrap md:flex-row gap-2 mb-4" data-tour="users.filters">
           <div className="w-fit">
             <Select value={roleFilter} onValueChange={setRoleFilter}>
               <SelectTrigger>
@@ -186,6 +186,7 @@ export function UsersPageClient({
 
           <RoleGuard roles={[UserRoles.ADMIN, UserRoles.MANAGER]}>
             <Link
+              data-tour="users.onboarding"
               href={basePath.replace("/users", "/students/onboarding")}
               className={cn(buttonVariants({ variant: "outline" }), "shrink-0 border-primary/20 text-primary hover:bg-primary/5")}
             >
@@ -195,7 +196,7 @@ export function UsersPageClient({
         </div>
 
         {filteredUsers.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-tour="users.list">
             {filteredUsers.map((user) => (
               <Link
                 key={user.id}

@@ -158,6 +158,7 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
       initial="hidden"
       animate="visible"
       className="flex flex-col gap-4"
+      data-tour="student-payments.list"
     >
       {initialData.map((payment) => {
         const isPending = payment.status !== "paid";

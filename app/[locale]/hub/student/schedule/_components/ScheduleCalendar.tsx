@@ -11,9 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { Vault, VaultHeader, VaultTitle, VaultBody, VaultContent, VaultPrimaryButton, VaultSecondaryButton } from "@/components/ui/vault";
 import { VaultLoadingOverlay } from "@/components/ui/vault-loading-overlay";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, Clock, Ticket, HelpCircle, AlertCircle, Info } from "lucide-react";
+import { Calendar, User, Clock, Ticket, AlertCircle, Info } from "lucide-react";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
 import { useWizard } from "@/hooks/ui/use-wizard";
+import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpProvider";
 import { cancelClassAction } from "@/modules/scheduling/scheduling.actions";
 import { useRouter } from "next/navigation";
 import { RescheduleVault } from "./RescheduleVault";
@@ -39,7 +40,6 @@ interface ScheduleCalendarProps {
 
 export function ScheduleCalendar({ initialClasses, balance, rescheduleStats }: ScheduleCalendarProps) {
   const t = useTranslations("Schedule");
-  const th = useTranslations("StudentHelpWizard");
   const locale = useLocale();
   const router = useRouter();
   const dateLocale = locale === "pt" ? ptBR : enUS;
@@ -59,23 +59,20 @@ export function ScheduleCalendar({ initialClasses, balance, rescheduleStats }: S
     completeWizard: handleCompleteHelp,
   } = useWizard("student-schedule");
 
+  // O (?) do header abre este wizard. Ver .agents/rules/page-help.md
+  useRegisterPageHelp(setIsHelpOpen);
+
   const headerActions = useMemo(() => {
-    const actions = [
+    if (!isMobile) return [];
+    return [
       {
-        icon: <HelpCircle className="w-5 h-5" />,
-        onClick: () => setIsHelpOpen(true),
-        label: th("common.helpLabel") || "Ajuda",
-      }
-    ];
-    if (isMobile) {
-      actions.push({
         icon: <Ticket className="w-5 h-5" />,
         onClick: () => setIsCreditsOpen(true),
-        label: t("Credits.title") || "Créditos"
-      });
-    }
-    return actions;
-  }, [isMobile, t, th, setIsHelpOpen, setIsCreditsOpen]);
+        label: t("Credits.title") || "Créditos",
+        dataTour: "student-schedule.credits-button",
+      },
+    ];
+  }, [isMobile, t, setIsCreditsOpen]);
 
   const events = useMemo(() => {
     return initialClasses.map((cls): CalendarEvent => {
@@ -140,7 +137,7 @@ export function ScheduleCalendar({ initialClasses, balance, rescheduleStats }: S
       />
       <main className={isStandalone ? "" : "container"}>
         <div className="flex flex-col lg:grid lg:grid-cols-[1fr_300px] gap-6">
-          <div className="order-2 lg:order-1">
+          <div className="order-2 lg:order-1" data-tour="student-schedule.calendar">
             <CalendarView
               events={events}
               onEventClick={handleEventClick}
@@ -148,7 +145,7 @@ export function ScheduleCalendar({ initialClasses, balance, rescheduleStats }: S
             />
           </div>
 
-          <div className="hidden lg:flex flex-col gap-6 order-1 lg:order-2">
+          <div className="hidden lg:flex flex-col gap-6 order-1 lg:order-2" data-tour="student-schedule.credits">
             <CreditsSummary balance={balance} rescheduleStats={rescheduleStats} />
           </div>
 

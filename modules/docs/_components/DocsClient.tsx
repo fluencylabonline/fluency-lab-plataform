@@ -161,7 +161,7 @@ export function DocsClient({ audiences, whatsappNumber, user }: DocsClientProps)
       />
 
       {/* Busca fixa — o Header do hub tem 3rem, então ela encosta logo abaixo. */}
-      <div className="sticky top-12 z-20 border-b border-border/60 backdrop-blur-md">
+      <div className="sticky top-12 z-20 border-b border-border/60 backdrop-blur-md" data-tour="docs.search">
         <div className="container max-w-7xl py-3">
           <div className="relative">
             <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -310,17 +310,19 @@ export function DocsClient({ audiences, whatsappNumber, user }: DocsClientProps)
           <>
             {/* Sem busca ativa, o painel mostra exemplos de pergunta —
                 é o que ensina o usuário a usar bem a ferramenta. */}
-            <DocsAskPanel
-              audience={audienceId}
-              query={query}
-              submitCount={askSubmitCount}
-              whatsappNumber={whatsappNumber}
-              onOpenArticle={goToArticle}
-            />
+            <div data-tour="docs.ask">
+              <DocsAskPanel
+                audience={audienceId}
+                query={query}
+                submitCount={askSubmitCount}
+                whatsappNumber={whatsappNumber}
+                onOpenArticle={goToArticle}
+              />
+            </div>
 
           <div className="grid gap-6 lg:grid-cols-[16rem_1fr] lg:items-start">
             {/* Índice lateral */}
-            <nav className="flex gap-2 overflow-x-auto pb-2 lg:sticky lg:top-32 lg:flex-col lg:overflow-visible lg:pb-0">
+            <nav data-tour="docs.sections" className="flex gap-2 overflow-x-auto pb-2 lg:sticky lg:top-32 lg:flex-col lg:overflow-visible lg:pb-0">
               <div className="hidden items-center gap-2 px-2 pb-2 lg:flex">
                 <BookOpen className="size-3.5 text-muted-foreground" />
                 <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">

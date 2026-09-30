@@ -1,4 +1,5 @@
 import { Wizard } from "@/components/ui/wizard";
+import { ShowMeAroundButton } from "@/modules/page-help/_components/ShowMeAroundButton";
 import { useTranslations } from "next-intl";
 import {
   Wallet,
@@ -188,6 +189,7 @@ export function FinanceHelpWizard({ open, onOpenChange }: FinanceHelpWizardProps
       onOpenChange={onOpenChange}
       steps={steps}
       onComplete={() => onOpenChange(false)}
+      extraFooter={<ShowMeAroundButton variant="outline" />}
     />
   );
 }

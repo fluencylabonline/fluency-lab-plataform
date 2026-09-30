@@ -8,8 +8,10 @@ import {
   VaultTitle,
   VaultDescription,
   VaultIcon,
+  VaultFooter,
 } from "@/components/ui/vault";
 import { useParams } from "next/navigation";
+import { ShowMeAroundButton } from "@/modules/page-help/_components/ShowMeAroundButton";
 import { Info, HelpCircle } from "lucide-react";
 
 interface UsersHelpVaultProps {
@@ -109,6 +111,10 @@ export function UsersHelpVault({ open, onOpenChange }: UsersHelpVaultProps) {
             </div>
           </div>
         </VaultBody>
+
+        <VaultFooter className="flex-row items-center justify-end">
+          <ShowMeAroundButton />
+        </VaultFooter>
       </VaultContent>
     </Vault>
   );

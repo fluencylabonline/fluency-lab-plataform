@@ -75,6 +75,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="hidden md:flex flex-col items-center mx-auto lg:ml-2 max-h-full"
+                data-tour="chrome.nav"
             > 
                 <motion.div
                     layout
@@ -130,6 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
             <motion.nav
                 key="mobile-navbar"
                 className="vault-bar-layout md:hidden fixed bottom-0 left-0 right-0 px-4 py-2 z-40 flex items-center justify-between"
+                data-tour="chrome.nav"
             >
                 <motion.div className="flex items-center justify-between w-full gap-2">
                     <div className="flex items-center flex-1 min-w-0 overflow-x-auto no-scrollbar scroll-smooth gap-1">

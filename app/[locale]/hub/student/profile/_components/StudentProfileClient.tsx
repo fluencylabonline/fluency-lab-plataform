@@ -11,9 +11,9 @@ import { OnboardingStatusCard, type OnboardingVariant } from "./OnboardingStatus
 import { StreakWidget } from "./StreakWidget";
 import { PracticeStatusWidget } from "./PracticeStatusWidget";
 import { useTranslations } from "next-intl";
-import { HelpCircle } from "lucide-react";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
 import { useWizard } from "@/hooks/ui/use-wizard";
+import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpProvider";
 import type { User } from "@/modules/user/user.schema";
 import type { StudentProficiency } from "@/utils/proficiency";
 
@@ -90,7 +90,6 @@ export function StudentProfileClient({
   practiceStatus,
 }: StudentProfileClientProps) {
   const t = useTranslations("Hub.Profile");
-  const th = useTranslations("StudentHelpWizard");
   
   const {
     isOpen: isHelpOpen,
@@ -98,13 +97,8 @@ export function StudentProfileClient({
     completeWizard: handleCompleteHelp,
   } = useWizard("student-profile");
 
-  const headerActions = [
-    {
-      icon: <HelpCircle className="h-5 w-5" />,
-      onClick: () => setIsHelpOpen(true),
-      label: th("common.helpLabel") || "Ajuda",
-    },
-  ];
+  // O (?) do header abre este wizard. Ver .agents/rules/page-help.md
+  useRegisterPageHelp(setIsHelpOpen);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -113,7 +107,6 @@ export function StudentProfileClient({
         user={user}
         showSubHeader={false}
         className="contents"
-        actions={headerActions}
       />
 
       <main className="container">
@@ -121,22 +114,28 @@ export function StudentProfileClient({
           {/* Column 1: Identity & Onboarding */}
           <div className="flex flex-col gap-3">
             <ProfileCard user={user} />
+            <div data-tour="student-profile.onboarding">
             <OnboardingStatusCard
               contract={onboardingData.contract}
               placement={onboardingData.placement}
               course={onboardingData.course}
             />
-            <Badges proficiencies={proficiencies} />
+            </div>
+            <div data-tour="student-profile.badges">
+              <Badges proficiencies={proficiencies} />
+            </div>
           </div>
 
           {/* Column 2: Performance & Achievements */}
           <div className="flex flex-col gap-3">
+            <div data-tour="student-profile.progress">
             <ProgressStatusCard
               retentionRate={retentionRate}
               vocabularyLevel={vocabularyLevel}
               totalClasses={curriculumStats.totalClasses}
               completedClasses={curriculumStats.completedClasses}
             />
+            </div>
             <StreakWidget streak={user.streakCount} />
             <PracticeStatusWidget
               status={practiceStatus.status}
@@ -146,8 +145,12 @@ export function StudentProfileClient({
 
           {/* Column 3: Financial & Scheduling */}
           <div className="flex flex-col gap-3">
-            <StudentPaymentStatusCard subscription={subscriptionData} />
-            <NextClassCard nextClass={nextClassMapped} studentId={user.id} />
+            <div data-tour="student-profile.payment">
+              <StudentPaymentStatusCard subscription={subscriptionData} />
+            </div>
+            <div data-tour="student-profile.next-class">
+              <NextClassCard nextClass={nextClassMapped} studentId={user.id} />
+            </div>
           </div>
         </div>
         <PaymentOverdueVault subscription={subscriptionData} />

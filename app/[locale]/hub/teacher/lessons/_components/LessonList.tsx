@@ -90,7 +90,7 @@ export function LessonList({ initialData, languages }: LessonListProps) {
 
       <main className="container">
         {/* Filters */}
-        <div className="flex flex-wrap gap-2 items-center py-2 pb-6">
+        <div className="flex flex-wrap gap-2 items-center py-2 pb-6" data-tour="teacher-lessons.filters">
           <span className="text-xs font-bold uppercase text-muted-foreground mr-2">
             {t("filtersLabel") || "Filtros:"}
           </span>
@@ -143,7 +143,7 @@ export function LessonList({ initialData, languages }: LessonListProps) {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-tour="teacher-lessons.list">
               {filteredLessons.map((lesson) => (
                 <LessonCard
                   key={lesson.id}

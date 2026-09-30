@@ -31,6 +31,11 @@ interface WizardProps {
     steps: WizardStep[];
     onComplete?: () => void;
     onStepChange?: (stepIndex: number) => void;
+    /**
+     * Conteúdo fixo no rodapé, visível em todos os passos — é aqui que entra o
+     * botão "Me mostre" (`ShowMeAroundButton`) nos wizards de primeiro acesso.
+     */
+    extraFooter?: React.ReactNode;
 }
 
 const contentVariants: Variants = {
@@ -60,6 +65,7 @@ export function Wizard({
     steps,
     onComplete,
     onStepChange,
+    extraFooter,
 }: WizardProps) {
     const [currentStep, setCurrentStep] = useState(0);
     const [direction, setDirection] = useState(0);
@@ -158,6 +164,8 @@ export function Wizard({
                 </VaultBody>
 
                 <VaultFooter className="px-12 pb-6 pt-4 border-t-1 border-background z-10 relative flex flex-col items-center gap-4">
+                    {extraFooter}
+
                     <div className="flex w-full gap-1.5 justify-center">
                         {steps.map((_, idx) => (
                             <motion.div

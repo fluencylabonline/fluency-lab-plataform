@@ -81,7 +81,7 @@ export function ProcedureEditor({ initialData }: ProcedureEditorProps) {
         </div>
       </div>
 
-      <div className="p-0">
+      <div className="p-0" data-tour="admin-procedure.editor">
         <RichTextEditor 
           content={content} 
           onChange={setContent} 

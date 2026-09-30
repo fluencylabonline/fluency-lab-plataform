@@ -24,6 +24,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 9. **NUNCA** use `try/catch` em Components para capturar erros do `authClient`. O `authClient` retorna `AuthResult` — nunca lança. Exiba erros via `notify.error()` (Toast), nunca com estado inline (`setLocalError`).
 10. **NUNCA** faça `fetch("/api/auth/...")` direto do frontend. Use Server Actions via `authClient`.
 11. **NUNCA** gerencie estado de formulários complexos manualmente com `useState`. Use **React Hook Form** + **Zod** para validação e consistência. (Dica: Use `z.input<typeof schema>` para exportar tipos de form e evitar erros com campos `.default()`).
+12. **NUNCA** altere uma página sem verificar se a ajuda dela continua verdadeira. Botão novo, botão removido, opção de `Select` alterada, regra de negócio mudada, página nova → atualize `modules/page-help/content/` nos **dois** idiomas. Ver `.agents/rules/page-help.md`.
+13. **NUNCA** monte o botão `(?)` de ajuda à mão em `headerActions`. Ele vive dentro do `Header` e se resolve pela rota.
 
 ---
 
@@ -153,6 +155,7 @@ As regras completas vivem em arquivos separados. **Leia-os quando for implementa
 | `.agents/rules/structure.md` | Padrão Sanduíche, regras de RSC, Client Components, Server Actions, Diretórios | Sempre |
 | `.agents/rules/primitives.md` | O que cada camada FAZ e NÃO FAZ (Repository, Service, Action, Hook, Component) | Ao criar qualquer arquivo |
 | `.agents/rules/design.md` | Mobile-First, Responsive Behavior, Header, Vaults, Theming | Ao criar UI |
+| `.agents/rules/page-help.md` | Ajuda de página e tour guiado: onde vive o conteúdo, `data-tour`, checklist de manutenção | Ao criar ou alterar qualquer página de `/hub` |
 
 ---
 

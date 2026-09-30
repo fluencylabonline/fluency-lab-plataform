@@ -15,6 +15,7 @@ import { NotificationBell } from "@/modules/notification/_components/Notificatio
 import { SearchBar } from "../ui/search-bar";
 import { useDebounce } from "@/hooks/common/use-debounce";
 import { useUserStore } from "@/modules/user/user.store";
+import { PageHelpButton } from "@/modules/page-help/_components/PageHelpButton";
 
 export interface HeaderAction {
     label?: string;
@@ -23,6 +24,8 @@ export interface HeaderAction {
     href?: string;
     className?: string;
     component?: React.ReactNode;
+    /** Valor de `data-tour`, para o tour guiado destacar esta ação. */
+    dataTour?: string;
 }
 
 export interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -95,6 +98,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                             <Link
                                 key={index}
                                 href={act.href}
+                                data-tour={act.dataTour}
                                 className={cn(
                                     buttonVariants({
                                         variant: isMobileSlot ? "ghost" : "outline",
@@ -115,6 +119,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                         <Button
                             key={index}
                             onClick={act.onClick}
+                            data-tour={act.dataTour}
                             variant={isMobileSlot ? "ghost" : "outline"}
                             size={isMobileSlot ? "icon" : "sm"}
                             className={cn("h-9", isMobileSlot && "h-10 w-10", act.className)}
@@ -192,11 +197,12 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                     {isMobile ? (
                                         <>
                                             {onSearchChange && (
-                                                <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)}>
+                                                <Button variant="ghost" size="icon" data-tour="chrome.search" onClick={() => setIsSearchOpen(true)}>
                                                     <Search className="h-5 w-5" />
                                                 </Button>
                                             )}
                                             {backHref ? renderActions(true) : null}
+                                            <PageHelpButton size="mobile" />
                                             {displayUser && <UserMenu user={displayUser} />}
                                         </>
                                     ) : (
@@ -242,6 +248,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                                                         <Button
                                                                             variant="ghost"
                                                                             size="icon"
+                                                                            data-tour="chrome.search"
                                                                             className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full"
                                                                             onClick={() => setIsSearchOpen(true)}
                                                                             title="Buscar"
@@ -257,6 +264,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                                         <Button
                                                             key={index}
                                                             onClick={act.onClick}
+                                                            data-tour={act.dataTour}
                                                             variant="ghost"
                                                             size="icon"
                                                             className={cn("h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full", act.className)}
@@ -267,6 +275,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                                     ))}
                                                 </>
                                             )}
+                                            <PageHelpButton />
                                             <ThemeSwitcher />
                                             <NotificationBell />
                                             {displayUser && <UserMenu user={displayUser} />}
@@ -343,6 +352,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
+                                                        data-tour="chrome.search"
                                                         className="rounded-full"
                                                         onClick={() => setIsSearchOpen(true)}
                                                     >

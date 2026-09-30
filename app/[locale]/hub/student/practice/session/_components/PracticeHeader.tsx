@@ -3,6 +3,7 @@
 import { X, Flame } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { PageHelpButton } from "@/modules/page-help/_components/PageHelpButton";
 
 interface PracticeHeaderProps {
   progress: number; // 0 to 100
@@ -12,7 +13,7 @@ interface PracticeHeaderProps {
 
 export function PracticeHeader({ progress, streak = 0, onClose }: PracticeHeaderProps) {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 flex items-center gap-2 p-2 px-3 bg-background/80 backdrop-blur-sm border-b border-border">
+    <header data-tour="practice-session.progress" className="fixed top-0 left-0 right-0 z-50 flex items-center gap-2 p-2 px-3 bg-background/80 backdrop-blur-sm border-b border-border">
       <Button
         variant="ghost"
         size="icon"
@@ -39,6 +40,7 @@ export function PracticeHeader({ progress, streak = 0, onClose }: PracticeHeader
           <span className="text-base font-bold text-orange-500">{streak}</span>
         </div>
       )}
-    </header>
+                <PageHelpButton />
+        </header>
   );
 }

@@ -121,18 +121,18 @@ export function LessonDetailView({ lesson }: LessonDetailViewProps) {
 
         {/* Desktop Layout */}
         <div className="hidden lg:grid grid-cols-3 gap-8">
-          <div className="col-span-2">
+          <div className="col-span-2" data-tour="teacher-lesson.content">
             {ContentSection}
           </div>
-          <aside className="sticky top-6">
+          <aside className="sticky top-6" data-tour="teacher-lesson.items">
             {LearningItemsSection}
           </aside>
         </div>
 
         {/* Mobile/Tablet Layout (Tabs) */}
-        <div className="lg:hidden">
+        <div className="lg:hidden" data-tour="teacher-lesson.content">
           <Tabs defaultValue="content" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6 h-12 p-1 bg-muted/50 rounded-2xl">
+            <TabsList className="grid w-full grid-cols-2 mb-6 h-12 p-1 bg-muted/50 rounded-2xl" data-tour="teacher-lesson.items">
               <TabsTrigger value="content" className="rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
                 {t("tabContent") || "Conteúdo"}
               </TabsTrigger>
