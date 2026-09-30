@@ -246,8 +246,9 @@ export const renewMyContractAction = protectedAction
       if (instance.status !== "expired") throw new Error("Este contrato não está expirado.");
 
       const newInstance = await contractService.renewContract(parsedInput.instanceId, false);
+      const fullInstance = await contractRepository.findInstanceById(newInstance.id);
       revalidatePath("/student", "layout");
-      return { success: true, data: newInstance } as { success: boolean; error?: string; data?: ContractInstance };
+      return { success: true, data: fullInstance } as { success: boolean; error?: string; data?: ContractInstance };
     } catch (error) {
       const err = error as Error;
       console.error("[renewMyContractAction] Error:", err.message);

@@ -100,7 +100,8 @@ export function ContractsDashboard({
 
   // Local dashboard state for instant UI updates
   const [templates, setTemplates] = useState<ContractTemplate[]>(initialTemplates);
-  const [instances] = useState<ContractInstanceExtended[]>(initialInstances);
+  // Sem cópia local: `initialInstances` vem do RSC pai e é atualizado via router.refresh().
+  const instances = initialInstances;
   const [schoolSettings, setSchoolSettings] = useState<SchoolSettings | null>(initialSchoolSettings);
 
   // Modals state

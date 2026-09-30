@@ -153,8 +153,9 @@ export function ContractDetails({ contract, user }: ContractDetailsProps) {
     setIsRenewing(true);
     try {
       const result = await renewMyContractAction({ instanceId: currentContract.id });
-      if (result?.data?.success) {
+      if (result?.data?.success && result.data.data) {
         notify.success("Contrato renovado! Assine o novo contrato para continuar.");
+        setCurrentContract(result.data.data as ContractWithTemplate);
         router.refresh();
       } else {
         notify.error(result?.data?.error || "Erro ao renovar o contrato.");
