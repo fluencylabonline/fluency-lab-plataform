@@ -136,6 +136,7 @@ export default function LyricsTrainingGame({
             {status === "setup" ? (
               <motion.div
                 key="setup"
+                data-tour="immersion-lyrics.search"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -337,6 +338,7 @@ export default function LyricsTrainingGame({
             {status === "playing" ? (
               <motion.div
                 key="playing"
+                data-tour="immersion-lyrics.game"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}

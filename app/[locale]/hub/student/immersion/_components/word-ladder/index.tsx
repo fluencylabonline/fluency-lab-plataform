@@ -57,7 +57,7 @@ export default function WordLadderGame(props: WordLadderGameProps) {
   const headerActions = [
     {
       component: (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" data-tour="immersion-word-ladder.toolbar">
           <span className="hidden md:inline text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
             Idioma:
           </span>
@@ -126,7 +126,7 @@ export default function WordLadderGame(props: WordLadderGameProps) {
           <CarouselContent>
             {/* Slide 1: Board + Teclado */}
             <CarouselItem className="w-full flex flex-col items-center min-h-[calc(100dvh-200px)]">
-              <div className="flex-1 flex items-center justify-center w-full py-4">
+              <div className="flex-1 flex items-center justify-center w-full py-4" data-tour="immersion-word-ladder.board">
                 <WordLadderBoard
                   length={length}
                   steps={steps}

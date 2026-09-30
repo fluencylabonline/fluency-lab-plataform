@@ -46,6 +46,7 @@ export default async function RecessActivitiesPage() {
           </div>
           <Link
             href="/hub/teacher/recess/new"
+            data-tour="teacher-recess.new"
             className={buttonVariants({
               variant: "default",
               className:
@@ -68,7 +69,7 @@ export default async function RecessActivitiesPage() {
           </p>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6" data-tour="teacher-recess.list">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold tracking-tight">

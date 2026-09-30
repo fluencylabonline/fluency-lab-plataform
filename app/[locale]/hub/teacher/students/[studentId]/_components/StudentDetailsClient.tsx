@@ -8,7 +8,6 @@ import { StudentRoadmap } from "@/modules/learning/learning.types";
 import {
   Goal,
   Notebook as NotebookIcon,
-  HelpCircle,
   User,
 } from "lucide-react";
 import {
@@ -26,6 +25,7 @@ import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { Notebook } from "@/modules/notebook/notebook.schema";
 import { StudentDetailsWizard } from "./StudentDetailsWizard";
 import { useWizard } from "@/hooks/ui/use-wizard";
+import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpProvider";
 
 interface StudentDetailsClientProps {
   studentId: string;
@@ -56,12 +56,10 @@ export function StudentDetailsClient({
   } = useWizard("teacher-student-detail");
 
   // Botões de ação para o Header
+  // O (?) do header abre este wizard. Ver .agents/rules/page-help.md
+  useRegisterPageHelp(setIsHelpOpen);
+
   const headerActions = [
-    {
-      icon: <HelpCircle className="h-5 w-5" />,
-      onClick: () => setIsHelpOpen(true),
-      label: "Ajuda",
-    },
     ...(profileId ? [{
       icon: <User className="h-5 w-5" />,
       onClick: () => router.push(`/hub/teacher/students/${studentId}/profile`),
@@ -92,20 +90,20 @@ export function StudentDetailsClient({
       <main className="container">
         {/* Layout Desktop (3 Colunas) */}
         <div className="hidden lg:grid lg:grid-cols-3 gap-3">
-          <div className="h-[calc(100vh-110px)]">
+          <div className="h-[calc(100vh-110px)]" data-tour="teacher-student-detail.notebooks">
             <StudentNotebooksCard 
               studentId={studentId} 
               studentName={studentName}
               initialNotebooks={initialNotebooks} 
             />
           </div>
-          <div className="h-[calc(100vh-110px)]">
+          <div className="h-[calc(100vh-110px)]" data-tour="teacher-student-detail.plan">
             <StudentPlanCard 
               studentId={studentId} 
               initialData={initialRoadmap}
             />
           </div>
-          <div className="h-[calc(100vh-110px)] overflow-y-auto no-scrollbar">
+          <div className="h-[calc(100vh-110px)] overflow-y-auto no-scrollbar" data-tour="teacher-student-detail.classes">
             <StudentClassesCard
               studentId={studentId}
               initialData={initialClasses}
@@ -114,7 +112,7 @@ export function StudentDetailsClient({
         </div>
 
         {/* Layout Mobile (Apenas Classes) */}
-        <div className="lg:hidden h-[calc(100vh-150px)] overflow-y-auto no-scrollbar">
+        <div className="lg:hidden h-[calc(100vh-150px)] overflow-y-auto no-scrollbar" data-tour="teacher-student-detail.classes">
           <StudentClassesCard
             studentId={studentId}
             initialData={initialClasses}

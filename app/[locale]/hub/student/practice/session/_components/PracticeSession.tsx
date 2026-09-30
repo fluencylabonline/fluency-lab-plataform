@@ -190,7 +190,7 @@ export function PracticeSession({ session, planId, currentStreak, isReplay = fal
         onClose={() => setIsExitVaultOpen(true)}
       />
 
-      <main className="flex-1 flex flex-col items-center justify-center pt-20 pb-32 px-4 overflow-hidden">
+      <main className="flex-1 flex flex-col items-center justify-center pt-20 pb-32 px-4 overflow-hidden" data-tour="practice-session.exercise">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={currentIndex}

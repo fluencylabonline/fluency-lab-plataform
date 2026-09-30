@@ -29,7 +29,8 @@ export function LearningHubClient({ user, languages }: LearningHubClientProps) {
                 actions={[{
                     label: t("create_plan") || "Create Plan",
                     icon: <Plus className="w-5 h-5" />,
-                    onClick: () => setIsVaultOpen(true)
+                    onClick: () => setIsVaultOpen(true),
+                    dataTour: "manager-learning.create"
                 }]}
                 className="contents"
             />

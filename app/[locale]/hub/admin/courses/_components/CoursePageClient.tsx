@@ -116,7 +116,8 @@ export function CoursePageClient({ initialData, currentUser }: CoursePageClientP
         actions={[{
           label: t("createCourse"),
           icon: <Plus className="w-4 h-4" />,
-          onClick: () => setIsOpen(true)
+          onClick: () => setIsOpen(true),
+          dataTour: "admin-courses.create"
         }]}
       />
 
@@ -164,6 +165,7 @@ export function CoursePageClient({ initialData, currentUser }: CoursePageClientP
               initial="hidden"
               animate="visible"
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              data-tour="admin-courses.list"
             >
               {filteredCourses.map((course) => (
                 <motion.div

@@ -5,12 +5,13 @@ import { SecuritySettings } from "./SecuritySettings";
 import { AccountSettings } from "./AccountSettings";
 import { AppearanceSettings } from "@/modules/appearance/_components/AppearanceSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Palette, Bell, User, Shield, Smartphone, HelpCircle, Globe, MessageSquare } from "lucide-react";
+import { Palette, Bell, User, Shield, Smartphone, Globe, MessageSquare } from "lucide-react";
 import { AppSettings } from "./AppSettings";
 import type { NotificationPrefs, SettingsUserDTO } from "@/modules/user/user.schema";
 import { useTranslations } from "next-intl";
 import { StudentHelpWizard } from "@/app/[locale]/hub/student/_components/StudentHelpWizard";
 import { useWizard } from "@/hooks/ui/use-wizard";
+import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpProvider";
 import { PlatformSettings } from "./PlatformSettings";
 import { WhatsAppSettings } from "@/modules/settings/_components/WhatsAppSettings";
 import type { SystemSettings } from "@/modules/settings/settings.schema";
@@ -28,7 +29,6 @@ interface SettingsPageContentProps {
 export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
   const t = useTranslations("Settings");
   const tc = useTranslations("Common");
-  const th = useTranslations("StudentHelpWizard");
 
   const {
     isOpen: isHelpOpen,
@@ -36,13 +36,8 @@ export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
     completeWizard: handleCompleteHelp,
   } = useWizard("student-settings");
 
-  const headerActions = [
-    {
-      icon: <HelpCircle className="h-5 w-5" />,
-      onClick: () => setIsHelpOpen(true),
-      label: th("common.helpLabel") || "Ajuda",
-    },
-  ];
+  // O (?) do header abre este wizard. Ver .agents/rules/page-help.md
+  useRegisterPageHelp(setIsHelpOpen);
 
   return (
     <div>
@@ -50,13 +45,12 @@ export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
         title={tc("settings")}
         subtitle={t("subtitle")}
         className="contents"
-        actions={headerActions}
       />
 
       <div className="container">
         <Tabs defaultValue="account" className="w-full">
           <div className="overflow-x-auto pb-2 mb-4 scrollbar-none">
-            <TabsList className="w-full justify-start md:w-fit bg-transparent gap-2 p-0 h-auto">
+            <TabsList className="w-full justify-start md:w-fit bg-transparent gap-2 p-0 h-auto" data-tour="settings.tabs">
               <TabsTrigger 
                 value="account" 
                 className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-md border-none transition-all flex items-center gap-2"

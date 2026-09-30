@@ -655,6 +655,7 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             className="lg:col-span-8 space-y-6"
+            data-tour="admin-course-detail.sections"
           >
             <div className="flex items-center justify-between">
               <div>

@@ -121,7 +121,7 @@ export function RecessActivityEditorClient({
           <div className="lg:col-span-4 space-y-6">
             <div className="card p-6 space-y-6">
               <form onSubmit={handleSubmit(handleSave)} className="space-y-4">
-                <Field label={t('title') || "Título"} required error={errors.title?.message}>
+                <Field label={t('title') || "Título"} required error={errors.title?.message} data-tour="teacher-recess-editor.meta">
                   <Input {...form.register("title")} placeholder={t('titlePlaceholder') || "Ex: Prática de Conversação"} />
                 </Field>
 
@@ -178,7 +178,8 @@ export function RecessActivityEditorClient({
                 </div>
 
                 <Button 
-                  type="submit" 
+                  type="submit"
+                  data-tour="teacher-recess-editor.save" 
                   className="w-full gap-2 font-bold h-12 rounded-md"
                   disabled={isSubmitting}
                 >
@@ -187,7 +188,7 @@ export function RecessActivityEditorClient({
                 </Button>
               </form>
 
-              <div className="pt-6 border-t space-y-2">
+              <div className="pt-6 border-t space-y-2" data-tour="teacher-recess-editor.tabs">
                 <Button
                   variant={activeTab === "content" ? "default" : "ghost"}
                   className="w-full justify-start gap-3 h-12 rounded-md"

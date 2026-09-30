@@ -1,6 +1,7 @@
 "use client";
 
 import { Wizard } from "@/components/ui/wizard";
+import { ShowMeAroundButton } from "@/modules/page-help/_components/ShowMeAroundButton";
 import { Users, UserMinus, Search } from "lucide-react";
 
 interface TeacherStudentsWizardProps {
@@ -105,6 +106,7 @@ export function TeacherStudentsWizard({ open, onOpenChange, onComplete }: Teache
         onComplete?.();
         onOpenChange(false);
       }}
+      extraFooter={<ShowMeAroundButton variant="outline" />}
     />
   );
 }

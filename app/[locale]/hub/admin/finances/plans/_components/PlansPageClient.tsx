@@ -110,14 +110,15 @@ export function PlansPageClient({ initialPlans, languages, user }: PlansPageClie
         actions={[{
           label: t("newPlan") || "Novo Plano",
           icon: <Plus className="w-4 h-4" />,
-          onClick: handleCreate
+          onClick: handleCreate,
+          dataTour: "admin-plans.new"
         }]}
         backHref="/hub/admin/finances"
         className="contents"
       />
 
       <div className="container">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" data-tour="admin-plans.list">
           {plans.length === 0 ? (
             <div className="col-span-full h-64 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl border-border bg-card/50 text-muted-foreground animate-in fade-in zoom-in duration-300">
               <div className="p-4 bg-muted rounded-full mb-4">

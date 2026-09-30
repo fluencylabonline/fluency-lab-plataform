@@ -117,7 +117,8 @@ export function StudentPlayerClient({ courseData, enrollment, currentUser }: Stu
         actions={isMobile ? [{
           label: t('menu') || "Menu",
           icon: isSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />,
-          onClick: () => setIsSidebarOpen(!isSidebarOpen)
+          onClick: () => setIsSidebarOpen(!isSidebarOpen),
+          dataTour: "student-course-player.menu"
         }] : undefined}
         className="contents"
       />
@@ -136,6 +137,7 @@ export function StudentPlayerClient({ courseData, enrollment, currentUser }: Stu
         </AnimatePresence>
 
         <aside
+          data-tour="student-course-player.menu"
           className={cn(
             "absolute inset-y-0 left-0 z-10 w-80 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-transform lg:relative lg:translate-x-0",
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -202,7 +204,7 @@ export function StudentPlayerClient({ courseData, enrollment, currentUser }: Stu
           </div>
         </aside>
 
-        <main className="flex-1 overflow-y-auto bg-white dark:bg-black relative">
+        <main className="flex-1 overflow-y-auto bg-white dark:bg-black relative" data-tour="student-course-player.content">
           <AnimatePresence mode="wait">
             {currentLesson ? (
               <motion.div
@@ -223,6 +225,7 @@ export function StudentPlayerClient({ courseData, enrollment, currentUser }: Stu
                       </span>
                       <span>•</span>
                       <button
+                        data-tour="student-course-player.complete"
                         onClick={() => toggleLessonCompletion(currentLesson.id)}
                         className={cn(
                           "flex items-center gap-1 font-bold transition-colors",

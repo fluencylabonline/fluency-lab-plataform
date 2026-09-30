@@ -113,7 +113,7 @@ export function ForecastDetailsTable({ initialData }: ForecastDetailsTableProps)
   return (
     <div className="space-y-8">
       {/* Receitas Projetadas */}
-      <section className="space-y-4">
+      <section className="space-y-4" data-tour="admin-forecast.revenue">
         <div className="flex items-center justify-between gap-2 px-2">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-md bg-emerald-500/10 text-emerald-600">
@@ -248,7 +248,7 @@ export function ForecastDetailsTable({ initialData }: ForecastDetailsTableProps)
       </section>
 
       {/* Despesas Pendentes */}
-      <section className="space-y-4">
+      <section className="space-y-4" data-tour="admin-forecast.expenses">
         <div className="flex items-center justify-between gap-2 px-2">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-md bg-rose-500/10 text-rose-600">

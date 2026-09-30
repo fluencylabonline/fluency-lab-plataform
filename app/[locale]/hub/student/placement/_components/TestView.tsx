@@ -11,6 +11,7 @@ import { useTranslations } from "next-intl";
 import { usePlacementSound } from "@/hooks/ui/use-placement-sound";
 import { Question } from "@/modules/placement/placement.schema";
 import { UnscrambleView } from "./UnscrambleView";
+import { PageHelpButton } from "@/modules/page-help/_components/PageHelpButton";
 
 interface TestViewProps {
   currentQuestion: Question;
@@ -91,6 +92,7 @@ export const TestView = ({
         >
           <X className="h-6 w-6" />
         </Button>
+        <PageHelpButton />
         <div className="flex-1 h-4 bg-muted rounded-full overflow-hidden relative shadow-inner">
           <motion.div
             className="absolute top-0 left-0 h-full bg-green-500 rounded-full"
@@ -111,7 +113,7 @@ export const TestView = ({
           exit="exit"
           className="w-full flex-1 flex flex-col"
         >
-          <div className="flex-1 flex flex-col justify-center">
+          <div className="flex-1 flex flex-col justify-center" data-tour="placement-test.question">
             <div className="mb-8">
               {currentQuestion.metadata?.mediaUrl && (
                 <AudioPlayer
@@ -212,7 +214,7 @@ export const TestView = ({
         </motion.div>
       </AnimatePresence>
 
-      <div className="w-full py-6 mt-auto flex flex-col md:flex-row gap-4">
+      <div className="w-full py-6 mt-auto flex flex-col md:flex-row gap-4" data-tour="placement-test.actions">
         <Button
           variant="ghost"
           className="w-full md:w-auto font-bold text-muted-foreground hover:text-foreground uppercase tracking-widest"

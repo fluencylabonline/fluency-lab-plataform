@@ -171,6 +171,7 @@ export function TeacherScheduleClient({
 
   const renderCreateButton = (iconOnly: boolean) => (
     <Button 
+      data-tour="teacher-schedule.create-slot"
       onClick={() => setIsCreateOpen(true)}
       variant={iconOnly ? "ghost" : "default"}
       size={iconOnly ? "icon" : "sm"}
@@ -192,6 +193,7 @@ export function TeacherScheduleClient({
 
   const renderRecessLibraryButton = (iconOnly: boolean) => (
     <Button
+      data-tour="teacher-schedule.recess-library"
       onClick={() => router.push("/hub/teacher/recess")}
       variant={iconOnly ? "ghost" : "outline"}
       size={iconOnly ? "icon" : "sm"}
@@ -246,7 +248,7 @@ export function TeacherScheduleClient({
         showSubHeader={(!isStandalone)}
       />
 
-      <div className={isStandalone ? "" : "container"}>
+      <div className={isStandalone ? "" : "container"} data-tour="teacher-schedule.calendar">
         <CalendarView
           events={events}
           onEventClick={handleEventClick}

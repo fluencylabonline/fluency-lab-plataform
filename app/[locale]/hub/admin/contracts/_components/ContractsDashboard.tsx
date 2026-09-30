@@ -311,11 +311,11 @@ export function ContractsDashboard({
         {/* Tab system */}
         <Tabs defaultValue="templates">
           <TabsList variant="line" className="mb-6 flex gap-4 border-b border-gray-200/50 dark:border-gray-800 pb-px">
-            <TabsTrigger value="templates" className="pb-3 text-base">
+            <TabsTrigger value="templates" className="pb-3 text-base" data-tour="admin-contracts.templates">
               <FileCode className="w-4 h-4 mr-2" />
               {t("tabs.templates") || "Modelos de Contrato"}
             </TabsTrigger>
-            <TabsTrigger value="instances" className="pb-3 text-base">
+            <TabsTrigger value="instances" className="pb-3 text-base" data-tour="admin-contracts.instances">
               <CheckCircle2 className="w-4 h-4 mr-2" />
               {t("tabs.signatures") || "Assinaturas & Status"}
             </TabsTrigger>

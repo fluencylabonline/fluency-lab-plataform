@@ -23,7 +23,7 @@ export function ProjectSidebar({ projects, selectedId, onSelect, className, hide
   const [editingProject, setEditingProject] = useState<TaskProjectWithStatuses | null>(null);
 
   return (
-    <aside className={cn("flex flex-col", className)}>
+    <aside className={cn("flex flex-col", className)} data-tour="tasks.projects">
       {!hideTitle && (
         <div className="p-4 border-b">
           <h2 className="font-semibold text-xs uppercase tracking-widest text-muted-foreground/70">

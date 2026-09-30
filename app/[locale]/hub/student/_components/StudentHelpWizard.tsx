@@ -1,6 +1,7 @@
 "use client";
 
 import { Wizard } from "@/components/ui/wizard";
+import { ShowMeAroundButton } from "@/modules/page-help/_components/ShowMeAroundButton";
 import { useTranslations } from "next-intl";
 import {
   Trophy,
@@ -525,6 +526,7 @@ export function StudentHelpWizard({
         onComplete?.();
         onOpenChange(false);
       }}
+      extraFooter={<ShowMeAroundButton variant="outline" />}
     />
   );
 }

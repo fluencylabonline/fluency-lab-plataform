@@ -296,7 +296,7 @@ export function UserDetailsClient({
             </div>
           </div>
 
-          <TabsList className="mt-0 py-4 flex w-full justify-start overflow-x-auto flex-nowrap scrollbar-hide h-full bg-transparent border-none">
+          <TabsList className="mt-0 py-4 flex w-full justify-start overflow-x-auto flex-nowrap scrollbar-hide h-full bg-transparent border-none" data-tour="user-details.tabs">
 
             <TabsTrigger value="personal" className={tabTriggerClass}>
               {t("profile")}
@@ -351,6 +351,7 @@ export function UserDetailsClient({
           />
 
           {isAdmin && (
+            <div data-tour="user-details.actions">
             <ActionsTab
               userId={user.id}
               userName={user.name || ""}
@@ -369,6 +370,7 @@ export function UserDetailsClient({
               adminPassword={adminPassword}
               setAdminPassword={setAdminPassword}
             />
+            </div>
           )}
         </TabsContent>
 

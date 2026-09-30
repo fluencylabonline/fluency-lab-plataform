@@ -64,7 +64,7 @@ export function ProceduresList({ initialData }: ProceduresListProps) {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-        <div className="relative w-full md:w-96">
+        <div className="relative w-full md:w-96" data-tour="admin-procedures.search">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar procedimentos..."
@@ -74,6 +74,7 @@ export function ProceduresList({ initialData }: ProceduresListProps) {
           />
         </div>
         <Button 
+          data-tour="admin-procedures.new"
           onClick={() => setIsVaultOpen(true)}
           className="w-full md:w-auto h-11 rounded-xl gap-2"
         >

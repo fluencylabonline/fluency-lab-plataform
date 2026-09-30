@@ -891,7 +891,7 @@ export function StudentProfileSurvey({
         backHref={basePath}
       />
 
-      <main className="flex-1 container max-w-2xl py-8 pb-32">
+      <main className="flex-1 container max-w-2xl py-8 pb-32" data-tour="manager-onboarding.form">
         {/* Step pills nav */}
         <div className="flex items-center gap-1.5 mb-8 px-1">
           {steps.map((_, i) => (

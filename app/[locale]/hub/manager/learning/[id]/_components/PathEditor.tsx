@@ -158,7 +158,7 @@ export function PathEditor({ plan, availableLessons }: PathEditorProps) {
             </div>
 
             {/* Path List */}
-            <div className="space-y-4">
+            <div className="space-y-4" data-tour="manager-path.sequence">
                 {lessons.length > 0 ? (
                     <Reorder.Group
                         axis="y"

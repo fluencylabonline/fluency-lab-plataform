@@ -213,7 +213,7 @@ export function ProfileDiagnosisView({ profile, basePath = "/hub/manager/student
           {/* Main Content Area */}
           <div className="lg:col-span-8 space-y-8">
             {/* AI Diagnosis Section */}
-            <section className="space-y-4">
+            <section className="space-y-4" data-tour="teacher-student-profile.report">
               <div className="flex items-center gap-3">
                 <div className="size-10 rounded-md bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
                   <Sparkles className="size-5" />
@@ -253,7 +253,7 @@ export function ProfileDiagnosisView({ profile, basePath = "/hub/manager/student
 
             {/* Actions Section */}
             {!readOnly && (
-              <section className="space-y-4">
+              <section className="space-y-4" data-tour="manager-diagnosis.plan">
                 <div className="border border-border/60 rounded-md p-6 md:p-8 space-y-6">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="space-y-1">
@@ -379,7 +379,7 @@ export function ProfileDiagnosisView({ profile, basePath = "/hub/manager/student
             </div>
 
             {/* Metrics Card */}
-            <div className="border border-border/60 rounded-md p-6 space-y-6">
+            <div className="border border-border/60 rounded-md p-6 space-y-6" data-tour="teacher-student-profile.metrics">
               <h3 className="font-bold flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
                 <Target className="h-4 w-4 text-primary" /> Dados Estruturais
               </h3>

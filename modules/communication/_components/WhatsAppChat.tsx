@@ -56,6 +56,7 @@ import { notify } from "@/components/ui/toaster";
 import { useIsMobile } from "@/hooks/ui/use-device";
 import { cn } from "@/lib/utils";
 import { UserMenu } from "@/components/layout/user-menu";
+import { PageHelpButton } from "@/modules/page-help/_components/PageHelpButton";
 import { SettingsUserDTO } from "@/modules/user/user.schema";
 
 const WHATSAPP_TEMPLATES_WHITELIST = [
@@ -701,7 +702,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
         )}
       >
         {/* Header */}
-        <div className="flex-none px-4 pt-4 pb-3 border-b border-border/40 space-y-3">
+        <div className="flex-none px-4 pt-4 pb-3 border-b border-border/40 space-y-3" data-tour="conversas.list">
           <div className="flex items-center justify-between">
             <h2 className="text-[15px] font-bold text-foreground flex items-center gap-2">
               <MessageCircle className="w-4.5 h-4.5 text-primary" />
@@ -717,10 +718,12 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                   setIsNewChatOpen(true);
                 }}
                 className="w-8 h-8 rounded-full hover:bg-muted"
+                data-tour="conversas.new"
                 title="Nova Conversa por Template"
               >
                 <Plus className="w-4 h-4 text-foreground" />
               </Button>
+              <PageHelpButton />
               <UserMenu user={currentUser} />
             </div>
           </div>
@@ -1203,6 +1206,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                     }
                   }}
                   placeholder="Digite sua mensagem ou '/' para respostas..."
+                  data-tour="conversas.composer"
                   disabled={isSending}
                   className={cn(
                     "flex-1 h-11 px-4 text-[13.5px] rounded-full",

@@ -11,6 +11,7 @@ import {
   maskName
 } from "@/utils/format";
 import { BackButton } from "@/components/ui/back-button";
+import { PageHelpButton } from "@/modules/page-help/_components/PageHelpButton";
 
 export interface Receipt {
   id: string;
@@ -88,6 +89,7 @@ export function ReceiptView({ payment }: ReceiptViewProps) {
               <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/20">
                 <Wallet className="w-6 h-6 text-text" />
               </div>
+              <PageHelpButton className="text-text/70 hover:text-text" />
             </div>
 
             <h2 className="text-text text-4xl md:text-5xl font-bold leading-tight tracking-tight whitespace-pre-line">
@@ -189,6 +191,7 @@ export function ReceiptView({ payment }: ReceiptViewProps) {
 
           <div className="w-full md:w-auto flex flex-col items-center gap-3">
             <button
+              data-tour="receipt.download"
               onClick={handleDownload}
               disabled={isGenerating}
               className="w-full md:px-12 h-14 flex items-center justify-center gap-3 rounded-2xl font-bold text-text text-lg transition-all active:scale-95 disabled:opacity-60"

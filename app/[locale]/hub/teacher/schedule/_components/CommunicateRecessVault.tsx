@@ -201,6 +201,7 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
       <VaultTrigger asChild>
         {iconOnly ? (
           <Button 
+            data-tour="teacher-schedule.communicate-recess"
             variant="ghost" 
             size="icon" 
             className="h-10 w-10 text-muted-foreground hover:text-foreground"
@@ -209,7 +210,7 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
             <span className="sr-only">{t('communicateRecess') || "Comunicar Recesso"}</span>
           </Button>
         ) : (
-          <Button variant="outline" className="gap-2 font-bold">
+          <Button data-tour="teacher-schedule.communicate-recess" variant="outline" className="gap-2 font-bold">
             <ParasolIcon className="w-4 h-4 mr-2" />
             {t('communicateRecess') || "Comunicar Recesso"}
           </Button>

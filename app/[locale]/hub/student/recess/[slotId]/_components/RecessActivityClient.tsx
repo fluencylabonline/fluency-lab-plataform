@@ -114,7 +114,7 @@ export function RecessActivityClient({ slot, lesson, locale }: RecessActivityCli
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left/Middle: Lesson Content (2/3 width on desktop) */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6" data-tour="student-recess.content">
           <div className="card p-6 space-y-4">
             <div className="flex items-center justify-between border-b pb-4">
               <div className="flex items-center gap-2.5">
@@ -144,7 +144,7 @@ export function RecessActivityClient({ slot, lesson, locale }: RecessActivityCli
 
         {/* Right: Quiz (1/3 width on desktop) */}
         <div className="space-y-6">
-          <div className="card p-6 space-y-4">
+          <div className="card p-6 space-y-4" data-tour="student-recess.quiz">
             <div className="flex items-center gap-2 border-b pb-4">
               <HelpCircle className="w-5 h-5 text-primary" />
               <h3 className="font-bold">Praticar e Testar</h3>
