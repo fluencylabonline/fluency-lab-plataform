@@ -7,6 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { twMerge } from "tailwind-merge";
+import { useEffect, useRef } from "react";
 
 interface VaultItemProps {
   item: MenuItemType;
@@ -18,6 +19,21 @@ export default function VaultItem({
   const t = useTranslations("Navigation");
   const pathname = usePathname();
   const isActive = isPathActive(pathname, item.href);
+  const linkRef = useRef<HTMLAnchorElement>(null);
+
+  // Ao navegar, mantém o item ativo visível no bottom nav mobile (que rola
+  // horizontalmente) — sem isso, o item ganha texto e pode ficar fora da
+  // área visível. Roda só quando `isActive` muda, então não briga com o
+  // scroll manual do usuário.
+  useEffect(() => {
+    if (isActive) {
+      linkRef.current?.scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "nearest",
+      });
+    }
+  }, [isActive]);
 
   if (item.subItems) {
     return null;
@@ -28,6 +44,7 @@ export default function VaultItem({
 
   return (
     <Link
+      ref={linkRef}
       href={item.href}
       prefetch={true}
       className={twMerge(
