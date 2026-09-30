@@ -92,6 +92,13 @@
       "when": 1783393047250,
       "tag": "0012_add_quick_replies",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790782466223,
+      "tag": "0013_add_payment_expiry_fields",
+      "breakpoints": true
     }
   ]
 }

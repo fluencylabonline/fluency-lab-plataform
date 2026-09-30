@@ -935,7 +935,10 @@
         "regeneratePayment": "Update PIX Code",
         "regenerating": "Generating new code...",
         "regenerateSuccess": "New PIX code generated successfully!",
-        "payNow": "Pay now"
+        "payNow": "Pay now",
+        "codeExpired": "Code expired",
+        "codeExpiredTitle": "This PIX code has expired",
+        "codeExpiredDesc": "It can no longer be paid. Generate a new code to continue."
       },
       "ProgressHero": {
         "classes": "Classes",
@@ -2490,7 +2493,14 @@
     "copied": "Code copied!",
     "waitingPayment": "Waiting for payment confirmation...",
     "paymentConfirmed": "Payment confirmed! Finalizing your account...",
-    "helpInfo": "After payment, the system will automatically process the cancellation in a few moments."
+    "helpInfo": "After payment, the system will automatically process the cancellation in a few moments.",
+    "codeExpiredTitle": "This PIX code has expired",
+    "codeExpiredDesc": "It can no longer be paid. Generate a new code to continue.",
+    "generateNewCode": "Generate new code",
+    "regenerating": "Generating...",
+    "codeProblem": "Problem with the code? Generate a new one",
+    "codeRegenerated": "New PIX code generated successfully!",
+    "regenerateError": "Error generating a new code."
   },
   "StatsDashboard": {
     "dueToday": "Due Today",

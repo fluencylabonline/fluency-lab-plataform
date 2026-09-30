@@ -104,6 +104,10 @@ export const usersTable = pgTable("users", {
   cancellationPixCode: text("cancellation_pix_code"),
   cancellationPixImage: text("cancellation_pix_image"),
   cancellationAmount: integer("cancellation_amount"),
+  // Quando o PIX da taxa de cancelamento vence no gateway. Sem isso, o único
+  // jeito de saber que expirou era o aluno tentar pagar e falhar — agora dá
+  // pra avisar e oferecer "gerar novo código" antes disso acontecer.
+  cancellationPixExpiresAt: timestamp("cancellation_pix_expires_at"),
 
   // PWA Tracking
   pwaInstalled: boolean("pwa_installed").notNull().default(false),

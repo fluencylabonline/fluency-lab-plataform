@@ -295,11 +295,12 @@ export const contractService = {
     const result = await billingService.cancelSubscription(instance.subscriptionId);
 
     if (result.pixCode) {
-      return { 
-        success: true, 
-        feeRequired: true, 
-        pixCode: result.pixCode, 
+      return {
+        success: true,
+        feeRequired: true,
+        pixCode: result.pixCode,
         pixImage: result.pixImage,
+        pixExpiresAt: result.pixExpiresAt,
         amount: result.amount
       };
     }
