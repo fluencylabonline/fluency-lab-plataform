@@ -265,18 +265,30 @@ export function TourOverlay({ steps, open, onClose }: TourOverlayProps) {
 
     if (!mounted || !open || !step) return null;
 
-    /** Posição do card: no mobile sempre embaixo; no desktop, perto do alvo. */
+    /**
+     * Posição do card: perto do alvo, tanto no mobile quanto no desktop. Sem
+     * alvo (`rect` nulo), cai para o padrão — centralizado no desktop, colado
+     * embaixo no mobile — via `centred`/`bottom-4` na className.
+     */
     const cardStyle: React.CSSProperties = (() => {
-        if (isMobile || !rect) return {};
+        if (!rect) return {};
 
         const vh = window.innerHeight;
-        const vw = window.innerWidth;
         const height = cardHeight || 180;
 
         const fitsBelow =
             rect.top + rect.height + CARD_GAP + height + VIEWPORT_MARGIN < vh;
         const fitsAbove = rect.top - CARD_GAP - height - VIEWPORT_MARGIN > 0;
 
+        if (isMobile) {
+            // Largura já é fixada por `inset-x-4` na className — só a posição
+            // vertical muda, para o card nunca cobrir o alvo destacado.
+            if (fitsBelow) return { top: rect.top + rect.height + CARD_GAP };
+            if (fitsAbove) return { top: rect.top - CARD_GAP - height };
+            return { bottom: VIEWPORT_MARGIN };
+        }
+
+        const vw = window.innerWidth;
         const top = fitsBelow
             ? rect.top + rect.height + CARD_GAP
             : fitsAbove
@@ -356,7 +368,8 @@ export function TourOverlay({ steps, open, onClose }: TourOverlayProps) {
                     transition={{ duration: 0.2 }}
                     className={cn(
                         "fixed z-[71] rounded-2xl border border-border bg-background p-5 outline-none",
-                        isMobile && "inset-x-4 bottom-4",
+                        isMobile && !rect && "inset-x-4 bottom-4",
+                        isMobile && rect && "inset-x-4",
                         centred &&
                         "left-1/2 top-1/2 w-[min(344px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2",
                     )}
