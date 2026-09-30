@@ -16,6 +16,7 @@ import type { SubscriptionWithPlan, Installment } from "../../billing/billing.ty
 import type { SlotInstanceWithDetails } from "../../scheduling/scheduling.types";
 import type { ContractWithTemplate } from "../../contract/contract.types";
 import { updateUserAction, resendCancellationFeeAction, markCancellationFeePaidAction } from "../user.actions";
+import { regenerateCancellationFeeAction } from "@/modules/billing/billing.actions";
 import { getContractDownloadUrlAction } from "../../contract/contract.actions";
 import { updateInstallmentAction, generateInstallmentInvoiceAction, resendInstallmentReminderAction } from "../../billing/billing.actions";
 import { PersonalInfoTab } from "./userDetails/PersonalInfoTab";
@@ -216,6 +217,26 @@ export function UserDetailsClient({
     }
   };
 
+  // "Reenviar" manda de novo o MESMO código — inútil se ele já expirou no
+  // gateway. Isto gera um PIX novo de verdade (mesmo valor já calculado) e
+  // reenvia por e-mail/WhatsApp.
+  const handleRegenerateCancellationFee = async () => {
+    setIsUpdating(true);
+    try {
+      const result = await regenerateCancellationFeeAction({ userId: user.id });
+      if (result?.data?.success) {
+        notify.success("Novo código PIX da taxa de cancelamento gerado com sucesso!");
+        router.refresh();
+      } else {
+        notify.error(result?.data?.error || "Erro ao gerar novo código PIX.");
+      }
+    } catch {
+      notify.error("Erro ao processar solicitação.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const handleMarkCancellationFeeAsPaid = async (password: string) => {
     if (!password) return;
     setIsUpdating(true);
@@ -363,8 +384,10 @@ export function UserDetailsClient({
               cancellationPending={user.cancellationPending}
               cancellationPixCode={user.cancellationPixCode}
               cancellationPixImage={user.cancellationPixImage}
+              cancellationPixExpiresAt={user.cancellationPixExpiresAt}
               cancellationAmount={user.cancellationAmount}
               onResendCancellationFee={handleResendCancellationFee}
+              onRegenerateCancellationFee={handleRegenerateCancellationFee}
               onMarkCancellationFeeAsPaid={handleMarkCancellationFeeAsPaid}
               adminPassword={adminPassword}
               setAdminPassword={setAdminPassword}
@@ -391,8 +414,10 @@ export function UserDetailsClient({
               cancellationPending={user.cancellationPending}
               cancellationPixCode={user.cancellationPixCode}
               cancellationPixImage={user.cancellationPixImage}
+              cancellationPixExpiresAt={user.cancellationPixExpiresAt}
               cancellationAmount={user.cancellationAmount}
               onResendCancellationFee={handleResendCancellationFee}
+              onRegenerateCancellationFee={handleRegenerateCancellationFee}
               onMarkCancellationFeeAsPaid={handleMarkCancellationFeeAsPaid}
             />
           ) : (

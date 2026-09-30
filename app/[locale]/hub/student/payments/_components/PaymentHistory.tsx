@@ -3,7 +3,7 @@
 import { useTranslations, useFormatter } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { FileText, Receipt, ChevronDown, ChevronUp, Copy, RotateCw, CreditCard } from "lucide-react";
+import { FileText, Receipt, ChevronDown, ChevronUp, Copy, RotateCw, CreditCard, AlertTriangle } from "lucide-react";
 import { notify } from "@/components/ui/toaster";
 import { motion, AnimatePresence } from "framer-motion";
 import { containerVariants, itemVariants } from "@/lib/animations";
@@ -25,6 +25,7 @@ export interface PaymentRecord {
   };
   pixPayload?: string | null;
   pixImage?: string | null;
+  paymentExpiresAt?: Date | string | null;
 }
 
 interface PaymentHistoryProps {
@@ -163,6 +164,16 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
         const isPending = payment.status !== "paid";
         const hasActionDetails = isPending && !!payment.pixPayload;
         const isExpanded = expandedPaymentId === payment.id;
+        // O código pode ter vencido no gateway mesmo com o status local ainda
+        // "pending" ou já "cancelled" (é o que o sync marca quando confirma o
+        // vencimento) — por isso não dá pra confiar só no status para decidir
+        // se mostra o aviso e o botão de gerar de novo.
+        const isExpired = isPending && Boolean(
+          payment.paymentExpiresAt && new Date(payment.paymentExpiresAt) < new Date()
+        );
+        const canRegenerate =
+          payment.subscription?.plan?.currency !== "USD" &&
+          (payment.status === "overdue" || payment.status === "cancelled" || isExpired);
 
         return (
           <motion.div
@@ -195,8 +206,15 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
               <div className="flex flex-wrap items-center gap-4 md:gap-8">
                 <div className="text-right">
                   <p className="font-bold">{formatCurrency(payment.amount, payment.subscription?.plan?.currency)}</p>
-                  <div className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full inline-block ${getStatusColor(payment.status)}`}>
-                    {t(payment.status)}
+                  <div className="flex items-center justify-end gap-1.5">
+                    <div className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full inline-block ${getStatusColor(payment.status)}`}>
+                      {t(payment.status)}
+                    </div>
+                    {isExpired && (
+                      <div className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full inline-block text-red-500 bg-red-500/10">
+                        {tProfile("codeExpired") || "Código expirado"}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -261,14 +279,28 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
                       </div>
                       
                       <div className="flex-1 w-full space-y-3 min-w-0">
-                        <div className="text-center md:text-left">
-                          <p className="font-medium text-zinc-900 dark:text-zinc-100">
-                            {tProfile("pixInstructions") || "Pagamento via PIX"}
-                          </p>
-                          <p className="text-xs text-zinc-500 mt-1">
-                            {tProfile("pix_qr_instructions") || "Use o app do seu banco para escanear ou copie o código abaixo."}
-                          </p>
-                        </div>
+                        {isExpired ? (
+                          <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 text-left">
+                            <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                            <div>
+                              <p className="text-sm font-medium text-red-700 dark:text-red-400">
+                                {tProfile("codeExpiredTitle") || "Este código PIX expirou"}
+                              </p>
+                              <p className="text-xs text-red-600/80 dark:text-red-400/70 mt-0.5">
+                                {tProfile("codeExpiredDesc") || "Ele não pode mais ser pago. Gere um código novo para continuar."}
+                              </p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center md:text-left">
+                            <p className="font-medium text-zinc-900 dark:text-zinc-100">
+                              {tProfile("pixInstructions") || "Pagamento via PIX"}
+                            </p>
+                            <p className="text-xs text-zinc-500 mt-1">
+                              {tProfile("pix_qr_instructions") || "Use o app do seu banco para escanear ou copie o código abaixo."}
+                            </p>
+                          </div>
+                        )}
 
                         <div className="relative flex items-center w-full">
                           <div className="w-full flex items-center gap-2 p-1.5 pl-3 bg-zinc-100 dark:bg-zinc-800/80 rounded-lg border border-zinc-200 dark:border-zinc-700 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
@@ -311,8 +343,10 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
                               : tProfile("verifyPayment") || "Já paguei, verificar pagamento"}
                           </Button>
 
-                          {/* Regenerate expired PIX — only for overdue BRL */}
-                          {payment.status === "overdue" && payment.subscription?.plan?.currency !== "USD" && (
+                          {/* Gerar novo PIX — atrasado, cancelado (é o status que o sync usa
+                              quando o gateway confirma o vencimento) ou já vencido pela data
+                              que guardamos localmente. BRL apenas: em dólar é checkout Stripe. */}
+                          {canRegenerate && (
                             <Button
                               size="default"
                               variant="outline"

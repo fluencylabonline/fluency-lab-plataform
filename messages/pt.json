@@ -935,7 +935,10 @@
         "regeneratePayment": "Atualizar Código PIX",
         "regenerating": "Gerando novo código...",
         "regenerateSuccess": "Novo código PIX gerado com sucesso!",
-        "payNow": "Quero pagar agora"
+        "payNow": "Quero pagar agora",
+        "codeExpired": "Código expirado",
+        "codeExpiredTitle": "Este código PIX expirou",
+        "codeExpiredDesc": "Ele não pode mais ser pago. Gere um código novo para continuar."
       },
       "ProgressHero": {
         "classes": "Aulas",
@@ -2489,7 +2492,14 @@
     "copied": "Código copiado!",
     "waitingPayment": "Aguardando confirmação de pagamento...",
     "paymentConfirmed": "Pagamento confirmado! Finalizando sua conta...",
-    "helpInfo": "Após o pagamento, o sistema processará automaticamente o cancelamento em alguns instantes."
+    "helpInfo": "Após o pagamento, o sistema processará automaticamente o cancelamento em alguns instantes.",
+    "codeExpiredTitle": "Este código PIX expirou",
+    "codeExpiredDesc": "Ele não pode mais ser pago. Gere um código novo para continuar.",
+    "generateNewCode": "Gerar novo código",
+    "regenerating": "Gerando...",
+    "codeProblem": "Problema com o código? Gerar um novo",
+    "codeRegenerated": "Novo código PIX gerado com sucesso!",
+    "regenerateError": "Erro ao gerar novo código."
   },
   "StatsDashboard": {
     "dueToday": "Para Revisar",

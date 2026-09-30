@@ -62,6 +62,11 @@ export const installmentsTable = pgTable("installments", {
   stripePaymentIntentId: text("stripe_payment_intent_id"),
   pixPayload: text("pix_payload"), // For transparent checkout
   pixImage: text("pix_image"),     // For transparent checkout
+  // Quando o PIX (ou a sessão Stripe) vence no gateway. Vem direto da
+  // resposta do gateway na criação — sem isso, o único jeito de saber que
+  // expirou era o aluno clicar em "verificar" e o sistema descobrir a
+  // posteriori. Com isso dá pra avisar e oferecer "gerar novamente" antes.
+  paymentExpiresAt: timestamp("payment_expires_at"),
   paidAt: timestamp("paid_at"),
   notified2dAt: timestamp("notified_2d_at"),
   notifiedDueAt: timestamp("notified_due_at"),

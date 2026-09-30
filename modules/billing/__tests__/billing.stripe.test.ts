@@ -94,6 +94,7 @@ describe("Billing Gateway Dispatcher (Stripe Checkout vs AbacatePay)", () => {
     vi.mocked(createStripeCheckoutSession).mockResolvedValue({
       id: "cs_stripe_123",
       url: "https://checkout.stripe.com/pay/cs_stripe_123",
+      expires_at: 1700000000,
     } as unknown as Awaited<ReturnType<typeof createStripeCheckoutSession>>);
 
     // 3. Call service
@@ -118,6 +119,7 @@ describe("Billing Gateway Dispatcher (Stripe Checkout vs AbacatePay)", () => {
       pixPayload: "https://checkout.stripe.com/pay/cs_stripe_123",
       pixImage: null,
       status: "pending",
+      paymentExpiresAt: new Date(1700000000 * 1000),
     });
 
     expect(createPixCharge).not.toHaveBeenCalled();
@@ -160,6 +162,7 @@ describe("Billing Gateway Dispatcher (Stripe Checkout vs AbacatePay)", () => {
       id: "ch_abacate_123",
       brCode: "abacate_pix_copy_paste_payload",
       brCodeBase64: "abacate_qr_code_base64_data",
+      expiresAt: "2024-01-08T00:00:00.000Z",
     } as unknown as Awaited<ReturnType<typeof createPixCharge>>);
 
     // 3. Call service
@@ -174,6 +177,7 @@ describe("Billing Gateway Dispatcher (Stripe Checkout vs AbacatePay)", () => {
       pixPayload: "abacate_pix_copy_paste_payload",
       pixImage: "abacate_qr_code_base64_data",
       status: "pending",
+      paymentExpiresAt: new Date("2024-01-08T00:00:00.000Z"),
     });
   });
 

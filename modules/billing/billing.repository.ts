@@ -64,6 +64,17 @@ export const billingRepository = {
       with: { plan: true }
     });
   },
+  // A assinatura em processo de cancelamento, aguardando a taxa. Usado para
+  // regenerar o PIX da taxa quando o original expira.
+  async findPendingFeeSubscriptionByStudent(studentId: string) {
+    return db.query.subscriptionsTable.findFirst({
+      where: and(
+        eq(subscriptionsTable.studentId, studentId),
+        eq(subscriptionsTable.status, "pending_fee")
+      ),
+      with: { plan: true }
+    });
+  },
   async findSubscriptionsByStudent(studentId: string) {
     return db.query.subscriptionsTable.findMany({
       where: eq(subscriptionsTable.studentId, studentId),

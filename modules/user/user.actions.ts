@@ -480,6 +480,7 @@ export const requestStudentDeactivationAction = adminAction
         feeRequired: boolean;
         pixCode?: string;
         pixImage?: string;
+        pixExpiresAt?: string;
         amount?: number;
         error?: string;
       };
@@ -489,6 +490,7 @@ export const requestStudentDeactivationAction = adminAction
           cancellationPending: true,
           cancellationPixCode: result.pixCode,
           cancellationPixImage: result.pixImage,
+          cancellationPixExpiresAt: result.pixExpiresAt ? new Date(result.pixExpiresAt) : null,
           cancellationAmount: result.amount,
         });
       }

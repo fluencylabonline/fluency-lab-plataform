@@ -277,6 +277,29 @@ export const generateInstallmentInvoiceAction = protectedAction
     }
   });
 
+export const regenerateCancellationFeeAction = protectedAction
+  .metadata({ name: "regenerateCancellationFee" })
+  .inputSchema(z.object({ userId: z.string() }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      if (ctx.user.role !== "admin" && ctx.user.id !== parsedInput.userId) {
+        throw new Error("UNAUTHORIZED");
+      }
+
+      const result = await billingService.regenerateCancellationFee(parsedInput.userId);
+
+      revalidatePath("/pending-cancellation");
+      revalidatePath(`/hub/admin/users/${parsedInput.userId}`);
+      revalidatePath(`/hub/manager/users/${parsedInput.userId}`);
+
+      return { success: true, ...result };
+    } catch (error) {
+      console.error("[regenerateCancellationFeeAction] Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro ao gerar novo código de pagamento";
+      return { success: false, error: errorMessage };
+    }
+  });
+
 
 export const changeStudentPlanAction = managerAction
   .metadata({ name: "changeStudentPlan" })

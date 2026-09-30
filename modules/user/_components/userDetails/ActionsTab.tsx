@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
-import { AlertTriangle, Lock, UserMinus, CheckCircle2, Copy, Send } from "lucide-react";
+import { AlertTriangle, Lock, UserMinus, CheckCircle2, Copy, Send, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,8 +25,10 @@ interface ActionsTabProps {
   cancellationPending?: boolean;
   cancellationPixCode?: string | null;
   cancellationPixImage?: string | null;
+  cancellationPixExpiresAt?: Date | string | null;
   cancellationAmount?: number | null;
   onResendCancellationFee?: () => Promise<void>;
+  onRegenerateCancellationFee?: () => Promise<void>;
   onMarkCancellationFeeAsPaid?: (password: string) => Promise<void>;
   adminPassword?: string;
   setAdminPassword?: (p: string) => void;
@@ -44,8 +46,10 @@ export function ActionsTab({
   cancellationPending,
   cancellationPixCode,
   cancellationPixImage,
+  cancellationPixExpiresAt,
   cancellationAmount,
   onResendCancellationFee,
+  onRegenerateCancellationFee,
   onMarkCancellationFeeAsPaid,
   adminPassword: adminPasswordProp,
   setAdminPassword: setAdminPasswordProp,
@@ -57,7 +61,22 @@ export function ActionsTab({
   const [isPending, setIsPending] = useState(false);
   const [isConfirmingFee, setIsConfirmingFee] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [isRegeneratingFee, setIsRegeneratingFee] = useState(false);
   const [pixData, setPixData] = useState<{ pixCode: string; pixImage: string; amount?: number } | null>(null);
+
+  const isFeeExpired = Boolean(
+    cancellationPixExpiresAt && new Date(cancellationPixExpiresAt) < new Date()
+  );
+
+  const handleRegenerateFee = async () => {
+    if (!onRegenerateCancellationFee) return;
+    setIsRegeneratingFee(true);
+    try {
+      await onRegenerateCancellationFee();
+    } finally {
+      setIsRegeneratingFee(false);
+    }
+  };
 
   useEffect(() => {
     if (cancellationPixCode && cancellationPixImage) {
@@ -238,7 +257,13 @@ export function ActionsTab({
               ) : (
                 <div className="flex flex-col gap-6 items-center">
                   <div className="text-center">
-                    <Badge variant="outline" className="mb-2 font-black uppercase tracking-widest text-[9px] bg-amber-500/10 text-amber-500 border-amber-500/20">{t("waitingPayment")}</Badge>
+                    {isFeeExpired ? (
+                      <Badge variant="outline" className="mb-2 font-black uppercase tracking-widest text-[9px] bg-red-500/10 text-red-500 border-red-500/20">
+                        Código PIX expirado
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="mb-2 font-black uppercase tracking-widest text-[9px] bg-amber-500/10 text-amber-500 border-amber-500/20">{t("waitingPayment")}</Badge>
+                    )}
                     <p className="font-black text-sm tracking-tight">{t("feeGenerated")}</p>
                     {feeAmount && (
                       <p className="text-xl font-black text-primary mt-1">
@@ -249,6 +274,31 @@ export function ActionsTab({
                       {t("feeGeneratedDesc")}
                     </p>
                   </div>
+
+                  {isFeeExpired && onRegenerateCancellationFee && (
+                    <div className="w-full max-w-sm flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 text-left">
+                      <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                      <p className="text-xs text-red-700 dark:text-red-400">
+                        Este código venceu no gateway e não pode mais ser pago. &quot;Reenviar&quot; manda o mesmo código morto — gere um novo.
+                      </p>
+                    </div>
+                  )}
+
+                  {onRegenerateCancellationFee && (
+                    <div className={isFeeExpired ? "w-full max-w-sm" : "flex flex-col items-center gap-3"}>
+                      <Button
+                        type="button"
+                        variant={isFeeExpired ? "default" : "outline"}
+                        size="sm"
+                        className="w-full gap-2 font-bold text-xs"
+                        onClick={handleRegenerateFee}
+                        disabled={isRegeneratingFee}
+                      >
+                        <RotateCw className={isRegeneratingFee ? "w-3.5 h-3.5 animate-spin" : "w-3.5 h-3.5"} />
+                        {isRegeneratingFee ? "Gerando..." : "Gerar Novo PIX"}
+                      </Button>
+                    </div>
+                  )}
 
                   {pixData?.pixCode && (
                     <div className="p-4 bg-white rounded-md shadow-sm border flex flex-col items-center gap-4 w-full max-w-sm">

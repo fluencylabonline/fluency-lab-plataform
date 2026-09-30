@@ -12,6 +12,69 @@ import { Installment, installmentsTable, Subscription, abacatePayWebhookSchema, 
 import { eq, asc, and, ne, gte } from "drizzle-orm";
 import { decrypt } from "@/lib/cryptography";
 import { revalidatePath } from "next/cache";
+import type { User } from "../user/user.schema";
+
+/**
+ * Gera o PIX da taxa de cancelamento e envia por e-mail/WhatsApp.
+ *
+ * Compartilhado entre `cancelSubscription` (primeira geração, no pedido de
+ * desativação) e `regenerateCancellationFee` (quando o PIX original expira) —
+ * as duas fazem exatamente a mesma chamada à AbacatePay e o mesmo envio, só
+ * mudam o que fazem com o resultado depois.
+ */
+async function createCancellationFeePix(
+  student: User,
+  planName: string,
+  feeAmount: number,
+  subscriptionId: string,
+) {
+  let taxId = student.taxId || "00000000000";
+  let cellphone = student.cellphone || "00000000000";
+
+  if (taxId.includes(":")) taxId = decrypt(taxId);
+  if (cellphone.includes(":")) cellphone = decrypt(cellphone);
+
+  taxId = taxId.replace(/\D/g, "");
+  cellphone = cellphone.replace(/\D/g, "");
+
+  const pix = await createPixCharge({
+    amount: feeAmount,
+    description: `Taxa de Cancelamento - ${planName}`.slice(0, 30),
+    customer: {
+      name: student.name || "Aluno",
+      email: student.email || "",
+      taxId,
+      cellphone,
+    },
+    metadata: {
+      subscriptionId,
+      type: "cancellation_fee",
+    },
+  });
+
+  if (student.email) {
+    await communicationService.sendNewInvoiceEmail(student.email, {
+      studentName: student.name || "Aluno",
+      amount: feeAmount,
+      dueDate: new Date(pix.expiresAt),
+      pixPayload: pix.brCode,
+      pixImage: pix.brCodeBase64,
+      description: `Taxa de Cancelamento - ${planName}`,
+    });
+  }
+
+  if (cellphone && pix.brCode) {
+    await communicationService.sendPaymentReminderWhatsApp({
+      cellphone,
+      studentName: student.name || "Aluno",
+      amount: feeAmount,
+      dueDate: new Date(pix.expiresAt),
+      pixPayload: pix.brCode,
+    });
+  }
+
+  return pix;
+}
 
 export const billingService = {
   async getActiveSubscription(studentId: string) {
@@ -496,6 +559,7 @@ export const billingService = {
           pixPayload: session.url,
           pixImage: null,
           status: "pending",
+          paymentExpiresAt: session.expires_at ? new Date(session.expires_at * 1000) : null,
         });
 
         // Send email with payment link instead of Pix QR code
@@ -542,6 +606,7 @@ export const billingService = {
         abacatePayBillingId: null,
         pixPayload: null,
         pixImage: null,
+        paymentExpiresAt: null,
         status: "pending",
       });
     }
@@ -618,6 +683,7 @@ export const billingService = {
       abacatePayBillingId: pix.id,
       pixPayload: pix.brCode,
       pixImage: pix.brCodeBase64,
+      paymentExpiresAt: new Date(pix.expiresAt),
       status: "pending",
     });
 
@@ -682,45 +748,9 @@ export const billingService = {
       const feeAmount = Math.floor(sub.plan.price * 0.5);
 
       const student = await userService.getUser(sub.studentId);
+      if (!student) throw new Error("Aluno não encontrado");
 
-      // Create Fee via Transparent PIX (allows custom amount)
-      let taxId = student?.taxId || "00000000000";
-      let cellphone = student?.cellphone || "00000000000";
-
-      if (taxId.includes(":")) taxId = decrypt(taxId);
-      if (cellphone.includes(":")) cellphone = decrypt(cellphone);
-
-      taxId = taxId.replace(/\D/g, "");
-      cellphone = cellphone.replace(/\D/g, "");
-
-      const result = await createPixCharge({
-        amount: feeAmount,
-        description: `Taxa de Cancelamento - ${sub?.plan?.name || ""}`.slice(0, 30),
-        customer: {
-          name: student?.name || "Aluno",
-          email: student?.email || "",
-          taxId: taxId?.replace(/\D/g, "") || "",
-          cellphone: cellphone?.replace(/\D/g, "") || "",
-        },
-        metadata: {
-          subscriptionId: sub.id,
-          type: "cancellation_fee",
-        },
-      });
-
-      const pix = result;
-
-      // Send email with PIX for cancellation fee
-      if (student?.email) {
-        await communicationService.sendNewInvoiceEmail(student.email, {
-          studentName: student.name || "Aluno",
-          amount: feeAmount,
-          dueDate: new Date(pix.expiresAt),
-          pixPayload: pix.brCode,
-          pixImage: pix.brCodeBase64,
-          description: `Taxa de Cancelamento - ${sub?.plan?.name || ""}`,
-        });
-      }
+      const pix = await createCancellationFeePix(student, sub.plan.name, feeAmount, sub.id);
 
       await this.updateSubscription(sub.id, {
         status: "pending_fee",
@@ -728,22 +758,12 @@ export const billingService = {
         cancellationFeeInstallmentId: pix.id,
       });
 
-      // Send WhatsApp with PIX for cancellation fee
-      if (cellphone && pix.brCode) {
-        await communicationService.sendPaymentReminderWhatsApp({
-          cellphone: cellphone,
-          studentName: student?.name || "Aluno",
-          amount: feeAmount,
-          dueDate: new Date(pix.expiresAt),
-          pixPayload: pix.brCode,
-        });
-      }
-
-      return { 
-        success: true, 
-        feeRequired: true, 
-        pixCode: pix.brCode, 
+      return {
+        success: true,
+        feeRequired: true,
+        pixCode: pix.brCode,
         pixImage: pix.brCodeBase64,
+        pixExpiresAt: pix.expiresAt,
         amount: feeAmount
       };
     }
@@ -754,6 +774,52 @@ export const billingService = {
     });
 
     return { success: true };
+  },
+
+  /**
+   * Gera um PIX novo para a taxa de cancelamento quando o original expirou.
+   * Não existia nenhum jeito de fazer isso antes — "Reenviar Taxa" só
+   * reenviava o mesmo código morto por e-mail/WhatsApp, nunca criava um novo.
+   * Reaproveita o valor já calculado em `cancelSubscription` (não recalcula
+   * a partir do preço atual do plano, que pode ter mudado desde então).
+   */
+  async regenerateCancellationFee(studentId: string) {
+    const student = await userService.getUser(studentId);
+    if (!student) throw new Error("Aluno não encontrado");
+
+    if (!student.cancellationPending || !student.cancellationAmount) {
+      throw new Error("Este aluno não tem uma taxa de cancelamento pendente.");
+    }
+
+    const sub = await billingRepository.findPendingFeeSubscriptionByStudent(studentId);
+    if (!sub) throw new Error("Assinatura em processo de cancelamento não encontrada.");
+
+    const pix = await createCancellationFeePix(
+      student,
+      sub.plan?.name || "Plano",
+      student.cancellationAmount,
+      sub.id,
+    );
+
+    await userService.updateUser(studentId, {
+      cancellationPixCode: pix.brCode,
+      cancellationPixImage: pix.brCodeBase64,
+      cancellationPixExpiresAt: new Date(pix.expiresAt),
+    });
+
+    await this.updateSubscription(sub.id, {
+      cancellationFeeInstallmentId: pix.id,
+    });
+
+    revalidatePath("/pending-cancellation");
+    revalidatePath(`/hub/admin/users/${studentId}`);
+    revalidatePath(`/hub/manager/users/${studentId}`);
+
+    return {
+      pixCode: pix.brCode,
+      pixImage: pix.brCodeBase64,
+      pixExpiresAt: pix.expiresAt,
+    };
   },
 
   // 5. Get Active Payment (For Transparent Checkout)

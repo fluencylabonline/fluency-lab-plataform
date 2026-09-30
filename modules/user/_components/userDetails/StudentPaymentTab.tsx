@@ -38,8 +38,10 @@ interface StudentPaymentTabProps {
   cancellationPending?: boolean;
   cancellationPixCode?: string | null;
   cancellationPixImage?: string | null;
+  cancellationPixExpiresAt?: Date | string | null;
   cancellationAmount?: number | null;
   onResendCancellationFee?: () => Promise<void>;
+  onRegenerateCancellationFee?: () => Promise<void>;
   onMarkCancellationFeeAsPaid?: (password: string) => Promise<void>;
 }
 
@@ -60,8 +62,10 @@ export function StudentPaymentTab({
   cancellationPending,
   cancellationPixCode,
   cancellationPixImage,
+  cancellationPixExpiresAt,
   cancellationAmount,
   onResendCancellationFee,
+  onRegenerateCancellationFee,
   onMarkCancellationFeeAsPaid,
 }: StudentPaymentTabProps) {
   const t = useTranslations("UserManagement");
@@ -85,6 +89,10 @@ export function StudentPaymentTab({
     .filter((inst) => inst.status === "pending" || inst.status === "overdue")
     .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
 
+  const isFeeExpired = Boolean(
+    cancellationPixExpiresAt && new Date(cancellationPixExpiresAt) < new Date()
+  );
+
   return (
     <div className="flex flex-col gap-8">
       {/* Cancellation Fee Section */}
@@ -97,9 +105,15 @@ export function StudentPaymentTab({
                 Taxa de Cancelamento de Matrícula
               </p>
             </div>
-            <Badge variant="outline" className="text-[9px] h-4 font-black uppercase tracking-widest bg-amber-500/10 text-amber-500 border-amber-500/20">
-              Aguardando Pagamento
-            </Badge>
+            {isFeeExpired ? (
+              <Badge variant="outline" className="text-[9px] h-4 font-black uppercase tracking-widest bg-red-500/10 text-red-500 border-red-500/20">
+                Código Expirado
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-[9px] h-4 font-black uppercase tracking-widest bg-amber-500/10 text-amber-500 border-amber-500/20">
+                Aguardando Pagamento
+              </Badge>
+            )}
           </div>
 
           <div className="p-6 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -141,6 +155,24 @@ export function StudentPaymentTab({
                     <Copy className="w-3.5 h-3.5" />
                   </Button>
                 </div>
+                {isFeeExpired && (
+                  <p className="text-[11px] text-red-600 dark:text-red-400 text-left leading-relaxed">
+                    Este código venceu no gateway. &quot;Reenviar&quot; manda o mesmo código morto — gere um novo.
+                  </p>
+                )}
+
+                {onRegenerateCancellationFee && (
+                  <Button
+                    variant={isFeeExpired ? "default" : "outline"}
+                    size="sm"
+                    className="w-full gap-2 font-bold text-xs"
+                    onClick={onRegenerateCancellationFee}
+                  >
+                    <RotateCw className="w-3.5 h-3.5" />
+                    Gerar Novo PIX
+                  </Button>
+                )}
+
                 {onResendCancellationFee && (
                   <Button
                     variant="secondary"
@@ -406,8 +438,11 @@ export function StudentPaymentTab({
                                   </div>
                                 )}
 
-                                {/* Regenerate expired PIX — only for BRL overdue/cancelled */}
-                                {(inst.status === "overdue" || inst.status === "cancelled") &&
+                                {/* Gerar novo PIX — atrasado, cancelado (status que o sync usa
+                                    quando o gateway confirma vencimento) ou já vencido pela data
+                                    local. BRL apenas: em dólar é checkout Stripe. */}
+                                {(inst.status === "overdue" || inst.status === "cancelled" ||
+                                  Boolean(inst.paymentExpiresAt && new Date(inst.paymentExpiresAt) < new Date())) &&
                                   activeSubscription?.plan?.currency !== "USD" && (
                                     <Button
                                       variant="outline"
