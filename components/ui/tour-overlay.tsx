@@ -276,17 +276,35 @@ export function TourOverlay({ steps, open, onClose }: TourOverlayProps) {
         const vh = window.innerHeight;
         const height = cardHeight || 180;
 
+        if (isMobile) {
+            // Largura já é fixada por `inset-x-4` na className — só a posição
+            // vertical muda. Em vez de exigir que o card caiba inteiro de um
+            // lado (o que falha quando o alvo é quase do tamanho da tela),
+            // escolhe sempre o lado com mais espaço e limita a altura do card
+            // a esse espaço, com scroll interno — assim ele nunca invade o
+            // retângulo do alvo, só fica mais baixo quando o espaço é curto.
+            const spaceBelow = vh - (rect.top + rect.height) - CARD_GAP - VIEWPORT_MARGIN;
+            const spaceAbove = rect.top - CARD_GAP - VIEWPORT_MARGIN;
+
+            if (spaceBelow >= spaceAbove) {
+                return {
+                    top: rect.top + rect.height + CARD_GAP,
+                    maxHeight: Math.max(spaceBelow, 96),
+                    overflowY: "auto",
+                };
+            }
+
+            const maxHeight = Math.max(spaceAbove, 96);
+            return {
+                top: Math.max(VIEWPORT_MARGIN, rect.top - CARD_GAP - maxHeight),
+                maxHeight,
+                overflowY: "auto",
+            };
+        }
+
         const fitsBelow =
             rect.top + rect.height + CARD_GAP + height + VIEWPORT_MARGIN < vh;
         const fitsAbove = rect.top - CARD_GAP - height - VIEWPORT_MARGIN > 0;
-
-        if (isMobile) {
-            // Largura já é fixada por `inset-x-4` na className — só a posição
-            // vertical muda, para o card nunca cobrir o alvo destacado.
-            if (fitsBelow) return { top: rect.top + rect.height + CARD_GAP };
-            if (fitsAbove) return { top: rect.top - CARD_GAP - height };
-            return { bottom: VIEWPORT_MARGIN };
-        }
 
         const vw = window.innerWidth;
         const top = fitsBelow
