@@ -156,6 +156,7 @@ export function TeacherScheduleTab({ teacherId }: TeacherScheduleTabProps) {
       status: slot.status,
       type: slot.type || "NORMAL",
       isRecurring: !!slot.ruleId,
+      ruleId: slot.ruleId,
       ruleStartDate: slot.rule?.startDate ? new Date(slot.rule.startDate) : undefined,
       ruleEndDate: slot.rule?.endDate ? new Date(slot.rule.endDate) : null,
       location: (slot.lessonTitle || slot.planName) || undefined,

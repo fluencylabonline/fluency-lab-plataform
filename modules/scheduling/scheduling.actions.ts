@@ -219,24 +219,23 @@ export const checkSlotConflictAction = protectedAction
     startAt: z.string().datetime(),
     endAt: z.string().datetime(),
     excludeSlotId: z.string().uuid().optional(),
+    studentId: z.string().optional(), // Também verifica a agenda do aluno
   }))
   .action(async ({ parsedInput }) => {
     try {
-      const conflict = await schedulingRepository.findOverlappingSlot(
+      const conflict = await schedulingService.findSlotConflict(
         parsedInput.teacherId,
         new Date(parsedInput.startAt),
         new Date(parsedInput.endAt),
-        parsedInput.excludeSlotId
+        parsedInput.excludeSlotId,
+        parsedInput.studentId
       );
 
       if (conflict) {
         return {
           success: true,
           hasConflict: true,
-          conflict: {
-            startAt: conflict.startAt,
-            endAt: conflict.endAt,
-          }
+          conflict,
         };
       }
 
@@ -308,7 +307,8 @@ export const retimeRecurrenceAction = protectedAction
         parsedInput.ruleId,
         parsedInput.newStartTime,
         parsedInput.newEndTime,
-        parsedInput.newStartDate
+        parsedInput.newStartDate,
+        parsedInput.fromSlotId
       );
       revalidatePath("/");
       return { success: true, updatedCount: result.updatedCount };

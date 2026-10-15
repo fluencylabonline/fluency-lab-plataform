@@ -12,8 +12,10 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  CalendarClock
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +39,7 @@ interface ClassCardProps {
   onUpdateStatus: (slotId: string, status: SlotInstanceWithDetails["status"]) => void;
   onSwapTeacher: (slot: SlotInstanceWithDetails) => void;
   onUpdateLesson: (slot: SlotInstanceWithDetails) => void;
+  onChangeTime: (slot: SlotInstanceWithDetails) => void;
   /** The video call session matched to this class, when one took place. */
   callSession?: CallSession;
   /** Recordings are admin-only; managers still get transcripts. */
@@ -50,6 +53,7 @@ export function ClassCard({
   onUpdateStatus,
   onSwapTeacher,
   onUpdateLesson,
+  onChangeTime,
   callSession,
   canViewRecordings = false,
 }: ClassCardProps) {
@@ -64,7 +68,9 @@ export function ClassCard({
     "teacher-recess": { label: "Recesso", color: "bg-purple-500/10 text-purple-500 border-purple-500/20", icon: Clock },
   };
 
+  const tChangeTime = useTranslations("ChangeClassTime");
   const config = statusConfig[slot.status] || statusConfig.scheduled;
+  const canChangeTime = slot.status === "scheduled" && new Date(slot.startAt) > new Date();
   const StatusIcon = config.icon;
 
   return (
@@ -133,6 +139,11 @@ export function ClassCard({
               <DropdownMenuItem onClick={() => onUpdateLesson(slot)}>
                 <BookOpen className="mr-2 h-4 w-4" /> Alterar Lição
               </DropdownMenuItem>
+              {canChangeTime && (
+                <DropdownMenuItem onClick={() => onChangeTime(slot)}>
+                  <CalendarClock className="mr-2 h-4 w-4" /> {tChangeTime("menuItem") || "Alterar Horário"}
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}

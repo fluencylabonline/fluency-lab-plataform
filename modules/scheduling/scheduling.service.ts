@@ -165,6 +165,21 @@ async function linkLessonToActivePlan(
   return { planId: null, planName: null };
 }
 
+type SlotStatus = (typeof slotInstances.$inferSelect)["status"];
+
+// Statuses still "on the calendar" that must be conflict-checked when retiming
+const ACTIVE_RETIME_STATUSES: SlotStatus[] = ["scheduled", "available", "teacher-recess"];
+
+// Every not-finished status moved together with the recurrence when retiming
+const RETIMABLE_STATUSES: SlotStatus[] = [
+  ...ACTIVE_RETIME_STATUSES,
+  "canceled-student",
+  "canceled-teacher",
+  "canceled-admin",
+  "canceled-credit",
+  "rescheduled",
+];
+
 export const schedulingService = {
   // --- Rule Management ---
   async createRule(
@@ -1291,6 +1306,14 @@ export const schedulingService = {
             throw new Error(`Conflict detected in this slot: Teacher already has a slot at this time (${format(conflict.startAt, "HH:mm")} - ${format(conflict.endAt, "HH:mm")})`);
           }
         }
+
+        // Student Overlap (class with any other teacher)
+        if (slot.studentId) {
+          const studentConflict = await schedulingRepository.findOverlappingStudentSlot(slot.studentId, checkStart, checkEnd, slotId);
+          if (studentConflict) {
+            throw new Error(`Conflito detectado: o aluno já tem uma aula das ${formatLocalTime(studentConflict.startAt, "HH:mm")} às ${formatLocalTime(studentConflict.endAt, "HH:mm")} neste dia.`);
+          }
+        }
       }
 
       // 3. Plan & Lesson Synchronization
@@ -1430,14 +1453,17 @@ export const schedulingService = {
   },
 
   /**
-   * Retime all future "scheduled" slots of a specific recurrence rule to a new HH:mm.
-   * This is an atomic operation: if any future slot conflicts with another class at the
-   * new time, the entire operation is rejected with the conflicting date info.
+   * Retime a recurrence rule "from a given class onwards" (this and all following classes).
    *
+   * - `fromSlotId` anchors the change: only slots of the rule starting at or after that class
+   *   are moved. Without it, the anchor is the next upcoming class.
+   * - `newStartDate` optionally moves the anchor class to another day; every following class
+   *   is shifted by the same number of days (e.g. Thursday → Tuesday).
+   * - Atomic: if any active class conflicts with the teacher's or the student's agenda at the
+   *   new time, the entire operation is rejected with the conflicting date info.
+   * - Classes before the anchor keep their time. The rule template (time + startDate) moves to
+   *   the anchor, so materialization never regenerates the untouched earlier weeks.
    * - Only the teacher owner of the rule (or admin/manager) may perform this.
-   * - Only future slots (startAt >= now) with status "scheduled" are affected.
-   * - Past slots are preserved as-is.
-   * - Other recurrence rules (even same teacher+student) are NOT touched.
    * - After success, sends a push notification to student, teacher, admin and manager.
    */
   async retimeRecurrence(
@@ -1445,7 +1471,8 @@ export const schedulingService = {
     ruleId: string,
     newStartTime: string, // "HH:mm"
     newEndTime: string,   // "HH:mm"
-    newStartDate?: string | null
+    newStartDate?: string | null,
+    fromSlotId?: string | null
   ) {
     // 1. Fetch the rule and verify it exists
     const rule = await schedulingRepository.findRuleById(ruleId);
@@ -1469,39 +1496,60 @@ export const schedulingService = {
 
     const now = new Date();
 
-    // 4. Fetch all future "scheduled" slots for this rule
-    const futureSlots = await db
+    // 4. Resolve the anchor: the chosen class, or "now" (next upcoming class)
+    let anchorAt = now;
+    if (fromSlotId) {
+      const fromSlot = await schedulingRepository.findById(fromSlotId);
+      if (!fromSlot || fromSlot.ruleId !== ruleId) {
+        throw new Error("A aula escolhida não pertence a esta recorrência.");
+      }
+      if (isBefore(fromSlot.startAt, now)) {
+        throw new Error("Não é possível alterar a partir de uma aula que já passou.");
+      }
+      anchorAt = fromSlot.startAt;
+    }
+
+    // 5. Fetch every slot of the rule from the anchor onwards that is not finished.
+    //    Canceled ones move too: left at the old time, materialization would recreate
+    //    a class on a day that had been canceled.
+    const slotsToMove = await db
       .select()
       .from(slotInstances)
       .where(
         and(
           eq(slotInstances.ruleId, ruleId),
-          eq(slotInstances.status, "scheduled"),
-          gte(slotInstances.startAt, now)
+          gte(slotInstances.startAt, anchorAt),
+          inArray(slotInstances.status, RETIMABLE_STATUSES)
         )
       )
       .orderBy(asc(slotInstances.startAt));
 
-    if (futureSlots.length === 0) {
+    const activeSlots = slotsToMove.filter((s) => ACTIVE_RETIME_STATUSES.includes(s.status));
+    if (activeSlots.length === 0) {
       throw new Error("Nenhuma aula futura encontrada para esta recorrência.");
     }
 
-    const originalFirstSlot = futureSlots[0];
+    const anchorSlot = slotsToMove[0];
     let offsetDays = 0;
     if (newStartDate) {
-      const targetStart = new Date(newStartDate);
-      const targetMidnight = getLocalMidnight(targetStart);
-      const originalMidnight = getLocalMidnight(originalFirstSlot.startAt);
+      const targetMidnight = getLocalMidnight(new Date(newStartDate));
+      const originalMidnight = getLocalMidnight(anchorSlot.startAt);
       const diffMs = targetMidnight.getTime() - originalMidnight.getTime();
       offsetDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
     }
 
-    // 5. Pre-flight conflict check: verify the new time doesn't conflict on ANY future date
-    for (const slot of futureSlots) {
-      const slotDateWithOffset = addDays(slot.startAt, offsetDays);
-      const parts = getLocalDateParts(slotDateWithOffset);
-      const newStartAt = localToUtc(parts.year, parts.month, parts.day, newStartHour, newStartMin);
-      const newEndAt   = localToUtc(parts.year, parts.month, parts.day, newEndHour,   newEndMin);
+    const computeNewWindow = (startAt: Date) => {
+      const parts = getLocalDateParts(addDays(startAt, offsetDays));
+      return {
+        newStartAt: localToUtc(parts.year, parts.month, parts.day, newStartHour, newStartMin),
+        newEndAt: localToUtc(parts.year, parts.month, parts.day, newEndHour, newEndMin),
+      };
+    };
+
+    // 6. Pre-flight conflict check on every active class (teacher and student agendas)
+    for (const slot of activeSlots) {
+      const { newStartAt, newEndAt } = computeNewWindow(slot.startAt);
+      const conflictDateStr = formatLocalTime(newStartAt, "dd/MM/yyyy");
 
       const conflict = await schedulingRepository.findOverlappingSlot(
         rule.teacherId,
@@ -1509,24 +1557,33 @@ export const schedulingService = {
         newEndAt,
         slot.id  // exclude the slot itself
       );
-
       if (conflict) {
-        const conflictDateStr  = format(newStartAt, "dd/MM/yyyy");
-        const conflictStartStr = format(conflict.startAt, "HH:mm");
-        const conflictEndStr   = format(conflict.endAt,   "HH:mm");
         throw new Error(
-          `Conflito detectado em ${conflictDateStr}: o professor já tem uma aula das ${conflictStartStr} às ${conflictEndStr} neste horário.`
+          `Conflito detectado em ${conflictDateStr}: o professor já tem uma aula das ${formatLocalTime(conflict.startAt, "HH:mm")} às ${formatLocalTime(conflict.endAt, "HH:mm")} neste horário.`
         );
+      }
+
+      if (slot.studentId) {
+        const studentConflict = await schedulingRepository.findOverlappingStudentSlot(
+          slot.studentId,
+          newStartAt,
+          newEndAt,
+          slot.id
+        );
+        if (studentConflict) {
+          throw new Error(
+            `Conflito detectado em ${conflictDateStr}: o aluno já tem uma aula das ${formatLocalTime(studentConflict.startAt, "HH:mm")} às ${formatLocalTime(studentConflict.endAt, "HH:mm")} neste horário.`
+          );
+        }
       }
     }
 
-    // 6. All clear — execute inside a single atomic transaction
+    // 7. All clear — execute inside a single atomic transaction
+    const anchorWindow = computeNewWindow(anchorSlot.startAt);
+
     await db.transaction(async (tx) => {
-      for (const slot of futureSlots) {
-        const slotDateWithOffset = addDays(slot.startAt, offsetDays);
-        const parts = getLocalDateParts(slotDateWithOffset);
-        const newStartAt = localToUtc(parts.year, parts.month, parts.day, newStartHour, newStartMin);
-        const newEndAt   = localToUtc(parts.year, parts.month, parts.day, newEndHour,   newEndMin);
+      for (const slot of slotsToMove) {
+        const { newStartAt, newEndAt } = computeNewWindow(slot.startAt);
 
         await tx.update(slotInstances)
           .set({
@@ -1540,42 +1597,60 @@ export const schedulingService = {
           .where(eq(slotInstances.id, slot.id));
       }
 
-      // Update the recurrence rule template so future materializations use the new time and startDate (aligned to day of week)
-      const updatedRuleStartDate = addDays(new Date(rule.startDate), offsetDays);
-      const ruleUpdates: Partial<typeof recurrenceRules.$inferSelect> = {
-        startTime: newStartTime,
-        endTime:   newEndTime,
-        startDate: updatedRuleStartDate,
-        updatedAt: new Date(),
-      };
-
+      // Move the rule template to the anchor: future materializations use the new
+      // time and weekday, and never revisit the weeks before the anchor.
       await tx.update(recurrenceRules)
-        .set(ruleUpdates)
+        .set({
+          startTime: newStartTime,
+          endTime:   newEndTime,
+          startDate: anchorWindow.newStartAt,
+          updatedAt: new Date(),
+        })
         .where(eq(recurrenceRules.id, ruleId));
     });
 
-    // 7. Fire-and-forget notifications (outside the transaction)
-    const representativeSlot = originalFirstSlot;
-    const repDateWithOffset = addDays(representativeSlot.startAt, offsetDays);
-    const repParts = getLocalDateParts(repDateWithOffset);
-    const newRepStart = localToUtc(repParts.year, repParts.month, repParts.day, newStartHour, newStartMin);
-    const newRepEnd = localToUtc(repParts.year, repParts.month, repParts.day, newEndHour, newEndMin);
-
+    // 8. Fire-and-forget notifications (outside the transaction)
     setTimeout(() => {
       schedulingService.notifySlotTimeChange(
         {
           teacherId: rule.teacherId,
           studentId: rule.studentId ?? null,
-          startAt: representativeSlot.startAt,
-          endAt:   representativeSlot.endAt,
+          startAt: anchorSlot.startAt,
+          endAt:   anchorSlot.endAt,
         },
-        newRepStart,
-        newRepEnd,
+        anchorWindow.newStartAt,
+        anchorWindow.newEndAt,
         "future"
       ).catch((err) => console.error("[retimeRecurrence] notifySlotTimeChange failed:", err));
     }, 0);
 
-    return { success: true, updatedCount: futureSlots.length };
+    return { success: true, updatedCount: activeSlots.length };
+  },
+
+  /**
+   * Returns the first class overlapping the window in the teacher's agenda or,
+   * when `studentId` is given, in the student's agenda (with any teacher).
+   */
+  async findSlotConflict(
+    teacherId: string,
+    startAt: Date,
+    endAt: Date,
+    excludeSlotId?: string,
+    studentId?: string
+  ): Promise<{ kind: "teacher" | "student"; startAt: Date; endAt: Date } | null> {
+    const teacherConflict = await schedulingRepository.findOverlappingSlot(teacherId, startAt, endAt, excludeSlotId);
+    if (teacherConflict) {
+      return { kind: "teacher", startAt: teacherConflict.startAt, endAt: teacherConflict.endAt };
+    }
+
+    if (studentId) {
+      const studentConflict = await schedulingRepository.findOverlappingStudentSlot(studentId, startAt, endAt, excludeSlotId);
+      if (studentConflict) {
+        return { kind: "student", startAt: studentConflict.startAt, endAt: studentConflict.endAt };
+      }
+    }
+
+    return null;
   },
 
   async notifySlotTimeChange(

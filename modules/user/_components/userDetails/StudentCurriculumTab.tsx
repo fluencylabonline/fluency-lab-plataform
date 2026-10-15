@@ -44,6 +44,10 @@ import { CurriculumVaults } from "./CurriculumVaults";
 import { ManageCreditsVault } from "./ManageCreditsVault";
 import { CallMediaControls } from "./CallMediaControls";
 import { matchCallSessionsToSlots } from "./matchCallSessions";
+import {
+  ChangeClassTimeVault,
+  type ChangeClassTimeTarget,
+} from "@/modules/scheduling/_components/ChangeClassTimeVault";
 import { SectionLabel } from "./UserDetailsPrimitives";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -80,6 +84,7 @@ export function StudentCurriculumTab({ studentId, isAdmin, callHistory = [] }: S
   // Selection States for Vaults
   const [swapSlot, setSwapSlot] = useState<SlotInstanceWithDetails | null>(null);
   const [lessonSlot, setLessonSlot] = useState<SlotInstanceWithDetails | null>(null);
+  const [timeSlot, setTimeSlot] = useState<ChangeClassTimeTarget | null>(null);
   const [showAssignPlan, setShowAssignPlan] = useState(false);
   const [showManageSchedule, setShowManageSchedule] = useState(false);
   const [availableRules, setAvailableRules] = useState<RecurrenceRule[]>([]);
@@ -441,6 +446,16 @@ export function StudentCurriculumTab({ studentId, isAdmin, callHistory = [] }: S
           onUpdateStatus={handleUpdateStatus}
           onSwapTeacher={setSwapSlot}
           onUpdateLesson={setLessonSlot}
+          onChangeTime={(slot) =>
+            setTimeSlot({
+              id: slot.id,
+              ruleId: slot.ruleId,
+              teacherId: slot.teacherId,
+              studentId: slot.studentId,
+              startAt: new Date(slot.startAt),
+              endAt: new Date(slot.endAt),
+            })
+          }
         />
       </Shimmer>
 
@@ -502,6 +517,16 @@ export function StudentCurriculumTab({ studentId, isAdmin, callHistory = [] }: S
         onOpenTransfer={handleOpenTransfer}
         onCheckCompatibility={handleCheckCompatibility}
         onConfirmTransfer={handleConfirmTransfer}
+      />
+
+      <ChangeClassTimeVault
+        slot={timeSlot}
+        open={!!timeSlot}
+        onOpenChange={(open) => !open && setTimeSlot(null)}
+        onSuccess={() => {
+          fetchSchedule();
+          fetchRules();
+        }}
       />
 
       <ManageCreditsVault

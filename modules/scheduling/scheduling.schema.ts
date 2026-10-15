@@ -255,9 +255,22 @@ export const retimeRecurrenceSchema = z.object({
   newStartTime: z.string().regex(timeRegex, "Formato inválido (HH:mm)"),
   newEndTime: z.string().regex(timeRegex, "Formato inválido (HH:mm)"),
   newStartDate: z.string().datetime().optional().nullable(),
+  fromSlotId: z.string().uuid().optional().nullable(), // Aula a partir da qual a mudança vale
 });
 
 export type RetimeRecurrenceValues = z.infer<typeof retimeRecurrenceSchema>;
+
+// Formulário de mudança de horário (uma aula ou esta e as próximas)
+export const changeClassTimeFormSchema = z.object({
+  date: z.date(),
+  startTime: z.string().regex(timeRegex, "Formato inválido (HH:mm)"),
+  endTime: z.string().regex(timeRegex, "Formato inválido (HH:mm)"),
+}).refine((v) => v.endTime > v.startTime, {
+  message: "O término deve ser após o início.",
+  path: ["endTime"],
+});
+
+export type ChangeClassTimeFormValues = z.input<typeof changeClassTimeFormSchema>;
 
 export const transferStudentTeacherSchema = z.object({
   ruleId: z.string().uuid(),        // Recurrence rule atual do aluno

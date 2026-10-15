@@ -183,6 +183,27 @@ export const schedulingRepository = {
     });
   },
 
+  /**
+   * Finds a "scheduled" class of the student (with any teacher) overlapping the given window.
+   */
+  async findOverlappingStudentSlot(studentId: string, startAt: Date, endAt: Date, excludeId?: string, dbClient?: DbClient) {
+    const client = dbClient || db;
+    const filters = [
+      eq(slotInstances.studentId, studentId),
+      eq(slotInstances.status, "scheduled"),
+      lt(slotInstances.startAt, endAt),
+      gt(slotInstances.endAt, startAt),
+    ];
+
+    if (excludeId) {
+      filters.push(ne(slotInstances.id, excludeId));
+    }
+
+    return client.query.slotInstances.findFirst({
+      where: and(...filters),
+    });
+  },
+
   async findOverdueClasses(thresholdTime: Date) {
     return db.query.slotInstances.findMany({
       where: and(

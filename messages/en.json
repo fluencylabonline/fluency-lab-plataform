@@ -3508,5 +3508,31 @@
     "stepCounter": "{current} of {total}",
     "learnMore": "Read the full guide",
     "wizardIntro": "Tap Next to get to know this page."
+  },
+  "ChangeClassTime": {
+    "scopeTitle": "Change time",
+    "scopeDescription": "This class is part of a recurrence. Where should the new time apply?",
+    "scopeSingle": "This class only",
+    "scopeSingleHint": "Only this class changes. The others stay the same.",
+    "scopeFuture": "This and following classes",
+    "scopeFutureHint": "From this class on, every following class moves to the new time. Earlier classes do not change.",
+    "singleTitle": "Change this class",
+    "futureTitle": "Change this and following",
+    "currentTime": "Current: {date} · {start}–{end}",
+    "dateLabel": "Date",
+    "dateFutureLabel": "New date for this class",
+    "startTime": "Start",
+    "endTime": "End",
+    "teacherConflict": "Conflict: the teacher already has a class from {start} to {end} at this time.",
+    "studentConflict": "Conflict: the student already has a class from {start} to {end} at this time.",
+    "futureWarning": "This class and every following class of the recurrence move to the new time. Changing the date changes the weekday of all of them. If any date conflicts, nothing is changed.",
+    "successSingle": "Class time updated!",
+    "successFuture": "Time updated for {count, plural, one {# class} other {# classes}}!",
+    "error": "Could not change the time.",
+    "cancel": "Cancel",
+    "back": "Back",
+    "saving": "Saving...",
+    "confirm": "Confirm",
+    "menuItem": "Change Time"
   }
 }
