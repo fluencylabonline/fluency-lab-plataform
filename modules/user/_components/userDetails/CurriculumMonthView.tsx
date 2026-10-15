@@ -15,6 +15,7 @@ interface CurriculumMonthViewProps {
   onUpdateStatus: (slotId: string, status: SlotInstanceWithDetails["status"]) => void;
   onSwapTeacher: (slot: SlotInstanceWithDetails) => void;
   onUpdateLesson: (slot: SlotInstanceWithDetails) => void;
+  onChangeTime: (slot: SlotInstanceWithDetails) => void;
 }
 
 
@@ -24,7 +25,8 @@ export function CurriculumMonthView({
   canViewRecordings,
   onUpdateStatus,
   onSwapTeacher,
-  onUpdateLesson
+  onUpdateLesson,
+  onChangeTime
 }: CurriculumMonthViewProps) {
   // Group slots by month
   const groupedSlots = slots.reduce((acc: Record<string, SlotWithCallSession[]>, slot) => {
@@ -72,6 +74,7 @@ export function CurriculumMonthView({
                   onUpdateStatus={onUpdateStatus}
                   onSwapTeacher={onSwapTeacher}
                   onUpdateLesson={onUpdateLesson}
+                  onChangeTime={onChangeTime}
                 />
               ))}
             </div>

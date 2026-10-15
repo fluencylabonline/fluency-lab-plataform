@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const { mockUpdate, mockSet, mockSelect } = vi.hoisted(() => {
   const setFn = vi.fn();
@@ -51,6 +51,7 @@ vi.mock("../scheduling.repository", () => ({
   schedulingRepository: {
     findById: vi.fn(),
     findOverlappingSlot: vi.fn(),
+    findOverlappingStudentSlot: vi.fn(),
     findRuleById: vi.fn(),
     updateSlot: vi.fn(),
   },
@@ -209,6 +210,38 @@ describe("Scheduling Service - updateSlot Date Change & Reminders", () => {
     // Verify notifications were sent
     expect(notificationService.sendNotification).toHaveBeenCalled();
   });
+
+  it("should reject a single-slot time change that conflicts with another class of the student", async () => {
+    const mockUser = { id: "admin-1", role: "admin" as const };
+    (hasPermission as any).mockReturnValue(true);
+    (schedulingRepository.findById as any).mockResolvedValue({
+      id: "slot-uuid",
+      teacherId: "teacher-1",
+      studentId: "student-1",
+      startAt: new Date("2026-07-06T20:00:00.000Z"),
+      endAt: new Date("2026-07-06T20:45:00.000Z"),
+      status: "scheduled",
+    });
+    (schedulingRepository.findOverlappingSlot as any).mockResolvedValue(null);
+    (schedulingRepository.findOverlappingStudentSlot as any).mockResolvedValue({
+      id: "other-teacher-class",
+      startAt: new Date("2026-07-06T17:00:00.000Z"),
+      endAt: new Date("2026-07-06T17:45:00.000Z"),
+    });
+
+    await expect(
+      schedulingService.updateSlot(
+        mockUser,
+        "slot-uuid",
+        {
+          startAt: new Date("2026-07-06T17:00:00.000Z"),
+          endAt: new Date("2026-07-06T17:45:00.000Z"),
+        },
+        "single"
+      )
+    ).rejects.toThrow(/o aluno já tem uma aula/);
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -256,6 +289,7 @@ describe("Scheduling Service - retimeRecurrence", () => {
     (hasPermission as any).mockReturnValue(false);
     (schedulingRepository.findRuleById as any).mockResolvedValue(mockRule);
     (schedulingRepository.findOverlappingSlot as any).mockResolvedValue(null);
+    (schedulingRepository.findOverlappingStudentSlot as any).mockResolvedValue(null);
 
     // db.select chain returns our two future slots
     (mockSelect.orderBy as any).mockResolvedValue([futureSlot1, futureSlot2]);
@@ -384,12 +418,108 @@ describe("Scheduling Service - retimeRecurrence", () => {
     expect(result.success).toBe(true);
     expect(result.updatedCount).toBe(2);
 
-    // Verify it updated the rule startDate with the shifted date (original 2026-07-04 + 1 day = 2026-07-05)
+    // The rule now starts at the shifted anchor class (2026-07-12 10:00 BRT = 13:00 UTC)
     expect(mockSet).toHaveBeenCalledWith(
       expect.objectContaining({
-        startDate: expect.any(Date),
+        startDate: new Date("2026-07-12T13:00:00.000Z"),
       })
     );
+  });
+
+  describe("from a chosen class (fromSlotId)", () => {
+    beforeEach(() => {
+      // Fixture classes are in July 2026: freeze "now" before them (Date only, timers stay real)
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date("2026-07-01T12:00:00.000Z"));
+      (hasPermission as any).mockReturnValue(true);
+      (schedulingRepository.findById as any).mockResolvedValue(futureSlot2);
+      // The query is anchored on the chosen class, so only it (and later ones) come back
+      (mockSelect.orderBy as any).mockResolvedValue([futureSlot2]);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("should move only the chosen class and the following ones", async () => {
+      const adminUser = { id: "admin-1", role: "admin" as const };
+      const result = await schedulingService.retimeRecurrence(
+        adminUser, "rule-uuid", "14:00", "14:45", null, "slot-2"
+      );
+
+      expect(result.updatedCount).toBe(1);
+      // 1 slot update + 1 rule update
+      expect(mockUpdate).toHaveBeenCalledTimes(2);
+      // 14:00 BRT on 2026-07-18 = 17:00 UTC
+      expect(mockSet).toHaveBeenCalledWith(
+        expect.objectContaining({
+          startAt: new Date("2026-07-18T17:00:00.000Z"),
+          endAt: new Date("2026-07-18T17:45:00.000Z"),
+        })
+      );
+    });
+
+    it("should move the rule startDate to the chosen class so earlier weeks are not regenerated", async () => {
+      const adminUser = { id: "admin-1", role: "admin" as const };
+      await schedulingService.retimeRecurrence(
+        adminUser, "rule-uuid", "14:00", "14:45", null, "slot-2"
+      );
+
+      expect(mockSet).toHaveBeenCalledWith(
+        expect.objectContaining({
+          startTime: "14:00",
+          endTime: "14:45",
+          startDate: new Date("2026-07-18T17:00:00.000Z"),
+        })
+      );
+    });
+
+    it("should reject a class from another recurrence", async () => {
+      (schedulingRepository.findById as any).mockResolvedValue({ ...futureSlot2, ruleId: "other-rule" });
+      const adminUser = { id: "admin-1", role: "admin" as const };
+
+      await expect(
+        schedulingService.retimeRecurrence(adminUser, "rule-uuid", "14:00", "14:45", null, "slot-2")
+      ).rejects.toThrow("A aula escolhida não pertence a esta recorrência.");
+    });
+
+    it("should reject a class that already happened", async () => {
+      (schedulingRepository.findById as any).mockResolvedValue({
+        ...futureSlot2,
+        startAt: new Date("2020-01-02T20:00:00.000Z"),
+      });
+      const adminUser = { id: "admin-1", role: "admin" as const };
+
+      await expect(
+        schedulingService.retimeRecurrence(adminUser, "rule-uuid", "14:00", "14:45", null, "slot-2")
+      ).rejects.toThrow("já passou");
+    });
+  });
+
+  it("should reject when the student already has a class with another teacher at the new time", async () => {
+    (schedulingRepository.findOverlappingStudentSlot as any).mockResolvedValueOnce({
+      id: "other-teacher-class",
+      startAt: new Date("2026-07-11T13:00:00.000Z"),
+      endAt: new Date("2026-07-11T13:45:00.000Z"),
+    });
+
+    await expect(
+      schedulingService.retimeRecurrence(mockUser, "rule-uuid", "10:00", "10:45")
+    ).rejects.toThrow(/o aluno já tem uma aula/);
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it("should move canceled classes along without conflict-checking them", async () => {
+    const canceledSlot = { ...futureSlot2, id: "slot-canceled", status: "canceled-student" };
+    (mockSelect.orderBy as any).mockResolvedValue([futureSlot1, canceledSlot]);
+
+    const result = await schedulingService.retimeRecurrence(mockUser, "rule-uuid", "10:00", "10:45");
+
+    // Only the active class counts and is conflict-checked...
+    expect(result.updatedCount).toBe(1);
+    expect(schedulingRepository.findOverlappingSlot).toHaveBeenCalledTimes(1);
+    // ...but both slots are moved (2 slot updates + 1 rule update)
+    expect(mockUpdate).toHaveBeenCalledTimes(3);
   });
 });
 

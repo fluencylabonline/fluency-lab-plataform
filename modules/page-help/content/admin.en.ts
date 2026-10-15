@@ -207,6 +207,15 @@ export const ADMIN_HELP_EN: RoleHelpContent<AdminHelpRoute> = {
         ],
       },
       {
+        heading: "Changing a class time",
+        body: [
+          "In the menu (⋮) of an upcoming class in Classes and Curriculum, Change Time changes its date and time. The same works by clicking the class in the teacher Schedule and choosing Edit.",
+          "This class only changes just that day. The others stay the same.",
+          "This and following classes changes the chosen class and every following class of the recurrence. Earlier classes do not change. Changing the date changes the weekday of all of them.",
+          "If the teacher or the student already has a class at the new time on any of those dates, nothing is changed and the conflicting date is shown. Student and teacher are notified of the change.",
+        ],
+      },
+      {
         heading: "The buttons on an instalment",
         body: [
           "Generate payment code creates the charge at the gateway: a PIX through AbacatePay in reais, a Stripe checkout link in dollars.",

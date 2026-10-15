@@ -26,9 +26,12 @@ import {
   deleteSlotAction,
   updateSlotAction,
   checkSlotConflictAction,
-  retimeRecurrenceAction,
   updateClassStatusAction,
 } from "@/modules/scheduling/scheduling.actions";
+import {
+  ChangeClassTimeVault,
+  type ChangeClassTimeTarget,
+} from "@/modules/scheduling/_components/ChangeClassTimeVault";
 import { updateSlotStatusSchema } from "@/modules/scheduling/scheduling.schema";
 import { z } from "zod";
 import { getLessonsAction } from "@/modules/curriculum/curriculum.actions";
@@ -81,6 +84,7 @@ export function SlotDetailsVault({
 }: SlotDetailsVaultProps) {
   const t = useTranslations("UserManagement");
   const tClasses = useTranslations("ClassesCard");
+  const tChangeTime = useTranslations("ChangeClassTime");
   const isMobile = useIsMobile();
   const router = useRouter();
 
@@ -108,6 +112,7 @@ export function SlotDetailsVault({
   });
 
   const [conflict, setConflict] = useState<{
+    kind: "teacher" | "student";
     startAt: Date;
     endAt: Date;
   } | null>(null);
@@ -118,12 +123,21 @@ export function SlotDetailsVault({
   const [isSearchingLessons, setIsSearchingLessons] = useState(false);
   const [editScope] = useState<"single">("single");
   const [showRetimeVault, setShowRetimeVault] = useState(false);
-  const [retimeForm, setRetimeForm] = useState({
-    newStartDate: new Date(),
-    newStartTime: "",
-    newEndTime: "",
-  });
-  const [isRetiming, setIsRetiming] = useState(false);
+
+  const changeTimeTarget = useMemo<ChangeClassTimeTarget | null>(
+    () =>
+      event
+        ? {
+            id: event.id,
+            ruleId: (event.ruleId as string | undefined) ?? null,
+            teacherId,
+            studentId: event.studentId ?? null,
+            startAt: new Date(event.start),
+            endAt: new Date(event.end || event.start),
+          }
+        : null,
+    [event, teacherId],
+  );
 
   const [currentStatus, setCurrentStatus] = useState<string>("");
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
@@ -206,11 +220,13 @@ export function SlotDetailsVault({
           startAt: start.toISOString(),
           endAt: end.toISOString(),
           excludeSlotId: event.id,
+          studentId: event.studentId,
         });
 
         const data = result?.data;
         if (data?.success && data.hasConflict && data.conflict) {
           setConflict({
+            kind: data.conflict.kind,
             startAt: new Date(data.conflict.startAt),
             endAt: new Date(data.conflict.endAt),
           });
@@ -243,11 +259,6 @@ export function SlotDetailsVault({
 
   const openRetimeVault = () => {
     setShowEditScope(false);
-    setRetimeForm({
-      newStartDate: new Date(event!.start),
-      newStartTime: format(event!.start, "HH:mm"),
-      newEndTime: format(event!.end || event!.start, "HH:mm"),
-    });
     setShowRetimeVault(true);
   };
 
@@ -782,10 +793,15 @@ export function SlotDetailsVault({
                     <div className="p-2 rounded bg-rose-500/10 border border-rose-500/20 flex items-start gap-2 animate-in fade-in slide-in-from-top-1">
                       <AlertTriangle className="w-3 h-3 text-rose-500 mt-0.5 shrink-0" />
                       <p className="text-[10px] text-rose-500 leading-tight font-medium">
-                        {t("conflictWarning", {
-                          start: format(conflict.startAt, "HH:mm"),
-                          end: format(conflict.endAt, "HH:mm"),
-                        }) ||
+                        {(conflict.kind === "student"
+                          ? tChangeTime("studentConflict", {
+                              start: format(conflict.startAt, "HH:mm"),
+                              end: format(conflict.endAt, "HH:mm"),
+                            })
+                          : t("conflictWarning", {
+                              start: format(conflict.startAt, "HH:mm"),
+                              end: format(conflict.endAt, "HH:mm"),
+                            })) ||
                           `Conflito detectado: O professor já possui uma aula das ${format(conflict.startAt, "HH:mm")} às ${format(conflict.endAt, "HH:mm")}.`}
                       </p>
                     </div>
@@ -978,12 +994,12 @@ export function SlotDetailsVault({
                   <div className="flex items-center gap-2 mb-1">
                     <Repeat className="w-4 h-4 text-primary" />
                     <h4 className="text-sm font-bold text-primary">
-                      Mudar horário de todas as futuras
+                      {tChangeTime("scopeFuture") || "Esta e as próximas aulas"}
                     </h4>
                   </div>
                   <p className="text-xs text-primary/60">
-                    Altera o HH:mm de todas as aulas futuras desta recorrência.
-                    As aulas passadas são preservadas.
+                    {tChangeTime("scopeFutureHint") ||
+                      "A partir desta aula, todas as seguintes passam para o novo horário. As anteriores não mudam."}
                   </p>
                 </button>
               )}
@@ -992,160 +1008,17 @@ export function SlotDetailsVault({
         </VaultContent>
       </Vault>
 
-      {/* Retime Recurrence Vault */}
-      <Vault open={showRetimeVault} onClose={() => setShowRetimeVault(false)}>
-        <VaultContent>
-          <VaultHeader>
-            <VaultIcon type="edit" />
-            <div className="flex flex-col items-center">
-              <VaultTitle>Mudar Horário da Recorrência</VaultTitle>
-              <VaultDescription>
-                Defina a nova data de início e horário para todas as aulas futuras desta
-                recorrência. As aulas passadas serão preservadas.
-              </VaultDescription>
-            </div>
-          </VaultHeader>
-
-          <VaultBody>
-            <div className="space-y-6">
-              {/* Date picker for recurrence start / day change */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                  <CalendarIcon className="w-3 h-3" />
-                  Próxima Aula (Nova Data de Início)
-                </label>
-                <CalendarVault
-                  date={retimeForm.newStartDate}
-                  onSelect={(date) =>
-                    date && setRetimeForm((prev) => ({ ...prev, newStartDate: date }))
-                  }
-                  placeholder="Selecione a data de início"
-                  label="Nova Data de Início"
-                  className="h-10 bg-white/5 border-white/10 rounded-md"
-                />
-              </div>
-
-              {/* Time inputs */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    Novo Início
-                  </label>
-                  <input
-                    type="time"
-                    value={retimeForm.newStartTime}
-                    onChange={(e) =>
-                      setRetimeForm((prev) => ({
-                        ...prev,
-                        newStartTime: e.target.value,
-                      }))
-                    }
-                    className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-sm text-text focus:outline-none focus:border-primary transition-colors"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    Novo Término
-                  </label>
-                  <input
-                    type="time"
-                    value={retimeForm.newEndTime}
-                    onChange={(e) =>
-                      setRetimeForm((prev) => ({
-                        ...prev,
-                        newEndTime: e.target.value,
-                      }))
-                    }
-                    className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-sm text-text focus:outline-none focus:border-primary transition-colors"
-                  />
-                </div>
-              </div>
-
-              {/* Invalid time warning */}
-              {retimeForm.newEndTime &&
-                retimeForm.newStartTime &&
-                retimeForm.newEndTime <= retimeForm.newStartTime && (
-                  <div className="p-2 rounded bg-amber-500/10 border border-amber-500/20 flex items-start gap-2 animate-in fade-in slide-in-from-top-1">
-                    <AlertCircle className="w-3 h-3 text-amber-500 mt-0.5 shrink-0" />
-                    <p className="text-[10px] text-amber-500 leading-tight font-medium">
-                      Horário inválido: O término deve ser após o início.
-                    </p>
-                  </div>
-                )}
-
-              {/* Scope warning */}
-              <div className="p-4 rounded-md bg-primary/5 border border-primary/10 flex items-start gap-3">
-                <Repeat className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-[11px] text-primary/80 leading-relaxed font-medium">
-                    Esta ação mudará o dia/horário de{" "}
-                    <strong>todas as aulas futuras</strong> desta recorrência.
-                    Os lembretes serão re-agendados automaticamente.
-                  </p>
-                  <p className="text-[10px] text-primary/50 mt-1 leading-relaxed">
-                    Se houver conflito em qualquer data futura, a operação será
-                    cancelada e você receberá a data do conflito.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </VaultBody>
-
-          <VaultFooter>
-            <VaultSecondaryButton
-              onClick={() => setShowRetimeVault(false)}
-              disabled={isRetiming}
-            >
-              Cancelar
-            </VaultSecondaryButton>
-            <VaultPrimaryButton
-              onClick={async () => {
-                if (!event?.ruleId) return;
-                if (
-                  !retimeForm.newStartTime ||
-                  !retimeForm.newEndTime ||
-                  retimeForm.newEndTime <= retimeForm.newStartTime
-                )
-                  return;
-
-                setIsRetiming(true);
-                try {
-                  const result = await retimeRecurrenceAction({
-                    ruleId: event.ruleId as string,
-                    newStartTime: retimeForm.newStartTime,
-                    newEndTime: retimeForm.newEndTime,
-                    newStartDate: retimeForm.newStartDate.toISOString(),
-                  });
-                  if (result?.data?.success) {
-                    notify.success(
-                      `Horário e dia atualizados para ${result.data.updatedCount} aulas futuras!`
-                    );
-                    setShowRetimeVault(false);
-                    onOpenChange(false);
-                    onSuccess();
-                  } else {
-                    notify.error(
-                      result?.data?.error || "Erro ao atualizar a recorrência."
-                    );
-                  }
-                } catch {
-                  notify.error("Erro ao atualizar a recorrência.");
-                } finally {
-                  setIsRetiming(false);
-                }
-              }}
-              disabled={
-                isRetiming ||
-                !retimeForm.newStartTime ||
-                !retimeForm.newEndTime ||
-                retimeForm.newEndTime <= retimeForm.newStartTime
-              }
-            >
-              {isRetiming ? "Atualizando..." : "Confirmar Mudança"}
-            </VaultPrimaryButton>
-          </VaultFooter>
-        </VaultContent>
-      </Vault>
+      {/* Change time of this and following classes */}
+      <ChangeClassTimeVault
+        slot={changeTimeTarget}
+        initialScope="future"
+        open={showRetimeVault}
+        onOpenChange={setShowRetimeVault}
+        onSuccess={() => {
+          onOpenChange(false);
+          onSuccess();
+        }}
+      />
 
       {/* Confirmation Vault */}
       <Vault

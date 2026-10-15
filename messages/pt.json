@@ -3507,5 +3507,31 @@
     "stepCounter": "{current} de {total}",
     "learnMore": "Ver o guia completo",
     "wizardIntro": "Toque em Próximo para conhecer esta página."
+  },
+  "ChangeClassTime": {
+    "scopeTitle": "Alterar horário",
+    "scopeDescription": "Esta aula faz parte de uma recorrência. Onde deseja aplicar o novo horário?",
+    "scopeSingle": "Apenas esta aula",
+    "scopeSingleHint": "Somente esta aula muda de horário. As outras continuam iguais.",
+    "scopeFuture": "Esta e as próximas aulas",
+    "scopeFutureHint": "A partir desta aula, todas as seguintes passam para o novo horário. As anteriores não mudam.",
+    "singleTitle": "Alterar esta aula",
+    "futureTitle": "Alterar esta e as próximas",
+    "currentTime": "Atual: {date} · {start}–{end}",
+    "dateLabel": "Data",
+    "dateFutureLabel": "Nova data desta aula",
+    "startTime": "Início",
+    "endTime": "Término",
+    "teacherConflict": "Conflito: o professor já tem uma aula das {start} às {end} neste horário.",
+    "studentConflict": "Conflito: o aluno já tem uma aula das {start} às {end} neste horário.",
+    "futureWarning": "Esta aula e todas as seguintes da recorrência vão para o novo horário. Mudar a data muda o dia da semana de todas. Se houver conflito em alguma data, nada é alterado.",
+    "successSingle": "Horário da aula atualizado!",
+    "successFuture": "Horário atualizado em {count, plural, one {# aula} other {# aulas}}!",
+    "error": "Erro ao alterar o horário.",
+    "cancel": "Cancelar",
+    "back": "Voltar",
+    "saving": "Salvando...",
+    "confirm": "Confirmar",
+    "menuItem": "Alterar Horário"
   }
 }

@@ -208,6 +208,15 @@ export const ADMIN_HELP_PT: RoleHelpContent<AdminHelpRoute> = {
         ],
       },
       {
+        heading: "Mudar o horário de uma aula",
+        body: [
+          "No menu (⋮) de uma aula futura em Aulas e Currículo, Alterar Horário muda data e horário. O mesmo vale ao clicar na aula pela Agenda do professor e escolher Editar.",
+          "Apenas esta aula muda só aquele dia. As outras continuam iguais.",
+          "Esta e as próximas aulas muda a aula escolhida e todas as seguintes da recorrência. As anteriores não mudam. Trocar a data troca o dia da semana de todas.",
+          "Se o professor ou o aluno já tiver aula no novo horário em qualquer uma das datas, nada é alterado e aparece a data do conflito. Aluno e professor recebem notificação da mudança.",
+        ],
+      },
+      {
         heading: "Os botões de uma parcela",
         body: [
           "Gerar código de pagamento cria a cobrança no gateway: PIX pela AbacatePay em reais, link de checkout Stripe em dólar.",
