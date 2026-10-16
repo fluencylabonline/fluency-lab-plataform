@@ -37,6 +37,7 @@ import {
 } from "date-fns";
 import { notificationService } from "@/modules/notification/notification.service";
 import { NewSlotInstance } from "./scheduling.types";
+import { isQuietHours, brtHourMinute, QUIET_HOURS_END } from "@/lib/quiet-hours";
 
 // Regras de negócio para recesso do professor: aviso mínimo de 30 dias corridos
 // (inclui fins de semana, já que os alunos também têm aulas aos sábados/domingos)
@@ -1818,6 +1819,10 @@ export const schedulingService = {
   },
 
   async processOverdueClasses() {
+    // De madrugada nada é avisado, e marcar a aula como "overdue" já dispararia
+    // os avisos; então a rodada inteira espera 07:00. O atraso é só de algumas horas.
+    if (isQuietHours()) return 0;
+
     // Threshold: 2 hours ago
     const threshold = subHours(new Date(), 2);
     const overdueSlots = await schedulingRepository.findOverdueClasses(threshold);
@@ -1881,8 +1886,16 @@ export const schedulingService = {
     const now = new Date();
     let totalSent = 0;
 
+    // Sem lembretes de madrugada (00:00-07:00). Nada é marcado como enviado
+    // aqui, então o que ficou pendente sai na rodada das 07:00 (ver abaixo).
+    if (isQuietHours(now)) return 0;
+
     // --- 24h Reminders ---
-    const window24hStart = addHours(now, 23);
+    // Na rodada das 07:00 a janela volta até 17h à frente: aulas de amanhã
+    // entre 00:00 e 07:00 cairiam no silêncio e nunca receberiam o lembrete.
+    // O flag reminder24hSent impede duplicar.
+    const afterQuietHours = brtHourMinute(now).hour === QUIET_HOURS_END;
+    const window24hStart = addHours(now, afterQuietHours ? 17 : 23);
     const window24hEnd = addHours(now, 25);
     const slots24h = await schedulingRepository.findClassesForReminders("24h", window24hStart, window24hEnd);
 
