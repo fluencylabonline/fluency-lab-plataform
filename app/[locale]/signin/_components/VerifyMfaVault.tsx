@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Shield, ArrowRight } from "lucide-react";
+import { Shield } from "lucide-react";
 import { 
   Vault, 
   VaultHeader, 
@@ -11,11 +11,9 @@ import {
   VaultTitle, 
   VaultDescription, 
   VaultIcon,
-  VaultPrimaryButton
 } from "@/components/ui/vault";
-import { Input } from "@/components/ui/input";
+import { OtpInput, type OtpStatus } from "@/components/ui/otp-input";
 import { notify } from "@/components/ui/toaster";
-import { Spinner } from "@/components/ui/spinner";
 import { verifyMfaLoginAction } from "@/modules/user/user.actions";
 
 interface VerifyMfaVaultProps {
@@ -32,38 +30,33 @@ export function VerifyMfaVault({ open, onOpenChange, onSuccess, rememberMe = fal
 
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
-  // evita disparar a verificação duas vezes para o mesmo código
-  const verifiedCodeRef = useRef<string | null>(null);
+  const [status, setStatus] = useState<OtpStatus>("idle");
 
   const handleVerify = useCallback(async (value: string) => {
-    if (value.length !== 6) return;
-
-    verifiedCodeRef.current = value;
     setLoading(true);
     const result = await verifyMfaLoginAction({ token: value, rememberMe });
     setLoading(false);
 
     if (result?.data?.success) {
-      onSuccess(result.data.role);
+      setStatus("success");
+      // deixa o usuário ver os campos verdes antes de seguir
+      setTimeout(() => onSuccess(result.data?.role), 700);
     } else {
+      setStatus("error");
       notify.error(ta(`errors.${result?.data?.error || "error"}`) || tc("error"));
-      setCode("");
-      verifiedCodeRef.current = null;
     }
   }, [rememberMe, onSuccess, ta, tc]);
 
-  // verifica automaticamente assim que os 6 dígitos são preenchidos
-  useEffect(() => {
-    if (code.length === 6 && !loading && verifiedCodeRef.current !== code) {
-      handleVerify(code);
-    }
-  }, [code, loading, handleVerify]);
+  const handleChange = useCallback((value: string) => {
+    setCode(value);
+    setStatus("idle");
+  }, []);
 
   // limpa o estado ao fechar/reabrir o vault
   useEffect(() => {
     if (!open) {
       setCode("");
-      verifiedCodeRef.current = null;
+      setStatus("idle");
     }
   }, [open]);
 
@@ -89,26 +82,15 @@ export function VerifyMfaVault({ open, onOpenChange, onSuccess, rememberMe = fal
               </p>
             </div>
 
-            <div className="max-w-[240px] mx-auto py-4">
-              <Input
+            <div className="py-4">
+              <OtpInput
                 value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                placeholder="000000"
-                className="text-center text-3xl tracking-[0.5em] font-mono h-16 rounded-md"
-                autoFocus
+                onChange={handleChange}
+                onComplete={handleVerify}
+                status={status}
                 disabled={loading}
-                type="number"
               />
             </div>
-
-            <VaultPrimaryButton 
-              onClick={() => handleVerify(code)} 
-              disabled={loading || code.length !== 6} 
-              className="w-full"
-            >
-              {loading ? <Spinner className="mr-2" /> : tc("continue")}
-              {!loading && <ArrowRight className="w-4 h-4 ml-2" />}
-            </VaultPrimaryButton>
           </div>
         </VaultBody>
       </VaultContent>

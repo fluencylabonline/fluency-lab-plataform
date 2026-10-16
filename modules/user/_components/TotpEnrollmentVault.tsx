@@ -15,7 +15,7 @@ import {
   VaultPrimaryButton,
   VaultSecondaryButton
 } from "@/components/ui/vault";
-import { Input } from "@/components/ui/input";
+import { OtpInput, type OtpStatus } from "@/components/ui/otp-input";
 import { authClient } from "@/lib/auth-client";
 import { notify } from "@/components/ui/toaster";
 import { Spinner } from "@/components/ui/spinner";
@@ -35,6 +35,7 @@ export function TotpEnrollmentVault({ open, onOpenChange, onSuccess }: TotpEnrol
   const [totpSecret, setTotpSecret] = useState<{ secret: string; otpAuthUrl: string } | null>(null);
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [otpStatus, setOtpStatus] = useState<OtpStatus>("idle");
 
   const startEnrollment = async () => {
     setLoading(true);
@@ -49,17 +50,20 @@ export function TotpEnrollmentVault({ open, onOpenChange, onSuccess }: TotpEnrol
     }
   };
 
-  const verifyAndEnroll = async () => {
-    if (code.length !== 6) return;
-
+  const verifyAndEnroll = async (value: string) => {
     setLoading(true);
-    const result = await authClient.enrollTotp(totpSecret!.secret, code);
+    const result = await authClient.enrollTotp(totpSecret!.secret, value);
     setLoading(false);
 
     if (result.success) {
-      setStep("success");
-      onSuccess();
+      setOtpStatus("success");
+      // deixa o usuário ver os campos verdes antes de seguir
+      setTimeout(() => {
+        setStep("success");
+        onSuccess();
+      }, 700);
     } else {
+      setOtpStatus("error");
       notify.error(ta(`errors.${result.error}`) || tc("error"));
     }
   };
@@ -122,23 +126,17 @@ export function TotpEnrollmentVault({ open, onOpenChange, onSuccess }: TotpEnrol
                 </p>
               </div>
 
-              <div className="max-w-[240px] mx-auto">
-                <Input
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  placeholder="000000"
-                  className="text-center text-3xl tracking-[0.5em] font-mono h-16 rounded-2xl"
-                  autoFocus
-                />
-              </div>
+              <OtpInput
+                value={code}
+                onChange={(value) => {
+                  setCode(value);
+                  setOtpStatus("idle");
+                }}
+                onComplete={verifyAndEnroll}
+                status={otpStatus}
+                disabled={loading}
+              />
 
-              <VaultPrimaryButton 
-                onClick={verifyAndEnroll} 
-                disabled={loading || code.length !== 6} 
-                className="w-full"
-              >
-                {loading ? <Spinner className="mr-2" /> : t("mfaVerifyButton") || "Verificar e Ativar"}
-              </VaultPrimaryButton>
               <VaultSecondaryButton onClick={() => setStep("qr")} className="w-full">
                 {tc("back")}
               </VaultSecondaryButton>
