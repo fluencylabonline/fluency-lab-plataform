@@ -48,6 +48,17 @@ interface StudentProfileSurveyProps {
   basePath?: string;
 }
 
+/** Flattens react-hook-form's nested error object into the list of validation messages. */
+function collectErrorMessages(error: unknown): string[] {
+  if (!error || typeof error !== "object") return [];
+  const node = error as { message?: unknown; [key: string]: unknown };
+  const own = typeof node.message === "string" && node.message ? [node.message] : [];
+  const nested = Object.entries(node)
+    .filter(([key]) => key !== "ref" && key !== "message" && key !== "type")
+    .flatMap(([, value]) => collectErrorMessages(value));
+  return [...new Set([...own, ...nested])];
+}
+
 export function StudentProfileSurvey({
   profileId: propProfileId,
   studentId,
@@ -130,7 +141,12 @@ export function StudentProfileSurvey({
     const isValid = await methods.trigger(stepKey);
 
     if (!isValid) {
-      notify.error("Por favor, preencha os campos obrigatórios desta etapa.");
+      const messages = collectErrorMessages(methods.getFieldState(stepKey).error);
+      notify.error(
+        messages.length > 0
+          ? `Corrija para continuar: ${messages.join(" • ")}`
+          : "Por favor, preencha os campos obrigatórios desta etapa."
+      );
       return;
     }
 
@@ -571,6 +587,7 @@ export function StudentProfileSurvey({
                       onClick={() => {
                         const current = field.value || [];
                         if (checked) field.onChange(current.filter((m: string) => m !== method.id));
+                        else if (current.length >= 3) notify.error("Selecione no máximo 3 métodos");
                         else field.onChange([...current, method.id]);
                       }}
                       className={cn(
@@ -725,6 +742,7 @@ export function StudentProfileSurvey({
                           onClick={() => {
                              const curr = field.value || [];
                              if(checked) field.onChange(curr.filter((x:string) => x !== opt.id));
+                             else if (curr.length >= 3) notify.error("Selecione no máximo 3 expectativas");
                              else field.onChange([...curr, opt.id]);
                           }}
                           className={cn(
