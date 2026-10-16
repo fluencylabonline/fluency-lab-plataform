@@ -1091,7 +1091,7 @@ export class CommunicationService {
     let textToSave = `[Template: ${templateName}]`;
     try {
       const templates = await this.getWhatsAppTemplates();
-      const template = templates.find(t => t.name === templateName);
+      const template = templates.find(t => t.name === templateName && t.language === languageCode);
       if (template) {
         const bodyComp = template.components.find((c) => c.type === "BODY" || (c.type as string) === "body");
         if (bodyComp?.text) {

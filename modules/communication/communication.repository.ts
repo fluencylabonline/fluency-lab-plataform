@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
 import { whatsappConversationsTable, whatsappMessagesTable, whatsappQuickRepliesTable, emailsTable, whatsappConversationStudentsTable } from "./communication.schema";
 import { usersTable } from "../user/user.schema";
-import { eq, desc, and, lt, sql } from "drizzle-orm";
+import { eq, desc, and, lt, sql, inArray } from "drizzle-orm";
+import { waIdVariants } from "@/utils/whatsapp-phone";
 import { EmailMessage } from "./communication.types";
 
 
@@ -49,17 +50,19 @@ export const communicationRepository = {
 
   async findConversationByWaId(waId: string) {
     return db.query.whatsappConversationsTable.findFirst({
-      where: eq(whatsappConversationsTable.waId, waId),
+      // Aceita as duas grafias do celular brasileiro (com/sem o 9º dígito).
+      where: inArray(whatsappConversationsTable.waId, waIdVariants(waId)),
     });
   },
 
   async findUserByPhone(phone: string) {
     // Tenta encontrar o usuário pelo telefone (removendo o código do país se necessário ou buscando parcial)
     // No Brasil, a Meta envia 55 + DDD + 9 + Número.
+    const variants = waIdVariants(phone);
     return db.query.usersTable.findFirst({
       where: (table, { or, like }) => or(
-        eq(table.cellphone, phone),
-        like(table.cellphone, `%${phone.slice(2)}%`) // Busca aproximada sem o 55
+        ...variants.map((v) => eq(table.cellphone, v)),
+        ...variants.map((v) => like(table.cellphone, `%${v.slice(2)}%`)), // sem o 55
       ),
     });
   },

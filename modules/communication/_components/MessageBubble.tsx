@@ -20,6 +20,8 @@ interface MediaMetadata {
 }
 
 interface WhatsAppMessageMetadata {
+  templateName?: string;
+  languageCode?: string;
   components?: {
     type?: string;
     parameters?: {
@@ -47,7 +49,7 @@ interface MessageBubbleProps {
 
 function MessageBubbleComponent({ msg, templates = [], onResendSuccess }: MessageBubbleProps) {
   const isOut = msg.direction === "outbound";
-  const isTemplate = msg.content?.startsWith("[Template:");
+  const isTemplate = msg.type === "template" || msg.content?.startsWith("[Template:");
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
@@ -282,31 +284,30 @@ function MessageBubbleComponent({ msg, templates = [], onResendSuccess }: Messag
             </div>
             <p className="text-[13px] opacity-90 leading-snug whitespace-pre-wrap">
               {(() => {
-                if (isTemplate) {
-                  const match = msg.content?.match(/\[Template:\s*(.+?)\]/);
-                  if (match && match[1]) {
-                    const templateName = match[1];
-                    const template = templates.find((t) => t.name === templateName);
-                    if (template) {
-                      const bodyComp = template.components.find((c) => c.type === "BODY");
-                      if (bodyComp?.text) {
-                        let interpolated = bodyComp.text;
-                        const metadataComps = (msg.metadata as WhatsAppMessageMetadata)?.components || [];
-                        const bodyParams = metadataComps.find((c) => c.type === "body" || c.type === "BODY")?.parameters || [];
-                        if (bodyParams.length > 0) {
-                          bodyParams.forEach((param, idx: number) => {
-                            interpolated = interpolated.replace(new RegExp(`\\{\\{${idx + 1}\\}\\}`, 'g'), param.text || '');
-                          });
-                          return interpolated;
-                        }
-                        return bodyComp.text;
-                      }
-                      return msg.content;
-                    } else {
-                      // Template não encontrado
-                      return "⚠️ [Template não disponível]";
-                    }
+                // Renderiza a partir do template no idioma em que foi enviado
+                // (metadata.languageCode), não o primeiro com o mesmo nome — o
+                // texto salvo em `content` pode estar em outro idioma.
+                const meta = msg.metadata as WhatsAppMessageMetadata | null;
+                const templateName =
+                  meta?.templateName ?? msg.content?.match(/\[Template:\s*(.+?)\]/)?.[1];
+                if (templateName) {
+                  const language = meta?.languageCode ?? "pt_BR";
+                  const template = templates.find(
+                    (t) => t.name === templateName && t.language === language,
+                  );
+                  const bodyText = template?.components.find(
+                    (c) => c.type === "BODY" || (c.type as string) === "body",
+                  )?.text;
+                  if (bodyText) {
+                    const bodyParams =
+                      meta?.components?.find((c) => c.type === "body" || c.type === "BODY")?.parameters ?? [];
+                    return bodyParams.reduce(
+                      (text, param, idx) =>
+                        text.replace(new RegExp(`\\{\\{${idx + 1}\\}\\}`, "g"), param.text || ""),
+                      bodyText,
+                    );
                   }
+                  if (msg.content?.startsWith("[Template:")) return "⚠️ [Template não disponível]";
                 }
                 return msg.content;
               })()}

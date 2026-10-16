@@ -408,8 +408,8 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
       const initialParams: string[] = [];
       const count = getTemplateParamsCount(selectedTemplate);
       for (let i = 0; i < count; i++) {
-        if (i === 0 && selectedConv.studentName) {
-          initialParams.push(selectedConv.studentName);
+        if (i === 0 && (selectedConv.studentName || selectedConv.contactName)) {
+          initialParams.push(selectedConv.studentName || selectedConv.contactName || "");
         } else {
           initialParams.push("");
         }
@@ -550,6 +550,13 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
     return new Set(matches).size;
   };
 
+  // Com a conversa aberta, {{1}} (o nome) já aparece preenchido nas prévias.
+  const recipientName = selectedConv
+    ? selectedConv.studentName || selectedConv.contactName || ""
+    : newChatStudentName;
+  const withRecipientName = (text?: string) =>
+    recipientName ? (text ?? "").replace(/\{\{1\}\}/g, recipientName) : text;
+
   const getInterpolatedTemplateText = () => {
     if (!selectedTemplate) return "";
     const bodyComp = selectedTemplate.components.find((c) => c.type === "BODY" || (c.type as unknown as string) === "body");
@@ -583,6 +590,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
       const result = await sendWhatsAppTemplateAction({
         to: phone,
         templateName: selectedTemplate.name,
+        languageCode: selectedTemplate.language,
         components: componentsToSend
       });
 
@@ -990,10 +998,32 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                       +{selectedConv.waId}
                     </span>
                   )}
-                  <Wifi className="w-3 h-3 text-emerald-500 shrink-0" />
-                  <span className="text-[9px] text-emerald-500 font-semibold tracking-wide uppercase select-none">
-                    Online (Meta API)
-                  </span>
+                  {/* A API da Meta não informa se o contato está online. O que ela
+                      permite saber é a janela de 24h: texto livre só dentro dela. */}
+                  {(() => {
+                    const lastInbound = [...(messages ?? [])]
+                      .reverse()
+                      .find((m) => m.direction === "inbound");
+                    const msLeft = lastInbound
+                      ? new Date(lastInbound.createdAt).getTime() + 24 * 60 * 60 * 1000 - Date.now()
+                      : 0;
+                    const open = msLeft > 0;
+                    return (
+                      <>
+                        <Wifi className={cn("w-3 h-3 shrink-0", open ? "text-emerald-500" : "text-muted-foreground")} />
+                        <span
+                          className={cn(
+                            "text-[9px] font-semibold tracking-wide uppercase select-none",
+                            open ? "text-emerald-500" : "text-muted-foreground",
+                          )}
+                        >
+                          {open
+                            ? `Janela de 24h aberta · ${Math.ceil(msLeft / 3600000)}h restantes`
+                            : "Janela de 24h fechada · só template"}
+                        </span>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </header>
@@ -1357,6 +1387,9 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                           </span>
                           <div className="flex items-center gap-1.5">
                             <span className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                              {t.language.replace("_", "-")}
+                            </span>
+                            <span className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                               {t.category}
                             </span>
                             {isSelected && (
@@ -1365,7 +1398,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                           </div>
                         </div>
                         <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                          {bodyComp?.text}
+                          {withRecipientName(bodyComp?.text)}
                         </p>
                       </div>
                     );
@@ -1378,7 +1411,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
               <div className="space-y-3 p-3 bg-muted/20 rounded-xl border border-border/20">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Conteúdo do Template:</span>
                 <p className="text-xs bg-[#ffffff] dark:bg-[#182229] border border-border/10 p-3 rounded-lg leading-relaxed whitespace-pre-wrap">
-                  {selectedTemplate.components.find((c) => c.type === "BODY" || (c.type as string) === "body")?.text}
+                  {withRecipientName(selectedTemplate.components.find((c) => c.type === "BODY" || (c.type as string) === "body")?.text)}
                 </p>
 
                 {/* Parameters inputs */}
@@ -1462,6 +1495,9 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                           </span>
                           <div className="flex items-center gap-1.5">
                             <span className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                              {t.language.replace("_", "-")}
+                            </span>
+                            <span className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                               {t.category}
                             </span>
                             {isSelected && (
@@ -1470,7 +1506,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                           </div>
                         </div>
                         <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                          {bodyComp?.text}
+                          {withRecipientName(bodyComp?.text)}
                         </p>
                       </div>
                     );
@@ -1483,7 +1519,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
               <div className="space-y-3 p-3 bg-muted/20 rounded-xl border border-border/20">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Conteúdo do Template:</span>
                 <p className="text-xs bg-[#ffffff] dark:bg-[#182229] border border-border/10 p-3 rounded-lg leading-relaxed whitespace-pre-wrap">
-                  {selectedTemplate.components.find((c) => c.type === "BODY" || (c.type as string) === "body")?.text}
+                  {withRecipientName(selectedTemplate.components.find((c) => c.type === "BODY" || (c.type as string) === "body")?.text)}
                 </p>
 
                 {/* Parameters inputs */}
