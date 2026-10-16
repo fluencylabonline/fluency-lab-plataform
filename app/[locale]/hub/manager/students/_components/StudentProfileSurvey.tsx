@@ -623,6 +623,7 @@ export function StudentProfileSurvey({
                    <Controller
                      name={`step7.activityPreferences.${activity}`}
                      control={methods.control}
+                     defaultValue={3}
                      render={({ field }) => (
                        <input 
                          type="range" min="1" max="5" step="1" 
