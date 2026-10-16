@@ -5,6 +5,7 @@ import { SendNotificationValues } from "./notification.schema";
 import { db } from "@/lib/db";
 import { usersTable } from "../user/user.schema";
 import { eq } from "drizzle-orm";
+import { isQuietHours } from "@/lib/quiet-hours";
 
 // Initialize web-push
 webpush.setVapidDetails(
@@ -49,7 +50,9 @@ export const notificationService = {
     }
 
     // 3. Send Push Notifications
-    if (channels.push) {
+    // De madrugada (00:00-07:00, Brasília) o push não sai: o registro in-app
+    // acima é silencioso e fica no sino para quando a pessoa abrir a plataforma.
+    if (channels.push && !isQuietHours()) {
       const subscriptions = await notificationRepository.findSubscriptionsByUserIds(targetUserIds);
       
       const pushPromises = subscriptions.map(async (sub) => {

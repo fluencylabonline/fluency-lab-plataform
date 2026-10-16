@@ -5,6 +5,7 @@ import { communicationService } from "@/modules/communication/communication.serv
 import crypto from "node:crypto";
 import { type NotificationPrefs } from "@/modules/user/user.schema";
 import { userService } from "@/modules/user/user.service";
+import { isQuietHours } from "@/lib/quiet-hours";
 import { notificationService } from "@/modules/notification/notification.service";
 import { adminRtdb } from "@/lib/firebase-admin";
 import { db } from "@/lib/db";
@@ -308,7 +309,9 @@ export async function POST(req: NextRequest) {
             const idsWithoutPush = await notificationService.getUserIdsWithoutActiveSubscription(
               allNotified.map((u) => u.id)
             );
-            if (idsWithoutPush.length > 0) {
+            // De madrugada (00:00-07:00) o email também não sai: a mensagem
+            // continua registrada no sino para quando a pessoa abrir a plataforma.
+            if (idsWithoutPush.length > 0 && !isQuietHours()) {
               const emailTargets = allNotified.filter(
                 (u) => idsWithoutPush.includes(u.id) && u.email
               );

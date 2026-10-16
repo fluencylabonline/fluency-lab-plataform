@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { schedulingService } from "@/modules/scheduling/scheduling.service";
 import { env } from "@/env";
+import { isQuietHours } from "@/lib/quiet-hours";
 
 import crypto from "node:crypto";
 
@@ -16,6 +17,12 @@ export async function POST(req: Request) {
 
   if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Roda às 21h. Se a execução atrasar para dentro do silêncio (00:00-07:00) é
+  // ignorada: o "amanhã" já seria outro dia e os avisos sairiam de madrugada.
+  if (isQuietHours()) {
+    return NextResponse.json({ success: true, skipped: "quiet-hours" });
   }
 
   try {

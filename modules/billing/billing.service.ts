@@ -1689,7 +1689,7 @@ export const billingService = {
   },
 
   /**
-   * Política de inadimplência, chamada pelo cron diário (00:00 de Brasília).
+   * Política de inadimplência, chamada pelo cron diário (9h de Brasília).
    * Para uma parcela que vence no mês M:
    * - 1º dia de atraso: vira "overdue", avisa aluno, admins e managers;
    * - de 3 em 3 dias até o fim de M: lembrete ao aluno;
