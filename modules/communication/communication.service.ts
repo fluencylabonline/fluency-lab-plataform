@@ -40,6 +40,8 @@ import { CertificateEmail } from "./templates/CertificateEmail";
 import { FarewellEmail } from "./templates/FarewellEmail";
 import { PasswordResetRequestEmail } from "./templates/PasswordResetRequestEmail";
 import { PasswordResetConfirmationEmail } from "./templates/PasswordResetConfirmationEmail";
+import { NoticeEmail } from "./templates/NoticeEmail";
+import { buildDelinquencyEmail, type DelinquencyEmail } from "./templates/delinquency-translations";
 import type {
   SendWhatsAppTemplateOptions,
   WhatsAppResponse,
@@ -298,6 +300,101 @@ export class CommunicationService {
       });
     } catch (error) {
       console.error("[CommunicationService.sendBillingOverdueEmail] Error:", error);
+    }
+  }
+
+  /**
+   * Comunicado das regras de inadimplência para todos os alunos e
+   * professores ativos.
+   * - dryRun: só conta os destinatários;
+   * - test: envia as duas versões (aluno e professor) só para quem pediu;
+   * - send: envia para todos, em lotes de 100 (Resend batch), para não
+   *   esbarrar no limite de requisições por segundo.
+   */
+  async sendDelinquencyPolicyAnnouncement(params: {
+    mode: "dryRun" | "test" | "send";
+    startDate: string; // YYYY-MM-DD
+    requester: { email: string; name: string; locale?: string | null };
+  }) {
+    const { userService } = await import("@/modules/user/user.service");
+    const [students, teachers] = await Promise.all([
+      userService.getUsersByRole("student"),
+      userService.getUsersByRole("teacher"),
+    ]);
+    const activeStudents = students.filter((u) => u.isActive && u.email);
+    const activeTeachers = teachers.filter((u) => u.isActive && u.email);
+    const counts = { students: activeStudents.length, teachers: activeTeachers.length };
+
+    if (params.mode === "dryRun") return { ...counts, sent: 0, failed: 0 };
+
+    const [y, m, d] = params.startDate.split("-");
+    const formatStart = (locale: "pt" | "en") => (locale === "en" ? `${m}/${d}/${y}` : `${d}/${m}/${y}`);
+    const appUrl = env.NEXT_PUBLIC_APP_URL;
+    const build = (
+      person: { email: string; name: string; locale?: string | null },
+      kind: "policyStudent" | "policyTeacher"
+    ) => {
+      const locale = person.locale === "en" ? "en" : "pt";
+      const content = buildDelinquencyEmail({ kind, name: person.name, startDate: formatStart(locale), appUrl }, locale);
+      return { to: person.email, subject: content.subject, template: React.createElement(NoticeEmail, content) };
+    };
+
+    const messages =
+      params.mode === "test"
+        ? [build(params.requester, "policyStudent"), build(params.requester, "policyTeacher")]
+        : [
+            ...activeStudents.map((u) => build(u, "policyStudent")),
+            ...activeTeachers.map((u) => build(u, "policyTeacher")),
+          ];
+
+    let sent = 0;
+    let failed = 0;
+    for (let i = 0; i < messages.length; i += 100) {
+      const chunk = messages.slice(i, i + 100);
+      try {
+        const payload = await Promise.all(
+          chunk.map(async (msg) => ({
+            from: this.defaultFrom,
+            to: msg.to,
+            subject: msg.subject,
+            html: await render(msg.template),
+          }))
+        );
+        const result = await resend.batch.send(payload);
+        if (result.error) {
+          console.error("[CommunicationService.sendDelinquencyPolicyAnnouncement] Batch error:", result.error);
+          failed += chunk.length;
+        } else {
+          sent += chunk.length;
+        }
+      } catch (error) {
+        console.error("[CommunicationService.sendDelinquencyPolicyAnnouncement] Batch failed:", error);
+        failed += chunk.length;
+      }
+    }
+
+    return { ...counts, sent, failed };
+  }
+
+  /**
+   * Emails da política de inadimplência (aviso final, bloqueio, aulas
+   * canceladas, cancelamento automático e comunicado das regras).
+   * Textos em `templates/delinquency-translations.ts`. Não lança: retorna
+   * `false` em caso de falha, para o envio em massa poder contar os erros.
+   */
+  async sendDelinquencyEmail(email: string, data: DelinquencyEmail, explicitLocale?: "pt" | "en") {
+    try {
+      const locale = explicitLocale || await this.getRecipientLocale(email);
+      const content = buildDelinquencyEmail(data, locale);
+      await this.sendEmail({
+        to: email,
+        subject: content.subject,
+        template: React.createElement(NoticeEmail, content),
+      });
+      return true;
+    } catch (error) {
+      console.error(`[CommunicationService.sendDelinquencyEmail:${data.kind}] Error:`, error);
+      return false;
     }
   }
 
@@ -691,6 +788,105 @@ export class CommunicationService {
       });
     } catch (error) {
       console.error("[CommunicationService.sendPaymentOverdueWhatsApp] Error:", error);
+    }
+  }
+
+  /**
+   * Avisos da política de inadimplência ao aluno, com botão de pagamento.
+   * Templates (criados por scripts/create-delinquency-templates.js):
+   * - payment_final_warning_v1: último dia do mês, o acesso bloqueia amanhã;
+   * - payment_cancel_warning_v1: último dia do mês de bloqueio, a matrícula é cancelada amanhã.
+   * Corpo: {{1}} nome, {{2}} valor. Botão URL dinâmico sobre NEXT_PUBLIC_APP_URL:
+   * link de checkout (Stripe) passa pelo `api/pay`; PIX abre a página de pagamento.
+   */
+  async sendDelinquencyStudentWhatsApp(
+    templateName: "payment_final_warning_v1" | "payment_cancel_warning_v1",
+    data: {
+      cellphone: string;
+      studentName: string;
+      amount: number;
+      currency: string;
+      pixPayload: string | null;
+    },
+    explicitLocale?: "pt" | "en"
+  ) {
+    try {
+      const locale = explicitLocale || await this.getRecipientLocale(data.cellphone);
+      const amountStr = new Intl.NumberFormat(locale === "en" ? "en-US" : "pt-BR", {
+        style: "currency",
+        currency: data.currency,
+      }).format(data.amount / 100);
+
+      const isUrl = !!data.pixPayload && /^https?:\/\//.test(data.pixPayload);
+      const buttonSuffix = isUrl
+        ? `api/pay?url=${encodeURIComponent(data.pixPayload!)}`
+        : "payment-required";
+
+      return await this.sendWhatsAppTemplate({
+        to: data.cellphone,
+        templateName,
+        languageCode: locale === "en" ? "en" : "pt_BR",
+        components: [
+          {
+            type: "body",
+            parameters: [
+              { type: "text", text: data.studentName },
+              { type: "text", text: amountStr },
+            ],
+          },
+          {
+            type: "button",
+            sub_type: "url",
+            index: "0",
+            parameters: [{ type: "text", text: buttonSuffix }],
+          },
+        ],
+      });
+    } catch (error) {
+      console.error(`[CommunicationService.sendDelinquencyStudentWhatsApp:${templateName}] Error:`, error);
+    }
+  }
+
+  /** Aviso ao aluno de que a matrícula foi cancelada por falta de pagamento ({{1}} nome). */
+  async sendAccountCancelledDelinquencyWhatsApp(cellphone: string, studentName: string, explicitLocale?: "pt" | "en") {
+    try {
+      const locale = explicitLocale || await this.getRecipientLocale(cellphone);
+      return await this.sendWhatsAppTemplate({
+        to: cellphone,
+        templateName: "account_cancelled_delinquency_v1",
+        languageCode: locale === "en" ? "en" : "pt_BR",
+        components: [{ type: "body", parameters: [{ type: "text", text: studentName }] }],
+      });
+    } catch (error) {
+      console.error("[CommunicationService.sendAccountCancelledDelinquencyWhatsApp] Error:", error);
+    }
+  }
+
+  /**
+   * Avisos ao professor sobre o aluno inadimplente.
+   * - student_payment_block_teacher_v1: {{1}} professor, {{2}} aluno, {{3}} data do bloqueio;
+   * - student_payment_unblock_teacher_v1: {{1}} professor, {{2}} aluno.
+   */
+  async sendTeacherDelinquencyWhatsApp(
+    cellphone: string,
+    explicitLocale: "pt" | "en",
+    data:
+      | { kind: "block"; teacherName: string; studentName: string; blockDate: string }
+      | { kind: "unblock"; teacherName: string; studentName: string }
+  ) {
+    try {
+      const texts = data.kind === "block"
+        ? [data.teacherName, data.studentName, data.blockDate]
+        : [data.teacherName, data.studentName];
+      const parameters = texts.map((text) => ({ type: "text" as const, text }));
+      return await this.sendWhatsAppTemplate({
+        to: cellphone,
+        templateName: data.kind === "block" ? "student_payment_block_teacher_v1" : "student_payment_unblock_teacher_v1",
+        languageCode: explicitLocale === "en" ? "en" : "pt_BR",
+        components: [{ type: "body", parameters }],
+      });
+    } catch (error) {
+      console.error(`[CommunicationService.sendTeacherDelinquencyWhatsApp:${data.kind}] Error:`, error);
     }
   }
 

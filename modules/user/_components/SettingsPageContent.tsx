@@ -14,6 +14,7 @@ import { useWizard } from "@/hooks/ui/use-wizard";
 import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpProvider";
 import { PlatformSettings } from "./PlatformSettings";
 import { WhatsAppSettings } from "@/modules/settings/_components/WhatsAppSettings";
+import { DelinquencyAnnouncementCard } from "@/modules/communication/_components/DelinquencyAnnouncementCard";
 import type { SystemSettings } from "@/modules/settings/settings.schema";
 
 interface SettingsPageContentProps {
@@ -138,9 +139,12 @@ export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
           {initialData.user.role === "admin" && (
             <>
               <TabsContent value="platform" className="mt-0">
-                {initialData.systemSettings && (
-                  <PlatformSettings initialSettings={initialData.systemSettings} />
-                )}
+                <div className="space-y-6">
+                  {initialData.systemSettings && (
+                    <PlatformSettings initialSettings={initialData.systemSettings} />
+                  )}
+                  <DelinquencyAnnouncementCard />
+                </div>
               </TabsContent>
               <TabsContent value="whatsapp" className="mt-0">
                 {initialData.systemSettings && (

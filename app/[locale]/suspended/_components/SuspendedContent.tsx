@@ -6,7 +6,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-export function SuspendedContent() {
+export function SuspendedContent({ whatsappNumber }: { whatsappNumber: string | null }) {
     const t = useTranslations("Suspended");
     const router = useRouter();
 
@@ -35,19 +35,21 @@ export function SuspendedContent() {
             </div>
 
             <div className="pt-4 flex flex-col gap-3">
-                <Button
-                    className="h-12 text-base font-medium rounded-md"
-                >
-                    <a
-                        href="https://wa.me/5500000000000" // TODO: Colocar link real do suporte
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2"
+                {whatsappNumber && (
+                    <Button
+                        className="h-12 text-base font-medium rounded-md"
                     >
-                        <MessageCircle className="w-5 h-5" />
-                        {t("talkToUs") || "Falar com a gente"}
-                    </a>
-                </Button>
+                        <a
+                            href={`https://wa.me/${whatsappNumber}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2"
+                        >
+                            <MessageCircle className="w-5 h-5" />
+                            {t("talkToUs") || "Falar com a gente"}
+                        </a>
+                    </Button>
+                )}
 
                 <button
                     onClick={handleLogout}

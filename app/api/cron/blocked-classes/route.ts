@@ -1,0 +1,28 @@
+import { NextResponse } from "next/server";
+import { schedulingService } from "@/modules/scheduling/scheduling.service";
+import { env } from "@/env";
+
+import crypto from "node:crypto";
+
+// Cancela as aulas de amanhã dos alunos bloqueados por inadimplência.
+// Agendado às 00:00 UTC (21:00 de Brasília) em .github/workflows/blocked-classes-cron.yml.
+export async function POST(req: Request) {
+  const authHeader = req.headers.get("authorization");
+  const expected = `Bearer ${env.CRON_SECRET}`;
+  const provided = authHeader ?? "";
+  const isAuthorized =
+    provided.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
+
+  if (!isAuthorized) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const result = await schedulingService.cancelClassesForBlockedStudents();
+    return NextResponse.json({ success: true, ...result });
+  } catch (error) {
+    console.error("[Cron Blocked Classes] Error:", error);
+    return NextResponse.json({ error: "Operation failed" }, { status: 500 });
+  }
+}

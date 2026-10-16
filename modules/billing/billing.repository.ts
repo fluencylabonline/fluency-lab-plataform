@@ -7,7 +7,7 @@ import {
   Subscription, 
   Installment 
 } from "./billing.schema";
-import { eq, and, lte, between, sum, ne, count, inArray } from "drizzle-orm";
+import { eq, and, lte, gt, between, sum, ne, count, inArray } from "drizzle-orm";
 
 export const billingRepository = {
   // Audit
@@ -119,6 +119,18 @@ export const billingRepository = {
         )
       );
   },
+  // Cancela as parcelas ainda não vencidas (as vencidas ficam como dívida).
+  async cancelInstallmentsDueAfter(subscriptionId: string, date: Date) {
+    await db.update(installmentsTable)
+      .set({ status: "cancelled" })
+      .where(
+        and(
+          eq(installmentsTable.subscriptionId, subscriptionId),
+          inArray(installmentsTable.status, ["pending", "overdue"]),
+          gt(installmentsTable.dueDate, date)
+        )
+      );
+  },
   async findSubscriptionsForCron(date: Date) {
     // Subscriptions that have an installment due in exactly 7 days
     // and don't have a billing generated yet for that installment
@@ -201,6 +213,44 @@ export const billingRepository = {
         }
       }
     });
+  },
+
+  // Parcelas em aberto (pendente ou atrasada) que já venceram até `maxDate`,
+  // das mais antigas para as mais novas. Base do cron da inadimplência.
+  async findUnpaidInstallmentsDueBefore(maxDate: Date) {
+    return db.query.installmentsTable.findMany({
+      where: and(
+        inArray(installmentsTable.status, ["pending", "overdue"]),
+        lte(installmentsTable.dueDate, maxDate)
+      ),
+      with: {
+        subscription: {
+          with: { student: true, plan: true }
+        }
+      },
+      orderBy: (table, { asc }) => [asc(table.dueDate)]
+    });
+  },
+
+  // Parcelas em aberto da assinatura ativa do aluno, das mais antigas primeiro.
+  async findUnpaidInstallmentsOfActiveSubscription(studentId: string) {
+    const sub = await db.query.subscriptionsTable.findFirst({
+      where: and(
+        eq(subscriptionsTable.studentId, studentId),
+        eq(subscriptionsTable.status, "active")
+      ),
+      with: { plan: true }
+    });
+    if (!sub) return { subscription: null, installments: [] };
+
+    const installments = await db.query.installmentsTable.findMany({
+      where: and(
+        eq(installmentsTable.subscriptionId, sub.id),
+        inArray(installmentsTable.status, ["pending", "overdue"])
+      ),
+      orderBy: (table, { asc }) => [asc(table.dueDate)]
+    });
+    return { subscription: sub, installments };
   },
 
   async sumInstallments(filters: { status: "paid" | "pending"; start: Date; end: Date }) {

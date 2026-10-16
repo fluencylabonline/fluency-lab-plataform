@@ -1288,7 +1288,7 @@ export const ADMIN_HELP_PT: RoleHelpContent<AdminHelpRoute> = {
         id: "platform",
         target: "settings.tabs",
         title: "Aba Plataforma",
-        text: "Configurações globais como e-mail de suporte e número de contato da escola. Mudanças aqui valem para todos os usuários — confira antes de salvar.",
+        text: "Configurações globais como e-mail de suporte e número de contato da escola. Mudanças aqui valem para todos os usuários — confira antes de salvar. Aqui também fica o comunicado das regras de inadimplência: conte os destinatários, envie um teste para você e só então envie para todos.",
       },
       {
         id: "whatsapp",
