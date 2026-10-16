@@ -8,6 +8,7 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import {
   Sparkles,
+  Mic,
   User,
   Calendar,
   MoreHorizontal,
@@ -98,6 +99,11 @@ export function ProfilesPageClient({ initialData, basePath = "/hub/manager/stude
           icon: <Sparkles className="h-4 w-4" />,
           onClick: () => router.push(`${basePath}/new`),
           dataTour: "manager-onboarding.new"
+        }, {
+          label: "Perfil por Áudio",
+          icon: <Mic className="h-4 w-4" />,
+          onClick: () => router.push(`${basePath}/from-audio`),
+          dataTour: "manager-onboarding.audio"
         }]}
         backHref={basePath.split("/students/onboarding")[0] + "/users"}
       />

@@ -1,4 +1,9 @@
 import { GoogleGenerativeAI, SchemaType, Schema } from "@google/generative-ai";
+import { GoogleAIFileManager, FileState } from "@google/generative-ai/server";
+import { randomUUID } from "node:crypto";
+import { writeFile, unlink } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { env } from "@/env";
 import { QuizData, CEFRLevel, QuizItem, AnalysisResult, LearningItemMetadata } from "@/modules/curriculum/curriculum.types";
 import type { QuizData as NotebookQuizData } from "@/components/tiptap-extension/quiz/quiz.types";
@@ -97,6 +102,25 @@ function cleanJsonString(str: string): string {
   return content.substring(start, lastIndex + 1);
 }
 
+const PROFILE_AUDIO_PROMPT = `You are assisting an English/language teacher who just had an onboarding conversation with a prospective student (a recorded call or WhatsApp voice messages). The audio may contain both the teacher and the student: only what the STUDENT says (or confirms) counts as an answer.
+
+Fill the student profile questionnaire with ONLY what was clearly stated or directly confirmed. If something was not mentioned, OMIT the field. Never guess, never infer from tone, never invent. Free-text values must be written in Brazilian Portuguese, short and factual.
+
+Return JSON: {"responses": {"step1": {...}, ...}, "evidence": {"step1.fullName": "short quote", ...}}.
+"evidence" has one short literal quote (max 15 words, original language) for every field you filled, keyed "stepN.field".
+
+FIELDS (type / allowed values):
+step1: fullName (string), approximateAge (string, e.g. "34"), isMinor (boolean), guardianName (string), guardianContact (string), occupation (string: profession or school grade)
+step2: previousStudy (boolean), previousStudyDetails (string), studyDuration ("less_than_6m"|"6m_to_2y"|"more_than_2y"), selfAssessedLevel ("A1"|"A2"|"B1"|"B2"|"C1"|"C2", only if the student states or clearly describes it)
+step3: mainGoals (array of "fluency"|"travel"|"work"|"exams"|"hobby"|"moving"|"other"), customGoal (string, when "other"), targetDeadline (string), deadlineReason (string), specificMotivation (string), commitmentLevel (integer 1-10, only if a number or clear degree was given)
+step4: weeklyFrequency (integer 1-7, classes per week), preferredTimes (string), dailyStudyTime ("none"|"5_30min"|"30_60min"|"1h_plus")
+step5: employmentStatus ("employed"|"seeking"|"student"), professionalArea (string), professionalUse (array of strings), usageType ("writing"|"speaking"|"balanced"), technicalVocabNeeded (boolean), currentUsageFrequency (string)
+step6: hobbies (array of strings), mediaConsumptionFrequency (string), contentTypes (array of strings), conversationTopics (string)
+step7: preferredMethods (up to 3 of "visual"|"auditory"|"reading"|"practical"|"grammar"), activityPreferences (object with keys among "Conversação","Escuta","Leitura","Gramática","Dinâmicas" and integer values 1-5)
+step8: mainDifficulties (array of "Pronúncia"|"Gramática"|"Vocabulário"|"Escuta"|"Falar em público"), whatWorked (string), whatDidntWork (string), specialNeeds (string), speakingAnxiety ("none"|"low"|"medium"|"high"|"very_high")
+step9: languageVariant (string, e.g. American/British), accentGoal ("intelligible"|"natural"), classExpectations (up to 3 of "conversation_focus"|"grammar_focus"|"exam_prep"|"business"), learningPace ("intense"|"moderate"|"relaxed"|"flexible"), correctionStyle ("immediate"|"important_only"|"end_of_lesson"|"gentle")
+step10: otherLanguages (string), generalObservations (string: anything relevant about the student not covered above), restrictions (string), questions (string: questions the student asked)`;
+
 export const aiService = {
   /**
    * Generates embeddings for a given text using text-embedding-004.
@@ -160,6 +184,60 @@ export const aiService = {
 
     await aiRepository.setCache(hash, "gemini_summary", summary, 30);
     return summary;
+  },
+
+  /**
+   * Listens to an onboarding conversation (WhatsApp audio or video call) and extracts
+   * whatever the student said that answers the profile survey. Fields that were not
+   * clearly stated are omitted. The audio goes through the Gemini Files API so long
+   * recordings are not limited by the inline request size.
+   */
+  async extractStudentProfileFromAudio(params: {
+    audio: Buffer;
+    mimeType: string;
+    userId: string;
+  }): Promise<{
+    responses: Record<string, Record<string, unknown> | null>;
+    evidence: Record<string, string | null>;
+  }> {
+    const limit = await checkRateLimit("gemini_profile_audio", params.userId, 20);
+    if (!limit.success) throw new Error("Rate limit exceeded for AI audio analysis");
+
+    const fileManager = new GoogleAIFileManager(env.GEMINI_API_KEY);
+    const tmpPath = join(tmpdir(), `profile-audio-${randomUUID()}`);
+    await writeFile(tmpPath, params.audio);
+
+    let uploadedName: string | undefined;
+    try {
+      const upload = await fileManager.uploadFile(tmpPath, { mimeType: params.mimeType });
+      uploadedName = upload.file.name;
+
+      let file = upload.file;
+      for (let i = 0; file.state === FileState.PROCESSING && i < 60; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        file = await fileManager.getFile(uploadedName);
+      }
+      if (file.state !== FileState.ACTIVE) throw new Error("Audio processing failed");
+
+      const model = genAI.getGenerativeModel({
+        model: `models/${MODELS.fast}`,
+        generationConfig: { responseMimeType: "application/json", temperature: 0.1 },
+      });
+
+      const result = await model.generateContent([
+        { fileData: { mimeType: file.mimeType, fileUri: file.uri } },
+        { text: PROFILE_AUDIO_PROMPT },
+      ]);
+
+      const parsed = JSON.parse(cleanJsonString(result.response.text()));
+      return {
+        responses: parsed?.responses && typeof parsed.responses === "object" ? parsed.responses : {},
+        evidence: parsed?.evidence && typeof parsed.evidence === "object" ? parsed.evidence : {},
+      };
+    } finally {
+      await unlink(tmpPath).catch(() => undefined);
+      if (uploadedName) await fileManager.deleteFile(uploadedName).catch(() => undefined);
+    }
   },
 
   /**
