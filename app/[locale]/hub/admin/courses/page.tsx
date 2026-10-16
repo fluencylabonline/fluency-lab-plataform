@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { hasPermission } from "@/lib/rbac";
 import { courseService } from "@/modules/course/course.service";
 import { CoursePageClient } from "./_components/CoursePageClient";
+import { userService } from "@/modules/user/user.service";
 
 export default async function AdminCoursesPage() {
   const user = await getCurrentUser();
@@ -13,6 +14,6 @@ export default async function AdminCoursesPage() {
   const courses = await courseService.getAllCourses(user);
 
   return (
-    <CoursePageClient initialData={courses} currentUser={user} />
+    <CoursePageClient initialData={courses} currentUser={userService.toSessionDTO(user)} />
   );
 }

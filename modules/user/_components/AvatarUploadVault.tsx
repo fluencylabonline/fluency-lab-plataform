@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { Upload } from "lucide-react";
-import { storage } from "@/lib/firebase";
+import { storage } from "@/lib/firebase-storage";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { syncUserPhotoAction } from "../user.actions";
 import { notify } from "@/components/ui/toaster";

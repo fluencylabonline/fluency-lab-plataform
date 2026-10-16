@@ -56,7 +56,7 @@ import { Video } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { SlotInstanceWithDetails, RecurrenceRule } from "@/modules/scheduling/scheduling.types";
-import { User } from "@/modules/user/user.schema";
+import type { TeacherOptionDTO } from "@/modules/user/user.schema";
 import { LearningPlan, LearningPlanWithLessons, StudentCurriculumGap } from "@/modules/learning/learning.types";
 import { LessonSummary } from "@/modules/curriculum/curriculum.types";
 import type { CallSession } from "@/modules/call/call.schema";
@@ -77,7 +77,7 @@ export function StudentCurriculumTab({ studentId, isAdmin, callHistory = [] }: S
   const [gap, setGap] = useState<StudentCurriculumGap | null>(null);
 
   // Data for Vaults
-  const [teachers, setTeachers] = useState<User[]>([]);
+  const [teachers, setTeachers] = useState<TeacherOptionDTO[]>([]);
   const [plans, setPlans] = useState<LearningPlan[]>([]);
   const [lessons, setLessons] = useState<LessonSummary[]>([]);
 

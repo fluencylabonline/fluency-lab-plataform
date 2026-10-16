@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { billingService } from "@/modules/billing/billing.service";
 import { PaymentHistory, type PaymentRecord } from "./_components/PaymentHistory";
 import { redirect } from "next/navigation";
+import { userService } from "@/modules/user/user.service";
 
 export default async function PaymentsPage() {
   const t = await getTranslations("Hub.Payments");
@@ -18,7 +19,7 @@ export default async function PaymentsPage() {
 
   return (
     <div>
-      <Header title={t("title")} user={user} showSubHeader={false} backHref="/hub/student/profile" className="contents" />
+      <Header title={t("title")} user={userService.toSessionDTO(user)} showSubHeader={false} backHref="/hub/student/profile" className="contents" />
 
       <main className="container">
         <PaymentHistory initialData={payments as PaymentRecord[]} />

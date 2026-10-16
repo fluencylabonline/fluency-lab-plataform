@@ -1206,11 +1206,11 @@ export const ADMIN_HELP_EN: RoleHelpContent<AdminHelpRoute> = {
     sections: [
       {
         heading: "How it works",
-        body: "Students' messages arrive here in real time, and your reply goes out from the school's official number. The list on the left holds the conversations; the search above it finds a conversation or a shortcut.",
+        body: "Students' messages arrive here in real time, and your reply goes out from the school's official number. The list on the left holds the conversations; the search above it finds a conversation or a shortcut. The list shows the 200 most recent conversations; the button at its end loads older ones.",
       },
       {
         heading: "The 24-hour window",
-        body: "You can write freely while you are within 24 hours of the student's last message. After that, you can only start contact with an approved template. That is a Meta rule, not a platform one.",
+        body: "You can write freely while you are within 24 hours of the student's last message. After that, you can only start contact with an approved template. That is a Meta rule, not a platform one. If a message fails to go out, it stays marked as not sent and the text goes back to the field so you can try again.",
       },
       {
         heading: "The buttons in a conversation",

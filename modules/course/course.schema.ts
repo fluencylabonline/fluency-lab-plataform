@@ -6,7 +6,8 @@ import {
   boolean,
   jsonb,
   uuid,
-  primaryKey
+  primaryKey,
+  index
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
@@ -87,7 +88,10 @@ export const courseQuizSubmissionsTable = pgTable("course_quiz_submissions", {
   score: integer("score").notNull(),
   passed: boolean("passed").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [
+  // Índices das consultas quentes (listas, agenda, cobrança, crons).
+  index("course_quiz_submissions_user_quiz_idx").on(t.userId, t.quizId, t.createdAt),
+]);
 
 export const courseEnrollmentsTable = pgTable("course_enrollments", {
   userId: text("user_id").references(() => usersTable.id, { onDelete: "cascade" }).notNull(),

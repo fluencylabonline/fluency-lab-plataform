@@ -31,7 +31,7 @@ import { notify } from "@/components/ui/toaster";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn, FieldValues } from "react-hook-form";
 import { Label } from "@/components/ui/label";
-import type { User } from "../../user.schema";
+import type { AdminUserDetailDTO } from "../../user.schema";
 import { Badge } from "@/components/ui/badge";
 import {
   revealSensitiveDataAction,
@@ -42,7 +42,7 @@ import { getLanguagesAction } from "@/modules/curriculum/curriculum.actions";
 import type { LanguageWithLessons } from "@/modules/curriculum/curriculum.types";
 
 interface PersonalInfoTabProps {
-  user: User;
+  user: AdminUserDetailDTO;
   isAdmin: boolean;
   isUpdating: boolean;
   rateForm: UseFormReturn<FieldValues>;

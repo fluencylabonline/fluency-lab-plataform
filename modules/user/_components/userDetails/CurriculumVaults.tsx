@@ -43,7 +43,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-import { User } from "@/modules/user/user.schema";
+import type { TeacherOptionDTO } from "@/modules/user/user.schema";
 import { LessonSummary } from "@/modules/curriculum/curriculum.types";
 import { LearningPlan, LearningPlanWithLessons } from "@/modules/learning/learning.types";
 import { RecurrenceRule, SlotInstanceWithDetails } from "@/modules/scheduling/scheduling.types";
@@ -56,7 +56,7 @@ interface CurriculumVaultsProps {
   // Swap Teacher
   swapSlot: SlotInstanceWithDetails | null;
   setSwapSlot: (slot: SlotInstanceWithDetails | null) => void;
-  teachers: User[];
+  teachers: TeacherOptionDTO[];
   onConfirmSwap: (slotId: string, teacherId: string) => void;
 
   // Update Lesson

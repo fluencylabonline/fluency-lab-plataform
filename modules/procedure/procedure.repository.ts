@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { proceduresTable } from "./procedure.schema";
 import { eq, desc } from "drizzle-orm";

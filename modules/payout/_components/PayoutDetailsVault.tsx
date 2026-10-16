@@ -22,7 +22,7 @@ import {
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { notify } from "@/components/ui/toaster";
-import { storage } from "@/lib/firebase";
+import { storage } from "@/lib/firebase-storage";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { updatePayoutInvoiceAction, updatePayoutReceiptAction } from "../payout.actions";
 import { cn } from "@/lib/utils";

@@ -23,7 +23,7 @@ import * as React from "react";
 
 import { Wizard, type WizardStep } from "@/components/ui/wizard";
 
-import { helpRouteRole } from "../page-help";
+import { helpRouteRole } from "../page-help.match";
 import type { HelpRoute, PageHelp, PageHelpSection } from "../page-help.types";
 import { ShowMeAroundButton } from "./ShowMeAroundButton";
 

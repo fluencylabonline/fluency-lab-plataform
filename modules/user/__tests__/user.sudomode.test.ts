@@ -25,7 +25,7 @@ vi.mock("@/lib/cryptography", () => ({
   decrypt: vi.fn((val) => val.replace("enc:", "")),
 }));
 
-vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: unknown) => fn, updateTag: vi.fn(), refresh: vi.fn() }));
 
 // Mock dynamic imports
 vi.mock("../../contract/contract.repository", () => ({

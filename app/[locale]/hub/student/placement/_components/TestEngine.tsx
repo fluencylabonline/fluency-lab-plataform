@@ -1,9 +1,9 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState, useCallback } from "react";
 import { Question } from "@/modules/placement/placement.schema";
 import { TestView } from "./TestView";
-import { ResultView } from "./ResultView";
 import { submitPlacementAnswerAction, getTestResultAction } from "@/modules/placement/placement.actions";
 import { usePlacementSound } from "@/hooks/ui/use-placement-sound";
 import { notify } from "@/components/ui/toaster";
@@ -11,7 +11,7 @@ import { Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { type PlacementResult } from "./ResultView";
+import type { PlacementResult } from "./ResultView";
 import { 
   Vault, 
   VaultContent, 
@@ -23,6 +23,10 @@ import {
   VaultSecondaryButton,
   VaultIcon
 } from "@/components/ui/vault";
+
+// O resultado (com os gráficos do recharts) só aparece no fim do teste ou ao
+// abrir um teste antigo: carrega sob demanda.
+const ResultView = dynamic(() => import("./ResultView").then((m) => m.ResultView), { ssr: false });
 
 interface TestEngineProps {
   initialQuestion: Question;

@@ -28,14 +28,15 @@ import {
   createNotebookAction,
   getNotebookAction,
   deleteNotebookAction,
+  searchStudentNotebooksAction,
 } from "@/modules/notebook/notebook.actions";
-import type { Notebook } from "@/modules/notebook/notebook.schema";
-import { generateNotebookPDF } from "@/lib/pdfGenerator";
+import type { NotebookListItem, NotebookSearchHit } from "@/modules/notebook/notebook.schema";
+import { useSearch } from "@/hooks/data/use-search";
 
 interface StudentNotebooksCardProps {
   studentId: string;
   studentName?: string;
-  initialNotebooks?: Notebook[];
+  initialNotebooks?: NotebookListItem[];
   isVaultMode?: boolean;
 }
 
@@ -53,12 +54,12 @@ export function StudentNotebooksCard({
   const [searchQuery, setSearchQuery] = useState("");
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [isDeleteVaultOpen, setIsDeleteVaultOpen] = useState(false);
-  const [notebookToDelete, setNotebookToDelete] = useState<Notebook | null>(null);
+  const [notebookToDelete, setNotebookToDelete] = useState<NotebookListItem | null>(null);
   const [newNotebookTitle, setNewNotebookTitle] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
-  const [notebooks, setNotebooks] = useState<Notebook[]>(initialNotebooks);
+  const [notebooks, setNotebooks] = useState<NotebookListItem[]>(initialNotebooks);
 
   const handleDeleteNotebook = async () => {
     if (!notebookToDelete) return;
@@ -88,22 +89,26 @@ export function StudentNotebooksCard({
     }
   };
 
-  const notebooksWithPlainText = useMemo(() => {
-    return notebooks.map((nb) => ({
-      ...nb,
-      plainText: nb.content ? stripHtml(nb.content).toLowerCase() : "",
-    }));
-  }, [notebooks]);
+  // A lista não traz o conteúdo dos cadernos; a busca no texto roda no servidor
+  // e devolve só id + trecho. O título continua filtrando na hora, no cliente.
+  const { results: contentHits } = useSearch<NotebookSearchHit>(
+    searchQuery.trim(),
+    ({ term }) => searchStudentNotebooksAction({ studentId, term }),
+    { domain: `notebooks-${studentId}` },
+  );
+
+  const snippetsById = useMemo(
+    () => new Map(contentHits.map((hit) => [hit.id, hit.snippet])),
+    [contentHits],
+  );
 
   const filteredNotebooks = useMemo(() => {
-    if (!searchQuery.trim()) return notebooksWithPlainText;
+    if (!searchQuery.trim()) return notebooks;
     const query = searchQuery.toLowerCase();
-    return notebooksWithPlainText.filter((nb) => {
-      const titleMatch = nb.title.toLowerCase().includes(query);
-      const contentMatch = nb.plainText.includes(query);
-      return titleMatch || contentMatch;
-    });
-  }, [notebooksWithPlainText, searchQuery]);
+    return notebooks.filter(
+      (nb) => nb.title.toLowerCase().includes(query) || snippetsById.has(nb.id),
+    );
+  }, [notebooks, searchQuery, snippetsById]);
 
   const handleCreateNotebook = async () => {
     if (!newNotebookTitle.trim()) return;
@@ -149,6 +154,8 @@ export function StudentNotebooksCard({
         throw new Error("Notebook not found");
       }
 
+      // pdf-lib só é baixado quando a pessoa pede o PDF.
+      const { generateNotebookPDF } = await import("@/lib/pdfGenerator");
       await generateNotebookPDF({
         title: result.data.notebook.title,
         studentName,
@@ -272,9 +279,9 @@ export function StudentNotebooksCard({
                       <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
                         {highlightText(notebook.title, searchQuery)}
                       </h3>
-                      {searchQuery.trim() && notebook.content && stripHtml(notebook.content).toLowerCase().includes(searchQuery.toLowerCase()) && (
+                      {searchQuery.trim() && snippetsById.get(notebook.id) && (
                         <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2 bg-muted/40 p-1.5 rounded border border-border/45 font-normal select-none">
-                          {highlightText(getContentSnippet(notebook.content, searchQuery), searchQuery)}
+                          {highlightText(snippetsById.get(notebook.id)!, searchQuery)}
                         </p>
                       )}
                       <p className="text-[10px] text-muted-foreground mt-1">
@@ -392,37 +399,6 @@ export function StudentNotebooksCard({
       </Vault>
     </div>
   );
-}
-
-function stripHtml(html: string) {
-  if (!html) return "";
-  return html
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function getContentSnippet(content: string, query: string) {
-  const stripped = stripHtml(content);
-  if (!query.trim()) return "";
-  
-  const index = stripped.toLowerCase().indexOf(query.toLowerCase());
-  if (index === -1) return "";
-
-  const start = Math.max(0, index - 40);
-  const end = Math.min(stripped.length, index + query.length + 60);
-  
-  let snippet = stripped.substring(start, end);
-  if (start > 0) snippet = "..." + snippet;
-  if (end < stripped.length) snippet = snippet + "...";
-  
-  return snippet;
 }
 
 function escapeRegExp(string: string) {

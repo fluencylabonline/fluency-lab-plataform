@@ -1,3 +1,4 @@
+import "server-only";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { docsQuestionsTable, type NewDocsQuestion } from "./docs.schema";

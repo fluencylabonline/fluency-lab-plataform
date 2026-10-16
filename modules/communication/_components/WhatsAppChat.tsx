@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import useSWR from "swr";
 import { useSearchParams } from "next/navigation";
-import { rtdb, storage } from "@/lib/firebase";
+import { rtdb } from "@/lib/firebase-rtdb";
+import { storage } from "@/lib/firebase-storage";
 import { ref as dbRef, onValue } from "firebase/database";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
@@ -222,7 +223,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
     // O RTDB (whatsapp_sync_signal/conversations) já dispara mutateConvs() em
     // tempo real a cada mudança; este intervalo é só uma rede de segurança caso
     // o listener em tempo real perca algum evento.
-    { refreshInterval: 60000 }
+    { refreshInterval: 300000 }
   );
 
   const { data: templates } = useSWR(
@@ -266,11 +267,47 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
     },
     // O RTDB (whatsapp_sync_signal/messages/{id}) já dispara mutateMessages() em
     // tempo real; este intervalo é só uma rede de segurança de fallback.
-    { refreshInterval: 30000 }
+    { refreshInterval: 120000 }
   );
 
   // Histórico mais antigo, carregado sob demanda (fora do cache do SWR para não
   // ser sobrescrito pelas revalidações da janela de mensagens recentes acima).
+  // Conversas além da primeira página (200), carregadas sob demanda — fora do
+  // cache do SWR, no mesmo esquema das mensagens anteriores abaixo.
+  const [olderConversations, setOlderConversations] = useState<WhatsAppConversation[]>([]);
+  const [hasMoreConversations, setHasMoreConversations] = useState(true);
+  const [isLoadingMoreConversations, setIsLoadingMoreConversations] = useState(false);
+
+  useEffect(() => {
+    setOlderConversations([]);
+    setHasMoreConversations(true);
+  }, [viewArchived]);
+
+  // A primeira página pode ter mudado de ordem desde o último "carregar mais";
+  // o que já está nela não se repete na lista antiga.
+  const combinedConversations = useMemo(() => {
+    if (!conversations) return conversations;
+    const loaded = new Set(conversations.map((c) => c.id));
+    return [...conversations, ...olderConversations.filter((c) => !loaded.has(c.id))];
+  }, [conversations, olderConversations]);
+
+  const handleLoadMoreConversations = async () => {
+    if (isLoadingMoreConversations || !conversations) return;
+    setIsLoadingMoreConversations(true);
+    try {
+      const offset = conversations.length + olderConversations.length;
+      const result = await getWhatsAppConversationsAction({ includeArchived: viewArchived, offset });
+      const page = (result?.data as unknown as WhatsAppConversation[]) || [];
+      setOlderConversations((prev) => [...prev, ...page]);
+      setHasMoreConversations(page.length === 100);
+    } catch (err) {
+      console.error("[WhatsAppChat] Error loading more conversations:", err);
+      notify.error("Erro ao carregar mais conversas.");
+    } finally {
+      setIsLoadingMoreConversations(false);
+    }
+  };
+
   const [olderMessages, setOlderMessages] = useState<WhatsAppMessage[]>([]);
   const [hasMoreOlderMessages, setHasMoreOlderMessages] = useState(true);
   const [isLoadingOlderMessages, setIsLoadingOlderMessages] = useState(false);
@@ -509,17 +546,27 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
         mutateMessages();
         mutateConvs();
       } else {
+        rollbackFailedMessage(tempId, textToSend);
         notify.error("Erro ao enviar mensagem. Verifique se está dentro da janela de 24h.");
-        mutateMessages();
-        mutateConvs();
       }
     } catch {
+      rollbackFailedMessage(tempId, textToSend);
       notify.error("Erro técnico ao enviar mensagem.");
-      mutateMessages();
-      mutateConvs();
     } finally {
       setIsSending(false);
     }
+  };
+
+  // Rollback do envio otimista: a bolha fica marcada como "failed" (em vez de
+  // sumir) e o texto volta para o campo, se a pessoa ainda não digitou outro.
+  const rollbackFailedMessage = (tempId: string, text: string) => {
+    mutateMessages(
+      //eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (prev: any) => prev?.map((m: { id: string }) => (m.id === tempId ? { ...m, status: "failed" } : m)),
+      false
+    );
+    mutateConvs();
+    setMessageText((current) => current || text);
   };
 
   // Search student autocomplete logic
@@ -669,7 +716,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
     }
   };
 
-  const filteredConversations = conversations?.filter((conv: WhatsAppConversation) => {
+  const filteredConversations = combinedConversations?.filter((conv: WhatsAppConversation) => {
     if (!searchTerm) return true;
     const q = searchTerm.toLowerCase();
     return (
@@ -837,6 +884,19 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                     onClick={() => handleSelectConv(conv)}
                   />
                 ))
+              )}
+              {!isLoadingConvs && hasMoreConversations && (conversations?.length ?? 0) >= 200 && (
+                <div className="flex justify-center py-3">
+                  <button
+                    type="button"
+                    onClick={handleLoadMoreConversations}
+                    disabled={isLoadingMoreConversations}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-background/80 hover:bg-background border border-border/30 text-muted-foreground hover:text-foreground transition-all disabled:opacity-50"
+                  >
+                    {isLoadingMoreConversations ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                    {isLoadingMoreConversations ? "Carregando..." : "Carregar mais conversas"}
+                  </button>
+                </div>
               )}
             </>
           )}
@@ -1237,7 +1297,6 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                   }}
                   placeholder="Digite sua mensagem ou '/' para respostas..."
                   data-tour="conversas.composer"
-                  disabled={isSending}
                   className={cn(
                     "flex-1 h-11 px-4 text-[13.5px] rounded-full",
                     "bg-[#ffffff] dark:bg-[#2a3942] border-[#ffffff] dark:border-[#2a3942] text-[#111b21] dark:text-[#e9edef] focus-visible:ring-primary/30",

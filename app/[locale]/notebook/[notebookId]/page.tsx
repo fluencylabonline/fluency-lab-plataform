@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { notebookService } from "@/modules/notebook/notebook.service";
 import { NotebookEditor } from "./_components/NotebookEditor";
 import { UserStoreInitializer } from "@/modules/user/_components/UserStoreInitializer";
+import { userService } from "@/modules/user/user.service";
 import { Metadata } from "next";
 
 interface NotebookPageProps {
@@ -51,6 +52,8 @@ export default async function NotebookPage({ params }: NotebookPageProps) {
   const user = await getCurrentUser();
   if (!user) redirect("/signin");
 
+  const sessionUser = userService.toSessionDTO(user);
+
   let notebook;
   try {
     notebook = await notebookService.getNotebook(user.id, user.role, notebookId);
@@ -60,7 +63,7 @@ export default async function NotebookPage({ params }: NotebookPageProps) {
 
   return (
     <>
-      <UserStoreInitializer user={user} />
+      <UserStoreInitializer user={sessionUser} />
       <NotebookEditor
         notebookId={notebookId}
         studentId={notebook.studentId}
@@ -68,7 +71,7 @@ export default async function NotebookPage({ params }: NotebookPageProps) {
         userName={user.name}
         userRole={user.role}
         userColor={colorFromString(user.id)}
-        user={user}
+        user={sessionUser}
       />
     </>
   );

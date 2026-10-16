@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { whatsappConversationsTable, whatsappMessagesTable, whatsappQuickRepliesTable, emailsTable, whatsappConversationStudentsTable } from "./communication.schema";
 import { usersTable } from "../user/user.schema";
@@ -118,7 +119,7 @@ export const communicationRepository = {
     return message;
   },
 
-  async getConversations(includeArchived: boolean = false, limit = 200) {
+  async getConversations(includeArchived: boolean = false, limit = 200, offset = 0) {
     let query = db
       .select({
         id: whatsappConversationsTable.id,
@@ -141,7 +142,7 @@ export const communicationRepository = {
       
     query = query.where(eq(whatsappConversationsTable.isArchived, includeArchived));
 
-    return query.orderBy(desc(whatsappConversationsTable.lastMessageAt)).limit(limit);
+    return query.orderBy(desc(whatsappConversationsTable.lastMessageAt)).limit(limit).offset(offset);
   },
 
   async getMessages(conversationId: string, limit = 50, before?: Date) {

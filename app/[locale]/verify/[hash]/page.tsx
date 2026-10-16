@@ -146,7 +146,6 @@ export default async function VerifyContractPage({ params }: VerifyContractPageP
                           <Clock className="w-3.5 h-3.5" />
                           {format(new Date(auditItem.timestamp), "dd/MM/yyyy HH:mm:ss")} (UTC)
                         </span>
-                        <span>{t("verify.ipLabel")}: <strong className="font-mono text-foreground">{auditItem.ip}</strong></span>
                       </div>
                     ))}
                   </div>

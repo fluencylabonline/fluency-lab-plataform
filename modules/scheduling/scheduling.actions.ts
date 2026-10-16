@@ -13,7 +13,7 @@ import {
   retimeRecurrenceSchema,
   createRecurrenceRulesBatchSchema
 } from "./scheduling.schema";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { z } from "zod";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { schedulingRepository } from "./scheduling.repository";
@@ -28,7 +28,7 @@ export const createRecurrenceRuleAction = protectedAction
         studentId: parsedInput.studentId || null,
         endDate: parsedInput.endDate || null,
       });
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[createRecurrenceRuleAction] Error:", error);
@@ -42,7 +42,7 @@ export const createRecurrenceRulesBatchAction = protectedAction
   .action(async ({ parsedInput, ctx }) => {
     try {
       await schedulingService.createRulesBatch(ctx.user, parsedInput.rules);
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[createRecurrenceRulesBatchAction] Error:", error);
@@ -91,7 +91,7 @@ export const allocateStudentAction = permissionAction("class.update.any")
   .action(async ({ parsedInput, ctx }) => {
     try {
       await schedulingService.allocateStudentToRule(ctx.user, parsedInput.ruleId, parsedInput.studentId);
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[allocateStudentAction] Error:", error);
@@ -105,7 +105,7 @@ export const updateClassStatusAction = protectedAction
   .action(async ({ parsedInput, ctx }) => {
     try {
       await schedulingService.updateClassStatus(ctx.user, parsedInput.classId, parsedInput.status);
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[updateClassStatusAction] Error:", error);
@@ -122,7 +122,7 @@ export const grantCreditAction = permissionAction("credits.grant")
         ...parsedInput,
         expiresAt: parsedInput.expiresAt, // already a Date from schema if using z.date()
       });
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[grantCreditAction] Error:", error);
@@ -152,7 +152,7 @@ export const cancelClassAction = protectedAction
   .action(async ({ parsedInput, ctx }) => {
     try {
       await schedulingService.cancelClass(ctx.user, parsedInput.classId, parsedInput.reason);
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[cancelClassAction] Error:", error);
@@ -171,7 +171,7 @@ export const rescheduleWithCreditAction = protectedAction
         parsedInput.newSlotId,
         parsedInput.creditId
       );
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[rescheduleWithCreditAction] Error:", error);
@@ -185,7 +185,7 @@ export const convertToAvailableAction = protectedAction
   .action(async ({ parsedInput, ctx }) => {
     try {
       await schedulingService.convertToAvailable(ctx.user, parsedInput.classId);
-      revalidatePath("/");
+      refresh();
       return { success: true } as { success: boolean; error?: string };
     } catch (error) {
       console.error("[convertToAvailableAction] Error:", error);
@@ -255,7 +255,7 @@ export const deleteSlotAction = protectedAction
   .action(async ({ parsedInput, ctx }) => {
     try {
       await schedulingService.deleteSlot(ctx.user, parsedInput.slotId, parsedInput.scope);
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[deleteSlotAction] Error:", error);
@@ -289,7 +289,7 @@ export const updateSlotAction = protectedAction
         },
         parsedInput.scope
       );
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[updateSlotAction] Error:", error);
@@ -310,7 +310,7 @@ export const retimeRecurrenceAction = protectedAction
         parsedInput.newStartDate,
         parsedInput.fromSlotId
       );
-      revalidatePath("/");
+      refresh();
       return { success: true, updatedCount: result.updatedCount };
     } catch (error) {
       console.error("[retimeRecurrenceAction] Error:", error);
@@ -327,7 +327,7 @@ export const swapSlotTeacherAction = permissionAction("class.update.any")
   .action(async ({ parsedInput, ctx }) => {
     try {
       await schedulingService.swapSlotTeacher(ctx.user, parsedInput.slotId, parsedInput.newTeacherId);
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[swapSlotTeacherAction] Error:", error);
@@ -345,7 +345,7 @@ export const updateSlotLessonAction = protectedAction
   .action(async ({ parsedInput, ctx }) => {
     try {
       await schedulingService.updateSlotLesson(ctx.user, parsedInput.slotId, parsedInput.lessonId, parsedInput.lessonTitle);
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[updateSlotLessonAction] Error:", error);
@@ -454,7 +454,7 @@ export const deallocateStudentAction = permissionAction("class.update.any")
   .action(async ({ parsedInput, ctx }) => {
     try {
       await schedulingService.deallocateStudentFromRule(ctx.user, parsedInput.ruleId);
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[deallocateStudentAction] Error:", error);
@@ -507,7 +507,7 @@ export const updateClassEarningsAction = permissionAction("class.update.any")
       await schedulingRepository.updateSlot(parsedInput.classId, {
         teacherHourlyRate: parsedInput.teacherHourlyRate
       });
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[updateClassEarningsAction] Error:", error);
@@ -584,7 +584,7 @@ export const confirmRecessAction = protectedAction
         startDate: parsedInput.startDate,
         endDate: parsedInput.endDate
       });
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[confirmRecessAction] Error:", error);
@@ -630,7 +630,7 @@ export const updateClassNotesAction = protectedAction
   .action(async ({ parsedInput, ctx }) => {
     try {
       await schedulingService.updateClassNotes(ctx.user, parsedInput.classId, parsedInput.notes);
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[updateClassNotesAction] Error:", error);
@@ -674,7 +674,7 @@ export const rescheduleAction = protectedAction
         parsedInput.newSlotId,
         parsedInput.creditId
       );
-      revalidatePath("/");
+      refresh();
       return { success: true } as { success: boolean; error?: string };
     } catch (error) {
       console.error("[rescheduleAction] Error:", error);
@@ -726,7 +726,7 @@ export const transferStudentTeacherAction = permissionAction("class.update.any")
         parsedInput.studentId,
         parsedInput.force
       );
-      revalidatePath("/");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[transferStudentTeacherAction] Error:", error);

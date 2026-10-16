@@ -9,6 +9,7 @@ import { PayoutSummary } from "./_components/PayoutSummary";
 import { ContractBadge } from "./_components/ContractBadge";
 import { DailyLessonsSummary } from "./_components/DailyLessonsSummary";
 import { PendingClassesWarning } from "./_components/PendingClassesWarning";
+import { userService } from "@/modules/user/user.service";
 
 export default async function ProfilePage() {
     const user = await getCurrentUser();
@@ -27,13 +28,13 @@ export default async function ProfilePage() {
 
     return (
         <div>
-            <Header title="Perfil" className="contents" user={user} showSubHeader={false} />
+            <Header title="Perfil" className="contents" user={userService.toSessionDTO(user)} showSubHeader={false} />
             <main className="container pt-8 pb-24 md:pb-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column: Basic Info & Stats */}
                     <div className="lg:col-span-1 space-y-6">
                         <PendingClassesWarning pendingClasses={pendingClasses} />
-                        <ProfileCard user={user} />
+                        <ProfileCard user={userService.toSessionDTO(user)} />
                         <ContractBadge contract={activeContract} />
                         <DailyLessonsSummary lessons={dailySummary} />
                     </div>

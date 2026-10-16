@@ -21,6 +21,7 @@ import { ADMIN_HELP_PT } from "./content/admin.pt";
 import { SHARED_HELP_EN } from "./content/shared.en";
 import { SHARED_HELP_PT } from "./content/shared.pt";
 import type { HelpRoute, PageHelp } from "./page-help.types";
+import { matchHelpRoute as matchRoute, helpRouteRole } from "./page-help.match";
 
 /**
  * Todo o conteúdo, por idioma.
@@ -48,63 +49,12 @@ const PAGE_HELP: Record<Locale, Record<HelpRoute, PageHelp>> = {
 /** Todas as rotas com ajuda, da mais específica para a menos. */
 const HELP_ROUTES = Object.keys(PAGE_HELP.pt) as HelpRoute[];
 
-const isDynamicSegment = (segment: string) =>
-  segment.startsWith("[") && segment.endsWith("]");
-
 /**
- * Casa um `pathname` real com um padrão de rota do registry.
- *
- * Exato primeiro; depois segmento a segmento, tratando `[param]` como coringa.
- * Entre vários candidatos vence o com menos coringas — assim
- * `/hub/teacher/recess/new` ganha de `/hub/teacher/recess/[id]`.
+ * Casa um `pathname` real com um padrão de rota do registry. A lógica vive em
+ * `page-help.match.ts`, que não importa conteúdo e pode ir ao cliente.
  */
 export function matchHelpRoute(pathname: string | null): HelpRoute | null {
-  if (!pathname) return null;
-
-  const normalized =
-    pathname.length > 1 && pathname.endsWith("/")
-      ? pathname.slice(0, -1)
-      : pathname;
-
-  if (HELP_ROUTES.includes(normalized as HelpRoute)) {
-    return normalized as HelpRoute;
-  }
-
-  const parts = normalized.split("/");
-  let best: HelpRoute | null = null;
-  let bestWildcards = Number.POSITIVE_INFINITY;
-
-  for (const route of HELP_ROUTES) {
-    const routeParts = route.split("/");
-    if (routeParts.length !== parts.length) continue;
-
-    let wildcards = 0;
-    let matches = true;
-
-    for (let i = 0; i < routeParts.length; i += 1) {
-      const routePart = routeParts[i];
-      if (isDynamicSegment(routePart)) {
-        // Um segmento dinâmico casa com qualquer coisa, menos vazio.
-        if (!parts[i]) {
-          matches = false;
-          break;
-        }
-        wildcards += 1;
-        continue;
-      }
-      if (routePart !== parts[i]) {
-        matches = false;
-        break;
-      }
-    }
-
-    if (matches && wildcards < bestWildcards) {
-      best = route;
-      bestWildcards = wildcards;
-    }
-  }
-
-  return best;
+  return matchRoute(pathname, HELP_ROUTES);
 }
 
 /** A ajuda da rota atual no idioma pedido, ou `null` se a rota não tem ajuda. */
@@ -123,21 +73,7 @@ export function resolvePageHelp(
   return { route, help };
 }
 
-/** O papel dono da rota, para montar o link da Central de Ajuda. */
-export function helpRouteRole(
-  route: HelpRoute,
-): "admin" | "manager" | "teacher" | "student" | null {
-  const segment = route.split("/")[2];
-  if (
-    segment === "admin" ||
-    segment === "manager" ||
-    segment === "teacher" ||
-    segment === "student"
-  ) {
-    return segment;
-  }
-  return null;
-}
+export { helpRouteRole };
 
 /**
  * Aviso de desenvolvimento quando `pt` e `en` divergem.

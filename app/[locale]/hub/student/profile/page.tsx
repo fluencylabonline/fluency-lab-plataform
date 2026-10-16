@@ -91,7 +91,7 @@ export default async function ProfilePage() {
 
     return (
         <StudentProfileClient
-            user={user}
+            user={{ ...userService.toSessionDTO(user), streakCount: user.streakCount }}
             subscriptionData={subscriptionData}
             nextClassMapped={nextClassMapped}
             onboardingData={onboardingData}

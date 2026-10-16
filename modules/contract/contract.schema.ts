@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, pgEnum, uuid, jsonb, AnyPgColumn, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, pgEnum, uuid, jsonb, AnyPgColumn, integer, index } from "drizzle-orm/pg-core";
 import { usersTable } from "../user/user.schema";
 import { relations } from "drizzle-orm";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
@@ -60,7 +60,12 @@ export const contractInstancesTable = pgTable("contract_instances", {
     .notNull()
     .defaultNow()
     .$onUpdate(() => new Date()),
-});
+}, (t) => [
+  // Índices das consultas quentes (listas, agenda, cobrança, crons).
+  index("contract_instances_user_idx").on(t.userId),
+  index("contract_instances_subscription_idx").on(t.subscriptionId),
+  index("contract_instances_status_expires_idx").on(t.status, t.expiresAt),
+]);
 
 // Metadados de Assinatura (Forense/Auditoria)
 export const contractSignaturesMetadataTable = pgTable("contract_signatures_metadata", {

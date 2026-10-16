@@ -10,7 +10,7 @@ import {
   getCallRecordingsSchema,
   type CallRecordingSummary,
 } from "./call.schema";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 
 /**
  * startCallAction — Teacher initiates a call from the notebook.
@@ -117,8 +117,7 @@ export const syncCallTranscriptionAction = protectedAction
     const success = await callService.syncCallTranscription(parsedInput.streamCallId);
 
     if (success && session) {
-      revalidatePath(`/hub/admin/users/${session.studentId}`);
-      revalidatePath(`/hub/manager/users/${session.studentId}`);
+      refresh();
     }
 
     return {

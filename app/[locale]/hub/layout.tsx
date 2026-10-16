@@ -7,6 +7,7 @@ import { UserStoreInitializer } from "@/modules/user/_components/UserStoreInitia
 import { getTranslations } from "next-intl/server";
 import { PageHelpProvider } from "@/modules/page-help/_components/PageHelpProvider";
 import { billingService } from "@/modules/billing/billing.service";
+import { userService } from "@/modules/user/user.service";
 
 export async function generateMetadata({
     params,
@@ -52,11 +53,11 @@ export default async function HubLayout({ children }: HubLayoutProps) {
 
     return (
         <div className="flex h-dvh w-full overflow-hidden">
-            <UserStoreInitializer user={user} />
+            <UserStoreInitializer user={userService.toSessionDTO(user)} />
             <Sidebar items={menuItems} />
             <main className="flex-1 flex flex-col min-w-0 relative overflow-hidden lg:p-2 md:p-0 p-0">
                 <div className="content-layout rounded-none lg:rounded-md w-full h-full overflow-y-auto">
-                    <PageHelpProvider>{children}</PageHelpProvider>
+                    <PageHelpProvider role={user.role}>{children}</PageHelpProvider>
                 </div>
             </main>
         </div>

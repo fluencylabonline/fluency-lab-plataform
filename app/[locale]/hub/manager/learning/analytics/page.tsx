@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/header";
 import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth-server";
+import { userService } from "@/modules/user/user.service";
 
 export default async function LearningAnalyticsPage() {
     const t = await getTranslations("Learning");
@@ -13,7 +14,7 @@ export default async function LearningAnalyticsPage() {
             <Header
                 title={t("analytics") || "Learning Analytics"}
                 subtitle="Performance and engagement metrics for curriculum paths."
-                user={user}
+                user={userService.toSessionDTO(user)}
                 backHref="/hub/manager/learning"
             />
 

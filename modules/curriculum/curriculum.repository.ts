@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import {
   languages, media, learningItems, lessons, lessonLearningItems, cefrLevelEnum, lessonStatusEnum

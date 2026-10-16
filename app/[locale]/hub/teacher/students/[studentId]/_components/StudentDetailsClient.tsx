@@ -22,7 +22,7 @@ import { StudentNotebooksCard } from "./StudentNotebooksCard";
 import { StudentPlanCard } from "./StudentPlanCard";
 import { StudentClassesCard } from "./StudentClassesCard";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
-import { Notebook } from "@/modules/notebook/notebook.schema";
+import type { NotebookListItem } from "@/modules/notebook/notebook.schema";
 import { StudentDetailsWizard } from "./StudentDetailsWizard";
 import { useWizard } from "@/hooks/ui/use-wizard";
 import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpProvider";
@@ -31,7 +31,7 @@ interface StudentDetailsClientProps {
   studentId: string;
   studentName: string;
   initialClasses: SlotInstanceWithDetails[];
-  initialNotebooks: Notebook[];
+  initialNotebooks: NotebookListItem[];
   initialRoadmap: StudentRoadmap | null;
   profileId: string | null;
 }

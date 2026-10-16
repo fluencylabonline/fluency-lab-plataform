@@ -16,7 +16,7 @@ import Logo from "@/public/brand/logo.png";
 import Image from "next/image";
 import useSWR from "swr";
 import { getWhatsAppUnreadCountAction } from "@/modules/communication/communication.actions";
-import { rtdb } from "@/lib/firebase";
+import { rtdb } from "@/lib/firebase-rtdb";
 import { ref as dbRef, onValue } from "firebase/database";
 
 export interface SidebarProps {
@@ -27,8 +27,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
     const pathname = usePathname();
     const isCollapsed = useCollapsedStore((state) => state.isCollapsed);
 
+    // Só admin/manager têm o item de conversas no menu; para os demais a
+    // action é negada e o RTDB recusa o listener, então nem tentamos.
+    const hasChat = useMemo(
+        () => items.some((item) => item.labelKey === "chat" || item.href.endsWith("/conversas")),
+        [items],
+    );
+
     const { data: unreadData, mutate: mutateUnread } = useSWR(
-        "whatsapp-unread-count",
+        hasChat ? "whatsapp-unread-count" : null,
         async () => {
             const res = await getWhatsAppUnreadCountAction();
             return res?.data?.count || 0;
@@ -36,12 +43,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
     );
 
     useEffect(() => {
+        if (!hasChat) return;
         const signalRef = dbRef(rtdb, "whatsapp_sync_signal/conversations");
         const unsubscribe = onValue(signalRef, () => {
             mutateUnread();
         });
         return () => unsubscribe();
-    }, [mutateUnread]);
+    }, [hasChat, mutateUnread]);
 
     const itemsWithBadges = useMemo(() => {
         return items.map(item => {

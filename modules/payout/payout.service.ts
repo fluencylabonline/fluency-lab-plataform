@@ -1,3 +1,4 @@
+import "server-only";
 import { payoutRepository } from "./payout.repository";
 import { userService } from "@/modules/user/user.service";
 import { decrypt } from "@/lib/cryptography";

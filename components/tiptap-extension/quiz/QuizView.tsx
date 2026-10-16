@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
 import { useParams } from "next/navigation";
 import { ref, onValue, set, off, type DataSnapshot } from "firebase/database";
-import { rtdb } from "@/lib/firebase";
+import { rtdb } from "@/lib/firebase-rtdb";
 import { 
   Sparkles, 
   CheckCircle2, 

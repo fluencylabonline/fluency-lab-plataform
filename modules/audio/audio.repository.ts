@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { audiosTable } from "./audio.schema";
 import { eq } from "drizzle-orm";

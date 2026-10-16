@@ -7,20 +7,20 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Shimmer } from "@shimmer-from-structure/react";
 
 import { authClient } from "@/lib/auth-client";
-import { storage } from "@/lib/firebase";
+import { storage } from "@/lib/firebase-storage";
 import { useUserStore } from "../user.store";
 import { syncUserAction } from "@/modules/user/user.actions";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { notify } from "@/components/ui/toaster";
-import { User } from "../user.schema";
+import { SessionUserDTO } from "../user.schema";
 
 interface ProfileCardProps {
-  user?: User | null;
+  user?: SessionUserDTO | null;
   isLoading?: boolean;
 }
 
-const mockUser: Partial<User> = {
+const mockUser: Partial<SessionUserDTO> = {
   name: "Loading Name...",
   email: "loading@email.com",
   role: "student",

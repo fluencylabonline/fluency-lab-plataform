@@ -11,16 +11,15 @@ import {
   RangeRequestsPlugin,
   StaleWhileRevalidate 
 } from "serwist";
+import { PUBLIC_PAGES_CACHE, PUBLIC_PAGE_PATHS, purgePrivateCaches } from "./lib/pwa-cache";
 
 declare const self: ServiceWorkerGlobalScope & {
   __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
 };
 
-const PAGES_CACHE_NAME = {
-  rscPrefetch: "pages-rsc-prefetch",
-  rsc: "pages-rsc",
-  html: "pages",
-} as const;
+// HTML e RSC de páginas logadas nunca vão para o Cache Storage: a chave é só a
+// URL, então outra pessoa no mesmo aparelho veria a página de quem saiu.
+const isPublicPage = (pathname: string) => PUBLIC_PAGE_PATHS.includes(pathname.replace(/\/$/, "") || "/");
 
 const customCache: RuntimeCaching[] = [
   // 1. Google Fonts Webfonts
@@ -200,28 +199,19 @@ const customCache: RuntimeCaching[] = [
       networkTimeoutSeconds: 10,
     }),
   },
-  // 14. API requests (NetworkFirst with short network timeout)
+  // 14. API requests: respostas por usuário — sem Cache Storage. O cache HTTP
+  // do navegador ainda vale para quem manda `Cache-Control: private`.
   {
     matcher: ({ sameOrigin, url: { pathname } }: RouteMatchCallbackOptions) => sameOrigin && pathname.startsWith("/api/"),
     method: "GET",
-    handler: new NetworkFirst({
-      cacheName: "apis",
-      plugins: [
-        new ExpirationPlugin({
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60, // 24 hours
-          maxAgeFrom: "last-used",
-        }),
-      ],
-      networkTimeoutSeconds: 10,
-    }),
+    handler: new NetworkOnly(),
   },
   // 15. Next.js RSC Prefetch requests (NetworkFirst)
   {
     matcher: ({ request, url: { pathname }, sameOrigin }: RouteMatchCallbackOptions) =>
-      request.headers.get("RSC") === "1" && request.headers.get("Next-Router-Prefetch") === "1" && sameOrigin && !pathname.startsWith("/api/"),
+      request.headers.get("RSC") === "1" && request.headers.get("Next-Router-Prefetch") === "1" && sameOrigin && isPublicPage(pathname),
     handler: new NetworkFirst({
-      cacheName: PAGES_CACHE_NAME.rscPrefetch,
+      cacheName: PUBLIC_PAGES_CACHE.rscPrefetch,
       plugins: [
         new ExpirationPlugin({
           maxEntries: 64,
@@ -232,9 +222,9 @@ const customCache: RuntimeCaching[] = [
   },
   // 16. Next.js RSC standard requests (NetworkFirst)
   {
-    matcher: ({ request, url: { pathname }, sameOrigin }: RouteMatchCallbackOptions) => request.headers.get("RSC") === "1" && sameOrigin && !pathname.startsWith("/api/"),
+    matcher: ({ request, url: { pathname }, sameOrigin }: RouteMatchCallbackOptions) => request.headers.get("RSC") === "1" && sameOrigin && isPublicPage(pathname),
     handler: new NetworkFirst({
-      cacheName: PAGES_CACHE_NAME.rsc,
+      cacheName: PUBLIC_PAGES_CACHE.rsc,
       plugins: [
         new ExpirationPlugin({
           maxEntries: 64,
@@ -251,9 +241,9 @@ const customCache: RuntimeCaching[] = [
   // 17. HTML Document Requests (NetworkFirst)
   {
     matcher: ({ request, url: { pathname }, sameOrigin }: RouteMatchCallbackOptions) =>
-      request.mode === "navigate" && sameOrigin && !pathname.startsWith("/api/"),
+      request.mode === "navigate" && sameOrigin && isPublicPage(pathname),
     handler: new NetworkFirst({
-      cacheName: PAGES_CACHE_NAME.html,
+      cacheName: PUBLIC_PAGES_CACHE.html,
       plugins: [
         new ExpirationPlugin({
           maxEntries: 32,
@@ -264,6 +254,12 @@ const customCache: RuntimeCaching[] = [
       // indefinitely instead of falling back to the cached page quickly.
       networkTimeoutSeconds: 10,
     }),
+  },
+  // 17b. Demais páginas (logadas): sempre rede. Offline cai no fallback /offline.
+  {
+    matcher: ({ request, sameOrigin }: RouteMatchCallbackOptions) =>
+      sameOrigin && (request.mode === "navigate" || request.headers.get("RSC") === "1"),
+    handler: new NetworkOnly(),
   },
   // 18. Other local GETs (NetworkFirst)
   {
@@ -406,6 +402,12 @@ self.addEventListener("fetch", (event: FetchEvent) => {
       }
     })(),
   );
+});
+
+// Versões antigas do SW guardavam /hub e /api no Cache Storage. Ao ativar esta
+// versão, apagamos esses caches de todos os aparelhos.
+self.addEventListener("activate", (event: ExtendableEvent) => {
+  event.waitUntil(purgePrivateCaches());
 });
 
 serwist.addEventListeners();

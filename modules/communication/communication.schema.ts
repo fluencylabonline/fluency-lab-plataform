@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { pgTable, text, timestamp, integer, uuid, jsonb, pgEnum, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer, uuid, jsonb, pgEnum, boolean, index } from "drizzle-orm/pg-core";
 import { usersTable } from "../user/user.schema";
 
 export const whatsappMessageDirectionEnum = pgEnum("whatsapp_message_direction", ["inbound", "outbound"]);
@@ -20,7 +20,10 @@ export const whatsappConversationsTable = pgTable("whatsapp_conversations", {
     .notNull()
     .defaultNow()
     .$onUpdate(() => new Date()),
-});
+}, (t) => [
+  // Índices das consultas quentes (listas, agenda, cobrança, crons).
+  index("whatsapp_conversations_last_message_idx").on(t.lastMessageAt),
+]);
 
 export const whatsappMessagesTable = pgTable("whatsapp_messages", {
   id: text("id").primaryKey(), // ID da Meta (wamid.HB...)
@@ -33,7 +36,10 @@ export const whatsappMessagesTable = pgTable("whatsapp_messages", {
   status: whatsappMessageStatusEnum("status").notNull().default("sent"),
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (t) => [
+  // Índices das consultas quentes (listas, agenda, cobrança, crons).
+  index("whatsapp_messages_conversation_created_idx").on(t.conversationId, t.createdAt),
+]);
 
 export const whatsappQuickRepliesTable = pgTable("whatsapp_quick_replies", {
   id: uuid("id").primaryKey().defaultRandom(),

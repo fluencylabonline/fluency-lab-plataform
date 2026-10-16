@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "./db";
 import { rateLimits } from "@/modules/curriculum/curriculum.schema";
 import { and, eq, sql } from "drizzle-orm";

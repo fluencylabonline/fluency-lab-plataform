@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { notificationsTable, pushSubscriptionsTable } from "./notification.schema";
 import { eq, and, inArray, desc } from "drizzle-orm";
@@ -14,10 +15,12 @@ export const notificationRepository = {
     return db.insert(notificationsTable).values(data).returning();
   },
 
-  async findByUserId(userId: string) {
+  // Consultado a cada 30s pelo sino; sem limite a lista crescia para sempre.
+  async findByUserId(userId: string, limit = 50) {
     return db.query.notificationsTable.findMany({
       where: eq(notificationsTable.userId, userId),
       orderBy: (notifications, { desc }) => [desc(notifications.createdAt)],
+      limit,
     });
   },
 

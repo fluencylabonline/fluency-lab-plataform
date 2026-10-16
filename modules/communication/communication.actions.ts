@@ -4,7 +4,7 @@ import { managerAction, adminAction } from "@/lib/safe-action";
 import { z } from "zod";
 import { communicationService } from "./communication.service";
 import { createWhatsAppTemplateSchema, createWhatsAppQuickReplySchema, sendAdminEmailSchema } from "./communication.schema";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 
 export const getWhatsAppTemplatesAction = managerAction
   .metadata({ name: "getWhatsAppTemplates" })
@@ -17,7 +17,7 @@ export const createWhatsAppTemplateAction = managerAction
   .schema(createWhatsAppTemplateSchema)
   .action(async ({ parsedInput }) => {
     await communicationService.createWhatsAppTemplate(parsedInput);
-    revalidatePath("/hub/admin/communication");
+    refresh();
     return { success: true };
   });
 
@@ -26,15 +26,25 @@ export const deleteWhatsAppTemplateAction = managerAction
   .schema(z.object({ name: z.string() }))
   .action(async ({ parsedInput }) => {
     await communicationService.deleteWhatsAppTemplate(parsedInput.name);
-    revalidatePath("/hub/admin/communication");
+    refresh();
     return { success: true };
   });
 
 export const getWhatsAppConversationsAction = managerAction
   .metadata({ name: "getWhatsAppConversations" })
-  .schema(z.object({ includeArchived: z.boolean().optional().default(false) }).optional())
+  .schema(
+    z
+      .object({
+        includeArchived: z.boolean().optional().default(false),
+        offset: z.number().int().min(0).optional().default(0),
+      })
+      .optional()
+  )
   .action(async ({ parsedInput }) => {
-    return await communicationService.getConversations(parsedInput?.includeArchived ?? false);
+    return await communicationService.getConversations(
+      parsedInput?.includeArchived ?? false,
+      parsedInput?.offset ?? 0
+    );
   });
 
 export const archiveWhatsAppConversationAction = managerAction

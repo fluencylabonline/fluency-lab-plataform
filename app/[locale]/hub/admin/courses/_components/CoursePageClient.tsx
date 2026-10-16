@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { CreateCourseVault } from "./CreateCourseVault";
-import { type User } from "@/modules/user/user.schema";
+import type { SessionUserDTO } from "@/modules/user/user.schema";
 import { Course } from "@/modules/course/course.types";
 import { containerVariants, itemVariants } from "@/lib/animations";
 import {
@@ -45,7 +45,7 @@ import { notify } from "@/components/ui/toaster";
 
 interface CoursePageClientProps {
   initialData: Course[];
-  currentUser: User;
+  currentUser: SessionUserDTO;
 }
 
 export function CoursePageClient({ initialData, currentUser }: CoursePageClientProps) {

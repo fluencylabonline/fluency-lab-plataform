@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { QuestionsBank } from "./QuestionsBank";
 import { PlacementWizardVault } from "./PlacementWizardVault";
-import { User } from "@/modules/user/user.schema";
+import { SessionUserDTO } from "@/modules/user/user.schema";
 import { Language } from "@/modules/curriculum/curriculum.types";
 
 interface PlacementStats {
@@ -22,7 +22,7 @@ interface PlacementStats {
 }
 
 interface PlacementClientProps {
-    user: User;
+    user: SessionUserDTO;
     languages: Language[];
     initialStats: PlacementStats;
 }

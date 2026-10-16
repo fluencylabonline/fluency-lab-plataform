@@ -32,7 +32,7 @@ import {
   CommandItem
 } from "@/components/ui/command";
 import { notify } from "@/components/ui/toaster";
-import { User } from "@/modules/user/user.schema";
+import type { AdminUserDTO } from "@/modules/user/user.schema";
 import { useSearch } from "@/hooks/data/use-search";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -47,13 +47,13 @@ interface SendNotificationVaultProps {
 
 export function SendNotificationVault({ open, onOpenChange }: SendNotificationVaultProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<AdminUserDTO[]>([]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const {
     results: searchResults,
     isSearching
-  } = useSearch<User>(searchTerm, searchUsersAction, { domain: "users" });
+  } = useSearch<AdminUserDTO>(searchTerm, searchUsersAction, { domain: "users" });
 
   const { register, handleSubmit, watch, setValue, control, formState: { errors }, reset } = useForm<SendNotificationValues>({
     resolver: zodResolver(sendNotificationSchema),
@@ -68,7 +68,7 @@ export function SendNotificationVault({ open, onOpenChange }: SendNotificationVa
 
   const targetType = watch("targetType");
 
-  const toggleUser = (user: User) => {
+  const toggleUser = (user: AdminUserDTO) => {
     const isSelected = selectedUsers.find(u => u.id === user.id);
     let newSelection;
     if (isSelected) {

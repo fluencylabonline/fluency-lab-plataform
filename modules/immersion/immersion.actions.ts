@@ -3,7 +3,7 @@
 import { protectedAction } from "@/lib/safe-action";
 import { saveImmersionProgressSchema, recordImmersionResultSchema } from "./immersion.schema";
 import { immersionService } from "./immersion.service";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { z } from "zod";
 
 
@@ -22,7 +22,7 @@ export const recordImmersionResultAction = protectedAction
   .action(async ({ parsedInput, ctx }) => {
     const { gameId, entry } = parsedInput;
     await immersionService.recordResult(ctx.user.id, gameId, entry);
-    revalidatePath(`/hub/student/immersion/${gameId}`);
+    refresh();
     return { success: true };
   });
 

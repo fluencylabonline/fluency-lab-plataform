@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import * as Y from "yjs";
-import { rtdb } from "@/lib/firebase";
+import { rtdb } from "@/lib/firebase-rtdb";
 import { RealtimeDatabaseProvider, type AwarenessUser } from "@/lib/y-rtdb-provider";
 
 interface NotebookCollaborationOptions {

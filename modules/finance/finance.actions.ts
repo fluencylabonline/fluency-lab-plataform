@@ -3,7 +3,7 @@
 import { protectedAction } from "@/lib/safe-action";
 import { financeService } from "./finance.service";
 import { createTransactionSchema, upsertFiscalConfigSchema } from "./finance.schema";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { z } from "zod";
 
 import { payoutService } from "../payout/payout.service";
@@ -18,7 +18,7 @@ export const createTransactionAction = protectedAction
 
     try {
       await financeService.createTransaction(ctx.user.id, parsedInput);
-      revalidatePath("/hub/admin/finances");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[createTransactionAction] Error:", error);
@@ -39,7 +39,7 @@ export const updateTransactionAction = protectedAction
 
     try {
       await financeService.updateTransaction(parsedInput.id, parsedInput.data);
-      revalidatePath("/hub/admin/finances");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[updateTransactionAction] Error:", error);
@@ -57,7 +57,7 @@ export const deleteTransactionAction = protectedAction
 
     try {
       await financeService.deleteTransaction(parsedInput.id);
-      revalidatePath("/hub/admin/finances");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[deleteTransactionAction] Error:", error);
@@ -86,7 +86,7 @@ export const payTeacherAction = protectedAction
         parsedInput.year
       );
 
-      revalidatePath("/hub/admin/finances");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[payTeacherAction] Error:", error);
@@ -104,7 +104,7 @@ export const upsertFiscalConfigAction = protectedAction
 
     try {
       await financeService.upsertFiscalConfig(parsedInput);
-      revalidatePath("/hub/admin/finances");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[upsertFiscalConfigAction] Error:", error);

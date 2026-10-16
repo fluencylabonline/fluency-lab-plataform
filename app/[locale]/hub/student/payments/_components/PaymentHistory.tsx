@@ -92,7 +92,6 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
           notify.success(
             tProfile("paymentConfirmed") || "Pagamento confirmado com sucesso!",
           );
-          router.refresh();
           setExpandedPaymentId(null);
         } else {
           notify.info(
@@ -129,7 +128,6 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
         notify.success(
           tProfile("regenerateSuccess") || "Novo código PIX gerado com sucesso!"
         );
-        router.refresh();
         setExpandedPaymentId(null);
       } else {
         notify.error(

@@ -7,10 +7,10 @@ import { Plus } from "lucide-react";
 import { LessonsList } from "./LessonsList";
 import { CreateLessonVault } from "./CreateLessonVault";
 import { LessonSummary } from "@/modules/curriculum/curriculum.types";
-import { User } from "@/modules/user/user.schema";
+import { SessionUserDTO } from "@/modules/user/user.schema";
 
 interface LessonsPageContentProps {
-    user: User | null;
+    user: SessionUserDTO | null;
     initialLessons: LessonSummary[];
     languages: { id: string; name: string }[];
 }

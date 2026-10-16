@@ -44,7 +44,7 @@ import { createAudioAction, listAudiosAction } from "@/modules/audio/audio.actio
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 
 // --- Firebase ---
-import { storage } from "@/lib/firebase";
+import { storage } from "@/lib/firebase-storage";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 // --- Interfaces & Schemas ---

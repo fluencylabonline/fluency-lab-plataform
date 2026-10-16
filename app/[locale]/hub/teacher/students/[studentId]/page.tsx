@@ -22,13 +22,9 @@ export default async function StudentDetailsPage({ params }: StudentDetailsPageP
     redirect("/signin");
   }
 
-  const student = await userService.getUserById(studentId);
-  if (!student) {
-    redirect("/hub/teacher/students");
-  }
-
   const now = new Date();
-  const [initialClasses, initialNotebooks, initialRoadmap, profile] = await Promise.all([
+  const [student, initialClasses, initialNotebooks, initialRoadmap, profile] = await Promise.all([
+    userService.getUserById(studentId),
     schedulingService.getStudentClassesByTeacher(
       user,
       studentId,
@@ -39,6 +35,10 @@ export default async function StudentDetailsPage({ params }: StudentDetailsPageP
     learningService.getStudentRoadmap(studentId),
     learningService.findProfileByStudentId(studentId),
   ]);
+
+  if (!student) {
+    redirect("/hub/teacher/students");
+  }
 
   const profileId = profile?.status === "active" ? profile.id : null;
 

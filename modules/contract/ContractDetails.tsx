@@ -16,7 +16,7 @@ import { notify } from "@/components/ui/toaster";
 import { getContractDownloadUrlAction, resendContractEmailAction, signContractAction, renewMyContractAction } from "@/modules/contract/contract.actions";
 import { format, differenceInDays } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { RefreshCw } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -34,7 +34,6 @@ interface ContractDetailsProps {
 export function ContractDetails({ contract, user }: ContractDetailsProps) {
   const t = useTranslations("Hub.Contract");
   const { locale } = useParams();
-  const router = useRouter();
   const [currentContract, setCurrentContract] = useState<ContractWithTemplate | null>(contract);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
@@ -156,7 +155,6 @@ export function ContractDetails({ contract, user }: ContractDetailsProps) {
       if (result?.data?.success && result.data.data) {
         notify.success("Contrato renovado! Assine o novo contrato para continuar.");
         setCurrentContract(result.data.data as ContractWithTemplate);
-        router.refresh();
       } else {
         notify.error(result?.data?.error || "Erro ao renovar o contrato.");
       }

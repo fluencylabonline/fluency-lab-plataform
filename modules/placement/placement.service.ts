@@ -1,3 +1,4 @@
+import "server-only";
 import { placementRepository } from "./placement.repository";
 import { userService } from "../user/user.service";
 import { calculateElo, mapEloToCEFR, cefrToInitialDifficulty } from "@/lib/adaptive-scoring";

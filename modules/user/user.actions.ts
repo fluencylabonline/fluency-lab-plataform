@@ -346,7 +346,8 @@ export const searchUsersAction = protectedAction
     try {
       // Apenas admin pode buscar todos os usuários
       if (ctx.user.role !== "admin") return { success: false, error: "UNAUTHORIZED" };
-      const data = await userService.searchUsers(parsedInput.term);
+      const users = await userService.searchUsers(parsedInput.term);
+      const data = users.map((u) => userService.sanitizeUserForAdmin(u));
       return { success: true, data };
     } catch (error) {
       console.error("[searchUsersAction] Error:", error);
@@ -359,7 +360,7 @@ export const getTeachersAction = protectedAction
   .inputSchema(z.object({}))
   .action(async () => {
     try {
-      const data = await userService.getAllTeachers();
+      const data = await userService.getTeacherOptions();
       return { success: true, data };
     } catch (error) {
       console.error("[getTeachersAction] Error:", error);

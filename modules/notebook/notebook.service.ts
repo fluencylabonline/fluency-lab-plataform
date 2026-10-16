@@ -1,5 +1,7 @@
+import "server-only";
 import { notebookRepository } from "./notebook.repository";
-import type { Notebook } from "./notebook.schema";
+import type { Notebook, NotebookListItem, NotebookSearchHit } from "./notebook.schema";
+import { getContentSnippet } from "@/utils/html-text";
 import { adminStorage } from "@/lib/firebase-admin";
 import { aiService } from "@/modules/ai/ai.service";
 
@@ -30,7 +32,7 @@ export const notebookService = {
     requesterId: string,
     requesterRole: string,
     studentId: string
-  ): Promise<Notebook[]> {
+  ): Promise<NotebookListItem[]> {
     if (requesterRole === "admin" || requesterRole === "manager") {
       return notebookRepository.findByStudent(studentId);
     }
@@ -48,6 +50,29 @@ export const notebookService = {
     }
 
     throw new Error("Unauthorized");
+  },
+
+  /**
+   * Busca texto no título e no conteúdo dos cadernos de um aluno, com as mesmas
+   * regras de acesso da listagem. Devolve só o id e um trecho, nunca o documento.
+   */
+  async searchNotebooksForStudent(
+    requesterId: string,
+    requesterRole: string,
+    studentId: string,
+    term: string
+  ): Promise<NotebookSearchHit[]> {
+    let teacherId: string | undefined;
+    if (requesterRole === "teacher") {
+      teacherId = requesterId;
+    } else if (requesterRole === "student") {
+      if (requesterId !== studentId) throw new Error("Unauthorized");
+    } else if (requesterRole !== "admin" && requesterRole !== "manager") {
+      throw new Error("Unauthorized");
+    }
+
+    const matches = await notebookRepository.searchByStudent(studentId, term, teacherId);
+    return matches.map((nb) => ({ id: nb.id, snippet: getContentSnippet(nb.content || "", term) }));
   },
 
   /**

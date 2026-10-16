@@ -4,7 +4,7 @@ import { adminAction, protectedAction } from "@/lib/safe-action";
 import { z } from "zod";
 import { notificationService } from "./notification.service";
 import { sendNotificationSchema } from "./notification.schema";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 
 export const saveSubscriptionAction = protectedAction
   .schema(z.object({
@@ -21,7 +21,7 @@ export const sendNotificationAction = adminAction
   .metadata({ name: "sendNotificationAction" })
   .action(async ({ parsedInput }) => {
     await notificationService.sendNotification(parsedInput);
-    revalidatePath("/hub/admin/notifications");
+    refresh();
     return { success: true };
   });
 
@@ -30,7 +30,7 @@ export const sendPwaSuggestionAction = adminAction
   .metadata({ name: "sendPwaSuggestionAction" })
   .action(async ({ parsedInput }) => {
     await notificationService.sendPwaSuggestion(parsedInput.studentId);
-    revalidatePath("/hub/admin/dashboard");
+    refresh();
     return { success: true };
   });
 
@@ -40,8 +40,8 @@ export const markNotificationAsReadAction = protectedAction
   }))
   .metadata({ name: "markNotificationAsReadAction" })
   .action(async ({ parsedInput, ctx }) => {
+    // Sem refresh(): o sino e a lista são SWR e se atualizam via mutate.
     await notificationService.markAsRead(parsedInput.id, ctx.user.id);
-    revalidatePath("/hub");
     return { success: true };
   });
 
@@ -60,15 +60,15 @@ export const getGlobalHistoryAction = adminAction
 export const markAllNotificationsAsReadAction = protectedAction
   .metadata({ name: "markAllNotificationsAsReadAction" })
   .action(async ({ ctx }) => {
+    // Sem refresh(): o sino e a lista são SWR e se atualizam via mutate.
     await notificationService.markAllAsRead(ctx.user.id);
-    revalidatePath("/hub");
     return { success: true };
   });
 
 export const clearNotificationsAction = protectedAction
   .metadata({ name: "clearNotificationsAction" })
   .action(async ({ ctx }) => {
+    // Sem refresh(): o sino e a lista são SWR e se atualizam via mutate.
     await notificationService.clearAll(ctx.user.id);
-    revalidatePath("/hub");
     return { success: true };
   });

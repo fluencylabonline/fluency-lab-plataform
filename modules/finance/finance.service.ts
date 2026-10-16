@@ -1,3 +1,4 @@
+import "server-only";
 import { financeRepository } from "./finance.repository";
 import { billingService } from "../billing/billing.service";
 import { payoutService } from "../payout/payout.service";

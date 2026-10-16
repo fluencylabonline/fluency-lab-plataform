@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { protectedAction } from "@/lib/safe-action";
 import { createNotebookSchema } from "./notebook.schema";
 import { notebookService } from "./notebook.service";
@@ -56,7 +56,7 @@ export const createNotebookAction = protectedAction
     }
 
 
-    revalidatePath(`/hub/teacher/students/${parsedInput.studentId}`);
+    refresh();
 
     return { notebook };
   });
@@ -78,6 +78,21 @@ export const getStudentNotebooksAction = protectedAction
     );
 
     return { notebooks };
+  });
+
+/**
+ * Busca nos cadernos de um aluno (título e conteúdo) — usado pela busca da lista.
+ */
+export const searchStudentNotebooksAction = protectedAction
+  .schema(z.object({ studentId: z.string(), term: z.string().trim().min(2).max(100) }))
+  .metadata({ name: "searchStudentNotebooksAction" })
+  .action(async ({ parsedInput, ctx }) => {
+    return notebookService.searchNotebooksForStudent(
+      ctx.user.id,
+      ctx.user.role,
+      parsedInput.studentId,
+      parsedInput.term
+    );
   });
 
 /**
@@ -189,7 +204,7 @@ export const generateNotebookQuizAction = protectedAction
       parsedInput.level
     );
 
-    revalidatePath(`/notebook/${parsedInput.notebookId}`);
+    refresh();
 
     return { quizData, usageCount };
   });
@@ -216,7 +231,7 @@ export const deleteNotebookAction = protectedAction
     const notebook = await notebookService.getNotebook(user.id, user.role, parsedInput.notebookId);
     await notebookService.deleteNotebook(user.id, user.role, parsedInput.notebookId);
     
-    revalidatePath(`/hub/teacher/students/${notebook.studentId}`);
+    refresh();
     return { success: true };
   });
 

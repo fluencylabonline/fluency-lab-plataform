@@ -1,3 +1,4 @@
+import "server-only";
 import { learningRepository } from "./learning.repository";
 import { curriculumRepository } from "@/modules/curriculum/curriculum.repository";
 import { VocabMetadata } from "@/modules/curriculum/curriculum.types";
@@ -334,19 +335,18 @@ export const learningService = {
     const lesson = await curriculumRepository.findLessonById(lessonId);
     if (!lesson) throw new Error("Lesson not found");
 
-    for (const lessonItem of lesson.items) {
-      if (lessonItem.priority === "CORE") {
-        const progress = await learningRepository.findProgressByItem(studentId, lessonItem.item.id);
-        if (!progress) {
-          await learningRepository.createProgress({
-            studentId,
-            itemId: lessonItem.item.id,
-            status: "ACTIVE",
-            nextReviewDate: new Date(),
-          });
-        }
-      }
-    }
+    // Uma leitura e um insert em lote, em vez de 1–2 queries por item.
+    const coreItemIds = lesson.items
+      .filter((lessonItem) => lessonItem.priority === "CORE")
+      .map((lessonItem) => lessonItem.item.id);
+    const existing = new Set(await learningRepository.findProgressItemIds(studentId, coreItemIds));
+    const now = new Date();
+
+    await learningRepository.createProgressMany(
+      [...new Set(coreItemIds)]
+        .filter((itemId) => !existing.has(itemId))
+        .map((itemId) => ({ studentId, itemId, status: "ACTIVE" as const, nextReviewDate: now }))
+    );
 
     return { success: true };
   },

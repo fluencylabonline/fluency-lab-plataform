@@ -20,6 +20,7 @@ import { Link } from "@/i18n/navigation";
 import { LanguagesVault } from "./_components/LanguagesVault";
 import { MediaLibraryVault } from "./_components/MediaLibraryVault";
 import { CreatePlanVault } from "./_components/CreatePlanVault";
+import { userService } from "@/modules/user/user.service";
 
 
 const quickActions = (languages: LanguageWithLessons[], t: (key: string) => string) => [
@@ -92,7 +93,7 @@ export default async function LearningPage() {
 
     return (
         <main>
-            <LearningHubClient user={user} languages={languages} />
+            <LearningHubClient user={userService.toSessionDTO(user)} languages={languages} />
 
             <div className="container">
 

@@ -12,12 +12,11 @@ import { notify } from "@/components/ui/toaster";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { getNotebookAction } from "@/modules/notebook/notebook.actions";
-import { generateNotebookPDF } from "@/lib/pdfGenerator";
-import type { Notebook } from "@/modules/notebook/notebook.schema";
+import type { NotebookListItem } from "@/modules/notebook/notebook.schema";
 
 interface NotebooksCardProps {
   isVaultMode?: boolean;
-  initialNotebooks?: Notebook[];
+  initialNotebooks?: NotebookListItem[];
   studentName?: string;
 }
 
@@ -30,7 +29,7 @@ export function NotebooksCard({
   const formatIntl = useFormatter();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [notebooks] = useState<Notebook[]>(initialNotebooks);
+  const [notebooks] = useState<NotebookListItem[]>(initialNotebooks);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
 
   const filteredNotebooks = useMemo(() => {
@@ -50,6 +49,8 @@ export function NotebooksCard({
         throw new Error("Notebook not found");
       }
 
+      // pdf-lib só é baixado quando a pessoa pede o PDF.
+      const { generateNotebookPDF } = await import("@/lib/pdfGenerator");
       await generateNotebookPDF({
         title: result.data.notebook.title,
         studentName,

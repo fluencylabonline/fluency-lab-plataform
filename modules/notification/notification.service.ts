@@ -1,3 +1,4 @@
+import "server-only";
 import webpush from "web-push";
 import { env } from "@/env";
 import { notificationRepository } from "./notification.repository";
@@ -6,6 +7,7 @@ import { db } from "@/lib/db";
 import { usersTable } from "../user/user.schema";
 import { eq } from "drizzle-orm";
 import { isQuietHours } from "@/lib/quiet-hours";
+import { adminRtdb } from "@/lib/firebase-admin";
 
 // Initialize web-push
 webpush.setVapidDetails(
@@ -47,6 +49,17 @@ export const notificationService = {
         actionUrl,
       }));
       await notificationRepository.createMany(inAppNotifications);
+
+      // Avisa os sinos abertos em tempo real (o polling do SWR vira só rede de
+      // segurança). Uma escrita multi-path, mesmo para muitos destinatários.
+      try {
+        const now = Date.now();
+        await adminRtdb
+          .ref("notification_sync_signal")
+          .update(Object.fromEntries(targetUserIds.map((userId) => [userId, now])));
+      } catch (rtdbErr) {
+        console.error("[sendNotification] RTDB sync signal error:", rtdbErr);
+      }
     }
 
     // 3. Send Push Notifications

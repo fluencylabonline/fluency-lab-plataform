@@ -321,6 +321,53 @@ export interface SettingsUserDTO {
   locale: "pt" | "en";
 }
 
+/**
+ * O que o navegador pode saber do usuário logado (props, Zustand, localStorage).
+ * Nada de documentos, chaves PIX, endereço, segredos ou IDs de gateway.
+ */
+export interface SessionUserDTO {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "teacher" | "student" | "manager";
+  photoUrl: string | null;
+  locale: "pt" | "en";
+  mfaEnabled: boolean;
+  pwaInstalled: boolean;
+}
+
+/** Perfil do aluno: sessão + o que o card de prática mostra. */
+export type StudentProfileUserDTO = SessionUserDTO & { streakCount: number };
+
+/** Tela de cancelamento pendente: sessão + o PIX da taxa do próprio usuário. */
+export type PendingCancellationUserDTO = SessionUserDTO & {
+  cancellationPixCode: string | null;
+  cancellationPixImage: string | null;
+  cancellationPixExpiresAt: Date | null;
+  cancellationAmount: number | null;
+};
+
+/**
+ * Usuário visto na tela de detalhes do admin/manager. Documentos, telefones e
+ * PIX chegam só como "••••" + os 4 últimos caracteres (já descriptografados);
+ * o valor completo sai apenas pelo `revealSensitiveDataAction` (modo sudo).
+ */
+export type AdminUserDetailDTO = Pick<
+  User,
+  | "id" | "name" | "email" | "role" | "photoUrl" | "locale" | "isActive" | "createdAt"
+  | "birthDate" | "classesStartDate" | "languages" | "teacherHourlyRate" | "pixType"
+  | "guardianName" | "guardianRelationship"
+  | "cellphone" | "taxId" | "businessTaxId" | "pixKey" | "guardianTaxId" | "guardianCellphone"
+  | "cancellationPending" | "cancellationAmount" | "cancellationPixCode" | "cancellationPixImage" | "cancellationPixExpiresAt"
+>;
+
+/** Professor como opção de seleção (troca/transferência de professor). */
+export interface TeacherOptionDTO {
+  id: string;
+  name: string;
+  photoUrl: string | null;
+}
+
 export interface AdminUserDTO {
   id: string;
   name: string;

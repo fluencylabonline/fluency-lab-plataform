@@ -17,7 +17,7 @@ import {
 import { format, addMonths, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { SectionLabel, StatBlock } from "./UserDetailsPrimitives";
-import type { User } from "../../user.schema";
+import type { AdminUserDetailDTO } from "../../user.schema";
 import { Button } from "@/components/ui/button";
 import { getTeacherEarningsAction, updateClassEarningsAction } from "@/modules/scheduling/scheduling.actions";
 import { getTeacherPayoutHistoryAction } from "@/modules/payout/payout.actions";
@@ -56,7 +56,7 @@ interface PayoutHistoryItem {
 }
 
 interface TeacherEarningsTabProps {
-  user: User;
+  user: AdminUserDetailDTO;
   teacherClasses: SlotInstanceWithDetails[];
   earningsSummary: {
     count: number;

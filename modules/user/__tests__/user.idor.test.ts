@@ -13,6 +13,7 @@ vi.mock("../user.service", () => ({
   userService: {
     searchUsers: vi.fn().mockResolvedValue([{ id: "u-1", name: "User 1", email: "u1@test.com", taxId: "123" }]),
     searchStudents: vi.fn().mockResolvedValue([{ id: "s-1", name: "Student 1", email: "s1@test.com", cellphone: "999", taxId: "456" }]),
+    sanitizeUserForAdmin: vi.fn((u: { id: string; name: string; email: string }) => ({ id: u.id, name: u.name, email: u.email })),
   },
 }));
 
@@ -20,7 +21,7 @@ vi.mock("@/lib/rate-limit", () => ({
   checkRateLimit: vi.fn().mockResolvedValue({ success: true }),
 }));
 
-vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: unknown) => fn, updateTag: vi.fn(), refresh: vi.fn() }));
 
 describe("User Module - IDOR & Data Leakage", () => {
   beforeEach(() => {
@@ -56,13 +57,15 @@ describe("User Module - IDOR & Data Leakage", () => {
     expect(students[0]).not.toHaveProperty("pixKey");
   });
 
-  it("[RBAC] Admin SHOULD be able to search all users and get raw data (Internal check)", async () => {
+  it("[RBAC] Admin SHOULD be able to search all users, sanitized for admin", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue(createMockUser({ id: "admin-id", role: "admin" }));
     
     const result = await searchUsersAction({ term: "any" });
     
-    const data = result.data as { success?: boolean; error?: string };
+    const data = result.data as { success?: boolean; error?: string; data?: Record<string, unknown>[] };
     expect(data?.success).toBe(true);
     expect(userService.searchUsers).toHaveBeenCalledWith("any");
+    expect(userService.sanitizeUserForAdmin).toHaveBeenCalled();
+    expect(data?.data?.[0]).not.toHaveProperty("taxId");
   });
 });

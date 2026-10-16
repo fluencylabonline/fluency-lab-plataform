@@ -1,6 +1,7 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { notebooksTable, notebookSessionsTable, notebookAssetsTable, notebookQuizLimitsTable } from "./notebook.schema";
-import { eq, and, lte, isNull } from "drizzle-orm";
+import { eq, and, lte, isNull, or, ilike } from "drizzle-orm";
 
 export const notebookRepository = {
   async findById(id: string) {
@@ -16,12 +17,14 @@ export const notebookRepository = {
     });
   },
 
+  // Listagens não trazem `content` (o documento inteiro de cada aula).
   async findByStudent(studentId: string) {
     return db.query.notebooksTable.findMany({
       where: and(
         eq(notebooksTable.studentId, studentId),
         isNull(notebooksTable.deletedAt)
       ),
+      columns: { content: false },
       orderBy: (t, { desc }) => [desc(t.createdAt)],
     });
   },
@@ -33,7 +36,23 @@ export const notebookRepository = {
         eq(notebooksTable.teacherId, teacherId),
         isNull(notebooksTable.deletedAt)
       ),
+      columns: { content: false },
       orderBy: (t, { desc }) => [desc(t.createdAt)],
+    });
+  },
+
+  async searchByStudent(studentId: string, term: string, teacherId?: string, limit = 50) {
+    const pattern = `%${term}%`;
+    return db.query.notebooksTable.findMany({
+      where: and(
+        eq(notebooksTable.studentId, studentId),
+        teacherId ? eq(notebooksTable.teacherId, teacherId) : undefined,
+        isNull(notebooksTable.deletedAt),
+        or(ilike(notebooksTable.title, pattern), ilike(notebooksTable.content, pattern))
+      ),
+      columns: { id: true, content: true },
+      orderBy: (t, { desc }) => [desc(t.createdAt)],
+      limit,
     });
   },
 

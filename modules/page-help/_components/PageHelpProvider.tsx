@@ -27,7 +27,8 @@ import { useLocale } from "next-intl";
 import { TourOverlay } from "@/components/ui/tour-overlay";
 import { useIsMobile } from "@/hooks/ui/use-device";
 
-import { resolvePageHelp } from "../page-help";
+import { matchHelpRoute } from "../page-help.match";
+import { loadPageHelp, type HelpDictionary, type HelpRole } from "../page-help.loader";
 import type { HelpRoute, PageHelp } from "../page-help.types";
 import { PageHelpWizard } from "./PageHelpWizard";
 
@@ -90,19 +91,34 @@ export function useRegisterPageHelp(
     }, [register]);
 }
 
-export function PageHelpProvider({ children }: { children: React.ReactNode }) {
+export function PageHelpProvider({ children, role }: { children: React.ReactNode; role: HelpRole }) {
     const pathname = usePathname();
     const locale = useLocale();
+
+    // Só o conteúdo do papel de quem está logado (+ compartilhado) vai ao
+    // navegador, carregado sob demanda — ver page-help.loader.ts.
+    const [dictionary, setDictionary] = React.useState<HelpDictionary | null>(null);
+    React.useEffect(() => {
+        let cancelled = false;
+        loadPageHelp(role, locale).then((dict) => {
+            if (!cancelled) setDictionary(dict);
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [role, locale]);
     const isMobile = useIsMobile();
 
     const [panelOpen, setPanelOpen] = React.useState(false);
     const [tourOpen, setTourOpen] = React.useState(false);
     const [customPanel, setCustomPanel] = React.useState<((open: boolean) => void) | null>(null);
 
-    const resolved = React.useMemo(
-        () => resolvePageHelp(pathname, locale),
-        [pathname, locale],
-    );
+    const resolved = React.useMemo(() => {
+        if (!dictionary) return null;
+        const route = matchHelpRoute(pathname, Object.keys(dictionary) as HelpRoute[]);
+        const help = route ? dictionary[route] : undefined;
+        return route && help ? { route, help } : null;
+    }, [dictionary, pathname]);
 
     // Uma navegação não deve carregar o painel nem o tour da página anterior.
     React.useEffect(() => {

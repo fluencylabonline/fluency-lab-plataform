@@ -1,3 +1,4 @@
+import "server-only";
 import { AbacatePay } from "@abacatepay/sdk";
 import { env } from "@/env";
 

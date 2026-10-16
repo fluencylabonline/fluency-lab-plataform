@@ -1,3 +1,4 @@
+import "server-only";
 import { curriculumRepository } from "./curriculum.repository";
 import { aiService } from "@/modules/ai/ai.service";
 import { mediaService } from "@/modules/media/media.service";

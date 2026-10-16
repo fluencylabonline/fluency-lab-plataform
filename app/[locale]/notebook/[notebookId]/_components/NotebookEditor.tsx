@@ -41,7 +41,7 @@ import { NotebookBubbleMenu } from "./NotebookBubbleMenu";
 import { useCursorVisibility } from "@/hooks/use-cursor-visibility";
 import { useRefRect } from "@/hooks/use-element-rect";
 import { MAX_FILE_SIZE } from "@/lib/tiptap-utils";
-import { storage } from "@/lib/firebase";
+import { storage } from "@/lib/firebase-storage";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { registerNotebookAssetAction } from "@/modules/notebook/notebook.actions";
 

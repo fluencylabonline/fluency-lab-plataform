@@ -3,7 +3,7 @@
 import { protectedAction, permissionAction } from "@/lib/safe-action";
 import { learningService } from "./learning.service";
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { studentProfileSurveySchema, fillProfileFromAudioSchema } from "./learning.schema";
 
 
@@ -104,7 +104,7 @@ export const recordPracticeResultAction = protectedAction
     );
 
     // Revalidation logic
-    revalidatePath("/student/learning");
+    refresh();
 
     return result;
   });
@@ -126,7 +126,7 @@ export const generatePlanAction = protectedAction
       { allowSuggestions: false }
     );
 
-    revalidatePath("/student/learning/plans");
+    refresh();
 
     return { success: true, planId: plan.id };
   });
@@ -139,7 +139,7 @@ export const startLessonAction = protectedAction
   .schema(startLessonSchema)
   .action(async ({ parsedInput, ctx }) => {
     const result = await learningService.startLesson(ctx.user.id, parsedInput.lessonId);
-    revalidatePath("/student/learning");
+    refresh();
     return result;
   });
 
@@ -160,8 +160,7 @@ export const syncPracticeBatchAction = protectedAction
       }))
     );
 
-    revalidatePath("/student/learning");
-    revalidatePath("/student/curriculum"); // Revalidate curriculum if items status changed
+    refresh();
 
     return result;
   });
@@ -174,7 +173,7 @@ export const createPlanTemplateAction = permissionAction("material.create")
   .schema(createPlanTemplateSchema)
   .action(async ({ parsedInput }) => {
     const plan = await learningService.createPlanTemplate(parsedInput);
-    revalidatePath("/hub/manager/learning");
+    refresh();
     return { success: true, planId: plan.id };
   });
 
@@ -190,7 +189,7 @@ export const assignPlanAction = permissionAction("material.create")
       parsedInput.studentId,
       parsedInput.startClassId
     );
-    revalidatePath("/hub/manager/learning");
+    refresh();
     return { success: true, planId: plan.id };
   });
 
@@ -234,7 +233,7 @@ export const reorderLessonsAction = permissionAction("material.create")
   .schema(reorderLessonsSchema)
   .action(async ({ parsedInput }) => {
     await learningService.reorderLessons(parsedInput.planId, parsedInput.lessonIds);
-    revalidatePath(`/hub/manager/learning/${parsedInput.planId}`);
+    refresh();
     return { success: true };
   });
 
@@ -246,7 +245,7 @@ export const addLessonToPlanAction = permissionAction("material.create")
   .schema(addLessonToPlanSchema)
   .action(async ({ parsedInput }) => {
     await learningService.addLessonToPlan(parsedInput.planId, parsedInput.lessonId);
-    revalidatePath(`/hub/manager/learning/${parsedInput.planId}`);
+    refresh();
     return { success: true };
   });
 
@@ -258,7 +257,7 @@ export const removeLessonFromPlanAction = permissionAction("material.create")
   .schema(removeLessonFromPlanSchema)
   .action(async ({ parsedInput }) => {
     await learningService.removeLessonFromPlan(parsedInput.planId, parsedInput.lessonId);
-    revalidatePath(`/hub/manager/learning/${parsedInput.planId}`);
+    refresh();
     return { success: true };
   });
 
@@ -297,8 +296,7 @@ export const fillProfileFromAudioAction = permissionAction("student.support")
   .schema(fillProfileFromAudioSchema)
   .action(async ({ parsedInput, ctx }) => {
     const result = await learningService.fillProfileFromAudio(parsedInput, ctx.user.id);
-    revalidatePath("/hub/admin/students/onboarding");
-    revalidatePath("/hub/manager/students/onboarding");
+    refresh();
     return { success: true, ...result };
   });
 
@@ -319,8 +317,7 @@ export const finalizeProfileAction = protectedAction
     }
 
     const result = await learningService.finalizeProfile(parsedInput.profileId, ctx.user.id);
-    revalidatePath("/hub/manager/students");
-    revalidatePath("/hub/admin/students");
+    refresh();
     return { success: true, profile: result };
   });
 
@@ -332,8 +329,7 @@ export const associateProfileToStudentAction = permissionAction("student.support
   .schema(associateProfileSchema)
   .action(async ({ parsedInput }) => {
     await learningService.associateStudentProfile(parsedInput.profileId, parsedInput.studentId);
-    revalidatePath("/hub/manager/students");
-    revalidatePath("/hub/admin/students");
+    refresh();
     return { success: true };
   });
 
@@ -356,8 +352,7 @@ export const generatePersonalizedPlanAction = protectedAction
       ctx.user.id
     );
 
-    revalidatePath(`/hub/manager/students/onboarding/${parsedInput.profileId}/view`);
-    revalidatePath(`/hub/admin/students/onboarding/${parsedInput.profileId}/view`);
+    refresh();
     return { success: true, planId: plan.id };
   });
 
@@ -377,8 +372,7 @@ export const archiveProfileAction = permissionAction("student.support")
     }
 
     await learningService.archiveProfile(parsedInput.profileId);
-    revalidatePath("/hub/manager/students/onboarding");
-    revalidatePath("/hub/admin/students/onboarding");
+    refresh();
     return { success: true };
   });
 
@@ -489,7 +483,7 @@ export const processSessionResultsAction = protectedAction
       parsedInput.isReplay,
       parsedInput.streak
     );
-    revalidatePath("/hub/student/practice");
+    refresh();
     return result;
   });
 

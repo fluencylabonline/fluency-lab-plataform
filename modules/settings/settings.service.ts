@@ -1,13 +1,10 @@
+import "server-only";
 import { settingsRepository } from "./settings.repository";
 import { UpdateSystemSettingsValues, UpdateDelinquencyPolicyValues } from "./settings.schema";
 
 export const settingsService = {
   async getSettings() {
-    let settings = await settingsRepository.getSettings();
-    if (!settings) {
-      settings = await settingsRepository.createDefaultSettings();
-    }
-    return settings;
+    return settingsRepository.getOrCreateSettings();
   },
 
   async updateSettings(

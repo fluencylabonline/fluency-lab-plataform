@@ -9,11 +9,11 @@ import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { getUserStatusAction } from "@/modules/user/user.actions";
 import { regenerateCancellationFeeAction } from "@/modules/billing/billing.actions";
-import type { User } from "@/modules/user/user.schema";
+import type { PendingCancellationUserDTO } from "@/modules/user/user.schema";
 import { Img } from "@react-email/components";
 
 interface PendingCancellationContentProps {
-  user: User;
+  user: PendingCancellationUserDTO;
 }
 
 export function PendingCancellationContent({ user }: PendingCancellationContentProps) {
@@ -32,7 +32,6 @@ export function PendingCancellationContent({ user }: PendingCancellationContentP
       const result = await regenerateCancellationFeeAction({ userId: user.id });
       if (result?.data?.success) {
         notify.success(t("codeRegenerated") || "Novo código PIX gerado com sucesso!");
-        router.refresh();
       } else {
         notify.error(result?.data?.error || t("regenerateError") || "Erro ao gerar novo código.");
       }

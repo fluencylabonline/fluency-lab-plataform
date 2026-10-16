@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 vi.mock("@/lib/db", () => ({ db: { query: {}, update: vi.fn(), insert: vi.fn() } }));
-vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: unknown) => fn, updateTag: vi.fn(), refresh: vi.fn() }));
 vi.mock("@/lib/abacate-pay", () => ({ abacate: {}, createPixCharge: vi.fn() }));
 vi.mock("@/lib/stripe", () => ({
   stripe: { checkout: { sessions: { retrieve: vi.fn(), expire: vi.fn() } }, paymentIntents: { retrieve: vi.fn() } },

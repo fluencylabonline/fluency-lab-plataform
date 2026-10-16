@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
 import { ref, onValue, set, off, DataSnapshot } from "firebase/database";
-import { rtdb } from "@/lib/firebase";
+import { rtdb } from "@/lib/firebase-rtdb";
 import { toast } from "sonner";
 import { 
   Search, 

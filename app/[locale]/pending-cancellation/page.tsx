@@ -14,7 +14,13 @@ export default async function PendingCancellationPage() {
 
   return (
     <main className="min-h-screen bg-background flex flex-col">
-      <PendingCancellationContent user={user} />
+      <PendingCancellationContent user={{
+        ...userService.toSessionDTO(user),
+        cancellationPixCode: user.cancellationPixCode,
+        cancellationPixImage: user.cancellationPixImage,
+        cancellationPixExpiresAt: user.cancellationPixExpiresAt,
+        cancellationAmount: user.cancellationAmount,
+      }} />
     </main>
   );
 }

@@ -1,3 +1,4 @@
+import "server-only";
 import { StreamClient } from "@stream-io/node-sdk";
 import type { StreamCallCredentials } from "./call.types";
 import { env } from "@/env";

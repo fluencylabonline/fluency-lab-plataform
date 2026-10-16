@@ -27,7 +27,7 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase";
+import { storage } from "@/lib/firebase-storage";
 import { notify } from "@/components/ui/toaster";
 import { insertCourseSchema } from "@/modules/course/course.schema";
 import { updateCourseAction } from "@/modules/course/course.actions";

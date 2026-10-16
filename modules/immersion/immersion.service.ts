@@ -1,3 +1,4 @@
+import "server-only";
 import { immersionRepository } from "./immersion.repository";
 import { immersionHistory } from "./immersion.schema";
 import { eq, and, gte, inArray } from "drizzle-orm";

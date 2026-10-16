@@ -40,7 +40,7 @@ import { updateTransactionAction, deleteTransactionAction, getCategoriesAction }
 import { notify } from "@/components/ui/toaster";
 import { useEffect, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { storage } from "@/lib/firebase";
+import { storage } from "@/lib/firebase-storage";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Button } from "@/components/ui/button";
 

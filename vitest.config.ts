@@ -11,6 +11,8 @@ export default defineConfig({
     include: ['modules/**/__tests__/**/*.test.ts', 'lib/**/__tests__/**/*.test.ts'],
     alias: {
       '@': path.resolve(__dirname, './'),
+      // `server-only` lança fora da condição react-server; nos testes usamos o módulo vazio.
+      'server-only': path.resolve(__dirname, './node_modules/server-only/empty.js'),
     },
   },
 });

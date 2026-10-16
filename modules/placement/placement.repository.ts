@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { placementTestsTable, questionsTable, testAnswersTable, Question, PlacementTest, TestAnswer } from "./placement.schema";
 import { eq, and, notInArray, desc, sql } from "drizzle-orm";

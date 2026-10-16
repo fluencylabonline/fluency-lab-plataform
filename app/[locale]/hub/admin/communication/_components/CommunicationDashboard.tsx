@@ -27,7 +27,7 @@ import { notify } from "@/components/ui/toaster";
 import { SendWhatsAppMessageVault } from "@/app/[locale]/hub/admin/communication/_components/SendWhatsAppMessageVault";
 import { SendEmailVault } from "./SendEmailVault";
 import { EmailDetailsVault, EmailMessageDetail } from "./EmailDetailsVault";
-import { rtdb } from "@/lib/firebase";
+import { rtdb } from "@/lib/firebase-rtdb";
 import { ref as dbRef, onValue } from "firebase/database";
 import { 
   Vault, 

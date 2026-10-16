@@ -23,7 +23,7 @@ import {
   Clock
 } from "lucide-react";
 import Image from "next/image";
-import { type User } from "@/modules/user/user.schema";
+import type { SessionUserDTO } from "@/modules/user/user.schema";
 import { Course, Section, Lesson } from "@/modules/course/course.types";
 import {
   updateCourseAction,
@@ -43,7 +43,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertCourseSchema } from "@/modules/course/course.schema";
 import { z } from "zod";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase";
+import { storage } from "@/lib/firebase-storage";
 import {
   DndContext,
   closestCenter,
@@ -100,7 +100,7 @@ interface CourseDetailClientProps {
     sections: (Section & { lessons: Lesson[] })[];
     studentCount: number;
   };
-  currentUser: User;
+  currentUser: SessionUserDTO;
 }
 
 function SortableLesson({ lesson, onDelete, onEdit }: {

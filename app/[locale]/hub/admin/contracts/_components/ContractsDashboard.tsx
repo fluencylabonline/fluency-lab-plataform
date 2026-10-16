@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -43,9 +42,9 @@ import {
 } from "@/modules/contract/contract.actions";
 import {
   type ContractTemplate,
-  type ContractInstance,
   type SchoolSettings,
 } from "@/modules/contract/contract.schema";
+import type { ContractInstanceListItem } from "@/modules/contract/contract.types";
 import {
   FileText,
   Plus,
@@ -55,24 +54,15 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import type { User } from "@/modules/user/user.schema";
+import type { SessionUserDTO } from "@/modules/user/user.schema";
 import { ContractTemplatesTab } from "./ContractTemplatesTab";
 import { ContractInstancesTab } from "./ContractInstancesTab";
 import { SchoolSettingsTab, type SchoolSettingsFormValues } from "./SchoolSettingsTab";
 
-// Types mapping for standard Drizzle load
-interface ContractInstanceExtended extends ContractInstance {
-  template: ContractTemplate;
-  user: {
-    name: string;
-    email: string;
-  };
-}
-
 interface ContractsDashboardProps {
-  user: User;
+  user: SessionUserDTO;
   initialTemplates: ContractTemplate[];
-  initialInstances: ContractInstanceExtended[];
+  initialInstances: ContractInstanceListItem[];
   initialSchoolSettings: SchoolSettings | null;
 }
 
@@ -95,12 +85,11 @@ export function ContractsDashboard({
   initialSchoolSettings,
 }: ContractsDashboardProps) {
   const t = useTranslations("Contracts");
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   // Local dashboard state for instant UI updates
   const [templates, setTemplates] = useState<ContractTemplate[]>(initialTemplates);
-  // Sem cópia local: `initialInstances` vem do RSC pai e é atualizado via router.refresh().
+  // Sem cópia local: `initialInstances` vem do RSC pai e é atualizado pela revalidação que as actions de contrato fazem.
   const instances = initialInstances;
   const [schoolSettings, setSchoolSettings] = useState<SchoolSettings | null>(initialSchoolSettings);
 
@@ -235,7 +224,6 @@ export function ContractsDashboard({
       const result = await manualRenewContractAction({ instanceId });
       if (result?.data?.success) {
         notify.success(t("notifications.contractRenewed") || "Contrato renovado com sucesso!");
-        router.refresh();
       } else {
         notify.error(result?.data?.error || t("notifications.renewError") || "Erro ao renovar contrato.");
       }

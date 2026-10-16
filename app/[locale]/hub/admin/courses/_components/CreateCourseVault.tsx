@@ -35,7 +35,7 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useState } from "react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase";
+import { storage } from "@/lib/firebase-storage";
 
 const languages = [
   { label: "Inglês", value: "en" },

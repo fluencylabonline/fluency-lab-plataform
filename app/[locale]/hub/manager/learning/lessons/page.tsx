@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { curriculumService } from "@/modules/curriculum/curriculum.service";
 import { LessonsPageContent } from "./_components/LessonsPageContent";
+import { userService } from "@/modules/user/user.service";
 
 export default async function LessonsListPage() {
     const user = await getCurrentUser();
@@ -18,7 +19,7 @@ export default async function LessonsListPage() {
 
     return (
         <LessonsPageContent
-            user={user}
+            user={userService.toSessionDTO(user)}
             initialLessons={lessons}
             languages={languages}
         />

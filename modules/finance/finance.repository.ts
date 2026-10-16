@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { transactionsTable, fiscalConfigsTable } from "./finance.schema";
 import { eq, and, between, sum, sql } from "drizzle-orm";

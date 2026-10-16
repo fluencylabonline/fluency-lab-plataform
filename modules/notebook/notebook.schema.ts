@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, integer, index } from "drizzle-orm/pg-core";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { usersTable } from "../user/user.schema";
@@ -26,7 +26,10 @@ export const notebooksTable = pgTable("notebooks", {
     .defaultNow()
     .$onUpdate(() => new Date()),
   deletedAt: timestamp("deleted_at"),
-});
+}, (t) => [
+  // Índices das consultas quentes (listas, agenda, cobrança, crons).
+  index("notebooks_student_teacher_created_idx").on(t.studentId, t.teacherId, t.createdAt),
+]);
 
 export const notebookSessionsTable = pgTable("notebook_sessions", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -92,6 +95,10 @@ export const createNotebookSchema = z.object({
 // --- Types ---
 export type Notebook = typeof notebooksTable.$inferSelect;
 export type NewNotebook = typeof notebooksTable.$inferInsert;
+/** Caderno nas listagens: sem `content`, que é o documento inteiro da aula. */
+export type NotebookListItem = Omit<Notebook, "content">;
+/** Resultado da busca de texto nos cadernos de um aluno. */
+export type NotebookSearchHit = { id: string; snippet: string };
 export type CreateNotebookValues = z.input<typeof createNotebookSchema>;
 
 export type NotebookSession = typeof notebookSessionsTable.$inferSelect;

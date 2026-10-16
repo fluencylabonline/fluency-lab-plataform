@@ -1,11 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "@/modules/user/user.schema";
+import type { SessionUserDTO } from "@/modules/user/user.schema";
 import { motion } from "framer-motion";
 import { Bell, BookOpen, Lock, Star, Trophy } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
-export function PathScreen({ user }: { user: User | null }) {
+export function PathScreen({ user }: { user: SessionUserDTO | null }) {
   const t = useTranslations("LandingPage");
   const tPath = useTranslations("PathScreen");
   const [greeting, setGreeting] = useState<string>("");

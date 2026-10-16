@@ -36,7 +36,7 @@ vi.mock("next-intl/server", () => ({
   getTranslations: () => Promise.resolve((key: string) => key),
 }));
 
-vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: unknown) => fn, updateTag: vi.fn(), refresh: vi.fn() }));
 
 describe("Billing Authorization & RBAC", () => {
   beforeEach(() => {

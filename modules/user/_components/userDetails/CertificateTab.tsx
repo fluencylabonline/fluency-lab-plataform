@@ -14,14 +14,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Field } from "@/components/ui/field";
 import React from "react";
 
-import type { User } from "@/modules/user/user.schema";
+import type { AdminUserDetailDTO } from "@/modules/user/user.schema";
 import type { LanguageWithLessons } from "@/modules/curriculum/curriculum.types";
 import { getLanguagesAction } from "@/modules/curriculum/curriculum.actions";
 import type { CertificateData } from "@/modules/certificate/certificate.types";
 import { useCallback } from "react";
 
 interface CertificateTabProps {
-  user: User;
+  user: AdminUserDetailDTO;
 }
 
 export function CertificateTab({ user }: CertificateTabProps) {

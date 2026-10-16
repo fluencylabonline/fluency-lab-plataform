@@ -9,7 +9,7 @@ import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpPro
 import { Header, type HeaderAction } from "@/components/layout/header";
 import { hasPermission, Role, UserRoles } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
-import type { User, AdminUserDTO } from "@/modules/user/user.schema";
+import type { AdminUserDTO, SessionUserDTO } from "@/modules/user/user.schema";
 import {
   Select,
   SelectContent,
@@ -27,7 +27,7 @@ import { useIsMobile } from "@/hooks/ui/use-device";
 
 interface UsersPageClientProps {
   initialData: AdminUserDTO[];
-  currentUser: User;
+  currentUser: SessionUserDTO;
   basePath: string;
   studentTeachersMap?: Record<string, string[]>;
   studentContractsMap?: Record<string, boolean>;

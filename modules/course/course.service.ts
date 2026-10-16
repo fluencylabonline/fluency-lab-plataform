@@ -1,3 +1,4 @@
+import "server-only";
 import { courseRepository } from "./course.repository";
 import { type User } from "@/modules/user/user.schema";
 import { hasPermission } from "@/lib/rbac";
@@ -122,24 +123,26 @@ export const courseService = {
     if (!hasPermission(user, "course.view")) {
       throw new Error("Unauthorized: You do not have permission to view courses.");
     }
-    const course = await courseRepository.findById(courseId);
+    const [course, studentCount] = await Promise.all([
+      courseRepository.findById(courseId),
+      courseRepository.countEnrollments(courseId),
+    ]);
     if (!course) return null;
 
-    // Fetch last submission for each quiz if studentId is provided
+    // Última submissão de cada quiz, numa única query em vez de uma por aula.
     if (studentId) {
-      for (const section of course.sections) {
-        for (const lesson of section.lessons) {
-          if (lesson.quizId) {
-            const lastSubmission = await courseRepository.findLastSubmission(studentId, lesson.quizId);
-            if (lesson.quiz) {
-              (lesson.quiz as Quiz & { lastSubmission?: QuizSubmission | null }).lastSubmission = lastSubmission;
-            }
-          }
+      const lessons = course.sections.flatMap((section) => section.lessons);
+      const quizIds = lessons.map((lesson) => lesson.quizId).filter((id): id is string => !!id);
+      const submissions = await courseRepository.findLastSubmissionsByQuizzes(studentId, quizIds);
+      const lastByQuiz = new Map(submissions.map((sub) => [sub.quizId, sub]));
+
+      for (const lesson of lessons) {
+        if (lesson.quizId && lesson.quiz) {
+          (lesson.quiz as Quiz & { lastSubmission?: QuizSubmission | null }).lastSubmission =
+            lastByQuiz.get(lesson.quizId) ?? null;
         }
       }
     }
-
-    const studentCount = await courseRepository.countEnrollments(courseId);
 
     return {
       course: {

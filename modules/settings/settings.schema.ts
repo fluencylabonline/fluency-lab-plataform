@@ -3,6 +3,9 @@ import { createSelectSchema } from "drizzle-zod";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
 
+/** Tag do cache das configurações (ver settingsRepository.getOrCreateSettings). */
+export const SETTINGS_CACHE_TAG = "system-settings";
+
 export const systemSettingsTable = pgTable("system_settings", {
   id: text("id").primaryKey().default("default"),
   whatsappNumber: text("whatsapp_number").notNull().default("554936180727"),

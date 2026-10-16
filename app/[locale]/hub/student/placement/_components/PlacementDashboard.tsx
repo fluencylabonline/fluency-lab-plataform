@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useTranslations, useFormatter } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +10,7 @@ import { motion } from "framer-motion";
 import { mapEloToCEFR } from "@/lib/adaptive-scoring";
 import { Vault, VaultContent, VaultHeader, VaultTitle, VaultDescription } from "@/components/ui/vault";
 import { useState } from "react";
-import { ResultView, type PlacementResult } from "./ResultView";
+import type { PlacementResult } from "./ResultView";
 import { getTestResultAction } from "@/modules/placement/placement.actions";
 import { notify } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
@@ -17,6 +18,10 @@ import { Header } from "@/components/layout/header";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
 import { useWizard } from "@/hooks/ui/use-wizard";
 import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpProvider";
+
+// O resultado (com os gráficos do recharts) só aparece no fim do teste ou ao
+// abrir um teste antigo: carrega sob demanda.
+const ResultView = dynamic(() => import("./ResultView").then((m) => m.ResultView), { ssr: false });
 
 interface PlacementHistoryItem {
   id: number;

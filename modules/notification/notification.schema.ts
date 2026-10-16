@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, jsonb, index } from "drizzle-orm/pg-core";
 import { usersTable } from "../user/user.schema";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -15,7 +15,10 @@ export const notificationsTable = pgTable("notifications", {
   actionUrl: text("action_url"),
   isRead: boolean("is_read").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (t) => [
+  // Índices das consultas quentes (listas, agenda, cobrança, crons).
+  index("notifications_user_created_idx").on(t.userId, t.createdAt),
+]);
 
 export const pushSubscriptionsTable = pgTable("push_subscriptions", {
   id: text("id")
@@ -27,7 +30,10 @@ export const pushSubscriptionsTable = pgTable("push_subscriptions", {
   endpoint: text("endpoint").notNull().unique(),
   subscription: jsonb("subscription").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (t) => [
+  // Índices das consultas quentes (listas, agenda, cobrança, crons).
+  index("push_subscriptions_user_idx").on(t.userId),
+]);
 
 // Schemas
 export const selectNotificationSchema = createSelectSchema(notificationsTable);

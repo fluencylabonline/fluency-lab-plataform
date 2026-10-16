@@ -16,7 +16,7 @@ import {
   FileAudio
 } from "lucide-react";
 import { notify } from "@/components/ui/toaster";
-import { storage } from "@/lib/firebase";
+import { storage } from "@/lib/firebase-storage";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { registerNotebookAssetAction } from "@/modules/notebook/notebook.actions";
 

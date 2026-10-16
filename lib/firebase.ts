@@ -1,25 +1,10 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getStorage } from "firebase/storage";
-import { getFirestore } from "firebase/firestore";
-import { getDatabase } from "firebase/database";
-import { env } from "@/env";
-
-const firebaseConfig = {
-  apiKey: env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  databaseURL: env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-};
-
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const storage = getStorage(app);
-const db = getFirestore(app);
-const rtdb = getDatabase(app);
-
-export { app, auth, storage, db, rtdb };
-
+/**
+ * Compatibilidade: reexporta todos os serviços. Importar daqui puxa o SDK
+ * inteiro do Firebase — prefira o módulo do serviço (`@/lib/firebase-rtdb`,
+ * `@/lib/firebase-storage`, `@/lib/firebase-firestore`, `@/lib/firebase-auth`).
+ */
+export { app } from "./firebase-app";
+export { auth } from "./firebase-auth";
+export { storage } from "./firebase-storage";
+export { db } from "./firebase-firestore";
+export { rtdb } from "./firebase-rtdb";

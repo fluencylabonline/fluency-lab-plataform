@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { certificatesTable, NewCertificate } from "./certificate.schema";
 import { eq, desc } from "drizzle-orm";

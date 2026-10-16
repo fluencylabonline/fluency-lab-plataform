@@ -3,7 +3,7 @@
 import { permissionAction } from "@/lib/safe-action";
 import { courseService } from "./course.service";
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { insertCourseSchema } from "./course.schema";
 
 export const createCourseAction = permissionAction("course.manage")
@@ -12,7 +12,7 @@ export const createCourseAction = permissionAction("course.manage")
   .action(async ({ parsedInput, ctx }) => {
     try {
       const course = await courseService.createCourse(ctx.user, parsedInput);
-      revalidatePath("/hub/admin/courses");
+      refresh();
       return { success: true, data: course };
     } catch (error) {
       console.error("[createCourseAction] Error:", error);
@@ -29,7 +29,7 @@ export const updateCourseAction = permissionAction("course.manage")
   .action(async ({ parsedInput, ctx }) => {
     try {
       const course = await courseService.updateCourse(ctx.user, parsedInput.id, parsedInput.data);
-      revalidatePath("/hub/admin/courses");
+      refresh();
       return { success: true, data: course };
     } catch (error) {
       console.error("[updateCourseAction] Error:", error);
@@ -43,7 +43,7 @@ export const deleteCourseAction = permissionAction("course.manage")
   .action(async ({ parsedInput, ctx }) => {
     try {
       await courseService.deleteCourse(ctx.user, parsedInput.id);
-      revalidatePath("/hub/admin/courses");
+      refresh();
       return { success: true, id: parsedInput.id };
     } catch (error) {
       console.error("[deleteCourseAction] Error:", error);
@@ -57,7 +57,7 @@ export const enrollAction = permissionAction("course.learn")
   .action(async ({ parsedInput, ctx }) => {
     try {
       await courseService.enroll(ctx.user, parsedInput.courseId);
-      revalidatePath("/hub/student/my-courses");
+      refresh();
       return { success: true };
     } catch (error) {
       console.error("[enrollAction] Error:", error);
@@ -97,7 +97,7 @@ export const addSectionAction = permissionAction("course.manage")
   .action(async ({ parsedInput, ctx }) => {
     try {
       const section = await courseService.addSection(ctx.user, parsedInput);
-      revalidatePath(`/hub/admin/courses/${parsedInput.courseId}`);
+      refresh();
       return { success: true, data: section };
     } catch (error) {
       return { success: false, error: (error as Error).message };
@@ -116,7 +116,7 @@ export const addLessonAction = permissionAction("course.manage")
   .action(async ({ parsedInput, ctx }) => {
     try {
       const lesson = await courseService.addLesson(ctx.user, parsedInput);
-      revalidatePath(`/hub/admin/courses/${parsedInput.courseId}`);
+      refresh();
       return { success: true, data: lesson };
     } catch (error) {
       return { success: false, error: (error as Error).message };
@@ -132,7 +132,7 @@ export const deleteSectionAction = permissionAction("course.manage")
   .action(async ({ parsedInput, ctx }) => {
     try {
       await courseService.deleteSection(ctx.user, parsedInput.sectionId);
-      revalidatePath(`/hub/admin/courses/${parsedInput.courseId}`);
+      refresh();
       return { success: true, id: parsedInput.sectionId };
     } catch (error) {
       return { success: false, error: (error as Error).message };
@@ -148,7 +148,7 @@ export const deleteLessonAction = permissionAction("course.manage")
   .action(async ({ parsedInput, ctx }) => {
     try {
       await courseService.deleteLesson(ctx.user, parsedInput.lessonId);
-      revalidatePath(`/hub/admin/courses/${parsedInput.courseId}`);
+      refresh();
       return { success: true, id: parsedInput.lessonId };
     } catch (error) {
       return { success: false, error: (error as Error).message };
@@ -170,7 +170,7 @@ export const updateLessonAction = permissionAction("course.manage")
   .action(async ({ parsedInput, ctx }) => {
     try {
       await courseService.updateLesson(ctx.user, parsedInput.courseId, parsedInput.lessonId, parsedInput.data);
-      revalidatePath(`/hub/admin/courses/${parsedInput.courseId}`);
+      refresh();
       return { success: true };
     } catch (error) {
       return { success: false, error: (error as Error).message };
@@ -186,7 +186,7 @@ export const reorderLessonsAction = permissionAction("course.manage")
   .action(async ({ parsedInput, ctx }) => {
     try {
       await courseService.reorderLessons(ctx.user, parsedInput.lessonIds);
-      revalidatePath(`/hub/admin/courses/${parsedInput.courseId}`);
+      refresh();
       return { success: true };
     } catch (error) {
       return { success: false, error: (error as Error).message };
@@ -202,7 +202,7 @@ export const reorderSectionsAction = permissionAction("course.manage")
   .action(async ({ parsedInput, ctx }) => {
     try {
       await courseService.reorderSections(ctx.user, parsedInput.sectionIds);
-      revalidatePath(`/hub/admin/courses/${parsedInput.courseId}`);
+      refresh();
       return { success: true };
     } catch (error) {
       return { success: false, error: (error as Error).message };

@@ -52,8 +52,8 @@ export default async function UserDetailsPage({ params }: UserDetailsPageProps) 
 
   return (
     <UserDetailsClient
-      user={targetUser}
-      currentUser={user}
+      user={userService.toAdminUserDetailDTO(targetUser)}
+      currentUser={userService.toSessionDTO(user)}
       contracts={contracts}
       subscriptions={subscriptions}
       activeSubscription={activeSub}

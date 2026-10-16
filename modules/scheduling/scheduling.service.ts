@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { schedulingRepository, DbClient } from "./scheduling.repository";
 import { hasPermission } from "@/lib/rbac";
@@ -191,6 +192,14 @@ const RETIMABLE_STATUSES: SlotStatus[] = [
   "canceled-credit",
   "rescheduled",
 ];
+
+/** Ocorrência de uma regra que pode virar slot (ver insertMissingRuleSlots). */
+type SlotCandidate = {
+  startAt: Date;
+  endAt: Date;
+  studentId: string | null;
+  baseStatus: "scheduled" | "available";
+};
 
 export const schedulingService = {
   // --- Rule Management ---
@@ -695,7 +704,7 @@ export const schedulingService = {
     const now = new Date();
     const alignThreshold = startAllocationFrom ? getLocalMidnight(startAllocationFrom) : getLocalMidnight(now);
     let current = getLocalMidnight(new Date(rule.startDate));
-    let generatedCount = 0;
+    const candidates: SlotCandidate[] = [];
 
     if (isBefore(current, alignThreshold) && rule.frequency !== "NONE") {
       while (isBefore(current, alignThreshold)) {
@@ -716,41 +725,14 @@ export const schedulingService = {
       const startAt = localToUtc(parts.year, parts.month, parts.day, startHour, startMin);
       const endAt = localToUtc(parts.year, parts.month, parts.day, endHour, endMin);
 
-      if (!isBefore(startAt, startGenerationThreshold)) {
-        if (!isRecessPeriod(startAt)) {
-          const exists = await schedulingRepository.findSlotByRuleAndDate(ruleId, startAt, dbClient);
-          const conflict = await schedulingRepository.findOverlappingSlot(rule.teacherId, startAt, endAt, undefined, dbClient);
-
-          if (!exists && !conflict) {
-            const shouldAssignStudent = overrideStudentId && (!startAllocationFrom || !isBefore(startAt, startAllocationFrom));
-
-            // Check if teacher has a registered recess covering this date
-            const recesses = await schedulingRepository.findRecessesByTeacher(rule.teacherId);
-            const isTeacherRecess = recesses.some(r =>
-              startAt >= r.startDate && startAt <= r.endDate
-            );
-
-            let slotStatus: typeof slotInstances.status.enumValues[number];
-            if (isTeacherRecess) {
-              slotStatus = "teacher-recess";
-            } else if (shouldAssignStudent) {
-              slotStatus = "scheduled";
-            } else {
-              slotStatus = "available";
-            }
-
-            await schedulingRepository.createSlotInstance({
-              ruleId: rule.id,
-              teacherId: rule.teacherId,
-              studentId: shouldAssignStudent ? overrideStudentId : null,
-              type: rule.type,
-              status: slotStatus,
-              startAt,
-              endAt,
-            });
-            generatedCount++;
-          }
-        }
+      if (!isBefore(startAt, startGenerationThreshold) && !isRecessPeriod(startAt)) {
+        const shouldAssignStudent = !!overrideStudentId && (!startAllocationFrom || !isBefore(startAt, startAllocationFrom));
+        candidates.push({
+          startAt,
+          endAt,
+          studentId: shouldAssignStudent ? overrideStudentId! : null,
+          baseStatus: shouldAssignStudent ? "scheduled" : "available",
+        });
       }
 
       if (rule.frequency === "WEEKLY") current = addWeeks(current, 1);
@@ -758,7 +740,53 @@ export const schedulingService = {
       else if (rule.frequency === "MONTHLY") current = addMonths(current, 1);
       else break;
     }
-    return generatedCount;
+
+    return this.insertMissingRuleSlots(rule, candidates, dbClient);
+  },
+
+  /**
+   * Cria os slots candidatos de uma regra que ainda não existem e não conflitam
+   * com a agenda do professor. Antes eram 3–4 queries por ocorrência (até ~200
+   * num horizonte de 12 meses); agora são 3 leituras e um insert em lote.
+   * Ocorrências da mesma regra caem em datas distintas, então inserir no fim
+   * não muda o resultado das checagens.
+   */
+  async insertMissingRuleSlots(
+    rule: { id: string; teacherId: string; type: NewSlotInstance["type"] },
+    candidates: SlotCandidate[],
+    dbClient: DbClient
+  ) {
+    if (candidates.length === 0) return 0;
+
+    const from = candidates[0].startAt;
+    const to = candidates[candidates.length - 1].endAt;
+    const [ruleStarts, teacherWindows, recesses] = await Promise.all([
+      schedulingRepository.findRuleSlotStartTimes(rule.id, from, to, dbClient),
+      schedulingRepository.findTeacherSlotWindows(rule.teacherId, from, to, dbClient),
+      schedulingRepository.findRecessesByTeacher(rule.teacherId),
+    ]);
+    const existingStarts = new Set(ruleStarts.map((d) => d.getTime()));
+
+    const rows: NewSlotInstance[] = candidates
+      .filter(
+        (c) =>
+          !existingStarts.has(c.startAt.getTime()) &&
+          !teacherWindows.some((w) => w.startAt < c.endAt && w.endAt > c.startAt)
+      )
+      .map((c) => ({
+        ruleId: rule.id,
+        teacherId: rule.teacherId,
+        studentId: c.studentId,
+        type: rule.type,
+        status: recesses.some((r) => c.startAt >= r.startDate && c.startAt <= r.endDate)
+          ? "teacher-recess"
+          : c.baseStatus,
+        startAt: c.startAt,
+        endAt: c.endAt,
+      }));
+
+    await schedulingRepository.createSlotInstances(rows, dbClient);
+    return rows.length;
   },
 
 
@@ -1761,7 +1789,7 @@ export const schedulingService = {
     const horizon = addWeeks(now, weeksAhead);
     const localMidnightOfToday = getLocalMidnight(now);
     let current = getLocalMidnight(new Date(rule.startDate));
-    let generatedCount = 0;
+    const candidates: SlotCandidate[] = [];
 
     // Safety: ensure we don't start too far in the past for recurrence
     // If startDate is old, align 'current' to the first occurrence >= today
@@ -1785,35 +1813,14 @@ export const schedulingService = {
       const startAt = localToUtc(parts.year, parts.month, parts.day, startHour, startMin);
       const endAt = localToUtc(parts.year, parts.month, parts.day, endHour, endMin);
 
-      // Final checks
-      if (isAfter(startAt, now)) {
-        if (!isRecessPeriod(startAt)) {
-          // 1. Check for specific materialized slot
-          const exists = await schedulingRepository.findSlotByRuleAndDate(ruleId, startAt, dbClient);
-
-          // 2. Check for ANY overlapping slot for this teacher (Conflict Prevention)
-          const conflict = await schedulingRepository.findOverlappingSlot(rule.teacherId, startAt, endAt, undefined, dbClient);
-
-          if (!exists && !conflict) {
-            // 3. Check if teacher has a registered recess covering this date
-            const recesses = await schedulingRepository.findRecessesByTeacher(rule.teacherId);
-            const isTeacherRecess = recesses.some(r =>
-              startAt >= r.startDate && startAt <= r.endDate
-            );
-
-            const baseStatus = rule.studentId ? "scheduled" : "available";
-            await schedulingRepository.createSlotInstance({
-              ruleId: rule.id,
-              teacherId: rule.teacherId,
-              studentId: rule.studentId, // Inherit current allocation
-              type: rule.type,
-              status: isTeacherRecess ? "teacher-recess" : baseStatus,
-              startAt,
-              endAt,
-            }, dbClient);
-            generatedCount++;
-          }
-        }
+      // Existência, conflito e recesso são checados em insertMissingRuleSlots.
+      if (isAfter(startAt, now) && !isRecessPeriod(startAt)) {
+        candidates.push({
+          startAt,
+          endAt,
+          studentId: rule.studentId, // Inherit current allocation
+          baseStatus: rule.studentId ? "scheduled" : "available",
+        });
       }
 
       // Advance
@@ -1823,7 +1830,7 @@ export const schedulingService = {
       else break; // Frequency NONE or end
     }
 
-    return generatedCount;
+    return this.insertMissingRuleSlots(rule, candidates, dbClient);
   },
 
   async cleanupExpiredCredits() {
@@ -2526,29 +2533,23 @@ export const schedulingService = {
     const studentIds = await schedulingRepository.findUniqueStudentsByTeacher(teacherId);
     if (studentIds.length === 0) return [];
 
-    const students = await db.query.usersTable.findMany({
-      where: and(
-        inArray(usersTable.id, studentIds),
-        eq(usersTable.isActive, true)
-      ),
-    });
+    // Duas queries fixas em vez de uma por aluno.
+    const [students, nextClasses] = await Promise.all([
+      userService.getActiveUserCards(studentIds),
+      schedulingRepository.findNextClassesForStudentsWithTeacher(studentIds, teacherId),
+    ]);
+    const nextClassByStudent = new Map(nextClasses.map((c) => [c.studentId, c]));
 
-    const enrichedStudents = await Promise.all(students.map(async (student) => {
-      const nextClass = await schedulingRepository.findNextClassForStudent(student.id, teacherId);
-      
+    return students.map((student) => {
+      const nextClass = nextClassByStudent.get(student.id);
       return {
         id: student.id,
         name: student.name,
         email: student.email,
         photoUrl: student.photoUrl,
-        nextClass: nextClass ? {
-          startAt: nextClass.startAt,
-          type: nextClass.type
-        } : null
+        nextClass: nextClass ? { startAt: nextClass.startAt, type: nextClass.type } : null,
       };
-    }));
-
-    return enrichedStudents;
+    });
   },
 
   async getStudentClassesByTeacher(

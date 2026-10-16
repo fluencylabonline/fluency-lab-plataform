@@ -14,6 +14,8 @@ percorre as partes importantes, uma por vez, com holofote.
 | Peça | Arquivo | Papel |
 |---|---|---|
 | Registry | `modules/page-help/page-help.ts` | Junta o conteúdo e resolve `pathname` → entrada (inclusive rotas dinâmicas) |
+| Loader | `modules/page-help/page-help.loader.ts` | Carrega no navegador só o conteúdo do papel logado (+ compartilhado). Arquivo novo em `content/` precisa de uma linha aqui |
+| Matcher | `modules/page-help/page-help.match.ts` | `matchHelpRoute`/`helpRouteRole` puros, sem conteúdo — é o que o cliente importa |
 | Tipos e união de rotas | `modules/page-help/page-help.types.ts` | `HelpRoute`, `PageHelp`, `TourStep` |
 | Conteúdo | `modules/page-help/content/<papel>.<idioma>.ts` | O texto, em `pt` e `en` |
 | Engine do tour | `components/ui/tour-overlay.tsx` | `<TourOverlay steps open onClose />` — única superfície |

@@ -1,3 +1,5 @@
+import "server-only";
+import { cache } from "react";
 import { billingRepository } from "./billing.repository";
 import { abacate, createPixCharge } from "@/lib/abacate-pay";
 import { createStripeCheckoutSession, stripe } from "@/lib/stripe";
@@ -121,6 +123,18 @@ async function createCancellationFeePix(
 
   return pix;
 }
+
+/**
+ * Leituras feitas no layout do hub, no layout do aluno e de novo em páginas
+ * (ex.: perfil) dentro do mesmo request. `cache` deduplica por request de
+ * render; fora dele (actions, crons) só repassa a chamada.
+ */
+const isStudentBlockedToday = cache((studentId: string) =>
+  billingService.getBlockingInstallments(studentId).then(({ installments }) => installments.length > 0)
+);
+const getStudentPaymentStatusCached = cache((studentId: string) =>
+  billingService.loadStudentPaymentStatus(studentId)
+);
 
 export const billingService = {
   async getActiveSubscription(studentId: string) {
@@ -905,6 +919,10 @@ export const billingService = {
   },
 
   async getStudentPaymentStatus(studentId: string) {
+    return getStudentPaymentStatusCached(studentId);
+  },
+
+  async loadStudentPaymentStatus(studentId: string) {
     const sub = await billingRepository.findActiveSubscriptionByStudent(studentId);
     if (!sub) return null;
 
@@ -1374,6 +1392,7 @@ export const billingService = {
   },
 
   async isStudentBlocked(studentId: string, today?: CivilDate) {
+    if (!today) return isStudentBlockedToday(studentId);
     const { installments } = await this.getBlockingInstallments(studentId, today);
     return installments.length > 0;
   },

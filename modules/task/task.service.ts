@@ -1,3 +1,4 @@
+import "server-only";
 import { taskRepository } from "./task.repository";
 import { userService } from "../user/user.service";
 import { CreateTaskValues, UpdateTaskValues, CreateProjectValues, CreateStatusValues, MoveTaskValues, ReorderStatusesValues } from "./task.schema";

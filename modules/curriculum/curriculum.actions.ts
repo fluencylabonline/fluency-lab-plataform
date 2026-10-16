@@ -4,7 +4,7 @@ import { protectedAction, managerAction } from "@/lib/safe-action";
 import { curriculumService } from "./curriculum.service";
 import { mediaService } from "@/modules/media/media.service";
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { curriculumRepository } from "./curriculum.repository";
 import { LanguageWithLessons, MediaWithLessons, Segment, QuizData, QuizQuestion, AnalysisResult, QualityResult, MediaConfig } from "./curriculum.types";
 import type { JSONContent } from "@tiptap/core";
@@ -128,8 +128,7 @@ export const updateLessonAction = managerAction
       analysisResultJson: parsedInput.analysisResultJson as AnalysisResult,
       qualityAnalysisJson: parsedInput.qualityAnalysisJson as QualityResult,
     });
-    revalidatePath(`/hub/manager/learning/lessons/${parsedInput.id}`);
-    revalidatePath("/hub/manager/learning/lessons");
+    refresh();
     return { success: true };
   });
 
@@ -141,7 +140,7 @@ export const createLessonAction = managerAction
   .inputSchema(createLessonSchema)
   .action(async ({ parsedInput }) => {
     const lesson = await curriculumService.createLesson(parsedInput);
-    revalidatePath("/hub/manager/learning/lessons");
+    refresh();
     return lesson;
   });
 
@@ -185,7 +184,7 @@ export const attachMediaAction = managerAction
       parsedInput.lessonId,
       parsedInput.mediaUrl
     );
-    revalidatePath(`/hub/manager/learning/lessons/${parsedInput.lessonId}`);
+    refresh();
     return result;
   });
 
@@ -197,7 +196,7 @@ export const analyzeLessonAction = managerAction
   .inputSchema(analyzeLessonSchema)
   .action(async ({ parsedInput, ctx }) => {
     const result = await curriculumService.analyzeLesson(parsedInput.lessonId, ctx.user.id);
-    revalidatePath(`/hub/manager/learning/lessons/${parsedInput.lessonId}`);
+    refresh();
     return result;
   });
 
@@ -209,7 +208,7 @@ export const enrichItemsAction = managerAction
   .inputSchema(enrichItemsSchema)
   .action(async ({ parsedInput, ctx }) => {
     await curriculumService.enrichItems(parsedInput.lessonId, parsedInput.items, ctx.user.id);
-    revalidatePath(`/hub/manager/learning/lessons/${parsedInput.lessonId}`);
+    refresh();
     return { success: true };
   });
 
@@ -222,7 +221,7 @@ export const enrichLinkedItemsAction = managerAction
   .inputSchema(z.object({ lessonId: z.uuid() }))
   .action(async ({ parsedInput, ctx }) => {
     const result = await curriculumService.enrichLinkedItems(parsedInput.lessonId, ctx.user.id);
-    revalidatePath(`/hub/manager/learning/lessons/${parsedInput.lessonId}`);
+    refresh();
     return result;
   });
 
@@ -235,7 +234,7 @@ export const updateItemsPriorityAction = managerAction
   .inputSchema(updateItemsPrioritySchema)
   .action(async ({ parsedInput }) => {
     await curriculumService.updateItemsPriority(parsedInput.lessonId, parsedInput.priorities);
-    revalidatePath(`/hub/manager/learning/lessons/${parsedInput.lessonId}`);
+    refresh();
     return { success: true };
   });
 
@@ -247,7 +246,7 @@ export const generateQuizAction = managerAction
   .inputSchema(generateQuizSchema)
   .action(async ({ parsedInput, ctx }) => {
     const quiz = await curriculumService.generateQuiz(parsedInput.lessonId, ctx.user.id);
-    revalidatePath(`/hub/manager/learning/lessons/${parsedInput.lessonId}`);
+    refresh();
     return quiz;
   });
 
@@ -259,7 +258,7 @@ export const updateQuizAction = managerAction
   .inputSchema(updateQuizSchema)
   .action(async ({ parsedInput }) => {
     await curriculumService.updateLessonQuiz(parsedInput.lessonId, parsedInput.quizData as QuizData);
-    revalidatePath(`/hub/manager/learning/lessons/${parsedInput.lessonId}`);
+    refresh();
     return { success: true };
   });
 
@@ -271,8 +270,7 @@ export const finalizeLessonAction = managerAction
   .inputSchema(finalizeLessonSchema)
   .action(async ({ parsedInput }) => {
     const result = await curriculumService.finalizeLesson(parsedInput.lessonId);
-    revalidatePath(`/hub/manager/learning/lessons/${parsedInput.lessonId}`);
-    revalidatePath(`/student/learning/plans`);
+    refresh();
     return { success: true, practicesCount: result.practiceItems.length };
   });
 
@@ -284,7 +282,7 @@ export const deleteLessonAction = managerAction
   .inputSchema(deleteLessonSchema)
   .action(async ({ parsedInput }) => {
     await curriculumService.deleteLesson(parsedInput.lessonId);
-    revalidatePath("/hub/manager/learning/lessons");
+    refresh();
     return { success: true };
   });
 
@@ -296,7 +294,7 @@ export const cloneLessonAction = managerAction
   .inputSchema(cloneLessonSchema)
   .action(async ({ parsedInput }) => {
     const newLesson = await curriculumService.cloneLesson(parsedInput.lessonId);
-    revalidatePath("/hub/manager/learning/lessons");
+    refresh();
     return newLesson;
   });
 
@@ -313,7 +311,7 @@ export const deleteLessonItemAction = managerAction
   .inputSchema(deleteLessonItemSchema)
   .action(async ({ parsedInput }) => {
     await curriculumRepository.unlinkItemFromLesson(parsedInput.lessonId, parsedInput.itemId);
-    revalidatePath(`/hub/manager/learning/lessons/${parsedInput.lessonId}`);
+    refresh();
     return { success: true };
   });
 
@@ -338,7 +336,7 @@ export const createLanguageAction = managerAction
   }))
   .action(async ({ parsedInput }) => {
     const result = await curriculumService.createLanguage(parsedInput);
-    revalidatePath("/hub/manager/learning");
+    refresh();
     return result;
   });
 
@@ -350,7 +348,7 @@ export const deleteLanguageAction = managerAction
   .inputSchema(z.object({ id: z.uuid() }))
   .action(async ({ parsedInput }) => {
     await curriculumService.deleteLanguage(parsedInput.id);
-    revalidatePath("/hub/manager/learning");
+    refresh();
     return { success: true };
   });
 
@@ -474,8 +472,7 @@ export const upsertRecessActivityAction = protectedAction
         quizData: (parsedInput.quizData as unknown) as { questions: QuizQuestion[]; passingScore: number } | null,
         teacherId: ctx.user.id,
       });
-      revalidatePath("/hub/teacher/recess");
-      revalidatePath("/hub/manager/learning/lessons");
+      refresh();
       return { success: true, data: result };
     } catch (error) {
       console.error("[upsertRecessActivityAction] Error:", error);

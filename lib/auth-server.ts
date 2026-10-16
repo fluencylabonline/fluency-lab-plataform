@@ -1,3 +1,4 @@
+import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { adminAuth } from "./firebase-admin";
@@ -6,24 +7,56 @@ import { type Permission, hasPermission } from "./rbac";
 import type { User } from "@/modules/user/user.schema";
 
 /**
- * Get the current authenticated user from the session cookie.
- * Uses React `cache()` for request deduplication.
+ * Revogação de sessão (logout, troca de senha, conta desativada).
+ *
+ * `verifySessionCookie(cookie, true)` faz uma chamada de rede ao Firebase em
+ * todo render, toda action e todo polling. Em vez disso, verificamos a
+ * assinatura localmente e consultamos a data de revogação do usuário com um
+ * cache curto por instância: no máximo uma chamada a cada 5 minutos por
+ * usuário. Uma sessão revogada deixa de valer em até 5 minutos — e na hora
+ * para ações de admin/manager, que usam `{ strict: true }`.
  */
-export const getCurrentUser = cache(async (): Promise<User | null> => {
+const REVOCATION_TTL_MS = 5 * 60 * 1000;
+const revocationCache = new Map<string, { validSinceSec: number; disabled: boolean; checkedAt: number }>();
+
+async function getRevocationState(uid: string) {
+  const hit = revocationCache.get(uid);
+  if (hit && Date.now() - hit.checkedAt < REVOCATION_TTL_MS) return hit;
+
+  const firebaseUser = await adminAuth.getUser(uid);
+  const state = {
+    validSinceSec: firebaseUser.tokensValidAfterTime
+      ? Math.floor(new Date(firebaseUser.tokensValidAfterTime).getTime() / 1000)
+      : 0,
+    disabled: firebaseUser.disabled,
+    checkedAt: Date.now(),
+  };
+  revocationCache.set(uid, state);
+  return state;
+}
+
+const getCurrentUserCached = cache(async (strict: boolean): Promise<User | null> => {
   try {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("session")?.value;
 
     if (!sessionCookie) return null;
 
-    // 1. Verify session cookie with Firebase Admin
-    // checkRevoked: true ensures we catch revoked tokens
-    const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+    // 1. Verify session cookie with Firebase Admin. In strict mode Firebase
+    // also checks revocation over the network, with no cache.
+    const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, strict);
 
     if (!decodedClaims) return null;
 
-    // 2. Fetch user data from our database
-    const user = await userRepository.findById(decodedClaims.uid);
+    // 2. Revocation (cached) + user data from our database, in parallel
+    const [revocation, user] = await Promise.all([
+      strict ? null : getRevocationState(decodedClaims.uid),
+      userRepository.findById(decodedClaims.uid),
+    ]);
+
+    if (revocation && (revocation.disabled || decodedClaims.auth_time < revocation.validSinceSec)) {
+      return null;
+    }
 
     return user ?? null;
   } catch (error) {
@@ -34,6 +67,17 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
     return null;
   }
 });
+
+/**
+ * Get the current authenticated user from the session cookie.
+ * Uses React `cache()` for request deduplication.
+ *
+ * `strict: true` re-checks revocation with Firebase on every call — use it
+ * for privileged operations (admin/manager actions).
+ */
+export function getCurrentUser(options?: { strict?: boolean }): Promise<User | null> {
+  return getCurrentUserCached(options?.strict ?? false);
+}
 
 /**
  * Server-side check for permission.

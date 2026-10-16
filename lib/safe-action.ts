@@ -114,7 +114,8 @@ export const protectedAction = actionClient.use(async ({ next }) => {
  * Admin action client — requires admin role.
  */
 export const adminAction = protectedAction.use(async ({ next, ctx }) => {
-  if (ctx.user.role !== "admin") {
+  // Ações privilegiadas re-checam a revogação da sessão sem cache.
+  if ((ctx.user.role !== "admin") || !(await getCurrentUser({ strict: true }))) {
     const t = await getTranslations("Common");
     throw new Error(t("unauthorized"));
   }
@@ -126,7 +127,8 @@ export const adminAction = protectedAction.use(async ({ next, ctx }) => {
  * Manager action client — requires admin or manager role.
  */
 export const managerAction = protectedAction.use(async ({ next, ctx }) => {
-  if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
+  // Ações privilegiadas re-checam a revogação da sessão sem cache.
+  if ((ctx.user.role !== "admin" && ctx.user.role !== "manager") || !(await getCurrentUser({ strict: true }))) {
     const t = await getTranslations("Common");
     throw new Error(t("unauthorized"));
   }

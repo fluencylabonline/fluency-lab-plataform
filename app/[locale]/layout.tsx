@@ -118,13 +118,7 @@ export default async function RootLayout({
         <link
           rel="preload"
           as="image"
-          href="/icons/android/launchericon-transparent-512x512.png" 
-        />
-        <link
-          rel="preload"
-          as="image"
-          href="/videos/landing-poster.webp"
-          fetchPriority="high"
+          href="/icons/android/launchericon-transparent-512x512.png"
         />
         {/* Preconnect: estabelece TCP/TLS antecipadamente para origens críticas */}
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />

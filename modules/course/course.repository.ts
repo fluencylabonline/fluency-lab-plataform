@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { 
   coursesTable, 
@@ -8,7 +9,7 @@ import {
   courseQuizSubmissionsTable,
   type CourseProgress,
 } from "./course.schema";
-import { eq, and, asc, desc, sql, arrayContains } from "drizzle-orm";
+import { eq, and, asc, desc, sql, arrayContains, inArray } from "drizzle-orm";
 
 export const courseRepository = {
   // Courses
@@ -208,6 +209,21 @@ export const courseRepository = {
       ),
       orderBy: [desc(courseQuizSubmissionsTable.createdAt)],
     });
+  },
+
+  /** Última submissão do aluno em cada um dos quizzes (uma linha por quiz). */
+  async findLastSubmissionsByQuizzes(userId: string, quizIds: string[]) {
+    if (quizIds.length === 0) return [];
+    return db
+      .selectDistinctOn([courseQuizSubmissionsTable.quizId])
+      .from(courseQuizSubmissionsTable)
+      .where(
+        and(
+          eq(courseQuizSubmissionsTable.userId, userId),
+          inArray(courseQuizSubmissionsTable.quizId, quizIds)
+        )
+      )
+      .orderBy(courseQuizSubmissionsTable.quizId, desc(courseQuizSubmissionsTable.createdAt));
   },
 
   async findLastSubmission(userId: string, quizId: string) {

@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { 
   contractTemplatesTable, 
@@ -232,9 +233,20 @@ export const contractRepository = {
   async findAllInstances() {
     return db.query.contractInstancesTable.findMany({
       orderBy: [desc(contractInstancesTable.createdAt)],
+      columns: {
+        id: true,
+        templateId: true,
+        userId: true,
+        status: true,
+        integrityHash: true,
+        signedAt: true,
+        expiresAt: true,
+        pdfUrl: true,
+        createdAt: true,
+      },
       with: {
-        template: true,
-        user: true,
+        template: { columns: { id: true, name: true, version: true, region: true } },
+        user: { columns: { id: true, name: true, email: true } },
       },
     });
   },

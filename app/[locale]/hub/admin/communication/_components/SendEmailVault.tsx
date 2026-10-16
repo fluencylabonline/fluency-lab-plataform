@@ -23,7 +23,7 @@ import { searchUsersAction } from "@/modules/user/user.actions";
 import { useSearch } from "@/hooks/data/use-search";
 import { useState } from "react";
 import { notify } from "@/components/ui/toaster";
-import { User } from "@/modules/user/user.schema";
+import type { AdminUserDTO } from "@/modules/user/user.schema";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { User as UserIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +37,7 @@ interface SendEmailVaultProps {
 export function SendEmailVault({ open, onOpenChange, replyTo }: SendEmailVaultProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const { results: searchResults, isSearching } = useSearch<User>(searchTerm, searchUsersAction, { domain: "users" });
+  const { results: searchResults, isSearching } = useSearch<AdminUserDTO>(searchTerm, searchUsersAction, { domain: "users" });
 
   const { register, handleSubmit, setValue, formState: { errors }, reset } = useForm<SendAdminEmailValues>({
     resolver: zodResolver(sendAdminEmailSchema),
@@ -68,7 +68,7 @@ export function SendEmailVault({ open, onOpenChange, replyTo }: SendEmailVaultPr
     }
   };
 
-  const handleSelectStudent = (student: User) => {
+  const handleSelectStudent = (student: AdminUserDTO) => {
     if (student.email) {
       setValue("to", student.email);
       setSearchTerm("");

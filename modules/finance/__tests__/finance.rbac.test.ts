@@ -17,6 +17,9 @@ vi.mock("@/modules/finance/finance.service", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
+  refresh: vi.fn(),
+  unstable_cache: (fn: unknown) => fn,
+  updateTag: vi.fn(),
 }));
 
 describe("Finance RBAC - finance.actions", () => {

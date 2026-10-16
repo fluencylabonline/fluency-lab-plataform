@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { immersionProgress, immersionHistory } from "./immersion.schema";
 import { eq, and, desc } from "drizzle-orm";

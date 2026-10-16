@@ -1,3 +1,4 @@
+import "server-only";
 import { dashboardRepository } from "./dashboard.repository";
 import { AdminDashboardOverview, MonthlyFinance, OnboardingStepStats, OnboardingStudent } from "./dashboard.types";
 import {
@@ -41,15 +42,26 @@ export const dashboardService = {
       comparisonLabel = "vs. mês anterior";
     }
 
-    // 1. Core Stats
+    // As três frentes (core, financeiro, acadêmico) não dependem umas das
+    // outras: disparamos tudo de uma vez em vez de três round-trips em série.
     const [
+      // 1. Core Stats
       activeStudents,
       revenueCurrent,
       revenueLast,
       classesCurrent,
       classesLast,
       newStudentsCurrent,
-      newStudentsLast
+      newStudentsLast,
+      // 2. Finance Data
+      cashFlowRaw,
+      pendingIncome,
+      // 3. Academic & Engagement
+      attendanceRaw,
+      onboardingStudents,
+      popularCourses,
+      pwaStats,
+      todayClassesList,
     ] = await Promise.all([
       dashboardRepository.countActiveStudents(),
       dashboardRepository.getMonthlyRevenue(currentStart, currentEnd),
@@ -58,12 +70,13 @@ export const dashboardService = {
       dashboardRepository.countClasses(lastStart, lastEnd),
       dashboardRepository.countNewStudents(currentStart, currentEnd),
       dashboardRepository.countNewStudents(lastStart, lastEnd),
-    ]);
-
-    // 2. Finance Data
-    const [cashFlowRaw, pendingIncome] = await Promise.all([
       dashboardRepository.getCashFlow(6),
       dashboardRepository.getPendingRevenue(),
+      dashboardRepository.getAttendanceStats(),
+      dashboardRepository.getOnboardingStudents(),
+      dashboardRepository.getPopularCourses(5),
+      dashboardRepository.getPwaStats(),
+      dashboardRepository.getTodayClassesList(),
     ]);
 
     const monthlyCashFlow: MonthlyFinance[] = cashFlowRaw.map(row => ({
@@ -71,15 +84,6 @@ export const dashboardService = {
       income: Number(row.income) / 100, // cents to real
       expense: Number(row.expense) / 100,
     }));
-
-    // 3. Academic & Engagement
-    const [attendanceRaw, onboardingStudents, popularCourses, pwaStats, todayClassesList] = await Promise.all([
-      dashboardRepository.getAttendanceStats(),
-      dashboardRepository.getOnboardingStudents(),
-      dashboardRepository.getPopularCourses(5),
-      dashboardRepository.getPwaStats(),
-      dashboardRepository.getTodayClassesList(),
-    ]);
 
     const attendance = {
       completed: 0,

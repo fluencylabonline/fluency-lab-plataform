@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db } from "@/lib/firebase-firestore";
 import { useCallStore } from "@/hooks/data/use-call-store";
 import { generateStreamTokenAction } from "@/modules/call/call.actions";
 

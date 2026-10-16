@@ -5,7 +5,7 @@ import { useTranslations, useFormatter } from "next-intl";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db } from "@/lib/firebase-firestore";
 
 interface NextClassCardProps {
   nextClass: {

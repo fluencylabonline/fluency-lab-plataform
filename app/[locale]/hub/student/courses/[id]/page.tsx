@@ -2,6 +2,7 @@ import { courseService } from "@/modules/course/course.service";
 import { getCurrentUser } from "@/lib/auth-server";
 import { redirect, notFound } from "next/navigation";
 import { CoursePlayerClient } from "../../../_components/CoursePlayerClient";
+import { userService } from "@/modules/user/user.service";
 
 interface CoursePageProps {
   params: Promise<{ id: string; locale: string }>;
@@ -32,7 +33,7 @@ export default async function StudentCoursePage({ params }: CoursePageProps) {
     <CoursePlayerClient 
       courseData={courseData}
       enrollment={currentCourse.enrollment!}
-      currentUser={user}
+      currentUser={userService.toSessionDTO(user)}
     />
   );
 }

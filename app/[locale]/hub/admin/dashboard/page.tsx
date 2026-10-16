@@ -11,6 +11,7 @@ import { OnboardingFunnel } from "./_components/OnboardingFunnel";
 import { PwaStatsVault } from "./_components/PwaStatsVault";
 import { PeriodFilter } from "./_components/PeriodFilter";
 import { TodayClassesVault } from "./_components/TodayClassesVault";
+import { userService } from "@/modules/user/user.service";
 
 interface PageProps {
   searchParams: Promise<{ period?: string }>;
@@ -53,7 +54,7 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
       <Header
         title={t("title")}
         subtitle={t("subtitle")}
-        user={user}
+        user={userService.toSessionDTO(user)}
         className="contents"
       />
 

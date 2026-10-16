@@ -1,3 +1,4 @@
+import "server-only";
 import { contractRepository } from "./contract.repository";
 import { userService } from "../user/user.service";
 import { encrypt, decrypt, generateIntegrityHash } from "@/lib/cryptography";
@@ -638,9 +639,9 @@ export const contractService = {
       signedAt: instance.signedAt,
       region: instance.template.region,
       status: instance.status,
+      // Rota pública: o IP de quem assinou é dado pessoal e fica no servidor.
       audit: instance.signaturesMetadata.map((m: ContractSignatureMetadata) => ({
         timestamp: m.createdAt,
-        ip: m.ipAddress,
       })),
     };
   },

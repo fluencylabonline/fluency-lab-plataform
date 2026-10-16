@@ -1,5 +1,5 @@
 import {
-  pgTable, uuid, varchar, text, timestamp, integer, doublePrecision, pgEnum, jsonb, vector, boolean, uniqueIndex, primaryKey
+  pgTable, uuid, varchar, text, timestamp, integer, doublePrecision, pgEnum, jsonb, vector, boolean, uniqueIndex, primaryKey, index
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import { usersTable } from "../user/user.schema";
@@ -95,7 +95,11 @@ export const studentItemProgress = pgTable("learning_student_item_progress", {
   lastReviewedAt: timestamp("last_reviewed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (t) => [
+  // Índices das consultas quentes (listas, agenda, cobrança, crons).
+  index("student_item_progress_student_item_idx").on(t.studentId, t.itemId),
+  index("student_item_progress_student_review_idx").on(t.studentId, t.nextReviewDate),
+]);
 
 // 3. Learning Plans
 export const learningPlans = pgTable("learning_plans", {

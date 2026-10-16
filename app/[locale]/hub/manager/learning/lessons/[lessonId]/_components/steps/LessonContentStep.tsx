@@ -20,7 +20,7 @@ import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/imag
 import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
 
 // --- Firebase ---
-import { storage } from "@/lib/firebase";
+import { storage } from "@/lib/firebase-storage";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 // --- Custom Sync Nodes ---

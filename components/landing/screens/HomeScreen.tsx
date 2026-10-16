@@ -1,10 +1,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "@/modules/user/user.schema";
+import type { SessionUserDTO } from "@/modules/user/user.schema";
 import { Bell } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
-export function HomeScreen({ user }: { user: User | null }) {
+export function HomeScreen({ user }: { user: SessionUserDTO | null }) {
   const t = useTranslations("LandingPage");
   const [greeting, setGreeting] = useState<string>("");
 

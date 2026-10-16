@@ -26,7 +26,7 @@ import { QuizPlayer } from "./QuizPlayer";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/ui/use-device";
 
-import { type User } from "@/modules/user/user.schema";
+import type { SessionUserDTO } from "@/modules/user/user.schema";
 
 interface CoursePlayerClientProps {
   courseData: {
@@ -35,7 +35,7 @@ interface CoursePlayerClientProps {
     studentCount: number;
   };
   enrollment: Enrollment;
-  currentUser: User;
+  currentUser: SessionUserDTO;
 }
 
 export function CoursePlayerClient({ courseData, enrollment, currentUser }: CoursePlayerClientProps) {

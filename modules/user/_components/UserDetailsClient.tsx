@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { notify } from "@/components/ui/toaster";
 
-import type { User } from "../user.schema";
+import type { SessionUserDTO, AdminUserDetailDTO } from "../user.schema";
 import type { SubscriptionWithPlan, Installment } from "../../billing/billing.types";
 import type { SlotInstanceWithDetails } from "../../scheduling/scheduling.types";
 import type { ContractWithTemplate } from "../../contract/contract.types";
@@ -44,8 +44,8 @@ const installmentSchema = z.object({
 });
 
 interface UserDetailsClientProps {
-  user: User;
-  currentUser: User;
+  user: AdminUserDetailDTO;
+  currentUser: SessionUserDTO;
   activeSubscription?: SubscriptionWithPlan | null;
   installments?: Installment[];
   subscriptions?: SubscriptionWithPlan[];
@@ -98,7 +98,6 @@ export function UserDetailsClient({
 
       if (result?.data?.success) {
         notify.success(t("hourlyRateUpdated"));
-        router.refresh();
       } else {
         notify.error(result?.data?.error || t("updateError"));
       }
@@ -121,7 +120,6 @@ export function UserDetailsClient({
       if (result?.data?.success) {
         notify.success(t("installmentUpdated"));
         setAdminPassword("");
-        router.refresh();
       } else {
         notify.error(result?.data?.error || t("updateError"));
       }
@@ -145,7 +143,6 @@ export function UserDetailsClient({
       if (result?.data?.success) {
         notify.success(t("paymentConfirmed"));
         setAdminPassword("");
-        router.refresh();
       } else {
         notify.error(result?.data?.error || t("authError"));
       }
@@ -170,7 +167,6 @@ export function UserDetailsClient({
             ? t("regenerateInvoiceSuccess") || "Nova cobrança gerada com sucesso!"
             : t("invoiceGeneratedSuccess") || "Código de pagamento gerado com sucesso!"
         );
-        router.refresh();
       } else {
         notify.error(result?.data?.error || "Erro ao gerar código de pagamento.");
       }
@@ -226,7 +222,6 @@ export function UserDetailsClient({
       const result = await regenerateCancellationFeeAction({ userId: user.id });
       if (result?.data?.success) {
         notify.success("Novo código PIX da taxa de cancelamento gerado com sucesso!");
-        router.refresh();
       } else {
         notify.error(result?.data?.error || "Erro ao gerar novo código PIX.");
       }
@@ -296,7 +291,6 @@ export function UserDetailsClient({
       const result = await manualRenewContractAction({ instanceId: id });
       if (result?.data?.success) {
         notify.success("Contrato renovado com sucesso!");
-        router.refresh();
       } else {
         notify.error(result?.data?.error || "Erro ao renovar contrato");
       }

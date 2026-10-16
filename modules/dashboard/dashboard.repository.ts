@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { usersTable } from "../user/user.schema";
 import { transactionsTable } from "../finance/finance.schema";

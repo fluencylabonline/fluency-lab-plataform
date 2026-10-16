@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import {
   recurrenceRules,
@@ -106,6 +107,31 @@ export const schedulingRepository = {
   async createSlotInstance(data: NewSlotInstance, dbClient?: DbClient) {
     const client = dbClient || db;
     return client.insert(slotInstances).values(data).returning();
+  },
+
+  async createSlotInstances(data: NewSlotInstance[], dbClient?: DbClient) {
+    if (data.length === 0) return;
+    const client = dbClient || db;
+    await client.insert(slotInstances).values(data);
+  },
+
+  /** Horários de início já materializados para a regra dentro do intervalo. */
+  async findRuleSlotStartTimes(ruleId: string, from: Date, to: Date, dbClient?: DbClient) {
+    const client = dbClient || db;
+    const rows = await client
+      .select({ startAt: slotInstances.startAt })
+      .from(slotInstances)
+      .where(and(eq(slotInstances.ruleId, ruleId), gte(slotInstances.startAt, from), lte(slotInstances.startAt, to)));
+    return rows.map((r) => r.startAt);
+  },
+
+  /** Janelas (início/fim) de todos os slots do professor que tocam o intervalo. */
+  async findTeacherSlotWindows(teacherId: string, from: Date, to: Date, dbClient?: DbClient) {
+    const client = dbClient || db;
+    return client
+      .select({ startAt: slotInstances.startAt, endAt: slotInstances.endAt })
+      .from(slotInstances)
+      .where(and(eq(slotInstances.teacherId, teacherId), lt(slotInstances.startAt, to), gt(slotInstances.endAt, from)));
   },
 
   // --- Recurrence Rules ---
@@ -346,6 +372,27 @@ export const schedulingRepository = {
       );
     
     return results.map(r => r.studentId as string);
+  },
+
+  /** Próxima aula agendada de cada aluno com este professor (uma linha por aluno). */
+  async findNextClassesForStudentsWithTeacher(studentIds: string[], teacherId: string) {
+    if (studentIds.length === 0) return [];
+    return db
+      .selectDistinctOn([slotInstances.studentId], {
+        studentId: slotInstances.studentId,
+        startAt: slotInstances.startAt,
+        type: slotInstances.type,
+      })
+      .from(slotInstances)
+      .where(
+        and(
+          inArray(slotInstances.studentId, studentIds),
+          eq(slotInstances.teacherId, teacherId),
+          gte(slotInstances.startAt, new Date()),
+          eq(slotInstances.status, "scheduled")
+        )
+      )
+      .orderBy(slotInstances.studentId, asc(slotInstances.startAt));
   },
 
   async findNextClassForStudent(studentId: string, teacherId?: string) {

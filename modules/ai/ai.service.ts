@@ -1,3 +1,4 @@
+import "server-only";
 import { GoogleGenerativeAI, SchemaType, Schema } from "@google/generative-ai";
 import { GoogleAIFileManager, FileState } from "@google/generative-ai/server";
 import { randomUUID } from "node:crypto";

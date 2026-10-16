@@ -8,7 +8,8 @@ import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { notify } from "@/components/ui/toaster";
-import { auth, storage } from "@/lib/firebase";
+import { auth } from "@/lib/firebase-auth";
+import { storage } from "@/lib/firebase-storage";
 import { fillProfileFromAudioAction } from "@/modules/learning/learning.actions";
 
 /** Same cache name used by the share-target handler in sw.ts. */

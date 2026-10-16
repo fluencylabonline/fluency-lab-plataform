@@ -1,3 +1,4 @@
+import "server-only";
 import { env } from "@/env";
 import { checkRateLimit } from "@/lib/rate-limit";
 import admin from "firebase-admin";

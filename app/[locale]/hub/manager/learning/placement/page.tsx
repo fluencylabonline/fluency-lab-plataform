@@ -4,6 +4,7 @@ import { getLocale } from "next-intl/server";
 import { curriculumService } from "@/modules/curriculum/curriculum.service";
 import { placementService } from "@/modules/placement/placement.service";
 import { PlacementClient } from "./_components/PlacementClient";
+import { userService } from "@/modules/user/user.service";
 
 export default async function PlacementManagerPage() {
     const user = await getCurrentUser();
@@ -21,7 +22,7 @@ export default async function PlacementManagerPage() {
 
     return (
         <PlacementClient 
-            user={user} 
+            user={userService.toSessionDTO(user)} 
             languages={languages} 
             initialStats={initialStats} 
         />

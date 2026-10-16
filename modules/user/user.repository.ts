@@ -1,11 +1,21 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { usersTable, type User, type NewUser, type NotificationPrefs } from "./user.schema";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 export const userRepository = {
   /**
    * Find user by Firebase UID.
    */
+  /** Cartão básico de usuários ativos (listas de alunos/professores). */
+  async findActiveCardsByIds(ids: string[]) {
+    if (ids.length === 0) return [];
+    return db.query.usersTable.findMany({
+      where: and(inArray(usersTable.id, ids), eq(usersTable.isActive, true)),
+      columns: { id: true, name: true, email: true, photoUrl: true },
+    });
+  },
+
   async findById(id: string): Promise<User | undefined> {
     return db.query.usersTable.findFirst({
       where: eq(usersTable.id, id),

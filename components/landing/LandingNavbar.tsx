@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { BottomSheetIcon } from "@/components/animated-icons/bottom-sheet";
-import { User } from "@/modules/user/user.schema";
+import type { SessionUserDTO } from "@/modules/user/user.schema";
 import {
   Vault,
   VaultTrigger,
@@ -31,7 +31,7 @@ import { useGSAP } from "@gsap/react";
 gsap.registerPlugin(ScrollTrigger);
 
 interface LandingNavbarProps {
-  user: User | null;
+  user: SessionUserDTO | null;
   compact?: boolean;
 }
 

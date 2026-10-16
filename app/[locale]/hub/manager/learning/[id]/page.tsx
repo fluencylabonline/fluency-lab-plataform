@@ -6,6 +6,7 @@ import { curriculumService } from "@/modules/curriculum/curriculum.service";
 import { notFound, redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { PathEditor } from "./_components/PathEditor";
+import { userService } from "@/modules/user/user.service";
 
 interface PlanEditorPageProps {
     params: Promise<{ id: string, locale: string }>;
@@ -28,7 +29,7 @@ export default async function PlanEditorPage({ params }: PlanEditorPageProps) {
             <Header
                 title={plan.name}
                 subtitle={plan.description || t("path_editor_subtitle") || "Organize the sequence of lessons for this plan."}
-                user={user}
+                user={userService.toSessionDTO(user)}
                 backHref={`/hub/manager/learning`}
                 className="contents"
             />

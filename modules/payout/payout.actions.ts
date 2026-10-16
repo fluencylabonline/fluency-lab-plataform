@@ -3,7 +3,7 @@
 import { protectedAction, permissionAction } from "@/lib/safe-action";
 import { z } from "zod";
 import { payoutService } from "./payout.service";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { checkUserHasPassword, verifySudoMode } from "@/lib/auth-server";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
@@ -43,7 +43,7 @@ export const processTeacherPayoutAction = permissionAction("class.update.any")
         parsedInput.year
       );
 
-      revalidatePath("/");
+      refresh();
       return { success: true, data: payout };
     } catch (error) {
       console.error("[processTeacherPayoutAction] Error:", error);
@@ -161,7 +161,7 @@ export const updatePayoutReceiptAction = permissionAction("class.update.any")
   .action(async ({ parsedInput }) => {
     try {
       const payout = await payoutService.updatePayoutReceipt(parsedInput.payoutId, parsedInput.receiptUrl);
-      revalidatePath("/");
+      refresh();
       return { success: true, data: payout };
     } catch (error) {
       console.error("[updatePayoutReceiptAction] Error:", error);
@@ -190,7 +190,7 @@ export const updatePayoutInvoiceAction = protectedAction
       }
 
       const updatedPayout = await payoutService.updatePayoutInvoice(parsedInput.payoutId, parsedInput.invoiceUrl);
-      revalidatePath("/");
+      refresh();
       return { success: true, data: updatedPayout };
     } catch (error) {
       console.error("[updatePayoutInvoiceAction] Error:", error);

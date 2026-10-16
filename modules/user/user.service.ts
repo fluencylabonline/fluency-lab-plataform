@@ -1,6 +1,7 @@
+import "server-only";
 import { userRepository } from "./user.repository";
 import { adminAuth, adminStorage } from "@/lib/firebase-admin";
-import type { User, NewUser, NotificationPrefs, SettingsUserDTO, AdminUserDTO } from "./user.schema";
+import type { User, NewUser, NotificationPrefs, SettingsUserDTO, AdminUserDTO, SessionUserDTO, TeacherOptionDTO, AdminUserDetailDTO } from "./user.schema";
 import type { OnboardingProfile } from "@/modules/onboarding/onboarding.types";
 import { env } from "@/env";
 import { communicationService } from "@/modules/communication/communication.service";
@@ -255,6 +256,16 @@ export const userService = {
     return userRepository.findAllByRole("teacher");
   },
 
+  async getActiveUserCards(ids: string[]) {
+    return userRepository.findActiveCardsByIds(ids);
+  },
+
+  /** Professores como opção de seleção — seguro para qualquer usuário logado. */
+  async getTeacherOptions(): Promise<TeacherOptionDTO[]> {
+    const teachers = await userRepository.findAllByRole("teacher");
+    return teachers.map((t) => ({ id: t.id, name: t.name, photoUrl: t.photoUrl }));
+  },
+
   async getUsersByRole(role: "admin" | "teacher" | "student" | "manager"): Promise<User[]> {
     return userRepository.findAllByRole(role);
   },
@@ -474,6 +485,58 @@ export const userService = {
       mfaEnabled: user.mfaEnabled,
       cellphone: this.maskCellphone(decryptedCellphone),
       locale: (user.locale || "pt") as "pt" | "en",
+    };
+  },
+
+  /** Usuário logado no formato que pode ir para o navegador. */
+  toSessionDTO(user: User): SessionUserDTO {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role as SessionUserDTO["role"],
+      photoUrl: user.photoUrl,
+      locale: (user.locale || "pt") as "pt" | "en",
+      mfaEnabled: user.mfaEnabled,
+      pwaInstalled: user.pwaInstalled,
+    };
+  },
+
+  /** Usuário para a tela de detalhes do admin/manager (ver AdminUserDetailDTO). */
+  toAdminUserDetailDTO(user: User): AdminUserDetailDTO {
+    const maskTail = (value: string | null) => {
+      if (!value) return null;
+      const plain = value.includes(":") ? decrypt(value) : value;
+      return plain ? `••••${plain.slice(-4)}` : null;
+    };
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      photoUrl: user.photoUrl,
+      locale: user.locale,
+      isActive: user.isActive,
+      createdAt: user.createdAt,
+      birthDate: user.birthDate,
+      classesStartDate: user.classesStartDate,
+      languages: user.languages,
+      teacherHourlyRate: user.teacherHourlyRate,
+      pixType: user.pixType,
+      guardianName: user.guardianName,
+      guardianRelationship: user.guardianRelationship,
+      cellphone: maskTail(user.cellphone),
+      taxId: maskTail(user.taxId),
+      businessTaxId: maskTail(user.businessTaxId),
+      pixKey: maskTail(user.pixKey),
+      guardianTaxId: maskTail(user.guardianTaxId),
+      guardianCellphone: maskTail(user.guardianCellphone),
+      cancellationPending: user.cancellationPending,
+      cancellationAmount: user.cancellationAmount,
+      cancellationPixCode: user.cancellationPixCode,
+      cancellationPixImage: user.cancellationPixImage,
+      cancellationPixExpiresAt: user.cancellationPixExpiresAt,
     };
   },
 

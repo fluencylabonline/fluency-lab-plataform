@@ -3,6 +3,7 @@ import { ProfileCard } from "@/modules/user/_components/ProfileCard";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { Header } from "@/components/layout/header";
+import { userService } from "@/modules/user/user.service";
 
 export default async function ProfilePage() {
     const user = await getCurrentUser();
@@ -13,10 +14,10 @@ export default async function ProfilePage() {
     return (
         <div>
             <header>
-                <Header title="Perfil" user={user} showSubHeader={false} />
+                <Header title="Perfil" user={userService.toSessionDTO(user)} showSubHeader={false} />
             </header>
             <main className="container">
-                <ProfileCard user={user} />
+                <ProfileCard user={userService.toSessionDTO(user)} />
             </main>
         </div>
     );

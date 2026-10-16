@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { useForm, useWatch, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { 
   BookOpen, 
@@ -28,10 +27,10 @@ import {
 } from "@/components/ui/select";
 import { getPlansAction, changeStudentPlanAction } from "@/modules/billing/billing.actions";
 import type { SubscriptionWithPlan } from "@/modules/billing/billing.types";
-import type { User } from "@/modules/user/user.schema";
+import type { AdminUserDetailDTO } from "@/modules/user/user.schema";
 
 interface StudentPlanTabProps {
-  user: User;
+  user: AdminUserDetailDTO;
   activeSubscription?: SubscriptionWithPlan | null;
   isAdmin: boolean;
 }
@@ -43,7 +42,6 @@ const changePlanSchema = z.object({
 type ChangePlanValues = z.infer<typeof changePlanSchema>;
 
 export function StudentPlanTab({ user, activeSubscription, isAdmin }: StudentPlanTabProps) {
-  const router = useRouter();
   const [plans, setPlans] = useState<{ id: string; name: string; price: number; classesPerWeek: number | null; durationMonths: number; language?: string | null }[]>([]);
   const [isLoadingPlans, setIsLoadingPlans] = useState(true);
 
@@ -101,7 +99,6 @@ export function StudentPlanTab({ user, activeSubscription, isAdmin }: StudentPla
           "As parcelas futuras do aluno foram reajustadas e o e-mail de aviso foi enviado.",
           toastId
         );
-        router.refresh();
       } else {
         const errorMsg = result?.data?.error || "Erro desconhecido";
         notify.error("Falha ao alterar o plano", errorMsg, toastId);

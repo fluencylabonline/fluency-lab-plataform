@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { payoutsTable } from "./payout.schema";
 import { slotInstances } from "@/modules/scheduling/scheduling.schema";

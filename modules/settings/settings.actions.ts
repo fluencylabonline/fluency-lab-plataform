@@ -1,9 +1,9 @@
 "use server";
 
 import { protectedAction } from "@/lib/safe-action";
-import { updateSystemSettingsSchema, updateDelinquencyPolicySchema } from "./settings.schema";
+import { updateSystemSettingsSchema, updateDelinquencyPolicySchema, SETTINGS_CACHE_TAG } from "./settings.schema";
 import { settingsService } from "./settings.service";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 export const updateSystemSettingsAction = protectedAction
   .metadata({ name: "updateSystemSettings" })
@@ -16,7 +16,8 @@ export const updateSystemSettingsAction = protectedAction
         parsedInput
       );
 
-      // Revalidate paths to apply new configuration
+      // Expira o cache das configurações (a próxima leitura já vê a mudança)
+      updateTag(SETTINGS_CACHE_TAG);
       revalidatePath("/");
       revalidatePath("/hub/admin/settings");
 
@@ -36,6 +37,7 @@ export const updateDelinquencyPolicyAction = protectedAction
   .action(async ({ parsedInput, ctx }) => {
     try {
       await settingsService.updateDelinquencyPolicy(ctx.user.role, parsedInput);
+      updateTag(SETTINGS_CACHE_TAG);
       revalidatePath("/hub/admin/settings");
       return { success: true as const };
     } catch (error) {

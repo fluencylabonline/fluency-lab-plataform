@@ -68,19 +68,36 @@ export function KanbanView({ tasks, isLoading, project, inboxStatuses }: KanbanV
 
     const targetStatusId = statuses[nextIndex].id;
 
-    const promise = moveTaskAction({ id: taskId, statusId: targetStatusId });
+    // Otimista: o card muda de coluna na hora. Se a action falhar, o SWR volta
+    // a lista anterior (rollbackOnError) e avisamos com notify.error.
+    type TasksCache = { data?: { success: boolean; data: TaskWithAssignees[] } } | undefined;
+    const applyMove = (current: TasksCache): TasksCache =>
+      current?.data
+        ? {
+            ...current,
+            data: {
+              ...current.data,
+              data: current.data.data.map((item) =>
+                item.id === taskId ? { ...item, statusId: targetStatusId } : item
+              ),
+            },
+          }
+        : current;
 
-    notify.promise(promise, {
-      loading: t("movingTask"),
-      success: (result) => {
-        if (result?.data?.success) {
-          mutate(project?.id ? ["tasks", project.id] : "tasks-inbox");
-          return t("taskMoved");
-        }
-        throw new Error(result?.data?.error || t("moveError"));
-      },
-      error: (err: unknown) => (err as Error).message || t("moveError"),
-    });
+    try {
+      await mutate<TasksCache>(
+        project?.id ? ["tasks", project.id] : "tasks-inbox",
+        async (current) => {
+          const result = await moveTaskAction({ id: taskId, statusId: targetStatusId });
+          if (!result?.data?.success) throw new Error(result?.data?.error || t("moveError"));
+          return applyMove(current);
+        },
+        { optimisticData: applyMove, rollbackOnError: true, populateCache: true, revalidate: true }
+      );
+      notify.success(t("taskMoved"));
+    } catch (err) {
+      notify.error((err as Error).message || t("moveError"));
+    }
   };
 
   const mockTasks = Array(3).fill({

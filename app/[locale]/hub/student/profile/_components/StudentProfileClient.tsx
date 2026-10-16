@@ -14,7 +14,7 @@ import { useTranslations } from "next-intl";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
 import { useWizard } from "@/hooks/ui/use-wizard";
 import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpProvider";
-import type { User } from "@/modules/user/user.schema";
+import type { StudentProfileUserDTO } from "@/modules/user/user.schema";
 import type { StudentProficiency } from "@/utils/proficiency";
 
 type SubscriptionData = {
@@ -64,7 +64,7 @@ type CurriculumStats = {
 };
 
 interface StudentProfileClientProps {
-  user: User;
+  user: StudentProfileUserDTO;
   subscriptionData: SubscriptionData;
   nextClassMapped: NextClassMapped;
   onboardingData: OnboardingData;

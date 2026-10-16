@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, integer, boolean, uuid, pgEnum, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer, boolean, uuid, pgEnum, jsonb, index } from "drizzle-orm/pg-core";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { usersTable } from "../user/user.schema";
@@ -26,7 +26,10 @@ export const transactionsTable = pgTable("transactions", {
     .notNull()
     .defaultNow()
     .$onUpdate(() => new Date()),
-});
+}, (t) => [
+  // Índices das consultas quentes (listas, agenda, cobrança, crons).
+  index("transactions_date_idx").on(t.date),
+]);
 
 export const fiscalConfigsTable = pgTable("fiscal_configs", {
   id: uuid("id").primaryKey().defaultRandom(),

@@ -31,6 +31,9 @@ vi.mock("next-intl/server", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
+  unstable_cache: (fn: unknown) => fn,
+  updateTag: vi.fn(),
+  refresh: vi.fn(),
 }));
 
 describe("Billing IDOR Prevention", () => {

@@ -4,6 +4,7 @@ import { TeacherScheduleClient } from "./_components/TeacherScheduleClient";
 import { addMonths, startOfMonth, endOfMonth } from "date-fns";
 import { redirect } from "next/navigation";
 import { CalendarEvent } from "@/components/ui/calendar-view";
+import { userService } from "@/modules/user/user.service";
 
 export default async function TeacherSchedulePage() {
   const user = await getCurrentUser();
@@ -42,7 +43,7 @@ export default async function TeacherSchedulePage() {
     <TeacherScheduleClient 
       teacherId={user.id}
       initialEvents={events}
-      user={user}
+      user={userService.toSessionDTO(user)}
     />
   );
 }

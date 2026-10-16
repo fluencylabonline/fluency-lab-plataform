@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, integer, pgEnum, uuid, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer, pgEnum, uuid, boolean, index } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { usersTable } from "../user/user.schema";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
@@ -47,7 +47,10 @@ export const subscriptionsTable = pgTable("subscriptions", {
     .notNull()
     .defaultNow()
     .$onUpdate(() => new Date()),
-});
+}, (t) => [
+  // Índices das consultas quentes (listas, agenda, cobrança, crons).
+  index("subscriptions_student_status_idx").on(t.studentId, t.status),
+]);
 
 export const installmentsTable = pgTable("installments", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -82,7 +85,11 @@ export const installmentsTable = pgTable("installments", {
     .notNull()
     .defaultNow()
     .$onUpdate(() => new Date()),
-});
+}, (t) => [
+  // Índices das consultas quentes (listas, agenda, cobrança, crons).
+  index("installments_subscription_order_idx").on(t.subscriptionId, t.orderIndex),
+  index("installments_status_due_idx").on(t.status, t.dueDate),
+]);
 
 export const billingAuditLogs = pgTable("billing_audit_logs", {
   id: uuid("id").primaryKey().defaultRandom(),

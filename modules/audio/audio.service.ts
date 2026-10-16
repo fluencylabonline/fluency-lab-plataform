@@ -1,3 +1,4 @@
+import "server-only";
 import { audioRepository } from "./audio.repository";
 import { checkRateLimit } from "@/lib/rate-limit";
 import type { NewAudio } from "./audio.schema";

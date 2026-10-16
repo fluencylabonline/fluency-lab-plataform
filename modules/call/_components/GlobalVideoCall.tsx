@@ -1,9 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useUserStore } from "@/modules/user/user.store";
 import { useCallStore } from "@/hooks/data/use-call-store";
-import { useStudentCallListener } from "@/hooks/data/use-student-call-listener";
-import { VideoCall } from "./VideoCall";
+
+// O SDK de vídeo (e o CSS dele) e o listener do Firestore só são baixados
+// quando realmente necessários: antes entravam no bundle de todas as páginas,
+// inclusive landing e páginas públicas.
+const VideoCall = dynamic(() => import("./VideoCall").then((m) => m.VideoCall), { ssr: false });
+const StudentCallListener = dynamic(() => import("./StudentCallListener"), { ssr: false });
 
 /**
  * GlobalVideoCall — mounted once in Providers, independent of route.
@@ -21,18 +26,21 @@ export function GlobalVideoCall() {
   const callState = useCallStore((s) => s.callState);
   const isPanelHidden = useCallStore((s) => s.isPanelHidden);
 
-  useStudentCallListener(user?.id ?? "", hasHydrated && user?.role === "student");
-
-  if (!hasHydrated || !user || !callState || isPanelHidden) {
+  if (!hasHydrated || !user) {
     return null;
   }
 
   return (
-    <VideoCall
-      userId={user.id}
-      userName={user.name}
-      userRole={user.role}
-      userPhotoUrl={user.photoUrl}
-    />
+    <>
+      {user.role === "student" && <StudentCallListener userId={user.id} />}
+      {callState && !isPanelHidden && (
+        <VideoCall
+          userId={user.id}
+          userName={user.name}
+          userRole={user.role}
+          userPhotoUrl={user.photoUrl}
+        />
+      )}
+    </>
   );
 }

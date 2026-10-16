@@ -4,7 +4,7 @@ import { managerAction } from "@/lib/safe-action";
 import { z } from "zod";
 import { certificateService } from "./certificate.service";
 import { issueCertificateSchema } from "./certificate.types";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 
 export const getCertificateDataAction = managerAction
   .metadata({ name: "getCertificateData" })
@@ -25,8 +25,7 @@ export const issueCertificateAction = managerAction
   .action(async ({ parsedInput, ctx }) => {
     try {
       const certificate = await certificateService.issueCertificate(ctx.user.id, parsedInput);
-      revalidatePath(`/hub/admin/users/${parsedInput.studentId}`);
-      revalidatePath(`/hub/manager/users/${parsedInput.studentId}`);
+      refresh();
       return { success: true, data: certificate };
     } catch (error) {
       console.error("[issueCertificateAction] Error:", error);

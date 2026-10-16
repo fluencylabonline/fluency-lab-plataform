@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { callSessionsTable, type CallSession, type NewCallSession } from "./call.schema";
 import { eq, desc } from "drizzle-orm";

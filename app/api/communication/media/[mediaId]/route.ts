@@ -33,7 +33,9 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       status: 200,
       headers: {
         "Content-Type": media.mimeType,
-        "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200",
+        // private: só o navegador de quem passou pela checagem acima guarda a
+        // mídia. Com public/s-maxage o CDN servia o arquivo a qualquer um.
+        "Cache-Control": "private, max-age=86400",
       },
     });
 

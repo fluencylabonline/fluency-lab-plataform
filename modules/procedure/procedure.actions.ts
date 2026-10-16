@@ -3,7 +3,7 @@
 import { adminAction } from "@/lib/safe-action";
 import { insertProcedureSchema, updateProcedureSchema } from "./procedure.schema";
 import { procedureService } from "./procedure.service";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { z } from "zod";
 
 export const createProcedureAction = adminAction
@@ -15,7 +15,7 @@ export const createProcedureAction = adminAction
       parsedInput.title
     );
     
-    revalidatePath("/[locale]/hub/admin/procedures", "page");
+    refresh();
     
     return { procedureId: procedure.id };
   });
@@ -29,8 +29,7 @@ export const updateProcedureAction = adminAction
       content: parsedInput.content,
     });
     
-    revalidatePath("/[locale]/hub/admin/procedures", "page");
-    revalidatePath(`/[locale]/hub/admin/procedures/${parsedInput.procedureId}`, "page");
+    refresh();
     
     return { success: true };
   });
@@ -41,7 +40,7 @@ export const deleteProcedureAction = adminAction
   .action(async ({ parsedInput }) => {
     await procedureService.deleteProcedure(parsedInput.id);
     
-    revalidatePath("/[locale]/hub/admin/procedures", "page");
+    refresh();
     
     return { success: true };
   });

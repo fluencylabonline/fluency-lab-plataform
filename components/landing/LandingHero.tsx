@@ -9,13 +9,13 @@ import { PathScreen } from "@/components/landing/screens/PathScreen";
 import { EditorScreen } from "./screens/EditScreen";
 import { PlacementScreen } from "./screens/PlacementScreen";
 
-import { User } from "@/modules/user/user.schema";
+import type { SessionUserDTO } from "@/modules/user/user.schema";
 import { SystemSettings } from "@/modules/settings/settings.schema";
 import { CalendarDaysIcon } from "../animated-icons/calendar";
 import { PhoneMockup } from "./PhoneMockup";
 import Link from "next/link";
 
-export function LandingHero({ user, settings }: { user: User | null; settings: SystemSettings }) {
+export function LandingHero({ user, settings }: { user: SessionUserDTO | null; settings: SystemSettings }) {
   const t = useTranslations("LandingPage");
   const [currentScreen, setCurrentScreen] = useState<
     "home" | "path" | "editor" | "placement"

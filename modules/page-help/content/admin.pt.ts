@@ -1208,11 +1208,11 @@ export const ADMIN_HELP_PT: RoleHelpContent<AdminHelpRoute> = {
     sections: [
       {
         heading: "Como funciona",
-        body: "As mensagens dos alunos chegam aqui em tempo real, e a sua resposta sai pelo número oficial da escola. A lista da esquerda são as conversas; a busca acima dela procura por conversa ou por atalho.",
+        body: "As mensagens dos alunos chegam aqui em tempo real, e a sua resposta sai pelo número oficial da escola. A lista da esquerda são as conversas; a busca acima dela procura por conversa ou por atalho. A lista mostra as 200 conversas mais recentes; no fim dela, “Carregar mais conversas” traz as anteriores.",
       },
       {
         heading: "A janela de 24 horas",
-        body: "Você escreve livremente enquanto estiver dentro de 24 horas desde a última mensagem do aluno. Passado esse prazo, só é possível iniciar contato com um template aprovado. É regra da Meta, não da plataforma.",
+        body: "Você escreve livremente enquanto estiver dentro de 24 horas desde a última mensagem do aluno. Passado esse prazo, só é possível iniciar contato com um template aprovado. É regra da Meta, não da plataforma. Se uma mensagem não sair, ela fica marcada como não enviada e o texto volta para o campo, para você tentar de novo.",
       },
       {
         heading: "Os botões da conversa",

@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db";
 import { aiCache } from "@/modules/curriculum/curriculum.schema";
 import { eq, and, lt } from "drizzle-orm";

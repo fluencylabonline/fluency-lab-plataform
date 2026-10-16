@@ -6,7 +6,7 @@ import { useDevice } from "@/hooks/ui/use-device";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { PwaWelcomeScreen } from "@/components/landing/PwaWelcomeScreen";
-import { User } from "@/modules/user/user.schema";
+import type { SessionUserDTO } from "@/modules/user/user.schema";
 import { SystemSettings } from "@/modules/settings/settings.schema";
 
 // Seções below-the-fold: carregadas apenas após o hero ser exibido
@@ -27,7 +27,7 @@ const Footer = dynamic(
   { ssr: false }
 );
 
-export function LandingView({ user, settings }: { user: User | null; settings: SystemSettings }) {
+export function LandingView({ user, settings }: { user: SessionUserDTO | null; settings: SystemSettings }) {
   const { isStandalone } = useDevice();
   const [videoSrc, setVideoSrc] = useState<string>("");
 

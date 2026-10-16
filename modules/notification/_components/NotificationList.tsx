@@ -7,11 +7,6 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import { useParams, useRouter } from "next/navigation";
 import { useNotifications } from "@/hooks/notification/use-notifications";
-import {
-  markNotificationAsReadAction,
-  markAllNotificationsAsReadAction,
-  clearNotificationsAction,
-} from "../notification.actions";
 import { notify } from "@/components/ui/toaster";
 import { Spinner } from "@/components/ui/spinner";
 import { type Notification } from "@/modules/notification/notification.schema";
@@ -20,7 +15,7 @@ import { NotificationDetail } from "./NotificationDetail";
 export function NotificationList() {
   const { locale } = useParams();
   const dateLocale = locale === "pt" ? ptBR : enUS;
-  const { notifications, isLoading, mutate } = useNotifications();
+  const { notifications, isLoading, markAsRead, markAllAsRead, clearAll } = useNotifications();
   const router = useRouter();
 
   const [selected, setSelected] = useState<Notification | null>(null);
@@ -28,10 +23,7 @@ export function NotificationList() {
   const unreadCount = notifications?.filter((n) => !n.isRead).length || 0;
 
   const handleMarkAsRead = async (id: string) => {
-    const result = await markNotificationAsReadAction({ id });
-    if (result?.data?.success) {
-      mutate();
-    } else {
+    if (!(await markAsRead(id))) {
       notify.error("Erro ao marcar como lida");
     }
   };
@@ -48,9 +40,7 @@ export function NotificationList() {
   };
 
   const handleMarkAllAsRead = async () => {
-    const result = await markAllNotificationsAsReadAction();
-    if (result?.data?.success) {
-      mutate();
+    if (await markAllAsRead()) {
       notify.success("Todas as notificações foram marcadas como lidas");
     } else {
       notify.error("Erro ao marcar todas como lidas");
@@ -58,9 +48,7 @@ export function NotificationList() {
   };
 
   const handleClearAll = async () => {
-    const result = await clearNotificationsAction();
-    if (result?.data?.success) {
-      mutate();
+    if (await clearAll()) {
       notify.success("Todas as notificações foram limpas");
     } else {
       notify.error("Erro ao limpar notificações");

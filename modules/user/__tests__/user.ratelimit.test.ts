@@ -26,6 +26,9 @@ vi.mock("../user.service", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
+  unstable_cache: (fn: unknown) => fn,
+  updateTag: vi.fn(),
+  refresh: vi.fn(),
 }));
 
 describe("User Rate Limit - Search Abuse Prevention", () => {

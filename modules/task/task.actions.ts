@@ -18,7 +18,7 @@ import {
 import { TaskProjectWithStatuses, TaskWithAssignees } from "./task.types";
 import { User } from "../user/user.schema";
 import { taskService } from "./task.service";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 
 // Projects
 export const getProjectsAction = protectedAction
@@ -40,8 +40,7 @@ export const createProjectAction = managerAction
   .metadata({ name: "createProjectAction" })
   .action(async ({ parsedInput, ctx }) => {
     const project = await taskService.createProject(ctx.user.id, parsedInput);
-    revalidatePath("/hub/admin/tasks");
-    revalidatePath("/hub/manager/tasks");
+    refresh();
     return { success: true, data: project } as { success: boolean; data: TaskProject; error?: string };
   });
 
@@ -50,8 +49,7 @@ export const deleteProjectAction = managerAction
   .metadata({ name: "deleteProjectAction" })
   .action(async ({ parsedInput }) => {
     await taskService.deleteProject(parsedInput.id);
-    revalidatePath("/hub/admin/tasks");
-    revalidatePath("/hub/manager/tasks");
+    refresh();
     return { success: true } as { success: boolean; error?: string };
   });
 
@@ -61,8 +59,7 @@ export const createStatusAction = managerAction
   .metadata({ name: "createStatusAction" })
   .action(async ({ parsedInput }) => {
     const status = await taskService.createStatus(parsedInput);
-    revalidatePath("/hub/admin/tasks");
-    revalidatePath("/hub/manager/tasks");
+    refresh();
     return { success: true, data: status } as { success: boolean; data: TaskStatus; error?: string };
   });
 
@@ -79,8 +76,7 @@ export const reorderStatusesAction = managerAction
   .metadata({ name: "reorderStatusesAction" })
   .action(async ({ parsedInput }) => {
     await taskService.reorderStatuses(parsedInput);
-    revalidatePath("/hub/admin/tasks");
-    revalidatePath("/hub/manager/tasks");
+    refresh();
     return { success: true } as { success: boolean; error?: string };
   });
 
@@ -98,8 +94,7 @@ export const createTaskAction = managerAction
   .metadata({ name: "createTaskAction" })
   .action(async ({ parsedInput, ctx }) => {
     const task = await taskService.createTask(ctx.user.id, parsedInput);
-    revalidatePath("/hub/admin/tasks");
-    revalidatePath("/hub/manager/tasks");
+    refresh();
     return { success: true, data: task } as { success: boolean; data: Task; error?: string };
   });
 
@@ -108,8 +103,7 @@ export const updateTaskAction = managerAction
   .metadata({ name: "updateTaskAction" })
   .action(async ({ parsedInput, ctx }) => {
     const task = await taskService.updateTask(ctx.user.id, parsedInput);
-    revalidatePath("/hub/admin/tasks");
-    revalidatePath("/hub/manager/tasks");
+    refresh();
     return { success: true, data: task } as { success: boolean; data: Task; error?: string };
   });
 
@@ -118,8 +112,7 @@ export const moveTaskAction = protectedAction
   .metadata({ name: "moveTaskAction" })
   .action(async ({ parsedInput, ctx }) => {
     const task = await taskService.moveTask(ctx.user.id, parsedInput);
-    revalidatePath("/hub/admin/tasks");
-    revalidatePath("/hub/manager/tasks");
+    refresh();
     return { success: true, data: task } as { success: boolean; data: Task; error?: string };
   });
 
@@ -138,8 +131,7 @@ export const completeTaskAction = protectedAction
       statusId: finalStatus.id 
     });
     
-    revalidatePath("/hub/admin/tasks");
-    revalidatePath("/hub/manager/tasks");
+    refresh();
     
     return { success: true, data: updatedTask } as { success: boolean; data: Task; error?: string };
   });
@@ -149,7 +141,6 @@ export const deleteTaskAction = managerAction
   .metadata({ name: "deleteTaskAction" })
   .action(async ({ parsedInput }) => {
     await taskService.deleteTask(parsedInput.id);
-    revalidatePath("/hub/admin/tasks");
-    revalidatePath("/hub/manager/tasks");
+    refresh();
     return { success: true } as { success: boolean; error?: string };
   });

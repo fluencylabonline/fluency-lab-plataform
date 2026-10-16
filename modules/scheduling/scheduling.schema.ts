@@ -1,5 +1,5 @@
 import {
-  pgTable, uuid, varchar, timestamp, boolean, pgEnum, integer, jsonb, text
+  pgTable, uuid, varchar, timestamp, boolean, pgEnum, integer, jsonb, text, index
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
@@ -113,7 +113,13 @@ export const slotInstances = pgTable("slot_instances", {
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (t) => [
+  // Índices das consultas quentes (listas, agenda, cobrança, crons).
+  index("slot_instances_teacher_start_idx").on(t.teacherId, t.startAt),
+  index("slot_instances_student_start_idx").on(t.studentId, t.startAt),
+  index("slot_instances_rule_start_idx").on(t.ruleId, t.startAt),
+  index("slot_instances_status_start_idx").on(t.status, t.startAt),
+]);
 
 // 4. Logs de Auditoria
 export const schedulingAuditLogs = pgTable("scheduling_audit_logs", {
@@ -143,7 +149,10 @@ export const recessRequestsTable = pgTable("scheduling_recess_requests", {
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (t) => [
+  // Índices das consultas quentes (listas, agenda, cobrança, crons).
+  index("recess_requests_teacher_idx").on(t.teacherId),
+]);
 
 
 // ================= RELATIONS =================

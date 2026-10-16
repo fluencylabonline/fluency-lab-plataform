@@ -16,7 +16,7 @@ import {
     attachMediaAction
 } from "@/modules/curriculum/curriculum.actions";
 import { ref, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase";
+import { storage } from "@/lib/firebase-storage";
 import { notify } from "@/components/ui/toaster";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";

@@ -1,9 +1,10 @@
+import "server-only";
 import { db } from "@/lib/db";
 import {
   studentProfiles, studentItemProgress, learningPlans, planLessons, studentProfileHistory,
   learningPracticeSessions, learningXpTransactions, learningEngagementLogs
 } from "./learning.schema";
-import { eq, and, asc, sql, isNull, desc } from "drizzle-orm";
+import { eq, and, asc, sql, isNull, desc, inArray } from "drizzle-orm";
 
 export const learningRepository = {
   // Profiles
@@ -87,6 +88,20 @@ export const learningRepository = {
         eq(studentItemProgress.itemId, itemId)
       ),
     });
+  },
+
+  async findProgressItemIds(studentId: string, itemIds: string[]) {
+    if (itemIds.length === 0) return [];
+    const rows = await db
+      .select({ itemId: studentItemProgress.itemId })
+      .from(studentItemProgress)
+      .where(and(eq(studentItemProgress.studentId, studentId), inArray(studentItemProgress.itemId, itemIds)));
+    return rows.map((r) => r.itemId);
+  },
+
+  async createProgressMany(data: (typeof studentItemProgress.$inferInsert)[]) {
+    if (data.length === 0) return;
+    await db.insert(studentItemProgress).values(data);
   },
 
   async createProgress(data: typeof studentItemProgress.$inferInsert) {

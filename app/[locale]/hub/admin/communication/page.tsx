@@ -5,6 +5,7 @@ import { notificationService } from "@/modules/notification/notification.service
 import { CommunicationDashboard } from "./_components/CommunicationDashboard";
 
 import { EmailMessageDetail } from "./_components/EmailDetailsVault";
+import { userService } from "@/modules/user/user.service";
 
 export default async function AdminCommunicationPage() {
   const user = await getCurrentUser();
@@ -25,7 +26,7 @@ export default async function AdminCommunicationPage() {
       initialHistory={history}
       initialEmails={emails as EmailMessageDetail[]}
       initialResendUsage={resendUsage}
-      user={user}
+      user={userService.toSessionDTO(user)}
     />
   );
 }

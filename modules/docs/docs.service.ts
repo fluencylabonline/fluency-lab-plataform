@@ -1,3 +1,4 @@
+import "server-only";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { env } from "@/env";
 import { checkDailyBudget, checkRateLimit } from "@/lib/rate-limit";

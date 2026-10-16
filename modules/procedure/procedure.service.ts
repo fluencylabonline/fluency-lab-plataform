@@ -1,3 +1,4 @@
+import "server-only";
 import { procedureRepository } from "./procedure.repository";
 import type { JSONContent } from "@tiptap/core";
 import { UserRoles } from "@/lib/rbac";

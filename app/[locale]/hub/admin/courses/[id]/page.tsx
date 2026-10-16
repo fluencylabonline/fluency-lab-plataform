@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { hasPermission } from "@/lib/rbac";
 import { courseService } from "@/modules/course/course.service";
 import { CourseDetailClient } from "../_components/CourseDetailClient";
+import { userService } from "@/modules/user/user.service";
 
 export default async function AdminCourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -19,7 +20,7 @@ export default async function AdminCourseDetailPage({ params }: { params: Promis
   return (
     <CourseDetailClient
       courseData={courseData}
-      currentUser={user}
+      currentUser={userService.toSessionDTO(user)}
     />
   );
 }

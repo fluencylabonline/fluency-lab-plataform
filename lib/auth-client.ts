@@ -14,7 +14,7 @@ import {
   setPersistence,
   browserLocalPersistence
 } from "firebase/auth";
-import { auth } from "./firebase";
+import { auth } from "./firebase-auth";
 
 /**
  * Standard result type for all authClient operations.
@@ -173,6 +173,14 @@ export const authClient = {
     } catch (error) {
       console.error("[authClient.signOut] Error:", error);
     } finally {
+      // Páginas e respostas de API do usuário que saiu não podem ficar no
+      // Cache Storage de um aparelho que talvez seja compartilhado.
+      try {
+        const { purgePrivateCaches } = await import("@/lib/pwa-cache");
+        await purgePrivateCaches();
+      } catch (error) {
+        console.error("[authClient.signOut] Cache purge error:", error);
+      }
       window.location.href = "/signin";
     }
   },

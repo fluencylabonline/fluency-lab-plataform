@@ -1,3 +1,4 @@
+import "server-only";
 import { certificateRepository } from "./certificate.repository";
 import { userService } from "../user/user.service";
 import { schedulingService } from "../scheduling/scheduling.service";

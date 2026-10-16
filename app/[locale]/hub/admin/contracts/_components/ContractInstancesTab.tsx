@@ -20,18 +20,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { type ContractTemplate, type ContractInstance } from "@/modules/contract/contract.schema";
-
-interface ContractInstanceExtended extends ContractInstance {
-  template: ContractTemplate;
-  user: {
-    name: string;
-    email: string;
-  };
-}
+import type { ContractInstanceListItem } from "@/modules/contract/contract.types";
 
 interface ContractInstancesTabProps {
-  instances: ContractInstanceExtended[];
+  instances: ContractInstanceListItem[];
   actionLoadingId: string | null;
   onDownload: (instanceId: string) => void;
   onResendEmail: (instanceId: string) => void;

@@ -11,7 +11,7 @@ vi.mock("@/lib/auth-server", () => ({
 
 vi.mock("../user.service", () => ({
   userService: {
-    getAllTeachers: vi.fn().mockResolvedValue([]),
+    getTeacherOptions: vi.fn().mockResolvedValue([{ id: "t-1", name: "Teacher 1", photoUrl: null }]),
     getUserById: vi.fn(),
   },
 }));
@@ -26,6 +26,9 @@ vi.mock("next-intl/server", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
+  unstable_cache: (fn: unknown) => fn,
+  updateTag: vi.fn(),
+  refresh: vi.fn(),
 }));
 
 vi.mock("next/headers", () => ({
@@ -52,6 +55,15 @@ describe("User RBAC - user.actions", () => {
     // Should not have authorization error
     expect(result.serverError).toBeUndefined();
     expect(data?.success).toBe(true);
+  });
+
+  it("[Data Leakage] Teachers list SHOULD only expose id, name and photo", async () => {
+    vi.mocked(getCurrentUser).mockResolvedValue(createMockUser({ id: "student-id", role: "student" }));
+
+    const result = await getTeachersAction({});
+    const data = result.data as { success: boolean; data?: Record<string, unknown>[] } | undefined;
+
+    expect(Object.keys(data?.data?.[0] ?? {}).sort()).toEqual(["id", "name", "photoUrl"]);
   });
 
   it("[RBAC] Student SHOULD NOT be able to reveal sensitive data (admin only)", async () => {

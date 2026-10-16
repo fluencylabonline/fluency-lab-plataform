@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { searchUsersAction } from "@/modules/user/user.actions";
 import { sendWhatsAppTemplateAction } from "@/modules/communication/communication.actions";
 import { WhatsAppTemplate, WhatsAppTemplateComponent } from "@/modules/communication/communication.types";
-import { User } from "@/modules/user/user.schema";
+import type { AdminUserDTO } from "@/modules/user/user.schema";
 import { notify } from "@/components/ui/toaster";
 import { Command, CommandInput, CommandList, CommandGroup, CommandItem } from "@/components/ui/command";
 import { User as UserIcon, AlertCircle, Info } from "lucide-react";
@@ -40,9 +40,9 @@ interface TemplateParam {
 export function SendWhatsAppMessageVault({ open, onOpenChange, templates }: SendWhatsAppMessageVaultProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [searchResults, setSearchResults] = useState<AdminUserDTO[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<AdminUserDTO | null>(null);
   const [selectedTemplateName, setSelectedTemplateName] = useState<string>("");
   const [params, setParams] = useState<TemplateParam[]>([]);
 

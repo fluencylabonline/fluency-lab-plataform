@@ -12,12 +12,19 @@ export default async function ManagerUsersPage() {
     redirect("/signin");
   }
 
-  const rawUsers = await userService.getAllUsers();
+  // Tudo independente entre si: um único round-trip em paralelo.
+  const [rawUsers, studentTeachersIdsMap, studentContractsMap, studentPaymentsMap, studentNextClassesMap] =
+    await Promise.all([
+      userService.getAllUsers(),
+      schedulingService.getStudentTeachersMap(),
+      contractService.getActiveContractsMap(),
+      billingService.getCurrentMonthPaymentStatusMap(),
+      schedulingService.getAllStudentsNextClassMap(),
+    ]);
   const users = rawUsers.map((u) => userService.sanitizeUserForAdmin(u));
 
   // Resolve student teacher names from the map of student teacher IDs
   const userNamesMap = new Map(rawUsers.map((u) => [u.id, u.name]));
-  const studentTeachersIdsMap = await schedulingService.getStudentTeachersMap();
   const studentTeachersMap: Record<string, string[]> = {};
   for (const [studentId, teacherIds] of Object.entries(studentTeachersIdsMap) as [string, string[]][]) {
     studentTeachersMap[studentId] = teacherIds
@@ -25,16 +32,10 @@ export default async function ManagerUsersPage() {
       .filter((name): name is string => !!name);
   }
 
-  const [studentContractsMap, studentPaymentsMap, studentNextClassesMap] = await Promise.all([
-    contractService.getActiveContractsMap(),
-    billingService.getCurrentMonthPaymentStatusMap(),
-    schedulingService.getAllStudentsNextClassMap(),
-  ]);
-
   return (
     <UsersPageClient
       initialData={users}
-      currentUser={user}
+      currentUser={userService.toSessionDTO(user)}
       basePath="/hub/manager/users"
       studentTeachersMap={studentTeachersMap}
       studentContractsMap={studentContractsMap}

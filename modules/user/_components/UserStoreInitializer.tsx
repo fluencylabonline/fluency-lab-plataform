@@ -2,10 +2,10 @@
 
 import { useEffect } from "react";
 import { useUserStore } from "../user.store";
-import { User } from "../user.schema";
+import type { SessionUserDTO } from "../user.schema";
 
 interface UserStoreInitializerProps {
-  user: User | null;
+  user: SessionUserDTO | null;
 }
 
 export function UserStoreInitializer({ user }: UserStoreInitializerProps) {

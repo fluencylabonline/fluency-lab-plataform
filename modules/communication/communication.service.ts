@@ -1,3 +1,4 @@
+import "server-only";
 import { resend } from "@/lib/resend";
 import { env } from "@/env";
 import { communicationRepository } from "./communication.repository";
@@ -1386,8 +1387,10 @@ export class CommunicationService {
     return { success: true, messageId: newMetaId };
   }
 
-  async getConversations(includeArchived: boolean = false) {
-    return communicationRepository.getConversations(includeArchived);
+  async getConversations(includeArchived: boolean = false, offset = 0) {
+    // Primeira página maior (é a que o SWR mantém atualizada); as seguintes
+    // vêm sob demanda pelo "Carregar mais conversas".
+    return communicationRepository.getConversations(includeArchived, offset === 0 ? 200 : 100, offset);
   }
 
   async getMessages(conversationId: string, before?: Date) {

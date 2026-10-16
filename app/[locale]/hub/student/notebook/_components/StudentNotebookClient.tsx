@@ -23,7 +23,7 @@ import {
   VaultBody
 } from "@/components/ui/vault";
 
-import { Notebook } from "@/modules/notebook/notebook.schema";
+import type { NotebookListItem } from "@/modules/notebook/notebook.schema";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
 import { useWizard } from "@/hooks/ui/use-wizard";
 import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpProvider";
@@ -33,7 +33,7 @@ interface StudentNotebookClientProps {
   learnedItems: LearningItemDetail[];
   reviewedItems: LearningItemDetail[];
   roadmap: StudentRoadmap | null;
-  initialNotebooks: Notebook[];
+  initialNotebooks: NotebookListItem[];
   wordOfTheDay: LearningItem | null;
   user: {
     name: string | null;

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Download, Loader2, Wallet } from "lucide-react";
-import { generateReceiptPDF } from "@/lib/pdfGenerator";
 import { useTranslations, useFormatter } from "next-intl";
 import { motion } from "framer-motion";
 import {
@@ -41,6 +40,8 @@ export function ReceiptView({ payment }: ReceiptViewProps) {
   const handleDownload = async () => {
     setIsGenerating(true);
     try {
+      // pdf-lib só é baixado quando a pessoa pede o PDF.
+      const { generateReceiptPDF } = await import("@/lib/pdfGenerator");
       await generateReceiptPDF(payment);
     } catch (error) {
       console.error("Error generating PDF:", error);
