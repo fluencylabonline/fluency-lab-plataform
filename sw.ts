@@ -369,4 +369,43 @@ self.addEventListener("sync", (event: SyncEvent) => {
   }
 });
 
+/**
+ * Web Share Target: the OS share sheet POSTs the shared audio here. Files cannot be
+ * carried in a redirect, so they are parked in the Cache API and the import page
+ * picks them up (see SHARED_AUDIO_CACHE in the audio import component).
+ */
+const SHARED_AUDIO_CACHE = "shared-audio";
+
+self.addEventListener("fetch", (event: FetchEvent) => {
+  const url = new URL(event.request.url);
+  if (event.request.method !== "POST" || url.pathname !== "/share-target") return;
+
+  event.respondWith(
+    (async () => {
+      try {
+        const formData = await event.request.formData();
+        const files = formData.getAll("audio").filter((f): f is File => f instanceof File);
+        const cache = await caches.open(SHARED_AUDIO_CACHE);
+        for (const key of await cache.keys()) await cache.delete(key);
+        await Promise.all(
+          files.map((file, index) =>
+            cache.put(
+              `/__shared-audio/${index}`,
+              new Response(file, {
+                headers: {
+                  "Content-Type": file.type || "application/octet-stream",
+                  "X-File-Name": encodeURIComponent(file.name),
+                },
+              }),
+            ),
+          ),
+        );
+        return Response.redirect("/hub/admin/students/onboarding/from-audio?shared=1", 303);
+      } catch {
+        return Response.redirect("/hub/admin/students/onboarding/from-audio", 303);
+      }
+    })(),
+  );
+});
+
 serwist.addEventListeners();

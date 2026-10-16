@@ -12,7 +12,7 @@ import { saveProfileSurveyAction, finalizeProfileAction } from "@/modules/learni
 import {
   User, History, Target, Calendar, Briefcase,
   Heart, Lightbulb, AlertTriangle, Settings,
-  CheckCircle2, ChevronLeft, ChevronRight, Trash2
+  CheckCircle2, ChevronLeft, ChevronRight, Trash2, Mic
 } from "lucide-react";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
@@ -889,6 +889,12 @@ export function StudentProfileSurvey({
         title="Montar Perfil do Aluno"
         showSubHeader={false}
         backHref={basePath}
+        actions={profileId ? [{
+          label: "Preencher por áudio",
+          icon: <Mic className="h-4 w-4" />,
+          onClick: () => router.push(`${basePath}/from-audio?profileId=${profileId}`),
+          dataTour: "manager-onboarding.audio"
+        }] : []}
       />
 
       <main className="flex-1 container max-w-2xl py-8 pb-32" data-tour="manager-onboarding.form">

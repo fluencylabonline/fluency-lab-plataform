@@ -344,3 +344,32 @@ export const studentProfileSurveySchema = z.object({
 
 export type StudentProfileSurveyData = z.infer<typeof studentProfileSurveySchema>;
 export type StudentProfileSurveyInput = z.input<typeof studentProfileSurveySchema>;
+
+// ================= AUDIO EXTRACTION =================
+
+/**
+ * Maps each survey step to its schema so extracted values can be validated one
+ * field at a time (a single bad value from the AI must not discard the rest).
+ */
+export const surveyStepSchemas = {
+  step1: step1Schema,
+  step2: step2Schema,
+  step3: step3Schema,
+  step4: step4Schema,
+  step5: step5Schema,
+  step6: step6Schema,
+  step7: step7Schema,
+  step8: step8Schema,
+  step9: step9Schema,
+  step10: step10Schema,
+} as const;
+
+export type SurveyStepKey = keyof typeof surveyStepSchemas;
+
+/** Input of the "fill profile from audio" flow. */
+export const fillProfileFromAudioSchema = z.object({
+  storagePath: z.string().min(1).max(512),
+  mimeType: z.string().min(1).max(100),
+  profileId: z.uuid().optional(),
+  studentId: z.string().optional(),
+});

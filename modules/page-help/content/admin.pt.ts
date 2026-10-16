@@ -295,6 +295,10 @@ export const ADMIN_HELP_PT: RoleHelpContent<AdminHelpRoute> = {
         body: "O botão do topo cria um perfil do zero — útil quando o aluno foi matriculado sem passar pelo questionário.",
       },
       {
+        heading: "Perfil por Áudio",
+        body: "Envie o áudio da chamada inicial ou do WhatsApp e a IA preenche o que o aluno disse. Campos não mencionados ficam em branco para você completar. No Android, também dá para compartilhar o áudio direto do WhatsApp para o app.",
+      },
+      {
         heading: "O menu de cada item",
         body: [
           "Ver abre o diagnóstico pedagógico gerado a partir das respostas.",
@@ -320,6 +324,12 @@ export const ADMIN_HELP_PT: RoleHelpContent<AdminHelpRoute> = {
         text: "Cria um perfil do zero — útil quando o aluno foi matriculado sem passar pelo questionário.",
       },
       {
+        id: "audio",
+        target: "manager-onboarding.audio",
+        title: "Perfil por Áudio",
+        text: "Envia a conversa inicial e a IA preenche o questionário com o que ouviu. Você revisa e completa o resto.",
+      },
+      {
         id: "list",
         target: "manager-onboarding.list",
         title: "A lista",
@@ -333,11 +343,48 @@ export const ADMIN_HELP_PT: RoleHelpContent<AdminHelpRoute> = {
     ],
   },
 
+  "/hub/admin/students/onboarding/from-audio": {
+    title: "Perfil por Áudio",
+    summary:
+      "Envie a conversa inicial com o aluno e a IA preenche o questionário com o que ele disse.",
+    sections: [
+      {
+        heading: "Como funciona",
+        body: "Selecione o áudio (WhatsApp, mp3, m4a ou vídeo mp4). A IA ouve, preenche só os campos que ainda estão vazios e deixa em branco o que não foi dito. Depois você revisa o perfil no questionário.",
+      },
+      {
+        heading: "Pelo celular",
+        body: "No Android, com o app instalado, compartilhe o áudio do WhatsApp escolhendo o FluencyLab na lista de compartilhamento. No iPhone, use o botão Selecionar áudio.",
+      },
+      {
+        heading: "Privacidade",
+        body: "O áudio é enviado para a IA analisar e apagado logo em seguida. Avise o aluno de que a conversa será analisada.",
+      },
+    ],
+    tour: [
+      {
+        id: "intro",
+        title: "Perfil por Áudio",
+        text: "Envie a conversa inicial e a IA preenche o questionário por você.",
+      },
+      {
+        id: "upload",
+        target: "onboarding-audio.upload",
+        title: "Envie o áudio",
+        text: "Selecione um ou mais arquivos. Chamadas de 15 a 25 minutos funcionam bem. A IA preenche só o que ainda está vazio.",
+      },
+    ],
+  },
+
   "/hub/admin/students/onboarding/[profileId]": {
     title: "Questionário do aluno",
     summary: "O perfil de entrada do aluno, para preencher ou corrigir.",
     docsArticleId: "onboarding",
     sections: [
+      {
+        heading: "Preencher por áudio",
+        body: "Com o perfil já criado, o botão do topo abre a tela de áudio: a IA preenche só os campos ainda vazios com o que o aluno disse na conversa. Salve o passo atual antes de sair.",
+      },
       {
         heading: "O que é este formulário",
         body: "O questionário de entrada respondido na matrícula: objetivo com o idioma, experiência anterior, disponibilidade, nível que o aluno atribui a si mesmo e o quanto pretende se dedicar.",

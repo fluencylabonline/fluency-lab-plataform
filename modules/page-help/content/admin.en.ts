@@ -294,6 +294,10 @@ export const ADMIN_HELP_EN: RoleHelpContent<AdminHelpRoute> = {
         body: "The button at the top creates a profile from scratch — useful when a student was enrolled without going through the questionnaire.",
       },
       {
+        heading: "Profile from Audio",
+        body: "Upload the audio of the intro call or a WhatsApp voice message and the AI fills in what the student said. Anything not mentioned stays blank for you to complete. On Android you can also share the audio straight from WhatsApp to the app.",
+      },
+      {
         heading: "The menu on each row",
         body: [
           "View opens the teaching diagnosis generated from the answers.",
@@ -319,6 +323,12 @@ export const ADMIN_HELP_EN: RoleHelpContent<AdminHelpRoute> = {
         text: "Creates a profile from scratch — useful when a student was enrolled without going through the questionnaire.",
       },
       {
+        id: "audio",
+        target: "manager-onboarding.audio",
+        title: "Profile from Audio",
+        text: "Uploads the intro conversation and the AI fills the questionnaire with what it heard. You review and complete the rest.",
+      },
+      {
         id: "list",
         target: "manager-onboarding.list",
         title: "The list",
@@ -332,11 +342,48 @@ export const ADMIN_HELP_EN: RoleHelpContent<AdminHelpRoute> = {
     ],
   },
 
+  "/hub/admin/students/onboarding/from-audio": {
+    title: "Profile from Audio",
+    summary:
+      "Upload the intro conversation with the student and the AI fills the questionnaire with what they said.",
+    sections: [
+      {
+        heading: "How it works",
+        body: "Pick the audio (WhatsApp, mp3, m4a or mp4 video). The AI listens, fills only the fields that are still empty and leaves blank whatever was not said. Then you review the profile in the questionnaire.",
+      },
+      {
+        heading: "From your phone",
+        body: "On Android, with the app installed, share the WhatsApp audio and pick FluencyLab from the share list. On iPhone, use the Select audio button.",
+      },
+      {
+        heading: "Privacy",
+        body: "The audio is sent to the AI for analysis and deleted right after. Let the student know the conversation will be analysed.",
+      },
+    ],
+    tour: [
+      {
+        id: "intro",
+        title: "Profile from Audio",
+        text: "Upload the intro conversation and the AI fills in the questionnaire for you.",
+      },
+      {
+        id: "upload",
+        target: "onboarding-audio.upload",
+        title: "Upload the audio",
+        text: "Pick one or more files. Calls of 15 to 25 minutes work well. The AI fills only what is still empty.",
+      },
+    ],
+  },
+
   "/hub/admin/students/onboarding/[profileId]": {
     title: "Student questionnaire",
     summary: "The student's entry profile, to fill in or correct.",
     docsArticleId: "onboarding",
     sections: [
+      {
+        heading: "Fill from audio",
+        body: "Once the profile exists, the button at the top opens the audio screen: the AI fills only the fields that are still empty with what the student said in the conversation. Save the current step before leaving.",
+      },
       {
         heading: "What this form is",
         body: "The entry questionnaire answered at enrolment: the goal with the language, previous experience, availability, the level the student assigns to themselves and how much they intend to commit.",

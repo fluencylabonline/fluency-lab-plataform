@@ -4,7 +4,7 @@ import { protectedAction, permissionAction } from "@/lib/safe-action";
 import { learningService } from "./learning.service";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { studentProfileSurveySchema } from "./learning.schema";
+import { studentProfileSurveySchema, fillProfileFromAudioSchema } from "./learning.schema";
 
 
 // ================= SCHEMAS =================
@@ -287,6 +287,19 @@ export const saveProfileSurveyAction = protectedAction
   .action(async ({ parsedInput, ctx }) => {
     const result = await learningService.saveProfileSurvey(parsedInput, ctx.user.id);
     return { success: true, profile: result };
+  });
+
+/**
+ * Action to fill the student profile draft from an onboarding audio (empty fields only).
+ */
+export const fillProfileFromAudioAction = permissionAction("student.support")
+  .metadata({ name: "fillProfileFromAudio" })
+  .schema(fillProfileFromAudioSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const result = await learningService.fillProfileFromAudio(parsedInput, ctx.user.id);
+    revalidatePath("/hub/admin/students/onboarding");
+    revalidatePath("/hub/manager/students/onboarding");
+    return { success: true, ...result };
   });
 
 /**

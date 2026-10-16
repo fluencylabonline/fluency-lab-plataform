@@ -140,6 +140,19 @@ service firebase.storage {
                     && request.resource.contentType == 'application/pdf';
     }
 
+    match /profile-audio/{userId}/{fileName} {
+      // Onboarding audios used to pre-fill the student profile. The server reads them
+      // with the Admin SDK and deletes them right after the AI analysis.
+      // Only the staff member who uploads can write (max 200MB, audio/video only).
+      allow read: if false;
+      allow write: if request.auth != null
+                    && request.auth.uid == userId
+                    && (request.auth.token.role == 'admin' || request.auth.token.role == 'manager')
+                    && request.resource.size < 200 * 1024 * 1024
+                    && (request.resource.contentType.matches('audio/.*')
+                        || request.resource.contentType.matches('video/.*'));
+    }
+
     match /whatsapp_attachments/{conversationId}/{fileName} {
       // Accessible by anyone with the link (for Meta Graph API to fetch)
       allow read: if true;
