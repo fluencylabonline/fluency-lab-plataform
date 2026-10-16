@@ -115,7 +115,7 @@ export function ProfilesPageClient({ initialData, basePath = "/hub/manager/stude
             filteredProfiles.map((profile) => (
               <div
                 key={profile.id}
-                className="card flex items-center gap-4 p-4 transition-all animate-in fade-in slide-in-from-bottom-2 duration-300"
+                className="card grid grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-3 p-4 transition-all animate-in fade-in slide-in-from-bottom-2 duration-300 sm:flex sm:gap-4"
               >
                 <div className="size-12 rounded-md bg-primary/10 flex items-center justify-center text-primary shrink-0">
                   <User className="h-6 w-6" />
@@ -123,40 +123,41 @@ export function ProfilesPageClient({ initialData, basePath = "/hub/manager/stude
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <h3 className="font-semibold truncate">
+                    <h3 className="font-semibold truncate min-w-0">
                       {profile.student?.name || "Aluno não vinculado"}
                     </h3>
                     <Badge variant={profile.status === "active" ? "default" : "outline"} className={cn(
-                      "text-[10px] uppercase tracking-wider py-0 px-1.5 h-4",
+                      "text-[10px] uppercase tracking-wider py-0 px-1.5 h-4 shrink-0",
                       profile.status === "active" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-orange-500/10 text-orange-600 border-orange-500/20"
                     )}>
                       {profile.status === "active" ? "Ativo" : "Rascunho"}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1 truncate">
-                      {profile.student?.email || "Nenhum e-mail"}
-                    </span>
-                    <span className="flex items-center gap-1 shrink-0">
+                  <div className="text-xs text-muted-foreground sm:flex sm:items-center sm:gap-3">
+                    <p className="truncate">{profile.student?.email || "Nenhum e-mail"}</p>
+                    <p className="flex items-center gap-1 shrink-0 mt-0.5 sm:mt-0">
                       <Calendar className="h-3 w-3" />
                       {profile.updatedAt ? format(new Date(profile.updatedAt), "dd 'de' MMM", { locale: ptBR }) : "Nunca"}
-                    </span>
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  {profile.status === "active" && (
-                    <Link
-                      href={`${basePath}/${profile.id}/view`}
-                      className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex gap-2 rounded-md border-primary/20 text-primary hover:bg-primary/5")}
-                    >
-                      <Eye className="h-3.5 w-3.5" /> Ver Diagnóstico
-                    </Link>
-                  )}
+                {profile.status === "active" && (
+                  <Link
+                    href={`${basePath}/${profile.id}/view`}
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "sm" }),
+                      "col-span-3 row-start-2 flex h-11 w-full justify-center gap-2 rounded-md border-primary/20 text-primary hover:bg-primary/5 sm:h-9 sm:w-auto"
+                    )}
+                  >
+                    <Eye className="h-3.5 w-3.5" /> Ver Diagnóstico
+                  </Link>
+                )}
 
+                <div className="col-start-3 row-start-1 flex items-center">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="rounded-md h-8 w-8">
+                      <Button variant="ghost" size="icon" className="rounded-md size-10 sm:size-8">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
