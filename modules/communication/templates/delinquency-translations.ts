@@ -363,7 +363,7 @@ export function buildDelinquencyEmail(data: DelinquencyEmail, locale: Locale): N
             preview: "Revise antes de ligar o cancelamento automático",
             heading: `Olá, ${data.recipientName}`,
             paragraphs: [
-              "O cancelamento automático por inadimplência está desligado em Configurações → Plataforma. Nada foi cancelado.",
+              "O cancelamento automático por inadimplência está desligado em Configurações → Políticas. Nada foi cancelado.",
               "Se estivesse ligado, estes alunos teriam a matrícula cancelada hoje:",
             ],
             highlight: data.lines,
@@ -374,7 +374,7 @@ export function buildDelinquencyEmail(data: DelinquencyEmail, locale: Locale): N
             preview: "Review before turning automatic cancellation on",
             heading: `Hello, ${data.recipientName}`,
             paragraphs: [
-              "Automatic cancellation for non-payment is turned off in Settings → Platform. Nothing was cancelled.",
+              "Automatic cancellation for non-payment is turned off in Settings → Policies. Nothing was cancelled.",
               "If it were on, these students would have their enrollment cancelled today:",
             ],
             highlight: data.lines,

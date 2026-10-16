@@ -1268,13 +1268,13 @@ export const ADMIN_HELP_EN: RoleHelpContent<AdminHelpRoute> = {
       {
         id: "intro",
         title: "The settings",
-        text: "The five tabs everyone has, plus two only the admin sees: Platform and WhatsApp.",
+        text: "The five tabs everyone has, plus three only the admin sees: Platform, Policies and WhatsApp.",
       },
       {
         id: "tabs",
         target: "settings.tabs",
         title: "The tabs",
-        text: "Account, Appearance, Notifications, Security and App appear for everyone. Platform and WhatsApp are admin-only and change global configuration.",
+        text: "Account, Appearance, Notifications, Security and App appear for everyone. Platform, Policies and WhatsApp are admin-only and change global configuration.",
       },
       {
         id: "security",
@@ -1286,7 +1286,13 @@ export const ADMIN_HELP_EN: RoleHelpContent<AdminHelpRoute> = {
         id: "platform",
         target: "settings.tabs",
         title: "Platform tab",
-        text: "Global settings such as the support email and the school's contact number. Changes here apply to every user — check before saving. The non-payment policy also lives here: turn the access block on or off, choose from which due date it applies and whether enrollments are cancelled automatically. The same card sends the rules announcement — send it before turning the policy on.",
+        text: "Global settings such as the support email and the school's contact number. Changes here apply to every user — check before saving.",
+      },
+      {
+        id: "policies",
+        target: "settings.tabs",
+        title: "Policies tab",
+        text: "The non-payment policy: turn the access block on or off, choose from which due date it applies and whether enrollments are cancelled automatically. The same card sends the rules announcement to students and teachers — send it before turning the policy on.",
       },
       {
         id: "whatsapp",

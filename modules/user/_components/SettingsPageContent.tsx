@@ -5,7 +5,7 @@ import { SecuritySettings } from "./SecuritySettings";
 import { AccountSettings } from "./AccountSettings";
 import { AppearanceSettings } from "@/modules/appearance/_components/AppearanceSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Palette, Bell, User, Shield, Smartphone, Globe, MessageSquare } from "lucide-react";
+import { Palette, Bell, User, Shield, Smartphone, Globe, MessageSquare, ScrollText } from "lucide-react";
 import { AppSettings } from "./AppSettings";
 import type { NotificationPrefs, SettingsUserDTO } from "@/modules/user/user.schema";
 import { useTranslations } from "next-intl";
@@ -97,6 +97,13 @@ export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
                     Plataforma
                   </TabsTrigger>
                   <TabsTrigger 
+                    value="policies" 
+                    className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-md border-none transition-all flex items-center gap-2"
+                  >
+                    <ScrollText className="w-4 h-4" />
+                    Políticas
+                  </TabsTrigger>
+                  <TabsTrigger 
                     value="whatsapp" 
                     className="data-active:bg-secondary/50 data-active:text-primary py-2 px-4 rounded-md border-none transition-all flex items-center gap-2"
                   >
@@ -140,10 +147,12 @@ export function SettingsPageContent({ initialData }: SettingsPageContentProps) {
             <>
               <TabsContent value="platform" className="mt-0">
                 {initialData.systemSettings && (
-                  <div className="space-y-6">
-                    <PlatformSettings initialSettings={initialData.systemSettings} />
-                    <DelinquencyPolicyCard initialSettings={initialData.systemSettings} />
-                  </div>
+                  <PlatformSettings initialSettings={initialData.systemSettings} />
+                )}
+              </TabsContent>
+              <TabsContent value="policies" className="mt-0">
+                {initialData.systemSettings && (
+                  <DelinquencyPolicyCard initialSettings={initialData.systemSettings} />
                 )}
               </TabsContent>
               <TabsContent value="whatsapp" className="mt-0">

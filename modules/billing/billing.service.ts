@@ -34,7 +34,7 @@ import {
 const MIN_PAYMENT_VALIDITY_MS = 12 * 60 * 60 * 1000;
 
 /**
- * Política de inadimplência configurada pelo admin (Configurações → Plataforma).
+ * Política de inadimplência configurada pelo admin (Configurações → Políticas).
  * `start` é null quando a política está desligada.
  */
 async function getDelinquencyPolicy() {
@@ -1699,7 +1699,7 @@ export const billingService = {
    * Só a parcela mais antiga em aberto de cada assinatura gera mensagens ao
    * aluno, para ninguém receber dois lembretes no mesmo dia.
    * Bloqueio e cancelamento só valem para parcelas sob a política
-   * (ligada em Configurações → Plataforma, com data de início); as
+   * (ligada em Configurações → Políticas, com data de início); as
    * anteriores, ou todas com a política desligada, recebem só os lembretes.
    */
   async processDelinquency(now: Date = new Date()) {
