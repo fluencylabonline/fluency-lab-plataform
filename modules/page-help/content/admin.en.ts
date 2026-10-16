@@ -1286,7 +1286,7 @@ export const ADMIN_HELP_EN: RoleHelpContent<AdminHelpRoute> = {
         id: "platform",
         target: "settings.tabs",
         title: "Platform tab",
-        text: "Global settings such as the support email and the school's contact number. Changes here apply to every user — check before saving. The announcement of the non-payment rules also lives here: count the recipients, send yourself a test and only then send it to everyone.",
+        text: "Global settings such as the support email and the school's contact number. Changes here apply to every user — check before saving. The non-payment policy also lives here: turn the access block on or off, choose from which due date it applies and whether enrollments are cancelled automatically. The same card sends the rules announcement — send it before turning the policy on.",
       },
       {
         id: "whatsapp",

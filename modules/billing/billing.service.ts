@@ -13,6 +13,7 @@ import { eq, asc, and, ne, gte } from "drizzle-orm";
 import { decrypt } from "@/lib/cryptography";
 import { revalidatePath } from "next/cache";
 import type { User } from "../user/user.schema";
+import { settingsService } from "../settings/settings.service";
 import {
   brtCivilDate,
   civilDaysBetween,
@@ -32,9 +33,12 @@ import {
 // uma sessão nova a cada envio — é o comportamento desejado.
 const MIN_PAYMENT_VALIDITY_MS = 12 * 60 * 60 * 1000;
 
-/** Data de início da política de inadimplência, ou `null` se desligada. */
-function getDelinquencyPolicyStart(): Date | null {
-  return env.DELINQUENCY_POLICY_START ? new Date(`${env.DELINQUENCY_POLICY_START}T00:00:00Z`) : null;
+/**
+ * Política de inadimplência configurada pelo admin (Configurações → Plataforma).
+ * `start` é null quando a política está desligada.
+ */
+async function getDelinquencyPolicy() {
+  return settingsService.getDelinquencyPolicy();
 }
 
 function formatMoney(amount: number, currency: string = "BRL") {
@@ -1223,7 +1227,7 @@ export const billingService = {
       try {
         const wasBlocking =
           !!installment.blockedAt ||
-          (isUnderPolicy(installment.dueDate, getDelinquencyPolicyStart()) &&
+          (isUnderPolicy(installment.dueDate, (await getDelinquencyPolicy()).start) &&
             monthsPastDue(installment.dueDate, brtCivilDate(new Date())) >= 1);
         if (wasBlocking && !(await this.isStudentBlocked(sub.studentId))) {
           await this.notifyTeachersOfUnblock(sub.studentId);
@@ -1356,7 +1360,7 @@ export const billingService = {
    * ativa, sob a política, e com vencimento num mês anterior ao atual.
    */
   async getBlockingInstallments(studentId: string, today: CivilDate = brtCivilDate(new Date())) {
-    const policyStart = getDelinquencyPolicyStart();
+    const policyStart = (await getDelinquencyPolicy()).start;
     if (!policyStart) return { subscription: null, installments: [] };
 
     const { subscription, installments } =
@@ -1417,7 +1421,7 @@ export const billingService = {
 
   /** Alunos que estarão bloqueados no dia informado (usado no cancelamento de aulas). */
   async getStudentIdsBlockedOn(day: CivilDate) {
-    const policyStart = getDelinquencyPolicyStart();
+    const policyStart = (await getDelinquencyPolicy()).start;
     if (!policyStart) return [];
 
     const lastDayOfPreviousMonth = new Date(Date.UTC(day.year, day.month, 1) - 1);
@@ -1695,11 +1699,12 @@ export const billingService = {
    * Só a parcela mais antiga em aberto de cada assinatura gera mensagens ao
    * aluno, para ninguém receber dois lembretes no mesmo dia.
    * Bloqueio e cancelamento só valem para parcelas sob a política
-   * (DELINQUENCY_POLICY_START); as anteriores recebem apenas os lembretes.
+   * (ligada em Configurações → Plataforma, com data de início); as
+   * anteriores, ou todas com a política desligada, recebem só os lembretes.
    */
   async processDelinquency(now: Date = new Date()) {
     const today = brtCivilDate(now);
-    const policyStart = getDelinquencyPolicyStart();
+    const { start: policyStart, autoCancelEnabled } = await getDelinquencyPolicy();
     // Vencimentos são gravados à meia-noite UTC do dia: "venceu antes de hoje".
     const dueBeforeToday = new Date(Date.UTC(today.year, today.month, today.day) - 1);
     const unpaid = await billingRepository.findUnpaidInstallmentsDueBefore(dueBeforeToday);
@@ -1756,7 +1761,7 @@ export const billingService = {
     }
 
     if (toCancel.length > 0) {
-      await this.processDelinquentCancellations(toCancel);
+      await this.processDelinquentCancellations(toCancel, autoCancelEnabled);
     }
   },
 
@@ -2037,13 +2042,14 @@ export const billingService = {
   },
 
   /**
-   * Dia 1 do segundo mês após o vencimento. Com DELINQUENCY_AUTO_CANCEL_ENABLED
-   * desligado, só avisa os admins de quem seria cancelado.
+   * Dia 1 do segundo mês após o vencimento. Com o cancelamento automático
+   * desligado nas configurações, só avisa os admins de quem seria cancelado.
    */
   async processDelinquentCancellations(
-    installments: Awaited<ReturnType<typeof billingRepository.findUnpaidInstallmentsDueBefore>>
+    installments: Awaited<ReturnType<typeof billingRepository.findUnpaidInstallmentsDueBefore>>,
+    autoCancelEnabled: boolean
   ) {
-    if (!env.DELINQUENCY_AUTO_CANCEL_ENABLED) {
+    if (!autoCancelEnabled) {
       const lines = installments.map((inst) =>
         `${inst.subscription.student!.name} — ${formatMoney(inst.amount, inst.subscription.plan?.currency || "BRL")} (venc. ${format(inst.dueDate, "dd/MM/yyyy")})`
       );

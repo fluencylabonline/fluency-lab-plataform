@@ -59,8 +59,19 @@ vi.mock("../../contract/contract.service", () => ({
   contractService: { getContractBySubscriptionId: vi.fn(), finalizeCancellation: vi.fn() },
 }));
 
-import { env } from "@/env";
+vi.mock("../../settings/settings.service", () => ({
+  settingsService: { getDelinquencyPolicy: vi.fn() },
+}));
+
+import { settingsService } from "../../settings/settings.service";
 import { billingService } from "../billing.service";
+
+function setPolicy(start: string | null, autoCancelEnabled = false) {
+  (settingsService.getDelinquencyPolicy as any).mockResolvedValue({
+    start: start ? new Date(`${start}T00:00:00Z`) : null,
+    autoCancelEnabled: !!start && autoCancelEnabled,
+  });
+}
 import { billingRepository } from "../billing.repository";
 import { userService } from "../../user/user.service";
 import { communicationService } from "../../communication/communication.service";
@@ -114,8 +125,7 @@ describe("Billing Service — política de inadimplência", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers({ toFake: ["Date"] });
-    (env as any).DELINQUENCY_POLICY_START = "2026-11-01";
-    (env as any).DELINQUENCY_AUTO_CANCEL_ENABLED = false;
+    setPolicy("2026-11-01");
     (userService.getUser as any).mockImplementation(async (id: string) => (id === teacher.id ? teacher : student));
   });
 
@@ -223,8 +233,8 @@ describe("Billing Service — política de inadimplência", () => {
       expect(await billingService.isStudentBlocked(student.id)).toBe(false);
     });
 
-    it("sem DELINQUENCY_POLICY_START ninguém é bloqueado", async () => {
-      (env as any).DELINQUENCY_POLICY_START = undefined;
+    it("com a política desligada nas configurações ninguém é bloqueado", async () => {
+      setPolicy(null);
       vi.setSystemTime(new Date("2026-12-05T15:00:00Z"));
       expect(await billingService.isStudentBlocked(student.id)).toBe(false);
       expect(billingRepository.findUnpaidInstallmentsOfActiveSubscription).not.toHaveBeenCalled();
@@ -249,7 +259,7 @@ describe("Billing Service — política de inadimplência", () => {
     });
 
     it("com a flag ligada cancela a matrícula sem multa", async () => {
-      (env as any).DELINQUENCY_AUTO_CANCEL_ENABLED = true;
+      setPolicy("2026-11-01", true);
       (contractService.getContractBySubscriptionId as any).mockResolvedValue({ id: "contract-1" });
       vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: { status: "PENDING" } }) }));
 

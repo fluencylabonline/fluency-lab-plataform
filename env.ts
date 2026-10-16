@@ -42,18 +42,6 @@ export const env = createEnv({
 
     // Automation
     CRON_SECRET: z.string().min(1),
-
-    // Política de inadimplência. Sem data de início, bloqueio e cancelamento
-    // automático ficam desligados (só os lembretes rodam). Formato: YYYY-MM-DD;
-    // vale para parcelas com vencimento a partir dessa data.
-    DELINQUENCY_POLICY_START: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-    // Enquanto "false", o cancelamento automático só avisa os admins de quem
-    // seria cancelado, sem cancelar nada.
-    DELINQUENCY_AUTO_CANCEL_ENABLED: z
-      .enum(["true", "false"])
-      .default("false")
-      .transform((v) => v === "true"),
-
     // AI & External Services
     GEMINI_API_KEY: z.string().min(1),
     YOUTUBE_API_KEY: z.string().min(1),
@@ -120,8 +108,6 @@ export const env = createEnv({
 
     // Automation
     CRON_SECRET: process.env.CRON_SECRET,
-    DELINQUENCY_POLICY_START: process.env.DELINQUENCY_POLICY_START,
-    DELINQUENCY_AUTO_CANCEL_ENABLED: process.env.DELINQUENCY_AUTO_CANCEL_ENABLED,
 
     // AI & External Services
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,

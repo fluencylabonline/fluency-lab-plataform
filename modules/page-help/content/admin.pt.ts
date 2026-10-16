@@ -1288,7 +1288,7 @@ export const ADMIN_HELP_PT: RoleHelpContent<AdminHelpRoute> = {
         id: "platform",
         target: "settings.tabs",
         title: "Aba Plataforma",
-        text: "Configurações globais como e-mail de suporte e número de contato da escola. Mudanças aqui valem para todos os usuários — confira antes de salvar. Aqui também fica o comunicado das regras de inadimplência: conte os destinatários, envie um teste para você e só então envie para todos.",
+        text: "Configurações globais como e-mail de suporte e número de contato da escola. Mudanças aqui valem para todos os usuários — confira antes de salvar. Aqui também fica a política de inadimplência: ative ou desative o bloqueio por falta de pagamento, escolha a partir de qual vencimento ele vale e se a matrícula é cancelada automaticamente. No mesmo card está o comunicado das regras — envie antes de ativar.",
       },
       {
         id: "whatsapp",

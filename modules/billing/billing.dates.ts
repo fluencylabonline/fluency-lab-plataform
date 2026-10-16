@@ -81,8 +81,8 @@ export function monthsPastDue(dueDate: Date, today: CivilDate): number {
 
 /**
  * A política só vale para parcelas que vencem a partir da data de início
- * (`DELINQUENCY_POLICY_START`). Sem data configurada, a política está
- * desligada — lembretes continuam, mas ninguém é bloqueado ou cancelado.
+ * (Configurações → Plataforma). Desligada (`policyStart` null), lembretes
+ * continuam, mas ninguém é bloqueado ou cancelado.
  */
 export function isUnderPolicy(dueDate: Date, policyStart: Date | null): boolean {
   if (!policyStart) return false;

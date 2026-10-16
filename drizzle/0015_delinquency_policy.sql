@@ -16,3 +16,8 @@ ALTER TABLE "installments" ADD COLUMN IF NOT EXISTS "notified_cancel_warning_at"
 -- Marca que o aluno chegou a ficar bloqueado por esta parcela; usado para
 -- avisar o professor do desbloqueio quando ela for paga.
 ALTER TABLE "installments" ADD COLUMN IF NOT EXISTS "blocked_at" timestamp;
+--> statement-breakpoint
+-- Liga/desliga da política pela tela de configurações do admin (aba Plataforma).
+ALTER TABLE "system_settings" ADD COLUMN IF NOT EXISTS "delinquency_policy_enabled" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "system_settings" ADD COLUMN IF NOT EXISTS "delinquency_policy_start" date;--> statement-breakpoint
+ALTER TABLE "system_settings" ADD COLUMN IF NOT EXISTS "delinquency_auto_cancel_enabled" boolean DEFAULT false NOT NULL;
