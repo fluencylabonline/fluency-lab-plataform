@@ -945,12 +945,6 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
         title: "The subjects",
         text: "The guides grouped by theme: getting started, classes and calendar, payments, study, account and common problems.",
       },
-      {
-        id: "ask",
-        target: "docs.ask",
-        title: "Asking",
-        text: "Did not find it? Send your question. It reaches the school, and what many people ask tends to become an article here.",
-      },
     ],
   },
 };

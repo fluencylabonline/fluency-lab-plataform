@@ -776,12 +776,6 @@ export const TEACHER_HELP_PT: RoleHelpContent<TeacherHelpRoute> = {
         title: "Os assuntos",
         text: "Começando, agenda e aulas, alunos, material didático, contrato e ganhos, e problemas comuns. Contrato e Ganhos é onde ficam as regras de pagamento.",
       },
-      {
-        id: "ask",
-        target: "docs.ask",
-        title: "Perguntar",
-        text: "Não achou? Envie sua pergunta. Ela chega à escola, e o que muita gente pergunta acaba virando artigo aqui.",
-      },
     ],
   },
 };

@@ -1346,12 +1346,6 @@ export const ADMIN_HELP_EN: RoleHelpContent<AdminHelpRoute> = {
         title: "The subjects",
         text: "Getting started, dashboard, users, finance, contracts, courses, communication, operations and troubleshooting. Worth reading Getting Started end to end once.",
       },
-      {
-        id: "ask",
-        target: "docs.ask",
-        title: "Asking",
-        text: "Questions asked here are recorded. The Questions screen shows what went unanswered — it is the list of what still needs documenting.",
-      },
     ],
   },
 

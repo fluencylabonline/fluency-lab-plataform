@@ -947,12 +947,6 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
         title: "Os assuntos",
         text: "Os guias agrupados por tema: começando, aulas e calendário, pagamentos, estudos, conta e problemas comuns.",
       },
-      {
-        id: "ask",
-        target: "docs.ask",
-        title: "Perguntar",
-        text: "Não achou? Envie sua pergunta. Ela chega à escola, e o que muita gente pergunta acaba virando artigo aqui.",
-      },
     ],
   },
 };

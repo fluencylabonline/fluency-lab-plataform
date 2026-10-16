@@ -1348,12 +1348,6 @@ export const ADMIN_HELP_PT: RoleHelpContent<AdminHelpRoute> = {
         title: "Os assuntos",
         text: "Primeiros passos, dashboard, usuários, financeiro, contratos, cursos, comunicação, operação e solução de problemas. Vale ler Primeiros Passos inteiro uma vez.",
       },
-      {
-        id: "ask",
-        target: "docs.ask",
-        title: "Perguntar",
-        text: "As perguntas feitas aqui ficam registradas. A tela de Perguntas mostra o que ficou sem resposta — é a lista do que falta documentar.",
-      },
     ],
   },
 

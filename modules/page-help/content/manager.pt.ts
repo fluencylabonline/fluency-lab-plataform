@@ -1092,12 +1092,6 @@ export const MANAGER_HELP_PT: RoleHelpContent<ManagerHelpRoute> = {
         title: "Os assuntos",
         text: "Começando, suporte a alunos, aprendizado, operação e situações comuns. Situações Comuns é onde estão os roteiros de atendimento.",
       },
-      {
-        id: "ask",
-        target: "docs.ask",
-        title: "Perguntar",
-        text: "Não achou? Envie sua pergunta. Ela chega à escola, e o que muita gente pergunta acaba virando artigo aqui.",
-      },
     ],
   },
 };

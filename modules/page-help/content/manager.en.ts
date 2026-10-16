@@ -1087,12 +1087,6 @@ export const MANAGER_HELP_EN: RoleHelpContent<ManagerHelpRoute> = {
         title: "The subjects",
         text: "Getting started, student support, learning, operations and common situations. Common Situations is where the support playbooks live.",
       },
-      {
-        id: "ask",
-        target: "docs.ask",
-        title: "Asking",
-        text: "Did not find it? Send your question. It reaches the school, and what many people ask tends to become an article here.",
-      },
     ],
   },
 };

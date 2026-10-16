@@ -308,18 +308,6 @@ export function DocsClient({ audiences, whatsappNumber, user }: DocsClientProps)
         ) : (
           /* ── Navegação por seção ── */
           <>
-            {/* Sem busca ativa, o painel mostra exemplos de pergunta —
-                é o que ensina o usuário a usar bem a ferramenta. */}
-            <div data-tour="docs.ask">
-              <DocsAskPanel
-                audience={audienceId}
-                query={query}
-                submitCount={askSubmitCount}
-                whatsappNumber={whatsappNumber}
-                onOpenArticle={goToArticle}
-              />
-            </div>
-
           <div className="grid gap-6 lg:grid-cols-[16rem_1fr] lg:items-start">
             {/* Índice lateral */}
             <nav data-tour="docs.sections" className="flex gap-2 overflow-x-auto pb-2 lg:sticky lg:top-32 lg:flex-col lg:overflow-visible lg:pb-0">

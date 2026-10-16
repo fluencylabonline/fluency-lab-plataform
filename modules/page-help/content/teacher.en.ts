@@ -772,12 +772,6 @@ export const TEACHER_HELP_EN: RoleHelpContent<TeacherHelpRoute> = {
         title: "The subjects",
         text: "Getting started, schedule and classes, students, teaching material, contract and earnings, and common problems. Contract and Earnings is where the payment rules live.",
       },
-      {
-        id: "ask",
-        target: "docs.ask",
-        title: "Asking",
-        text: "Did not find it? Send your question. It reaches the school, and what many people ask tends to become an article here.",
-      },
     ],
   },
 };
