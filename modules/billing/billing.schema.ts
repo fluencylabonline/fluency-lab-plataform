@@ -71,6 +71,12 @@ export const installmentsTable = pgTable("installments", {
   notified2dAt: timestamp("notified_2d_at"),
   notifiedDueAt: timestamp("notified_due_at"),
   notifiedOverdueAt: timestamp("notified_overdue_at"),
+  // Política de inadimplência (drizzle/0015_delinquency_policy.sql)
+  lastOverdueReminderAt: timestamp("last_overdue_reminder_at"),
+  overdueReminderCount: integer("overdue_reminder_count").notNull().default(0),
+  notifiedFinalWarningAt: timestamp("notified_final_warning_at"),
+  notifiedCancelWarningAt: timestamp("notified_cancel_warning_at"),
+  blockedAt: timestamp("blocked_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .notNull()

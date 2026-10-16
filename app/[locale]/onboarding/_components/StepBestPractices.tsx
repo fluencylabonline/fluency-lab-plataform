@@ -4,12 +4,13 @@ import { useTranslations } from "next-intl";
 import { completeOnboardingAction } from "@/modules/onboarding/onboarding.actions";
 import { notify } from "@/components/ui/toaster";
 import { useState, useEffect } from "react";
-import { Loader2, Clock, Smartphone, ArrowRight, Download, Laptop, CalendarOff, UserRoundX } from "lucide-react";
+import { Loader2, Clock, Smartphone, ArrowRight, Download, Laptop, CalendarOff, UserRoundX, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import { useDevice } from "@/hooks/ui/use-device";
 import { QRCodeSVG } from "qrcode.react";
+import type { User } from "@/modules/user/user.schema";
 
-export function StepBestPractices() {
+export function StepBestPractices({ role }: { role?: User["role"] }) {
     const t = useTranslations("Onboarding");
     const [loading, setLoading] = useState(false);
     const { isMobile, isInstallable, install } = useDevice();
@@ -67,6 +68,22 @@ export function StepBestPractices() {
             title: t("finish.teacherLeaveTitle"),
             description: t("finish.teacherLeaveDesc"),
         },
+        // Política de inadimplência — mesma regra do contrato
+        role === "teacher"
+            ? {
+                icon: Lock,
+                title: t("finish.paymentBlockTeacherTitle") || "Alunos com mensalidade em atraso",
+                description:
+                    t("finish.paymentBlockTeacherDesc") ||
+                    "Se um aluno não pagar até o fim do mês, você é avisado no último dia. A partir do dia 1 o acesso dele é bloqueado e cada aula é cancelada no dia anterior, sem reposição. Você também é avisado quando ele voltar.",
+            }
+            : {
+                icon: Lock,
+                title: t("finish.paymentBlockTitle") || "Pagamento em atraso e bloqueio",
+                description:
+                    t("finish.paymentBlockDesc") ||
+                    "Depois do vencimento você recebe lembretes até o fim do mês. Sem pagamento até o último dia, a partir do dia 1 o acesso fica bloqueado até você pagar, e as aulas desse período são canceladas sem reposição. Se o mês de bloqueio terminar sem pagamento, a matrícula é cancelada automaticamente, sem multa.",
+            },
     ];
 
     return (

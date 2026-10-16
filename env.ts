@@ -42,7 +42,6 @@ export const env = createEnv({
 
     // Automation
     CRON_SECRET: z.string().min(1),
-
     // AI & External Services
     GEMINI_API_KEY: z.string().min(1),
     YOUTUBE_API_KEY: z.string().min(1),

@@ -1270,13 +1270,13 @@ export const ADMIN_HELP_PT: RoleHelpContent<AdminHelpRoute> = {
       {
         id: "intro",
         title: "As configurações",
-        text: "As cinco abas comuns a todo mundo, mais duas que só o admin vê: Plataforma e WhatsApp.",
+        text: "As cinco abas comuns a todo mundo, mais três que só o admin vê: Plataforma, Políticas e WhatsApp.",
       },
       {
         id: "tabs",
         target: "settings.tabs",
         title: "As abas",
-        text: "Conta, Aparência, Notificações, Segurança e Aplicativo aparecem para todos. Plataforma e WhatsApp são exclusivas do admin e mexem em configuração global.",
+        text: "Conta, Aparência, Notificações, Segurança e Aplicativo aparecem para todos. Plataforma, Políticas e WhatsApp são exclusivas do admin e mexem em configuração global.",
       },
       {
         id: "security",
@@ -1289,6 +1289,12 @@ export const ADMIN_HELP_PT: RoleHelpContent<AdminHelpRoute> = {
         target: "settings.tabs",
         title: "Aba Plataforma",
         text: "Configurações globais como e-mail de suporte e número de contato da escola. Mudanças aqui valem para todos os usuários — confira antes de salvar.",
+      },
+      {
+        id: "policies",
+        target: "settings.tabs",
+        title: "Aba Políticas",
+        text: "A política de inadimplência: ative ou desative o bloqueio por falta de pagamento, escolha a partir de qual vencimento ele vale e se a matrícula é cancelada automaticamente. No mesmo card está o comunicado das regras para alunos e professores — envie antes de ativar.",
       },
       {
         id: "whatsapp",

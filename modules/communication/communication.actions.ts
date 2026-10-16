@@ -1,6 +1,6 @@
 "use server";
 
-import { managerAction } from "@/lib/safe-action";
+import { managerAction, adminAction } from "@/lib/safe-action";
 import { z } from "zod";
 import { communicationService } from "./communication.service";
 import { createWhatsAppTemplateSchema, createWhatsAppQuickReplySchema, sendAdminEmailSchema } from "./communication.schema";
@@ -265,6 +265,27 @@ export const resendWhatsAppMessageAction = managerAction
       return { success: true, data: result, error: null as string | null };
     } catch (err) {
       return { success: false, data: null, error: err instanceof Error ? err.message : "Erro ao reenviar mensagem" };
+    }
+  });
+
+// Comunicado das regras de inadimplência para alunos e professores (admin).
+export const sendDelinquencyPolicyAnnouncementAction = adminAction
+  .metadata({ name: "sendDelinquencyPolicyAnnouncement" })
+  .inputSchema(z.object({
+    mode: z.enum(["dryRun", "test", "send"]),
+    startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida"),
+  }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const result = await communicationService.sendDelinquencyPolicyAnnouncement({
+        mode: parsedInput.mode,
+        startDate: parsedInput.startDate,
+        requester: { email: ctx.user.email!, name: ctx.user.name, locale: ctx.user.locale },
+      });
+      return { success: true as const, ...result };
+    } catch (err) {
+      console.error("[sendDelinquencyPolicyAnnouncementAction] Error:", err);
+      return { success: false as const, error: "Erro ao enviar o comunicado" };
     }
   });
 

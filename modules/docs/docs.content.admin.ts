@@ -124,7 +124,8 @@ export const ADMIN_DOCS: DocSection[] = [
             type: "fields",
             title: "Rotinas agendadas",
             items: [
-              { name: "Cobranças", does: "Gera as faturas pendentes do período e dispara os lembretes de pagamento (2 dias antes, no vencimento e em atraso)." },
+              { name: "Cobranças", does: "Todo dia às 9h (Brasília), nunca de madrugada: gera as faturas pendentes e dispara os lembretes (2 dias antes, no vencimento e de 3 em 3 dias em atraso até o fim do mês). Com a política de inadimplência ativa (Configurações → Políticas): no último dia do mês avisa aluno e professor de que o acesso será bloqueado; no mês seguinte, bloqueia o aluno e manda lembrete semanal; no dia 1 do mês posterior, cancela a matrícula sem multa (se o cancelamento automático estiver ligado; senão, só avisa os admins). Antes de cada envio, confere se o PIX ou o link do Stripe ainda vale e gera outro se venceu." },
+              { name: "Aulas de alunos bloqueados", does: "Todo dia às 21h (Brasília): cancela as aulas de amanhã dos alunos bloqueados por inadimplência, sem crédito nem reposição, e avisa aluno, professor e admins." },
               { name: "Agenda", does: "Materializa as aulas recorrentes dos próximos meses, expira créditos vencidos, marca aulas não realizadas como atrasadas e envia lembretes de aula." },
               { name: "Aprendizado", does: "Envia lembretes de prática para os alunos." },
               { name: "Limpezas", does: "Remove cadernos, anexos, certificados e cache de IA já expirados." },
@@ -1160,8 +1161,13 @@ export const ADMIN_DOCS: DocSection[] = [
             items: [
               "Abra a aba Pagamentos do aluno e clique no lápis da parcela.",
               "Use **Gerar novamente** para criar um código novo.",
-              "Use **Reenviar lembrete de pagamento** para mandar o código atualizado por e-mail e WhatsApp.",
+              "Use **Reenviar lembrete de pagamento** para mandar o código atualizado por e-mail e WhatsApp. O reenvio confere a validade antes e, se o código venceu, gera outro sozinho.",
             ],
+          },
+          {
+            type: "note",
+            variant: "info",
+            text: "Os lembretes automáticos também conferem o código antes de enviar: o aluno nunca recebe um PIX ou link do Stripe vencido. Quando o aluno clica em verificar e o gateway diz que o código expirou, a parcela continua em aberto (não é mais cancelada) e fica pronta para gerar outro.",
           },
           {
             type: "note",

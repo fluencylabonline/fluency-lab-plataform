@@ -6,6 +6,7 @@ import { Metadata } from "next";
 import { UserStoreInitializer } from "@/modules/user/_components/UserStoreInitializer";
 import { getTranslations } from "next-intl/server";
 import { PageHelpProvider } from "@/modules/page-help/_components/PageHelpProvider";
+import { billingService } from "@/modules/billing/billing.service";
 
 export async function generateMetadata({
     params,
@@ -40,6 +41,11 @@ export default async function HubLayout({ children }: HubLayoutProps) {
 
     if ((user.role === "student" || user.role === "teacher") && !user.onboarded) {
         redirect(`/onboarding`);
+    }
+
+    // Inadimplente desde o mês passado: só a página de pagamento até quitar.
+    if (user.role === "student" && await billingService.isStudentBlocked(user.id)) {
+        redirect(`/payment-required`);
     }
 
     const menuItems = getSidebarItemsByRole(user);

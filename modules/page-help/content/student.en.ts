@@ -336,7 +336,7 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
     sections: [
       {
         heading: "What the list shows",
-        body: "One row per instalment, with amount, due date and status (paid, open or overdue). The due date always falls between the 1st and the 10th of each month.",
+        body: "One row per instalment, with amount, due date and status (paid, open or overdue). The due date is the day chosen at enrollment (the 1st, 5th, 10th or 15th of each month).",
       },
       {
         heading: "How to pay",
@@ -354,7 +354,8 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
           "Copy Code copies the PIX code for your banking app.",
           "I already paid, check payment asks the bank again when clearing is slow.",
           "Generate new PIX appears on an overdue instalment and creates a fresh code, since the old one expires.",
-          "Go to Payment appears on plans billed in dollars and opens Stripe's secure page for international cards.",
+          "Generate payment code appears when the instalment has no valid code (the previous one expired).",
+          "Go to Payment appears on plans billed in dollars and opens Stripe's secure page for international cards. The link is valid for 24 hours; after that, Generate new link creates another one.",
         ],
       },
       {
@@ -363,7 +364,16 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
       },
       {
         heading: "Overdue instalment",
-        body: "A fixed notice appears at the top of the platform and disappears on its own once the payment is confirmed. You also get reminders by email and WhatsApp 2 days before, on the day and after the due date. If you have paid and the notice is still there, wait a few minutes: confirmation depends on your bank.",
+        body: "A fixed notice appears at the top of the platform and disappears on its own once the payment is confirmed. You get reminders by email, WhatsApp and notification 2 days before, on the due date and, after it, every 3 days until the end of the month. If you have paid and the notice is still there, wait a few minutes: confirmation depends on your bank.",
+      },
+      {
+        heading: "Access block for non-payment",
+        body: [
+          "On the last day of the due month you get a final notice. Without payment that day, starting on the 1st of the following month your access is blocked: when you log in, you only see the payment page.",
+          "While the block lasts, each class is cancelled the day before and cannot be made up. Your teacher is notified too.",
+          "Once you pay, access is restored right away.",
+          "If the blocked month ends without payment, your enrollment is cancelled automatically, with no fee. The outstanding amount is still due.",
+        ],
       },
       {
         heading: "Annual adjustment",

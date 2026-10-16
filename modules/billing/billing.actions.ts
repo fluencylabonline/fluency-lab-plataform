@@ -277,6 +277,30 @@ export const generateInstallmentInvoiceAction = protectedAction
     }
   });
 
+// Página /payment-required: garante um código de pagamento válido para a
+// parcela que bloqueia o aluno (gera outro se o atual venceu).
+export const refreshBlockedPaymentAction = protectedAction
+  .metadata({ name: "refreshBlockedPayment" })
+  .inputSchema(z.object({ installmentId: z.uuid() }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const result = await billingService.refreshBlockedPayment(ctx.user.id, parsedInput.installmentId);
+      revalidatePath("/payment-required");
+      return { success: true, status: result.status };
+    } catch (error) {
+      console.error("[refreshBlockedPaymentAction] Error:", error);
+      return { success: false, error: "Erro ao gerar código de pagamento" };
+    }
+  });
+
+// Polling da página /payment-required: o aluno ainda está bloqueado?
+export const getPaymentBlockStatusAction = protectedAction
+  .metadata({ name: "getPaymentBlockStatus" })
+  .action(async ({ ctx }) => {
+    const blocked = await billingService.isStudentBlocked(ctx.user.id);
+    return { success: true, blocked };
+  });
+
 export const regenerateCancellationFeeAction = protectedAction
   .metadata({ name: "regenerateCancellationFee" })
   .inputSchema(z.object({ userId: z.string() }))

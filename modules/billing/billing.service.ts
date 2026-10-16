@@ -13,6 +13,52 @@ import { eq, asc, and, ne, gte } from "drizzle-orm";
 import { decrypt } from "@/lib/cryptography";
 import { revalidatePath } from "next/cache";
 import type { User } from "../user/user.schema";
+import { settingsService } from "../settings/settings.service";
+import {
+  brtCivilDate,
+  civilDaysBetween,
+  addCivilDays,
+  isLastDayOfMonth,
+  monthsPastDue,
+  isUnderPolicy,
+  dueCivilDate,
+  type CivilDate,
+  DELINQUENCY_REMINDER_INTERVAL_DAYS,
+  DELINQUENCY_BLOCKED_REMINDER_INTERVAL_DAYS,
+} from "./billing.dates";
+
+// Um código de pagamento que vence em menos que isso é trocado antes de ser
+// enviado: não adianta mandar um link que morre antes de o aluno abrir.
+// Sessões do Stripe duram no máximo 24h, então para USD isso quase sempre gera
+// uma sessão nova a cada envio — é o comportamento desejado.
+const MIN_PAYMENT_VALIDITY_MS = 12 * 60 * 60 * 1000;
+
+/**
+ * Política de inadimplência configurada pelo admin (Configurações → Políticas).
+ * `start` é null quando a política está desligada.
+ */
+async function getDelinquencyPolicy() {
+  return settingsService.getDelinquencyPolicy();
+}
+
+function formatMoney(amount: number, currency: string = "BRL") {
+  return new Intl.NumberFormat(currency === "USD" ? "en-US" : "pt-BR", { style: "currency", currency }).format(amount / 100);
+}
+
+function formatCivilDate(d: CivilDate, locale: "pt" | "en" = "pt") {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return locale === "en"
+    ? `${pad(d.month + 1)}/${pad(d.day)}/${d.year}`
+    : `${pad(d.day)}/${pad(d.month + 1)}/${d.year}`;
+}
+
+function recipientLocale(user: { locale?: string | null }): "pt" | "en" {
+  return user.locale === "en" ? "en" : "pt";
+}
+
+const PAYMENTS_URL = () => `${env.NEXT_PUBLIC_APP_URL}/hub/student/payments`;
+
+type GatewayState = { state: "paid"; reference: string } | { state: "open" | "expired" | "unknown" };
 
 /**
  * Gera o PIX da taxa de cancelamento e envia por e-mail/WhatsApp.
@@ -515,7 +561,10 @@ export const billingService = {
 
   // Helper to generate the actual AbacatePay or Stripe billing for an installment
   // force=true: skip idempotency guard for BRL plans and regenerate a new PIX charge
-  async generateInvoiceForInstallment(installmentId: string, force = false) {
+  // notify=false: só cria a cobrança, sem email/WhatsApp — usado quando quem
+  // chamou vai enviar o próprio lembrete com o código novo (ensureValidPayment).
+  async generateInvoiceForInstallment(installmentId: string, force = false, options: { notify?: boolean } = {}) {
+    const notify = options.notify ?? true;
     const installment = await this.getInstallmentById(installmentId);
     if (!installment) return;
 
@@ -563,7 +612,7 @@ export const billingService = {
         });
 
         // Send email with payment link instead of Pix QR code
-        if (student?.email) {
+        if (notify && student?.email) {
           await communicationService.sendNewInvoiceEmail(student.email, {
             studentName: student.name || "Aluno",
             amount: installment.amount,
@@ -577,7 +626,7 @@ export const billingService = {
         // WhatsApp
         let cellphone = student.cellphone;
         if (cellphone?.includes(":")) cellphone = decrypt(cellphone);
-        if (cellphone && session.url) {
+        if (notify && cellphone && session.url) {
           await communicationService.sendPaymentReminderWhatsApp({
             cellphone: cellphone,
             studentName: student.name || "Aluno",
@@ -688,7 +737,7 @@ export const billingService = {
     });
 
     // Send email with PIX
-    if (student?.email) {
+    if (notify && student?.email) {
       await communicationService.sendNewInvoiceEmail(student.email, {
         studentName: student.name || "Aluno",
         amount: installment.amount,
@@ -700,7 +749,7 @@ export const billingService = {
     }
 
     // WhatsApp
-    if (cellphone && pix.brCode) {
+    if (notify && cellphone && pix.brCode) {
       await communicationService.sendPaymentReminderWhatsApp({
         cellphone: cellphone,
         studentName: student.name || "Aluno",
@@ -985,12 +1034,19 @@ export const billingService = {
     }
 
     if (abacateStatus === "EXPIRED" || abacateStatus === "CANCELLED") {
-      const newStatus = "cancelled";
-      if (installment.status !== newStatus) {
-        await billingRepository.updateInstallment(installmentId, { status: newStatus });
-        revalidatePath("/hub/student/payments");
-      }
-      return { status: newStatus };
+      // O código venceu, mas a mensalidade continua devida. Antes isto marcava
+      // a parcela como "cancelled", o que a tirava dos lembretes e do bloqueio
+      // por inadimplência. Agora só descarta o código vencido; a parcela
+      // segue pendente/atrasada e um código novo é gerado no próximo envio
+      // (ensureValidPayment) ou pelo botão "Gerar novo PIX".
+      await billingRepository.updateInstallment(installmentId, {
+        abacatePayBillingId: null,
+        pixPayload: null,
+        pixImage: null,
+        paymentExpiresAt: null,
+      });
+      revalidatePath("/hub/student/payments");
+      return { status: installment.status };
     }
 
     return { status: installment.status };
@@ -1165,9 +1221,258 @@ export const billingService = {
           console.error("[BillingService] Failed to send admin/manager payment notification:", error);
         }
       }
+
+      // 4. Desbloqueio: se esta parcela deixava o aluno bloqueado e não
+      // sobrou nenhuma outra, avisa o(s) professor(es) que ele voltou.
+      try {
+        const wasBlocking =
+          !!installment.blockedAt ||
+          (isUnderPolicy(installment.dueDate, (await getDelinquencyPolicy()).start) &&
+            monthsPastDue(installment.dueDate, brtCivilDate(new Date())) >= 1);
+        if (wasBlocking && !(await this.isStudentBlocked(sub.studentId))) {
+          await this.notifyTeachersOfUnblock(sub.studentId);
+        }
+      } catch (error) {
+        console.error("[BillingService] Failed to send unblock notice:", error);
+      }
     }
 
     return { success: true };
+  },
+
+  // ---------------------------------------------------------------------------
+  // Validade do código de pagamento
+  // ---------------------------------------------------------------------------
+
+  /** Consulta no gateway o estado da cobrança atual da parcela. Não altera nada. */
+  async getGatewayPaymentState(installment: Installment, isUsd: boolean): Promise<GatewayState> {
+    try {
+      if (isUsd) {
+        const id = installment.stripePaymentIntentId;
+        if (!id) return { state: "unknown" };
+        if (id.startsWith("cs_")) {
+          const session = await stripe.checkout.sessions.retrieve(id);
+          if (session.payment_status === "paid") {
+            const ref = typeof session.payment_intent === "string" ? session.payment_intent : session.id;
+            return { state: "paid", reference: ref };
+          }
+          if (session.status === "expired") return { state: "expired" };
+          return { state: "open" };
+        }
+        const intent = await stripe.paymentIntents.retrieve(id);
+        if (intent.status === "succeeded") return { state: "paid", reference: intent.id };
+        return intent.status === "canceled" ? { state: "expired" } : { state: "open" };
+      }
+
+      const id = installment.abacatePayBillingId;
+      if (!id) return { state: "unknown" };
+      const res = await fetch(`https://api.abacatepay.com/v2/transparents/check?id=${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${env.ABACATEPAY_API_KEY}`,
+        },
+      });
+      if (!res.ok) return { state: "unknown" };
+      const result = await res.json();
+      const status = result?.data?.status;
+      if (status === "PAID") return { state: "paid", reference: id };
+      if (status === "EXPIRED" || status === "CANCELLED") return { state: "expired" };
+      return status ? { state: "open" } : { state: "unknown" };
+    } catch (error) {
+      console.error("[BillingService.getGatewayPaymentState] Error:", error);
+      return { state: "unknown" };
+    }
+  },
+
+  /**
+   * Garante que a parcela tem um código de pagamento válido antes de um envio.
+   *
+   * - Código válido por mais de 12h: usa o atual.
+   * - Sem código, vencido ou vencendo: consulta o gateway primeiro. Se já foi
+   *   pago, dá baixa e não cobra. Senão gera um novo, sem disparar mensagens
+   *   (quem chamou envia o lembrete com o código novo).
+   * - Stripe: expira a sessão antiga antes de criar outra, para o aluno não
+   *   conseguir pagar duas vezes.
+   *
+   * Não chama revalidatePath diretamente (exceto via markInstallmentAsPaid);
+   * não use durante a renderização de um RSC.
+   */
+  async ensureValidPayment(installmentId: string): Promise<
+    | { status: "paid" }
+    | { status: "ready"; pixPayload: string; pixImage: string | null; currency: string }
+    | { status: "unavailable" }
+  > {
+    const inst = await billingRepository.findInstallmentWithDetails(installmentId);
+    if (!inst) return { status: "unavailable" };
+    if (inst.status === "paid") return { status: "paid" };
+
+    const currency = inst.subscription.plan?.currency || "BRL";
+    const isUsd = currency === "USD";
+    const hasCharge = isUsd ? !!inst.stripePaymentIntentId : !!inst.abacatePayBillingId;
+    const isFresh =
+      !!inst.paymentExpiresAt && inst.paymentExpiresAt.getTime() - Date.now() > MIN_PAYMENT_VALIDITY_MS;
+
+    if (hasCharge && isFresh && inst.pixPayload) {
+      return { status: "ready", pixPayload: inst.pixPayload, pixImage: inst.pixImage, currency };
+    }
+
+    if (hasCharge) {
+      const gateway = await this.getGatewayPaymentState(inst, isUsd);
+      if (gateway.state === "paid") {
+        await this.markInstallmentAsPaid(inst.id, gateway.reference);
+        return { status: "paid" };
+      }
+      if (isUsd && gateway.state === "open" && inst.stripePaymentIntentId?.startsWith("cs_")) {
+        try {
+          await stripe.checkout.sessions.expire(inst.stripePaymentIntentId);
+        } catch (error) {
+          // Pode ter sido paga entre a consulta e o expire: confere de novo.
+          const recheck = await this.getGatewayPaymentState(inst, isUsd);
+          if (recheck.state === "paid") {
+            await this.markInstallmentAsPaid(inst.id, recheck.reference);
+            return { status: "paid" };
+          }
+          console.warn("[BillingService.ensureValidPayment] Stripe session expire failed:", error);
+        }
+      }
+    }
+
+    try {
+      await this.generateInvoiceForInstallment(inst.id, true, { notify: false });
+    } catch (error) {
+      console.error(`[BillingService.ensureValidPayment] Failed to regenerate charge for ${inst.id}:`, error);
+    }
+
+    const refreshed = await billingRepository.findInstallmentById(inst.id);
+    if (refreshed?.pixPayload) {
+      return { status: "ready", pixPayload: refreshed.pixPayload, pixImage: refreshed.pixImage, currency };
+    }
+    return { status: "unavailable" };
+  },
+
+  // ---------------------------------------------------------------------------
+  // Política de inadimplência: bloqueio
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Parcelas que mantêm o aluno bloqueado hoje: em aberto, da assinatura
+   * ativa, sob a política, e com vencimento num mês anterior ao atual.
+   */
+  async getBlockingInstallments(studentId: string, today: CivilDate = brtCivilDate(new Date())) {
+    const policyStart = (await getDelinquencyPolicy()).start;
+    if (!policyStart) return { subscription: null, installments: [] };
+
+    const { subscription, installments } =
+      await billingRepository.findUnpaidInstallmentsOfActiveSubscription(studentId);
+    return {
+      subscription,
+      installments: installments.filter(
+        (i) => isUnderPolicy(i.dueDate, policyStart) && monthsPastDue(i.dueDate, today) >= 1
+      ),
+    };
+  },
+
+  async isStudentBlocked(studentId: string, today?: CivilDate) {
+    const { installments } = await this.getBlockingInstallments(studentId, today);
+    return installments.length > 0;
+  },
+
+  /** Dados da página de pagamento obrigatório (/payment-required). Só leitura. */
+  async getBlockedPaymentInfo(studentId: string) {
+    const today = brtCivilDate(new Date());
+    const { subscription, installments } = await this.getBlockingInstallments(studentId, today);
+    const installment = installments[0];
+    if (!subscription || !installment) return null;
+
+    // Matrícula é cancelada no dia 1 do segundo mês após o vencimento.
+    const due = dueCivilDate(installment.dueDate);
+    const cancelDate: CivilDate = {
+      year: due.month >= 10 ? due.year + 1 : due.year,
+      month: (due.month + 2) % 12,
+      day: 1,
+    };
+
+    return {
+      installmentId: installment.id,
+      amount: installment.amount,
+      currency: subscription.plan?.currency || "BRL",
+      dueDate: installment.dueDate,
+      pixPayload: installment.pixPayload,
+      pixImage: installment.pixImage,
+      paymentExpiresAt: installment.paymentExpiresAt,
+      pendingCount: installments.length,
+      cancelDate: formatCivilDate(cancelDate),
+    };
+  },
+
+  /**
+   * Garante um código válido para a parcela que bloqueia o aluno. Chamado
+   * pela página de pagamento obrigatório (via Server Action) quando o código
+   * está ausente ou vencido.
+   */
+  async refreshBlockedPayment(studentId: string, installmentId: string) {
+    const { installments } = await this.getBlockingInstallments(studentId);
+    if (!installments.some((i) => i.id === installmentId)) {
+      throw new Error("Parcela não encontrada");
+    }
+    return this.ensureValidPayment(installmentId);
+  },
+
+  /** Alunos que estarão bloqueados no dia informado (usado no cancelamento de aulas). */
+  async getStudentIdsBlockedOn(day: CivilDate) {
+    const policyStart = (await getDelinquencyPolicy()).start;
+    if (!policyStart) return [];
+
+    const lastDayOfPreviousMonth = new Date(Date.UTC(day.year, day.month, 1) - 1);
+    const candidates = await billingRepository.findUnpaidInstallmentsDueBefore(lastDayOfPreviousMonth);
+    const ids = new Set<string>();
+    for (const inst of candidates) {
+      const sub = inst.subscription;
+      if (!sub?.student || sub.status !== "active" || !sub.student.isActive) continue;
+      if (!isUnderPolicy(inst.dueDate, policyStart)) continue;
+      if (monthsPastDue(inst.dueDate, day) >= 1) ids.add(sub.studentId);
+    }
+    return [...ids];
+  },
+
+  async getTeachersOfStudent(studentId: string) {
+    const { schedulingService } = await import("../scheduling/scheduling.service");
+    const teacherIds = await schedulingService.getStudentTeacherIds(studentId);
+    const teachers = await Promise.all(teacherIds.map((id) => userService.getUser(id)));
+    return teachers.filter((t): t is User => !!t && t.isActive);
+  },
+
+  async notifyTeachersOfUnblock(studentId: string) {
+    const student = await userService.getUser(studentId);
+    if (!student) return;
+    const teachers = await this.getTeachersOfStudent(studentId);
+
+    for (const teacher of teachers) {
+      const locale = recipientLocale(teacher);
+      await communicationService.sendDelinquencyEmail(teacher.email, {
+        kind: "teacherUnblocked",
+        teacherName: teacher.name,
+        studentName: student.name,
+      }, locale);
+      if (teacher.cellphone) {
+        await communicationService.sendTeacherDelinquencyWhatsApp(teacher.cellphone, locale, {
+          kind: "unblock",
+          teacherName: teacher.name,
+          studentName: student.name,
+        });
+      }
+    }
+
+    if (teachers.length > 0) {
+      await notificationService.sendNotification({
+        title: "✅ Aluno voltou às aulas",
+        body: `${student.name} regularizou o pagamento e o acesso foi liberado. As próximas aulas seguem normalmente.`,
+        targetType: "specific",
+        userIds: teachers.map((t) => t.id),
+        channels: { inApp: true, push: true },
+      });
+    }
   },
 
   // 6. Webhook logic
@@ -1284,7 +1589,6 @@ export const billingService = {
     const today = startOfDay(now);
     const twoDaysFromNowStart = startOfDay(addDays(now, 2));
     const twoDaysFromNowEnd = endOfDay(addDays(now, 2));
-    const yesterdayEnd = endOfDay(addDays(now, -1));
 
     // --- CASE 1: 2 Days before due date ---
     const reminder2d = await billingRepository.findInstallmentsInDateRange(twoDaysFromNowStart, twoDaysFromNowEnd);
@@ -1317,15 +1621,19 @@ export const billingService = {
         actionUrl: "/hub/student/payments",
       });
 
-      // WhatsApp
-      if (student.cellphone && inst.pixPayload) {
-        await communicationService.sendPaymentReminderWhatsApp({
-          cellphone: student.cellphone,
-          studentName: student.name,
-          amount: inst.amount,
-          dueDate: inst.dueDate,
-          pixPayload: inst.pixPayload,
-        });
+      // WhatsApp — com o código conferido/renovado antes do envio
+      if (student.cellphone) {
+        const payment = await this.ensureValidPayment(inst.id);
+        if (payment.status === "paid") continue;
+        if (payment.status === "ready") {
+          await communicationService.sendPaymentReminderWhatsApp({
+            cellphone: student.cellphone,
+            studentName: student.name,
+            amount: inst.amount,
+            dueDate: inst.dueDate,
+            pixPayload: payment.pixPayload,
+          }, recipientLocale(student));
+        }
       }
 
       await billingRepository.updateInstallment(inst.id, { notified2dAt: new Date() });
@@ -1359,80 +1667,494 @@ export const billingService = {
         actionUrl: "/hub/student/payments",
       });
 
+      // WhatsApp no dia do vencimento (antes só ia email e push)
+      if (student.cellphone) {
+        const payment = await this.ensureValidPayment(inst.id);
+        if (payment.status === "ready") {
+          await communicationService.sendPaymentReminderWhatsApp({
+            cellphone: student.cellphone,
+            studentName: student.name,
+            amount: inst.amount,
+            dueDate: inst.dueDate,
+            pixPayload: payment.pixPayload,
+          }, recipientLocale(student));
+        }
+      }
+
       await billingRepository.updateInstallment(inst.id, { notifiedDueAt: new Date() });
     }
 
-    // --- CASE 3: Overdue (all pending before/including yesterday) ---
-    const reminderOverdue = await billingRepository.findPendingInstallmentsBeforeDate(yesterdayEnd);
-    for (const inst of reminderOverdue) {
-      if (
-        inst.notifiedOverdueAt || 
-        !inst.subscription.student || 
-        inst.subscription.status !== "active" || 
-        !inst.subscription.student.isActive
-      ) continue;
+    // --- CASE 3: Atraso, bloqueio e cancelamento (política de inadimplência) ---
+    await this.processDelinquency(now);
+  },
 
-      const student = inst.subscription.student;
-      const amountStr = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(inst.amount / 100);
+  /**
+   * Política de inadimplência, chamada pelo cron diário (9h de Brasília).
+   * Para uma parcela que vence no mês M:
+   * - 1º dia de atraso: vira "overdue", avisa aluno, admins e managers;
+   * - de 3 em 3 dias até o fim de M: lembrete ao aluno;
+   * - último dia de M: aviso final ao aluno e aos professores;
+   * - mês M+1: aluno bloqueado; lembrete semanal; no último dia, aviso de cancelamento;
+   * - dia 1 de M+2: cancelamento automático da matrícula, sem multa.
+   * Só a parcela mais antiga em aberto de cada assinatura gera mensagens ao
+   * aluno, para ninguém receber dois lembretes no mesmo dia.
+   * Bloqueio e cancelamento só valem para parcelas sob a política
+   * (ligada em Configurações → Políticas, com data de início); as
+   * anteriores, ou todas com a política desligada, recebem só os lembretes.
+   */
+  async processDelinquency(now: Date = new Date()) {
+    const today = brtCivilDate(now);
+    const { start: policyStart, autoCancelEnabled } = await getDelinquencyPolicy();
+    // Vencimentos são gravados à meia-noite UTC do dia: "venceu antes de hoje".
+    const dueBeforeToday = new Date(Date.UTC(today.year, today.month, today.day) - 1);
+    const unpaid = await billingRepository.findUnpaidInstallmentsDueBefore(dueBeforeToday);
 
-      // Update status to overdue
-      await billingRepository.updateInstallment(inst.id, {
-        status: "overdue",
-        notifiedOverdueAt: new Date()
-      });
+    const handledSubscriptions = new Set<string>();
+    const toCancel: typeof unpaid = [];
 
-      await communicationService.sendBillingOverdueEmail(student.email, {
-        studentName: student.name,
-        amount: inst.amount,
-        checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/hub/student/payments`,
+    for (const inst of unpaid) {
+      const sub = inst.subscription;
+      const student = sub?.student;
+      if (!sub || !student || sub.status !== "active" || !student.isActive) continue;
+
+      try {
+        const isOldest = !handledSubscriptions.has(sub.id);
+        handledSubscriptions.add(sub.id);
+
+        // 1º dia de atraso (comportamento original, agora para todas as parcelas)
+        if (inst.status === "pending" || !inst.notifiedOverdueAt) {
+          await this.sendFirstOverdueNotice(inst, isOldest);
+          continue;
+        }
+        if (!isOldest) continue;
+
+        const months = monthsPastDue(inst.dueDate, today);
+        const underPolicy = isUnderPolicy(inst.dueDate, policyStart);
+        const lastReminder = inst.lastOverdueReminderAt ?? inst.notifiedOverdueAt;
+        const daysSinceReminder = lastReminder ? civilDaysBetween(brtCivilDate(lastReminder), today) : Infinity;
+
+        if (months === 0) {
+          if (underPolicy && isLastDayOfMonth(today)) {
+            if (!inst.notifiedFinalWarningAt) await this.sendFinalWarning(inst, today);
+          } else if (daysSinceReminder >= DELINQUENCY_REMINDER_INTERVAL_DAYS) {
+            await this.sendOverdueReminder(inst);
+          }
+          continue;
+        }
+
+        if (!underPolicy) continue;
+
+        if (months === 1) {
+          if (!inst.blockedAt) await this.markStudentBlocked(inst);
+          if (isLastDayOfMonth(today)) {
+            if (!inst.notifiedCancelWarningAt) await this.sendCancelWarning(inst);
+          } else if (daysSinceReminder >= DELINQUENCY_BLOCKED_REMINDER_INTERVAL_DAYS) {
+            await this.sendBlockedReminder(inst, today);
+          }
+          continue;
+        }
+
+        toCancel.push(inst);
+      } catch (error) {
+        console.error(`[BillingService.processDelinquency] Failed for installment ${inst.id}:`, error);
+      }
+    }
+
+    if (toCancel.length > 0) {
+      await this.processDelinquentCancellations(toCancel, autoCancelEnabled);
+    }
+  },
+
+  async sendFirstOverdueNotice(
+    inst: Awaited<ReturnType<typeof billingRepository.findUnpaidInstallmentsDueBefore>>[number],
+    notifyStudent: boolean
+  ) {
+    const student = inst.subscription.student!;
+    const currency = inst.subscription.plan?.currency || "BRL";
+    const amountStr = formatMoney(inst.amount, currency);
+    const now = new Date();
+
+    await billingRepository.updateInstallment(inst.id, {
+      status: "overdue",
+      notifiedOverdueAt: inst.notifiedOverdueAt ?? now,
+      ...(notifyStudent ? { lastOverdueReminderAt: now, overdueReminderCount: inst.overdueReminderCount + 1 } : {}),
+    });
+
+    if (notifyStudent) {
+      await this.sendOverdueMessages(inst);
+    }
+
+    // Notify Admin & Manager about overdue payment
+    try {
+      const monthStr = format(inst.dueDate, "MMMM/yyyy", { locale: ptBR });
+      const overdueBody = `A mensalidade de ${amountStr} do aluno ${student.name} (Venc: ${format(inst.dueDate, "dd/MM")} - ${monthStr}) está em atraso.`;
+
+      await notificationService.sendNotification({
+        title: "⚠️ Mensalidade Atrasada",
+        body: overdueBody,
+        targetType: "role",
+        targetRole: "admin",
+        category: "paymentsOverdue",
+        channels: { inApp: true, push: true },
+        actionUrl: "/hub/admin/finances",
       });
 
       await notificationService.sendNotification({
-        title: "⚠️ Fatura em atraso",
-        body: `Atenção: Sua mensalidade de ${amountStr} está atrasada. Regularize para evitar suspensão.`,
-        targetType: "specific",
-        userIds: [student.id],
+        title: "⚠️ Mensalidade Atrasada",
+        body: overdueBody,
+        targetType: "role",
+        targetRole: "manager",
+        category: "paymentsOverdue",
         channels: { inApp: true, push: true },
-        actionUrl: "/hub/student/payments",
+        actionUrl: "/hub/manager/users",
       });
+    } catch (err) {
+      console.error("[BillingService] Failed to send overdue admin/manager notification:", err);
+    }
+  },
 
-      // Notify Admin & Manager about overdue payment
-      try {
-        const monthStr = format(inst.dueDate, "MMMM/yyyy", { locale: ptBR });
-        const overdueBody = `A mensalidade de ${amountStr} do aluno ${student.name} (Venc: ${format(inst.dueDate, "dd/MM")} - ${monthStr}) está em atraso.`;
+  /** Email + push + WhatsApp de "mensalidade em atraso", com código válido. */
+  async sendOverdueMessages(
+    inst: Awaited<ReturnType<typeof billingRepository.findUnpaidInstallmentsDueBefore>>[number]
+  ) {
+    const student = inst.subscription.student!;
+    const amountStr = formatMoney(inst.amount, inst.subscription.plan?.currency || "BRL");
 
-        await notificationService.sendNotification({
-          title: "⚠️ Mensalidade Atrasada",
-          body: overdueBody,
-          targetType: "role",
-          targetRole: "admin",
-          category: "paymentsOverdue",
-          channels: { inApp: true, push: true },
-          actionUrl: "/hub/admin/finances",
-        });
+    const payment = await this.ensureValidPayment(inst.id);
+    if (payment.status === "paid") return;
 
-        await notificationService.sendNotification({
-          title: "⚠️ Mensalidade Atrasada",
-          body: overdueBody,
-          targetType: "role",
-          targetRole: "manager",
-          category: "paymentsOverdue",
-          channels: { inApp: true, push: true },
-          actionUrl: "/hub/manager/users",
-        });
-      } catch (err) {
-        console.error("[BillingService] Failed to send overdue admin/manager notification:", err);
-      }
+    await communicationService.sendBillingOverdueEmail(student.email, {
+      studentName: student.name,
+      amount: inst.amount,
+      checkoutUrl: PAYMENTS_URL(),
+    }, recipientLocale(student));
 
-      // WhatsApp
-      if (student.cellphone && inst.pixPayload) {
-        await communicationService.sendPaymentOverdueWhatsApp({
-          cellphone: student.cellphone,
+    await notificationService.sendNotification({
+      title: "⚠️ Fatura em atraso",
+      body: `Atenção: sua mensalidade de ${amountStr} está atrasada. Pague até o fim do mês para não ter o acesso bloqueado.`,
+      targetType: "specific",
+      userIds: [student.id],
+      channels: { inApp: true, push: true },
+      actionUrl: "/hub/student/payments",
+    });
+
+    if (student.cellphone && payment.status === "ready") {
+      await communicationService.sendPaymentOverdueWhatsApp({
+        cellphone: student.cellphone,
+        studentName: student.name,
+        amount: inst.amount,
+        pixPayload: payment.pixPayload,
+      }, recipientLocale(student));
+    }
+  },
+
+  async sendOverdueReminder(
+    inst: Awaited<ReturnType<typeof billingRepository.findUnpaidInstallmentsDueBefore>>[number]
+  ) {
+    await this.sendOverdueMessages(inst);
+    await billingRepository.updateInstallment(inst.id, {
+      lastOverdueReminderAt: new Date(),
+      overdueReminderCount: inst.overdueReminderCount + 1,
+    });
+  },
+
+  /** Último dia do mês do vencimento: aviso final ao aluno e aos professores. */
+  async sendFinalWarning(
+    inst: Awaited<ReturnType<typeof billingRepository.findUnpaidInstallmentsDueBefore>>[number],
+    today: CivilDate
+  ) {
+    const student = inst.subscription.student!;
+    const currency = inst.subscription.plan?.currency || "BRL";
+    const amountStr = formatMoney(inst.amount, currency);
+    const studentLocale = recipientLocale(student);
+
+    const payment = await this.ensureValidPayment(inst.id);
+    if (payment.status === "paid") return;
+
+    await communicationService.sendDelinquencyEmail(student.email, {
+      kind: "studentFinalWarning",
+      studentName: student.name,
+      amount: amountStr,
+      payUrl: PAYMENTS_URL(),
+    }, studentLocale);
+
+    await notificationService.sendNotification({
+      title: "🚨 Último dia para pagar",
+      body: `Sua mensalidade de ${amountStr} segue em aberto. Sem o pagamento hoje, seu acesso será bloqueado a partir de amanhã e as aulas desse período não poderão ser repostas.`,
+      targetType: "specific",
+      userIds: [student.id],
+      channels: { inApp: true, push: true },
+      actionUrl: "/hub/student/payments",
+    });
+
+    if (student.cellphone) {
+      await communicationService.sendDelinquencyStudentWhatsApp("payment_final_warning_v1", {
+        cellphone: student.cellphone,
+        studentName: student.name,
+        amount: inst.amount,
+        currency,
+        pixPayload: payment.status === "ready" ? payment.pixPayload : null,
+      }, studentLocale);
+    }
+
+    // Professores
+    const blockDay = addCivilDays(today, 1);
+    const teachers = await this.getTeachersOfStudent(student.id);
+    for (const teacher of teachers) {
+      const locale = recipientLocale(teacher);
+      const blockDate = formatCivilDate(blockDay, locale);
+      await communicationService.sendDelinquencyEmail(teacher.email, {
+        kind: "teacherBlockWarning",
+        teacherName: teacher.name,
+        studentName: student.name,
+        blockDate,
+      }, locale);
+      if (teacher.cellphone) {
+        await communicationService.sendTeacherDelinquencyWhatsApp(teacher.cellphone, locale, {
+          kind: "block",
+          teacherName: teacher.name,
           studentName: student.name,
-          amount: inst.amount,
-          pixPayload: inst.pixPayload,
+          blockDate,
         });
       }
+    }
+    if (teachers.length > 0) {
+      await notificationService.sendNotification({
+        title: "⚠️ Aluno pode ficar sem aulas",
+        body: `${student.name} está com a mensalidade em atraso. Se não pagar hoje, fica sem acesso e sem aulas a partir de ${formatCivilDate(blockDay)}. As aulas perdidas nesse período não serão repostas.`,
+        targetType: "specific",
+        userIds: teachers.map((t) => t.id),
+        channels: { inApp: true, push: true },
+      });
+    }
+
+    await billingRepository.updateInstallment(inst.id, {
+      notifiedFinalWarningAt: new Date(),
+      lastOverdueReminderAt: new Date(),
+      overdueReminderCount: inst.overdueReminderCount + 1,
+    });
+  },
+
+  /** Dia 1 do mês seguinte ao vencimento: registra o bloqueio e avisa o aluno. */
+  async markStudentBlocked(
+    inst: Awaited<ReturnType<typeof billingRepository.findUnpaidInstallmentsDueBefore>>[number]
+  ) {
+    const student = inst.subscription.student!;
+    await billingRepository.updateInstallment(inst.id, { blockedAt: new Date() });
+    await notificationService.sendNotification({
+      title: "🔒 Acesso bloqueado",
+      body: "Seu acesso à plataforma está bloqueado por falta de pagamento. Pague a mensalidade para voltar às aulas.",
+      targetType: "specific",
+      userIds: [student.id],
+      channels: { inApp: true, push: true },
+      actionUrl: "/payment-required",
+    });
+  },
+
+  /** Lembrete semanal durante o mês de bloqueio. */
+  async sendBlockedReminder(
+    inst: Awaited<ReturnType<typeof billingRepository.findUnpaidInstallmentsDueBefore>>[number],
+    today: CivilDate
+  ) {
+    const student = inst.subscription.student!;
+    const currency = inst.subscription.plan?.currency || "BRL";
+    const locale = recipientLocale(student);
+
+    const payment = await this.ensureValidPayment(inst.id);
+    if (payment.status === "paid") return;
+
+    const cancelDay: CivilDate = { year: today.month === 11 ? today.year + 1 : today.year, month: (today.month + 1) % 12, day: 1 };
+    await communicationService.sendDelinquencyEmail(student.email, {
+      kind: "studentBlockedReminder",
+      studentName: student.name,
+      amount: formatMoney(inst.amount, currency),
+      cancelDate: formatCivilDate(cancelDay, locale),
+      payUrl: PAYMENTS_URL(),
+    }, locale);
+
+    if (student.cellphone && payment.status === "ready") {
+      await communicationService.sendPaymentOverdueWhatsApp({
+        cellphone: student.cellphone,
+        studentName: student.name,
+        amount: inst.amount,
+        pixPayload: payment.pixPayload,
+      }, locale);
+    }
+
+    await notificationService.sendNotification({
+      title: "🔒 Seu acesso continua bloqueado",
+      body: `Pague a mensalidade para voltar às aulas. Sem pagamento, a matrícula será cancelada em ${formatCivilDate(cancelDay)}.`,
+      targetType: "specific",
+      userIds: [student.id],
+      channels: { inApp: true, push: true },
+      actionUrl: "/payment-required",
+    });
+
+    await billingRepository.updateInstallment(inst.id, {
+      lastOverdueReminderAt: new Date(),
+      overdueReminderCount: inst.overdueReminderCount + 1,
+    });
+  },
+
+  /** Último dia do mês de bloqueio: amanhã a matrícula é cancelada. */
+  async sendCancelWarning(
+    inst: Awaited<ReturnType<typeof billingRepository.findUnpaidInstallmentsDueBefore>>[number]
+  ) {
+    const student = inst.subscription.student!;
+    const currency = inst.subscription.plan?.currency || "BRL";
+    const amountStr = formatMoney(inst.amount, currency);
+    const locale = recipientLocale(student);
+
+    const payment = await this.ensureValidPayment(inst.id);
+    if (payment.status === "paid") return;
+
+    await communicationService.sendDelinquencyEmail(student.email, {
+      kind: "studentCancelWarning",
+      studentName: student.name,
+      amount: amountStr,
+      payUrl: PAYMENTS_URL(),
+    }, locale);
+
+    await notificationService.sendNotification({
+      title: "⚠️ Sua matrícula será cancelada amanhã",
+      body: `Último dia para pagar a mensalidade de ${amountStr}. Sem o pagamento, a matrícula é cancelada automaticamente amanhã.`,
+      targetType: "specific",
+      userIds: [student.id],
+      channels: { inApp: true, push: true },
+      actionUrl: "/payment-required",
+    });
+
+    if (student.cellphone) {
+      await communicationService.sendDelinquencyStudentWhatsApp("payment_cancel_warning_v1", {
+        cellphone: student.cellphone,
+        studentName: student.name,
+        amount: inst.amount,
+        currency,
+        pixPayload: payment.status === "ready" ? payment.pixPayload : null,
+      }, locale);
+    }
+
+    await billingRepository.updateInstallment(inst.id, {
+      notifiedCancelWarningAt: new Date(),
+      lastOverdueReminderAt: new Date(),
+      overdueReminderCount: inst.overdueReminderCount + 1,
+    });
+  },
+
+  /**
+   * Dia 1 do segundo mês após o vencimento. Com o cancelamento automático
+   * desligado nas configurações, só avisa os admins de quem seria cancelado.
+   */
+  async processDelinquentCancellations(
+    installments: Awaited<ReturnType<typeof billingRepository.findUnpaidInstallmentsDueBefore>>,
+    autoCancelEnabled: boolean
+  ) {
+    if (!autoCancelEnabled) {
+      const lines = installments.map((inst) =>
+        `${inst.subscription.student!.name} — ${formatMoney(inst.amount, inst.subscription.plan?.currency || "BRL")} (venc. ${format(inst.dueDate, "dd/MM/yyyy")})`
+      );
+      const admins = (await userService.getUsersByRole("admin")).filter((a) => a.isActive);
+      for (const admin of admins) {
+        await communicationService.sendDelinquencyEmail(admin.email, {
+          kind: "staffAutoCancelPreview",
+          recipientName: admin.name,
+          lines,
+        }, recipientLocale(admin));
+      }
+      return;
+    }
+
+    for (const inst of installments) {
+      try {
+        await this.cancelSubscriptionForDelinquency(inst);
+      } catch (error) {
+        console.error(`[BillingService] Auto-cancel failed for subscription ${inst.subscriptionId}:`, error);
+      }
+    }
+  },
+
+  /**
+   * Cancela a matrícula por inadimplência, sem multa rescisória.
+   * Parcelas já vencidas continuam em aberto (a dívida segue registrada);
+   * as futuras são canceladas. O contrato é finalizado pelo fluxo normal
+   * (contrato cancelado, aulas futuras canceladas, usuário desativado).
+   */
+  async cancelSubscriptionForDelinquency(
+    inst: Awaited<ReturnType<typeof billingRepository.findUnpaidInstallmentsDueBefore>>[number]
+  ) {
+    const sub = inst.subscription;
+    const student = sub.student!;
+    const currency = sub.plan?.currency || "BRL";
+    const amountStr = formatMoney(inst.amount, currency);
+    const dueMonth = format(inst.dueDate, "MM/yyyy");
+
+    // Última checagem: pode ter sido pago agora há pouco.
+    const gateway = await this.getGatewayPaymentState(inst, currency === "USD");
+    if (gateway.state === "paid") {
+      await this.markInstallmentAsPaid(inst.id, gateway.reference);
+      return;
+    }
+
+    // Professores antes de finalizar: o cancelamento libera as regras do aluno.
+    const teachers = await this.getTeachersOfStudent(student.id);
+
+    await billingRepository.cancelInstallmentsDueAfter(sub.id, new Date());
+    await billingRepository.createAuditLog({
+      installmentId: inst.id,
+      actorId: "system",
+      actorName: "Cron de Inadimplência",
+      previousStatus: inst.status,
+      newStatus: inst.status,
+      previousAmount: inst.amount,
+      newAmount: inst.amount,
+      reason: "Matrícula cancelada automaticamente por inadimplência (sem multa rescisória)",
+    });
+
+    const { contractService } = await import("../contract/contract.service");
+    const contract = await contractService.getContractBySubscriptionId(sub.id);
+    if (contract) {
+      await contractService.finalizeCancellation(contract.id);
+    } else {
+      const { schedulingService } = await import("../scheduling/scheduling.service");
+      await schedulingService.cancelFutureClassesForStudent(student.id);
+      await this.updateSubscription(sub.id, { status: "cancelled" });
+      await userService.updateUser(student.id, { isActive: false });
+    }
+    await this.updateSubscription(sub.id, { cancellationDate: new Date() });
+
+    // Aluno
+    const studentLocale = recipientLocale(student);
+    await communicationService.sendDelinquencyEmail(student.email, {
+      kind: "studentAccountCancelled",
+      studentName: student.name,
+      amount: amountStr,
+    }, studentLocale);
+    if (student.cellphone) {
+      await communicationService.sendAccountCancelledDelinquencyWhatsApp(student.cellphone, student.name, studentLocale);
+    }
+
+    // Admins, managers e professores
+    const staff = [
+      ...(await userService.getActiveAdminsAndManagers()),
+      ...teachers,
+    ];
+    for (const person of staff) {
+      await communicationService.sendDelinquencyEmail(person.email, {
+        kind: "staffAccountCancelled",
+        recipientName: person.name,
+        studentName: student.name,
+        amount: amountStr,
+        dueMonth,
+      }, recipientLocale(person));
+    }
+    if (staff.length > 0) {
+      await notificationService.sendNotification({
+        title: "❌ Matrícula cancelada por inadimplência",
+        body: `A matrícula de ${student.name} foi cancelada automaticamente (mensalidade de ${amountStr}, ${dueMonth}, não paga). Sem multa rescisória.`,
+        targetType: "specific",
+        userIds: staff.map((p) => p.id),
+        channels: { inApp: true, push: true },
+      });
     }
   },
 
@@ -1599,11 +2321,13 @@ export const billingService = {
       throw new Error("Apenas parcelas pendentes ou em atraso podem ter lembretes reenviados.");
     }
 
-    const isUsdPlan = sub.plan?.currency === "USD";
-    const hasBilling = isUsdPlan ? !!installment.stripePaymentIntentId : !!installment.abacatePayBillingId;
-
-    if (!hasBilling) {
-      throw new Error("Gere o código de pagamento antes de reenviar o lembrete.");
+    // Confere (e renova, se preciso) o código antes de reenviar.
+    const payment = await this.ensureValidPayment(installmentId);
+    if (payment.status === "paid") {
+      throw new Error("Esta parcela já consta como paga no gateway. O status foi atualizado.");
+    }
+    if (payment.status === "unavailable") {
+      throw new Error("Não foi possível gerar um código de pagamento válido para esta parcela.");
     }
 
     const amountStr = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(installment.amount / 100);
@@ -1632,7 +2356,7 @@ export const billingService = {
       if (cellphone.includes(":")) cellphone = decrypt(cellphone);
       cellphone = cellphone.replace(/\D/g, "");
 
-      const payCode = installment.pixPayload;
+      const payCode = payment.pixPayload;
 
       if (payCode) {
         if (installment.status === "overdue") {
@@ -1659,7 +2383,7 @@ export const billingService = {
       await notificationService.sendNotification({
         title: installment.status === "overdue" ? "⚠️ Fatura em atraso" : "⏳ Lembrete de pagamento",
         body: installment.status === "overdue"
-          ? `Atenção: Sua mensalidade de ${amountStr} está atrasada. Regularize para evitar suspensão.`
+          ? `Atenção: sua mensalidade de ${amountStr} está atrasada. Pague até o fim do mês para não ter o acesso bloqueado.`
           : `Lembrete: Sua fatura de ${amountStr} vence em breve. Evite atrasos!`,
         targetType: "specific",
         userIds: [student.id],

@@ -254,7 +254,7 @@ export function OnboardingFlow({ user, initialProfile, schoolSettings, schoolInf
                                         />
                                     )}
                                     {currentStep === 5 && (
-                                        <StepBestPractices />
+                                        <StepBestPractices role={user.role} />
                                     )}
                                 </div>
 

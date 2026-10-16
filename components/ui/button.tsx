@@ -158,7 +158,12 @@ const Button = forwardRef<React.ComponentRef<typeof ButtonPrimitive>, ButtonProp
         {showChildren && (
           <span
             className={cn(
-              "flex items-center justify-center relative z-10",
+              // O gap do botão não alcança ícone e texto passados como filhos,
+              // porque eles ficam dentro deste span. gap-[inherit] repete o gap
+              // do tamanho (xs/sm/default/lg) aqui dentro, então ícone + texto
+              // já nascem espaçados. As margens manuais que antes compensavam
+              // isso (mr-2, ml-2) são zeradas para não somar com o gap.
+              "flex items-center justify-center gap-[inherit] relative z-10 [&>svg]:m-0!",
               (showLeftIcon || showRightIcon || isLoading) && "truncate"
             )}
           >

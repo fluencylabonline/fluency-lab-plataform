@@ -337,7 +337,7 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
     sections: [
       {
         heading: "O que a lista mostra",
-        body: "Uma linha por parcela, com valor, data de vencimento e situação (paga, em aberto ou vencida). O vencimento cai sempre entre os dias 1º e 10 de cada mês.",
+        body: "Uma linha por parcela, com valor, data de vencimento e situação (paga, em aberto ou vencida). O vencimento é o dia escolhido na contratação (1, 5, 10 ou 15 de cada mês).",
       },
       {
         heading: "Como pagar",
@@ -355,7 +355,8 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
           "Copiar Código copia o PIX copia e cola para o app do banco.",
           "Já paguei, verificar pagamento força uma nova consulta ao banco quando a baixa demora.",
           "Gerar novo PIX aparece em parcela vencida e cria um código novo, já que o antigo expira.",
-          "Ir para o Pagamento aparece em planos em dólar e leva à página segura da Stripe, para cartão internacional.",
+          "Gerar código de pagamento aparece quando a parcela está sem código válido (o anterior expirou).",
+          "Ir para o Pagamento aparece em planos em dólar e leva à página segura da Stripe, para cartão internacional. O link vale por 24 horas; depois disso, Gerar novo link cria outro.",
         ],
       },
       {
@@ -364,7 +365,16 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
       },
       {
         heading: "Parcela vencida",
-        body: "Um aviso fixo aparece no topo da plataforma e some sozinho quando o pagamento é confirmado. Você também recebe lembretes por e-mail e WhatsApp 2 dias antes, no dia e depois do vencimento. Se já pagou e o aviso continua, espere alguns minutos: a confirmação depende do banco.",
+        body: "Um aviso fixo aparece no topo da plataforma e some sozinho quando o pagamento é confirmado. Você recebe lembretes por e-mail, WhatsApp e notificação 2 dias antes, no dia do vencimento e, depois dele, a cada 3 dias até o fim do mês. Se já pagou e o aviso continua, espere alguns minutos: a confirmação depende do banco.",
+      },
+      {
+        heading: "Bloqueio por falta de pagamento",
+        body: [
+          "No último dia do mês do vencimento chega um aviso final. Sem pagamento nesse dia, a partir do dia 1 do mês seguinte o acesso fica bloqueado: ao entrar, você vê apenas a página de pagamento.",
+          "Enquanto o bloqueio durar, cada aula é cancelada no dia anterior e não pode ser reposta. Seu professor também é avisado.",
+          "Pagou, o acesso volta na hora.",
+          "Se o mês de bloqueio terminar sem pagamento, a matrícula é cancelada automaticamente, sem multa. O valor em aberto continua devido.",
+        ],
       },
       {
         heading: "Reajuste anual",

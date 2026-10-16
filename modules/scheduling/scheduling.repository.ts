@@ -471,6 +471,36 @@ export const schedulingRepository = {
     return rules.find((r) => new Date(r.startDate).getDay() === dayOfWeek) ?? null;
   },
 
+  /** Professores do aluno: regras de recorrência atribuídas e aulas futuras agendadas. */
+  async findTeacherIdsForStudent(studentId: string) {
+    const [rules, slots] = await Promise.all([
+      db.select({ teacherId: recurrenceRules.teacherId })
+        .from(recurrenceRules)
+        .where(eq(recurrenceRules.studentId, studentId)),
+      db.select({ teacherId: slotInstances.teacherId })
+        .from(slotInstances)
+        .where(and(
+          eq(slotInstances.studentId, studentId),
+          eq(slotInstances.status, "scheduled"),
+          gte(slotInstances.startAt, new Date())
+        )),
+    ]);
+    return [...new Set([...rules, ...slots].map((r) => r.teacherId))];
+  },
+
+  /** Aulas agendadas dos alunos informados que começam dentro do intervalo. */
+  async findScheduledSlotsForStudentsInRange(studentIds: string[], start: Date, end: Date) {
+    if (studentIds.length === 0) return [];
+    return db.query.slotInstances.findMany({
+      where: and(
+        inArray(slotInstances.studentId, studentIds),
+        eq(slotInstances.status, "scheduled"),
+        between(slotInstances.startAt, start, end)
+      ),
+      orderBy: [asc(slotInstances.startAt)],
+    });
+  },
+
   /**
    * Returns all FUTURE scheduled slot instances for a student tied to a specific rule.
    */

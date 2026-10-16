@@ -37,7 +37,18 @@ import {
 } from "date-fns";
 import { notificationService } from "@/modules/notification/notification.service";
 import { NewSlotInstance } from "./scheduling.types";
+import { addCivilDays, brtCivilDate, brtDayRangeUtc } from "@/modules/billing/billing.dates";
 import { isQuietHours, brtHourMinute, QUIET_HOURS_END } from "@/lib/quiet-hours";
+
+// Aluno bloqueado por inadimplência não remarca aulas. A UI já não deixa ele
+// chegar lá (só vê a página de pagamento), mas Server Actions não passam pelo
+// layout, então a regra também vale aqui.
+async function assertStudentNotBlocked(studentId: string) {
+  const { billingService } = await import("@/modules/billing/billing.service");
+  if (await billingService.isStudentBlocked(studentId)) {
+    throw new Error("Seu acesso está bloqueado por falta de pagamento. Regularize a mensalidade para remarcar aulas.");
+  }
+}
 
 // Regras de negócio para recesso do professor: aviso mínimo de 30 dias corridos
 // (inclui fins de semana, já que os alunos também têm aulas aos sábados/domingos)
@@ -1121,6 +1132,8 @@ export const schedulingService = {
     newSlotId: string,
     creditId: string
   ) {
+    await assertStudentNotBlocked(studentId);
+
     return await db.transaction(async (tx) => {
       // 1. Atomically consume the credit and check if it was actually available
       const [updatedCredit] = await tx.update(studentCredits)
@@ -2073,6 +2086,132 @@ export const schedulingService = {
     });
   },
 
+  async getStudentTeacherIds(studentId: string) {
+    return schedulingRepository.findTeacherIdsForStudent(studentId);
+  },
+
+  /**
+   * Cancela, sempre no dia anterior, as aulas dos alunos que estarão
+   * bloqueados por inadimplência amanhã. Roda às ~21h de Brasília (cron
+   * blocked-classes), depois do expediente: quem pagou durante o dia não perde
+   * a aula. Aula do dia 1 é cancelada no último dia do mês, a do dia 5 no dia 4,
+   * e assim por diante, enquanto o bloqueio durar.
+   *
+   * As aulas viram "canceled-admin" sem crédito e sem remarcação: aulas
+   * perdidas durante o bloqueio não são repostas. A regra de recorrência
+   * continua com o aluno, então ao pagar as aulas seguintes acontecem
+   * normalmente. Idempotente: só toca aulas ainda "scheduled".
+   */
+  async cancelClassesForBlockedStudents(now: Date = new Date()) {
+    const { billingService } = await import("@/modules/billing/billing.service");
+    const tomorrow = addCivilDays(brtCivilDate(now), 1);
+    const studentIds = await billingService.getStudentIdsBlockedOn(tomorrow);
+    if (studentIds.length === 0) return { cancelled: 0 };
+
+    const { start, end } = brtDayRangeUtc(tomorrow);
+    const slots = await schedulingRepository.findScheduledSlotsForStudentsInRange(studentIds, start, end);
+
+    const cancelled: typeof slots = [];
+    for (const slot of slots) {
+      try {
+        const done = await db.transaction(async (tx) => {
+          const [row] = await tx.update(slotInstances)
+            .set({ status: "canceled-admin", isReschedulable: false, updatedAt: new Date() })
+            .where(and(eq(slotInstances.id, slot.id), eq(slotInstances.status, "scheduled")))
+            .returning({ id: slotInstances.id });
+          if (!row) return false;
+
+          await tx.insert(schedulingAuditLogs).values({
+            slotId: slot.id,
+            actorId: "system",
+            actorRole: "system",
+            previousStatus: "scheduled",
+            newStatus: "canceled-admin",
+            reason: "Bloqueio por inadimplência: cancelada no dia anterior, sem reposição",
+          });
+          return true;
+        });
+        if (done) cancelled.push(slot);
+      } catch (error) {
+        console.error(`[cancelClassesForBlockedStudents] Failed to cancel slot ${slot.id}:`, error);
+      }
+    }
+
+    if (cancelled.length === 0) return { cancelled: 0 };
+
+    const userIds = [...new Set(cancelled.flatMap((s) => [s.studentId!, s.teacherId]))];
+    const users = await Promise.all(userIds.map((id) => userService.getUser(id)));
+    const byId = new Map(users.filter((u): u is User => !!u).map((u) => [u.id, u]));
+    const payUrl = `${env.NEXT_PUBLIC_APP_URL}/hub/student/payments`;
+    const summary: string[] = [];
+
+    for (const slot of cancelled) {
+      const student = byId.get(slot.studentId!);
+      const teacher = byId.get(slot.teacherId);
+      const when = formatLocalTime(slot.startAt, "dd/MM/yyyy HH:mm");
+      summary.push(`${when} — ${student?.name ?? "Aluno"} com ${teacher?.name ?? "Professor"}`);
+
+      try {
+        if (student) {
+          await communicationService.sendDelinquencyEmail(student.email, {
+            kind: "studentClassCancelled",
+            studentName: student.name,
+            classDateTime: when,
+            payUrl,
+          }, student.locale === "en" ? "en" : "pt");
+          await notificationService.sendNotification({
+            title: "Aula cancelada por falta de pagamento",
+            body: `Sua aula de ${when} foi cancelada porque seu acesso está bloqueado. Ela não pode ser reposta. Pague a mensalidade para não perder as próximas.`,
+            targetType: "specific",
+            userIds: [student.id],
+            channels: { inApp: true, push: true },
+            actionUrl: "/payment-required",
+          });
+        }
+        if (teacher) {
+          await communicationService.sendDelinquencyEmail(teacher.email, {
+            kind: "teacherClassCancelled",
+            teacherName: teacher.name,
+            studentName: student?.name ?? "Aluno",
+            classDateTime: when,
+          }, teacher.locale === "en" ? "en" : "pt");
+          await notificationService.sendNotification({
+            title: "Aula cancelada: aluno bloqueado",
+            body: `A aula de ${when} com ${student?.name ?? "o aluno"} foi cancelada por falta de pagamento. Não haverá reposição.`,
+            targetType: "specific",
+            userIds: [teacher.id],
+            channels: { inApp: true, push: true },
+          });
+        }
+      } catch (error) {
+        console.error(`[cancelClassesForBlockedStudents] Failed to notify for slot ${slot.id}:`, error);
+      }
+    }
+
+    // Admins: um resumo por rodada, não um aviso por aula.
+    try {
+      const admins = (await userService.getUsersByRole("admin")).filter((a) => a.isActive);
+      for (const admin of admins) {
+        await communicationService.sendDelinquencyEmail(admin.email, {
+          kind: "staffClassesCancelled",
+          recipientName: admin.name,
+          lines: summary,
+        }, admin.locale === "en" ? "en" : "pt");
+      }
+      await notificationService.sendNotification({
+        title: "Aulas canceladas por inadimplência",
+        body: `${cancelled.length} aula(s) de amanhã foram canceladas porque os alunos estão bloqueados por falta de pagamento.`,
+        targetType: "role",
+        targetRole: "admin",
+        channels: { inApp: true, push: true },
+      });
+    } catch (error) {
+      console.error("[cancelClassesForBlockedStudents] Failed to notify admins:", error);
+    }
+
+    return { cancelled: cancelled.length };
+  },
+
   async getRecessImpact(teacherId: string, startDate: Date, endDate: Date) {
     const start = getLocalMidnight(startDate);
     const end = getLocalEndOfDay(endDate);
@@ -2502,6 +2641,8 @@ export const schedulingService = {
     newSlotId: string,
     creditId?: string
   ) {
+    await assertStudentNotBlocked(studentId);
+
     const originalSlot = await schedulingRepository.findById(originalClassId);
     if (!originalSlot || originalSlot.studentId !== studentId) {
       throw new Error("Original class not found or not owned by student");

@@ -214,6 +214,29 @@ export const TEACHER_DOCS: DocSection[] = [
         ],
       },
       {
+        id: "prof-aluno-bloqueado",
+        title: "Aluno bloqueado por falta de pagamento",
+        summary: "Quando você é avisado e o que acontece com as aulas do aluno.",
+        keywords: ["bloqueado", "inadimplente", "atraso", "pagamento", "aula cancelada", "sem aula"],
+        blocks: [
+          {
+            type: "steps",
+            items: [
+              "**Último dia do mês:** se o aluno ainda não pagou a mensalidade, você recebe um aviso por e-mail, WhatsApp e notificação de que ele pode ficar sem aulas.",
+              "**A partir do dia 1:** o acesso do aluno fica bloqueado até ele pagar.",
+              "**Durante o bloqueio:** cada aula dele é cancelada no dia anterior, para não atrapalhar a sua agenda. Você recebe um aviso a cada cancelamento.",
+              "**Quando ele pagar:** você recebe um aviso de que ele voltou, e as próximas aulas seguem normalmente.",
+            ],
+          },
+          {
+            type: "note",
+            variant: "warning",
+            title: "Essas aulas não são repostas",
+            text: "As aulas canceladas durante o bloqueio não têm reposição. Se o mês de bloqueio terminar sem pagamento, a matrícula do aluno é cancelada automaticamente.",
+          },
+        ],
+      },
+      {
         id: "prof-caderno",
         title: "Caderno da aula",
         summary: "Registrar o que foi trabalhado para o aluno revisar depois.",

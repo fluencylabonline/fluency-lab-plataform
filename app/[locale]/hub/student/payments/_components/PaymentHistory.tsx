@@ -163,18 +163,21 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
     >
       {initialData.map((payment) => {
         const isPending = payment.status !== "paid";
-        const hasActionDetails = isPending && !!payment.pixPayload;
+        const hasCode = !!payment.pixPayload;
         const isExpanded = expandedPaymentId === payment.id;
         // O código pode ter vencido no gateway mesmo com o status local ainda
-        // "pending" ou já "cancelled" (é o que o sync marca quando confirma o
-        // vencimento) — por isso não dá pra confiar só no status para decidir
-        // se mostra o aviso e o botão de gerar de novo.
+        // "pending" — por isso não dá pra confiar só no status para decidir
+        // se mostra o aviso e o botão de gerar de novo. Quando o sync confirma
+        // o vencimento, ele descarta o código (a parcela segue em aberto), e
+        // aí a linha fica sem código e oferece gerar outro. Vale para PIX e
+        // para o link do Stripe, que vence em 24h.
         const isExpired = isPending && Boolean(
           payment.paymentExpiresAt && new Date(payment.paymentExpiresAt) < new Date()
         );
         const canRegenerate =
-          payment.subscription?.plan?.currency !== "USD" &&
-          (payment.status === "overdue" || payment.status === "cancelled" || isExpired);
+          isPending &&
+          (payment.status === "overdue" || payment.status === "cancelled" || isExpired || !hasCode);
+        const hasActionDetails = isPending && (hasCode || canRegenerate);
 
         return (
           <motion.div
@@ -267,7 +270,30 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
                   onClick={(e) => e.stopPropagation()} // Prevent toggling when clicking inside content
                   className="border-t border-zinc-100 dark:border-zinc-800/50 pt-4 flex flex-col md:flex-row gap-5 items-center md:items-start w-full overflow-hidden"
                 >
-                  {payment.pixImage ? (
+                  {!hasCode ? (
+                    <div className="flex-1 w-full space-y-3 min-w-0">
+                      <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/50 text-left">
+                        <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                        <p className="text-sm text-amber-700 dark:text-amber-400">
+                          {tProfile("noCodeDesc") || "Esta mensalidade está sem código de pagamento válido. Gere um novo para pagar."}
+                        </p>
+                      </div>
+                      <Button
+                        size="default"
+                        className="w-full sm:w-auto gap-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRegeneratePayment(payment.id);
+                        }}
+                        disabled={isRegenerating === payment.id}
+                      >
+                        <RotateCw className={cn("w-4 h-4 mr-2", isRegenerating === payment.id && "animate-spin")} />
+                        {isRegenerating === payment.id
+                          ? tProfile("regenerating") || "Gerando..."
+                          : tProfile("generatePayment") || "Gerar código de pagamento"}
+                      </Button>
+                    </div>
+                  ) : payment.pixImage ? (
                     <>
                       <div className="shrink-0 bg-white p-2 rounded-md border border-zinc-200 dark:border-zinc-700">
                         <Image
@@ -344,9 +370,8 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
                               : tProfile("verifyPayment") || "Já paguei, verificar pagamento"}
                           </Button>
 
-                          {/* Gerar novo PIX — atrasado, cancelado (é o status que o sync usa
-                              quando o gateway confirma o vencimento) ou já vencido pela data
-                              que guardamos localmente. BRL apenas: em dólar é checkout Stripe. */}
+                          {/* Gerar novo PIX — atrasado, cancelado ou já vencido pela data
+                              que guardamos localmente. */}
                           {canRegenerate && (
                             <Button
                               size="default"
@@ -416,6 +441,25 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
                             ? tProfile("verifying") || "Verificando..."
                             : tProfile("verifyPayment") || "Já paguei, verificar pagamento"}
                         </Button>
+
+                        {/* Link do Stripe vence em 24h: permite gerar outro. */}
+                        {isExpired && (
+                          <Button
+                            size="default"
+                            variant="outline"
+                            className="w-full sm:w-auto gap-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRegeneratePayment(payment.id);
+                            }}
+                            disabled={isRegenerating === payment.id}
+                          >
+                            <RotateCw className={cn("w-4 h-4 mr-2", isRegenerating === payment.id && "animate-spin")} />
+                            {isRegenerating === payment.id
+                              ? tProfile("regenerating") || "Gerando..."
+                              : tProfile("regenerateLink") || "Gerar novo link"}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   )}

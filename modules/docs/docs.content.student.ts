@@ -175,6 +175,7 @@ export const STUDENT_DOCS: DocSection[] = [
               "**Limite:** você pode remarcar até **2 aulas por mês civil**. Essas aulas não são cumulativas para os meses seguintes.",
               "**Prazo:** é preciso remarcar com pelo menos **4 horas** de antecedência. Passou disso, só dá para cancelar (e contar como falta).",
               "**Só aulas agendadas:** aulas já concluídas, canceladas ou com falta não podem ser remarcadas.",
+              "**Acesso bloqueado por falta de pagamento:** não é possível remarcar, e as aulas canceladas durante o bloqueio não têm reposição nem geram crédito.",
             ],
           },
           {
@@ -238,7 +239,7 @@ export const STUDENT_DOCS: DocSection[] = [
         blocks: [
           {
             type: "p",
-            text: "A página de Pagamentos lista todas as parcelas do seu plano, com valor, vencimento e situação. A parcela em aberto traz o QR Code e o código copia e cola do PIX. O vencimento ocorre sempre entre os dias 1º e 10º de cada mês.",
+            text: "A página de Pagamentos lista todas as parcelas do seu plano, com valor, vencimento e situação. A parcela em aberto traz o QR Code e o código copia e cola do PIX. O vencimento é o dia escolhido na contratação (1, 5, 10 ou 15 de cada mês).",
           },
           {
             type: "steps",
@@ -267,18 +268,36 @@ export const STUDENT_DOCS: DocSection[] = [
       {
         id: "aluno-atraso",
         title: "Mensalidade em atraso",
-        summary: "O que muda na plataforma quando uma parcela vence.",
-        keywords: ["atraso", "vencido", "bloqueado", "aviso", "faixa vermelha", "devendo"],
+        summary: "Lembretes, bloqueio do acesso e cancelamento da matrícula quando uma parcela vence.",
+        keywords: ["atraso", "vencido", "bloqueado", "bloqueio", "aviso", "faixa vermelha", "devendo", "inadimplência", "cancelamento"],
         blocks: [
           {
             type: "p",
-            text: "Ao vencer uma parcela, aparece um aviso fixo no topo da plataforma. Ele é um lembrete, e some sozinho assim que o pagamento é confirmado.",
+            text: "Ao vencer uma parcela, aparece um aviso fixo no topo da plataforma. Ele some sozinho assim que o pagamento é confirmado.",
+          },
+          {
+            type: "steps",
+            title: "O que acontece com uma parcela em atraso",
+            items: [
+              "**Lembretes:** 2 dias antes, no dia do vencimento e, depois dele, a cada 3 dias até o fim do mês, por e-mail, WhatsApp e notificação.",
+              "**Último dia do mês:** aviso final. Seu professor também é avisado.",
+              "**A partir do dia 1 do mês seguinte:** o acesso fica bloqueado. Ao entrar, você vê apenas a página de pagamento, com o QR Code.",
+              "**Durante o bloqueio:** cada aula é cancelada no dia anterior e **não pode ser reposta**. Você e o professor são avisados a cada cancelamento.",
+              "**Último dia do mês de bloqueio:** aviso de que a matrícula será cancelada no dia seguinte.",
+              "**Dia 1 do mês seguinte ao bloqueio:** a matrícula e o contrato são cancelados automaticamente, **sem multa rescisória**. O valor em aberto continua devido.",
+            ],
+          },
+          {
+            type: "note",
+            variant: "info",
+            title: "Pagou, voltou",
+            text: "Assim que o pagamento é confirmado, o acesso volta na hora e as próximas aulas acontecem normalmente. Só as aulas canceladas durante o bloqueio não são repostas.",
           },
           {
             type: "bullets",
             items: [
-              "Você recebe lembretes automáticos por e-mail e WhatsApp: 2 dias antes, no dia e após o vencimento.",
-              "Se já pagou e o aviso continua, aguarde alguns minutos — a confirmação depende do banco.",
+              "O código PIX enviado nos lembretes é sempre conferido antes do envio: se o anterior venceu, um novo é gerado.",
+              "Se já pagou e o aviso continua, aguarde alguns minutos — a confirmação depende do banco. Use **Já paguei, verificar** para consultar de novo.",
               "Persistindo, fale com a secretaria informando data e valor do pagamento.",
             ],
           },
