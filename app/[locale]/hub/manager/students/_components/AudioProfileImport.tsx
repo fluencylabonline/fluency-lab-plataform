@@ -8,7 +8,7 @@ import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { notify } from "@/components/ui/toaster";
-import { storage } from "@/lib/firebase";
+import { auth, storage } from "@/lib/firebase";
 import { fillProfileFromAudioAction } from "@/modules/learning/learning.actions";
 
 /** Same cache name used by the share-target handler in sw.ts. */
@@ -108,19 +108,47 @@ export function AudioProfileImport({
       );
     });
 
+  const describeUploadError = (error: unknown): string => {
+    const code = (error as { code?: string } | null)?.code ?? "";
+    if (code === "storage/unauthorized") {
+      return "Sem permissão para enviar o áudio. Peça para publicar as regras do Storage ou entre novamente.";
+    }
+    if (code === "storage/retry-limit-exceeded" || code === "storage/canceled") {
+      return "Conexão instável durante o envio. Tente novamente.";
+    }
+    return `Falha no envio do áudio${code ? ` (${code})` : ""}. Tente novamente.`;
+  };
+
   const handleAnalyze = async () => {
     if (files.length === 0) return;
     let currentProfileId = resultProfileId;
     const allFilled = new Set<string>();
     const allEvidence: Record<string, string> = {};
 
-    try {
-      for (const file of files) {
-        setProgress(0);
-        setPhase("uploading");
-        const storagePath = await uploadFile(file);
+    // The Storage rules check the role claim, so make sure the session is ready and the token fresh.
+    await auth.authStateReady();
+    if (!auth.currentUser) {
+      notify.error("Sessão expirada. Entre novamente para enviar o áudio.");
+      return;
+    }
+    await auth.currentUser.getIdToken(true).catch(() => undefined);
 
-        setPhase("analyzing");
+    for (const file of files) {
+      setProgress(0);
+      setPhase("uploading");
+
+      let storagePath: string;
+      try {
+        storagePath = await uploadFile(file);
+      } catch (error) {
+        console.error("[AudioProfileImport] upload failed", error);
+        notify.error(describeUploadError(error));
+        setPhase("idle");
+        return;
+      }
+
+      setPhase("analyzing");
+      try {
         const result = await fillProfileFromAudioAction({
           storagePath,
           mimeType: resolveMimeType(file),
@@ -135,11 +163,12 @@ export function AudioProfileImport({
         currentProfileId = result.data.profileId;
         result.data.filled.forEach((path) => allFilled.add(path));
         Object.assign(allEvidence, result.data.evidence);
+      } catch (error) {
+        console.error("[AudioProfileImport] analysis failed", error);
+        notify.error("A análise demorou demais ou falhou. Tente novamente.");
+        setPhase("idle");
+        return;
       }
-    } catch {
-      notify.error("Falha no envio do áudio. Tente novamente.");
-      setPhase("idle");
-      return;
     }
 
     setResultProfileId(currentProfileId);
