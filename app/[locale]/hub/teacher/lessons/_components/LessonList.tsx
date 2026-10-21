@@ -6,13 +6,52 @@ import { getLessonsAction } from "@/modules/curriculum/curriculum.actions";
 import { LessonSummary } from "@/modules/curriculum/curriculum.types";
 import { LessonCard } from "./LessonCard";
 import { EmptyResults } from "@/components/ui/empty";
-import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Shimmer } from "@shimmer-from-structure/react";
 import { Header } from "@/components/layout/header";
 import { useTranslations } from "next-intl";
 
 const PAGE_SIZE = 20;
+
+interface FilterGroupProps {
+  label: string;
+  allLabel: string;
+  options: { value: string; label: string }[];
+  selected: string | null;
+  onSelect: (value: string | null) => void;
+}
+
+function FilterGroup({ label, allLabel, options, selected, onSelect }: FilterGroupProps) {
+  const chip = (active: boolean) =>
+    cn(
+      "h-8 rounded-md px-3 text-xs font-semibold transition-colors",
+      active
+        ? "bg-primary text-primary-foreground"
+        : "text-foreground/70 hover:bg-muted hover:text-foreground"
+    );
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className="mr-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{label}</span>
+      <button type="button" className={chip(selected === null)} onClick={() => onSelect(null)}>
+        {allLabel}
+      </button>
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          className={chip(selected === option.value)}
+          aria-pressed={selected === option.value}
+          onClick={() => onSelect(selected === option.value ? null : option.value)}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 interface LessonListProps {
   initialData: LessonSummary[];
@@ -90,36 +129,43 @@ export function LessonList({ initialData, languages }: LessonListProps) {
 
       <main className="container">
         {/* Filters */}
-        <div className="flex flex-wrap gap-2 items-center py-2 pb-6" data-tour="teacher-lessons.filters">
-          <span className="text-xs font-bold uppercase text-muted-foreground mr-2">
-            {t("filtersLabel") || "Filtros:"}
-          </span>
-
-          {/* Difficulty Filters */}
-          {difficulties.map(diff => (
-            <Badge
-              key={diff}
-              variant={selectedDifficulty === diff ? "default" : "outline"}
-              className="cursor-pointer transition-all hover:scale-105 active:scale-95"
-              onClick={() => setSelectedDifficulty(selectedDifficulty === diff ? null : diff)}
-            >
-              {diff}
-            </Badge>
-          ))}
-
-          <div className="w-px h-4 bg-border mx-2 hidden sm:block" />
-
-          {/* Language Filters */}
-          {languages.map(lang => (
-            <Badge
-              key={lang.id}
-              variant={selectedLanguage === lang.id ? "secondary" : "outline"}
-              className="cursor-pointer transition-all hover:scale-105 active:scale-95"
-              onClick={() => setSelectedLanguage(selectedLanguage === lang.id ? null : lang.id)}
-            >
-              {lang.name}
-            </Badge>
-          ))}
+        <div className="mb-6 flex flex-col gap-3 rounded-md border border-border/60 p-3 md:flex-row md:items-center md:gap-6" data-tour="teacher-lessons.filters">
+          <FilterGroup
+            label={t("levelLabel")}
+            allLabel={t("allLabel")}
+            options={difficulties.map((d) => ({ value: d, label: d }))}
+            selected={selectedDifficulty}
+            onSelect={setSelectedDifficulty}
+          />
+          <div className="hidden h-6 w-px bg-border md:block" />
+          <FilterGroup
+            label={t("languageLabel")}
+            allLabel={t("allLabel")}
+            options={languages.map((l) => ({ value: l.id, label: l.name }))}
+            selected={selectedLanguage}
+            onSelect={setSelectedLanguage}
+          />
+          <div className="flex items-center gap-3 md:ml-auto">
+            {/* Com rolagem infinita, o total só é exato depois da última página. */}
+            {isReachingEnd && (
+              <span className="text-xs font-semibold text-muted-foreground">
+                {t("resultsCount", { count: filteredLessons.length })}
+              </span>
+            )}
+            {(selectedDifficulty || selectedLanguage) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedDifficulty(null);
+                  setSelectedLanguage(null);
+                }}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+              >
+                <X className="h-3.5 w-3.5" />
+                {t("clearFilters")}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Grid */}
@@ -143,7 +189,7 @@ export function LessonList({ initialData, languages }: LessonListProps) {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-tour="teacher-lessons.list">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" data-tour="teacher-lessons.list">
               {filteredLessons.map((lesson) => (
                 <LessonCard
                   key={lesson.id}

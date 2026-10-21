@@ -60,7 +60,8 @@ export default async function RecessActivityPage({ params }: RecessPageProps) {
         className="contents"
       />
 
-      <main className="container py-6">
+      {/* pt e não py: o pb-24 do .container reserva espaço para a barra inferior no celular. */}
+      <main className="container pt-6">
         <RecessActivityClient
           slot={slotData}
           lesson={lessonData}

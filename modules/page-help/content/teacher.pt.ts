@@ -311,7 +311,7 @@ export const TEACHER_HELP_PT: RoleHelpContent<TeacherHelpRoute> = {
       },
       {
         heading: "Os filtros",
-        body: "Nível e idioma são etiquetas clicáveis: clicar marca o filtro, clicar de novo na mesma etiqueta remove. A busca do header procura pelo título. Combinar nível com busca é o caminho mais rápido quando a biblioteca está grande.",
+        body: "Nível e idioma ficam em dois grupos no topo. Clique num botão para filtrar, de novo para remover, ou em Todos para voltar a ver tudo. Limpar filtros desfaz os dois de uma vez. A busca do header procura pelo título.",
       },
       {
         heading: "Só material pronto aparece",
@@ -319,7 +319,7 @@ export const TEACHER_HELP_PT: RoleHelpContent<TeacherHelpRoute> = {
       },
       {
         heading: "Estas não são as atividades de recesso",
-        body: "A biblioteca de recesso é outra tela, acessível pela Agenda. Uma lição daqui pode ser usada como atividade de recesso no momento de comunicar a ausência.",
+        body: "Lições com o selo Recesso também são atividades de recesso: você pode escolhê-las ao comunicar uma ausência. A biblioteca de recesso, acessível pela Agenda, mostra só essas atividades.",
       },
     ],
     tour: [
@@ -332,13 +332,13 @@ export const TEACHER_HELP_PT: RoleHelpContent<TeacherHelpRoute> = {
         id: "filters",
         target: "teacher-lessons.filters",
         title: "Filtrar por nível e idioma",
-        text: "São etiquetas clicáveis: clique para filtrar, clique de novo na mesma para remover. Junto com a busca por título no header, é a forma mais rápida de achar o que serve.",
+        text: "Dois grupos: nível e idioma. Clique para filtrar, de novo para remover, ou use Todos e Limpar filtros. Junto com a busca por título no header, é a forma mais rápida de achar o que serve.",
       },
       {
         id: "list",
         target: "teacher-lessons.list",
         title: "As lições",
-        text: "Toque numa lição para abrir o conteúdo. Só aparecem as com situação pronta — material em produção não fica visível aqui.",
+        text: "Cada cartão mostra o nível (cores diferentes para A, B e C), o resumo e o idioma. Toque para abrir. Só aparecem as lições prontas.",
       },
     ],
   },
@@ -350,7 +350,7 @@ export const TEACHER_HELP_PT: RoleHelpContent<TeacherHelpRoute> = {
     sections: [
       {
         heading: "O que você vê",
-        body: "De um lado, o conteúdo completo da lição. Do outro, os Itens de Aprendizado que ela cobre, separados em Vocabulário e Estruturas, com a tradução de cada um. No topo ficam duas etiquetas: o nível e o idioma da lição.",
+        body: "À esquerda, o conteúdo completo da lição, com o resumo em destaque no topo. À direita: a Visão geral (nível, idioma, tipo e número de perguntas), o Quiz com a resposta certa de cada pergunta destacada em verde e, quando existem, os Itens de Aprendizado (Vocabulário e Estruturas).",
       },
       {
         heading: "Esta tela é só leitura",
@@ -377,7 +377,7 @@ export const TEACHER_HELP_PT: RoleHelpContent<TeacherHelpRoute> = {
         id: "items",
         target: "teacher-lesson.items",
         title: "Itens de Aprendizado",
-        text: "O que a lição cobre, separado em Vocabulário e Estruturas, com a tradução de cada item. Serve para conferir rápido se a lição bate com o que o aluno precisa. No celular, fica na aba Vocabulário.",
+        text: "O quiz com as respostas certas destacadas e, quando existem, os itens de vocabulário e estruturas. Serve para conferir rápido se a lição bate com o que o aluno precisa. No celular, fica na aba Quiz e itens.",
       },
       {
         id: "assign",

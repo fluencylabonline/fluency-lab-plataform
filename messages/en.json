@@ -1647,7 +1647,19 @@
     "noVocabulary": "No vocabulary listed.",
     "structuresTitle": "Structures",
     "tabContent": "Content",
-    "vocabularyTitle": "Vocabulary"
+    "vocabularyTitle": "Vocabulary",
+    "summaryTitle": "About this lesson",
+    "overviewTitle": "Overview",
+    "levelLabel": "Level",
+    "languageLabel": "Language",
+    "typeLabel": "Type",
+    "typeRecess": "Recess activity",
+    "typeRegular": "Lesson",
+    "questionsLabel": "Quiz questions",
+    "quizTitle": "Quiz",
+    "quizSubtitle": "{count, plural, one {# question} other {# questions}} — the right answer is highlighted.",
+    "noQuiz": "This lesson has no quiz.",
+    "tabQuiz": "Quiz & items"
   },
   "Lessons": {
     "contentLabel": "Content",
@@ -1658,7 +1670,13 @@
     "noDescription": "No description available.",
     "subtitle": "Explore and use pre-configured lessons for your classes",
     "title": "Lessons Library",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "levelLabel": "Level",
+    "languageLabel": "Language",
+    "allLabel": "All",
+    "clearFilters": "Clear filters",
+    "resultsCount": "{count, plural, one {# lesson} other {# lessons}}",
+    "recessTag": "Recess"
   },
   "Media": {
     "cannotDeleteInUse": "Não é possível excluir um idioma em uso"

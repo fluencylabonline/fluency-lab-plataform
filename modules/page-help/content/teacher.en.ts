@@ -309,7 +309,7 @@ export const TEACHER_HELP_EN: RoleHelpContent<TeacherHelpRoute> = {
       },
       {
         heading: "The filters",
-        body: "Level and language are clickable tags: clicking one applies the filter, clicking the same one again removes it. The header search looks through titles. Combining level with a search is the fastest route once the library gets large.",
+        body: "Level and language sit in two groups at the top. Click a button to filter, click it again to remove it, or click All to see everything. Clear filters undoes both at once. The header search looks through titles.",
       },
       {
         heading: "Only finished material appears",
@@ -317,7 +317,7 @@ export const TEACHER_HELP_EN: RoleHelpContent<TeacherHelpRoute> = {
       },
       {
         heading: "These are not the recess activities",
-        body: "The recess library is a different screen, reached from My Schedule. A lesson from here can be used as a recess activity when you communicate an absence.",
+        body: "Lessons with the Recess badge are also recess activities: you can pick them when communicating an absence. The recess library, reached from My Schedule, shows only those activities.",
       },
     ],
     tour: [
@@ -330,13 +330,13 @@ export const TEACHER_HELP_EN: RoleHelpContent<TeacherHelpRoute> = {
         id: "filters",
         target: "teacher-lessons.filters",
         title: "Filter by level and language",
-        text: "They are clickable tags: click to filter, click the same one again to remove it. Together with the title search in the header, it is the fastest way to find something usable.",
+        text: "Two groups: level and language. Click to filter, click again to remove, or use All and Clear filters. Together with the title search in the header, it is the fastest way to find something usable.",
       },
       {
         id: "list",
         target: "teacher-lessons.list",
         title: "The lessons",
-        text: "Tap a lesson to open its content. Only lessons marked ready appear — material in production is not visible here.",
+        text: "Each card shows the level (different colours for A, B and C), the summary and the language. Tap to open it. Only lessons marked ready appear.",
       },
     ],
   },
@@ -348,7 +348,7 @@ export const TEACHER_HELP_EN: RoleHelpContent<TeacherHelpRoute> = {
     sections: [
       {
         heading: "What you see",
-        body: "On one side, the full content of the lesson. On the other, the Learning Items it covers, split into Vocabulary and Structures, each with its translation. At the top are two tags: the lesson's level and language.",
+        body: "On the left, the full lesson content, with its summary highlighted at the top. On the right: the Overview (level, language, type and number of questions), the Quiz with each right answer highlighted in green and, when there are any, the Learning Items (Vocabulary and Structures).",
       },
       {
         heading: "This screen is read only",
@@ -375,7 +375,7 @@ export const TEACHER_HELP_EN: RoleHelpContent<TeacherHelpRoute> = {
         id: "items",
         target: "teacher-lesson.items",
         title: "Learning Items",
-        text: "What the lesson covers, split into Vocabulary and Structures, each with its translation. Useful for quickly checking the lesson matches what your student needs. On a phone it sits under the Vocabulary tab.",
+        text: "The quiz with the right answers highlighted and, when there are any, the vocabulary and structure items. Useful for quickly checking the lesson matches what your student needs. On a phone it sits under the Quiz & items tab.",
       },
       {
         id: "assign",

@@ -1,12 +1,12 @@
 "use client";
 
 import { LessonSummary } from "@/modules/curriculum/curriculum.types";
-import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button-variants";
-import { BookOpen, Tag, ArrowRight } from "lucide-react";
+import { ArrowUpRight, Globe, Coffee } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
+import { levelBadgeClass } from "./level-style";
 
 interface LessonCardProps {
   lesson: LessonSummary;
@@ -19,43 +19,41 @@ export function LessonCard({ lesson }: LessonCardProps) {
   const locale = params.locale as string;
 
   return (
-    <div className="card flex flex-col h-full group p-4">
-      <div className="flex items-center justify-between mb-3">
-        <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-medium uppercase tracking-wider">
-          {lesson.language?.name || commonT("language") || "Idioma"}
-        </Badge>
-        <div className="flex items-center gap-1 text-muted-foreground">
-          <Tag className="w-3 h-3" />
-          <span className="text-[10px] font-medium uppercase tracking-wider">{lesson.difficulty}</span>
-        </div>
+    <Link
+      href={`/${locale}/hub/teacher/lessons/${lesson.id}`}
+      className="card group flex h-full flex-col gap-3 p-5 outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+      aria-label={`${t("viewDetails")}: ${lesson.title}`}
+    >
+      <div className="flex items-center gap-2">
+        <span
+          className={cn(
+            "inline-flex h-6 min-w-9 items-center justify-center rounded-md px-2 text-xs font-bold ring-1 ring-inset",
+            levelBadgeClass(lesson.difficulty)
+          )}
+        >
+          {lesson.difficulty}
+        </span>
+        {lesson.isRecessActivity && (
+          <span className="inline-flex h-6 items-center gap-1 rounded-md bg-amber-500/15 px-2 text-[11px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-500/30 dark:text-amber-300">
+            <Coffee className="h-3 w-3" />
+            {t("recessTag")}
+          </span>
+        )}
+        <ArrowUpRight className="ml-auto h-4 w-4 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
       </div>
 
-      <h3 className="text-base font-bold line-clamp-2 mb-2 group-hover:text-primary transition-colors">
+      <h3 className="text-base font-bold leading-snug text-foreground line-clamp-2 transition-colors group-hover:text-primary">
         {lesson.title}
       </h3>
 
-      <p className="text-sm text-muted-foreground line-clamp-3 italic mb-4 flex-1">
-        {lesson.contentText || t("noDescription") || "Nenhuma descrição disponível."}
+      <p className="flex-1 text-sm leading-relaxed text-foreground/70 line-clamp-3">
+        {lesson.contentText || t("noDescription")}
       </p>
 
-      <div className="pt-4 border-t border-border/50 flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-muted-foreground">
-          <BookOpen className="w-3.5 h-3.5" />
-          <span className="text-xs font-medium">{t("contentLabel") || "Conteúdo"}</span>
-        </div>
-
-        <Link
-          href={`/${locale}/hub/teacher/lessons/${lesson.id}`}
-          className={buttonVariants({
-            variant: "ghost",
-            size: "sm",
-            className: "h-8 gap-2 text-xs font-bold hover:bg-primary/10 hover:text-primary"
-          })}
-        >
-          {t("viewDetails") || "Ver Detalhes"}
-          <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
+      <div className="flex items-center gap-1.5 border-t border-border/60 pt-3 text-xs font-medium text-muted-foreground">
+        <Globe className="h-3.5 w-3.5" />
+        {lesson.language?.name || commonT("language")}
       </div>
-    </div>
+    </Link>
   );
 }

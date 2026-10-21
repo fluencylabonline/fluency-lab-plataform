@@ -1647,7 +1647,19 @@
     "noVocabulary": "Nenhum vocabulário listado.",
     "structuresTitle": "Estruturas",
     "tabContent": "Conteúdo",
-    "vocabularyTitle": "Vocabulário"
+    "vocabularyTitle": "Vocabulário",
+    "summaryTitle": "Sobre a lição",
+    "overviewTitle": "Visão geral",
+    "levelLabel": "Nível",
+    "languageLabel": "Idioma",
+    "typeLabel": "Tipo",
+    "typeRecess": "Atividade de recesso",
+    "typeRegular": "Lição",
+    "questionsLabel": "Perguntas no quiz",
+    "quizTitle": "Quiz",
+    "quizSubtitle": "{count, plural, one {# pergunta} other {# perguntas}} — a resposta certa aparece destacada.",
+    "noQuiz": "Esta lição não tem quiz.",
+    "tabQuiz": "Quiz e itens"
   },
   "Lessons": {
     "contentLabel": "Conteúdo",
@@ -1658,7 +1670,13 @@
     "noDescription": "Nenhuma descrição disponível.",
     "subtitle": "Explore e utilize lições pré-configuradas para suas aulas",
     "title": "Biblioteca de Lições",
-    "viewDetails": "Ver Detalhes"
+    "viewDetails": "Ver Detalhes",
+    "levelLabel": "Nível",
+    "languageLabel": "Idioma",
+    "allLabel": "Todos",
+    "clearFilters": "Limpar filtros",
+    "resultsCount": "{count, plural, one {# lição} other {# lições}}",
+    "recessTag": "Recesso"
   },
   "Media": {
     "cannotDeleteInUse": "Não é possível excluir um idioma em uso"

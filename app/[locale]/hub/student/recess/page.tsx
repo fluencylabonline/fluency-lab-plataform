@@ -69,7 +69,7 @@ export default async function StudentRecessListPage() {
     <div className="flex min-h-screen flex-col">
       <Header title={t("title")} subtitle={t("subtitle")} backHref="/hub/student/profile" className="contents" />
 
-      <main className="container space-y-8 py-6">
+      <main className="container space-y-8 pt-6">
         {activities.length === 0 ? (
           <EmptyResults title={t("empty")} description={t("emptyText")} />
         ) : (
