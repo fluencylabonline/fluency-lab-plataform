@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import { type JSONContent } from "@tiptap/core";
 import { type QuizData } from "@/modules/curriculum/curriculum.types";
+import { RecessActivityPdfActions } from "./RecessActivityPdfActions";
 
 interface RecessActivityClientProps {
   slot: {
@@ -124,6 +125,13 @@ export function RecessActivityClient({ slot, lesson, locale }: RecessActivityCli
               <Badge variant="outline" className="uppercase font-bold text-xs">
                 {lesson.difficulty}
               </Badge>
+            </div>
+
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs text-muted-foreground">
+                Prefere estudar no papel? O PDF traz o conteúdo, o quiz e o gabarito.
+              </p>
+              <RecessActivityPdfActions slotId={slot.id} />
             </div>
 
             {lesson.contentJson ? (

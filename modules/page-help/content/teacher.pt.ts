@@ -492,7 +492,8 @@ export const TEACHER_HELP_PT: RoleHelpContent<TeacherHelpRoute> = {
         heading: "Os botões",
         body: [
           "Criar uma lição abre o editor de uma atividade sua, com texto e quiz.",
-          "O lápis em cada cartão abre a atividade para editar.",
+          "O lápis aparece só nas atividades suas (Minha Atividade) e abre a atividade para editar.",
+          "Atividades com o selo Global são da escola, valem para todos os professores e não podem ser editadas aqui.",
           "Os cartões mostram idioma e nível, para você achar a adequada a cada aluno.",
         ],
       },

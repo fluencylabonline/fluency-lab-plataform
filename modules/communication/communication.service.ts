@@ -37,6 +37,7 @@ import {
 } from "./templates/ContractStatusEmails";
 import { ScheduleAlertEmail } from "./templates/ScheduleAlertEmail";
 import { TeacherRecessStudentEmail } from "./templates/TeacherRecessStudentEmail";
+import { LessonPdfEmail } from "./templates/LessonPdfEmail";
 import { CertificateEmail } from "./templates/CertificateEmail";
 import { FarewellEmail } from "./templates/FarewellEmail";
 import { PasswordResetRequestEmail } from "./templates/PasswordResetRequestEmail";
@@ -462,6 +463,24 @@ export class CommunicationService {
       });
     } catch (error) {
       console.error("[CommunicationService.sendTeacherRecessStudentEmail] Error:", error);
+    }
+  }
+
+  /** Lição em PDF pedida pelo próprio usuário — o erro sobe para a tela avisar. */
+  async sendLessonPdfEmail(
+    email: string,
+    data: { name: string; lessonTitle: string; filename: string; pdfBytes: Uint8Array }
+  ) {
+    const result = await this.sendEmail({
+      to: email,
+      subject: `📄 Sua lição em PDF: ${data.lessonTitle}`,
+      template: React.createElement(LessonPdfEmail, { name: data.name, lessonTitle: data.lessonTitle }),
+      attachments: [{ filename: data.filename, content: data.pdfBytes }],
+    });
+    // O Resend devolve o erro no resultado em vez de lançar.
+    if (result?.error) {
+      console.error("[CommunicationService.sendLessonPdfEmail] Error:", result.error);
+      throw new Error("Falha ao enviar o e-mail.");
     }
   }
 

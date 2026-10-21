@@ -489,7 +489,8 @@ export const TEACHER_HELP_EN: RoleHelpContent<TeacherHelpRoute> = {
         heading: "The buttons",
         body: [
           "Create a lesson opens the editor for an activity of your own, with text and a quiz.",
-          "The pencil on each card opens that activity for editing.",
+          "The pencil only shows on your own activities (My Activity) and opens that activity for editing.",
+          "Activities with the Global badge belong to the school, are available to every teacher and cannot be edited here.",
           "The cards show language and level, so you can find the one that suits each student.",
         ],
       },

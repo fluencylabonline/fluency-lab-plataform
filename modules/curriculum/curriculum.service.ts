@@ -670,6 +670,27 @@ export const curriculumService = {
     });
   },
 
+  /** PDF imprimível da lição (conteúdo + quiz + gabarito). */
+  async renderLessonPdf(lessonId: string, subtitle?: string) {
+    const lesson = await curriculumRepository.findLessonById(lessonId);
+    if (!lesson) throw new Error("Lição não encontrada.");
+    const { renderLessonPdf } = await import("./lesson-pdf");
+    const bytes = await renderLessonPdf({
+      title: lesson.title,
+      difficulty: lesson.difficulty,
+      contentJson: lesson.contentJson,
+      quizData: lesson.quizData,
+      subtitle,
+    });
+    const slug = lesson.title
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-zA-Z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .toLowerCase();
+    return { bytes, filename: `${slug || "licao"}.pdf`, title: lesson.title };
+  },
+
   async getRecessActivities(teacherId?: string) {
     return await curriculumRepository.findRecessActivities(teacherId);
   },
@@ -685,6 +706,11 @@ export const curriculumService = {
     teacherId: string
   }) {
     if (data.id) {
+      // ABAC: atividades globais (sem dono) e de outros professores não podem ser editadas aqui.
+      const existing = await curriculumRepository.findLessonById(data.id);
+      if (!existing || !existing.isRecessActivity || existing.teacherId !== data.teacherId) {
+        throw new Error("Você só pode editar as suas próprias atividades de recesso.");
+      }
       return await curriculumRepository.updateLesson(data.id, {
         ...data,
         isRecessActivity: true,

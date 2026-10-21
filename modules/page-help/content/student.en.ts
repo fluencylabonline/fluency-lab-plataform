@@ -880,6 +880,15 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
         body: "Answer the questions and, when you finish, the screen shows how many you got right. Try Again restarts the quiz as often as you like — there is no limit and no grade at stake.",
       },
       {
+        heading: "Studying on paper",
+        body: [
+          "Print opens the print dialog for the whole lesson, already laid out in pages.",
+          "Download PDF saves the file to your device.",
+          "Send by email sends the PDF to your account's email. You can ask for it up to 5 times per hour.",
+          "The PDF has the content, the quiz to answer by hand and the answer key on the last page.",
+        ],
+      },
+      {
         heading: "No content or no quiz?",
         body: "Some activities have only text, others only a quiz. The screen says so when one of the parts was not set up — it is not something you did wrong.",
       },
@@ -895,6 +904,12 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
         target: "student-recess.content",
         title: "The content",
         text: "The lesson to read, in your own time. If the activity has no text set up, the screen says so here.",
+      },
+      {
+        id: "pdf",
+        target: "student-recess.pdf",
+        title: "Print it or take it with you",
+        text: "Print, download the PDF or get it by email. The file has the content, the quiz and the answer key at the end.",
       },
       {
         id: "quiz",

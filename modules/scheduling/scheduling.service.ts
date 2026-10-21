@@ -2793,6 +2793,28 @@ export const schedulingService = {
 
     return slot;
   },
+
+  /** PDF da atividade de recesso de uma aula. Só existe enquanto a aula está em recesso. */
+  async getRecessActivityPdf(user: User, slotId: string) {
+    const slot = await this.getSlotById(user, slotId);
+    if (!slot || slot.status !== "teacher-recess" || !slot.fallbackLessonId) {
+      throw new Error("Esta aula não tem uma atividade de recesso disponível.");
+    }
+    return curriculumService.renderLessonPdf(slot.fallbackLessonId, "Atividade de recesso");
+  },
+
+  /** Envia a atividade de recesso em PDF para o e-mail do próprio usuário. */
+  async emailRecessActivityPdf(user: User, slotId: string) {
+    if (!user.email) throw new Error("Seu usuário não tem e-mail cadastrado.");
+    const pdf = await this.getRecessActivityPdf(user, slotId);
+    await communicationService.sendLessonPdfEmail(user.email, {
+      name: user.name || "",
+      lessonTitle: pdf.title,
+      filename: pdf.filename,
+      pdfBytes: pdf.bytes,
+    });
+    return { email: user.email };
+  },
 };
 
 

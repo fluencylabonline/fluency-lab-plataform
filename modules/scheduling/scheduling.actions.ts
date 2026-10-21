@@ -17,6 +17,7 @@ import { refresh } from "next/cache";
 import { z } from "zod";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { schedulingRepository } from "./scheduling.repository";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const createRecurrenceRuleAction = protectedAction
   .metadata({ name: "createRecurrenceRule" })
@@ -730,6 +731,40 @@ export const transferStudentTeacherAction = permissionAction("class.update.any")
       return { success: true };
     } catch (error) {
       console.error("[transferStudentTeacherAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const getRecessActivityPdfAction = protectedAction
+  .metadata({ name: "getRecessActivityPdf" })
+  .inputSchema(z.object({ slotId: z.string().uuid() }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const pdf = await schedulingService.getRecessActivityPdf(ctx.user, parsedInput.slotId);
+      return {
+        success: true,
+        filename: pdf.filename,
+        base64: Buffer.from(pdf.bytes).toString("base64"),
+      };
+    } catch (error) {
+      console.error("[getRecessActivityPdfAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const emailRecessActivityPdfAction = protectedAction
+  .metadata({ name: "emailRecessActivityPdf" })
+  .inputSchema(z.object({ slotId: z.string().uuid() }))
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const limit = await checkRateLimit("lesson_pdf_email", ctx.user.id, 5, 3600 * 1000);
+      if (!limit.success) {
+        return { success: false, error: "Você já pediu vários e-mails nesta hora. Tente de novo mais tarde." };
+      }
+      const result = await schedulingService.emailRecessActivityPdf(ctx.user, parsedInput.slotId);
+      return { success: true, email: result.email };
+    } catch (error) {
+      console.error("[emailRecessActivityPdfAction] Error:", error);
       return { success: false, error: (error as Error).message };
     }
   });

@@ -4,7 +4,7 @@ import {
   languages, media, learningItems, lessons, lessonLearningItems, cefrLevelEnum, lessonStatusEnum
 } from "./curriculum.schema";
 import { LessonWithDetails, LessonSummary } from "./curriculum.types";
-import { eq, and, isNull, sql, desc, inArray } from "drizzle-orm";
+import { eq, and, or, isNull, sql, desc, inArray } from "drizzle-orm";
 
 export const curriculumRepository = {
   // Languages
@@ -260,8 +260,9 @@ export const curriculumRepository = {
       eq(lessons.status, "ready"),
       isNull(lessons.deletedAt)
     ];
+    // Com professor: as atividades dele + as globais (sem dono), que valem para todos.
     if (teacherId) {
-      filters.push(eq(lessons.teacherId, teacherId));
+      filters.push(or(eq(lessons.teacherId, teacherId), isNull(lessons.teacherId))!);
     }
     return await db.query.lessons.findMany({
       where: and(...filters),

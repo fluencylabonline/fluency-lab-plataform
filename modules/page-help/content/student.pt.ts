@@ -882,6 +882,15 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
         body: "Responda as perguntas e, ao terminar, a tela mostra quantas você acertou. Tentar Novamente reinicia o quiz quantas vezes você quiser — não existe limite nem nota valendo.",
       },
       {
+        heading: "Estudar no papel",
+        body: [
+          "Imprimir abre a impressão da lição completa, já formatada em páginas.",
+          "Baixar PDF salva o arquivo no seu aparelho.",
+          "Receber por e-mail manda o PDF para o e-mail da sua conta. Dá para pedir até 5 vezes por hora.",
+          "O PDF traz o conteúdo, o quiz para marcar à mão e o gabarito na última página.",
+        ],
+      },
+      {
         heading: "Sem conteúdo ou sem quiz?",
         body: "Algumas atividades têm só texto, outras só quiz. A tela avisa quando uma das partes não foi cadastrada — não é erro seu.",
       },
@@ -897,6 +906,12 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
         target: "student-recess.content",
         title: "O conteúdo",
         text: "A lição para ler, no seu tempo. Se a atividade não tiver texto cadastrado, a tela avisa aqui.",
+      },
+      {
+        id: "pdf",
+        target: "student-recess.pdf",
+        title: "Imprimir ou levar com você",
+        text: "Imprima, baixe o PDF ou receba por e-mail. O arquivo tem o conteúdo, o quiz e o gabarito no final.",
       },
       {
         id: "quiz",
