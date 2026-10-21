@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { syncInstallmentPaymentAction, generateInstallmentInvoiceAction } from "@/modules/billing/billing.actions";
 
 interface StudentPaymentStatusCardProps {
@@ -36,6 +36,7 @@ interface StudentPaymentStatusCardProps {
       status: string;
       pixCode: string | null;
       pixQrCode: string | null;
+      paymentExpiresAt?: Date | string | null;
       orderIndex: number;
       totalMonths: number;
     } | null;
@@ -49,6 +50,12 @@ export function StudentPaymentStatusCard({
   const t = useTranslations("Hub.StudentProfile.Payment");
   const locale = useLocale();
   const [isVerifying, setIsVerifying] = useState(false);
+  // Reavalia a validade do PIX a cada 30s: se ele expirar com a tela aberta, o QR some.
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNowMs(Date.now()), 30_000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleVerifyPayment = async () => {
     if (!subscription?.currentInstallment?.id) return;
@@ -108,8 +115,8 @@ export function StudentPaymentStatusCard({
 
     setIsGenerating(true);
     try {
-      // If the installment is overdue, it means the PIX likely expired — force regeneration
-      const shouldForce = isOverdue;
+      // Só força um PIX novo quando o atual não serve mais (expirado, ou parcela vencida sem validade registrada).
+      const shouldForce = isPixExpired || isPixValidityUnknown;
       const result = await generateInstallmentInvoiceAction({
         installmentId: subscription.currentInstallment.id,
         force: shouldForce,
@@ -225,7 +232,16 @@ export function StudentPaymentStatusCard({
   };
 
   const isOverdue = getIsOverdue();
-  
+
+  // Parcela vencida não significa PIX inútil: enquanto o PIX estiver válido ele ainda pode ser pago.
+  // O botão de atualizar e o aviso dependem da validade real do PIX (paymentExpiresAt, vinda do gateway).
+  const pixExpiresAt = subscription.currentInstallment?.paymentExpiresAt
+    ? new Date(subscription.currentInstallment.paymentExpiresAt).getTime()
+    : null;
+  const isPixExpired = !isCreditCard && pixExpiresAt !== null && pixExpiresAt <= nowMs;
+  // Parcelas antigas não têm validade registrada: se estiverem vencidas, mantém o comportamento anterior.
+  const isPixValidityUnknown = !isCreditCard && pixExpiresAt === null && isOverdue;
+
   let currentStatus = subscription?.currentInstallment?.status || subscription?.subscriptionStatus || "pending";
   if (isOverdue) {
     currentStatus = "overdue";
@@ -330,6 +346,49 @@ export function StudentPaymentStatusCard({
                       </Button>
                     </div>
                   </div>
+                ) : isPixExpired ? (
+                  <div className="flex flex-col items-center gap-4 text-center py-4" data-testid="pix-expired">
+                    <div className="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-900/10 flex items-center justify-center">
+                      <AlertTriangle className="w-6 h-6 text-amber-500" />
+                    </div>
+
+                    <div className="space-y-1">
+                      <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                        {t("pixExpiredTitle") || "Este código PIX expirou"}
+                      </p>
+                      <p className="text-xs text-zinc-500 max-w-xs mx-auto">
+                        {t("pixExpiredDesc") || "Ele não pode mais ser usado para pagar. Gere um novo código para continuar."}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col gap-2 w-full max-w-xs pt-1">
+                      <Button
+                        size="default"
+                        className="w-full gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold shadow-sm"
+                        onClick={handleGenerateInvoice}
+                        disabled={isGenerating}
+                      >
+                        <RotateCw className={cn("w-4 h-4 mr-2", isGenerating && "animate-spin")} />
+                        {isGenerating
+                          ? t("regenerating") || "Gerando..."
+                          : t("regeneratePayment") || "Atualizar Código PIX"}
+                      </Button>
+
+                      <Button
+                        size="default"
+                        variant="ghost"
+                        className="w-full gap-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200/50 dark:border-zinc-800/50"
+                      >
+                        <a
+                          href={`/${locale}/hub/student/payments`}
+                          className="flex flex-row items-center gap-2 justify-center w-full"
+                        >
+                          <Wallet2 className="w-4 h-4 mr-2 text-zinc-500" />
+                          {t("managePayments") || "Gerenciar pagamentos"}
+                        </a>
+                      </Button>
+                    </div>
+                  </div>
                 ) : (
                   <div className="flex flex-col lg:flex-row gap-5 items-center lg:items-start">
                     <div className="relative shrink-0 group bg-white p-2 rounded-md border-2 border-dashed border-zinc-200 dark:border-zinc-700 shadow-sm">
@@ -396,8 +455,8 @@ export function StudentPaymentStatusCard({
                               "Já paguei, verificar pagamento"}
                         </Button>
 
-                        {/* Regenerate expired PIX — only when overdue */}
-                        {isOverdue && (
+                        {/* Parcelas antigas vencidas, sem validade registrada: não dá para saber se o PIX serve. */}
+                        {isPixValidityUnknown && (
                           <Button
                             size="default"
                             variant="outline"

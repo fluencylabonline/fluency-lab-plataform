@@ -945,6 +945,8 @@ export const billingService = {
         status: currentInstallment.status,
         pixCode: currentInstallment.pixPayload,
         pixQrCode: currentInstallment.pixImage,
+        // Quando o PIX vence no gateway (a parcela vencida ainda pode ser paga com um PIX válido).
+        paymentExpiresAt: currentInstallment.paymentExpiresAt,
         orderIndex: currentInstallment.orderIndex,
         totalMonths: sub.plan?.durationMonths ?? 0,
       } : null,

@@ -31,7 +31,7 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
         id: "payment",
         target: "student-profile.payment",
         title: "Situação do seu pagamento",
-        text: "Mostra o plano e se a mensalidade do mês está paga ou em aberto. Havendo parcela vencida, um aviso aparece com o PIX para você quitar na hora.",
+        text: "Mostra o plano e se a mensalidade do mês está paga ou em aberto. Havendo parcela vencida, o PIX continua aparecendo enquanto o código for válido. Quando o código expira, o QR Code some e aparece o botão Atualizar Código PIX para gerar um novo.",
       },
       {
         id: "onboarding",

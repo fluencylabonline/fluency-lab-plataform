@@ -31,6 +31,7 @@ type SubscriptionData = {
     status: string;
     pixCode: string | null;
     pixQrCode: string | null;
+    paymentExpiresAt?: Date | string | null;
     orderIndex: number;
     totalMonths: number;
   } | null;

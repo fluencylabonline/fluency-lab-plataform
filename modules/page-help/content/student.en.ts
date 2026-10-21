@@ -30,7 +30,7 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
         id: "payment",
         target: "student-profile.payment",
         title: "Your payment status",
-        text: "Shows your plan and whether this month's invoice is paid or open. If an invoice is overdue, a notice appears with the PIX code so you can settle it right away.",
+        text: "Shows your plan and whether this month's invoice is paid or open. If an invoice is overdue, the PIX code keeps showing for as long as it is valid. When the code expires, the QR code disappears and an Update PIX Code button appears to generate a new one.",
       },
       {
         id: "onboarding",

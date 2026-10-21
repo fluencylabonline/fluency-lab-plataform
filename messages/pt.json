@@ -947,7 +947,9 @@
         "payNow": "Quero pagar agora",
         "codeExpired": "Código expirado",
         "codeExpiredTitle": "Este código PIX expirou",
-        "codeExpiredDesc": "Ele não pode mais ser pago. Gere um código novo para continuar."
+        "codeExpiredDesc": "Ele não pode mais ser pago. Gere um código novo para continuar.",
+        "pixExpiredTitle": "Este código PIX expirou",
+        "pixExpiredDesc": "Ele não pode mais ser usado para pagar. Gere um novo código para continuar."
       },
       "ProgressHero": {
         "classes": "Aulas",

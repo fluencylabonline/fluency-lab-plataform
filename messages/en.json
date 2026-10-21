@@ -947,7 +947,9 @@
         "payNow": "Pay now",
         "codeExpired": "Code expired",
         "codeExpiredTitle": "This PIX code has expired",
-        "codeExpiredDesc": "It can no longer be paid. Generate a new code to continue."
+        "codeExpiredDesc": "It can no longer be paid. Generate a new code to continue.",
+        "pixExpiredTitle": "This PIX code has expired",
+        "pixExpiredDesc": "It can no longer be used to pay. Generate a new code to continue."
       },
       "ProgressHero": {
         "classes": "Classes",
