@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { CalendarView, CalendarEvent } from "@/components/ui/calendar-view";
-import { CreateSlotVault } from "@/modules/scheduling/_components/CreateSlotVault";
+import { CreateSlotWizardVault } from "@/modules/scheduling/_components/create-slot-wizard/CreateSlotWizardVault";
 import { SlotDetailsVault } from "@/modules/scheduling/_components/SlotDetailsVault";
 import { CommunicateRecessVault } from "./CommunicateRecessVault";
 import { CheckRecessVault } from "./CheckRecessVault";
@@ -258,7 +258,7 @@ export function TeacherScheduleClient({
         />
       </div>
 
-      <CreateSlotVault
+      <CreateSlotWizardVault
         teacherId={teacherId}
         isOpen={isCreateOpen}
         onOpenChange={setIsCreateOpen}

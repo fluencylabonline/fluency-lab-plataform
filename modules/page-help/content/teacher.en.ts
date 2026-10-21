@@ -71,10 +71,20 @@ export const TEACHER_HELP_EN: RoleHelpContent<TeacherHelpRoute> = {
       {
         heading: "The four buttons",
         body: [
-          "Create Slot opens an availability slot. It is what allows students to be assigned to you.",
+          "Create Slot opens a step-by-step flow to create an availability slot. It is what allows students to be assigned to you.",
           "Recess Activities takes you to the library where you build the lessons that replace your classes during an absence.",
           "Recesses shows the recesses you have requested and the approval status of each.",
           "Communicate Recess opens a request for a new period of absence.",
+        ],
+      },
+      {
+        heading: "How to create a slot",
+        body: [
+          "Pick the type: regular slot (regular classes) or makeup.",
+          "Pick the start date. The weekday of that date sets the day the slot repeats — for example, starting on a Wednesday, it repeats every Wednesday.",
+          "Pick one or more times. Each class lasts 45 minutes and start times are every 15 minutes. Times where you already have a class show as a conflict and cannot be picked. For a time outside the list, use Another time.",
+          "Pick the frequency: One time, Weekly, Biweekly or Monthly. The default is Weekly for a regular slot and One time for a makeup, but a makeup can repeat too, such as every Saturday.",
+          "Check the summary and tap Create slot. The slot is created with no end date.",
         ],
       },
       {
@@ -119,7 +129,7 @@ export const TEACHER_HELP_EN: RoleHelpContent<TeacherHelpRoute> = {
         id: "create-slot",
         target: "teacher-schedule.create-slot",
         title: "Create Slot",
-        text: "Opens an availability slot. It is recurring: you set the weekly time and the system replicates it over the coming months. While your availability is empty, no student can be assigned to you.",
+        text: "Opens a step-by-step flow: type (regular or makeup), start date, 45-minute times and frequency. At the end you check the summary and create. While your availability is empty, no student can be assigned to you.",
       },
       {
         id: "register",

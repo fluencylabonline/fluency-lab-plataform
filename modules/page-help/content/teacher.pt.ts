@@ -73,10 +73,20 @@ export const TEACHER_HELP_PT: RoleHelpContent<TeacherHelpRoute> = {
       {
         heading: "Os quatro botões",
         body: [
-          "Criar Horário abre um horário de disponibilidade. É o que permite alocar alunos com você.",
+          "Criar Horário abre um passo a passo para criar um horário de disponibilidade. É o que permite alocar alunos com você.",
           "Atividades de Recesso leva à biblioteca onde você cria as lições que substituem suas aulas durante uma ausência.",
           "Recessos mostra seus recessos já pedidos e a situação de aprovação de cada um.",
           "Comunicar Recesso abre o pedido de um novo período de ausência.",
+        ],
+      },
+      {
+        heading: "Como criar um horário",
+        body: [
+          "Escolha o tipo: horário normal (aulas regulares) ou reposição.",
+          "Escolha a data de início. O dia da semana dessa data define em que dia o horário se repete — por exemplo, começando numa quarta, a recorrência cai toda quarta.",
+          "Escolha um ou mais horários. Cada aula tem 45 minutos e os inícios são de 15 em 15 minutos. Horários em que você já tem aula aparecem como conflito e não podem ser escolhidos. Para um horário fora da lista, use Outro horário.",
+          "Escolha a frequência: Único, Semanal, Quinzenal ou Mensal. O padrão é Semanal para horário normal e Único para reposição, mas a reposição também pode se repetir, como toda sábado.",
+          "Confira o resumo e toque em Criar horário. O horário é criado sem data de término.",
         ],
       },
       {
@@ -121,7 +131,7 @@ export const TEACHER_HELP_PT: RoleHelpContent<TeacherHelpRoute> = {
         id: "create-slot",
         target: "teacher-schedule.create-slot",
         title: "Criar Horário",
-        text: "Abre um horário de disponibilidade. Ele é recorrente: você define o horário semanal e o sistema replica nos próximos meses. Enquanto sua disponibilidade estiver vazia, nenhum aluno pode ser alocado com você.",
+        text: "Abre um passo a passo: tipo (normal ou reposição), data de início, horários de 45 minutos e frequência. No fim você confere o resumo e cria. Enquanto sua disponibilidade estiver vazia, nenhum aluno pode ser alocado com você.",
       },
       {
         id: "register",

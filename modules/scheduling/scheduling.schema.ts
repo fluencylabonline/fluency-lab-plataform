@@ -257,6 +257,19 @@ export const createRecurrenceRulesBatchSchema = z.object({
 
 export type CreateRecurrenceRulesBatchValues = z.input<typeof createRecurrenceRulesBatchSchema>;
 
+// Estado do formulário do wizard de criação de horários (professor).
+// Cada início em `startTimes` vira uma regra de 45 min; o término é derivado no submit.
+export const createSlotWizardSchema = z.object({
+  type: z.enum(slotTypeEnum.enumValues),
+  startDate: z.date(),
+  startTimes: z
+    .array(z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Formato inválido (HH:mm)"))
+    .min(1),
+  frequency: z.enum(recurrenceFreqEnum.enumValues),
+});
+
+export type CreateSlotWizardValues = z.input<typeof createSlotWizardSchema>;
+
 const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
 
 export const retimeRecurrenceSchema = z.object({
