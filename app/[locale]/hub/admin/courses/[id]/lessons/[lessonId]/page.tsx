@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/lib/auth-server";
 import { courseService } from "@/modules/course/course.service";
 import { notFound } from "next/navigation";
-import { LessonEditorClient } from "./_components/LessonEditorClient";
+import { LessonEditorClient } from "@/modules/course/_components/LessonEditorClient";
 
 interface LessonPageProps {
   params: Promise<{

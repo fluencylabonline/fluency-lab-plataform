@@ -32,6 +32,16 @@ export const settingsService = {
     return { start, autoCancelEnabled: !!start && settings.delinquencyAutoCancelEnabled };
   },
 
+  /** Reserva a campanha do recesso; false se ela já foi enviada este ano. */
+  async claimHolidayRecessCampaign(key: string) {
+    await this.getSettings(); // garante que a linha de configurações existe
+    return settingsRepository.claimHolidayRecessCampaign(key);
+  },
+
+  async releaseHolidayRecessCampaign(key: string) {
+    return settingsRepository.releaseHolidayRecessCampaign(key);
+  },
+
   async updateDelinquencyPolicy(userRole: string, data: UpdateDelinquencyPolicyValues) {
     if (userRole !== "admin") {
       throw new Error("Sem permissão para alterar as configurações do sistema");

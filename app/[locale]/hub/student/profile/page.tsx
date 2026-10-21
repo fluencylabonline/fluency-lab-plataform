@@ -10,6 +10,7 @@ import { getStudentProficiencies } from "@/utils/proficiency";
 import { type OnboardingVariant } from "./_components/OnboardingStatusCard";
 import { type PlacementTest } from "@/modules/placement/placement.schema";
 import { StudentProfileClient } from "./_components/StudentProfileClient";
+import { holidayRecessDates, isHolidayRecessPeriod } from "@/lib/holiday-recess";
 
 /** Course ID that exists only in production — kept server-side to avoid leaking in the client bundle. */
 const WELCOME_COURSE_ID = "0ece3db9-ccb1-4e8f-bd46-6f649d010762";
@@ -31,6 +32,13 @@ export default async function ProfilePage() {
         courseService.getStudentCourseStatus(user.id, WELCOME_COURSE_ID),
         schedulingService.getStudentRecessActivities(user),
     ]);
+
+    // No recesso de fim de ano não há aula ao vivo: o cartão de próxima aula vira
+    // o atalho para as aulas gravadas (se houver algum pacote publicado).
+    const holidayPackageCount = isHolidayRecessPeriod() ? await courseService.countPublishedHolidayRecessPackages() : 0;
+    const holidayClasses = holidayPackageCount > 0
+        ? { packageCount: holidayPackageCount, returnDay: holidayRecessDates().returnDay }
+        : null;
 
     const subscriptionData = activePayment;
 
@@ -102,6 +110,7 @@ export default async function ProfilePage() {
             curriculumStats={curriculumStats}
             practiceStatus={practiceStatus}
             recessActivitiesCount={recessActivities.length}
+            holidayClasses={holidayClasses}
         />
     );
 }

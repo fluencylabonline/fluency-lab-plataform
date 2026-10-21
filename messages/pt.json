@@ -614,7 +614,12 @@
     "videoLesson": "Vídeo Aula",
     "videoLinkPlaceholder": "Link do YouTube ou Google Drive...",
     "videosAndTexts": "{videos} Vídeos e {texts} Textos",
-    "targetRoles": "Público-alvo"
+    "targetRoles": "Público-alvo",
+    "attachmentLabel": "Anexo",
+    "addAttachment": "Adicionar anexo",
+    "attachmentTooLarge": "O anexo deve ter no máximo 50MB.",
+    "attachmentUploaded": "Anexo enviado. Salve a aula para publicar.",
+    "attachmentUploadError": "Erro ao enviar o anexo. Use PDF, imagem, áudio, Word, Excel, PowerPoint ou ZIP."
   },
   "Dashboard": {
     "academic": {
@@ -1723,7 +1728,8 @@
     "settings": "Configurações",
     "students": "Alunos",
     "tasks": "Tarefas",
-    "users": "Usuários"
+    "users": "Usuários",
+    "holidayClasses": "Aulas de Recesso"
   },
   "NotebookHub": {
     "myProgress": "Meu Progresso",
@@ -3676,6 +3682,29 @@
       "emailSent": "Enviamos o PDF para {email}.",
       "error": "Não foi possível gerar o PDF.",
       "emailError": "Não foi possível enviar o e-mail."
+    }
+  },
+  "HolidayClasses": {
+    "manage": {
+      "title": "Aulas de Recesso",
+      "subtitle": "Pacotes de aulas gravadas para o recesso de fim de ano",
+      "create": "Criar pacote de recesso",
+      "createDescription": "Um pacote reúne módulos e aulas gravadas (vídeo, texto, anexos e quiz). Publique para os alunos verem."
+    },
+    "student": {
+      "title": "Aulas de Recesso",
+      "subtitle": "Aulas gravadas para você estudar no recesso de fim de ano",
+      "noticeInPeriod": "Estamos no recesso de fim de ano, sem aulas ao vivo. As aulas voltam em {returnDay}. Enquanto isso, estude com as aulas gravadas abaixo.",
+      "noticeOutOfPeriod": "Estas aulas foram gravadas para o recesso de fim de ano (sem aulas ao vivo de {firstDayOff} a {endDay}), mas ficam disponíveis o ano todo para você revisar.",
+      "emptyTitle": "As aulas de recesso ainda estão sendo preparadas",
+      "emptyDescription": "Assim que forem publicadas, elas aparecem aqui.",
+      "lessonsCount": "{count, plural, =0 {nenhuma aula} one {# aula} other {# aulas}}"
+    },
+    "card": {
+      "title": "Aulas de recesso",
+      "description": "Sem aulas ao vivo no recesso de fim de ano. As aulas voltam em {returnDay}.",
+      "packages": "{count, plural, one {# pacote de aulas gravadas} other {# pacotes de aulas gravadas}}",
+      "cta": "Assistir agora"
     }
   }
 }

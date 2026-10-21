@@ -6,10 +6,11 @@ import {
   courseQuizzesTable,
   courseQuizSubmissionsTable,
   type LessonContentBlock,
-  type QuizQuestion
+  type QuizQuestion,
+  type CourseKind
 } from "./course.schema";
 
-export type { LessonContentBlock, QuizQuestion };
+export type { LessonContentBlock, QuizQuestion, CourseKind };
 
 export type Course = typeof coursesTable.$inferSelect;
 export type Section = typeof courseSectionsTable.$inferSelect;

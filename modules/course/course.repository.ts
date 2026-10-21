@@ -8,13 +8,15 @@ import {
   courseQuizzesTable,
   courseQuizSubmissionsTable,
   type CourseProgress,
+  type CourseKind,
 } from "./course.schema";
 import { eq, and, asc, desc, sql, arrayContains, inArray } from "drizzle-orm";
 
 export const courseRepository = {
   // Courses
-  async findAll() {
+  async findAll(kind: CourseKind = "course") {
     return db.query.coursesTable.findMany({
+      where: eq(coursesTable.kind, kind),
       orderBy: [desc(coursesTable.createdAt)],
     });
   },
@@ -38,22 +40,32 @@ export const courseRepository = {
     });
   },
 
-  async findUserCourses(userId: string, role: string) {
+  async findUserCourses(userId: string, role: string, kind: CourseKind = "course") {
     // We can use relational query to fetch courses and their enrollment for this user
     return db.query.coursesTable.findMany({
-      where: arrayContains(coursesTable.roles, [role]),
+      where: and(arrayContains(coursesTable.roles, [role]), eq(coursesTable.kind, kind)),
       with: {
         enrollments: {
           where: eq(courseEnrollmentsTable.userId, userId),
         },
         sections: {
+          orderBy: [asc(courseSectionsTable.order)],
           with: {
-            lessons: true,
+            lessons: {
+              orderBy: [asc(courseLessonsTable.order)],
+            },
           }
         }
       },
       orderBy: [desc(coursesTable.createdAt)],
     });
+  },
+
+  async countPublishedByKind(kind: CourseKind) {
+    const [result] = await db.select({ count: sql<number>`count(*)::int` })
+      .from(coursesTable)
+      .where(and(eq(coursesTable.kind, kind), eq(coursesTable.isPublished, true)));
+    return result?.count || 0;
   },
 
   async create(data: typeof coursesTable.$inferInsert) {

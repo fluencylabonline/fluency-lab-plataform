@@ -17,9 +17,14 @@ import type { JSONContent } from "@tiptap/core";
 
 // ================= TYPES =================
 
-export type LessonContentBlock = 
-  | { type: "text"; content: JSONContent } 
-  | { type: "video"; url: string; provider: "youtube" | "drive" | "storage" };
+export type LessonContentBlock =
+  | { type: "text"; content: JSONContent }
+  | { type: "video"; url: string; provider: "youtube" | "drive" | "storage" }
+  | { type: "file"; url: string; name: string; size: number; mimeType: string };
+
+/** "course": curso normal. "holiday_recess": pacote de aulas gravadas do recesso de fim de ano. */
+export const COURSE_KINDS = ["course", "holiday_recess"] as const;
+export type CourseKind = (typeof COURSE_KINDS)[number];
 
 export interface QuizQuestion {
   id: string;
@@ -45,6 +50,7 @@ export const coursesTable = pgTable("courses", {
   duration: text("duration").notNull(),
   isPublished: boolean("is_published").default(false).notNull(),
   roles: text("roles").array().default(["student"]).notNull(), // access levels required
+  kind: text("kind").$type<CourseKind>().default("course").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -169,6 +175,7 @@ export const insertCourseSchema = createInsertSchema(coursesTable, {
   language: (s) => s.min(2, "Selecione um idioma"),
   imageUrl: (s) => s.url("URL da imagem inválida"),
   roles: z.array(z.string()).min(1, "Selecione pelo menos um papel"),
+  kind: z.enum(COURSE_KINDS).optional(),
 });
 
 export const selectCourseSchema = createSelectSchema(coursesTable);

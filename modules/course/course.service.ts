@@ -10,8 +10,14 @@ import {
   insertSectionSchema, 
   insertLessonSchema, 
   insertQuizSchema,
-  type QuizQuestion
+  type QuizQuestion,
+  type CourseKind
 } from "./course.schema";
+
+/** Onde o aluno abre um curso, conforme o tipo. */
+function studentCourseUrl(kind: CourseKind, courseId: string) {
+  return kind === "holiday_recess" ? `/hub/student/holiday-classes/${courseId}` : `/hub/student/courses/${courseId}`;
+}
 import { type Quiz, type QuizSubmission } from "./course.types";
 import { z } from "zod";
 
@@ -21,14 +27,18 @@ export const courseService = {
     if (!hasPermission(user, "course.manage")) {
       throw new Error("Unauthorized: You do not have permission to manage courses.");
     }
+    // Pacote de recesso é sempre para alunos.
+    if (data.kind === "holiday_recess") {
+      return courseRepository.create({ ...data, roles: ["student"] });
+    }
     return courseRepository.create(data);
   },
 
-  async getAllCourses(user: User) {
+  async getAllCourses(user: User, kind: CourseKind = "course") {
     if (!hasPermission(user, "course.manage")) {
       throw new Error("Unauthorized: You do not have permission to manage courses.");
     }
-    return courseRepository.findAll();
+    return courseRepository.findAll(kind);
   },
 
   async updateCourse(user: User, courseId: string, data: Partial<z.infer<typeof insertCourseSchema>>) {
@@ -55,7 +65,7 @@ export const courseService = {
     await notificationService.sendNotification({
       title: `Atualização: ${course.title}`,
       body: message,
-      actionUrl: actionUrl || `/hub/student/courses/${courseId}`,
+      actionUrl: actionUrl || studentCourseUrl(course.kind, courseId),
       targetType: "specific",
       userIds,
       channels: { inApp: true, push: true }
@@ -87,11 +97,11 @@ export const courseService = {
   },
 
   // Student Actions
-  async getUserCourses(user: User) {
+  async getUserCourses(user: User, kind: CourseKind = "course") {
     if (!hasPermission(user, "course.view")) {
       throw new Error("Unauthorized: You do not have permission to view courses.");
     }
-    const courses = await courseRepository.findUserCourses(user.id, user.role);
+    const courses = await courseRepository.findUserCourses(user.id, user.role, kind);
     
     // Map to the extended StudentCourse type
     return courses.map(course => {
@@ -154,12 +164,46 @@ export const courseService = {
         duration: course.duration,
         isPublished: course.isPublished,
         roles: course.roles,
+        kind: course.kind,
         createdAt: course.createdAt,
         updatedAt: course.updatedAt,
       },
       sections: course.sections,
       studentCount,
     };
+  },
+
+  // Aulas de recesso gravadas (pacotes de recesso de fim de ano)
+
+  /** Pacotes publicados, com módulos, aulas e o progresso do aluno. */
+  async getHolidayRecessPackages(user: User) {
+    const packages = await this.getUserCourses(user, "holiday_recess");
+    return packages.filter((p) => p.isPublished);
+  },
+
+  async countPublishedHolidayRecessPackages() {
+    return courseRepository.countPublishedByKind("holiday_recess");
+  },
+
+  /**
+   * Abre um pacote para o aluno: só pacotes publicados, e a matrícula é feita
+   * automaticamente (o player exige matrícula para salvar o progresso).
+   */
+  async openHolidayRecessPackage(user: User, courseId: string) {
+    if (!hasPermission(user, "course.learn")) {
+      throw new Error("Unauthorized: You do not have permission to view this package.");
+    }
+    const course = await courseRepository.findById(courseId);
+    if (!course || course.kind !== "holiday_recess" || !course.isPublished) return null;
+
+    let enrollment = await courseRepository.findEnrollment(user.id, courseId);
+    if (!enrollment) {
+      [enrollment] = await this.enroll(user, courseId);
+    }
+
+    const courseData = await this.getCourseDetails(user, courseId, user.id);
+    if (!courseData) return null;
+    return { courseData, enrollment };
   },
 
   async enroll(user: User, courseId: string) {

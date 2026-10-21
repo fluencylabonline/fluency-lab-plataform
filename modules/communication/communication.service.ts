@@ -44,6 +44,14 @@ import { PasswordResetRequestEmail } from "./templates/PasswordResetRequestEmail
 import { PasswordResetConfirmationEmail } from "./templates/PasswordResetConfirmationEmail";
 import { NoticeEmail } from "./templates/NoticeEmail";
 import { buildDelinquencyEmail, type DelinquencyEmail } from "./templates/delinquency-translations";
+import { buildHolidayRecessEmail } from "./templates/holiday-recess-translations";
+import {
+  HOLIDAY_RECESS_CAMPAIGNS,
+  HOLIDAY_RECESS_END,
+  HOLIDAY_RECESS_START,
+  holidayRecessDates,
+  type HolidayRecessCampaign,
+} from "@/lib/holiday-recess";
 import type {
   SendWhatsAppTemplateOptions,
   WhatsAppResponse,
@@ -371,6 +379,122 @@ export class CommunicationService {
         }
       } catch (error) {
         console.error("[CommunicationService.sendDelinquencyPolicyAnnouncement] Batch failed:", error);
+        failed += chunk.length;
+      }
+    }
+
+    return { ...counts, sent, failed };
+  }
+
+  /**
+   * Emails do recesso de fim de ano para todos os alunos e professores ativos.
+   * - "start" (01/12 e 15/12): não há aulas ao vivo; alunos recebem o link das aulas gravadas;
+   * - "return" (01/01 e 10/01): as aulas voltam; alunos recebem a próxima aula marcada.
+   * Modos: dryRun (só conta), test (as duas versões só para quem pediu), send (todos).
+   * Não controla duplicidade: quem chama (o cron) reserva a campanha antes.
+   */
+  async sendHolidayRecessCampaign(params: {
+    campaign: HolidayRecessCampaign;
+    mode: "dryRun" | "test" | "send";
+    requester?: { email: string; name: string; locale?: string | null };
+    now?: Date;
+  }) {
+    const now = params.now ?? new Date();
+    const { kind } = HOLIDAY_RECESS_CAMPAIGNS[params.campaign];
+    const { userService } = await import("@/modules/user/user.service");
+    const [students, teachers] = await Promise.all([
+      userService.getUsersByRole("student"),
+      userService.getUsersByRole("teacher"),
+    ]);
+    const activeStudents = students.filter((u) => u.isActive && u.email);
+    const activeTeachers = teachers.filter((u) => u.isActive && u.email);
+    const counts = { students: activeStudents.length, teachers: activeTeachers.length };
+
+    if (params.mode === "dryRun") return { ...counts, sent: 0, failed: 0 };
+    if (params.mode === "test" && !params.requester) throw new Error("O modo test precisa de um destinatário.");
+
+    // Datas do recesso no idioma de cada destinatário ("18 de dezembro" / "December 18").
+    const { startYear } = holidayRecessDates(now);
+    const at = (year: number, month: number, day: number) => new Date(Date.UTC(year, month - 1, day, 15));
+    const dayMonth = (date: Date, locale: "pt" | "en") =>
+      new Intl.DateTimeFormat(locale === "en" ? "en-US" : "pt-BR", { day: "numeric", month: "long", timeZone: "America/Sao_Paulo" }).format(date);
+    const datesFor = (locale: "pt" | "en") => ({
+      firstDayOff: dayMonth(at(startYear, HOLIDAY_RECESS_START.month, HOLIDAY_RECESS_START.day), locale),
+      lastDayOff: dayMonth(at(startYear + 1, HOLIDAY_RECESS_END.month, HOLIDAY_RECESS_END.day), locale),
+      returnDay: dayMonth(at(startYear + 1, HOLIDAY_RECESS_END.month, HOLIDAY_RECESS_END.day + 1), locale),
+    });
+    const classDateTime = (date: Date, locale: "pt" | "en") =>
+      new Intl.DateTimeFormat(locale === "en" ? "en-US" : "pt-BR", {
+        weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo",
+      }).format(date);
+
+    // Próxima aula de cada aluno (só na volta): uma consulta para todos, nos próximos 60 dias.
+    const teacherNames = new Map(teachers.map((t) => [t.id, t.name]));
+    let nextClasses = new Map<string, { startAt: Date; teacherId: string }>();
+    if (kind === "return") {
+      const { schedulingService } = await import("@/modules/scheduling/scheduling.service");
+      const ids = params.mode === "test" ? [] : activeStudents.map((s) => s.id);
+      nextClasses = await schedulingService.getFirstScheduledClassByStudent(ids, now, new Date(now.getTime() + 60 * 86_400_000));
+    }
+
+    const appUrl = env.NEXT_PUBLIC_APP_URL;
+    const reminder = params.campaign === "dec-15";
+    const build = (person: { id?: string; email: string; name: string; locale?: string | null }, role: "student" | "teacher") => {
+      const locale = person.locale === "en" ? "en" : "pt";
+      const dates = datesFor(locale);
+      const next = person.id ? nextClasses.get(person.id) : undefined;
+      const content =
+        kind === "start"
+          ? role === "student"
+            ? buildHolidayRecessEmail({ kind: "studentStart", name: person.name, ...dates, reminder, classesUrl: `${appUrl}/hub/student/holiday-classes` }, locale)
+            : buildHolidayRecessEmail({ kind: "teacherStart", name: person.name, ...dates, reminder }, locale)
+          : role === "student"
+            ? buildHolidayRecessEmail({
+                kind: "studentReturn",
+                name: person.name,
+                returnDay: dates.returnDay,
+                nextClass: next ? { dateTime: classDateTime(next.startAt, locale), teacherName: teacherNames.get(next.teacherId) ?? null } : null,
+                scheduleUrl: `${appUrl}/hub/student/schedule`,
+              }, locale)
+            : buildHolidayRecessEmail({ kind: "teacherReturn", name: person.name, returnDay: dates.returnDay, scheduleUrl: `${appUrl}/hub/teacher/schedule` }, locale);
+      return { to: person.email, subject: content.subject, template: React.createElement(NoticeEmail, content) };
+    };
+
+    let messages: ReturnType<typeof build>[];
+    if (params.mode === "test") {
+      const requester = params.requester!;
+      messages = [build(requester, "student"), build(requester, "teacher")];
+      if (kind === "return") {
+        // Exemplo com próxima aula: 14h do dia da volta, para conferir o texto.
+        const sampleId = "__holiday-test__";
+        nextClasses.set(sampleId, {
+          startAt: new Date(Date.UTC(startYear + 1, HOLIDAY_RECESS_END.month - 1, HOLIDAY_RECESS_END.day + 1, 17)),
+          teacherId: sampleId,
+        });
+        teacherNames.set(sampleId, requester.locale === "en" ? "Sample Teacher" : "Professor(a) de exemplo");
+        messages.unshift(build({ ...requester, id: sampleId }, "student"));
+      }
+    } else {
+      messages = [...activeStudents.map((u) => build(u, "student")), ...activeTeachers.map((u) => build(u, "teacher"))];
+    }
+
+    let sent = 0;
+    let failed = 0;
+    for (let i = 0; i < messages.length; i += 100) {
+      const chunk = messages.slice(i, i + 100);
+      try {
+        const payload = await Promise.all(
+          chunk.map(async (msg) => ({ from: this.defaultFrom, to: msg.to, subject: msg.subject, html: await render(msg.template) }))
+        );
+        const result = await resend.batch.send(payload);
+        if (result.error) {
+          console.error("[CommunicationService.sendHolidayRecessCampaign] Batch error:", result.error);
+          failed += chunk.length;
+        } else {
+          sent += chunk.length;
+        }
+      } catch (error) {
+        console.error("[CommunicationService.sendHolidayRecessCampaign] Batch failed:", error);
         failed += chunk.length;
       }
     }

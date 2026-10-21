@@ -891,6 +891,101 @@ export const ADMIN_HELP_EN: RoleHelpContent<AdminHelpRoute> = {
     ],
   },
 
+  "/hub/admin/holiday-classes": {
+    title: "Holiday Classes",
+    summary: "The recorded class packages students watch during the year-end break.",
+    sections: [
+      {
+        heading: "What it is for",
+        body: "From Dec 18 to Jan 14 there are no live classes. During that period the next-class card on the student's profile becomes a shortcut to these recorded classes, and students get emails on Dec 1 and Dec 15 with the link. Outside the period, packages stay available for review.",
+      },
+      {
+        heading: "How to build one",
+        body: [
+          "Create holiday package opens the form with title, description, language and cover. The package is always for students.",
+          "Inside the package, create the modules and the lessons. Each lesson can have video (YouTube or Google Drive), text, downloadable attachments and a quiz.",
+          "The package starts as a draft. Publish it only when it is ready: publishing is what makes it show up for students.",
+        ],
+      },
+      {
+        heading: "Not the same as recess activities",
+        body: "A teacher's recess activities are text lessons tied to a specific class. These are recorded, shared classes, the same for every student.",
+      },
+    ],
+    tour: [
+      {
+        id: "intro",
+        title: "Recorded holiday classes",
+        text: "Class packages for the year-end break, when there are no live classes. Every package starts as a draft.",
+      },
+      {
+        id: "create",
+        target: "admin-courses.create",
+        title: "Create a package",
+        text: "Title, description, language and cover. Then build the modules and lessons inside it and publish.",
+      },
+      {
+        id: "list",
+        target: "admin-courses.list",
+        title: "The packages",
+        text: "Click a package to build its modules and lessons. The menu has Edit and Delete.",
+      },
+    ],
+  },
+  "/hub/admin/holiday-classes/[id]": {
+    title: "Holiday Package",
+    summary: "The modules and lessons of a recorded class package.",
+    sections: [
+      {
+        heading: "Modules and lessons",
+        body: "Organise the package into modules (by week, level or topic) and add lessons to each one. Click a lesson to edit its content.",
+      },
+      {
+        heading: "Publishing",
+        body: "While it is a draft, the package does not show up for students. Publish it when the lessons are ready; unpublishing hides it and keeps the progress of anyone who already started.",
+      },
+    ],
+    tour: [
+      {
+        id: "sections",
+        target: "admin-course-detail.sections",
+        title: "Modules and lessons",
+        text: "Create the package's modules and lessons. Click a lesson to open the editor.",
+      },
+    ],
+  },
+  "/hub/admin/holiday-classes/[id]/lessons/[lessonId]": {
+    title: "Holiday Lesson",
+    summary: "The editor for a recorded lesson: video, text, attachments and quiz.",
+    sections: [
+      {
+        heading: "The blocks",
+        body: [
+          "Add video accepts YouTube or Google Drive links.",
+          "Add text opens a rich text editor.",
+          "Add attachment uploads a file (PDF, image, audio, Word, Excel, PowerPoint or ZIP, up to 50MB) that students download in the lesson.",
+        ],
+      },
+      {
+        heading: "Saving",
+        body: "Changes, including uploaded attachments, only count after you save the lesson.",
+      },
+    ],
+    tour: [
+      {
+        id: "blocks",
+        target: "admin-lesson-editor.blocks",
+        title: "Lesson content",
+        text: "Video, text and attachments, in the order students will see them.",
+      },
+      {
+        id: "save",
+        target: "admin-lesson-editor.save",
+        title: "Save",
+        text: "Nothing counts until you save, attachments included.",
+      },
+    ],
+  },
   "/hub/admin/my-courses": {
     title: "My Learning",
     summary: "The student's view, for you to take the school's courses yourself.",

@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { QuizPlayer } from "./QuizPlayer";
+import { CourseAttachmentBlock } from "@/modules/course/_components/CourseAttachmentBlock";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/ui/use-device";
 
@@ -36,9 +37,11 @@ interface CoursePlayerClientProps {
   };
   enrollment: Enrollment;
   currentUser: SessionUserDTO;
+  /** Para onde a seta de voltar leva (padrão: a lista de cursos do papel). */
+  backHref?: string;
 }
 
-export function CoursePlayerClient({ courseData, enrollment, currentUser }: CoursePlayerClientProps) {
+export function CoursePlayerClient({ courseData, enrollment, currentUser, backHref }: CoursePlayerClientProps) {
   const t = useTranslations("Courses");
   const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -116,7 +119,7 @@ export function CoursePlayerClient({ courseData, enrollment, currentUser }: Cour
         title={courseData.course.title}
         showSubHeader={false}
         user={currentUser}
-        backHref={`/hub/${currentUser.role === 'student' ? 'student/courses' : `${currentUser.role}/my-courses`}`}
+        backHref={backHref ?? `/hub/${currentUser.role === 'student' ? 'student/courses' : `${currentUser.role}/my-courses`}`}
         actions={isMobile ? [{
           label: t('menu') || "Menu",
           icon: isSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />,
@@ -268,6 +271,8 @@ export function CoursePlayerClient({ courseData, enrollment, currentUser }: Cour
                     <div key={bIndex} className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
                       {block.type === "video" ? (
                         <VideoPlayer url={block.url} provider={block.provider} />
+                      ) : block.type === "file" ? (
+                        <CourseAttachmentBlock url={block.url} name={block.name} size={block.size} mimeType={block.mimeType} />
                       ) : (
                         <div className="prose dark:prose-invert max-w-none">
                           <RichTextEditor content={block.content} onChange={() => { }} editable={false} />

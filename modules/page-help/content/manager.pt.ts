@@ -913,6 +913,101 @@ export const MANAGER_HELP_PT: RoleHelpContent<ManagerHelpRoute> = {
     ],
   },
 
+  "/hub/manager/holiday-classes": {
+    title: "Aulas de Recesso",
+    summary: "Os pacotes de aulas gravadas que os alunos assistem no recesso de fim de ano.",
+    sections: [
+      {
+        heading: "Para que serve",
+        body: "De 18/12 a 14/01 não há aulas ao vivo. Nesse período o cartão de próxima aula do perfil do aluno vira um atalho para estas aulas gravadas, e os alunos recebem e-mails em 01/12 e 15/12 com o link. Fora do período, os pacotes continuam disponíveis para revisão.",
+      },
+      {
+        heading: "Como montar",
+        body: [
+          "Criar pacote de recesso abre o formulário com título, descrição, idioma e capa. O pacote é sempre para alunos.",
+          "Dentro do pacote, crie os módulos e as aulas. Cada aula pode ter vídeo (YouTube ou Google Drive), texto, anexos para baixar e quiz.",
+          "O pacote nasce como rascunho. Publique só quando estiver pronto: é a publicação que faz ele aparecer para os alunos.",
+        ],
+      },
+      {
+        heading: "Diferente das atividades de recesso",
+        body: "As atividades de recesso do professor são lições de texto ligadas a uma aula específica. Aqui são aulas gravadas e coletivas, iguais para todos os alunos.",
+      },
+    ],
+    tour: [
+      {
+        id: "intro",
+        title: "Aulas de recesso gravadas",
+        text: "Pacotes de aulas para o recesso de fim de ano, quando não há aulas ao vivo. Todo pacote nasce como rascunho.",
+      },
+      {
+        id: "create",
+        target: "admin-courses.create",
+        title: "Criar pacote",
+        text: "Título, descrição, idioma e capa. Depois, monte os módulos e as aulas dentro dele e publique.",
+      },
+      {
+        id: "list",
+        target: "admin-courses.list",
+        title: "Os pacotes",
+        text: "Clique num pacote para montar módulos e aulas. O menu traz Editar e Excluir.",
+      },
+    ],
+  },
+  "/hub/manager/holiday-classes/[id]": {
+    title: "Pacote de Recesso",
+    summary: "Os módulos e as aulas de um pacote de aulas gravadas.",
+    sections: [
+      {
+        heading: "Módulos e aulas",
+        body: "Organize o pacote em módulos (por semana, nível ou tema) e adicione as aulas em cada um. Clique numa aula para editar o conteúdo.",
+      },
+      {
+        heading: "Publicar",
+        body: "Enquanto estiver em rascunho, o pacote não aparece para os alunos. Publique quando as aulas estiverem prontas; despublicar esconde o pacote e mantém o progresso de quem já começou.",
+      },
+    ],
+    tour: [
+      {
+        id: "sections",
+        target: "admin-course-detail.sections",
+        title: "Módulos e aulas",
+        text: "Crie os módulos e as aulas do pacote. Clique numa aula para abrir o editor.",
+      },
+    ],
+  },
+  "/hub/manager/holiday-classes/[id]/lessons/[lessonId]": {
+    title: "Aula de Recesso",
+    summary: "O editor de uma aula gravada: vídeo, texto, anexos e quiz.",
+    sections: [
+      {
+        heading: "Os blocos",
+        body: [
+          "Adicionar vídeo aceita links do YouTube ou do Google Drive.",
+          "Adicionar texto abre um editor de texto formatado.",
+          "Adicionar anexo envia um arquivo (PDF, imagem, áudio, Word, Excel, PowerPoint ou ZIP, até 50MB) que o aluno baixa na aula.",
+        ],
+      },
+      {
+        heading: "Salvar",
+        body: "As mudanças, inclusive os anexos enviados, só valem depois de salvar a aula.",
+      },
+    ],
+    tour: [
+      {
+        id: "blocks",
+        target: "admin-lesson-editor.blocks",
+        title: "Conteúdo da aula",
+        text: "Vídeo, texto e anexos, na ordem em que o aluno vai ver.",
+      },
+      {
+        id: "save",
+        target: "admin-lesson-editor.save",
+        title: "Salvar",
+        text: "Nada vale até salvar, inclusive os anexos.",
+      },
+    ],
+  },
   "/hub/manager/my-courses": {
     title: "Meu Aprendizado",
     summary: "Os cursos de formação da escola em que você está matriculado.",

@@ -68,6 +68,21 @@ service firebase.storage {
                     && request.resource.contentType.matches('image/(jpeg|png|webp|jpg)');
     }
 
+    match /courses/attachments/{courseId}/{fileName} {
+      // Lesson attachments (PDFs, worksheets, images, audio) are readable by signed-in users
+      allow read: if request.auth != null;
+
+      // Only Admins and Managers can upload attachments (max 50MB)
+      allow write: if request.auth != null
+                    && (request.auth.token.role == 'admin' || request.auth.token.role == 'manager')
+                    && request.resource.size < 50 * 1024 * 1024
+                    && (request.resource.contentType.matches('application/pdf')
+                        || request.resource.contentType.matches('image/.*')
+                        || request.resource.contentType.matches('audio/.*')
+                        || request.resource.contentType.matches('text/plain')
+                        || request.resource.contentType.matches('application/(msword|vnd\\.openxmlformats-officedocument\\..*|vnd\\.ms-.*|zip)'));
+    }
+
     match /notebooks/{notebookId}/{userId}/{fileName} {
       // Notebook images and audio recordings are readable by authenticated users
       allow read: if request.auth != null;

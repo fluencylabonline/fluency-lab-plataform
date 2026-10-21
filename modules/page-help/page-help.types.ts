@@ -90,6 +90,8 @@ export type StudentHelpRoute =
   | "/hub/student/immersion/word-ladder"
   | "/hub/student/immersion/wordle"
   | "/hub/student/recess"
+  | "/hub/student/holiday-classes"
+  | "/hub/student/holiday-classes/[id]"
   | "/hub/student/recess/[slotId]";
 
 export type TeacherHelpRoute =
@@ -126,6 +128,9 @@ export type ManagerHelpRoute =
   | "/hub/manager/learning/lessons"
   | "/hub/manager/learning/lessons/[lessonId]"
   | "/hub/manager/learning/placement"
+  | "/hub/manager/holiday-classes"
+  | "/hub/manager/holiday-classes/[id]"
+  | "/hub/manager/holiday-classes/[id]/lessons/[lessonId]"
   | "/hub/manager/my-courses"
   | "/hub/manager/my-courses/[id]"
   | "/hub/manager/settings"
@@ -147,6 +152,9 @@ export type AdminHelpRoute =
   | "/hub/admin/courses"
   | "/hub/admin/courses/[id]"
   | "/hub/admin/courses/[id]/lessons/[lessonId]"
+  | "/hub/admin/holiday-classes"
+  | "/hub/admin/holiday-classes/[id]"
+  | "/hub/admin/holiday-classes/[id]/lessons/[lessonId]"
   | "/hub/admin/my-courses"
   | "/hub/admin/my-courses/[id]"
   | "/hub/admin/tasks"

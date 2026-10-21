@@ -10,6 +10,7 @@ import { ProgressStatusCard } from "./ProgressStatusCard";
 import { OnboardingStatusCard, type OnboardingVariant } from "./OnboardingStatusCard";
 import { StreakWidget } from "./StreakWidget";
 import { RecessActivitiesCard } from "./RecessActivitiesCard";
+import { HolidayClassesCard } from "./HolidayClassesCard";
 import { PracticeStatusWidget } from "./PracticeStatusWidget";
 import { useTranslations } from "next-intl";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
@@ -78,6 +79,8 @@ interface StudentProfileClientProps {
     daysLate?: number;
   };
   recessActivitiesCount: number;
+  /** Preenchido só no recesso de fim de ano, com pacotes publicados. */
+  holidayClasses: { packageCount: number; returnDay: string } | null;
 }
 
 export function StudentProfileClient({
@@ -91,6 +94,7 @@ export function StudentProfileClient({
   curriculumStats,
   practiceStatus,
   recessActivitiesCount,
+  holidayClasses,
 }: StudentProfileClientProps) {
   const t = useTranslations("Hub.Profile");
   
@@ -153,7 +157,11 @@ export function StudentProfileClient({
               <StudentPaymentStatusCard subscription={subscriptionData} />
             </div>
             <div data-tour="student-profile.next-class">
-              <NextClassCard nextClass={nextClassMapped} studentId={user.id} />
+              {holidayClasses ? (
+                <HolidayClassesCard packageCount={holidayClasses.packageCount} returnDay={holidayClasses.returnDay} />
+              ) : (
+                <NextClassCard nextClass={nextClassMapped} studentId={user.id} />
+              )}
             </div>
           </div>
         </div>

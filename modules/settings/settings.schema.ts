@@ -34,6 +34,12 @@ export const systemSettingsTable = pgTable("system_settings", {
   delinquencyPolicyEnabled: boolean("delinquency_policy_enabled").notNull().default(false),
   delinquencyPolicyStart: date("delinquency_policy_start", { mode: "string" }),
   delinquencyAutoCancelEnabled: boolean("delinquency_auto_cancel_enabled").notNull().default(false),
+  // Campanhas de e-mail do recesso de fim de ano já enviadas (ex.: "2026-dec-01"),
+  // para o cron nunca mandar a mesma campanha duas vezes.
+  holidayRecessEmailsSent: jsonb("holiday_recess_emails_sent")
+    .$type<string[]>()
+    .notNull()
+    .default(sql`'[]'`),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .notNull()

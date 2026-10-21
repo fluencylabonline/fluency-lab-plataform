@@ -2751,6 +2751,19 @@ export const schedulingService = {
     return schedulingRepository.findNextClassForStudent(studentId);
   },
 
+  /** Primeira aula marcada de cada aluno no intervalo (uma consulta para todos). */
+  async getFirstScheduledClassByStudent(studentIds: string[], from: Date, to: Date) {
+    const slots = await schedulingRepository.findScheduledSlotsForStudentsInRange(studentIds, from, to);
+    const first = new Map<string, { startAt: Date; teacherId: string }>();
+    for (const slot of slots) {
+      // Vem ordenado por início: a primeira ocorrência de cada aluno é a próxima aula.
+      if (slot.studentId && !first.has(slot.studentId)) {
+        first.set(slot.studentId, { startAt: slot.startAt, teacherId: slot.teacherId });
+      }
+    }
+    return first;
+  },
+
   /** Atividades de recesso que o aluno recebeu (próximas e passadas). Só o próprio aluno consulta. */
   async getStudentRecessActivities(user: User) {
     if (user.role !== "student") return [];

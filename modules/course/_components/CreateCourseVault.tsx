@@ -20,7 +20,7 @@ import {
   VaultIcon,
 } from "@/components/ui/vault";
 import { insertCourseSchema } from "@/modules/course/course.schema";
-import { type Course } from "@/modules/course/course.types";
+import { type Course, type CourseKind } from "@/modules/course/course.types";
 import { z } from "zod";
 import { Plus, Check, ChevronsUpDown, Upload, Image as ImageIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -60,11 +60,15 @@ interface CreateCourseVaultProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: (course: Course) => void;
+  /** "holiday_recess": pacote de aulas de recesso (sempre para alunos, sem escolha de público). */
+  kind?: CourseKind;
 }
 
-export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCourseVaultProps) {
+export function CreateCourseVault({ open, onOpenChange, onSuccess, kind = "course" }: CreateCourseVaultProps) {
   const t = useTranslations("Courses");
   const tCommon = useTranslations("Common");
+  const tHoliday = useTranslations("HolidayClasses.manage");
+  const isHoliday = kind === "holiday_recess";
   const [isUploading, setIsUploading] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
 
@@ -77,6 +81,7 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCours
       imageUrl: "",
       duration: "",
       roles: ["student"],
+      kind,
     },
   });
 
@@ -142,8 +147,8 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCours
       <VaultContent className="max-w-xl">
         <VaultIcon type="info" />
         <VaultHeader>
-          <VaultTitle>{t("createCourse")}</VaultTitle>
-          <VaultDescription>{t("subtitle")}</VaultDescription>
+          <VaultTitle>{isHoliday ? tHoliday("create") : t("createCourse")}</VaultTitle>
+          <VaultDescription>{isHoliday ? tHoliday("createDescription") : t("subtitle")}</VaultDescription>
         </VaultHeader>
 
         <VaultForm onSubmit={(e: React.FormEvent) => {
@@ -224,6 +229,7 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCours
               </VaultField>
             </div>
 
+            {!isHoliday && (
             <VaultField
               label={t('targetRoles') || "Público Alvo (Roles)"}
               required
@@ -255,6 +261,7 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess }: CreateCours
                 })}
               </div>
             </VaultField>
+            )}
 
             <VaultField
               label={t("description")}

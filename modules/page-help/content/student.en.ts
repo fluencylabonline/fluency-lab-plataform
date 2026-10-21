@@ -24,7 +24,7 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
         id: "next-class",
         target: "student-profile.next-class",
         title: "Your next class",
-        text: "Date, time and teacher of your next scheduled class. When the time comes, the Join Room button opens the video call. With nothing scheduled, the card tells you your calendar is empty.",
+        text: "Date, time and teacher of your next scheduled class. When the time comes, the Join Room button opens the video call. With nothing scheduled, the card tells you your calendar is empty. During the year-end break (Dec 18 to Jan 14), it becomes the shortcut to the recorded holiday classes.",
       },
       {
         id: "payment",
@@ -951,6 +951,54 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
     ],
   },
 
+  "/hub/student/holiday-classes": {
+    title: "Holiday Classes",
+    summary: "Recorded classes to study during the year-end break, when there are no live classes.",
+    sections: [
+      {
+        heading: "When to use it",
+        body: "From Dec 18 to Jan 14 there are no live classes. During that period, the next-class card on your profile brings you here. Outside the break, the classes stay available for you to review.",
+      },
+      {
+        heading: "How it works",
+        body: [
+          "Each package has modules and lessons with video, text, downloadable materials and sometimes a quiz.",
+          "Open a package to start. Your progress is saved and shows on each package's bar.",
+        ],
+      },
+    ],
+    tour: [
+      {
+        id: "intro",
+        title: "Holiday classes",
+        text: "Recorded classes so you can keep studying during the year-end break. Open a package to start.",
+      },
+    ],
+  },
+  "/hub/student/holiday-classes/[id]": {
+    title: "Holiday Package",
+    summary: "The recorded lessons of a package, with video, text, materials and quiz.",
+    sections: [
+      {
+        heading: "How to study",
+        body: "Pick a lesson in the side menu (on a phone, through the Menu button). Watch the video, read the text, download the materials and mark the lesson as complete to track your progress.",
+      },
+    ],
+    tour: [
+      {
+        id: "content",
+        target: "student-course-player.content",
+        title: "The lesson",
+        text: "Video, text and downloadable materials, in the order they were prepared.",
+      },
+      {
+        id: "menu",
+        target: "student-course-player.menu",
+        title: "The package's lessons",
+        text: "The modules and lessons. Choose where to continue.",
+      },
+    ],
+  },
   "/hub/student/docs": {
     title: "Help Centre",
     summary:

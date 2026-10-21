@@ -1,0 +1,70 @@
+name: Holiday Recess Emails Cron
+
+on:
+  schedule:
+    # Daily at 12:00 UTC = 09:00 in Brasília. The route only sends on Dec 1, Dec 15,
+    # Jan 1 and Jan 10 (Brasília time) and never sends the same campaign twice a year.
+    - cron: "0 12 * * *"
+  workflow_dispatch: # Manual trigger for testing
+    inputs:
+      campaign:
+        description: "Campaign to run (empty = today's campaign, if any)"
+        required: false
+        type: choice
+        options: ["", "dec-01", "dec-15", "jan-01", "jan-10"]
+      mode:
+        description: "dryRun = count only, test = send only to test_email, send = everyone"
+        required: false
+        type: choice
+        default: "dryRun"
+        options: ["dryRun", "test", "send"]
+      test_email:
+        description: "Recipient for test mode"
+        required: false
+        type: string
+
+jobs:
+  holiday-recess:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Holiday Recess API
+        env:
+          APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          CAMPAIGN: ${{ github.event.inputs.campaign }}
+          MODE: ${{ github.event.inputs.mode }}
+          TEST_EMAIL: ${{ github.event.inputs.test_email }}
+        run: |
+          if [ -z "$APP_URL" ]; then
+            echo "Error: NEXT_PUBLIC_APP_URL secret is not set."
+            exit 1
+          fi
+          if [ -z "$CRON_SECRET" ]; then
+            echo "Error: CRON_SECRET secret is not set."
+            exit 1
+          fi
+
+          # Scheduled runs send an empty body: the route picks today's campaign and sends.
+          BODY=$(jq -n --arg c "$CAMPAIGN" --arg m "$MODE" --arg e "$TEST_EMAIL" \
+            '{} + (if $c != "" then {campaign: $c} else {} end)
+                + (if $m != "" then {mode: $m} else {} end)
+                + (if $e != "" then {testEmail: $e} else {} end)')
+
+          BASE_URL="${APP_URL%/}"
+          echo "Triggering Cron at: $BASE_URL/api/cron/holiday-recess with body $BODY"
+
+          RESPONSE=$(curl -sL -w "\nHTTP_STATUS:%{http_code}" -X POST "$BASE_URL/api/cron/holiday-recess" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "$BODY")
+
+          echo "Response output:"
+          echo "$RESPONSE"
+
+          if [[ "$RESPONSE" == *"HTTP_STATUS:200"* ]]; then
+            echo "Cron executed successfully!"
+          else
+            echo "Cron execution failed!"
+            exit 1
+          fi

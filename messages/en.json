@@ -614,7 +614,12 @@
     "videoLesson": "Video Lesson",
     "videoLinkPlaceholder": "YouTube or Google Drive link...",
     "videosAndTexts": "{videos} Videos and {texts} Texts",
-    "targetRoles": "Target Roles"
+    "targetRoles": "Target Roles",
+    "attachmentLabel": "Attachment",
+    "addAttachment": "Add attachment",
+    "attachmentTooLarge": "Attachments can be up to 50MB.",
+    "attachmentUploaded": "Attachment uploaded. Save the lesson to publish it.",
+    "attachmentUploadError": "Could not upload the attachment. Use PDF, image, audio, Word, Excel, PowerPoint or ZIP."
   },
   "Dashboard": {
     "academic": {
@@ -1723,7 +1728,8 @@
     "settings": "Settings",
     "students": "Students",
     "tasks": "Tasks",
-    "users": "Users"
+    "users": "Users",
+    "holidayClasses": "Holiday Classes"
   },
   "NotebookHub": {
     "myProgress": "My Progress",
@@ -3677,6 +3683,29 @@
       "emailSent": "We sent the PDF to {email}.",
       "error": "Could not generate the PDF.",
       "emailError": "Could not send the email."
+    }
+  },
+  "HolidayClasses": {
+    "manage": {
+      "title": "Holiday Classes",
+      "subtitle": "Recorded class packages for the year-end break",
+      "create": "Create holiday package",
+      "createDescription": "A package groups modules and recorded lessons (video, text, attachments and quiz). Publish it so students can see it."
+    },
+    "student": {
+      "title": "Holiday Classes",
+      "subtitle": "Recorded classes to study during the year-end break",
+      "noticeInPeriod": "It's the year-end break, with no live classes. Classes come back on {returnDay}. In the meantime, study with the recorded classes below.",
+      "noticeOutOfPeriod": "These classes were recorded for the year-end break (no live classes from {firstDayOff} to {endDay}), but they stay available all year for you to review.",
+      "emptyTitle": "The holiday classes are still being prepared",
+      "emptyDescription": "They will show up here as soon as they are published.",
+      "lessonsCount": "{count, plural, =0 {no lessons} one {# lesson} other {# lessons}}"
+    },
+    "card": {
+      "title": "Holiday classes",
+      "description": "No live classes during the year-end break. Classes come back on {returnDay}.",
+      "packages": "{count, plural, one {# recorded class package} other {# recorded class packages}}",
+      "cta": "Watch now"
     }
   }
 }

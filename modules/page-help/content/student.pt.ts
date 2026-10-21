@@ -25,7 +25,7 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
         id: "next-class",
         target: "student-profile.next-class",
         title: "Sua próxima aula",
-        text: "Dia, horário e professor da próxima aula marcada. Quando o horário chega, o botão Acessar Sala abre a chamada de vídeo. Sem aula marcada, o cartão avisa que sua agenda está vazia.",
+        text: "Dia, horário e professor da próxima aula marcada. Quando o horário chega, o botão Acessar Sala abre a chamada de vídeo. Sem aula marcada, o cartão avisa que sua agenda está vazia. No recesso de fim de ano (18/12 a 14/01), ele vira o atalho para as aulas de recesso gravadas.",
       },
       {
         id: "payment",
@@ -953,6 +953,54 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
     ],
   },
 
+  "/hub/student/holiday-classes": {
+    title: "Aulas de Recesso",
+    summary: "Aulas gravadas para estudar no recesso de fim de ano, quando não há aulas ao vivo.",
+    sections: [
+      {
+        heading: "Quando usar",
+        body: "De 18/12 a 14/01 não há aulas ao vivo. Nesse período, o cartão de próxima aula do seu perfil leva para cá. Fora do recesso, as aulas continuam disponíveis para você revisar.",
+      },
+      {
+        heading: "Como funciona",
+        body: [
+          "Cada pacote tem módulos e aulas com vídeo, texto, materiais para baixar e, às vezes, um quiz.",
+          "Abra um pacote para começar. Seu progresso fica salvo e aparece na barra de cada pacote.",
+        ],
+      },
+    ],
+    tour: [
+      {
+        id: "intro",
+        title: "Aulas de recesso",
+        text: "Aulas gravadas para você seguir estudando no recesso de fim de ano. Abra um pacote para começar.",
+      },
+    ],
+  },
+  "/hub/student/holiday-classes/[id]": {
+    title: "Pacote de Recesso",
+    summary: "As aulas gravadas de um pacote, com vídeo, texto, materiais e quiz.",
+    sections: [
+      {
+        heading: "Como estudar",
+        body: "Escolha a aula no menu lateral (no celular, pelo botão Menu). Assista ao vídeo, leia o texto, baixe os materiais e marque a aula como concluída para acompanhar seu progresso.",
+      },
+    ],
+    tour: [
+      {
+        id: "content",
+        target: "student-course-player.content",
+        title: "A aula",
+        text: "Vídeo, texto e materiais para baixar, na ordem em que foram preparados.",
+      },
+      {
+        id: "menu",
+        target: "student-course-player.menu",
+        title: "As aulas do pacote",
+        text: "Os módulos e as aulas. Escolha por onde continuar.",
+      },
+    ],
+  },
   "/hub/student/docs": {
     title: "Central de Ajuda",
     summary:

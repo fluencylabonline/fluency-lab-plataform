@@ -101,6 +101,8 @@ interface CourseDetailClientProps {
     studentCount: number;
   };
   currentUser: SessionUserDTO;
+  /** Rota base de gestão (ex.: /hub/admin/courses ou /hub/manager/holiday-classes). */
+  basePath?: string;
 }
 
 function SortableLesson({ lesson, onDelete, onEdit }: {
@@ -295,7 +297,7 @@ function SortableSection({
   );
 }
 
-export function CourseDetailClient({ courseData, currentUser }: CourseDetailClientProps) {
+export function CourseDetailClient({ courseData, currentUser, basePath = "/hub/admin/courses" }: CourseDetailClientProps) {
   const router = useRouter();
   const [course, setCourse] = useState(courseData.course);
   const [sections, setSections] = useState(courseData.sections);
@@ -344,7 +346,7 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
   }, [sections, courseData.studentCount]);
 
   const handleEditContent = (lesson: Lesson) => {
-    router.push(`/hub/admin/courses/${course.id}/lessons/${lesson.id}`);
+    router.push(`${basePath}/${course.id}/lessons/${lesson.id}`);
   };
 
   const handleUpdateCourse = async (data: z.input<typeof insertCourseSchema>) => {
@@ -496,7 +498,7 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
         title={course.title}
         showSubHeader={false}
         user={currentUser}
-        backHref="/hub/admin/courses"
+        backHref={basePath}
       />
 
       <main className="container">
@@ -569,6 +571,8 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
                   </Field>
                 </div>
 
+                {/* Pacote de recesso é sempre para alunos: sem escolha de público. */}
+                {course.kind !== "holiday_recess" && (
                 <Field
                   label={t('targetRoles') || "Público Alvo (Roles)"}
                   required
@@ -600,6 +604,7 @@ export function CourseDetailClient({ courseData, currentUser }: CourseDetailClie
                     })}
                   </div>
                 </Field>
+                )}
 
                 <div className="pt-4 flex items-center gap-3">
                   <Button

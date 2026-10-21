@@ -14,7 +14,7 @@ import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { CreateCourseVault } from "./CreateCourseVault";
 import type { SessionUserDTO } from "@/modules/user/user.schema";
-import { Course } from "@/modules/course/course.types";
+import { Course, type CourseKind } from "@/modules/course/course.types";
 import { containerVariants, itemVariants } from "@/lib/animations";
 import {
   Select,
@@ -46,9 +46,13 @@ import { notify } from "@/components/ui/toaster";
 interface CoursePageClientProps {
   initialData: Course[];
   currentUser: SessionUserDTO;
+  /** "holiday_recess" reaproveita a tela para os pacotes de aulas de recesso gravadas. */
+  kind?: CourseKind;
+  /** Rota base de gestão (ex.: /hub/admin/courses ou /hub/manager/holiday-classes). */
+  basePath?: string;
 }
 
-export function CoursePageClient({ initialData, currentUser }: CoursePageClientProps) {
+export function CoursePageClient({ initialData, currentUser, kind = "course", basePath = "/hub/admin/courses" }: CoursePageClientProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [languageFilter, setLanguageFilter] = useState("all");
@@ -65,6 +69,8 @@ export function CoursePageClient({ initialData, currentUser }: CoursePageClientP
 
   const t = useTranslations("Courses");
   const tCommon = useTranslations("Common");
+  const tHoliday = useTranslations("HolidayClasses.manage");
+  const isHoliday = kind === "holiday_recess";
 
   const languages = useMemo(() => {
     const langs = new Set(courses.map((c) => c.language));
@@ -109,12 +115,12 @@ export function CoursePageClient({ initialData, currentUser }: CoursePageClientP
   return (
     <div>
       <Header
-        title={t("title")}
-        subtitle={t("subtitle")}
+        title={isHoliday ? tHoliday("title") : t("title")}
+        subtitle={isHoliday ? tHoliday("subtitle") : t("subtitle")}
         user={currentUser}
         onSearchChange={setSearch}
         actions={[{
-          label: t("createCourse"),
+          label: isHoliday ? tHoliday("create") : t("createCourse"),
           icon: <Plus className="w-4 h-4" />,
           onClick: () => setIsOpen(true),
           dataTour: "admin-courses.create"
@@ -173,7 +179,7 @@ export function CoursePageClient({ initialData, currentUser }: CoursePageClientP
                   variants={itemVariants}
                   layout
                   className="card group relative flex flex-col overflow-hidden transition-all cursor-pointer"
-                  onClick={() => router.push(`/hub/admin/courses/${course.id}`)}
+                  onClick={() => router.push(`${basePath}/${course.id}`)}
                 >
                   {/* Top Image */}
                   <div className="aspect-16/10 w-full overflow-hidden relative">
@@ -216,7 +222,7 @@ export function CoursePageClient({ initialData, currentUser }: CoursePageClientP
                             className="flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 hover:text-primary group/item"
                             onClick={(e) => {
                               e.stopPropagation();
-                              router.push(`/hub/admin/courses/${course.id}`);
+                              router.push(`${basePath}/${course.id}`);
                             }}
                           >
                             <span className="font-medium text-sm">{t("editCourse")}</span>
@@ -265,6 +271,7 @@ export function CoursePageClient({ initialData, currentUser }: CoursePageClientP
       <CreateCourseVault
         open={isOpen}
         onOpenChange={setIsOpen}
+        kind={kind}
         onSuccess={(newCourse) => setCourses(prev => [newCourse, ...prev])}
       />
 

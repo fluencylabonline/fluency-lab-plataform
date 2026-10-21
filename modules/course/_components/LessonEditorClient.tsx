@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/layout/header";
@@ -25,8 +25,15 @@ import {
   CheckCircle2,
   Circle,
   Loader2,
-  Settings2
+  Settings2,
+  Paperclip
 } from "lucide-react";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "@/lib/firebase-storage";
+import { CourseAttachmentBlock } from "./CourseAttachmentBlock";
+
+/** Mesmo limite do storage.rules (courses/attachments). */
+const MAX_ATTACHMENT_BYTES = 50 * 1024 * 1024;
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { VideoPlayer } from "@/components/ui/video-player";
@@ -50,15 +57,19 @@ interface LessonEditorClientProps {
   initialLesson: Lesson;
   courseId: string;
   availableQuizzes: Quiz[];
+  /** Rota base de gestão (ex.: /hub/admin/courses ou /hub/manager/holiday-classes). */
+  basePath?: string;
 }
 
-export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }: LessonEditorClientProps) {
+export function LessonEditorClient({ initialLesson, courseId, availableQuizzes, basePath = "/hub/admin/courses" }: LessonEditorClientProps) {
   const t = useTranslations("Courses");
   const tCommon = useTranslations("Common");
   const router = useRouter();
 
   // Tabs State
   const [activeTab, setActiveTab] = useState("content");
+  const attachmentInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
 
   // Lesson Form
   const form = useForm<LessonFormValues>({
@@ -151,6 +162,37 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
     form.setValue("contentBlocks", [...currentBlocks, newBlock], { shouldDirty: true });
   };
 
+  const handleAttachmentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      notify.error(t("attachmentTooLarge") || "O anexo deve ter no máximo 50MB.");
+      return;
+    }
+
+    setIsUploadingAttachment(true);
+    try {
+      const storageRef = ref(storage, `courses/attachments/${courseId}/${crypto.randomUUID()}-${file.name}`);
+      const snapshot = await uploadBytes(storageRef, file, { contentType: file.type || "application/octet-stream" });
+      const url = await getDownloadURL(snapshot.ref);
+      const currentBlocks = form.getValues("contentBlocks") || [];
+      const newBlock: LessonContentBlock = {
+        type: "file",
+        url,
+        name: file.name,
+        size: file.size,
+        mimeType: file.type || "application/octet-stream",
+      };
+      form.setValue("contentBlocks", [...currentBlocks, newBlock], { shouldDirty: true });
+      notify.success(t("attachmentUploaded") || "Anexo enviado. Salve a aula para publicar.");
+    } catch {
+      notify.error(t("attachmentUploadError") || "Erro ao enviar o anexo. Verifique o tipo do arquivo.");
+    } finally {
+      setIsUploadingAttachment(false);
+    }
+  };
+
   const removeBlock = (index: number) => {
     const currentBlocks = form.getValues("contentBlocks") || [];
     form.setValue("contentBlocks", currentBlocks.filter((_, i) => i !== index), { shouldDirty: true });
@@ -188,7 +230,7 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
       <Header
         title={initialLesson.title}
         showSubHeader={false}
-        backHref={`/hub/admin/courses/${courseId}`}
+        backHref={`${basePath}/${courseId}`}
       />
 
       <main className="container">
@@ -334,11 +376,11 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center text-primary">
-                            {block.type === "video" ? <Video className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
+                            {block.type === "video" ? <Video className="h-5 w-5" /> : block.type === "file" ? <Paperclip className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
                           </div>
                           <div>
                             <h4 className="font-bold text-sm">{t('blockNumber', { number: index + 1 }) || `Bloco ${index + 1}`}</h4>
-                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{block.type === "video" ? (t('videoLesson') || "Vídeo Aula") : (t('textContent') || "Conteúdo de Texto")}</p>
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{block.type === "video" ? (t('videoLesson') || "Vídeo Aula") : block.type === "file" ? (t('attachmentLabel') || "Anexo") : (t('textContent') || "Conteúdo de Texto")}</p>
                           </div>
                         </div>
                         <Button variant="ghost" size="icon" className="rounded-full text-destructive hover:bg-destructive/10" onClick={() => removeBlock(index)}>
@@ -365,13 +407,16 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                             </div>
                           )}
                         </div>
+                      ) : block.type === "file" ? (
+                        <CourseAttachmentBlock url={block.url} name={block.name} size={block.size} mimeType={block.mimeType} />
                       ) : (
                         <RichTextEditor content={block.content} onChange={(content) => updateTextBlock(index, content)} />
                       )}
                     </div>
                   ))}
 
-                  <div className="grid grid-cols-2 gap-4 pt-4">
+                  <input ref={attachmentInputRef} type="file" className="hidden" onChange={handleAttachmentUpload} />
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
                     <Button
                       variant="outline"
                       className="h-24 rounded-3xl border-dashed border-2 flex flex-col gap-2 transition-all hover:bg-primary/5 hover:border-primary"
@@ -387,6 +432,15 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                     >
                       <FileText className="h-6 w-6 text-primary mr-2" />
                       <span className="text-xs font-bold uppercase tracking-widest">{t('addText') || "Adicionar Texto"}</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-24 rounded-3xl border-dashed border-2 flex flex-col gap-2 transition-all hover:bg-primary/5 hover:border-primary"
+                      onClick={() => attachmentInputRef.current?.click()}
+                      disabled={isUploadingAttachment}
+                    >
+                      {isUploadingAttachment ? <Loader2 className="h-6 w-6 text-primary animate-spin" /> : <Paperclip className="h-6 w-6 text-primary mr-2" />}
+                      <span className="text-xs font-bold uppercase tracking-widest">{t('addAttachment') || "Adicionar Anexo"}</span>
                     </Button>
                   </div>
                 </motion.div>
@@ -668,6 +722,8 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes }
                                 <div className="aspect-video rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800">
                                   <VideoPlayer url={block.url} provider={block.provider} />
                                 </div>
+                              ) : block.type === "file" ? (
+                                <CourseAttachmentBlock url={block.url} name={block.name} size={block.size} mimeType={block.mimeType} />
                               ) : (
                                 <div className="prose prose-slate dark:prose-invert max-w-none px-2">
                                   <RichTextEditor content={block.content} onChange={() => { }} editable={false} />

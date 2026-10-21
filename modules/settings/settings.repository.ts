@@ -2,7 +2,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import { systemSettingsTable, SETTINGS_CACHE_TAG } from "./settings.schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 /**
  * As configurações são uma linha única lida na landing, em todo request do
@@ -48,5 +48,29 @@ export const settingsRepository = {
       .where(eq(systemSettingsTable.id, "default"))
       .returning();
     return results[0];
+  },
+
+  /**
+   * Reserva a chave de uma campanha numa única instrução: só grava (e retorna true)
+   * se a chave ainda não estiver na lista. Duas execuções simultâneas não passam juntas.
+   */
+  async claimHolidayRecessCampaign(key: string): Promise<boolean> {
+    const rows = await db
+      .update(systemSettingsTable)
+      .set({
+        holidayRecessEmailsSent: sql`${systemSettingsTable.holidayRecessEmailsSent} || ${JSON.stringify([key])}::jsonb`,
+        updatedAt: new Date(),
+      })
+      .where(sql`${systemSettingsTable.id} = 'default' AND NOT (${systemSettingsTable.holidayRecessEmailsSent} ? ${key})`)
+      .returning({ id: systemSettingsTable.id });
+    return rows.length > 0;
+  },
+
+  /** Desfaz a reserva quando o envio falhou por inteiro, para o cron poder tentar de novo. */
+  async releaseHolidayRecessCampaign(key: string) {
+    await db
+      .update(systemSettingsTable)
+      .set({ holidayRecessEmailsSent: sql`${systemSettingsTable.holidayRecessEmailsSent} - ${key}` })
+      .where(eq(systemSettingsTable.id, "default"));
   },
 };

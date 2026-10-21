@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout/header";
 import { Progress } from "@/components/ui/progress";
 import { VideoPlayer } from "@/components/ui/video-player";
+import { CourseAttachmentBlock } from "@/modules/course/_components/CourseAttachmentBlock";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Button } from "@/components/ui/button";
 
@@ -263,6 +264,8 @@ export function StudentPlayerClient({ courseData, enrollment, currentUser }: Stu
                     <div key={bIndex} className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
                       {block.type === "video" ? (
                         <VideoPlayer url={block.url} provider={block.provider} />
+                      ) : block.type === "file" ? (
+                        <CourseAttachmentBlock url={block.url} name={block.name} size={block.size} mimeType={block.mimeType} />
                       ) : (
                         <div className="prose dark:prose-invert max-w-none">
                           <RichTextEditor content={block.content} onChange={() => { }} editable={false} />

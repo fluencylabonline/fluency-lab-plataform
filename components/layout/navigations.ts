@@ -67,6 +67,14 @@ const adminItems: MenuItemType[] = [
         permission: "material.view",
     },
     {
+        href: "/admin/holiday-classes",
+        label: "Aulas de Recesso",
+        labelKey: "holidayClasses",
+        Icon: CalendarDaysIcon,
+        iconProps: { size: 20 },
+        permission: "course.manage",
+    },
+    {
         href: "/admin/my-courses",
         label: "Meu Aprendizado",
         labelKey: "myLearning",
@@ -259,6 +267,14 @@ const managerItems: MenuItemType[] = [
         Icon: ClapIcon,
         iconProps: { size: 20 },
         permission: "material.view",
+    },
+    {
+        href: "/manager/holiday-classes",
+        label: "Aulas de Recesso",
+        labelKey: "holidayClasses",
+        Icon: CalendarDaysIcon,
+        iconProps: { size: 20 },
+        permission: "course.manage",
     },
     {
         href: "/manager/my-courses",
