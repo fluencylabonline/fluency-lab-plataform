@@ -939,7 +939,7 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
       },
       {
         heading: "Where else they appear",
-        body: "On your profile, the Recess activities card only shows up when you have some, and it brings you here. On the calendar, a class on recess opens that day's activity.",
+        body: "On your profile, the Recess activities card only shows up when there is at least 1 class on recess in the next 2 weeks, and it brings you here. Even without the card, all your activities, older ones included, stay in this list. On the calendar, a class on recess opens that day's activity.",
       },
     ],
     tour: [

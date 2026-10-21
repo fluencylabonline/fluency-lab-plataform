@@ -3642,7 +3642,7 @@
   "StudentRecess": {
     "card": {
       "title": "Atividades de recesso",
-      "subtitle": "{count, plural, one {# atividade disponível} other {# atividades disponíveis}}"
+      "subtitle": "{count, plural, one {# atividade nas próximas 2 semanas} other {# atividades nas próximas 2 semanas}}"
     },
     "list": {
       "title": "Atividades de recesso",

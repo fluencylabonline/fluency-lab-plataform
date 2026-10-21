@@ -3643,7 +3643,7 @@
   "StudentRecess": {
     "card": {
       "title": "Recess activities",
-      "subtitle": "{count, plural, one {# activity available} other {# activities available}}"
+      "subtitle": "{count, plural, one {# activity in the next 2 weeks} other {# activities in the next 2 weeks}}"
     },
     "list": {
       "title": "Recess activities",

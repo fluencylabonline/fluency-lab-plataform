@@ -941,7 +941,7 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
       },
       {
         heading: "Onde mais elas aparecem",
-        body: "No seu perfil, o cartão Atividades de recesso só aparece quando você tem alguma, e leva até aqui. No calendário, a aula em recesso abre a atividade daquele dia.",
+        body: "No seu perfil, o cartão Atividades de recesso só aparece quando há pelo menos 1 aula em recesso nas próximas 2 semanas, e leva até aqui. Mesmo sem o cartão, todas as suas atividades, inclusive as antigas, continuam nesta lista. No calendário, a aula em recesso abre a atividade daquele dia.",
       },
     ],
     tour: [
