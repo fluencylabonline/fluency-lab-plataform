@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Mail, Printer } from "lucide-react";
+import { Download, Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { notify } from "@/components/ui/toaster";
@@ -10,7 +10,7 @@ import {
   getRecessActivityPdfAction,
 } from "@/modules/scheduling/scheduling.actions";
 
-type Busy = "print" | "download" | "email" | null;
+type Busy = "download" | "email" | null;
 
 function base64ToBlob(base64: string) {
   const binary = atob(base64);
@@ -46,34 +46,6 @@ export function RecessActivityPdfActions({ slotId }: { slotId: string }) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
-  const handlePrint = async () => {
-    setBusy("print");
-    const pdf = await fetchPdf();
-    setBusy(null);
-    if (!pdf) return;
-    const url = URL.createObjectURL(pdf.blob);
-    const frame = document.createElement("iframe");
-    frame.style.position = "fixed";
-    frame.style.width = "0";
-    frame.style.height = "0";
-    frame.style.border = "0";
-    frame.src = url;
-    frame.onload = () => {
-      try {
-        frame.contentWindow?.focus();
-        frame.contentWindow?.print();
-      } catch {
-        // Navegadores que não imprimem PDF em iframe (ex.: Safari no iPhone): abre em nova aba.
-        window.open(url, "_blank");
-      }
-      setTimeout(() => {
-        frame.remove();
-        URL.revokeObjectURL(url);
-      }, 60_000);
-    };
-    document.body.appendChild(frame);
-  };
-
   const handleEmail = async () => {
     setBusy("email");
     const result = await emailRecessActivityPdfAction({ slotId });
@@ -87,13 +59,12 @@ export function RecessActivityPdfActions({ slotId }: { slotId: string }) {
   };
 
   const actions = [
-    { key: "print" as const, label: t("print"), icon: Printer, onClick: handlePrint },
     { key: "download" as const, label: t("download"), icon: Download, onClick: handleDownload },
     { key: "email" as const, label: t("email"), icon: Mail, onClick: handleEmail },
   ];
 
   return (
-    <div className="flex flex-wrap items-center gap-2" data-tour="student-recess.pdf">
+    <div className="grid grid-cols-2 gap-2" data-tour="student-recess.pdf">
       {actions.map(({ key, label, icon: Icon, onClick }) => (
         <Button
           key={key}
@@ -102,7 +73,7 @@ export function RecessActivityPdfActions({ slotId }: { slotId: string }) {
           size="sm"
           onClick={onClick}
           disabled={busy !== null}
-          className="h-9 gap-2 text-xs"
+          className="h-9 w-full gap-2 text-xs"
         >
           {busy === key ? (
             <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />

@@ -873,7 +873,7 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
       },
       {
         heading: "How the screen is laid out",
-        body: "The lesson content sits on the wider side, for reading. Practise and Test, on the other side, holds the activity's quiz when there is one.",
+        body: "The lesson content fills the left-hand column, for reading. On the right, from top to bottom: the Alternative activity card (original class date and teacher), Practise and test with the quiz, and the PDF buttons.",
       },
       {
         heading: "The quiz",
@@ -882,8 +882,8 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
       {
         heading: "Studying on paper",
         body: [
-          "Print opens the print dialog for the whole lesson, already laid out in pages.",
-          "Download PDF saves the file to your device.",
+          "The buttons sit below the quiz, in the right-hand column.",
+          "Download PDF saves the file to your device — you can print it from there.",
           "Send by email sends the PDF to your account's email. You can ask for it up to 5 times per hour.",
           "The PDF has the content, the quiz to answer by hand and the answer key on the last page.",
         ],
@@ -909,7 +909,7 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
         id: "pdf",
         target: "student-recess.pdf",
         title: "Print it or take it with you",
-        text: "Print, download the PDF or get it by email. The file has the content, the quiz and the answer key at the end.",
+        text: "Download the PDF or get it by email. The file has the content, the quiz and the answer key at the end.",
       },
       {
         id: "quiz",

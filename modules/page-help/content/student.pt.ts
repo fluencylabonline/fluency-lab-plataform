@@ -875,7 +875,7 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
       },
       {
         heading: "Como a tela se organiza",
-        body: "O conteúdo da lição fica do lado maior, para leitura. Praticar e Testar, do outro lado, traz o quiz da atividade quando existe um.",
+        body: "O conteúdo da lição ocupa a coluna da esquerda, para leitura. Na direita ficam, de cima para baixo: o cartão Atividade alternativa (data da aula original e professor), o Praticar e testar com o quiz e os botões do PDF.",
       },
       {
         heading: "O quiz",
@@ -884,8 +884,8 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
       {
         heading: "Estudar no papel",
         body: [
-          "Imprimir abre a impressão da lição completa, já formatada em páginas.",
-          "Baixar PDF salva o arquivo no seu aparelho.",
+          "Os botões ficam abaixo do quiz, na coluna da direita.",
+          "Baixar PDF salva o arquivo no seu aparelho — de lá dá para imprimir.",
           "Receber por e-mail manda o PDF para o e-mail da sua conta. Dá para pedir até 5 vezes por hora.",
           "O PDF traz o conteúdo, o quiz para marcar à mão e o gabarito na última página.",
         ],
@@ -911,7 +911,7 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
         id: "pdf",
         target: "student-recess.pdf",
         title: "Imprimir ou levar com você",
-        text: "Imprima, baixe o PDF ou receba por e-mail. O arquivo tem o conteúdo, o quiz e o gabarito no final.",
+        text: "Baixe o PDF ou receba por e-mail. O arquivo tem o conteúdo, o quiz e o gabarito no final.",
       },
       {
         id: "quiz",

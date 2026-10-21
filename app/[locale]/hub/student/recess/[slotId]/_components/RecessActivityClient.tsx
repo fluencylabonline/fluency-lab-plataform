@@ -88,55 +88,22 @@ export function RecessActivityClient({ slot, lesson, locale }: RecessActivityCli
   };
 
   return (
-    <div className="space-y-8">
-      {/* Recess Context Banner */}
-      <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="bg-purple-500/20 text-purple-700 dark:text-purple-300 hover:bg-purple-500/30">
-              {t("badge")}
-            </Badge>
-            <span className="text-xs text-muted-foreground">{t("teacherStatus")}</span>
-          </div>
-          <p className="text-sm text-purple-700 dark:text-purple-400 font-medium">
-            {slot.notes || t("defaultNote")}
-          </p>
-        </div>
-        <div className="flex flex-col text-xs text-muted-foreground gap-1 border-t md:border-t-0 md:border-l pt-3 md:pt-0 md:pl-4">
-          <div className="flex items-center gap-2">
-            <Calendar className="w-3.5 h-3.5" />
-            <span>{t("originalClass", { date: format(new Date(slot.startAt), "PPp", { locale: dateLocale }) })}</span>
-          </div>
-          {slot.teacherName && (
-            <div className="flex items-center gap-2">
-              <User className="w-3.5 h-3.5" />
-              <span>{t("teacher", { name: slot.teacherName })}</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left/Middle: Lesson Content (2/3 width on desktop) */}
-        <div className="lg:col-span-2 space-y-6" data-tour="student-recess.content">
-          <div className="card p-6 space-y-4">
-            <div className="flex items-center justify-between border-b pb-4">
-              <div className="flex items-center gap-2.5">
-                <BookOpen className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-bold">{lesson.title}</h2>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        {/* Esquerda: conteúdo da lição ocupa toda a coluna (2/3 no desktop) */}
+        <div className="lg:col-span-2" data-tour="student-recess.content">
+          <div className="card p-4 md:p-6 space-y-4">
+            <div className="flex items-center justify-between gap-3 border-b pb-4">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <BookOpen className="w-5 h-5 text-primary shrink-0" />
+                <h2 className="text-xl font-bold truncate">{lesson.title}</h2>
               </div>
-              <Badge variant="outline" className="uppercase font-bold text-xs">
+              <Badge variant="outline" className="uppercase font-bold text-xs shrink-0">
                 {lesson.difficulty}
               </Badge>
             </div>
 
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs text-muted-foreground">{tPdf("hint")}</p>
-              <RecessActivityPdfActions slotId={slot.id} />
-            </div>
-
             {lesson.contentJson ? (
-              <div className="rich-text-container">
+              <div className="lesson-content -mx-4">
                 <RichTextEditor
                   content={lesson.contentJson}
                   onChange={() => {}}
@@ -149,8 +116,26 @@ export function RecessActivityClient({ slot, lesson, locale }: RecessActivityCli
           </div>
         </div>
 
-        {/* Right: Quiz (1/3 width on desktop) */}
-        <div className="space-y-6">
+        {/* Direita: contexto da aula, prática e PDF */}
+        <div className="space-y-4 lg:sticky lg:top-4">
+          <div className="rounded-md border border-purple-500/20 bg-purple-500/10 p-4 space-y-2" data-tour="student-recess.context">
+            <Badge variant="secondary" className="bg-purple-500/20 text-purple-700 dark:text-purple-300 hover:bg-purple-500/30">
+              {t("badge")}
+            </Badge>
+            <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-3.5 h-3.5 shrink-0" />
+                <span>{t("originalClass", { date: format(new Date(slot.startAt), "PPp", { locale: dateLocale }) })}</span>
+              </div>
+              {slot.teacherName && (
+                <div className="flex items-center gap-2">
+                  <User className="w-3.5 h-3.5 shrink-0" />
+                  <span>{t("teacher", { name: slot.teacherName })}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="card p-6 space-y-4" data-tour="student-recess.quiz">
             <div className="flex items-center gap-2 border-b pb-4">
               <HelpCircle className="w-5 h-5 text-primary" />
@@ -272,8 +257,12 @@ export function RecessActivityClient({ slot, lesson, locale }: RecessActivityCli
               </div>
             )}
           </div>
+
+          <div className="card p-4 space-y-3">
+            <p className="text-xs text-muted-foreground">{tPdf("hint")}</p>
+            <RecessActivityPdfActions slotId={slot.id} />
+          </div>
         </div>
-      </div>
     </div>
   );
 }
