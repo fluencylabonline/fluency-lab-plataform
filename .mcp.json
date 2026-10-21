@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "neon": {
+      "type": "http",
+      "url": "https://mcp.neon.tech/mcp"
+    },
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com"
+    },
+    "firebase": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "firebase-tools@latest", "mcp"]
+    },
+    "stripe": {
+      "type": "http",
+      "url": "https://mcp.stripe.com"
+    },
+    "abacatepay": {
+      "type": "http",
+      "url": "https://mcp.abacatepay.com/mcp",
+      "headers": {
+        "X-API-Key": "${ABACATE_PAY_API_KEY}"
+      }
+    }
+  }
+}
