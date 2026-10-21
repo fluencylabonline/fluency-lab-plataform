@@ -11,7 +11,6 @@ import { useLocale } from "next-intl";
 import { Calendar, Clock, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Field } from "@/components/ui/field";
-import { type ScheduledClass } from "@/modules/scheduling/scheduling.types";
 
 type TeacherSlot = {
   id: string;
@@ -32,12 +31,21 @@ type CreditBalance = {
   "teacher-cancellation": number;
 };
 
+/** O mínimo que o vault precisa da aula: serve tanto para a agenda quanto para o perfil. */
+export interface RescheduleVaultClass {
+  id: string;
+  teacherId: string;
+  startAt: Date | string;
+  status: string;
+}
+
 interface RescheduleVaultProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedClass: ScheduledClass | null;
-  balance: CreditBalance;
-  rescheduleStats: RescheduleStats;
+  selectedClass: RescheduleVaultClass | null;
+  /** Só a agenda mostra o saldo e a cota; o perfil reagenda apenas aula cancelada pelo professor. */
+  balance?: CreditBalance;
+  rescheduleStats?: RescheduleStats;
   onSuccess: () => void;
 }
 
@@ -53,6 +61,11 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, balance, re
   const [isConfirming, setIsConfirming] = useState(false);
   const [overlayState, setOverlayState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Aula cancelada pelo professor só se repõe com o crédito dela (o servidor escolhe qual),
+  // nunca com a cota mensal de reagendamentos.
+  const usesCredit = selectedClass?.status === "canceled-teacher";
+  const quotaExhausted = !!rescheduleStats && rescheduleStats.count >= rescheduleStats.limit;
 
   const fetchSlots = useCallback(async () => {
     if (!selectedClass?.teacherId) return;
@@ -173,9 +186,9 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, balance, re
                 </div>
 
                 <p className="text-xs text-muted-foreground text-center px-4">
-                  {useCreditId === undefined 
-                    ? (t("Reschedule.quotaNotice") || "Será consumido 1 crédito da sua cota mensal de reagendamentos.")
-                    : (t("Reschedule.creditNoticeConfirm") || "Será consumido 1 crédito de reposição.")
+                  {usesCredit || useCreditId !== undefined
+                    ? (t("Reschedule.creditNoticeConfirm") || "Será consumido 1 crédito de reposição.")
+                    : (t("Reschedule.quotaNotice") || "Será consumido 1 crédito da sua cota mensal de reagendamentos.")
                   }
                 </p>
               </div>
@@ -218,13 +231,26 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, balance, re
 
                 <Field label={t("Reschedule.paymentMethod") || "Método de Reagendamento"}>
                   <div className="grid grid-cols-1 gap-2">
+                    {usesCredit ? (
+                      <div className="flex items-start gap-3 p-3 rounded-md border border-primary bg-primary/5 ring-1 ring-primary">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <Check className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium">{t("Reschedule.creditMode") || "Reposição com crédito"}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {t("Reschedule.creditModeDesc") || "Esta aula foi cancelada pelo professor. Você usa 1 crédito de reposição, sem gastar sua cota mensal."}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
                     <button
-                      disabled={rescheduleStats?.count >= rescheduleStats?.limit}
+                      disabled={quotaExhausted}
                       onClick={() => setUseCreditId(undefined)}
                       className={cn(
                         "flex items-center justify-between p-3 rounded-md border text-left transition-all",
                         useCreditId === undefined ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-muted-foreground/20",
-                        rescheduleStats?.count >= rescheduleStats?.limit && "opacity-50 grayscale cursor-not-allowed"
+                        quotaExhausted && "opacity-50 grayscale cursor-not-allowed"
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -234,14 +260,15 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, balance, re
                         <div className="flex flex-col">
                           <span className="text-sm font-medium">{t("Reschedule.monthlyQuota") || "Cota Mensal"}</span>
                           <span className="text-xs text-muted-foreground">
-                            {rescheduleStats?.count} / {rescheduleStats?.limit} {t("Reschedule.used") || "usados"}
+                            {rescheduleStats?.count ?? 0} / {rescheduleStats?.limit ?? 0} {t("Reschedule.used") || "usados"}
                           </span>
                         </div>
                       </div>
                       {useCreditId === undefined && <Check className="w-4 h-4 text-primary" />}
                     </button>
+                    )}
 
-                    {balance?.total > 0 && (
+                    {!usesCredit && (balance?.total ?? 0) > 0 && (
                       <div className="p-1 border rounded-md bg-muted/30">
                         <p className="text-[10px] uppercase font-bold text-muted-foreground px-2 py-1">
                           {t("Reschedule.useCredit") || "Ou use um crédito"}
@@ -259,7 +286,7 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, balance, re
             <div className="pt-4 border-t flex flex-col gap-3">
               <VaultPrimaryButton
                 className="w-full"
-                disabled={overlayState !== "idle" || !selectedSlotId || (useCreditId === undefined && rescheduleStats?.count >= rescheduleStats?.limit)}
+                disabled={overlayState !== "idle" || !selectedSlotId || (!usesCredit && useCreditId === undefined && quotaExhausted)}
                 onClick={handleConfirm}
               >
                 {isConfirming 

@@ -860,7 +860,14 @@
         "join_class": "Acessar Sala",
         "next_session": "Próxima Aula",
         "schedule_now": "Agendar Agora",
-        "starting_soon": "Começa em breve"
+        "starting_soon": "Começa em breve",
+        "canceled_badge": "Cancelada",
+        "canceled_title": "Aula cancelada pelo professor",
+        "credit_valid_until": "Você ganhou 1 crédito de reposição, válido até {date}.",
+        "reschedule": "Reagendar",
+        "no_slots": "Não há horários disponíveis com seu professor nos próximos 14 dias. Fale com a secretaria.",
+        "next_line": "Próxima aula: {date}",
+        "no_next_class": "Nenhuma outra aula agendada."
       },
       "Onboarding": {
         "contract_pending": "Assinatura Pendente",
@@ -2413,7 +2420,9 @@
       "selectSlot": "Escolha um novo horário",
       "title": "Reagendar Aula",
       "useCredit": "Ou use um crédito",
-      "used": "usados"
+      "used": "usados",
+      "creditMode": "Reposição com crédito",
+      "creditModeDesc": "Esta aula foi cancelada pelo professor. Você usa 1 crédito de reposição, sem gastar sua cota mensal."
     },
     "Success": {
       "canceled": "Aula cancelada com sucesso!",

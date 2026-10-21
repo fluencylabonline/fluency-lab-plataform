@@ -860,7 +860,14 @@
         "join_class": "Join Class",
         "next_session": "Next Class",
         "schedule_now": "Schedule Now",
-        "starting_soon": "Starting soon"
+        "starting_soon": "Starting soon",
+        "canceled_badge": "Canceled",
+        "canceled_title": "Class canceled by your teacher",
+        "credit_valid_until": "You earned 1 make-up credit, valid until {date}.",
+        "reschedule": "Reschedule",
+        "no_slots": "There are no available times with your teacher in the next 14 days. Please contact the school office.",
+        "next_line": "Next class: {date}",
+        "no_next_class": "No other class scheduled."
       },
       "Onboarding": {
         "contract_pending": "Pending Signature",
@@ -2413,7 +2420,9 @@
       "selectSlot": "Choose a new slot",
       "title": "Reschedule Class",
       "useCredit": "Or use a credit",
-      "used": "used"
+      "used": "used",
+      "creditMode": "Make-up with credit",
+      "creditModeDesc": "This class was canceled by your teacher. You use 1 make-up credit, without spending your monthly quota."
     },
     "Success": {
       "canceled": "Class cancelled successfully!",

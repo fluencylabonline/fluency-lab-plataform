@@ -171,6 +171,53 @@ export const schedulingRepository = {
     });
   },
 
+  /** Aula nova criada ao repor `originalClassId` (a original continua `canceled-teacher`). */
+  async findReplacementForClass(originalClassId: string) {
+    return db.query.slotInstances.findFirst({
+      where: sql`${slotInstances.rescheduledFrom}->>'originalClassId' = ${originalClassId}`,
+    });
+  },
+
+  /** Ids, entre os informados, de aulas que já foram repostas. */
+  async findReplacedClassIds(originalClassIds: string[]): Promise<string[]> {
+    if (originalClassIds.length === 0) return [];
+    const rows = await db
+      .select({ originalId: sql<string>`${slotInstances.rescheduledFrom}->>'originalClassId'` })
+      .from(slotInstances)
+      .where(inArray(sql`${slotInstances.rescheduledFrom}->>'originalClassId'`, originalClassIds));
+    return rows.map((r) => r.originalId);
+  },
+
+  /** Aulas canceladas pelo professor desde `since` (mais antigas primeiro). */
+  async findTeacherCanceledClassesSince(studentId: string, since: Date) {
+    return db
+      .select({ id: slotInstances.id, startAt: slotInstances.startAt, teacherId: slotInstances.teacherId })
+      .from(slotInstances)
+      .where(
+        and(
+          eq(slotInstances.studentId, studentId),
+          eq(slotInstances.status, "canceled-teacher"),
+          gte(slotInstances.startAt, since)
+        )
+      )
+      .orderBy(asc(slotInstances.startAt));
+  },
+
+  /** Início das aulas reais do aluno (agendadas, concluídas, faltas, atrasadas) desde `since`. */
+  async findStudentRealClassStartsSince(studentId: string, since: Date): Promise<Date[]> {
+    const rows = await db
+      .select({ startAt: slotInstances.startAt })
+      .from(slotInstances)
+      .where(
+        and(
+          eq(slotInstances.studentId, studentId),
+          inArray(slotInstances.status, ["scheduled", "completed", "no-show", "overdue"]),
+          gte(slotInstances.startAt, since)
+        )
+      );
+    return rows.map((r) => r.startAt);
+  },
+
   // --- Recess ---
   async findRecessesByTeacher(teacherId: string) {
     return db.query.recessRequestsTable.findMany({

@@ -11,6 +11,7 @@ import { OnboardingStatusCard, type OnboardingVariant } from "./OnboardingStatus
 import { StreakWidget } from "./StreakWidget";
 import { RecessActivitiesCard } from "./RecessActivitiesCard";
 import { HolidayClassesCard } from "./HolidayClassesCard";
+import { RescheduleNoticeCard, type PendingReschedule } from "./RescheduleNoticeCard";
 import { PracticeStatusWidget } from "./PracticeStatusWidget";
 import { useTranslations } from "next-intl";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
@@ -82,6 +83,8 @@ interface StudentProfileClientProps {
   recessActivitiesCount: number;
   /** Preenchido só no recesso de fim de ano, com pacotes publicados. */
   holidayClasses: { packageCount: number; returnDay: string } | null;
+  /** Aula cancelada pelo professor que ainda pode ser reposta com o crédito (substitui o card de próxima aula). */
+  pendingReschedule: PendingReschedule | null;
 }
 
 export function StudentProfileClient({
@@ -96,6 +99,7 @@ export function StudentProfileClient({
   practiceStatus,
   recessActivitiesCount,
   holidayClasses,
+  pendingReschedule,
 }: StudentProfileClientProps) {
   const t = useTranslations("Hub.Profile");
   
@@ -160,6 +164,11 @@ export function StudentProfileClient({
             <div data-tour="student-profile.next-class">
               {holidayClasses ? (
                 <HolidayClassesCard packageCount={holidayClasses.packageCount} returnDay={holidayClasses.returnDay} />
+              ) : pendingReschedule ? (
+                <RescheduleNoticeCard
+                  pending={pendingReschedule}
+                  nextClassStartsAt={nextClassMapped?.startsAt ?? null}
+                />
               ) : (
                 <NextClassCard nextClass={nextClassMapped} studentId={user.id} />
               )}

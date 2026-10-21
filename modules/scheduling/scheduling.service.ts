@@ -38,6 +38,7 @@ import {
 } from "date-fns";
 import { notificationService } from "@/modules/notification/notification.service";
 import { NewSlotInstance } from "./scheduling.types";
+import { pickPendingTeacherCancellation } from "./reschedule-notice";
 import { addCivilDays, brtCivilDate, brtDayRangeUtc } from "@/modules/billing/billing.dates";
 import { isQuietHours, brtHourMinute, QUIET_HOURS_END } from "@/lib/quiet-hours";
 
@@ -2664,8 +2665,21 @@ export const schedulingService = {
     }
 
     // --- Mod 3: canceled-teacher requires credit, not monthly quota ---
-    if (originalSlot.status === "canceled-teacher" && !creditId) {
-      throw new Error("Para remarcar uma aula cancelada pelo professor, use o crédito de reposição recebido.");
+    // O original continua `canceled-teacher` depois da reposição; o que mostra que ela já
+    // aconteceu é o slot novo apontar para ele em `rescheduledFrom`.
+    let effectiveCreditId = creditId;
+    if (originalSlot.status === "canceled-teacher") {
+      if (await schedulingRepository.findReplacementForClass(originalClassId)) {
+        throw new Error("Esta aula já foi reposta.");
+      }
+      if (!effectiveCreditId) {
+        // O aluno não escolhe: usa o crédito de cancelamento que vence primeiro.
+        const credits = await schedulingRepository.findCreditsByStudent(studentId, true);
+        effectiveCreditId = credits.find((c) => c.type === "teacher-cancellation")?.id;
+      }
+      if (!effectiveCreditId) {
+        throw new Error("Para remarcar uma aula cancelada pelo professor, use o crédito de reposição recebido.");
+      }
     }
 
     const targetSlot = await schedulingRepository.findById(newSlotId);
@@ -2675,8 +2689,8 @@ export const schedulingService = {
 
     let creditToUse = null;
 
-    if (creditId) {
-      creditToUse = await schedulingRepository.findCreditById(creditId);
+    if (effectiveCreditId) {
+      creditToUse = await schedulingRepository.findCreditById(effectiveCreditId);
       if (!creditToUse || creditToUse.studentId !== studentId || creditToUse.usedAt || creditToUse.expiresAt < new Date()) {
         throw new Error("Invalid or expired credit");
       }
@@ -2690,11 +2704,15 @@ export const schedulingService = {
     }
 
     return await db.transaction(async (tx) => {
-      // 1. If using a credit, mark it as used
-      if (creditToUse && creditId) {
-        await tx.update(studentCredits)
+      // 1. If using a credit, mark it as used (só se ainda estiver livre: evita uso duplo)
+      if (creditToUse && effectiveCreditId) {
+        const consumed = await tx.update(studentCredits)
           .set({ usedAt: new Date(), usedForClassId: newSlotId })
-          .where(eq(studentCredits.id, creditId));
+          .where(and(eq(studentCredits.id, effectiveCreditId), isNull(studentCredits.usedAt)))
+          .returning({ id: studentCredits.id });
+        if (consumed.length === 0) {
+          throw new Error("Invalid or expired credit");
+        }
       }
 
       // 2. If original is still scheduled, cancel it (keep canceled-teacher as-is)
@@ -2719,7 +2737,7 @@ export const schedulingService = {
         .set({
           studentId,
           status: "scheduled",
-          creditId: creditId || null,
+          creditId: effectiveCreditId || null,
           creditType: creditToUse?.type || null,
           isReschedulable: false,
           rescheduledFrom: {
@@ -2749,6 +2767,47 @@ export const schedulingService = {
 
   async findNextClassForStudent(studentId: string) {
     return schedulingRepository.findNextClassForStudent(studentId);
+  },
+
+  /**
+   * Aula cancelada pelo professor que o perfil do aluno deve oferecer para reagendar, ou null.
+   * A regra (qual aula, até quando) está em reschedule-notice.ts; aqui só se juntam os dados.
+   * `hasAvailability` diz se o professor tem horário livre na mesma janela do vault de reagendar.
+   */
+  async getPendingTeacherCancellationReschedule(studentId: string, now: Date = new Date()) {
+    // O crédito vale 30 dias: aulas canceladas há mais tempo não têm mais o que repor.
+    const since = addDays(now, -31);
+
+    const [canceled, credits, realClassStarts] = await Promise.all([
+      schedulingRepository.findTeacherCanceledClassesSince(studentId, since),
+      schedulingRepository.findCreditsByStudent(studentId, true),
+      schedulingRepository.findStudentRealClassStartsSince(studentId, since),
+    ]);
+    if (canceled.length === 0) return null;
+
+    const replacedClassIds = await schedulingRepository.findReplacedClassIds(canceled.map((c) => c.id));
+    const pending = pickPendingTeacherCancellation({
+      canceled,
+      replacedClassIds,
+      realClassStarts,
+      credits: credits.filter((c) => c.type === "teacher-cancellation"),
+      now,
+    });
+    if (!pending) return null;
+
+    const [teacher, slots] = await Promise.all([
+      userService.getUserById(pending.teacherId),
+      schedulingRepository.findTeacherAvailableSlotsInRange(pending.teacherId, addDays(now, 1), addDays(now, 15)),
+    ]);
+
+    return {
+      classId: pending.classId,
+      startAt: pending.startAt,
+      teacherId: pending.teacherId,
+      teacherName: teacher?.name ?? null,
+      creditExpiresAt: pending.creditExpiresAt,
+      hasAvailability: slots.length > 0,
+    };
   },
 
   /** Primeira aula marcada de cada aluno no intervalo (uma consulta para todos). */

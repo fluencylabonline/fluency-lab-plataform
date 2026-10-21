@@ -24,7 +24,7 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
         id: "next-class",
         target: "student-profile.next-class",
         title: "Your next class",
-        text: "Date, time and teacher of your next scheduled class. When the time comes, the Join Room button opens the video call. With nothing scheduled, the card tells you your calendar is empty. During the year-end break (Dec 18 to Jan 14), it becomes the shortcut to the recorded holiday classes.",
+        text: "Date, time and teacher of your next scheduled class. When the time comes, the Join Room button opens the video call. With nothing scheduled, the card tells you your calendar is empty. If your teacher cancels a class and you earn a make-up credit, the card shows the canceled class and a Reschedule button until your next class starts; after that it goes back to normal and you can still make it up from the calendar. During the year-end break (Dec 18 to Jan 14), it becomes the shortcut to the recorded holiday classes.",
       },
       {
         id: "payment",
@@ -121,7 +121,7 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
         id: "reschedule",
         target: "student-schedule.calendar",
         title: "Rescheduling a class",
-        text: "Open the class and choose Reschedule. The system lists your teacher's free slots over the next 14 days and asks whether to spend your monthly quota or a make-up credit.",
+        text: "Open the class and choose Reschedule. The system lists your teacher's free slots over the next 14 days and asks whether to spend your monthly quota or a make-up credit. A class canceled by the teacher is always made up with its own credit, without spending the quota.",
       },
       {
         id: "cancel",

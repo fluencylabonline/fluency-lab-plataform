@@ -25,7 +25,7 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
         id: "next-class",
         target: "student-profile.next-class",
         title: "Sua próxima aula",
-        text: "Dia, horário e professor da próxima aula marcada. Quando o horário chega, o botão Acessar Sala abre a chamada de vídeo. Sem aula marcada, o cartão avisa que sua agenda está vazia. No recesso de fim de ano (18/12 a 14/01), ele vira o atalho para as aulas de recesso gravadas.",
+        text: "Dia, horário e professor da próxima aula marcada. Quando o horário chega, o botão Acessar Sala abre a chamada de vídeo. Sem aula marcada, o cartão avisa que sua agenda está vazia. Se o professor cancelar uma aula e você ganhar um crédito de reposição, o cartão mostra a aula cancelada e o botão Reagendar, até a próxima aula começar; depois volta ao normal e você ainda pode repor pela agenda. No recesso de fim de ano (18/12 a 14/01), ele vira o atalho para as aulas de recesso gravadas.",
       },
       {
         id: "payment",
@@ -122,7 +122,7 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
         id: "reschedule",
         target: "student-schedule.calendar",
         title: "Remarcar uma aula",
-        text: "Abra a aula e escolha Reagendar. O sistema lista os horários livres do seu professor nos próximos 14 dias e pergunta se você quer gastar a cota do mês ou um crédito de reposição.",
+        text: "Abra a aula e escolha Reagendar. O sistema lista os horários livres do seu professor nos próximos 14 dias e pergunta se você quer gastar a cota do mês ou um crédito de reposição. Aula cancelada pelo professor é sempre reposta com o crédito dela, sem gastar a cota.",
       },
       {
         id: "cancel",

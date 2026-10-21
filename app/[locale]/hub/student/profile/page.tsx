@@ -22,7 +22,7 @@ export default async function ProfilePage() {
     if (!user) redirect("/signin");
     if (!user.onboarded) redirect("/onboarding");
 
-    const [, nextClass, activeContract, curriculumStats, activePayment, learningStats, placementHistory, courseStatus, recessActivities] = await Promise.all([
+    const [, nextClass, activeContract, curriculumStats, activePayment, learningStats, placementHistory, courseStatus, recessActivities, pendingReschedule] = await Promise.all([
         userService.getLevelInfo(user.currentEloScore),
         schedulingService.findNextClassForStudent(user.id),
         contractService.getActiveContract(user.id),
@@ -32,6 +32,7 @@ export default async function ProfilePage() {
         placementRepository.getTestHistory(user.id),
         courseService.getStudentCourseStatus(user.id, WELCOME_COURSE_ID),
         schedulingService.getStudentRecessActivities(user),
+        schedulingService.getPendingTeacherCancellationReschedule(user.id),
     ]);
 
     // No recesso de fim de ano não há aula ao vivo: o cartão de próxima aula vira
@@ -112,6 +113,7 @@ export default async function ProfilePage() {
             practiceStatus={practiceStatus}
             recessActivitiesCount={recessNoticeCount(recessActivities)}
             holidayClasses={holidayClasses}
+            pendingReschedule={pendingReschedule}
         />
     );
 }

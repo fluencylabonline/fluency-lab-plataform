@@ -17,7 +17,7 @@ import { useWizard } from "@/hooks/ui/use-wizard";
 import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpProvider";
 import { cancelClassAction } from "@/modules/scheduling/scheduling.actions";
 import { useRouter } from "next/navigation";
-import { RescheduleVault } from "./RescheduleVault";
+import { RescheduleVault } from "@/modules/scheduling/_components/RescheduleVault";
 import { type ScheduledClass } from "@/modules/scheduling/scheduling.types";
 
 type RescheduleStats = {
