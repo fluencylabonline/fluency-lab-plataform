@@ -3,6 +3,7 @@ import { schedulingService } from "@/modules/scheduling/scheduling.service";
 import { curriculumService } from "@/modules/curriculum/curriculum.service";
 import { userService } from "@/modules/user/user.service";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/header";
 import { RecessActivityClient } from "./_components/RecessActivityClient";
 
@@ -12,7 +13,7 @@ interface RecessPageProps {
 
 export default async function RecessActivityPage({ params }: RecessPageProps) {
   const { slotId, locale } = await params;
-  const user = await getCurrentUser();
+  const [user, t] = await Promise.all([getCurrentUser(), getTranslations("StudentRecess.activity")]);
 
   if (!user) {
     redirect("/signin");
@@ -32,7 +33,7 @@ export default async function RecessActivityPage({ params }: RecessPageProps) {
 
   // 3. Fetch teacher details to display their name
   const teacher = await userService.getUserById(slot.teacherId);
-  const teacherName = teacher?.name || "Professor";
+  const teacherName = teacher?.name || null;
 
   // Prep data for client
   const slotData = {
@@ -53,9 +54,9 @@ export default async function RecessActivityPage({ params }: RecessPageProps) {
   return (
     <div>
       <Header
-        title="Atividade de Recesso"
-        subtitle={`Lição de fallback preparada especialmente para você.`}
-        backHref="/hub/student/schedule"
+        title={t("headerTitle")}
+        subtitle={t("headerSubtitle")}
+        backHref="/hub/student/recess"
         className="contents"
       />
 

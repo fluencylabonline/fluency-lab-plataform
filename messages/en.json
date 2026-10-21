@@ -2328,7 +2328,8 @@
       "cancel": "Cancel Class",
       "canceling": "Canceling class...",
       "reschedule": "Reschedule Class",
-      "viewDetails": "View Class"
+      "viewDetails": "View Class",
+      "viewRecessActivity": "View recess activity"
     },
     "CancelConfirm": {
       "back": "Back",
@@ -2363,7 +2364,10 @@
       "noShow": "No-Show classes cannot be rescheduled.",
       "canceledStudent": "Classes canceled by you cannot be rescheduled.",
       "canceledTeacher": "This class was canceled by the teacher. Use your makeup credit to reschedule it.",
-      "within4h": "Less than 4 hours until this class. Rescheduling is no longer possible. Canceling will be recorded as No-Show."
+      "within4h": "Less than 4 hours until this class. Rescheduling is no longer possible. Canceling will be recorded as No-Show.",
+      "teacherRecess": "Your teacher is on recess on this day.",
+      "teacherRecessFallback": "An alternative activity is available for you.",
+      "teacherRecessNoFallback": "The school will set an alternative activity soon."
     },
     "Reschedule": {
       "confirm": "Confirm Reschedule",
@@ -3565,7 +3569,7 @@
     "saving": "Saving...",
     "confirm": "Confirm",
     "menuItem": "Change Time"
-  },
+  },
   "SlotWizard": {
     "stepOf": "Step {current} of {total}",
     "typeTitle": "What kind of slot do you want to create?",
@@ -3609,5 +3613,52 @@
     "creating": "Creating slot...",
     "created": "Slot created successfully!",
     "error": "Error creating slot"
+  },
+  "StudentRecess": {
+    "card": {
+      "title": "Recess activities",
+      "subtitle": "{count, plural, one {# activity available} other {# activities available}}"
+    },
+    "list": {
+      "title": "Recess activities",
+      "subtitle": "The activities that replaced your classes while your teacher was on recess",
+      "upcoming": "Upcoming and today",
+      "past": "Previous",
+      "empty": "No recess activities",
+      "emptyText": "When your teacher goes on recess, the activities that replace your classes show up here.",
+      "classOf": "Class on {date}",
+      "teacher": "Teacher {name}",
+      "open": "Open activity"
+    },
+    "activity": {
+      "headerTitle": "Recess activity",
+      "headerSubtitle": "A lesson prepared so you can keep practising.",
+      "badge": "Alternative activity",
+      "teacherStatus": "Teacher status: on recess",
+      "defaultNote": "This lesson was made available so you can keep practising while your teacher is away.",
+      "originalClass": "Original class: {date}",
+      "teacher": "Teacher: {name}",
+      "noContent": "There is no text content for this lesson.",
+      "quizTitle": "Practise and test",
+      "noQuiz": "There is no quiz for this recess lesson.",
+      "quizDone": "Quiz complete!",
+      "quizScore": "You got {score} out of {total} questions right.",
+      "tryAgain": "Try again",
+      "questionOf": "Question {current} of {total}",
+      "correctCount": "{count, plural, one {# correct} other {# correct}}",
+      "explanation": "Explanation:",
+      "confirm": "Confirm answer",
+      "next": "Next question",
+      "seeResult": "See result"
+    },
+    "pdf": {
+      "hint": "Prefer studying on paper? The PDF has the content, the quiz and the answer key.",
+      "print": "Print",
+      "download": "Download PDF",
+      "email": "Send by email",
+      "emailSent": "We sent the PDF to {email}.",
+      "error": "Could not generate the PDF.",
+      "emailError": "Could not send the email."
+    }
   }
 }

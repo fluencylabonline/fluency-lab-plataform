@@ -20,7 +20,7 @@ export default async function ProfilePage() {
     if (!user) redirect("/signin");
     if (!user.onboarded) redirect("/onboarding");
 
-    const [, nextClass, activeContract, curriculumStats, activePayment, learningStats, placementHistory, courseStatus] = await Promise.all([
+    const [, nextClass, activeContract, curriculumStats, activePayment, learningStats, placementHistory, courseStatus, recessActivities] = await Promise.all([
         userService.getLevelInfo(user.currentEloScore),
         schedulingService.findNextClassForStudent(user.id),
         contractService.getActiveContract(user.id),
@@ -29,6 +29,7 @@ export default async function ProfilePage() {
         learningService.getStudentLearningStats(user.id),
         placementRepository.getTestHistory(user.id),
         courseService.getStudentCourseStatus(user.id, WELCOME_COURSE_ID),
+        schedulingService.getStudentRecessActivities(user),
     ]);
 
     const subscriptionData = activePayment;
@@ -100,6 +101,7 @@ export default async function ProfilePage() {
             vocabularyLevel={vocabularyLevel}
             curriculumStats={curriculumStats}
             practiceStatus={practiceStatus}
+            recessActivitiesCount={recessActivities.length}
         />
     );
 }

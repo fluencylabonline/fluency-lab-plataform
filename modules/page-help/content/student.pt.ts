@@ -922,6 +922,37 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
     ],
   },
 
+  "/hub/student/recess": {
+    title: "Atividades de Recesso",
+    summary:
+      "Todas as atividades que substituíram suas aulas enquanto seu professor estava em recesso.",
+    sections: [
+      {
+        heading: "O que aparece aqui",
+        body: "Cada aula que caiu num recesso do professor vira uma atividade para você fazer no lugar do encontro. Esta página junta todas elas, inclusive as antigas, para você revisar quando quiser.",
+      },
+      {
+        heading: "Como a lista se organiza",
+        body: [
+          "Próximas e de hoje: as atividades das aulas de hoje em diante.",
+          "Anteriores: as atividades de aulas que já passaram. Elas continuam abertas para revisão.",
+          "Cada item mostra a lição, o nível, a data da aula original e o professor. Toque para abrir.",
+        ],
+      },
+      {
+        heading: "Onde mais elas aparecem",
+        body: "No seu perfil, o cartão Atividades de recesso só aparece quando você tem alguma, e leva até aqui. No calendário, a aula em recesso abre a atividade daquele dia.",
+      },
+    ],
+    tour: [
+      {
+        id: "intro",
+        title: "Suas atividades de recesso",
+        text: "Aqui ficam todas as atividades que substituíram suas aulas durante o recesso do professor — as próximas e as que já passaram.",
+      },
+    ],
+  },
+
   "/hub/student/docs": {
     title: "Central de Ajuda",
     summary:

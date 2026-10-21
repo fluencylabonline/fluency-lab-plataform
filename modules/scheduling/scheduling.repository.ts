@@ -8,7 +8,8 @@ import {
   recessRequestsTable
 } from "./scheduling.schema";
 import { usersTable } from "@/modules/user/user.schema";
-import { eq, and, lte, gte, lt, gt, isNull, inArray, between, ne, isNotNull, asc, desc } from "drizzle-orm";
+import { lessons } from "@/modules/curriculum/curriculum.schema";
+import { eq, and, lte, gte, lt, gt, isNull, inArray, between, ne, isNotNull, asc, desc, sql } from "drizzle-orm";
 import {
   NewRecurrenceRule,
   NewStudentCredit,
@@ -393,6 +394,32 @@ export const schedulingRepository = {
         )
       )
       .orderBy(slotInstances.studentId, asc(slotInstances.startAt));
+  },
+
+  /** Todas as aulas do aluno que viraram atividade de recesso, das mais recentes para as mais antigas. */
+  async findRecessActivitiesByStudent(studentId: string) {
+    return db
+      .select({
+        id: slotInstances.id,
+        startAt: slotInstances.startAt,
+        endAt: slotInstances.endAt,
+        lessonId: slotInstances.fallbackLessonId,
+        lessonTitle: slotInstances.fallbackLessonTitle,
+        teacherName: usersTable.name,
+        difficulty: lessons.difficulty,
+      })
+      .from(slotInstances)
+      .leftJoin(usersTable, eq(slotInstances.teacherId, usersTable.id))
+      // fallback_lesson_id é varchar e curriculum_lessons.id é uuid.
+      .leftJoin(lessons, sql`${lessons.id}::text = ${slotInstances.fallbackLessonId}`)
+      .where(
+        and(
+          eq(slotInstances.studentId, studentId),
+          eq(slotInstances.status, "teacher-recess"),
+          isNotNull(slotInstances.fallbackLessonId)
+        )
+      )
+      .orderBy(desc(slotInstances.startAt));
   },
 
   async findNextClassForStudent(studentId: string, teacherId?: string) {

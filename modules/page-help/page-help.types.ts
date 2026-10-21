@@ -89,6 +89,7 @@ export type StudentHelpRoute =
   | "/hub/student/immersion/lyrics"
   | "/hub/student/immersion/word-ladder"
   | "/hub/student/immersion/wordle"
+  | "/hub/student/recess"
   | "/hub/student/recess/[slotId]";
 
 export type TeacherHelpRoute =

@@ -2751,6 +2751,12 @@ export const schedulingService = {
     return schedulingRepository.findNextClassForStudent(studentId);
   },
 
+  /** Atividades de recesso que o aluno recebeu (próximas e passadas). Só o próprio aluno consulta. */
+  async getStudentRecessActivities(user: User) {
+    if (user.role !== "student") return [];
+    return schedulingRepository.findRecessActivitiesByStudent(user.id);
+  },
+
   async getAllStudentsNextClassMap(): Promise<Record<string, string>> {
     const slots = await schedulingRepository.findAllFutureScheduledSlots();
     const map: Record<string, string> = {};

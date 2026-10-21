@@ -920,6 +920,37 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
     ],
   },
 
+  "/hub/student/recess": {
+    title: "Recess Activities",
+    summary:
+      "Every activity that replaced your classes while your teacher was on recess.",
+    sections: [
+      {
+        heading: "What shows up here",
+        body: "Each class that fell during your teacher's recess becomes an activity for you to do instead of the session. This page gathers all of them, including older ones, so you can review whenever you like.",
+      },
+      {
+        heading: "How the list is organised",
+        body: [
+          "Upcoming and today: activities for classes from today onwards.",
+          "Previous: activities for classes that have already passed. They stay open for review.",
+          "Each item shows the lesson, the level, the date of the original class and the teacher. Tap to open it.",
+        ],
+      },
+      {
+        heading: "Where else they appear",
+        body: "On your profile, the Recess activities card only shows up when you have some, and it brings you here. On the calendar, a class on recess opens that day's activity.",
+      },
+    ],
+    tour: [
+      {
+        id: "intro",
+        title: "Your recess activities",
+        text: "This is where every activity that replaced your classes during your teacher's recess lives — upcoming ones and those already past.",
+      },
+    ],
+  },
+
   "/hub/student/docs": {
     title: "Help Centre",
     summary:

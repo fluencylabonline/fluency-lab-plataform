@@ -2328,7 +2328,8 @@
       "cancel": "Cancelar Aula",
       "canceling": "Cancelando aula...",
       "reschedule": "Reagendar Aula",
-      "viewDetails": "Ver Aula"
+      "viewDetails": "Ver Aula",
+      "viewRecessActivity": "Ver atividade de recesso"
     },
     "CancelConfirm": {
       "back": "Voltar",
@@ -2363,7 +2364,10 @@
       "noShow": "Aulas marcadas como No-Show não podem ser remarcadas.",
       "canceledStudent": "Aulas canceladas por você não podem ser remarcadas.",
       "canceledTeacher": "Esta aula foi cancelada pelo professor. Use seu crédito de reposição para remarcá-la.",
-      "within4h": "Faltam menos de 4h para esta aula. Não é mais possível remarcar. Cancelar será registrado como No-Show."
+      "within4h": "Faltam menos de 4h para esta aula. Não é mais possível remarcar. Cancelar será registrado como No-Show.",
+      "teacherRecess": "Seu professor está de recesso neste dia.",
+      "teacherRecessFallback": "Uma atividade alternativa foi disponibilizada para você.",
+      "teacherRecessNoFallback": "A coordenação vai definir uma atividade alternativa em breve."
     },
     "Reschedule": {
       "confirm": "Confirmar Reagendamento",
@@ -3564,7 +3568,7 @@
     "saving": "Salvando...",
     "confirm": "Confirmar",
     "menuItem": "Alterar Horário"
-  },
+  },
   "SlotWizard": {
     "stepOf": "Passo {current} de {total}",
     "typeTitle": "Que tipo de horário você quer criar?",
@@ -3608,5 +3612,52 @@
     "creating": "Criando horário...",
     "created": "Horário criado com sucesso!",
     "error": "Erro ao criar horário"
+  },
+  "StudentRecess": {
+    "card": {
+      "title": "Atividades de recesso",
+      "subtitle": "{count, plural, one {# atividade disponível} other {# atividades disponíveis}}"
+    },
+    "list": {
+      "title": "Atividades de recesso",
+      "subtitle": "As atividades que substituíram suas aulas durante o recesso do professor",
+      "upcoming": "Próximas e de hoje",
+      "past": "Anteriores",
+      "empty": "Nenhuma atividade de recesso",
+      "emptyText": "Quando seu professor entrar em recesso, as atividades que substituem suas aulas aparecem aqui.",
+      "classOf": "Aula de {date}",
+      "teacher": "Prof. {name}",
+      "open": "Abrir atividade"
+    },
+    "activity": {
+      "headerTitle": "Atividade de recesso",
+      "headerSubtitle": "Lição preparada para você continuar praticando.",
+      "badge": "Atividade alternativa",
+      "teacherStatus": "Status do professor: em recesso",
+      "defaultNote": "Esta lição foi disponibilizada para que você continue praticando durante a ausência do seu professor.",
+      "originalClass": "Aula original: {date}",
+      "teacher": "Prof.: {name}",
+      "noContent": "Não há conteúdo de texto cadastrado para esta lição.",
+      "quizTitle": "Praticar e testar",
+      "noQuiz": "Nenhum quiz associado a esta lição de recesso.",
+      "quizDone": "Quiz concluído!",
+      "quizScore": "Você acertou {score} de {total} perguntas.",
+      "tryAgain": "Tentar novamente",
+      "questionOf": "Questão {current} de {total}",
+      "correctCount": "{count, plural, one {# acerto} other {# acertos}}",
+      "explanation": "Explicação:",
+      "confirm": "Confirmar resposta",
+      "next": "Próxima questão",
+      "seeResult": "Ver resultado"
+    },
+    "pdf": {
+      "hint": "Prefere estudar no papel? O PDF traz o conteúdo, o quiz e o gabarito.",
+      "print": "Imprimir",
+      "download": "Baixar PDF",
+      "email": "Receber por e-mail",
+      "emailSent": "Enviamos o PDF para {email}.",
+      "error": "Não foi possível gerar o PDF.",
+      "emailError": "Não foi possível enviar o e-mail."
+    }
   }
 }

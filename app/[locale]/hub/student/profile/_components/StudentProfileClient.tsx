@@ -9,6 +9,7 @@ import { PaymentOverdueVault } from "./PaymentOverdueVault";
 import { ProgressStatusCard } from "./ProgressStatusCard";
 import { OnboardingStatusCard, type OnboardingVariant } from "./OnboardingStatusCard";
 import { StreakWidget } from "./StreakWidget";
+import { RecessActivitiesCard } from "./RecessActivitiesCard";
 import { PracticeStatusWidget } from "./PracticeStatusWidget";
 import { useTranslations } from "next-intl";
 import { StudentHelpWizard } from "../../_components/StudentHelpWizard";
@@ -76,6 +77,7 @@ interface StudentProfileClientProps {
     status: "up_to_date" | "late" | "free";
     daysLate?: number;
   };
+  recessActivitiesCount: number;
 }
 
 export function StudentProfileClient({
@@ -88,6 +90,7 @@ export function StudentProfileClient({
   vocabularyLevel,
   curriculumStats,
   practiceStatus,
+  recessActivitiesCount,
 }: StudentProfileClientProps) {
   const t = useTranslations("Hub.Profile");
   
@@ -114,6 +117,7 @@ export function StudentProfileClient({
           {/* Column 1: Identity & Onboarding */}
           <div className="flex flex-col gap-3">
             <ProfileCard user={user} />
+            <RecessActivitiesCard count={recessActivitiesCount} />
             <div data-tour="student-profile.onboarding">
             <OnboardingStatusCard
               contract={onboardingData.contract}

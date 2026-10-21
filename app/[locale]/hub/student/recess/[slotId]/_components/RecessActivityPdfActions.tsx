@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Download, Mail, Printer } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { notify } from "@/components/ui/toaster";
 import {
@@ -19,13 +20,14 @@ function base64ToBlob(base64: string) {
 }
 
 export function RecessActivityPdfActions({ slotId }: { slotId: string }) {
+  const t = useTranslations("StudentRecess.pdf");
   const [busy, setBusy] = useState<Busy>(null);
 
   const fetchPdf = async () => {
     const result = await getRecessActivityPdfAction({ slotId });
     const data = result?.data;
     if (!data?.success || !("base64" in data) || !data.base64) {
-      notify.error((data && "error" in data && data.error) || "Não foi possível gerar o PDF.");
+      notify.error((data && "error" in data && data.error) || t("error"));
       return null;
     }
     return { blob: base64ToBlob(data.base64), filename: data.filename };
@@ -77,17 +79,17 @@ export function RecessActivityPdfActions({ slotId }: { slotId: string }) {
     const result = await emailRecessActivityPdfAction({ slotId });
     setBusy(null);
     const data = result?.data;
-    if (data?.success && "email" in data) {
-      notify.success(`Enviamos o PDF para ${data.email}.`);
+    if (data?.success && "email" in data && data.email) {
+      notify.success(t("emailSent", { email: data.email }));
     } else {
-      notify.error((data && "error" in data && data.error) || "Não foi possível enviar o e-mail.");
+      notify.error((data && "error" in data && data.error) || t("emailError"));
     }
   };
 
   const actions = [
-    { key: "print" as const, label: "Imprimir", icon: Printer, onClick: handlePrint },
-    { key: "download" as const, label: "Baixar PDF", icon: Download, onClick: handleDownload },
-    { key: "email" as const, label: "Receber por e-mail", icon: Mail, onClick: handleEmail },
+    { key: "print" as const, label: t("print"), icon: Printer, onClick: handlePrint },
+    { key: "download" as const, label: t("download"), icon: Download, onClick: handleDownload },
+    { key: "email" as const, label: t("email"), icon: Mail, onClick: handleEmail },
   ];
 
   return (

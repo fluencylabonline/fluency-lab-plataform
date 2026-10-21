@@ -11,6 +11,7 @@ import { ptBR, enUS } from "date-fns/locale";
 import { type JSONContent } from "@tiptap/core";
 import { type QuizData } from "@/modules/curriculum/curriculum.types";
 import { RecessActivityPdfActions } from "./RecessActivityPdfActions";
+import { useTranslations } from "next-intl";
 
 interface RecessActivityClientProps {
   slot: {
@@ -31,7 +32,9 @@ interface RecessActivityClientProps {
 
 export function RecessActivityClient({ slot, lesson, locale }: RecessActivityClientProps) {
   const dateLocale = locale === "pt" ? ptBR : enUS;
-  
+  const t = useTranslations("StudentRecess.activity");
+  const tPdf = useTranslations("StudentRecess.pdf");
+
   // State for interactive Quiz
   const questions = lesson.quizData?.questions || [];
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -91,23 +94,23 @@ export function RecessActivityClient({ slot, lesson, locale }: RecessActivityCli
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="bg-purple-500/20 text-purple-700 dark:text-purple-300 hover:bg-purple-500/30">
-              Atividade Alternativa
+              {t("badge")}
             </Badge>
-            <span className="text-xs text-muted-foreground">Status do professor: Em Recesso</span>
+            <span className="text-xs text-muted-foreground">{t("teacherStatus")}</span>
           </div>
           <p className="text-sm text-purple-700 dark:text-purple-400 font-medium">
-            {slot.notes || "Esta lição foi disponibilizada para que você continue praticando durante a ausência do seu professor."}
+            {slot.notes || t("defaultNote")}
           </p>
         </div>
         <div className="flex flex-col text-xs text-muted-foreground gap-1 border-t md:border-t-0 md:border-l pt-3 md:pt-0 md:pl-4">
           <div className="flex items-center gap-2">
             <Calendar className="w-3.5 h-3.5" />
-            <span>Aula original: {format(new Date(slot.startAt), "dd/MM/yyyy HH:mm", { locale: dateLocale })}</span>
+            <span>{t("originalClass", { date: format(new Date(slot.startAt), "PPp", { locale: dateLocale }) })}</span>
           </div>
           {slot.teacherName && (
             <div className="flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
-              <span>Prof: {slot.teacherName}</span>
+              <span>{t("teacher", { name: slot.teacherName })}</span>
             </div>
           )}
         </div>
@@ -128,9 +131,7 @@ export function RecessActivityClient({ slot, lesson, locale }: RecessActivityCli
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs text-muted-foreground">
-                Prefere estudar no papel? O PDF traz o conteúdo, o quiz e o gabarito.
-              </p>
+              <p className="text-xs text-muted-foreground">{tPdf("hint")}</p>
               <RecessActivityPdfActions slotId={slot.id} />
             </div>
 
@@ -143,9 +144,7 @@ export function RecessActivityClient({ slot, lesson, locale }: RecessActivityCli
                 />
               </div>
             ) : (
-              <div className="py-12 text-center text-muted-foreground">
-                Não há conteúdo de texto cadastrado para esta lição.
-              </div>
+              <div className="py-12 text-center text-muted-foreground">{t("noContent")}</div>
             )}
           </div>
         </div>
@@ -155,13 +154,11 @@ export function RecessActivityClient({ slot, lesson, locale }: RecessActivityCli
           <div className="card p-6 space-y-4" data-tour="student-recess.quiz">
             <div className="flex items-center gap-2 border-b pb-4">
               <HelpCircle className="w-5 h-5 text-primary" />
-              <h3 className="font-bold">Praticar e Testar</h3>
+              <h3 className="font-bold">{t("quizTitle")}</h3>
             </div>
 
             {questions.length === 0 ? (
-              <div className="py-8 text-center text-xs text-muted-foreground">
-                Nenhum quiz associado a esta lição de recesso.
-              </div>
+              <div className="py-8 text-center text-xs text-muted-foreground">{t("noQuiz")}</div>
             ) : quizFinished ? (
               // Quiz Finished Screen
               <div className="text-center py-6 space-y-4">
@@ -169,15 +166,15 @@ export function RecessActivityClient({ slot, lesson, locale }: RecessActivityCli
                   <CheckCircle2 className="w-6 h-6 text-primary" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="font-bold text-lg">Quiz Concluído!</h4>
+                  <h4 className="font-bold text-lg">{t("quizDone")}</h4>
                   <p className="text-sm text-muted-foreground">
-                    Você acertou {score} de {questions.length} perguntas.
+                    {t("quizScore", { score, total: questions.length })}
                   </p>
                 </div>
                 <div className="pt-4">
                   <Button variant="outline" onClick={handleRestartQuiz} className="w-full gap-2">
                     <RefreshCw className="w-4 h-4" />
-                    Tentar Novamente
+                    {t("tryAgain")}
                   </Button>
                 </div>
               </div>
@@ -185,9 +182,9 @@ export function RecessActivityClient({ slot, lesson, locale }: RecessActivityCli
               // Active Quiz Screen
               <div className="space-y-4">
                 <div className="flex justify-between items-center text-xs text-muted-foreground">
-                  <span>Questão {currentQuestionIndex + 1} de {questions.length}</span>
+                  <span>{t("questionOf", { current: currentQuestionIndex + 1, total: questions.length })}</span>
                   <Badge variant="secondary" className="text-[10px]">
-                    {score} acertos
+                    {t("correctCount", { count: score })}
                   </Badge>
                 </div>
 
@@ -247,7 +244,7 @@ export function RecessActivityClient({ slot, lesson, locale }: RecessActivityCli
                 {isAnswered && questions[currentQuestionIndex].explanation && (
                   <Alert className="bg-muted/50 border-none py-3 mt-4">
                     <AlertDescription className="text-[11px] text-muted-foreground leading-relaxed">
-                      <span className="font-bold block text-foreground mb-0.5">Explicação:</span>
+                      <span className="font-bold block text-foreground mb-0.5">{t("explanation")}</span>
                       {questions[currentQuestionIndex].explanation}
                     </AlertDescription>
                   </Alert>
@@ -260,14 +257,14 @@ export function RecessActivityClient({ slot, lesson, locale }: RecessActivityCli
                       disabled={selectedOption === null}
                       className="w-full gap-2 font-bold"
                     >
-                      Confirmar Resposta
+                      {t("confirm")}
                     </Button>
                   ) : (
                     <Button 
                       onClick={handleNextQuestion} 
                       className="w-full gap-2 font-bold"
                     >
-                      {currentQuestionIndex + 1 < questions.length ? "Próxima Questão" : "Ver Resultado"}
+                      {currentQuestionIndex + 1 < questions.length ? t("next") : t("seeResult")}
                       <ArrowRight className="w-4 h-4" />
                     </Button>
                   )}
