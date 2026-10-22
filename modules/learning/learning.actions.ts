@@ -178,6 +178,18 @@ export const createPlanTemplateAction = permissionAction("material.create")
   });
 
 /**
+ * Action for managers to publish a template or send it back to draft.
+ */
+export const setPlanTemplateStatusAction = permissionAction("material.update")
+  .metadata({ name: "setPlanTemplateStatus" })
+  .schema(z.object({ planId: z.uuid(), status: z.enum(["draft", "approved"]) }))
+  .action(async ({ parsedInput }) => {
+    await learningService.setPlanTemplateStatus(parsedInput.planId, parsedInput.status);
+    refresh();
+    return { success: true };
+  });
+
+/**
  * Action for managers to delete a plan template (lessons are kept; student plans are clones).
  */
 export const deletePlanTemplateAction = permissionAction("material.delete")
@@ -229,7 +241,8 @@ export const getTemplatesAction = permissionAction("material.view")
   .schema(z.object({}))
   .action(async () => {
     try {
-      const data = await learningService.getTemplatesForHub();
+      // Quem atribui planos (professor, ficha do aluno) só vê os templates publicados.
+      const data = await learningService.getAssignableTemplates();
       return { success: true, data };
     } catch (error) {
       console.error("[getTemplatesAction] Error:", error);

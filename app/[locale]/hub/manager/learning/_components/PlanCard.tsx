@@ -8,6 +8,7 @@ import {
     UserPlus,
     ArrowRight,
     CheckCircle2,
+    FileEdit,
     Clock,
     Languages
 } from "lucide-react";
@@ -18,7 +19,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { setPlanTemplateStatusAction } from "@/modules/learning/learning.actions";
+import { notify } from "@/components/ui/toaster";
 import { AssignPlanVault } from "./AssignPlanVault";
 import { DeletePlanVault } from "./DeletePlanVault";
 import { Link } from "@/i18n/navigation";
@@ -37,6 +40,22 @@ interface PlanCardProps {
 export function PlanCard({ plan }: PlanCardProps) {
     const t = useTranslations("Learning");
     const [isAssignOpen, setIsAssignOpen] = useState(false);
+    const [isPending, startTransition] = useTransition();
+    const isPublished = plan.status === "approved";
+
+    const handleToggleStatus = () => {
+        startTransition(async () => {
+            const result = await setPlanTemplateStatusAction({
+                planId: plan.id,
+                status: isPublished ? "draft" : "approved",
+            });
+            if (result?.data?.success) {
+                notify.success(t(isPublished ? "template_unpublished_success" : "template_published_success"));
+            } else {
+                notify.error(result?.serverError || "Erro ao atualizar o template");
+            }
+        });
+    };
 
     const statusColors: Record<string, string> = {
         draft: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800",
@@ -86,12 +105,22 @@ export function PlanCard({ plan }: PlanCardProps) {
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                                onClick={() => setIsAssignOpen(true)}
-                                className="cursor-pointer py-2.5 rounded-lg text-primary"
+                                onClick={handleToggleStatus}
+                                disabled={isPending}
+                                className="cursor-pointer py-2.5 rounded-lg"
                             >
-                                <UserPlus className="w-4 h-4 mr-2" />
-                                {t("assign_to_student") || "Assign Student"}
+                                {isPublished ? <FileEdit className="w-4 h-4 mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                                {t(isPublished ? "unpublish_template" : "publish_template")}
                             </DropdownMenuItem>
+                            {isPublished && (
+                                <DropdownMenuItem
+                                    onClick={() => setIsAssignOpen(true)}
+                                    className="cursor-pointer py-2.5 rounded-lg text-primary"
+                                >
+                                    <UserPlus className="w-4 h-4 mr-2" />
+                                    {t("assign_to_student") || "Assign Student"}
+                                </DropdownMenuItem>
+                            )}
                             <DropdownMenuSeparator />
                             <DeletePlanVault planId={plan.id} planName={plan.name} />
                         </DropdownMenuContent>

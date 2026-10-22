@@ -404,6 +404,23 @@ export const learningService = {
   },
 
   /**
+   * Publishes a template ("approved") or sends it back to draft. Only published templates can be assigned.
+   */
+  async setPlanTemplateStatus(planId: string, status: "draft" | "approved") {
+    const updated = await learningRepository.setTemplateStatus(planId, status);
+    if (!updated) throw new Error("Template não encontrado.");
+    return updated;
+  },
+
+  /**
+   * Templates that can be assigned to students (published only).
+   */
+  async getAssignableTemplates() {
+    const templates = await learningRepository.findAllTemplates();
+    return templates.filter((template) => template.status === "approved");
+  },
+
+  /**
    * Deletes a plan template. Student plans are independent clones, and lessons stay untouched.
    */
   async deletePlanTemplate(planId: string) {
@@ -423,6 +440,12 @@ export const learningService = {
    * Assigns a plan to a student by cloning it and linking to upcoming classes.
    */
   async assignPlanToStudent(templateId: string, studentId: string, startClassId?: string) {
+    const template = await learningRepository.findPlanWithLessons(templateId);
+    if (!template || template.studentId !== null) throw new Error("Template não encontrado.");
+    if (template.status !== "approved") {
+      throw new Error("Publique o template antes de atribuí-lo a um aluno.");
+    }
+
     // 1. Deactivate current active plan
     await db.update(learningPlans)
       .set({ status: "completed", updatedAt: new Date() })

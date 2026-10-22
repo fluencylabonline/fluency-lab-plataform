@@ -178,6 +178,15 @@ export const learningRepository = {
     });
   },
 
+  /** Muda o status de um template (plano sem aluno): rascunho ou publicado ("approved"). */
+  async setTemplateStatus(id: string, status: "draft" | "approved") {
+    const [result] = await db.update(learningPlans)
+      .set({ status, updatedAt: new Date() })
+      .where(and(eq(learningPlans.id, id), isNull(learningPlans.studentId)))
+      .returning({ id: learningPlans.id, status: learningPlans.status });
+    return result ?? null;
+  },
+
   /** Exclui um template (plano sem aluno). As lições não são tocadas: só os vínculos do plano caem em cascata. */
   async deleteTemplate(id: string) {
     const [result] = await db.delete(learningPlans)
