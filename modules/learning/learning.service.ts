@@ -404,6 +404,15 @@ export const learningService = {
   },
 
   /**
+   * Deletes a plan template. Student plans are independent clones, and lessons stay untouched.
+   */
+  async deletePlanTemplate(planId: string) {
+    const deleted = await learningRepository.deleteTemplate(planId);
+    if (!deleted) throw new Error("Template não encontrado.");
+    return deleted;
+  },
+
+  /**
    * Lists only generic plan templates.
    */
   async getTemplatesForHub() {

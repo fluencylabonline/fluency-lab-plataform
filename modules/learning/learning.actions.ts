@@ -178,6 +178,18 @@ export const createPlanTemplateAction = permissionAction("material.create")
   });
 
 /**
+ * Action for managers to delete a plan template (lessons are kept; student plans are clones).
+ */
+export const deletePlanTemplateAction = permissionAction("material.delete")
+  .metadata({ name: "deletePlanTemplate" })
+  .schema(z.object({ planId: z.uuid() }))
+  .action(async ({ parsedInput }) => {
+    await learningService.deletePlanTemplate(parsedInput.planId);
+    refresh();
+    return { success: true };
+  });
+
+/**
  * Action for managers to assign a plan to a student.
  */
 export const assignPlanAction = permissionAction("material.create")

@@ -15,10 +15,12 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { AssignPlanVault } from "./AssignPlanVault";
+import { DeletePlanVault } from "./DeletePlanVault";
 import { Link } from "@/i18n/navigation";
 
 interface PlanCardProps {
@@ -90,6 +92,8 @@ export function PlanCard({ plan }: PlanCardProps) {
                                 <UserPlus className="w-4 h-4 mr-2" />
                                 {t("assign_to_student") || "Assign Student"}
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DeletePlanVault planId={plan.id} planName={plan.name} />
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>

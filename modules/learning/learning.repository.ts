@@ -178,6 +178,14 @@ export const learningRepository = {
     });
   },
 
+  /** Exclui um template (plano sem aluno). As lições não são tocadas: só os vínculos do plano caem em cascata. */
+  async deleteTemplate(id: string) {
+    const [result] = await db.delete(learningPlans)
+      .where(and(eq(learningPlans.id, id), isNull(learningPlans.studentId)))
+      .returning({ id: learningPlans.id });
+    return result ?? null;
+  },
+
   async createPlan(data: typeof learningPlans.$inferInsert) {
     const [result] = await db.insert(learningPlans).values(data).returning();
     return result;
