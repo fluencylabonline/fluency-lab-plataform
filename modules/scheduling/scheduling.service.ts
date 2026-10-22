@@ -39,6 +39,7 @@ import {
 import { notificationService } from "@/modules/notification/notification.service";
 import { NewSlotInstance } from "./scheduling.types";
 import { pickPendingTeacherCancellation } from "./reschedule-notice";
+import { RESCHEDULE_MONTHLY_LIMIT, countQuotaReschedules } from "./reschedule-quota";
 import { addCivilDays, brtCivilDate, brtDayRangeUtc } from "@/modules/billing/billing.dates";
 import { isQuietHours, brtHourMinute, QUIET_HOURS_END } from "@/lib/quiet-hours";
 
@@ -2627,8 +2628,9 @@ export const schedulingService = {
     });
 
     return {
-      count: reschedules.length,
-      limit: 2, // Hardcoded as per user confirmation
+      // Reagendamento pago com crédito de reposição não gasta a cota mensal.
+      count: countQuotaReschedules(reschedules),
+      limit: RESCHEDULE_MONTHLY_LIMIT,
       month: format(start, "MM/yyyy"),
     };
   },
