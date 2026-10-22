@@ -6,6 +6,21 @@ import {
 import { LessonWithDetails, LessonSummary } from "./curriculum.types";
 import { eq, and, or, isNull, sql, desc, inArray } from "drizzle-orm";
 
+type LearningItemQuery = { languageId?: string, type?: "VOCABULARY" | "STRUCTURE", level?: string, search?: string, limit: number, offset?: number };
+
+function learningItemFilters({ languageId, type, level, search }: LearningItemQuery) {
+  const filters = [];
+  if (languageId) filters.push(eq(learningItems.languageId, languageId));
+  if (type) filters.push(eq(learningItems.type, type));
+  if (level) {
+    filters.push(sql`${learningItems.metadata}->>'level' = ${level}`);
+  }
+  if (search) {
+    filters.push(sql`${learningItems.lemma} ILIKE ${`%${search}%`}`);
+  }
+  return filters;
+}
+
 type LessonQueryParams = { search?: string, limit?: number, offset?: number, languageId?: string, difficulty?: string, status?: string };
 
 function lessonFilters({ search, languageId, difficulty, status }: LessonQueryParams) {
@@ -130,18 +145,9 @@ export const curriculumRepository = {
       .limit(limit);
   },
   
-  async findLearningItems(params: { languageId?: string, type?: "VOCABULARY" | "STRUCTURE", level?: string, search?: string, limit: number, offset?: number }) {
-    const { languageId, type, level, search, limit, offset = 0 } = params;
-    const filters = [];
-
-    if (languageId) filters.push(eq(learningItems.languageId, languageId));
-    if (type) filters.push(eq(learningItems.type, type));
-    if (level) {
-      filters.push(sql`${learningItems.metadata}->>'level' = ${level}`);
-    }
-    if (search) {
-      filters.push(sql`${learningItems.lemma} ILIKE ${`%${search}%`}`);
-    }
+  async findLearningItems(params: LearningItemQuery) {
+    const { limit, offset = 0 } = params;
+    const filters = learningItemFilters(params);
 
     return db.query.learningItems.findMany({
       where: filters.length > 0 ? and(...filters) : undefined,
@@ -152,6 +158,15 @@ export const curriculumRepository = {
         language: true
       }
     });
+  },
+
+  /** Total de itens que casam com os filtros (para paginação). */
+  async countLearningItems(params: LearningItemQuery): Promise<number> {
+    const filters = learningItemFilters(params);
+    const [row] = await db.select({ total: sql<number>`count(*)::int` })
+      .from(learningItems)
+      .where(filters.length > 0 ? and(...filters) : undefined);
+    return row?.total ?? 0;
   },
 
   // Lessons

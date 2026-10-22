@@ -412,6 +412,20 @@ export const getLearningItemsAction = managerAction
     return await curriculumService.getLearningItems(parsedInput);
   });
 
+export const getLearningItemsPageAction = managerAction
+  .metadata({ name: "getLearningItemsPage" })
+  .inputSchema(z.object({
+    languageId: z.string().uuid().optional(),
+    type: z.enum(["VOCABULARY", "STRUCTURE"]).optional(),
+    level: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]).optional(),
+    search: z.string().optional(),
+    limit: z.number().int().min(1).max(60).default(12),
+    offset: z.number().int().min(0).default(0),
+  }))
+  .action(async ({ parsedInput }) => {
+    return await curriculumService.getLearningItemsPage(parsedInput);
+  });
+
 export const enrichSingleItemAction = managerAction
   .metadata({ name: "enrichSingleItem" })
   .inputSchema(z.object({

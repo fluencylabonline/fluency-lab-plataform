@@ -8,7 +8,7 @@ import { LessonCard } from "./LessonCard";
 import { TemplateCard, type TemplateSummary } from "./TemplateCard";
 import { EmptyResults } from "@/components/ui/empty";
 import { PaginationBar } from "@/components/ui/pagination-bar";
-import { useGridPageSize } from "@/hooks/common/use-grid-page-size";
+import { useFillGrid } from "@/hooks/common/use-fill-grid";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/header";
@@ -16,9 +16,8 @@ import { useTranslations } from "next-intl";
 
 type LessonsPage = { items: LessonSummary[]; total: number };
 
-/** Colunas da grade por largura da janela (iguais às classes da grade abaixo) e linhas visíveis por página. */
+/** Colunas da grade por largura da janela; as linhas vêm da altura disponível (ver useFillGrid). */
 const GRID_BREAKPOINTS = [[1280, 4], [1024, 3], [640, 2]] as const;
-const GRID_ROWS = 2;
 const INITIAL_PAGE_SIZE = 8;
 
 interface FilterGroupProps {
@@ -72,7 +71,7 @@ export function LessonList({ initialData, languages, templates }: LessonListProp
   const [search, setSearch] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
-  const pageSize = useGridPageSize(GRID_BREAKPOINTS, GRID_ROWS);
+  const { ref: gridAreaRef, style: gridStyle, pageSize } = useFillGrid({ breakpoints: GRID_BREAKPOINTS, minCardHeight: 215 });
 
   // A página volta para a 1 sempre que muda um filtro, a busca, a aba ou o tamanho da página.
   const filterKey = [view, search, selectedLanguage, selectedDifficulty, pageSize].join("|");
@@ -201,14 +200,14 @@ export function LessonList({ initialData, languages, templates }: LessonListProp
           </div>
 
           {/* Grade (rola por dentro só se a janela for pequena demais para as linhas da página) */}
-          <div className={cn("min-h-0 flex-1 lg:overflow-y-auto", isLoading && "opacity-60 transition-opacity")}>
+          <div ref={gridAreaRef} className={cn("min-h-0 flex-1 lg:overflow-hidden", isLoading && "opacity-60 transition-opacity")}>
             {view === "templates" ? (
               filteredTemplates.length === 0 ? (
                 <div className="py-16">
                   <EmptyResults title={t("templatesEmptyTitle")} description={t("templatesEmptyDescription")} />
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" data-tour="teacher-lessons.templates">
+                <div className="grid lg:h-full" style={gridStyle} data-tour="teacher-lessons.templates">
                   {templatePage.map((template) => (
                     <TemplateCard key={template.id} template={template} />
                   ))}
@@ -222,7 +221,7 @@ export function LessonList({ initialData, languages, templates }: LessonListProp
                 />
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" data-tour="teacher-lessons.list">
+              <div className="grid lg:h-full" style={gridStyle} data-tour="teacher-lessons.list">
                 {lessons.map((lesson) => (
                   <LessonCard key={lesson.id} lesson={lesson} />
                 ))}

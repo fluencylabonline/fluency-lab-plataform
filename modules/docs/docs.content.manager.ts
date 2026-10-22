@@ -128,31 +128,6 @@ export const MANAGER_DOCS: DocSection[] = [
           },
         ],
       },
-      {
-        id: "mgr-analytics",
-        title: "Indicadores de aprendizado",
-        summary: "O painel de desempenho do conteúdo — ainda não disponível.",
-        route: "/hub/manager/learning/analytics",
-        keywords: ["analytics", "indicadores", "métricas", "desempenho", "engajamento", "relatório", "em breve"],
-        blocks: [
-          {
-            type: "note",
-            variant: "warning",
-            title: "Esta tela ainda não está pronta",
-            text: "A página mostra um aviso de que o painel está em construção e não traz dados. Ela vai responder duas perguntas quando estiver pronta: qual conteúdo está sendo consumido e onde os alunos estão travando.",
-          },
-          {
-            type: "p",
-            text: "Enquanto isso, para saber onde os alunos travam, use a ficha do aluno (aba de aulas e currículo) e a tela de Itens de Aprendizado, revisando os itens que parecem mal classificados.",
-          },
-          {
-            type: "note",
-            variant: "info",
-            title: "Item difícil ou item mal escrito?",
-            text: "Quando o painel estiver disponível, lembre: item com taxa de erro muito acima da média geralmente não é conteúdo difícil — é enunciado confuso ou nível mal classificado. Vale revisar antes de concluir que o assunto é complicado.",
-          },
-        ],
-      },
     ],
   },
 

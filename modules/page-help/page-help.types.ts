@@ -116,7 +116,6 @@ export type ManagerHelpRoute =
   | "/hub/manager/tasks"
   | "/hub/manager/learning"
   | "/hub/manager/learning/[id]"
-  | "/hub/manager/learning/analytics"
   | "/hub/manager/learning/learning-items"
   | "/hub/manager/learning/lessons"
   | "/hub/manager/learning/lessons/[lessonId]"

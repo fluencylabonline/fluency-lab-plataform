@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import {
     Library,
     BookPlus,
-    BarChart3,
     Languages,
     ImagePlay,
     ClipboardList,
@@ -18,7 +17,6 @@ import {
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { LanguagesVault } from "./_components/LanguagesVault";
-import { MediaLibraryVault } from "./_components/MediaLibraryVault";
 import { CreatePlanVault } from "./_components/CreatePlanVault";
 import { userService } from "@/modules/user/user.service";
 
@@ -43,20 +41,11 @@ const quickActions = (languages: LanguageWithLessons[], t: (key: string) => stri
     },
     {
         key: "media",
-        component: <MediaLibraryVault />,
+        href: `/hub/manager/learning/media`,
         icon: <ImagePlay className="w-5 h-5" />,
         label: "Media Library",
         color: "text-sky-600 dark:text-sky-400",
         bg: "bg-sky-50 dark:bg-sky-900/20",
-        isVault: true,
-    },
-    {
-        key: "analytics",
-        href: `/hub/manager/learning/analytics`,
-        icon: <BarChart3 className="w-5 h-5" />,
-        label: t("analytics") || "Analytics",
-        color: "text-amber-600 dark:text-amber-400",
-        bg: "bg-amber-50 dark:bg-amber-900/20",
     },
     {
         key: "placement",

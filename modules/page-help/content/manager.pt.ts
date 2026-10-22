@@ -471,38 +471,6 @@ export const MANAGER_HELP_PT: RoleHelpContent<ManagerHelpRoute> = {
     ],
   },
 
-  "/hub/manager/learning/analytics": {
-    title: "Indicadores de Aprendizado",
-    summary:
-      "O painel de desempenho do conteúdo — ainda não disponível.",
-    docsArticleId: "mgr-analytics",
-    sections: [
-      {
-        heading: "Esta tela ainda não está pronta",
-        body: "O painel aparece com o aviso de que está em construção. Ele vai mostrar progresso dos alunos, taxas de conclusão e desempenho das trilhas, mas ainda não traz dados.",
-      },
-      {
-        heading: "Enquanto isso",
-        body: "Para entender onde os alunos estão travando, o caminho hoje é a ficha do aluno (aulas e currículo) e os Itens de Aprendizado, onde dá para revisar itens que parecem mal classificados.",
-      },
-      {
-        heading: "Quando estiver pronto",
-        body: "A pergunta que ele vai responder é dupla: qual conteúdo está sendo consumido e onde os alunos estão parando. Item com taxa de erro muito acima da média costuma ser enunciado confuso ou nível mal classificado, não assunto difícil.",
-      },
-    ],
-    tour: [
-      {
-        id: "intro",
-        title: "Ainda em construção",
-        text: "Esta tela mostra um aviso de que o painel está a caminho. Ela ainda não traz dados — não é erro seu nem falha de carregamento.",
-      },
-      {
-        id: "meanwhile",
-        title: "Enquanto isso",
-        text: "Para saber onde os alunos travam, use a ficha do aluno (aulas e currículo) e os Itens de Aprendizado, revisando os que parecem mal classificados.",
-      },
-    ],
-  },
 
   "/hub/manager/courses": {
     title: "Cursos",

@@ -468,37 +468,6 @@ export const MANAGER_HELP_EN: RoleHelpContent<ManagerHelpRoute> = {
     ],
   },
 
-  "/hub/manager/learning/analytics": {
-    title: "Learning Analytics",
-    summary: "The content performance dashboard — not available yet.",
-    docsArticleId: "mgr-analytics",
-    sections: [
-      {
-        heading: "This screen is not ready yet",
-        body: "The dashboard shows a notice saying it is on the way. It will show student progress, completion rates and path performance, but it carries no data yet.",
-      },
-      {
-        heading: "In the meantime",
-        body: "To understand where students are stuck, the route today is the student's record (classes and curriculum) and Learning Items, where you can review items that look badly classified.",
-      },
-      {
-        heading: "When it is ready",
-        body: "It will answer two questions: which content is being consumed and where students are stopping. An item with an error rate far above average is usually a confusing prompt or a bad level classification, not a difficult topic.",
-      },
-    ],
-    tour: [
-      {
-        id: "intro",
-        title: "Still being built",
-        text: "This screen shows a notice that the dashboard is on the way. It carries no data yet — that is not your mistake or a loading failure.",
-      },
-      {
-        id: "meanwhile",
-        title: "In the meantime",
-        text: "To find where students get stuck, use the student's record (classes and curriculum) and Learning Items, reviewing the ones that look badly classified.",
-      },
-    ],
-  },
 
   "/hub/manager/courses": {
     title: "Courses",

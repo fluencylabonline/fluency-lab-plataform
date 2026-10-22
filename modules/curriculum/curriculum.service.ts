@@ -672,6 +672,16 @@ export const curriculumService = {
     });
   },
 
+  /** Uma página de itens com o total, para telas paginadas. */
+  async getLearningItemsPage(params: { languageId?: string, type?: "VOCABULARY" | "STRUCTURE", level?: string, search?: string, limit?: number, offset?: number }) {
+    const query = { ...params, limit: params.limit || 12, offset: params.offset || 0 };
+    const [items, total] = await Promise.all([
+      curriculumRepository.findLearningItems(query),
+      curriculumRepository.countLearningItems(query),
+    ]);
+    return { items, total };
+  },
+
   async getLearningItems(params: { languageId?: string, type?: "VOCABULARY" | "STRUCTURE", level?: string, search?: string, limit?: number, offset?: number }) {
     return await curriculumRepository.findLearningItems({
       languageId: params.languageId,
