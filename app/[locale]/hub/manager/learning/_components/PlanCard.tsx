@@ -9,6 +9,7 @@ import {
     ArrowRight,
     CheckCircle2,
     FileEdit,
+    Pencil,
     Clock,
     Languages
 } from "lucide-react";
@@ -24,6 +25,7 @@ import { setPlanTemplateStatusAction } from "@/modules/learning/learning.actions
 import { notify } from "@/components/ui/toaster";
 import { AssignPlanVault } from "./AssignPlanVault";
 import { DeletePlanVault } from "./DeletePlanVault";
+import { EditPlanVault } from "./EditPlanVault";
 import { Link } from "@/i18n/navigation";
 
 interface PlanCardProps {
@@ -40,6 +42,7 @@ interface PlanCardProps {
 export function PlanCard({ plan }: PlanCardProps) {
     const t = useTranslations("Learning");
     const [isAssignOpen, setIsAssignOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
     const [isPending, startTransition] = useTransition();
     const isPublished = plan.status === "approved";
 
@@ -105,6 +108,13 @@ export function PlanCard({ plan }: PlanCardProps) {
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem
+                                onClick={() => setIsEditOpen(true)}
+                                className="cursor-pointer py-2.5 rounded-lg"
+                            >
+                                <Pencil className="w-4 h-4 mr-2" />
+                                {t("edit_template_details")}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
                                 onClick={handleToggleStatus}
                                 disabled={isPending}
                                 className="cursor-pointer py-2.5 rounded-lg"
@@ -152,6 +162,8 @@ export function PlanCard({ plan }: PlanCardProps) {
                     </Link>
                 </div>
             </div>
+
+            <EditPlanVault plan={plan} open={isEditOpen} onOpenChange={setIsEditOpen} />
 
             <AssignPlanVault
                 templateId={plan.id}

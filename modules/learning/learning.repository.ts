@@ -187,6 +187,15 @@ export const learningRepository = {
     return result ?? null;
   },
 
+  /** Edita nome e descrição de um template (plano sem aluno). */
+  async updateTemplate(id: string, data: { name: string; description: string | null }) {
+    const [result] = await db.update(learningPlans)
+      .set({ name: data.name, description: data.description, updatedAt: new Date() })
+      .where(and(eq(learningPlans.id, id), isNull(learningPlans.studentId)))
+      .returning({ id: learningPlans.id, name: learningPlans.name, description: learningPlans.description });
+    return result ?? null;
+  },
+
   /** Exclui um template (plano sem aluno). As lições não são tocadas: só os vínculos do plano caem em cascata. */
   async deleteTemplate(id: string) {
     const [result] = await db.delete(learningPlans)

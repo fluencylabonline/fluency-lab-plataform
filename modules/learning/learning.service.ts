@@ -402,6 +402,18 @@ export const learningService = {
   },
 
   /**
+   * Edits a template's name and description.
+   */
+  async updatePlanTemplate(planId: string, data: { name: string; description?: string }) {
+    const updated = await learningRepository.updateTemplate(planId, {
+      name: data.name.trim(),
+      description: data.description?.trim() || null,
+    });
+    if (!updated) throw new Error("Template não encontrado.");
+    return updated;
+  },
+
+  /**
    * Publishes a template ("approved") or sends it back to draft. Only published templates can be assigned.
    */
   async setPlanTemplateStatus(planId: string, status: "draft" | "approved") {

@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { Reorder, AnimatePresence } from "framer-motion";
 import { LessonItemCard } from "./LessonItemCard";
 import { AddLessonVault } from "./AddLessonVault";
+import { EditPlanVault } from "../../_components/EditPlanVault";
 import {
     reorderLessonsAction,
     addLessonToPlanAction,
@@ -11,7 +12,7 @@ import {
 } from "@/modules/learning/learning.actions";
 import { notify } from "@/components/ui/toaster";
 import { useTranslations } from "next-intl";
-import { Loader2, Save, AlertCircle, GripVertical } from "lucide-react";
+import { Loader2, Save, AlertCircle, GripVertical, Pencil } from "lucide-react";
 
 interface Lesson {
     id: string;
@@ -25,6 +26,7 @@ interface PathEditorProps {
     plan: {
         id: string;
         name: string;
+        description?: string | null;
         lessons: Array<{
             lessonId: string;
             order: number;
@@ -44,6 +46,7 @@ const formatLessons = (planLessons: PathEditorProps["plan"]["lessons"]): LessonI
 export function PathEditor({ plan, availableLessons }: PathEditorProps) {
     const t = useTranslations("Learning");
     const [isPending, startTransition] = useTransition();
+    const [isEditOpen, setIsEditOpen] = useState(false);
 
     // 2. Generate a signature for the incoming props to know when they change
     // Incorporating both ID and order ensures we catch additions, removals, and external reorders
@@ -150,12 +153,28 @@ export function PathEditor({ plan, availableLessons }: PathEditorProps) {
                     )}
                 </div>
 
-                <AddLessonVault
-                    availableLessons={filteredAvailable}
-                    onAdd={handleAddLesson}
-                    isAdding={isPending}
-                />
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setIsEditOpen(true)}
+                        className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border px-3 text-sm font-medium transition-colors hover:bg-muted"
+                    >
+                        <Pencil className="h-3.5 w-3.5" />
+                        {t("edit_template_details")}
+                    </button>
+                    <AddLessonVault
+                        availableLessons={filteredAvailable}
+                        onAdd={handleAddLesson}
+                        isAdding={isPending}
+                    />
+                </div>
             </div>
+
+            <EditPlanVault
+                plan={{ id: plan.id, name: plan.name, description: plan.description ?? null }}
+                open={isEditOpen}
+                onOpenChange={setIsEditOpen}
+            />
 
             {/* Path List */}
             <div className="space-y-4" data-tour="manager-path.sequence">

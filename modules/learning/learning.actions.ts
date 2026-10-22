@@ -178,6 +178,25 @@ export const createPlanTemplateAction = permissionAction("material.create")
   });
 
 /**
+ * Action for managers to edit a template's name and description.
+ */
+export const updatePlanTemplateAction = permissionAction("material.update")
+  .metadata({ name: "updatePlanTemplate" })
+  .schema(z.object({
+    planId: z.uuid(),
+    name: z.string().trim().min(3).max(255),
+    description: z.string().max(2000).optional(),
+  }))
+  .action(async ({ parsedInput }) => {
+    await learningService.updatePlanTemplate(parsedInput.planId, {
+      name: parsedInput.name,
+      description: parsedInput.description,
+    });
+    refresh();
+    return { success: true };
+  });
+
+/**
  * Action for managers to publish a template or send it back to draft.
  */
 export const setPlanTemplateStatusAction = permissionAction("material.update")
