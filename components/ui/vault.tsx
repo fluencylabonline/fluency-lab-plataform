@@ -112,13 +112,15 @@ const VaultContent = React.forwardRef<
     React.ComponentPropsWithoutRef<typeof Drawer.Content> & {
         showHandle?: boolean;
         noPadding?: boolean;
+        /** Classes extras do fundo escurecido (ex.: z-index maior para abrir sobre um editor em tela cheia). */
+        overlayClassName?: string;
     }
->(({ className, children, showHandle = true, noPadding = false, onOpenAutoFocus, ...props }, ref) => {
+>(({ className, children, showHandle = true, noPadding = false, overlayClassName, onOpenAutoFocus, ...props }, ref) => {
     const { isStandalone } = useDevice();
 
     return (
         <Drawer.Portal container={typeof document !== 'undefined' ? document.getElementById('vault-root') : null}>
-            <Drawer.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
+            <Drawer.Overlay className={twMerge("fixed inset-0 z-50 bg-black/50 backdrop-blur-sm", overlayClassName)} />
             <Drawer.Content
                 ref={ref}
                 aria-describedby={undefined}
@@ -543,4 +545,4 @@ export {
     VaultPrimaryButton,
     VaultSecondaryButton,
 };
-
+

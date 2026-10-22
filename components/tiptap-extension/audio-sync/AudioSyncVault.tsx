@@ -250,7 +250,8 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
 
   return (
     <Vault open={open} onOpenChange={onOpenChange}>
-      <VaultContent className="sm:max-w-2xl max-h-[85vh]">
+      {/* z acima do editor de lições em tela cheia (z-[100]); sem isso o vault abre por trás e a página parece travada */}
+      <VaultContent className="sm:max-w-2xl max-h-[85vh] z-[110]" overlayClassName="z-[110]">
         <VaultHeader className="p-6 pb-4 border-b">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-amber-500/10 rounded-full text-amber-600">
