@@ -249,10 +249,13 @@ export const learningRepository = {
 
   async findSimilarLessons(vector: number[], languageId: string, limit: number = 10) {
     // pgvector similarity search: <=> is cosine distance
-    return db.execute<{ id: string, title: string, difficulty: string, distance: number }>(sql`
-      SELECT id, title, difficulty, (embedding <=> ${JSON.stringify(vector)}::vector) as distance
-      FROM curriculum_lessons 
-      WHERE status = 'ready' 
+    return db.execute<{ id: string, title: string, difficulty: string, source_workbook: string | null, source_position: number | null, distance: number }>(sql`
+      SELECT id, title, difficulty, source_workbook, source_position,
+             (embedding <=> ${JSON.stringify(vector)}::vector) as distance
+      FROM curriculum_lessons
+      WHERE status = 'ready'
+      AND deleted_at IS NULL
+      AND is_recess_activity = false
       AND language_id = ${languageId}
       ORDER BY distance ASC
       LIMIT ${limit}

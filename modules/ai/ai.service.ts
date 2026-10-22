@@ -249,7 +249,7 @@ export const aiService = {
     params: {
       profileSummary: string;
       currentLevel: string;
-      availableLessons: Array<{ id: string; title: string; difficulty: string }>;
+      availableLessons: Array<{ id: string; title: string; difficulty: string; workbook?: string; position?: number }>;
       allowSuggestions: boolean;
       targetLanguage: string;
       nativeLanguage: string;
@@ -317,7 +317,8 @@ export const aiService = {
        - If allowSuggestions is TRUE: Create a lesson SUGGESTION (type: "suggestion") with title, description, and objective.
        - If allowSuggestions is FALSE: Try to adapt the closest available lesson.
     4. The plan must be balanced between professional interests and necessary grammar for the level.
-    5. The plan name and suggestions must be in ${params.nativeLanguage}.
+    5. ORDER MATTERS. Lessons that have "workbook" and "position" belong to a course book whose pedagogical order is given by "position" (1 = first lesson of that book). Lessons from the same workbook MUST appear in increasing "position" order, and a review lesson (title starting with "Revisão"/"Review") must come after the lessons it reviews. Move from easier to harder levels as the plan advances.
+    6. The plan name and suggestions must be in ${params.nativeLanguage}.
     
     Allow Suggestions: ${params.allowSuggestions ? "YES" : "NO"}
     

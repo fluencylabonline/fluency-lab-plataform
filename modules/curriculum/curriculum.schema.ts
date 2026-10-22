@@ -108,6 +108,10 @@ export const lessons = pgTable("curriculum_lessons", {
 
   // Recess specific
   isRecessActivity: boolean("is_recess_activity").default(false).notNull(),
+
+  // Origem (apostila antiga) e posição pedagógica dentro dela; nulos em lições criadas pelo assistente
+  sourceWorkbook: varchar("source_workbook", { length: 100 }),
+  sourcePosition: integer("source_position"),
   teacherId: varchar("teacher_id", { length: 128 }), // Optional: private activity
 
   createdAt: timestamp("created_at").defaultNow().notNull(),

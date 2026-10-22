@@ -237,19 +237,15 @@ export const learningService = {
 
     // 2. Determine target language (default to English if not specified)
     // We'll use the first language from the student's languages array or a default
-    let languageId = student.languages?.[0];
+    // O aluno guarda o CÓDIGO do idioma ("EN"), não o id; o código é comparado sem diferenciar maiúsculas.
+    let languageId: string | undefined;
     let targetLanguageName = "English";
-    if (!languageId) {
-      const enLang = await db.query.languages.findFirst({
-        where: eq(languages.code, "en")
-      });
-      if (enLang) {
-        languageId = enLang.id;
-        targetLanguageName = enLang.name;
-      }
-    } else {
-      const lang = await db.query.languages.findFirst({ where: eq(languages.id, languageId) });
-      if (lang) targetLanguageName = lang.name;
+    const targetLang = await db.query.languages.findFirst({
+      where: sql`lower(${languages.code}) = lower(${student.languages?.[0] ?? "en"})`,
+    });
+    if (targetLang) {
+      languageId = targetLang.id;
+      targetLanguageName = targetLang.name;
     }
     if (!languageId) throw new Error("Target language not found for plan generation");
 
@@ -258,7 +254,7 @@ export const learningService = {
     if (student.locale === "en") nativeLanguage = "English";
     
     const nativeLangObj = await db.query.languages.findFirst({
-      where: eq(languages.code, nativeLanguageCode)
+      where: sql`lower(${languages.code}) = lower(${nativeLanguageCode})`,
     });
     const fallbackLang = nativeLangObj || await db.query.languages.findFirst();
     const nativeLanguageId = fallbackLang?.id || languageId;
@@ -273,7 +269,9 @@ export const learningService = {
     const availableLessons = similarRows.rows.map(r => ({
       id: r.id as string,
       title: r.title as string,
-      difficulty: r.difficulty as string
+      difficulty: r.difficulty as string,
+      workbook: (r.source_workbook as string | null) ?? undefined,
+      position: (r.source_position as number | null) ?? undefined,
     }));
 
     // 4. Call AI to generate the plan structure
