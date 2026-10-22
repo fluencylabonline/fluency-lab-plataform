@@ -1,3 +1,4 @@
+import type { ImageCredit } from "@/modules/curriculum/curriculum.types";
 import { learningPlans, planLessons, learningPracticeSessions, learningXpTransactions } from "./learning.schema";
 
 export interface StudentCurriculumGap {
@@ -70,6 +71,7 @@ export interface PracticeItem {
     front: string;
     back: string;
     imageUrl?: string | null;
+    imageCredit?: ImageCredit | null;
     useTTS?: boolean; // Always true for flashcard exercises
   };
 

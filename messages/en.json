@@ -3719,6 +3719,9 @@
       "cta": "Watch now"
     }
   },
+  "ImageCredit": {
+    "photoBy": "Photo by <author>{name}</author> on <unsplash>Unsplash</unsplash>"
+  },
   "LessonViewer": {
     "view": "View",
     "editDetails": "Edit details",

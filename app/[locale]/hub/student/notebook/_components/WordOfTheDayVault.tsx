@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { notify } from "@/components/ui/toaster";
 import Image from "next/image";
+import { UnsplashCredit, useTrackUnsplashDownload } from "@/components/ui/unsplash-credit";
 import { claimWordOfTheDayXPAction } from "@/modules/user/user.actions";
 
 interface WordOfTheDayVaultProps {
@@ -154,6 +155,8 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
 
   const definition = isStructure ? structMeta?.explanation : mainMeaning.definition;
   const imageUrl = vocabMeta?.image_url;
+  const imageCredit = vocabMeta?.image_credit;
+  useTrackUnsplashDownload(imageCredit, !!imageUrl && isVocab);
 
   // Study uses examples[0]; practice uses examples[1] (different from study), fallback to examples[0]
   const examples = (isStructure ? structMeta?.examples : vocabMeta?.examples) || [];
@@ -243,6 +246,7 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
             className="object-cover transition-transform duration-700 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent pointer-events-none" />
+          <UnsplashCredit credit={imageCredit} />
         </div>
       )}
 

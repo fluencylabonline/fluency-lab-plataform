@@ -2,6 +2,10 @@ import "server-only";
 import { env } from "@/env";
 import { checkRateLimit } from "@/lib/rate-limit";
 import admin from "firebase-admin";
+import type { ImageCredit } from "@/modules/curriculum/curriculum.types";
+
+const UNSPLASH_UTM = "utm_source=fluencylab&utm_medium=referral";
+const withUtm = (url: string) => `${url}${url.includes("?") ? "&" : "?"}${UNSPLASH_UTM}`;
 
 export interface YouTubeVideo {
   videoId: string;
@@ -16,6 +20,18 @@ export const mediaService = {
    * Returns the URL of the most relevant image.
    */
   async searchImage(keywords: string, userId?: string): Promise<string | null> {
+    const image = await this.searchImageWithCredit(keywords, userId);
+    return image?.url ?? null;
+  },
+
+  /**
+   * Same search, but also returns the credit data the Unsplash API guidelines require:
+   * photographer and Unsplash links (with UTM) and the endpoint to trigger the download event.
+   */
+  async searchImageWithCredit(
+    keywords: string,
+    userId?: string
+  ): Promise<{ url: string; credit: ImageCredit } | null> {
     if (userId) {
       const limit = await checkRateLimit("unsplash_search", userId, 100);
       if (!limit.success) {
@@ -40,10 +56,46 @@ export const mediaService = {
       }
 
       const data = await response.json();
-      return data.results[0]?.urls?.regular || null;
+      const photo = data.results?.[0];
+      if (!photo?.urls?.regular) return null;
+
+      return {
+        url: photo.urls.regular,
+        credit: {
+          photographer: photo.user?.name ?? "Unsplash",
+          photographerUrl: withUtm(photo.user?.links?.html ?? "https://unsplash.com"),
+          photoUrl: withUtm(photo.links?.html ?? "https://unsplash.com"),
+          downloadLocation: photo.links?.download_location,
+        },
+      };
     } catch (error) {
       console.error("Unsplash Search Failed:", error);
       return null;
+    }
+  },
+
+  /**
+   * Triggers the Unsplash "download" event for a photo that a student is actually using
+   * (required by the API guidelines). Only api.unsplash.com photo endpoints are accepted.
+   */
+  async trackImageDownload(downloadLocation: string): Promise<boolean> {
+    let url: URL;
+    try {
+      url = new URL(downloadLocation);
+    } catch {
+      return false;
+    }
+    if (url.protocol !== "https:" || url.hostname !== "api.unsplash.com" || !/^\/photos\/[\w-]+\/download$/.test(url.pathname)) {
+      return false;
+    }
+
+    try {
+      const response = await fetch(url.toString(), {
+        headers: { Authorization: `Client-ID ${env.UNSPLASH_ACCESS_KEY}` },
+      });
+      return response.ok;
+    } catch {
+      return false;
     }
   },
 

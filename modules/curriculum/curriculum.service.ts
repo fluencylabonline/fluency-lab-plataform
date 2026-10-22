@@ -213,8 +213,9 @@ export const curriculumService = {
           const vocabMeta = metadata as VocabMetadata;
           if (vocabMeta.is_visual && vocabMeta.key_image_words) {
             try {
-              const imageUrl = await mediaService.searchImage(vocabMeta.key_image_words, userId);
-              vocabMeta.image_url = imageUrl;
+              const image = await mediaService.searchImageWithCredit(vocabMeta.key_image_words, userId);
+              vocabMeta.image_url = image?.url ?? null;
+              vocabMeta.image_credit = image?.credit ?? null;
             } catch (e) {
               console.error("Failed to get image", e);
             }
@@ -798,9 +799,10 @@ export const curriculumService = {
       const vocabMeta = metadata as VocabMetadata;
       if (vocabMeta.is_visual && vocabMeta.key_image_words) {
         try {
-          const imageUrl = await mediaService.searchImage(vocabMeta.key_image_words, userId);
-          vocabMeta.image_url = imageUrl;
-          console.log("[enrichSingleItem] Image found:", imageUrl);
+          const image = await mediaService.searchImageWithCredit(vocabMeta.key_image_words, userId);
+          vocabMeta.image_url = image?.url ?? null;
+          vocabMeta.image_credit = image?.credit ?? null;
+          console.log("[enrichSingleItem] Image found:", image?.url);
         } catch (e) {
           console.error("Failed to get image", e);
         }

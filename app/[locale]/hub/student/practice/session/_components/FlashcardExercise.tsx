@@ -4,11 +4,14 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Volume2 } from "lucide-react";
 import Image from "next/image";
+import { UnsplashCredit, useTrackUnsplashDownload } from "@/components/ui/unsplash-credit";
+import type { ImageCredit } from "@/modules/curriculum/curriculum.types";
 
 interface FlashcardExerciseProps {
   front: string;
   back: string;
   imageUrl?: string | null;
+  imageCredit?: ImageCredit | null;
   /** If true, clicking the audio button reads the front text via browser TTS */
   useTTS?: boolean;
   language?: string;
@@ -26,12 +29,14 @@ export function FlashcardExercise({
   front,
   back,
   imageUrl,
+  imageCredit,
   useTTS = true,
   language = "en-US",
   onResult,
 }: FlashcardExerciseProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  useTrackUnsplashDownload(imageCredit, !!imageUrl);
 
   const handleSpeak = (e: React.MouseEvent, text: string) => {
     e.stopPropagation();
@@ -86,6 +91,7 @@ export function FlashcardExercise({
                   className="object-cover"
                   sizes="(max-width: 480px) 90vw, 384px"
                 />
+                <UnsplashCredit credit={imageCredit} />
               </div>
             )}
 
@@ -126,6 +132,7 @@ export function FlashcardExercise({
                   className="object-cover"
                   sizes="(max-width: 480px) 90vw, 384px"
                 />
+                <UnsplashCredit credit={imageCredit} />
               </div>
             )}
 

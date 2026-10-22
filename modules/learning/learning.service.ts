@@ -707,6 +707,7 @@ export const learningService = {
               front: isStructure && example ? example.text : item.lemma,
               back: isStructure && example ? example.translation : (meta.translation || vocabMeta?.meanings?.[0]?.translation || "..."),
               imageUrl: clampedDay === 1 ? vocabMeta?.image_url : null,
+              imageCredit: clampedDay === 1 ? vocabMeta?.image_credit : null,
               useTTS: true
             }
           });

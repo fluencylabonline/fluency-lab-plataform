@@ -14,6 +14,7 @@ import { TableKit } from "@tiptap/extension-table";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Link } from "@/i18n/navigation";
+import { UnsplashCredit } from "@/components/ui/unsplash-credit";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -270,8 +271,11 @@ export function LessonViewer({ lesson }: LessonViewerProps) {
                     </p>
                   ))}
                   {meta.image_url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={meta.image_url} alt={item.lemma} className="h-20 w-20 rounded-md object-cover" loading="lazy" />
+                    <div className="relative h-28 w-28 overflow-hidden rounded-md">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={meta.image_url} alt={item.lemma} className="h-full w-full object-cover" loading="lazy" />
+                      <UnsplashCredit credit={meta.image_credit} className="max-w-full" />
+                    </div>
                   )}
                 </div>
               );

@@ -141,6 +141,7 @@ export interface PracticeItem {
     front: string;
     back: string;
     imageUrl?: string | null;
+    imageCredit?: ImageCredit | null;
     useTTS?: boolean;
   };
   gapFill?: {
@@ -159,6 +160,15 @@ export interface PracticeItem {
 
 // ================= SCHEMA ENRICHMENT =================
 
+/** Crédito exigido pelas diretrizes da API do Unsplash (autor, links e endpoint de download). */
+export const imageCreditSchema = z.object({
+  photographer: z.string(),
+  photographerUrl: z.string().url(),
+  photoUrl: z.string().url(),
+  downloadLocation: z.string().url(),
+});
+export type ImageCredit = z.infer<typeof imageCreditSchema>;
+
 export const vocabMetadataSchema = z.object({
   type: z.string(), // "noun", "verb", "adjective", etc.
   level: z.string(),
@@ -167,6 +177,7 @@ export const vocabMetadataSchema = z.object({
   is_visual: z.boolean(),
   key_image_words: z.string(),
   image_url: z.string().url().nullable().optional(),
+  image_credit: imageCreditSchema.nullable().optional(),
   meanings: z.array(z.object({
     definition: z.string(),
     translation: z.string(),

@@ -3718,6 +3718,9 @@
       "cta": "Assistir agora"
     }
   },
+  "ImageCredit": {
+    "photoBy": "Foto de <author>{name}</author> no <unsplash>Unsplash</unsplash>"
+  },
   "LessonViewer": {
     "view": "Ver",
     "editDetails": "Editar detalhes",

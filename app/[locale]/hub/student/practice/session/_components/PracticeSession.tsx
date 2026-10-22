@@ -251,6 +251,7 @@ function renderExercise(item: PracticeItem, handlers: Handlers, language?: strin
           front={item.flashcard.front}
           back={item.flashcard.back}
           imageUrl={item.renderMode === "flashcard_visual" ? item.flashcard.imageUrl : null}
+          imageCredit={item.renderMode === "flashcard_visual" ? item.flashcard.imageCredit : null}
           useTTS={item.flashcard.useTTS ?? true}
           language={language}
           onResult={handlers.onFlashcard}
