@@ -23,7 +23,7 @@ export default async function LearningItemsPage() {
                 backHref="/hub/manager/learning"
                 />
 
-            <main className="container">
+            <main className="container pb-24 lg:pb-0">
                 <LearningItemsClient 
                     initialLanguages={languages}
                 />

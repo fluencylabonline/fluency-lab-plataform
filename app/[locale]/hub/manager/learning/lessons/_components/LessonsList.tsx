@@ -52,7 +52,7 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
     }, [initialLessons, searchQuery, statusFilter, languageFilter, recessFilter]);
 
     // Paginação: a página volta para a 1 quando muda um filtro, a busca ou o tamanho da página.
-    const pageSize = useGridPageSize(GRID_BREAKPOINTS, GRID_ROWS);
+    const pageSize = useGridPageSize(GRID_BREAKPOINTS, GRID_ROWS, 1, 6);
     const filterKey = [searchQuery, statusFilter, languageFilter, recessFilter, pageSize].join("|");
     const [pageState, setPageState] = useState({ key: filterKey, page: 1 });
     const page = pageState.key === filterKey ? pageState.page : 1;
@@ -91,8 +91,8 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
         <div className="flex flex-col gap-4 lg:h-[calc(100dvh-9.5rem)]">
             {/* Toolbar */}
             <div className="flex shrink-0 flex-col md:flex-row md:items-center justify-between gap-4 py-2">
-                <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md">
+                <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+                    <div className="flex w-full items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md sm:w-auto">
                         <Filter className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-muted-foreground">{t("filter_status") || "Status"}:</span>
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -110,7 +110,7 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
                         </Select>
                     </div>
 
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md">
+                    <div className="flex w-full items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md sm:w-auto">
                         <Filter className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-muted-foreground">{t("filter_language") || "Language"}:</span>
                         <Select value={languageFilter} onValueChange={setLanguageFilter}>
@@ -128,7 +128,7 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
                         </Select>
                     </div>
 
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md">
+                    <div className="flex w-full items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md sm:w-auto">
                         <Filter className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-muted-foreground">{t("filter_type") || "Tipo"}:</span>
                         <Select value={recessFilter} onValueChange={setRecessFilter}>
@@ -144,7 +144,7 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
                     </div>
                 </div>
 
-                <div className="text-xs font-medium text-muted-foreground uppercase tracking-widest bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
+                <div className="self-start text-xs font-medium text-muted-foreground uppercase tracking-widest bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
                     {filteredLessons.length} {t("lessons") || "Lessons"}
                 </div>
             </div>

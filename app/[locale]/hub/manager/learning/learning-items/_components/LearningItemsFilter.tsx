@@ -21,14 +21,14 @@ interface LearningItemsFilterProps {
 
 /** Barra de busca e filtros na cor do tema, para destacar do resto da tela. */
 const triggerClass =
-    "h-10 min-w-[150px] rounded-md border-primary-foreground/30 bg-primary-foreground/15 text-primary-foreground shadow-none hover:bg-primary-foreground/20 [&_svg]:text-primary-foreground";
+    "h-10 w-full min-w-0 rounded-md lg:min-w-[150px] border-primary-foreground/30 bg-primary-foreground/15 text-primary-foreground shadow-none hover:bg-primary-foreground/20 [&_svg]:text-primary-foreground";
 
 export function LearningItemsFilter({ languages, filters, setFilters, total }: LearningItemsFilterProps) {
     const t = useTranslations("Learning");
     const levels = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
     const label = (icon: React.ReactNode, text: string) => (
-        <span className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground/80">
+        <span className="mb-1 flex items-center gap-1 truncate text-[10px] font-bold uppercase tracking-wider text-primary-foreground/80">
             {icon}
             {text}
         </span>
@@ -36,10 +36,10 @@ export function LearningItemsFilter({ languages, filters, setFilters, total }: L
 
     return (
         <div
-            className="flex shrink-0 flex-wrap items-end gap-x-4 gap-y-3 rounded-md bg-primary p-3 text-primary-foreground shadow-sm"
+            className="grid shrink-0 grid-cols-3 gap-2 rounded-md bg-primary p-2.5 text-primary-foreground shadow-sm lg:flex lg:flex-wrap lg:items-end lg:gap-x-4 lg:gap-y-3 lg:p-3"
             data-tour="manager-items.filters"
         >
-            <div className="min-w-[240px] flex-1">
+            <div className="col-span-3 lg:min-w-[240px] lg:flex-1">
                 {label(<Search className="h-3 w-3" />, t("search_content") || "Search Content")}
                 <div className="relative">
                     <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary-foreground/70" />
@@ -53,7 +53,7 @@ export function LearningItemsFilter({ languages, filters, setFilters, total }: L
                 </div>
             </div>
 
-            <div>
+            <div className="min-w-0">
                 {label(<Languages className="h-3 w-3" />, t("language") || "Language")}
                 <Select value={filters.languageId} onValueChange={(val) => setFilters({ ...filters, languageId: val })}>
                     <SelectTrigger className={triggerClass}>
@@ -70,7 +70,7 @@ export function LearningItemsFilter({ languages, filters, setFilters, total }: L
                 </Select>
             </div>
 
-            <div>
+            <div className="min-w-0">
                 {label(<GraduationCap className="h-3 w-3" />, t("level") || "Level")}
                 <Select value={filters.level} onValueChange={(val) => setFilters({ ...filters, level: val })}>
                     <SelectTrigger className={triggerClass}>
@@ -87,7 +87,7 @@ export function LearningItemsFilter({ languages, filters, setFilters, total }: L
                 </Select>
             </div>
 
-            <div>
+            <div className="min-w-0">
                 {label(<Shapes className="h-3 w-3" />, t("type") || "Type")}
                 <Select value={filters.type} onValueChange={(val: FilterState["type"]) => setFilters({ ...filters, type: val })}>
                     <SelectTrigger className={triggerClass}>
@@ -101,7 +101,7 @@ export function LearningItemsFilter({ languages, filters, setFilters, total }: L
                 </Select>
             </div>
 
-            <span className="ml-auto self-center text-xs font-semibold text-primary-foreground/80">
+            <span className="col-span-3 text-center text-[11px] font-semibold text-primary-foreground/80 lg:ml-auto lg:self-center lg:text-xs">
                 {t("showing_items_count", { count: total })}
             </span>
         </div>

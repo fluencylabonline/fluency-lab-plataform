@@ -20,7 +20,7 @@ export default async function MediaLibraryPage() {
                 className="contents"
             />
 
-            <main className="container">
+            <main className="container pb-24 lg:pb-0">
                 <MediaLibraryClient />
             </main>
         </div>

@@ -48,7 +48,7 @@ export function LessonsPageContent({ user, initialLessons, languages }: LessonsP
                 onOpenChange={setIsVaultOpen}
             />
 
-            <main className="container" data-tour="manager-lessons.list">
+            <main className="container pb-24 lg:pb-0" data-tour="manager-lessons.list">
                 <LessonsList
                     initialLessons={initialLessons}
                     languages={languages}

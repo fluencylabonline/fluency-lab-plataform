@@ -54,7 +54,7 @@ export function MediaLibraryClient() {
     const [search, setSearch] = useState("");
     const fileInputRef = useRef<HTMLInputElement>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
-    const { ref: gridAreaRef, style: gridStyle, pageSize } = useFillGrid({ breakpoints: GRID_BREAKPOINTS, minCardHeight: 130 });
+    const { ref: gridAreaRef, style: gridStyle, pageSize } = useFillGrid({ breakpoints: GRID_BREAKPOINTS, minCardHeight: 130, mobileRows: 6 });
 
     const { data: mediaItems, mutate, isLoading } = useSWR("media_library_list", async () => {
         const result = await getMediaListAction({});
@@ -144,20 +144,20 @@ export function MediaLibraryClient() {
         // No desktop a página não rola: a grade ocupa o espaço que sobra e a paginação navega pelo resto.
         <div className="flex flex-col gap-4 lg:h-[calc(100dvh-9rem)]">
             {/* Envio e busca na cor do tema */}
-            <div className="flex shrink-0 flex-wrap items-center gap-3 rounded-md bg-primary p-3 text-primary-foreground shadow-sm">
+            <div className="flex shrink-0 flex-wrap items-center gap-2 rounded-md bg-primary p-2.5 text-primary-foreground shadow-sm sm:gap-3 sm:p-3">
                 <input type="file" accept="audio/*" className="hidden" ref={fileInputRef} onChange={handleUpload} />
                 <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="inline-flex h-10 items-center gap-2 rounded-md bg-primary-foreground px-4 text-sm font-semibold text-primary transition-opacity hover:opacity-90 disabled:opacity-60"
+                    className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-primary-foreground px-4 text-sm font-semibold text-primary transition-opacity hover:opacity-90 disabled:opacity-60 sm:w-auto"
                 >
                     {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                     {isUploading ? "Enviando..." : "Enviar áudio"}
                 </button>
                 <span className="hidden text-xs text-primary-foreground/70 sm:inline">MP3, WAV, M4A</span>
 
-                <div className="relative min-w-[220px] flex-1 sm:max-w-md sm:ml-auto">
+                <div className="relative w-full flex-1 sm:w-auto sm:min-w-[220px] sm:max-w-md sm:ml-auto">
                     <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary-foreground/70" />
                     <input
                         type="text"
@@ -167,7 +167,7 @@ export function MediaLibraryClient() {
                         className="h-10 w-full rounded-md border border-primary-foreground/30 bg-primary-foreground/15 pl-9 pr-3 text-sm text-primary-foreground outline-none placeholder:text-primary-foreground/70 focus:border-primary-foreground/60 focus:bg-primary-foreground/20"
                     />
                 </div>
-                <span className="text-xs font-semibold text-primary-foreground/80">{filtered.length} arquivos</span>
+                <span className="w-full text-center text-[11px] font-semibold text-primary-foreground/80 sm:w-auto sm:text-xs">{filtered.length} arquivos</span>
             </div>
 
             <div ref={gridAreaRef} className={cn("min-h-0 flex-1 lg:overflow-hidden", isLoading && "opacity-60 transition-opacity")}>

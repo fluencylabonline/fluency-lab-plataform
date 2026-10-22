@@ -32,7 +32,7 @@ export function LearningItemsClient({ initialLanguages }: LearningItemsClientPro
         level: "ALL",
         search: "",
     });
-    const { ref: gridAreaRef, style: gridStyle, pageSize } = useFillGrid({ breakpoints: GRID_BREAKPOINTS, minCardHeight: 235 });
+    const { ref: gridAreaRef, style: gridStyle, pageSize } = useFillGrid({ breakpoints: GRID_BREAKPOINTS, minCardHeight: 235, mobileRows: 4 });
 
     // A página volta para a 1 quando muda um filtro, a busca ou o tamanho da página.
     const filterKey = [filters.languageId, filters.type, filters.level, filters.search, pageSize].join("|");
