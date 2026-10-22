@@ -6,6 +6,25 @@ import {
 import { LessonWithDetails, LessonSummary } from "./curriculum.types";
 import { eq, and, or, isNull, sql, desc, inArray } from "drizzle-orm";
 
+type LessonQueryParams = { search?: string, limit?: number, offset?: number, languageId?: string, difficulty?: string, status?: string };
+
+function lessonFilters({ search, languageId, difficulty, status }: LessonQueryParams) {
+  const filters = [isNull(lessons.deletedAt)];
+  if (search) {
+    filters.push(sql`${lessons.title} ILIKE ${`%${search}%`}`);
+  }
+  if (languageId) {
+    filters.push(eq(lessons.languageId, languageId));
+  }
+  if (difficulty) {
+    filters.push(eq(lessons.difficulty, difficulty as typeof cefrLevelEnum.enumValues[number]));
+  }
+  if (status) {
+    filters.push(eq(lessons.status, status as typeof lessonStatusEnum.enumValues[number]));
+  }
+  return filters;
+}
+
 export const curriculumRepository = {
   // Languages
   async findAllLanguages() {
@@ -218,23 +237,10 @@ export const curriculumRepository = {
       }
     }) as unknown as Promise<LessonSummary[]>;
   },
-  async findLessons(params: { search?: string, limit?: number, offset?: number, languageId?: string, difficulty?: string, status?: string }): Promise<LessonSummary[]> {
-    const { search, limit = 50, offset = 0, languageId, difficulty, status } = params;
-    const filters = [isNull(lessons.deletedAt)];
-    if (search) {
-      filters.push(sql`${lessons.title} ILIKE ${`%${search}%`}`);
-    }
-    if (languageId) {
-      filters.push(eq(lessons.languageId, languageId));
-    }
-    if (difficulty) {
-      filters.push(eq(lessons.difficulty, difficulty as typeof cefrLevelEnum.enumValues[number]));
-    }
-    if (status) {
-      filters.push(eq(lessons.status, status as typeof lessonStatusEnum.enumValues[number]));
-    }
+  async findLessons(params: LessonQueryParams): Promise<LessonSummary[]> {
+    const { limit = 50, offset = 0 } = params;
     return db.query.lessons.findMany({
-      where: and(...filters),
+      where: and(...lessonFilters(params)),
       limit: limit,
       offset: offset,
       orderBy: [sql`${lessons.createdAt} DESC`],
@@ -244,6 +250,14 @@ export const curriculumRepository = {
         media: true
       }
     }) as unknown as Promise<LessonSummary[]>;
+  },
+
+  /** Total de lições que casam com os filtros (para paginação). */
+  async countLessons(params: LessonQueryParams): Promise<number> {
+    const [row] = await db.select({ total: sql<number>`count(*)::int` })
+      .from(lessons)
+      .where(and(...lessonFilters(params)));
+    return row?.total ?? 0;
   },
 
   async findLessonItems(lessonId: string) {

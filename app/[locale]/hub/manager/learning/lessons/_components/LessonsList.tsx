@@ -19,6 +19,12 @@ import {
     EmptyMedia
 } from "@/components/ui/empty";
 import { LessonSummary } from "@/modules/curriculum/curriculum.types";
+import { PaginationBar } from "@/components/ui/pagination-bar";
+import { useGridPageSize } from "@/hooks/common/use-grid-page-size";
+
+/** Colunas da grade por largura da janela (md:2, lg:3) e linhas visíveis por página. */
+const GRID_BREAKPOINTS = [[1024, 3], [768, 2]] as const;
+const GRID_ROWS = 2;
 
 interface LessonsListProps {
     initialLessons: LessonSummary[];
@@ -44,6 +50,13 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
             return matchesSearch && matchesStatus && matchesLanguage && matchesRecess;
         });
     }, [initialLessons, searchQuery, statusFilter, languageFilter, recessFilter]);
+
+    // Paginação: a página volta para a 1 quando muda um filtro, a busca ou o tamanho da página.
+    const pageSize = useGridPageSize(GRID_BREAKPOINTS, GRID_ROWS);
+    const filterKey = [searchQuery, statusFilter, languageFilter, recessFilter, pageSize].join("|");
+    const [pageState, setPageState] = useState({ key: filterKey, page: 1 });
+    const page = pageState.key === filterKey ? pageState.page : 1;
+    const pageLessons = filteredLessons.slice((page - 1) * pageSize, page * pageSize);
 
     const statuses = [
         "draft",
@@ -74,9 +87,10 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
     }
 
     return (
-        <div className="space-y-6">
+        // No desktop a página não rola: a grade ocupa o espaço que sobra e a paginação navega pelo resto.
+        <div className="flex flex-col gap-4 lg:h-[calc(100dvh-9.5rem)]">
             {/* Toolbar */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2">
+            <div className="flex shrink-0 flex-col md:flex-row md:items-center justify-between gap-4 py-2">
                 <div className="flex flex-wrap items-center gap-3">
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md">
                         <Filter className="w-4 h-4 text-muted-foreground" />
@@ -135,6 +149,7 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
                 </div>
             </div>
 
+            <div className="min-h-0 flex-1 lg:overflow-y-auto">
             {filteredLessons.length === 0 ? (
                 <div className="py-20">
                     <Empty>
@@ -150,12 +165,21 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
                     </Empty>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredLessons.map((lesson) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {pageLessons.map((lesson) => (
                         <LessonCard key={lesson.id} lesson={lesson} />
                     ))}
                 </div>
             )}
+            </div>
+
+            <PaginationBar
+                page={page}
+                pageSize={pageSize}
+                total={filteredLessons.length}
+                onPageChange={(next) => setPageState({ key: filterKey, page: next })}
+                className="shrink-0"
+            />
         </div>
     );
 }

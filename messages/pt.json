@@ -3733,6 +3733,12 @@
       "cta": "Assistir agora"
     }
   },
+  "Pagination": {
+    "label": "Paginação",
+    "previous": "Página anterior",
+    "next": "Próxima página",
+    "summary": "{from}–{to} de {total}"
+  },
   "ImageCredit": {
     "photoBy": "Foto de <author>{name}</author> no <unsplash>Unsplash</unsplash>"
   },

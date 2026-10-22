@@ -1,20 +1,25 @@
 "use client";
 
-import { useState, useMemo, useRef, useCallback } from "react";
-import useSWRInfinite from "swr/infinite";
-import { getLessonsAction } from "@/modules/curriculum/curriculum.actions";
+import { useMemo, useState } from "react";
+import useSWR from "swr";
+import { getLessonsPageAction } from "@/modules/curriculum/curriculum.actions";
 import { LessonSummary } from "@/modules/curriculum/curriculum.types";
 import { LessonCard } from "./LessonCard";
 import { TemplateCard, type TemplateSummary } from "./TemplateCard";
 import { EmptyResults } from "@/components/ui/empty";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { PaginationBar } from "@/components/ui/pagination-bar";
+import { useGridPageSize } from "@/hooks/common/use-grid-page-size";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Shimmer } from "@shimmer-from-structure/react";
 import { Header } from "@/components/layout/header";
 import { useTranslations } from "next-intl";
 
-const PAGE_SIZE = 20;
+type LessonsPage = { items: LessonSummary[]; total: number };
+
+/** Colunas da grade por largura da janela (iguais às classes da grade abaixo) e linhas visíveis por página. */
+const GRID_BREAKPOINTS = [[1280, 4], [1024, 3], [640, 2]] as const;
+const GRID_ROWS = 2;
+const INITIAL_PAGE_SIZE = 8;
 
 interface FilterGroupProps {
   label: string;
@@ -24,18 +29,19 @@ interface FilterGroupProps {
   onSelect: (value: string | null) => void;
 }
 
+/** Chips de filtro sobre o fundo da cor do tema (contraste com a tela). */
 function FilterGroup({ label, allLabel, options, selected, onSelect }: FilterGroupProps) {
   const chip = (active: boolean) =>
     cn(
       "h-8 rounded-md px-3 text-xs font-semibold transition-colors",
       active
-        ? "bg-primary text-primary-foreground"
-        : "text-foreground/70 hover:bg-muted hover:text-foreground"
+        ? "bg-primary-foreground text-primary"
+        : "text-primary-foreground/80 hover:bg-primary-foreground/15 hover:text-primary-foreground"
     );
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className="mr-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="mr-1 text-[11px] font-bold uppercase tracking-wider text-primary-foreground/70">{label}</span>
       <button type="button" className={chip(selected === null)} onClick={() => onSelect(null)}>
         {allLabel}
       </button>
@@ -55,7 +61,7 @@ function FilterGroup({ label, allLabel, options, selected, onSelect }: FilterGro
 }
 
 interface LessonListProps {
-  initialData: LessonSummary[];
+  initialData: LessonsPage;
   languages: { id: string, name: string }[];
   templates: TemplateSummary[];
 }
@@ -66,17 +72,23 @@ export function LessonList({ initialData, languages, templates }: LessonListProp
   const [search, setSearch] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
+  const pageSize = useGridPageSize(GRID_BREAKPOINTS, GRID_ROWS);
 
-  const { data, size, setSize, isValidating } = useSWRInfinite<LessonSummary[]>(
-    (pageIndex, previousPageData) => {
-      if (previousPageData && !previousPageData.length) return null;
-      return ["lessons", pageIndex, search, selectedLanguage, selectedDifficulty, "ready"];
-    },
-    async ([, index, search, lang, diff]: [string, number, string, string | null, string | null]): Promise<LessonSummary[]> => {
-      const result = await getLessonsAction({
-        search,
-        limit: PAGE_SIZE,
-        offset: index * PAGE_SIZE,
+  // A página volta para a 1 sempre que muda um filtro, a busca, a aba ou o tamanho da página.
+  const filterKey = [view, search, selectedLanguage, selectedDifficulty, pageSize].join("|");
+  const [pageState, setPageState] = useState({ key: filterKey, page: 1 });
+  const page = pageState.key === filterKey ? pageState.page : 1;
+  const setPage = (next: number) => setPageState({ key: filterKey, page: next });
+
+  const isInitialQuery = page === 1 && pageSize === INITIAL_PAGE_SIZE && !search && !selectedLanguage && !selectedDifficulty;
+
+  const { data, isLoading } = useSWR<LessonsPage>(
+    view === "lessons" ? ["teacher-lessons", page, pageSize, search, selectedLanguage, selectedDifficulty] : null,
+    async ([, p, size, term, lang, diff]: [string, number, number, string, string | null, string | null]) => {
+      const result = await getLessonsPageAction({
+        search: term || undefined,
+        limit: size,
+        offset: (p - 1) * size,
         languageId: lang || undefined,
         difficulty: diff || undefined,
         status: "ready",
@@ -85,23 +97,15 @@ export function LessonList({ initialData, languages, templates }: LessonListProp
       return result.data;
     },
     {
-      fallbackData: [initialData],
-      revalidateFirstPage: false,
-      persistSize: true,
+      fallbackData: isInitialQuery ? initialData : undefined,
+      keepPreviousData: true,
+      revalidateOnFocus: false,
+      revalidateIfStale: false,
     }
   );
 
-  const lessons = useMemo(() => {
-    return data ? data.flat() : [];
-  }, [data]);
-
-  const filteredLessons = useMemo(() => {
-    return lessons.filter(lesson => {
-      const matchesLang = !selectedLanguage || lesson.languageId === selectedLanguage;
-      const matchesDiff = !selectedDifficulty || lesson.difficulty === selectedDifficulty;
-      return matchesLang && matchesDiff;
-    });
-  }, [lessons, selectedLanguage, selectedDifficulty]);
+  const lessons = data?.items ?? [];
+  const lessonsTotal = data?.total ?? 0;
 
   const filteredTemplates = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -111,24 +115,11 @@ export function LessonList({ initialData, languages, templates }: LessonListProp
         (!term || template.name.toLowerCase().includes(term))
     );
   }, [templates, selectedLanguage, search]);
+  const templatePage = filteredTemplates.slice((page - 1) * pageSize, page * pageSize);
 
-  const isLoadingMore = isValidating || (size > 0 && data && typeof data[size - 1] === "undefined");
-  const isEmpty = data?.[0]?.length === 0;
-  const isReachingEnd = isEmpty || (data && data[data.length - 1]?.length < PAGE_SIZE);
-
-  const observer = useRef<IntersectionObserver | null>(null);
-  const lastElementRef = useCallback((node: HTMLDivElement | null) => {
-    if (isLoadingMore) return;
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && !isReachingEnd) {
-        setSize(size + 1);
-      }
-    });
-    if (node) observer.current.observe(node);
-  }, [isLoadingMore, isReachingEnd, setSize, size]);
-
+  const total = view === "lessons" ? lessonsTotal : filteredTemplates.length;
   const difficulties = ["A1", "A2", "B1", "B2", "C1", "C2"];
+  const hasFilters = !!(selectedDifficulty || selectedLanguage);
 
   return (
     <div>
@@ -140,127 +131,106 @@ export function LessonList({ initialData, languages, templates }: LessonListProp
       />
 
       <main className="container">
-        {/* Alternância: lições soltas ou templates (sequências prontas) */}
-        <div className="mb-4 inline-flex rounded-md border border-border/60 p-1" role="tablist" data-tour="teacher-lessons.view">
-          {(["lessons", "templates"] as const).map((option) => (
-            <button
-              key={option}
-              type="button"
-              role="tab"
-              aria-selected={view === option}
-              onClick={() => setView(option)}
-              className={cn(
-                "h-8 rounded px-4 text-xs font-semibold transition-colors",
-                view === option ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-muted hover:text-foreground"
-              )}
-            >
-              {option === "lessons" ? t("viewLessons") : t("viewTemplates")}
-            </button>
-          ))}
-        </div>
+        {/* No desktop a página não rola: a grade ocupa o espaço que sobra e a paginação navega pelo resto. */}
+        <div className="flex flex-col gap-4 lg:h-[calc(100dvh-9rem)]">
+          {/* Alternância Lições | Templates e filtros, lado a lado, na cor do tema */}
+          <div
+            className="flex shrink-0 flex-wrap items-center gap-x-6 gap-y-3 rounded-md bg-primary p-3 text-primary-foreground shadow-sm"
+            data-tour="teacher-lessons.filters"
+          >
+            <div className="inline-flex rounded-md bg-primary-foreground/15 p-1" role="tablist" data-tour="teacher-lessons.view">
+              {(["lessons", "templates"] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  role="tab"
+                  aria-selected={view === option}
+                  onClick={() => setView(option)}
+                  className={cn(
+                    "h-8 rounded px-4 text-xs font-semibold transition-colors",
+                    view === option
+                      ? "bg-primary-foreground text-primary"
+                      : "text-primary-foreground/80 hover:bg-primary-foreground/15 hover:text-primary-foreground"
+                  )}
+                >
+                  {option === "lessons" ? t("viewLessons") : t("viewTemplates")}
+                </button>
+              ))}
+            </div>
 
-        {/* Filters */}
-        <div className="mb-6 flex flex-col gap-3 rounded-md border border-border/60 p-3 md:flex-row md:items-center md:gap-6" data-tour="teacher-lessons.filters">
-          {view === "lessons" && (
-            <>
-              <FilterGroup
-                label={t("levelLabel")}
-                allLabel={t("allLabel")}
-                options={difficulties.map((d) => ({ value: d, label: d }))}
-                selected={selectedDifficulty}
-                onSelect={setSelectedDifficulty}
-              />
-              <div className="hidden h-6 w-px bg-border md:block" />
-            </>
-          )}
-          <FilterGroup
-            label={t("languageLabel")}
-            allLabel={t("allLabel")}
-            options={languages.map((l) => ({ value: l.id, label: l.name }))}
-            selected={selectedLanguage}
-            onSelect={setSelectedLanguage}
-          />
-          <div className="flex items-center gap-3 md:ml-auto">
-            {/* Com rolagem infinita, o total só é exato depois da última página. */}
-            {view === "lessons" && isReachingEnd && (
-              <span className="text-xs font-semibold text-muted-foreground">
-                {t("resultsCount", { count: filteredLessons.length })}
-              </span>
+            <div className="hidden h-6 w-px bg-primary-foreground/30 md:block" />
+
+            {view === "lessons" && (
+              <>
+                <FilterGroup
+                  label={t("levelLabel")}
+                  allLabel={t("allLabel")}
+                  options={difficulties.map((d) => ({ value: d, label: d }))}
+                  selected={selectedDifficulty}
+                  onSelect={setSelectedDifficulty}
+                />
+                <div className="hidden h-6 w-px bg-primary-foreground/30 md:block" />
+              </>
             )}
-            {view === "templates" && (
-              <span className="text-xs font-semibold text-muted-foreground">
-                {t("templatesCount", { count: filteredTemplates.length })}
+            <FilterGroup
+              label={t("languageLabel")}
+              allLabel={t("allLabel")}
+              options={languages.map((l) => ({ value: l.id, label: l.name }))}
+              selected={selectedLanguage}
+              onSelect={setSelectedLanguage}
+            />
+
+            <div className="flex items-center gap-3 md:ml-auto">
+              <span className="text-xs font-semibold text-primary-foreground/80">
+                {view === "lessons" ? t("resultsCount", { count: total }) : t("templatesCount", { count: total })}
               </span>
-            )}
-            {(selectedDifficulty || selectedLanguage) && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedDifficulty(null);
-                  setSelectedLanguage(null);
-                }}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-              >
-                <X className="h-3.5 w-3.5" />
-                {t("clearFilters")}
-              </button>
+              {hasFilters && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedDifficulty(null);
+                    setSelectedLanguage(null);
+                  }}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary-foreground underline-offset-2 hover:underline"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  {t("clearFilters")}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Grade (rola por dentro só se a janela for pequena demais para as linhas da página) */}
+          <div className={cn("min-h-0 flex-1 lg:overflow-y-auto", isLoading && "opacity-60 transition-opacity")}>
+            {view === "templates" ? (
+              filteredTemplates.length === 0 ? (
+                <div className="py-16">
+                  <EmptyResults title={t("templatesEmptyTitle")} description={t("templatesEmptyDescription")} />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" data-tour="teacher-lessons.templates">
+                  {templatePage.map((template) => (
+                    <TemplateCard key={template.id} template={template} />
+                  ))}
+                </div>
+              )
+            ) : lessons.length === 0 && !isLoading ? (
+              <div className="py-16">
+                <EmptyResults
+                  title={t("emptyTitle") || "Nenhuma lição encontrada"}
+                  description={t("emptyDescription") || "Tente ajustar seus filtros ou busca para encontrar o que procura."}
+                />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" data-tour="teacher-lessons.list">
+                {lessons.map((lesson) => (
+                  <LessonCard key={lesson.id} lesson={lesson} />
+                ))}
+              </div>
             )}
           </div>
-        </div>
 
-        {view === "templates" ? (
-          filteredTemplates.length === 0 ? (
-            <div className="py-20">
-              <EmptyResults title={t("templatesEmptyTitle")} description={t("templatesEmptyDescription")} />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" data-tour="teacher-lessons.templates">
-              {filteredTemplates.map((template) => (
-                <TemplateCard key={template.id} template={template} />
-              ))}
-            </div>
-          )
-        ) : (
-        <Shimmer
-          loading={isValidating && lessons.length === 0}
-          templateProps={{
-            lessons: Array(8).fill({
-              id: "1",
-              title: "Loading Lesson...",
-              difficulty: "A1",
-              language: { name: "Language" },
-              contentText: "This is a placeholder for the shimmer skeleton."
-            })
-          }}
-        >
-          {filteredLessons.length === 0 && !isValidating ? (
-            <div className="py-20">
-              <EmptyResults
-                title={t("emptyTitle") || "Nenhuma lição encontrada"}
-                description={t("emptyDescription") || "Tente ajustar seus filtros ou busca para encontrar o que procura."}
-              />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" data-tour="teacher-lessons.list">
-              {filteredLessons.map((lesson) => (
-                <LessonCard
-                  key={lesson.id}
-                  lesson={lesson}
-                />
-              ))}
-            </div>
-          )}
-        </Shimmer>
-        )}
-
-        {/* Infinite Scroll Trigger */}
-        <div ref={lastElementRef} className="h-10 flex items-center justify-center pb-10 mt-10">
-          {isLoadingMore && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <LoadingSpinner className="w-4 h-4" />
-              {t("loadingMore") || "Carregando mais lições..."}
-            </div>
-          )}
+          <PaginationBar page={page} pageSize={pageSize} total={total} onPageChange={setPage} className="shrink-0" />
         </div>
       </main>
     </div>

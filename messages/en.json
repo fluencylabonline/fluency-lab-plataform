@@ -3734,6 +3734,12 @@
       "cta": "Watch now"
     }
   },
+  "Pagination": {
+    "label": "Pagination",
+    "previous": "Previous page",
+    "next": "Next page",
+    "summary": "{from}–{to} of {total}"
+  },
   "ImageCredit": {
     "photoBy": "Photo by <author>{name}</author> on <unsplash>Unsplash</unsplash>"
   },

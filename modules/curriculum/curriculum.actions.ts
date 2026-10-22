@@ -439,6 +439,20 @@ export const getLessonsAction = protectedAction
     return await curriculumRepository.findLessons(parsedInput);
   });
 
+export const getLessonsPageAction = protectedAction
+  .metadata({ name: "getLessonsPage" })
+  .inputSchema(z.object({
+    search: z.string().optional(),
+    limit: z.number().int().min(1).max(60).default(8),
+    offset: z.number().int().min(0).default(0),
+    languageId: z.string().optional(),
+    difficulty: z.string().optional(),
+    status: z.string().optional(),
+  }))
+  .action(async ({ parsedInput }) => {
+    return await curriculumService.getLessonsPage(parsedInput);
+  });
+
 export const getLessonByIdAction = protectedAction
   .metadata({ name: "getLessonById" })
   .inputSchema(z.object({ id: z.string().uuid() }))

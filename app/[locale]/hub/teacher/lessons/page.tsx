@@ -11,7 +11,8 @@ export default async function LessonsPage() {
     redirect("/signin");
   }
 
-  const initialLessons = await curriculumService.getLessonsPaginated({ limit: 20, status: "ready" });
+  // Primeira página (tamanho de tela grande); o cliente refaz a busca se a janela pedir outro tamanho.
+  const initialLessons = await curriculumService.getLessonsPage({ limit: 8, status: "ready" });
   const languages = await curriculumService.findAllLanguages();
   // Só templates publicados aparecem para o professor.
   const templates = (await learningService.getAssignableTemplates()).map((template) => ({

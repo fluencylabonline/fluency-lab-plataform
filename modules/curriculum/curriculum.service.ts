@@ -591,6 +591,15 @@ export const curriculumService = {
     return curriculumRepository.findAllLessons();
   },
 
+  /** Uma página de lições com o total, para telas paginadas. */
+  async getLessonsPage(params: { search?: string, limit?: number, offset?: number, languageId?: string, difficulty?: string, status?: string }) {
+    const [items, total] = await Promise.all([
+      curriculumRepository.findLessons(params),
+      curriculumRepository.countLessons(params),
+    ]);
+    return { items, total };
+  },
+
   async getLessonsPaginated(params: { search?: string, limit?: number, offset?: number, status?: string }) {
     return curriculumRepository.findLessons(params);
   },
