@@ -33,11 +33,11 @@ export function PaginationBar({ page, pageSize, total, onPageChange, className }
 
   const from = (page - 1) * pageSize + 1;
   const to = Math.min(total, page * pageSize);
-  const button = "inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-xs font-semibold transition-colors disabled:pointer-events-none disabled:opacity-40";
+  const button = "inline-flex h-9 min-w-9 sm:h-8 sm:min-w-8 items-center justify-center rounded-md px-2 text-xs font-semibold transition-colors disabled:pointer-events-none disabled:opacity-40";
 
   return (
-    <nav className={cn("flex flex-wrap items-center justify-between gap-3", className)} aria-label={t("label")}>
-      <span className="text-xs font-semibold text-muted-foreground">{t("summary", { from, to, total })}</span>
+    <nav className={cn("flex items-center justify-center gap-3 sm:justify-between", className)} aria-label={t("label")}>
+      <span className="hidden text-xs font-semibold text-muted-foreground sm:block">{t("summary", { from, to, total })}</span>
       <div className="flex items-center gap-1">
         <button
           type="button"
@@ -48,19 +48,20 @@ export function PaginationBar({ page, pageSize, total, onPageChange, className }
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
+        <span className="px-3 text-xs font-semibold text-muted-foreground sm:hidden">{page} / {pageCount}</span>
         {pageItems(page, pageCount).map((item) =>
           typeof item === "number" ? (
             <button
               key={item}
               type="button"
-              className={cn(button, item === page ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-muted")}
+              className={cn(button, "hidden sm:inline-flex", item === page ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-muted")}
               aria-current={item === page ? "page" : undefined}
               onClick={() => onPageChange(item)}
             >
               {item}
             </button>
           ) : (
-            <span key={item} className="px-1 text-xs text-muted-foreground">…</span>
+            <span key={item} className="hidden px-1 text-xs text-muted-foreground sm:inline">…</span>
           )
         )}
         <button

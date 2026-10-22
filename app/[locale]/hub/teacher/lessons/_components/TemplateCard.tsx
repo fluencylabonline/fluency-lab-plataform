@@ -23,7 +23,7 @@ export function TemplateCard({ template }: { template: TemplateSummary }) {
   return (
     <Link
       href={`/${locale}/hub/teacher/lessons/templates/${template.id}`}
-      className="card group flex h-full flex-col gap-3 p-5 outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+      className="card group flex h-full flex-col gap-2.5 p-4 outline-none sm:gap-3 sm:p-5 focus-visible:ring-2 focus-visible:ring-primary/50"
       aria-label={`${t("viewTemplate")}: ${template.name}`}
     >
       <div className="flex items-center gap-2">
@@ -34,11 +34,11 @@ export function TemplateCard({ template }: { template: TemplateSummary }) {
         <ArrowUpRight className="ml-auto h-4 w-4 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
       </div>
 
-      <h3 className="text-base font-bold leading-snug text-foreground line-clamp-2 transition-colors group-hover:text-primary">
+      <h3 className="text-[15px] font-bold leading-snug text-foreground line-clamp-2 sm:text-base transition-colors group-hover:text-primary">
         {template.name}
       </h3>
 
-      <p className="flex-1 text-sm leading-relaxed text-foreground/70 line-clamp-3">
+      <p className="flex-1 text-sm leading-relaxed text-foreground/70 line-clamp-2 sm:line-clamp-3">
         {template.description || t("noDescription")}
       </p>
 
