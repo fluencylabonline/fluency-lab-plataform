@@ -59,7 +59,7 @@ interface ProfilesPageClientProps {
   basePath?: string;
 }
 
-export function ProfilesPageClient({ initialData, basePath = "/hub/manager/students/onboarding" }: ProfilesPageClientProps) {
+export function ProfilesPageClient({ initialData, basePath = "/hub/admin/students/onboarding" }: ProfilesPageClientProps) {
   const t = useTranslations("Survey");
   const router = useRouter();
   const [search, setSearch] = useState("");

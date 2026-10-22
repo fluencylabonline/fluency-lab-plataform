@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
-import { AudioProfileImport } from "@/app/[locale]/hub/manager/students/_components/AudioProfileImport";
+import { AudioProfileImport } from "@/app/[locale]/hub/admin/students/_components/AudioProfileImport";
 
 // Server Actions used on this page (audio analysis) can run for several minutes.
 export const maxDuration = 300;
@@ -16,7 +16,7 @@ interface FromAudioPageProps {
 export default async function AdminOnboardingFromAudioPage({ searchParams }: FromAudioPageProps) {
   const user = await getCurrentUser();
 
-  if (!user || (user.role !== "admin" && user.role !== "manager")) {
+  if (!user || user.role !== "admin") {
     redirect("/hub");
   }
 

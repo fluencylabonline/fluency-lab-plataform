@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/lib/auth-server";
 import { learningService } from "@/modules/learning/learning.service";
-import { ProfilesPageClient } from "@/app/[locale]/hub/manager/students/onboarding/_components/ProfilesPageClient";
+import { ProfilesPageClient } from "@/app/[locale]/hub/admin/students/onboarding/_components/ProfilesPageClient";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Metadata } from "next";
@@ -21,7 +21,7 @@ export async function generateMetadata({
 export default async function AdminOnboardingProfilesPage() {
   const user = await getCurrentUser();
 
-  if (!user || (user.role !== "admin" && user.role !== "manager")) {
+  if (!user || user.role !== "admin") {
     redirect("/hub");
   }
 

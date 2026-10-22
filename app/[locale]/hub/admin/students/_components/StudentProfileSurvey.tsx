@@ -65,7 +65,7 @@ export function StudentProfileSurvey({
   initialData,
   initialStep = 0,
   onComplete,
-  basePath = "/hub/manager/students/onboarding"
+  basePath = "/hub/admin/students/onboarding"
 }: StudentProfileSurveyProps) {
   const [profileId, setProfileId] = useState(propProfileId);
   const [isSaving, setIsSaving] = useState(false);
@@ -184,8 +184,7 @@ export function StudentProfileSurvey({
       if (onComplete) {
         onComplete(profileId);
       } else {
-        if (studentId && basePath.startsWith("/hub/admin")) {
-          // O manager não tem ficha de usuário: volta para a lista de perfis.
+        if (studentId) {
           router.push(`/hub/admin/users/${studentId}`);
         } else {
           router.push(basePath);

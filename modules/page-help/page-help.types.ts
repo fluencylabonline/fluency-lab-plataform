@@ -113,10 +113,6 @@ export type TeacherHelpRoute =
 
 export type ManagerHelpRoute =
   | "/hub/manager/profile"
-  | "/hub/manager/students/onboarding"
-  | "/hub/manager/students/onboarding/from-audio"
-  | "/hub/manager/students/onboarding/[profileId]"
-  | "/hub/manager/students/onboarding/[profileId]/view"
   | "/hub/manager/tasks"
   | "/hub/manager/learning"
   | "/hub/manager/learning/[id]"

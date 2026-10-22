@@ -1,5 +1,5 @@
 import { learningService } from "@/modules/learning/learning.service";
-import { StudentProfileSurvey } from "@/app/[locale]/hub/manager/students/_components/StudentProfileSurvey";
+import { StudentProfileSurvey } from "@/app/[locale]/hub/admin/students/_components/StudentProfileSurvey";
 import { notFound } from "next/navigation";
 import { type StudentProfileSurveyInput } from "@/modules/learning/learning.schema";
 import { getCurrentUser } from "@/lib/auth-server";
@@ -21,7 +21,7 @@ export default async function AdminOnboardingPage({ params, searchParams }: Onbo
   const user = await getCurrentUser();
   //console.log("[AdminOnboardingPage] Current user role:", user?.role);
 
-  if (!user || (user.role !== "admin" && user.role !== "manager")) {
+  if (!user || user.role !== "admin") {
     console.log("[AdminOnboardingPage] Access denied, redirecting to /hub");
     redirect("/hub");
   }

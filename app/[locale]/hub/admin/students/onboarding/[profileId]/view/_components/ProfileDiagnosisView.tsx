@@ -115,7 +115,7 @@ interface ProfileDiagnosisViewProps {
   readOnly?: boolean;
 }
 
-export function ProfileDiagnosisView({ profile, basePath = "/hub/manager/students/onboarding", readOnly = false }: ProfileDiagnosisViewProps) {
+export function ProfileDiagnosisView({ profile, basePath = "/hub/admin/students/onboarding", readOnly = false }: ProfileDiagnosisViewProps) {
   const { user: currentUser } = useUserStore();
   const role = currentUser?.role;
   const [isPending, startTransition] = useTransition();

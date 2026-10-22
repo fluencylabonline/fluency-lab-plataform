@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/lib/auth-server";
 import { learningService } from "@/modules/learning/learning.service";
 import { redirect, notFound } from "next/navigation";
-import { ProfileDiagnosisView } from "@/app/[locale]/hub/manager/students/onboarding/[profileId]/view/_components/ProfileDiagnosisView";
+import { ProfileDiagnosisView } from "@/app/[locale]/hub/admin/students/onboarding/[profileId]/view/_components/ProfileDiagnosisView";
 
 import { getTranslations } from "next-intl/server";
 import { Metadata } from "next";

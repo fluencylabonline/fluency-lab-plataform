@@ -394,11 +394,12 @@ export function StudentCurriculumTab({ studentId, isAdmin, callHistory = [] }: S
               <Button onClick={() => setShowAssignPlan(true)} className="shrink-0">
                 <BookOpen className="mr-2 h-4 w-4" /> Designar Plano
               </Button>
+              {isAdmin && (
               <Button 
                 variant="outline"
                 className="shrink-0 border-primary/20 hover:border-primary/50 text-primary"
                 onClick={() => {
-                  const basePath = isAdmin ? "/hub/admin/students/onboarding" : "/hub/manager/students/onboarding";
+                  const basePath = "/hub/admin/students/onboarding";
                   const path = gap?.profileId 
                     ? `${basePath}/${gap.profileId}`
                     : `${basePath}/new?studentId=${studentId}`;
@@ -407,6 +408,7 @@ export function StudentCurriculumTab({ studentId, isAdmin, callHistory = [] }: S
               >
                 <Sparkles className="mr-2 h-4 w-4 fill-primary/10" /> Perfil Adaptativo
               </Button>
+              )}
             </>
           )}
         </div>
