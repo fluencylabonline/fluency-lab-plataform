@@ -1,19 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useEditor, EditorContent, type JSONContent } from "@tiptap/react";
 import { useTranslations } from "next-intl";
 import { AudioLines, BookOpen, CheckCircle2, Globe, HelpCircle, ListChecks, Pencil, Play, Square, Info } from "lucide-react";
-import { StarterKit } from "@tiptap/starter-kit";
-import { Image } from "@tiptap/extension-image";
-import { TaskItem, TaskList } from "@tiptap/extension-list";
-import { TextAlign } from "@tiptap/extension-text-align";
-import { Typography } from "@tiptap/extension-typography";
-import { Highlight } from "@tiptap/extension-highlight";
-import { TableKit } from "@tiptap/extension-table";
-import { Color } from "@tiptap/extension-color";
-import { TextStyle } from "@tiptap/extension-text-style";
+import type { JSONContent } from "@tiptap/core";
 import { Link } from "@/i18n/navigation";
+import { LessonContentView } from "@/components/lesson/lesson-content-view";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { UnsplashCredit } from "@/components/ui/unsplash-credit";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,15 +21,6 @@ import type {
   StructureMetadata,
   VocabMetadata,
 } from "@/modules/curriculum/curriculum.types";
-
-import "@/components/tiptap-templates/simple/simple-editor.scss";
-import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
-import "@/components/tiptap-node/code-block-node/code-block-node.scss";
-import "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss";
-import "@/components/tiptap-node/list-node/list-node.scss";
-import "@/components/tiptap-node/image-node/image-node.scss";
-import "@/components/tiptap-node/heading-node/heading-node.scss";
-import "@/components/tiptap-node/paragraph-node/paragraph-node.scss";
 
 interface LessonViewerProps {
   lesson: LessonWithDetails;
@@ -57,28 +41,10 @@ function SectionLabel({ icon: Icon, children }: { icon: typeof BookOpen; childre
   );
 }
 
-function ReadOnlyContent({ content }: { content: JSONContent }) {
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({ link: { openOnClick: true } }),
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-      TaskList,
-      TaskItem.configure({ nested: true }),
-      Highlight.configure({ multicolor: true }),
-      Image,
-      Typography,
-      TableKit,
-      TextStyle,
-      Color,
-    ],
-    content,
-    editable: false,
-    immediatelyRender: false,
-    editorProps: { attributes: { class: "simple-editor" } },
-  });
+const sectionKey = (section: { type: string }, index: number) => `${section.type}-${index}`;
 
-  return <EditorContent editor={editor} />;
-}
+/** Altura fixa das abas de áudio e itens no desktop: a página não rola, só o conteúdo de dentro. */
+const PANEL_HEIGHT = "lg:h-[calc(100dvh-15rem)] lg:min-h-[26rem]";
 
 export function LessonViewer({ lesson }: LessonViewerProps) {
   const t = useTranslations("LessonViewer");
@@ -199,20 +165,20 @@ export function LessonViewer({ lesson }: LessonViewerProps) {
         </TabsList>
 
         <TabsContent value="content" className="mt-0 focus-visible:outline-none">
-          <article className="card p-4 md:p-8">
-            {contentJson ? (
-              <ReadOnlyContent content={contentJson} />
-            ) : (
+          {contentJson ? (
+            <LessonContentView content={contentJson} />
+          ) : (
+            <div className="card p-4">
               <p className="py-12 text-center italic text-muted-foreground">{t("noContent")}</p>
-            )}
-          </article>
+            </div>
+          )}
         </TabsContent>
 
-        <TabsContent value="audio" className="mt-0 space-y-4 focus-visible:outline-none">
-          <div className="card space-y-4 p-4">
-            <SectionLabel icon={AudioLines}>{t("audioTitle")}</SectionLabel>
-            {mediaUrl ? (
-              <>
+        <TabsContent value="audio" className="mt-0 focus-visible:outline-none">
+          {mediaUrl ? (
+            <div className={cn("grid gap-4 lg:grid-cols-2", PANEL_HEIGHT)}>
+              <div className="card flex min-h-0 flex-col gap-4 p-4">
+                <SectionLabel icon={AudioLines}>{t("audioTitle")}</SectionLabel>
                 <div className="flex items-center gap-3">
                   <Button type="button" size="sm" className="gap-1.5" onClick={() => playRange("full", 0, Number.MAX_SAFE_INTEGER)}>
                     {playingKey === "full" ? <Square className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
@@ -223,12 +189,15 @@ export function LessonViewer({ lesson }: LessonViewerProps) {
                   </a>
                 </div>
                 {lesson.media?.transcriptionText && (
-                  <p className="rounded-md border-l-4 border-primary bg-primary/5 px-4 py-3 text-sm leading-relaxed text-foreground/85">
+                  <p className="max-h-[50vh] min-h-0 flex-1 overflow-y-auto rounded-md border-l-4 border-primary bg-primary/5 px-4 py-3 text-sm leading-relaxed text-foreground/85 lg:max-h-none">
                     {lesson.media.transcriptionText}
                   </p>
                 )}
+              </div>
+              <div className="card flex min-h-0 flex-col gap-3 p-4">
+                <SectionLabel icon={ListChecks}>{t("segmentsTitle")} ({segments.length})</SectionLabel>
                 {segments.length > 0 ? (
-                  <ol className="space-y-2">
+                  <ol className="max-h-[60vh] min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 lg:max-h-none">
                     {segments.map((s, idx) => (
                       <li key={idx} className="flex items-start gap-3 rounded-md bg-muted/40 px-3 py-2">
                         <PlayButton id={`seg-${idx}`} start={s.start} end={s.end} />
@@ -239,129 +208,146 @@ export function LessonViewer({ lesson }: LessonViewerProps) {
                 ) : (
                   <p className="text-xs italic text-muted-foreground">{t("noSegments")}</p>
                 )}
-              </>
-            ) : (
+              </div>
+            </div>
+          ) : (
+            <div className="card p-4">
               <p className="text-xs italic text-muted-foreground">{t("noAudio")}</p>
-            )}
-          </div>
+            </div>
+          )}
         </TabsContent>
 
-        <TabsContent value="items" className="mt-0 grid gap-4 focus-visible:outline-none lg:grid-cols-2">
-          <div className="card space-y-3 p-4">
-            <SectionLabel icon={ListChecks}>{t("vocabulary")} ({vocabulary.length})</SectionLabel>
-            {vocabulary.length === 0 && <p className="text-xs italic text-muted-foreground">{t("noItems")}</p>}
-            {vocabulary.map(({ item, priority }) => {
-              const meta = item.metadata as VocabMetadata;
-              return (
-                <div key={item.id} className="space-y-1.5 rounded-md bg-muted/40 p-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-bold">{item.lemma}</span>
-                    {meta.level && <Badge variant="outline" className="h-5 text-[10px]">{meta.level}</Badge>}
-                    {meta.type && <Badge variant="outline" className="h-5 text-[10px]">{meta.type}</Badge>}
-                    {meta.phonetic && <span className="text-xs text-muted-foreground">{meta.phonetic}</span>}
-                    <Badge className="ml-auto h-5 text-[10px]">{priority}</Badge>
-                  </div>
-                  {meta.translation && <p className="text-xs font-medium text-primary">{meta.translation}</p>}
-                  {meta.meanings?.map((m, i) => (
-                    <p key={i} className="text-xs text-foreground/80">{m.definition}</p>
-                  ))}
-                  {meta.examples?.slice(0, 2).map((ex, i) => (
-                    <p key={i} className="text-[11px] italic text-muted-foreground">
-                      {ex.text} <span className="not-italic">— {ex.translation}</span>
-                    </p>
-                  ))}
-                  {meta.image_url && (
-                    <div className="relative h-28 w-28 overflow-hidden rounded-md">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={meta.image_url} alt={item.lemma} className="h-full w-full object-cover" loading="lazy" />
-                      <UnsplashCredit credit={meta.image_credit} className="max-w-full" />
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="card space-y-3 p-4">
-            <SectionLabel icon={BookOpen}>{t("structures")} ({structures.length})</SectionLabel>
-            {structures.length === 0 && <p className="text-xs italic text-muted-foreground">{t("noItems")}</p>}
-            {structures.map(({ item, priority }) => {
-              const meta = item.metadata as StructureMetadata;
-              return (
-                <div key={item.id} className="space-y-1.5 rounded-md bg-muted/40 p-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-bold">{meta.structure_type || item.lemma}</span>
-                    {meta.syntactic_pattern && <Badge variant="outline" className="h-5 text-[10px]">{meta.syntactic_pattern}</Badge>}
-                    <Badge className="ml-auto h-5 text-[10px]">{priority}</Badge>
-                  </div>
-                  {meta.explanation && <p className="text-xs text-foreground/80">{meta.explanation}</p>}
-                  {meta.examples?.slice(0, 2).map((ex, i) => (
-                    <div key={i} className="space-y-1">
-                      <p className="text-xs font-semibold">{ex.text}</p>
-                      <p className="text-[11px] text-muted-foreground">{ex.translation}</p>
-                      <div className="flex flex-wrap gap-1">
-                        {ex.word_order?.map((w, j) => (
-                          <span key={j} className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px]">
-                            {w.word} <span className="uppercase text-muted-foreground">{w.role}</span>
-                          </span>
-                        ))}
+        <TabsContent value="items" className="mt-0 focus-visible:outline-none">
+          <div className={cn("grid gap-4 lg:grid-cols-2", PANEL_HEIGHT)}>
+            <div className="card flex min-h-0 flex-col gap-3 p-4">
+              <SectionLabel icon={ListChecks}>{t("vocabulary")} ({vocabulary.length})</SectionLabel>
+              <div className="max-h-[70vh] min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 lg:max-h-none">
+                {vocabulary.length === 0 && <p className="text-xs italic text-muted-foreground">{t("noItems")}</p>}
+                {vocabulary.map(({ item, priority }) => {
+                  const meta = item.metadata as VocabMetadata;
+                  return (
+                    <div key={item.id} className="space-y-1.5 rounded-md bg-muted/40 p-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-bold">{item.lemma}</span>
+                        {meta.level && <Badge variant="outline" className="h-5 text-[10px]">{meta.level}</Badge>}
+                        {meta.type && <Badge variant="outline" className="h-5 text-[10px]">{meta.type}</Badge>}
+                        {meta.phonetic && <span className="text-xs text-muted-foreground">{meta.phonetic}</span>}
+                        <Badge className="ml-auto h-5 text-[10px]">{priority}</Badge>
                       </div>
+                      {meta.translation && <p className="text-xs font-medium text-primary">{meta.translation}</p>}
+                      {meta.meanings?.map((m, i) => (
+                        <p key={i} className="text-xs text-foreground/80">{m.definition}</p>
+                      ))}
+                      {meta.examples?.slice(0, 2).map((ex, i) => (
+                        <p key={i} className="text-[11px] italic text-muted-foreground">
+                          {ex.text} <span className="not-italic">— {ex.translation}</span>
+                        </p>
+                      ))}
+                      {meta.image_url && (
+                        <div className="relative h-28 w-28 overflow-hidden rounded-md">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={meta.image_url} alt={item.lemma} className="h-full w-full object-cover" loading="lazy" />
+                          <UnsplashCredit credit={meta.image_credit} className="max-w-full" />
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="card flex min-h-0 flex-col gap-3 p-4">
+              <SectionLabel icon={BookOpen}>{t("structures")} ({structures.length})</SectionLabel>
+              <div className="max-h-[70vh] min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 lg:max-h-none">
+                {structures.length === 0 && <p className="text-xs italic text-muted-foreground">{t("noItems")}</p>}
+                {structures.map(({ item, priority }) => {
+                  const meta = item.metadata as StructureMetadata;
+                  return (
+                    <div key={item.id} className="space-y-1.5 rounded-md bg-muted/40 p-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-bold">{meta.structure_type || item.lemma}</span>
+                        {meta.syntactic_pattern && <Badge variant="outline" className="h-5 text-[10px]">{meta.syntactic_pattern}</Badge>}
+                        <Badge className="ml-auto h-5 text-[10px]">{priority}</Badge>
+                      </div>
+                      {meta.explanation && <p className="text-xs text-foreground/80">{meta.explanation}</p>}
+                      {meta.examples?.slice(0, 2).map((ex, i) => (
+                        <div key={i} className="space-y-1">
+                          <p className="text-xs font-semibold">{ex.text}</p>
+                          <p className="text-[11px] text-muted-foreground">{ex.translation}</p>
+                          <div className="flex flex-wrap gap-1">
+                            {ex.word_order?.map((w, j) => (
+                              <span key={j} className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px]">
+                                {w.word} <span className="uppercase text-muted-foreground">{w.role}</span>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </TabsContent>
 
-        <TabsContent value="quiz" className="mt-0 space-y-4 focus-visible:outline-none">
-          {sections.length === 0 && (
+        <TabsContent value="quiz" className="mt-0 focus-visible:outline-none">
+          {sections.length === 0 ? (
             <div className="card p-4">
               <p className="text-xs italic text-muted-foreground">{t("noQuiz")}</p>
             </div>
-          )}
-          {sections.map((section, sIdx) => (
-            <div key={sIdx} className="card space-y-4 p-4">
-              <SectionLabel icon={HelpCircle}>
-                {t.has(`section.${section.type}`) ? t(`section.${section.type}`) : section.type} ({section.questions.length})
-              </SectionLabel>
-              <ol className="space-y-4">
-                {section.questions.map((q, idx) => {
-                  const correct = correctOf(q);
-                  return (
-                    <li key={q.id ?? idx} className="space-y-2">
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="text-sm font-semibold leading-snug">
-                          <span className="mr-1.5 text-primary">{idx + 1}.</span>
-                          {q.text}
-                        </p>
-                        {q.audioRange && <PlayButton id={`q-${sIdx}-${idx}`} start={q.audioRange.start} end={q.audioRange.end} />}
-                      </div>
-                      <ul className="space-y-1">
-                        {q.options.map((option) => (
-                          <li
-                            key={option}
-                            className={cn(
-                              "flex items-start gap-2 rounded-md px-2.5 py-1.5 text-xs",
-                              option === correct ? "bg-emerald-500/10 font-semibold text-emerald-700 dark:text-emerald-300" : "text-foreground/70"
-                            )}
-                          >
-                            {option === correct ? (
-                              <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                            ) : (
-                              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/40" />
-                            )}
-                            {option}
+          ) : (
+            <Accordion multiple defaultValue={[sectionKey(sections[0], 0)]} className="gap-3">
+              {sections.map((section, sIdx) => (
+                <AccordionItem key={sectionKey(section, sIdx)} value={sectionKey(section, sIdx)} className="card overflow-hidden border-b-0! px-4">
+                  <AccordionTrigger className="items-center py-3 hover:no-underline">
+                    <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                      <HelpCircle className="h-3.5 w-3.5" />
+                      {t.has(`section.${section.type}`) ? t(`section.${section.type}`) : section.type}
+                      <Badge variant="outline" className="h-5 text-[10px]">{section.questions.length}</Badge>
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ol className="space-y-4 pb-3">
+                      {section.questions.map((q, idx) => {
+                        const correct = correctOf(q);
+                        return (
+                          <li key={q.id ?? idx} className="space-y-2">
+                            <div className="flex items-start justify-between gap-3">
+                              <p className="text-sm font-semibold leading-snug">
+                                <span className="mr-1.5 text-primary">{idx + 1}.</span>
+                                {q.text}
+                              </p>
+                              {q.audioRange && <PlayButton id={`q-${sIdx}-${idx}`} start={q.audioRange.start} end={q.audioRange.end} />}
+                            </div>
+                            <ul className="space-y-1">
+                              {q.options.map((option) => (
+                                <li
+                                  key={option}
+                                  className={cn(
+                                    "flex items-start gap-2 rounded-md px-2.5 py-1.5 text-xs",
+                                    option === correct ? "bg-emerald-500/10 font-semibold text-emerald-700 dark:text-emerald-300" : "text-foreground/70"
+                                  )}
+                                >
+                                  {option === correct ? (
+                                    <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                  ) : (
+                                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/40" />
+                                  )}
+                                  {option}
+                                </li>
+                              ))}
+                            </ul>
+                            {q.explanation && <p className="pl-2.5 text-[11px] leading-relaxed text-muted-foreground">{q.explanation}</p>}
                           </li>
-                        ))}
-                      </ul>
-                      {q.explanation && <p className="pl-2.5 text-[11px] leading-relaxed text-muted-foreground">{q.explanation}</p>}
-                    </li>
-                  );
-                })}
-              </ol>
-            </div>
-          ))}
+                        );
+                      })}
+                    </ol>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
         </TabsContent>
 
         <TabsContent value="details" className="mt-0 focus-visible:outline-none">

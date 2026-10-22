@@ -3736,6 +3736,7 @@
     "playAll": "Ouvir tudo",
     "stop": "Parar",
     "openFile": "Abrir arquivo",
+    "segmentsTitle": "Trechos com timestamps",
     "noSegments": "Sem transcrição com timestamps.",
     "noAudio": "Esta lição não tem áudio.",
     "vocabulary": "Vocabulário",

@@ -3737,6 +3737,7 @@
     "playAll": "Play all",
     "stop": "Stop",
     "openFile": "Open file",
+    "segmentsTitle": "Segments with timestamps",
     "noSegments": "No transcript with timestamps.",
     "noAudio": "This lesson has no audio.",
     "vocabulary": "Vocabulary",
