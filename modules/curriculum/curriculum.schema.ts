@@ -49,6 +49,7 @@ export const languages = pgTable("curriculum_languages", {
 export const media = pgTable("curriculum_media", {
   id: uuid("id").primaryKey().defaultRandom(),
   url: varchar("url", { length: 512 }).notNull(),
+  title: varchar("title", { length: 255 }),
   transcriptionText: text("transcription_text"),
   transcriptionTimestamps: jsonb("transcription_timestamps").$type<Segment[]>(),
   config: jsonb("config").$type<MediaConfig | null>(),

@@ -270,6 +270,7 @@ export interface QualityResult {
 export interface Media {
   id: string;
   url: string;
+  title?: string | null;
   transcriptionText: string | null;
   transcriptionTimestamps: Segment[] | null;
   config: MediaConfig | null;

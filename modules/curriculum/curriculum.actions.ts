@@ -367,9 +367,9 @@ export const getMediaListAction = managerAction
  */
 export const createMediaAction = managerAction
   .metadata({ name: "createMedia" })
-  .inputSchema(z.object({ url: z.string().url() }))
+  .inputSchema(z.object({ url: z.string().url(), title: z.string().trim().min(1).max(255).optional() }))
   .action(async ({ parsedInput }) => {
-    const result = await curriculumService.createMedia(parsedInput.url);
+    const result = await curriculumService.createMedia(parsedInput.url, parsedInput.title);
     return result;
   });
 

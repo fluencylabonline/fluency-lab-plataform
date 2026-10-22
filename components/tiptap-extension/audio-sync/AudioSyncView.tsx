@@ -34,6 +34,9 @@ const SYNC_TOLERANCE_SEC = 1.5; // Diferença máxima aceitável antes de pular 
 export function AudioSyncView({ node, selected }: NodeViewProps) {
   const { nodeId, url, title, transcription } = node.attrs as AudioNodeAttributes;
   const t = useTranslations("AudioSync");
+  // Só o caderno (que define __notebookId) sincroniza play/pause entre professor e aluno. Numa lição, que é
+  // compartilhada por todos, cada pessoa controla o seu próprio player.
+  const syncEnabled = !!(globalThis as Record<string, unknown>).__notebookId;
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isSyncingRef = useRef(false);
@@ -64,7 +67,7 @@ export function AudioSyncView({ node, selected }: NodeViewProps) {
   // ── Publicar estado local no Firebase Realtime Database ───────────────────
   const publishState = useCallback(
     (playing: boolean, time: number, rateVal?: number) => {
-      if (!nodeId) return;
+      if (!nodeId || !syncEnabled) return;
       const rate = rateVal !== undefined ? rateVal : speed;
       const state: AudioSyncState = {
         playing,
@@ -77,12 +80,12 @@ export function AudioSyncView({ node, selected }: NodeViewProps) {
       };
       set(ref(rtdb, `audio-sync/${nodeId}`), state).catch(console.error);
     },
-    [nodeId, speed]
+    [nodeId, speed, syncEnabled]
   );
 
   // ── Escutar RTDB para aplicar estado remoto ─────────────────────────────────
   useEffect(() => {
-    if (!nodeId) return;
+    if (!nodeId || !syncEnabled) return;
 
     const syncRef = ref(rtdb, `audio-sync/${nodeId}`);
 
@@ -133,7 +136,7 @@ export function AudioSyncView({ node, selected }: NodeViewProps) {
 
     onValue(syncRef, handleSnapshot);
     return () => off(syncRef, "value", handleSnapshot);
-  }, [nodeId]);
+  }, [nodeId, syncEnabled]);
 
   // ── Sincronizar Volume Local no elemento ────────────────────────────────────
   useEffect(() => {

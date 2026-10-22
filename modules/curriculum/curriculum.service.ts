@@ -646,9 +646,10 @@ export const curriculumService = {
     return await curriculumRepository.deleteMedia(id);
   },
 
-  async createMedia(url: string) {
+  async createMedia(url: string, title?: string) {
     return await curriculumRepository.createMedia({
       url,
+      title: title ?? null,
       status: "pending_review",
     });
   },

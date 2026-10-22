@@ -30,6 +30,18 @@ import {
 import { MediaWithLessons } from "@/modules/curriculum/curriculum.types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
+/** Nome de reserva para mídias sem título: último trecho do caminho no Storage, já decodificado. */
+function mediaFallbackName(url: string) {
+    const raw = url.split("?")[0].split("/").pop() ?? "";
+    let decoded = raw;
+    try {
+        decoded = decodeURIComponent(raw);
+    } catch {
+        // mantém o texto cru
+    }
+    return decoded.split("/").pop() || "Áudio sem nome";
+}
+
 export function MediaLibraryVault() {
     const [isOpen, setIsOpen] = React.useState(false);
     const [isUploading, setIsUploading] = React.useState(false);
@@ -71,7 +83,8 @@ export function MediaLibraryVault() {
 
             const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/${encodeURIComponent(path)}?alt=media`;
 
-            await createMediaAction({ url: publicUrl });
+            // Título inicial = nome do arquivo sem extensão (a tela não mostra mais o começo do caminho no Storage).
+            await createMediaAction({ url: publicUrl, title: file.name.replace(/\.[^.]+$/, "") });
             notify.success("Mídia enviada com sucesso!");
             mutate();
         } catch (error: unknown) {
@@ -212,7 +225,7 @@ export function MediaLibraryVault() {
                                                     </div>
                                                     <div className="flex flex-col min-w-0 flex-1">
                                                         <span className="text-sm font-bold truncate pr-4">
-                                                            {(item.url.split('/').pop()?.split('?')[0] || "Áudio Sem Nome").slice(0, 10)}
+                                                            {item.title || mediaFallbackName(item.url)}
                                                         </span>
                                                         <div className="flex flex-wrap items-center gap-3 mt-1">
                                                             <span className="text-[10px] text-muted-foreground flex items-center gap-1">

@@ -5,8 +5,8 @@ import type { NewAudio } from "./audio.schema";
 
 export const audioService = {
   async listAll(requesterRole: string) {
-    // Apenas professores e admins acessam a galeria de áudios
-    if (requesterRole !== "teacher" && requesterRole !== "admin") {
+    // Professores, managers e admins acessam a galeria de áudios
+    if (requesterRole !== "teacher" && requesterRole !== "manager" && requesterRole !== "admin") {
       throw new Error("Apenas professores podem acessar a biblioteca de áudios.");
     }
     return audioRepository.listAll();
@@ -17,8 +17,8 @@ export const audioService = {
     userRole: string,
     data: Omit<NewAudio, "uploadedBy">
   ) {
-    // 1. RBAC: Apenas professores e administradores podem salvar áudios
-    if (userRole !== "teacher" && userRole !== "admin") {
+    // 1. RBAC: professores, managers e administradores podem salvar áudios
+    if (userRole !== "teacher" && userRole !== "manager" && userRole !== "admin") {
       throw new Error("Apenas professores podem fazer upload e salvar áudios.");
     }
 
@@ -38,15 +38,15 @@ export const audioService = {
   },
 
   async deleteAudio(userId: string, userRole: string, audioId: string) {
-    if (userRole !== "admin" && userRole !== "teacher") {
+    if (userRole !== "admin" && userRole !== "teacher" && userRole !== "manager") {
       throw new Error("Não autorizado.");
     }
 
     const audio = await audioRepository.findById(audioId);
     if (!audio) throw new Error("Áudio não encontrado.");
 
-    // Professores só podem deletar os áudios que eles mesmos enviaram
-    if (userRole === "teacher" && audio.uploadedBy !== userId) {
+    // Professores e managers só podem deletar os áudios que eles mesmos enviaram
+    if (userRole !== "admin" && audio.uploadedBy !== userId) {
       throw new Error("Você não tem permissão para deletar este áudio.");
     }
 

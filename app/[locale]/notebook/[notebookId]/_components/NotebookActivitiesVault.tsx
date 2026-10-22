@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Sparkles, Music, Play, Music2, FileQuestionMark, LucideIcon, Mic } from "lucide-react";
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
-import { NotebookAudioSyncVault } from "./NotebookAudioSyncVault";
+import { AudioSyncVault } from "@/components/tiptap-extension/audio-sync/AudioSyncVault";
 import {
   Vault,
   VaultContent,
@@ -141,7 +141,7 @@ export function NotebookActivitiesVault({ open, onOpenChange }: NotebookActiviti
         </VaultContent>
       </Vault>
 
-      <NotebookAudioSyncVault
+      <AudioSyncVault
         open={isAudioSyncOpen}
         onOpenChange={setIsAudioSyncOpen}
       />

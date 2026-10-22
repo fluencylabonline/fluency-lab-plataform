@@ -18,6 +18,7 @@ import { ColorHighlightPopover } from "@/components/tiptap-ui/color-highlight-po
 import { LinkPopover } from "@/components/tiptap-ui/link-popover";
 import { TableDropdownMenu } from "@/components/tiptap-ui/table-dropdown-menu";
 import { TextColorPopover } from "@/components/tiptap-ui/text-color-popover";
+import { AudioInsertButton } from "./AudioInsertButton";
 
 interface LessonEditorToolbarProps {
   toolbarRef: RefObject<HTMLDivElement | null>;
@@ -64,6 +65,7 @@ export function LessonEditorToolbar({ toolbarRef }: LessonEditorToolbarProps) {
 
       <ToolbarGroup>
         <ImageUploadButton text="Add Image" />
+        <AudioInsertButton />
       </ToolbarGroup>
 
       <Spacer />

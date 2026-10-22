@@ -45,10 +45,11 @@ import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 
 // --- Firebase ---
 import { storage } from "@/lib/firebase-storage";
+import { auth } from "@/lib/firebase-auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 // --- Interfaces & Schemas ---
-interface NotebookAudioSyncVaultProps {
+interface AudioSyncVaultProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -96,7 +97,7 @@ const uploadFormSchema = z.object({
 
 type UploadFormValues = z.infer<typeof uploadFormSchema>;
 
-export function NotebookAudioSyncVault({ open, onOpenChange }: NotebookAudioSyncVaultProps) {
+export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
   const { editor } = useTiptapEditor();
   const [activeTab, setActiveTab] = useState<"library" | "upload">("library");
 
@@ -163,7 +164,9 @@ export function NotebookAudioSyncVault({ open, onOpenChange }: NotebookAudioSync
     setUploadProgress(0);
 
     const file = values.file[0] as File;
-    const userId = ((globalThis as Record<string, unknown>).__userId as string) ?? "anonymous";
+    // O caderno define __userId; no editor de lições usamos o usuário logado no Firebase
+    // (a regra do Storage exige que a pasta seja o uid de quem envia).
+    const userId = ((globalThis as Record<string, unknown>).__userId as string) ?? auth.currentUser?.uid ?? "anonymous";
 
     const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
     const filePath = `notebooks/audio/${userId}/${fileName}`;
