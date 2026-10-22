@@ -3717,5 +3717,43 @@
       "packages": "{count, plural, one {# pacote de aulas gravadas} other {# pacotes de aulas gravadas}}",
       "cta": "Assistir agora"
     }
+  },
+  "LessonViewer": {
+    "view": "Ver",
+    "editDetails": "Editar detalhes",
+    "tabContent": "Conteúdo",
+    "tabAudio": "Áudio e transcrição",
+    "tabItems": "Itens de aprendizado",
+    "tabQuiz": "Quiz",
+    "tabDetails": "Detalhes",
+    "itemsCount": "{count, plural, one {# item} other {# itens}}",
+    "questionsCount": "{count, plural, one {# pergunta} other {# perguntas}}",
+    "noContent": "Nenhum conteúdo disponível.",
+    "audioTitle": "Áudio da aula",
+    "playAll": "Ouvir tudo",
+    "stop": "Parar",
+    "openFile": "Abrir arquivo",
+    "noSegments": "Sem transcrição com timestamps.",
+    "noAudio": "Esta lição não tem áudio.",
+    "vocabulary": "Vocabulário",
+    "structures": "Gramática e padrões",
+    "noItems": "Nenhum item.",
+    "noQuiz": "Esta lição não tem quiz.",
+    "section": {
+      "vocabulary": "Vocabulário",
+      "grammar": "Gramática",
+      "timestamp": "Áudio",
+      "context": "Contexto",
+      "comprehension": "Compreensão"
+    },
+    "status": "Status",
+    "creationStep": "Etapa de criação",
+    "embedding": "Embedding gerado",
+    "yes": "Sim",
+    "no": "Não",
+    "contentHash": "Hash do conteúdo",
+    "analysisVocabulary": "Vocabulário extraído",
+    "analysisStructures": "Estruturas extraídas",
+    "lessonId": "ID da lição"
   }
 }

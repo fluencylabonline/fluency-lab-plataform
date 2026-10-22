@@ -2,6 +2,7 @@ import "server-only";
 import { curriculumRepository } from "./curriculum.repository";
 import { aiService } from "@/modules/ai/ai.service";
 import { mediaService } from "@/modules/media/media.service";
+import { truncateByTokens } from "@/modules/ai/ai.utils";
 import crypto from "node:crypto";
 import { CEFRLevel, LearningItemMetadata, PracticeItem, VocabMetadata, StructureMetadata, AnalysisResult, QuizData, QuizQuestion } from "./curriculum.types";
 import { lessons, media } from "./curriculum.schema";
@@ -499,7 +500,8 @@ export const curriculumService = {
       let embedding = lesson.embedding;
 
       if (!embedding || lesson.contentHash !== currentHash) {
-        embedding = await aiService.getEmbeddings(contentText);
+        // O modelo de embedding tem limite de entrada: lições longas são truncadas só para o vetor.
+        embedding = await aiService.getEmbeddings(truncateByTokens(contentText, 7000));
       }
 
       await curriculumRepository.updateLesson(lessonId, {

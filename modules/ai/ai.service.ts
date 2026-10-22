@@ -18,7 +18,7 @@ const MODELS = {
   fast: "gemini-2.5-flash",
   pro: process.env.TRANSCRIPTION_MODEL || "gemini-2.5-pro",
   embedding: "gemini-embedding-2-preview",
-  media: "gemini-2.5-pro",
+  media: process.env.MEDIA_TRANSCRIPTION_MODEL || "gemini-2.5-pro",
 };
 
 export interface PlacementAIQuestion {
@@ -341,7 +341,8 @@ export const aiService = {
     targetLanguage: string,
     nativeLanguage: string,
     onChunkOrUserId?: ((chunk: string) => void) | string,
-    userId?: string
+    userId?: string,
+    maxTokens: number = 8000
   ): Promise<AnalysisResult> {
     const onChunk = typeof onChunkOrUserId === "function" ? onChunkOrUserId : undefined;
     const resolvedUserId = typeof onChunkOrUserId === "string" ? onChunkOrUserId : userId;
@@ -394,7 +395,7 @@ export const aiService = {
       }
     });
 
-    const safeText = truncateByTokens(text, 8000); // Max ~8k tokens for parsing safely
+    const safeText = truncateByTokens(text, maxTokens); // Default ~8k tokens for parsing safely
     const tokens = approximateTokens(safeText);
     console.log(`[aiService.parseLessonContent] Input tokens: ${tokens}`);
 

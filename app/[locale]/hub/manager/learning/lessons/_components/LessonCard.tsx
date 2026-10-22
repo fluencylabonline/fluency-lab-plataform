@@ -6,6 +6,7 @@ import {
     BookOpen,
     MoreHorizontal,
     ArrowRight,
+    Eye,
     Languages,
     Layers,
     Copy,
@@ -41,7 +42,10 @@ interface LessonCardProps {
 
 export function LessonCard({ lesson }: LessonCardProps) {
     const t = useTranslations("Learning");
+    const tViewer = useTranslations("LessonViewer");
     const router = useRouter();
+    // Lições prontas do currículo regular abrem a visualização; fallback de recesso e rascunhos seguem no assistente.
+    const isViewable = !lesson.isRecessActivity && lesson.status === "ready";
     const [isPending, startTransition] = useTransition();
 
     const statusColors: Record<string, string> = {
@@ -229,11 +233,11 @@ export function LessonCard({ lesson }: LessonCardProps) {
             {/* Footer */}
             <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end">
                 <Link
-                    href={`/hub/manager/learning/lessons/${lesson.id}`}
+                    href={isViewable ? `/hub/manager/learning/lessons/${lesson.id}/view` : `/hub/manager/learning/lessons/${lesson.id}`}
                     className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:gap-2 transition-all"
                 >
-                    {t("continue_editing") || "Continue"}
-                    <ArrowRight className="w-4 h-4" />
+                    {isViewable ? tViewer("view") : (t("continue_editing") || "Continue")}
+                    {isViewable ? <Eye className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                 </Link>
             </div>
         </div>

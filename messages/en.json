@@ -3718,5 +3718,43 @@
       "packages": "{count, plural, one {# recorded class package} other {# recorded class packages}}",
       "cta": "Watch now"
     }
+  },
+  "LessonViewer": {
+    "view": "View",
+    "editDetails": "Edit details",
+    "tabContent": "Content",
+    "tabAudio": "Audio and transcript",
+    "tabItems": "Learning items",
+    "tabQuiz": "Quiz",
+    "tabDetails": "Details",
+    "itemsCount": "{count, plural, one {# item} other {# items}}",
+    "questionsCount": "{count, plural, one {# question} other {# questions}}",
+    "noContent": "No content available.",
+    "audioTitle": "Lesson audio",
+    "playAll": "Play all",
+    "stop": "Stop",
+    "openFile": "Open file",
+    "noSegments": "No transcript with timestamps.",
+    "noAudio": "This lesson has no audio.",
+    "vocabulary": "Vocabulary",
+    "structures": "Grammar and patterns",
+    "noItems": "No items.",
+    "noQuiz": "This lesson has no quiz.",
+    "section": {
+      "vocabulary": "Vocabulary",
+      "grammar": "Grammar",
+      "timestamp": "Audio",
+      "context": "Context",
+      "comprehension": "Comprehension"
+    },
+    "status": "Status",
+    "creationStep": "Creation step",
+    "embedding": "Embedding generated",
+    "yes": "Yes",
+    "no": "No",
+    "contentHash": "Content hash",
+    "analysisVocabulary": "Extracted vocabulary",
+    "analysisStructures": "Extracted structures",
+    "lessonId": "Lesson ID"
   }
 }
