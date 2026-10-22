@@ -878,7 +878,7 @@ export const learningService = {
       dayIndex: clampedDay,
       mode,
       items: practiceItems,
-      language: lesson.language?.code || "en-US"
+      language: ({ en: "en-US", pt: "pt-BR" } as Record<string, string>)[(lesson.language?.code ?? "").toLowerCase()] ?? lesson.language?.code ?? "en-US"
     };
   },
 

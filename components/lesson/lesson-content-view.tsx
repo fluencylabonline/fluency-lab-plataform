@@ -11,6 +11,7 @@ import { TableKit } from "@tiptap/extension-table";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { AudioSyncNode } from "@/components/tiptap-extension/audio-sync/AudioSyncNode";
+import { QuizNode } from "@/components/tiptap-extension/quiz/QuizNode";
 import { cn } from "@/lib/utils";
 
 import "@/components/tiptap-templates/simple/simple-editor.scss";
@@ -45,6 +46,7 @@ export function LessonContentView({ content, className }: LessonContentViewProps
       TextStyle,
       Color,
       AudioSyncNode,
+      QuizNode,
     ],
     content,
     editable: false,
