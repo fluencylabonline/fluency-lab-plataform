@@ -1697,6 +1697,13 @@
     "languageLabel": "Idioma",
     "allLabel": "Todos",
     "clearFilters": "Limpar filtros",
+    "viewLessons": "Lições",
+    "viewTemplates": "Templates",
+    "viewTemplate": "Abrir template",
+    "templatesCount": "{count, plural, one {# template} other {# templates}}",
+    "templateLessons": "{count, plural, one {# lição} other {# lições}}",
+    "templatesEmptyTitle": "Nenhum template publicado",
+    "templatesEmptyDescription": "Os templates aparecem aqui quando o manager os publica.",
     "resultsCount": "{count, plural, one {# lição} other {# lições}}",
     "recessTag": "Recesso"
   },

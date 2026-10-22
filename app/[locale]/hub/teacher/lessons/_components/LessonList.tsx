@@ -5,6 +5,7 @@ import useSWRInfinite from "swr/infinite";
 import { getLessonsAction } from "@/modules/curriculum/curriculum.actions";
 import { LessonSummary } from "@/modules/curriculum/curriculum.types";
 import { LessonCard } from "./LessonCard";
+import { TemplateCard, type TemplateSummary } from "./TemplateCard";
 import { EmptyResults } from "@/components/ui/empty";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { X } from "lucide-react";
@@ -56,10 +57,12 @@ function FilterGroup({ label, allLabel, options, selected, onSelect }: FilterGro
 interface LessonListProps {
   initialData: LessonSummary[];
   languages: { id: string, name: string }[];
+  templates: TemplateSummary[];
 }
 
-export function LessonList({ initialData, languages }: LessonListProps) {
+export function LessonList({ initialData, languages, templates }: LessonListProps) {
   const t = useTranslations("Lessons");
+  const [view, setView] = useState<"lessons" | "templates">("lessons");
   const [search, setSearch] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
@@ -100,6 +103,15 @@ export function LessonList({ initialData, languages }: LessonListProps) {
     });
   }, [lessons, selectedLanguage, selectedDifficulty]);
 
+  const filteredTemplates = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return templates.filter(
+      (template) =>
+        (!selectedLanguage || template.languageId === selectedLanguage) &&
+        (!term || template.name.toLowerCase().includes(term))
+    );
+  }, [templates, selectedLanguage, search]);
+
   const isLoadingMore = isValidating || (size > 0 && data && typeof data[size - 1] === "undefined");
   const isEmpty = data?.[0]?.length === 0;
   const isReachingEnd = isEmpty || (data && data[data.length - 1]?.length < PAGE_SIZE);
@@ -128,16 +140,39 @@ export function LessonList({ initialData, languages }: LessonListProps) {
       />
 
       <main className="container">
+        {/* Alternância: lições soltas ou templates (sequências prontas) */}
+        <div className="mb-4 inline-flex rounded-md border border-border/60 p-1" role="tablist" data-tour="teacher-lessons.view">
+          {(["lessons", "templates"] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              role="tab"
+              aria-selected={view === option}
+              onClick={() => setView(option)}
+              className={cn(
+                "h-8 rounded px-4 text-xs font-semibold transition-colors",
+                view === option ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-muted hover:text-foreground"
+              )}
+            >
+              {option === "lessons" ? t("viewLessons") : t("viewTemplates")}
+            </button>
+          ))}
+        </div>
+
         {/* Filters */}
         <div className="mb-6 flex flex-col gap-3 rounded-md border border-border/60 p-3 md:flex-row md:items-center md:gap-6" data-tour="teacher-lessons.filters">
-          <FilterGroup
-            label={t("levelLabel")}
-            allLabel={t("allLabel")}
-            options={difficulties.map((d) => ({ value: d, label: d }))}
-            selected={selectedDifficulty}
-            onSelect={setSelectedDifficulty}
-          />
-          <div className="hidden h-6 w-px bg-border md:block" />
+          {view === "lessons" && (
+            <>
+              <FilterGroup
+                label={t("levelLabel")}
+                allLabel={t("allLabel")}
+                options={difficulties.map((d) => ({ value: d, label: d }))}
+                selected={selectedDifficulty}
+                onSelect={setSelectedDifficulty}
+              />
+              <div className="hidden h-6 w-px bg-border md:block" />
+            </>
+          )}
           <FilterGroup
             label={t("languageLabel")}
             allLabel={t("allLabel")}
@@ -147,9 +182,14 @@ export function LessonList({ initialData, languages }: LessonListProps) {
           />
           <div className="flex items-center gap-3 md:ml-auto">
             {/* Com rolagem infinita, o total só é exato depois da última página. */}
-            {isReachingEnd && (
+            {view === "lessons" && isReachingEnd && (
               <span className="text-xs font-semibold text-muted-foreground">
                 {t("resultsCount", { count: filteredLessons.length })}
+              </span>
+            )}
+            {view === "templates" && (
+              <span className="text-xs font-semibold text-muted-foreground">
+                {t("templatesCount", { count: filteredTemplates.length })}
               </span>
             )}
             {(selectedDifficulty || selectedLanguage) && (
@@ -168,7 +208,19 @@ export function LessonList({ initialData, languages }: LessonListProps) {
           </div>
         </div>
 
-        {/* Grid */}
+        {view === "templates" ? (
+          filteredTemplates.length === 0 ? (
+            <div className="py-20">
+              <EmptyResults title={t("templatesEmptyTitle")} description={t("templatesEmptyDescription")} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" data-tour="teacher-lessons.templates">
+              {filteredTemplates.map((template) => (
+                <TemplateCard key={template.id} template={template} />
+              ))}
+            </div>
+          )
+        ) : (
         <Shimmer
           loading={isValidating && lessons.length === 0}
           templateProps={{
@@ -199,6 +251,7 @@ export function LessonList({ initialData, languages }: LessonListProps) {
             </div>
           )}
         </Shimmer>
+        )}
 
         {/* Infinite Scroll Trigger */}
         <div ref={lastElementRef} className="h-10 flex items-center justify-center pb-10 mt-10">

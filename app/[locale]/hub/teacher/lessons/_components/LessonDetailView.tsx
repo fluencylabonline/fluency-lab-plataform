@@ -95,27 +95,27 @@ export function LessonDetailView({ lesson }: LessonDetailViewProps) {
   const contentJson = lesson.contentJson as JSONContent | null;
 
   const ContentSection = (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4 lg:h-full lg:min-h-0">
       {lesson.media?.url && (
-        <div className="space-y-3">
+        <div className="space-y-3 lg:shrink-0">
           <SectionLabel icon={AudioLines}>{t("audioTitle")}</SectionLabel>
           <AudioPlayer url={lesson.media.url} title={t("audioPlayerTitle")} className="card" />
         </div>
       )}
 
       {lesson.isRecessActivity && contentJson && lesson.contentText && (
-        <p className="rounded-md border-l-4 border-primary bg-primary/5 px-4 py-3 text-sm font-medium leading-relaxed text-foreground/85">
+        <p className="rounded-md border-l-4 border-primary bg-primary/5 px-4 py-3 text-sm font-medium leading-relaxed text-foreground/85 lg:shrink-0">
           {lesson.contentText}
         </p>
       )}
       {contentJson ? (
-        <LessonContentView content={contentJson} />
+        <LessonContentView content={contentJson} className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto" />
       ) : lesson.contentText ? (
-        <article className="card p-4 md:p-8">
+        <article className="card p-4 md:p-8 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">{lesson.contentText}</p>
         </article>
       ) : (
-        <article className="card p-4 md:p-8">
+        <article className="card p-4 md:p-8 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           <p className="py-12 text-center italic text-muted-foreground">{t("noContent")}</p>
         </article>
       )}
@@ -123,7 +123,7 @@ export function LessonDetailView({ lesson }: LessonDetailViewProps) {
   );
 
   const OverviewCard = (
-    <div className="space-y-3 rounded-md bg-primary p-4 text-primary-foreground shadow-sm">
+    <div className="space-y-3 rounded-md bg-primary p-4 text-primary-foreground shadow-sm lg:shrink-0">
       <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-primary-foreground/80">
         <GraduationCap className="h-3.5 w-3.5" />
         {t("overviewTitle")}
@@ -160,7 +160,7 @@ export function LessonDetailView({ lesson }: LessonDetailViewProps) {
   );
 
   const QuizSection = (
-    <div className="card space-y-4 p-4">
+    <div className="card space-y-4 p-4 lg:shrink-0">
       <div className="space-y-1">
         <SectionLabel icon={HelpCircle}>{t("quizTitle")}</SectionLabel>
         {questions.length > 0 && <p className="text-xs text-muted-foreground">{t("quizSubtitle", { count: questions.length })}</p>}
@@ -174,8 +174,9 @@ export function LessonDetailView({ lesson }: LessonDetailViewProps) {
   );
 
   const ItemsSection = (vocabulary.length > 0 || structures.length > 0) && (
-    <div className="card space-y-4 p-4">
+    <div className="card space-y-4 p-4 lg:flex lg:min-h-[12rem] lg:flex-1 lg:flex-col lg:space-y-0 lg:gap-4 lg:overflow-hidden">
       <SectionLabel icon={ListChecks}>{t("learningItemsTitle")}</SectionLabel>
+      <div className="space-y-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
       {vocabulary.length > 0 && (
         <div className="space-y-2">
           <h4 className="text-[11px] font-bold uppercase tracking-wider text-primary">{t("vocabularyTitle")}</h4>
@@ -202,11 +203,12 @@ export function LessonDetailView({ lesson }: LessonDetailViewProps) {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 
   const Sidebar = (
-    <div className="space-y-4">
+    <div className="space-y-4 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:gap-4 lg:space-y-0">
       {OverviewCard}
       {QuizSection}
       {ItemsSection}
@@ -219,11 +221,11 @@ export function LessonDetailView({ lesson }: LessonDetailViewProps) {
 
       <div className="container">
         {/* Desktop */}
-        <div className="hidden items-start gap-6 lg:grid lg:grid-cols-3">
-          <div className="col-span-2" data-tour="teacher-lesson.content">
+        <div className="hidden gap-6 lg:grid lg:h-[calc(100dvh-9rem)] lg:grid-cols-3">
+          <div className="col-span-2 min-h-0" data-tour="teacher-lesson.content">
             {ContentSection}
           </div>
-          <aside className="sticky top-4" data-tour="teacher-lesson.items">
+          <aside className="min-h-0 overflow-y-auto" data-tour="teacher-lesson.items">
             {Sidebar}
           </aside>
         </div>
