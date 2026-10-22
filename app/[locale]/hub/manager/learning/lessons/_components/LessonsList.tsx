@@ -20,11 +20,10 @@ import {
 } from "@/components/ui/empty";
 import { LessonSummary } from "@/modules/curriculum/curriculum.types";
 import { PaginationBar } from "@/components/ui/pagination-bar";
-import { useGridPageSize } from "@/hooks/common/use-grid-page-size";
+import { useFillGrid } from "@/hooks/common/use-fill-grid";
 
-/** Colunas da grade por largura da janela (md:2, lg:3) e linhas visíveis por página. */
-const GRID_BREAKPOINTS = [[1024, 3], [768, 2]] as const;
-const GRID_ROWS = 2;
+/** Colunas da grade por largura da janela; as linhas vêm da altura disponível (ver useFillGrid). */
+const GRID_BREAKPOINTS = [[1280, 4], [1024, 3], [768, 2]] as const;
 
 interface LessonsListProps {
     initialLessons: LessonSummary[];
@@ -52,7 +51,7 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
     }, [initialLessons, searchQuery, statusFilter, languageFilter, recessFilter]);
 
     // Paginação: a página volta para a 1 quando muda um filtro, a busca ou o tamanho da página.
-    const pageSize = useGridPageSize(GRID_BREAKPOINTS, GRID_ROWS, 1, 6);
+    const { ref: gridAreaRef, style: gridStyle, pageSize } = useFillGrid({ breakpoints: GRID_BREAKPOINTS, minCardHeight: 215, mobileRows: 6 });
     const filterKey = [searchQuery, statusFilter, languageFilter, recessFilter, pageSize].join("|");
     const [pageState, setPageState] = useState({ key: filterKey, page: 1 });
     const page = pageState.key === filterKey ? pageState.page : 1;
@@ -149,7 +148,7 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
                 </div>
             </div>
 
-            <div className="min-h-0 flex-1 lg:overflow-y-auto">
+            <div ref={gridAreaRef} className="min-h-0 flex-1 lg:overflow-hidden">
             {filteredLessons.length === 0 ? (
                 <div className="py-20">
                     <Empty>
@@ -165,7 +164,7 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
                     </Empty>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid lg:h-full" style={gridStyle}>
                     {pageLessons.map((lesson) => (
                         <LessonCard key={lesson.id} lesson={lesson} />
                     ))}
