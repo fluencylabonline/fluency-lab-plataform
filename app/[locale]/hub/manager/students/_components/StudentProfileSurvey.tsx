@@ -184,8 +184,9 @@ export function StudentProfileSurvey({
       if (onComplete) {
         onComplete(profileId);
       } else {
-        if (studentId) {
-          router.push(`/hub/manager/users/${studentId}`);
+        if (studentId && basePath.startsWith("/hub/admin")) {
+          // O manager não tem ficha de usuário: volta para a lista de perfis.
+          router.push(`/hub/admin/users/${studentId}`);
         } else {
           router.push(basePath);
         }

@@ -69,146 +69,7 @@ export const MANAGER_HELP_PT: RoleHelpContent<ManagerHelpRoute> = {
     ],
   },
 
-  "/hub/manager/users": {
-    title: "Usuários",
-    summary:
-      "A busca e a ficha de alunos e professores — o ponto de partida de quase todo atendimento.",
-    docsArticleId: "mgr-ficha-aluno",
-    sections: [
-      {
-        heading: "A busca",
-        body: "A busca do topo encontra por nome, e-mail ou telefone. Clique num cartão para abrir a ficha completa da pessoa.",
-      },
-      {
-        heading: "Os quatro filtros",
-        body: [
-          "Cargo: Todos os Cargos, Administrador, Professor, Aluno ou Gerente. Abre em Aluno.",
-          "Status: Todos, Ativos ou Inativos. Abre em Ativos — por isso uma conta encerrada não aparece até você trocar para Todos ou Inativos.",
-          "Contrato: Todos contratos, Ativo ou Sem Contrato. Útil para achar quem ainda não assinou.",
-          "Pagamento: Todos pagamentos, Pagos ou Pendentes. Útil para a régua de cobrança.",
-        ],
-      },
-      {
-        heading: "Quando alguém diz que não consegue entrar",
-        body: "O primeiro passo é quase sempre o filtro de Status: ele abre em Ativos, então uma conta desativada some da lista e parece não existir. Troque para Inativos antes de concluir qualquer coisa.",
-      },
-      {
-        heading: "Perfil Adaptativo",
-        body: "O botão à direita dos filtros leva ao onboarding: a lista dos perfis de entrada dos alunos novos, com quem já respondeu e quem travou no meio.",
-      },
-      {
-        heading: "Campos mascarados",
-        body: "CPF, telefone completo e endereço aparecem ocultos, e só o admin consegue revelá-los. Se o atendimento exigir confirmar um documento, encaminhe.",
-      },
-    ],
-    tour: [
-      {
-        id: "intro",
-        title: "O ponto de partida do atendimento",
-        text: "Quase todo atendimento começa aqui: achar a pessoa e abrir a ficha dela.",
-      },
-      {
-        id: "search",
-        target: "chrome.search",
-        title: "A busca",
-        text: "Encontra por nome, e-mail ou telefone. É o caminho mais rápido quando o aluno já se identificou.",
-      },
-      {
-        id: "filters",
-        target: "users.filters",
-        title: "Os quatro filtros",
-        text: "Cargo (abre em Aluno), Status (abre em Ativos), Contrato (Ativo ou Sem Contrato) e Pagamento (Pagos ou Pendentes). Combinando Contrato com Pagamento você monta a lista de pendências do dia.",
-      },
-      {
-        id: "status-trap",
-        target: "users.filters",
-        title: "A pegadinha do Status",
-        text: "Ele abre em Ativos. Aluno que diz não conseguir entrar e some da busca pode estar simplesmente desativado — troque para Inativos antes de concluir qualquer coisa.",
-      },
-      {
-        id: "list",
-        target: "users.list",
-        title: "A lista",
-        text: "Um cartão por pessoa, com situação de contrato e de pagamento à vista. Clique para abrir a ficha completa.",
-      },
-      {
-        id: "onboarding",
-        target: "users.onboarding",
-        title: "Perfil Adaptativo",
-        text: "Leva à lista dos perfis de entrada dos alunos novos. Perfil incompleto é alvo de contato ativo: quanto antes for concluído, melhor a alocação com o professor certo.",
-      },
-    ],
-  },
 
-  "/hub/manager/users/[userId]": {
-    title: "Ficha do usuário",
-    summary:
-      "O quadro completo de uma pessoa: dados, pagamentos, contrato, aulas e currículo.",
-    docsArticleId: "mgr-ficha-aluno",
-    sections: [
-      {
-        heading: "As abas mudam conforme o cargo",
-        body: [
-          "Perfil aparece sempre: dados de contato e informações de cadastro.",
-          "Para aluno: Pagamento, Contrato e Plano, Aulas e Currículo, e Certificado.",
-          "Para professor: Extrato de Ganhos, Contratos, Agenda e Alunos.",
-        ],
-      },
-      {
-        heading: "O que você resolve daqui",
-        body: [
-          "Conceder crédito de reposição pela aba de aulas e currículo.",
-          "Ajustar o status de uma aula quando o professor não conseguir.",
-          "Conferir a situação de contrato e de pagamento antes de responder ao aluno.",
-        ],
-      },
-      {
-        heading: "Os tipos de crédito",
-        body: [
-          "Cancelamento do professor: gerado automaticamente. Você não precisa fazer nada.",
-          "Atraso da escola: quando houve falha do nosso lado que prejudicou a aula.",
-          "Bônus: cortesia ou compensação combinada. Use com critério e registre o motivo no atendimento.",
-        ],
-      },
-      {
-        heading: "Duas armadilhas dos créditos",
-        body: "Todo crédito tem validade: defina uma realista e avise o aluno, porque crédito vencido some e vira reclamação. E se o aluno agendar a reposição com crédito e depois cancelar essa aula, o crédito é consumido do mesmo jeito — deixe isso claro antes de ele confirmar o horário.",
-      },
-      {
-        heading: "O que você não vê nem faz aqui",
-        body: "CPF, telefone completo e endereço ficam mascarados. Desativar a conta, confirmar pagamento manualmente e executar cancelamento de matrícula são ações do admin, com senha e auditoria.",
-      },
-    ],
-    tour: [
-      {
-        id: "intro",
-        title: "A ficha completa",
-        text: "Tudo sobre uma pessoa em abas. Quais abas aparecem depende do cargo dela.",
-      },
-      {
-        id: "tabs",
-        target: "user-details.tabs",
-        title: "As abas",
-        text: "Perfil aparece sempre. Aluno tem Pagamento, Contrato e Plano, Aulas e Currículo e Certificado. Professor tem Extrato de Ganhos, Contratos, Agenda e Alunos.",
-      },
-      {
-        id: "credits",
-        target: "user-details.tabs",
-        title: "Conceder crédito",
-        text: "Pela aba de aulas e currículo. Escolha o tipo certo: cancelamento do professor já é automático; atraso da escola é para falha nossa; bônus é cortesia, e merece o motivo registrado.",
-      },
-      {
-        id: "credit-traps",
-        title: "Duas armadilhas dos créditos",
-        text: "Crédito tem validade e some quando vence — defina uma realista e avise o aluno. E reposição agendada com crédito que o aluno depois cancela consome o crédito assim mesmo. Diga isso antes de ele confirmar.",
-      },
-      {
-        id: "masked",
-        title: "O que fica com o admin",
-        text: "CPF, telefone completo e endereço aparecem mascarados. Desativar conta, confirmar pagamento na mão e executar cancelamento de matrícula também são dele. Encaminhe em vez de prometer.",
-      },
-    ],
-  },
 
   "/hub/manager/students/onboarding": {
     title: "Perfis Adaptativos",
@@ -425,65 +286,6 @@ export const MANAGER_HELP_PT: RoleHelpContent<ManagerHelpRoute> = {
     ],
   },
 
-  "/hub/manager/conversas": {
-    title: "Conversas",
-    summary:
-      "A caixa de entrada do WhatsApp oficial da escola, com respostas rápidas e templates.",
-    docsArticleId: "mgr-conversas",
-    sections: [
-      {
-        heading: "Como funciona",
-        body: "As mensagens dos alunos chegam aqui em tempo real, e a sua resposta sai pelo número oficial da escola. A lista da esquerda são as conversas; a busca no topo dela procura por conversa ou por atalho. A lista mostra as 200 conversas mais recentes; no fim dela, “Carregar mais conversas” traz as anteriores.",
-      },
-      {
-        heading: "A janela de 24 horas",
-        body: "Você escreve livremente enquanto estiver dentro de 24 horas desde a última mensagem do aluno. Passado esse prazo, só é possível iniciar contato com um template aprovado. É regra da Meta, não da plataforma — não adianta insistir no campo de texto. Se uma mensagem não sair, ela fica marcada como não enviada e o texto volta para o campo, para você tentar de novo.",
-      },
-      {
-        heading: "Os botões da conversa",
-        body: [
-          "O + no topo da lista abre uma conversa nova por template — é o caminho para falar com quem está fora da janela de 24 horas.",
-          "O clipe envia foto, áudio ou documento.",
-          "Digitar / no campo de mensagem abre as respostas rápidas.",
-          "Tocar no nome do contato abre os detalhes e as etiquetas dele.",
-        ],
-      },
-      {
-        heading: "Respostas rápidas",
-        body: "São atalhos de texto pronto. Digite / seguido do nome do atalho, como /boasvindas. Economizam tempo e mantêm o tom da escola consistente entre as pessoas do atendimento.",
-      },
-    ],
-    tour: [
-      {
-        id: "intro",
-        title: "O WhatsApp da escola",
-        text: "As mensagens dos alunos chegam aqui, e sua resposta sai pelo número oficial da escola.",
-      },
-      {
-        id: "list",
-        target: "conversas.list",
-        title: "As conversas",
-        text: "A lista da esquerda, com a busca no topo — que procura tanto por conversa quanto por atalho de resposta rápida.",
-      },
-      {
-        id: "new",
-        target: "conversas.new",
-        title: "Nova conversa por template",
-        text: "O caminho para falar com quem está fora da janela de 24 horas. Fora dela, só template aprovado sai.",
-      },
-      {
-        id: "window",
-        title: "A janela de 24 horas",
-        text: "Dentro de 24 horas desde a última mensagem do aluno você escreve livremente. Passado isso, só template aprovado — é regra da Meta, não da plataforma.",
-      },
-      {
-        id: "quick",
-        target: "conversas.composer",
-        title: "Respostas rápidas",
-        text: "Digite / no campo de mensagem para abrir os atalhos de texto pronto, como /boasvindas. O clipe ao lado envia foto, áudio ou documento.",
-      },
-    ],
-  },
 
   "/hub/manager/tasks": {
     title: "Tarefas",
@@ -909,6 +711,169 @@ export const MANAGER_HELP_PT: RoleHelpContent<ManagerHelpRoute> = {
         id: "meanwhile",
         title: "Enquanto isso",
         text: "Para saber onde os alunos travam, use a ficha do aluno (aulas e currículo) e os Itens de Aprendizado, revisando os que parecem mal classificados.",
+      },
+    ],
+  },
+
+  "/hub/manager/courses": {
+    title: "Cursos",
+    summary: "O catálogo de cursos em vídeo: criar, publicar e controlar o que os alunos veem.",
+    docsArticleId: "cursos-catalogo",
+    sections: [
+      {
+        heading: "Criar curso",
+        body: "O formulário pede título, descrição, idioma e imagem de capa. O curso nasce como rascunho — invisível para os alunos até você publicar.",
+      },
+      {
+        heading: "O menu de cada curso",
+        body: [
+          "Editar ajusta os dados e a capa.",
+          "Publicar / Despublicar controla a visibilidade para os alunos. Despublicar esconde da vitrine mas mantém o progresso de quem já estava fazendo.",
+          "Excluir remove o curso e todo o conteúdo dele.",
+        ],
+      },
+      {
+        heading: "Excluir é destrutivo",
+        body: "Seções, lições e o progresso dos alunos vão junto e não voltam. Se a intenção é apenas tirar do ar, use Despublicar.",
+      },
+      {
+        heading: "Publique só quando estiver pronto",
+        body: "Curso publicado pela metade aparece na vitrine do aluno como se estivesse completo. Deixe em rascunho até o conteúdo fechar.",
+      },
+    ],
+    tour: [
+      {
+        id: "intro",
+        title: "O catálogo de cursos",
+        text: "Os cursos em vídeo da escola. Todo curso nasce como rascunho, invisível para os alunos.",
+      },
+      {
+        id: "create",
+        target: "admin-courses.create",
+        title: "Criar curso",
+        text: "Título, descrição, idioma e imagem de capa. Ele nasce em rascunho — publicar é um passo separado e consciente.",
+      },
+      {
+        id: "list",
+        target: "admin-courses.list",
+        title: "Os cursos",
+        text: "O menu de cada cartão traz Editar, Publicar / Despublicar e Excluir. Despublicar esconde da vitrine mas preserva o progresso de quem já estava fazendo.",
+      },
+      {
+        id: "delete",
+        title: "Excluir é destrutivo",
+        text: "Seções, lições e o progresso dos alunos vão junto e não voltam. Para só tirar do ar, use Despublicar.",
+      },
+    ],
+  },
+
+  "/hub/manager/courses/[id]": {
+    title: "Conteúdo do curso",
+    summary: "As seções e as aulas de um curso, na ordem em que o aluno vai percorrer.",
+    docsArticleId: "cursos-conteudo",
+    sections: [
+      {
+        heading: "Como o curso é montado",
+        body: "Um curso tem seções, e cada seção tem aulas. Você cria as seções na ordem do conteúdo e adiciona as aulas dentro de cada uma.",
+      },
+      {
+        heading: "Os botões",
+        body: [
+          "Nova Seção cria um agrupamento, pedindo o título.",
+          "Nova Aula cria uma aula dentro da seção, pedindo o título.",
+          "A alça de arrastar reordena seções e aulas.",
+          "O olho mostra ou esconde um item.",
+          "Editar Conteúdo abre o editor da aula.",
+        ],
+      },
+      {
+        heading: "A ordem é a que o aluno vê",
+        body: "A sequência montada aqui é exatamente a sequência do player do aluno. Vale revisar a ordem antes de publicar.",
+      },
+      {
+        heading: "Seção vazia",
+        body: "Seção sem aula aparece para o aluno como um bloco vazio. Ou adicione a primeira aula, ou remova a seção antes de publicar.",
+      },
+    ],
+    tour: [
+      {
+        id: "intro",
+        title: "Montando o curso",
+        text: "Seções agrupam aulas. Você cria as seções na ordem do conteúdo e coloca as aulas dentro de cada uma.",
+      },
+      {
+        id: "sections",
+        target: "admin-course-detail.sections",
+        title: "Seções e aulas",
+        text: "Nova Seção cria um agrupamento; Nova Aula cria uma aula dentro dele. A alça de arrastar reordena e o olho mostra ou esconde um item.",
+      },
+      {
+        id: "edit",
+        target: "admin-course-detail.sections",
+        title: "Editar Conteúdo",
+        text: "Abre o editor da aula, onde entram os blocos de vídeo e de texto e o quiz.",
+      },
+      {
+        id: "order",
+        title: "A ordem é a que o aluno vê",
+        text: "A sequência montada aqui é exatamente a do player do aluno. Seção sem aula aparece como bloco vazio — preencha ou remova antes de publicar.",
+      },
+    ],
+  },
+
+  "/hub/manager/courses/[id]/lessons/[lessonId]": {
+    title: "Editor de Aula",
+    summary: "O conteúdo de uma aula do curso: blocos de vídeo e texto, e a avaliação.",
+    docsArticleId: "cursos-conteudo",
+    sections: [
+      {
+        heading: "As abas",
+        body: [
+          "Conteúdo é onde entram os blocos de vídeo e de texto.",
+          "Avaliação é o quiz que o aluno responde ao final da aula.",
+          "Visualizar mostra a aula como o aluno vai ver.",
+        ],
+      },
+      {
+        heading: "Blocos de conteúdo",
+        body: [
+          "Adicionar Vídeo aceita link do YouTube ou do Google Drive.",
+          "Adicionar Texto abre um editor de texto formatado.",
+          "Os blocos aparecem para o aluno na ordem em que você os coloca — dá para intercalar vídeo e texto.",
+        ],
+      },
+      {
+        heading: "Configurações da aula",
+        body: "Título da Aula é obrigatório. Duração (minutos) é o tempo estimado que aparece para o aluno.",
+      },
+      {
+        heading: "Salvar Alterações",
+        body: "O quiz e o conteúdo são salvos juntos. Sair sem salvar perde o que você montou desde o último salvamento.",
+      },
+    ],
+    tour: [
+      {
+        id: "intro",
+        title: "O editor da aula",
+        text: "Aqui entram o conteúdo que o aluno consome e a avaliação do final.",
+      },
+      {
+        id: "tabs",
+        target: "admin-lesson-editor.tabs",
+        title: "Conteúdo, Avaliação e Visualizar",
+        text: "Conteúdo tem os blocos de vídeo e texto. Avaliação é o quiz do final. Visualizar mostra a aula como o aluno vai ver — vale conferir antes de publicar o curso.",
+      },
+      {
+        id: "blocks",
+        target: "admin-lesson-editor.blocks",
+        title: "Blocos de conteúdo",
+        text: "Adicionar Vídeo aceita link do YouTube ou do Google Drive; Adicionar Texto abre o editor formatado. Os blocos aparecem na ordem em que você os coloca, e dá para intercalar.",
+      },
+      {
+        id: "save",
+        target: "admin-lesson-editor.save",
+        title: "Salvar Alterações",
+        text: "Salva conteúdo e quiz juntos. Sair sem salvar perde o que foi montado desde o último salvamento.",
       },
     ],
   },

@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/auth-server";
 import { courseService } from "@/modules/course/course.service";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { hasPermission } from "@/lib/rbac";
 import { LessonEditorClient } from "@/modules/course/_components/LessonEditorClient";
 
 interface LessonPageProps {
@@ -14,8 +15,10 @@ interface LessonPageProps {
 export default async function LessonEditorPage({ params }: LessonPageProps) {
   const { id: courseId, lessonId } = await params;
   const user = await getCurrentUser();
-  if (!user) notFound();
-  
+  if (!user || !hasPermission(user, "course.manage")) {
+    redirect("/signin");
+  }
+
   const lesson = await courseService.getLessonDetails(user, lessonId);
   if (!lesson) notFound();
 
@@ -26,6 +29,7 @@ export default async function LessonEditorPage({ params }: LessonPageProps) {
       initialLesson={lesson} 
       courseId={courseId} 
       availableQuizzes={quizzes}
+      basePath="/hub/manager/courses"
     />
   );
 }

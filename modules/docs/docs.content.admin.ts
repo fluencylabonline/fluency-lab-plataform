@@ -743,77 +743,10 @@ export const ADMIN_DOCS: DocSection[] = [
   // ─────────────────────────────────────────────────────────────
   {
     id: "cursos",
-    title: "Cursos",
-    description: "Catálogo, estrutura de seções e lições, publicação.",
+    title: "Meu Aprendizado",
+    description: "Sua visão de aluno dentro da plataforma.",
     icon: "GraduationCap",
     articles: [
-      {
-        id: "cursos-catalogo",
-        title: "Catálogo de cursos",
-        summary: "Criar cursos, filtrar por idioma e controlar o que está publicado.",
-        route: "/hub/admin/courses",
-        keywords: ["curso", "catálogo", "publicar", "idioma", "criar", "excluir"],
-        blocks: [
-          {
-            type: "p",
-            text: "Lista todos os cursos da plataforma. Os filtros permitem separar por idioma e por situação (publicado ou rascunho).",
-          },
-          {
-            type: "actions",
-            items: [
-              {
-                label: "Criar curso",
-                does: "Abre o formulário com título, descrição, idioma e imagem de capa.",
-                flow: "O curso nasce como rascunho — invisível para os alunos até você publicar.",
-              },
-              {
-                label: "Menu (⋮) › Editar",
-                does: "Ajusta os dados do curso e a capa.",
-              },
-              {
-                label: "Menu (⋮) › Publicar / Despublicar",
-                does: "Controla a visibilidade do curso para os alunos.",
-                flow: "Despublicar esconde o curso da vitrine, mas mantém o progresso de quem já estava fazendo.",
-              },
-              {
-                label: "Menu (⋮) › Excluir",
-                does: "Remove o curso e todo o seu conteúdo.",
-                warning: "Ação destrutiva: seções, lições e o progresso dos alunos vão junto. Se a intenção é apenas tirar do ar, use despublicar.",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: "cursos-conteudo",
-        title: "Seções e lições",
-        summary: "Como o conteúdo do curso é montado e editado.",
-        route: "/hub/admin/courses",
-        keywords: ["lição", "seção", "módulo", "aula", "vídeo", "quiz", "editor"],
-        blocks: [
-          {
-            type: "p",
-            text: "Dentro de um curso o conteúdo é organizado em **seções** (módulos), e cada seção contém **lições**. A ordem em que aparecem é a ordem em que o aluno percorre.",
-          },
-          {
-            type: "steps",
-            title: "Montando um curso do zero",
-            items: [
-              "Crie o curso no catálogo — ele nasce como rascunho.",
-              "Abra o curso e adicione as seções, na sequência pedagógica desejada.",
-              "Dentro de cada seção, adicione as lições.",
-              "Abra cada lição no editor para montar o conteúdo (texto, vídeo, exercícios).",
-              "Revise a ordem e publique o curso para liberar aos alunos.",
-            ],
-          },
-          {
-            type: "note",
-            variant: "info",
-            title: "Publique só quando estiver pronto",
-            text: "Alunos com o curso em andamento veem as alterações imediatamente. Reordenar ou remover lições de um curso já publicado pode confundir quem está no meio da trilha.",
-          },
-        ],
-      },
       {
         id: "meu-aprendizado",
         title: "Meu Aprendizado",

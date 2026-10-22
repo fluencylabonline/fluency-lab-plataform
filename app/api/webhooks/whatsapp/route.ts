@@ -117,17 +117,15 @@ export async function POST(req: NextRequest) {
       // query a cada iteração do loop.
       const adminsAndManagers = await userService.getActiveAdminsAndManagers();
       const notifiedAdmins: { id: string; email: string | null }[] = [];
-      const notifiedManagers: { id: string; email: string | null }[] = [];
 
       for (const u of adminsAndManagers) {
         const prefs = (u.notificationPrefs as NotificationPrefs) || {};
         if (prefs.whatsapp === false) continue;
         if (u.pushNotificationsEnabled === false) continue;
 
+        // Managers cuidam só de aprendizado e não têm a tela de conversas.
         if (u.role === "admin") {
           notifiedAdmins.push({ id: u.id, email: u.email });
-        } else if (u.role === "manager") {
-          notifiedManagers.push({ id: u.id, email: u.email });
         }
       }
 
@@ -250,7 +248,7 @@ export async function POST(req: NextRequest) {
           console.error("[WhatsApp Webhook] Error sending RTDB sync signal for new message:", rtdbErr);
         }
 
-        // Enviar notificações push e in-app para admins e managers
+        // Enviar notificações push e in-app para os admins
         try {
           let student: { name: string; photoUrl: string | null } | undefined = undefined;
           if (conversation.studentId) {
@@ -286,25 +284,10 @@ export async function POST(req: NextRequest) {
             });
           }
 
-          if (notifiedManagers.length > 0) {
-            await notificationService.sendNotification({
-              title: notificationTitle,
-              body: bodyText,
-              actionUrl: `/hub/manager/conversas?convId=${conversation.id}`,
-              icon: studentPhotoUrl,
-              targetType: "specific",
-              userIds: notifiedManagers.map((m) => m.id),
-              channels: {
-                push: true,
-                inApp: true,
-              },
-            });
-          }
-
           // Fallback por e-mail: quem não tem nenhuma subscription de push ativa
           // ainda recebe um aviso, em vez de só descobrir a mensagem ao abrir a
           // plataforma manualmente.
-          const allNotified = [...notifiedAdmins, ...notifiedManagers];
+          const allNotified = notifiedAdmins;
           if (allNotified.length > 0) {
             const idsWithoutPush = await notificationService.getUserIdsWithoutActiveSubscription(
               allNotified.map((u) => u.id)

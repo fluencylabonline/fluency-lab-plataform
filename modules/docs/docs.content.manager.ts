@@ -17,18 +17,16 @@ export const MANAGER_DOCS: DocSection[] = [
         blocks: [
           {
             type: "p",
-            text: "O manager é a linha de frente: dá suporte a alunos e professores, cuida do material didático e acompanha o onboarding. Seu acesso é amplo no pedagógico e no atendimento, e propositalmente limitado no financeiro e no cadastral.",
+            text: "O manager cuida do aprendizado: lições, itens, nivelamento, planos de estudo, cursos e aulas de recesso. Seu acesso é focado no pedagógico; atendimento, usuários e financeiro ficam com o admin.",
           },
           {
             type: "fields",
             title: "Você pode",
             items: [
-              { name: "Suporte a alunos", does: "Abrir a ficha de qualquer aluno, ver histórico e resolver pendências do dia a dia." },
-              { name: "Suporte a professores", does: "Acompanhar agendas e ajudar em ajustes de aula." },
-              { name: "Créditos", does: "Conceder créditos de reposição quando a situação justificar." },
               { name: "Material didático", does: "Criar, editar e publicar lições, itens de aprendizado e testes de nivelamento." },
-              { name: "Aulas", does: "Ajustar o status de qualquer aula quando o professor não conseguir." },
-              { name: "Conversas", does: "Atender alunos pelo WhatsApp da escola." },
+              { name: "Planos de estudo", does: "Montar a sequência de lições dos templates e visualizar as lições prontas." },
+              { name: "Cursos", does: "Criar cursos em vídeo, organizar seções e lições e publicar." },
+              { name: "Aulas de recesso", does: "Montar os pacotes de aulas gravadas do recesso." },
             ],
           },
           {
@@ -59,17 +57,13 @@ export const MANAGER_DOCS: DocSection[] = [
             type: "fields",
             items: [
               { name: "Meu Perfil", does: "Seus dados e preferências." },
-              { name: "Usuários", does: "Busca e ficha de alunos e professores, para dar suporte." },
-              { name: "Conversas", does: "Caixa de entrada do WhatsApp da escola." },
               { name: "Aprendizado", does: "Material didático: lições, itens, nivelamento e indicadores." },
+              { name: "Cursos", does: "Cursos em vídeo: catálogo, seções, lições e publicação." },
+              { name: "Aulas de Recesso", does: "Pacotes de aulas gravadas do recesso." },
               { name: "Meu Aprendizado", does: "Cursos de formação em que você está matriculado." },
               { name: "Tarefas", does: "Gestor de tarefas e projetos da equipe." },
               { name: "Configurações", does: "Senha, notificações e preferências." },
             ],
-          },
-          {
-            type: "p",
-            text: "O **Onboarding de alunos** fica dentro da área de Usuários e lista os perfis de entrada dos novos matriculados.",
           },
         ],
       },
@@ -77,136 +71,6 @@ export const MANAGER_DOCS: DocSection[] = [
   },
 
   // ─────────────────────────────────────────────────────────────
-  {
-    id: "mgr-suporte",
-    title: "Suporte a Alunos",
-    description: "Atendimento, ficha do aluno, créditos e onboarding.",
-    icon: "Users",
-    articles: [
-      {
-        id: "mgr-ficha-aluno",
-        title: "Ficha do aluno",
-        summary: "O que você consegue ver e resolver na ficha de um aluno.",
-        route: "/hub/manager/users",
-        keywords: ["ficha", "aluno", "detalhes", "histórico", "suporte", "buscar"],
-        blocks: [
-          {
-            type: "p",
-            text: "A busca encontra por nome, e-mail ou telefone. Abrindo a ficha você vê o quadro completo do aluno: dados de contato, situação de pagamento, contrato, aulas, currículo e certificado.",
-          },
-          {
-            type: "note",
-            variant: "warning",
-            title: "Campos mascarados",
-            text: "CPF, telefone completo e endereço aparecem ocultos e só o admin consegue revelá-los. Se o atendimento exigir confirmar um documento, encaminhe ao admin.",
-          },
-        ],
-      },
-      {
-        id: "mgr-creditos",
-        title: "Conceder créditos de reposição",
-        summary: "Quando dar um crédito e o que isso significa para o aluno.",
-        keywords: ["crédito", "reposição", "bônus", "compensação", "aula extra", "conceder"],
-        blocks: [
-          {
-            type: "p",
-            text: "Crédito é o direito a uma aula extra. O aluno o usa para agendar uma reposição sem gastar a cota de 2 remarcações mensais dele.",
-          },
-          {
-            type: "fields",
-            title: "Tipos de crédito",
-            items: [
-              { name: "Cancelamento do professor", does: "Gerado automaticamente quando o professor cancela. Você não precisa fazer nada." },
-              { name: "Atraso da escola", does: "Para quando houve falha do nosso lado que prejudicou a aula." },
-              { name: "Bônus", does: "Cortesia ou compensação combinada — use com critério e registre o motivo no atendimento." },
-            ],
-          },
-          {
-            type: "note",
-            variant: "warning",
-            title: "Todo crédito tem validade",
-            text: "Ao conceder, defina uma validade realista e avise o aluno. Crédito vencido some e costuma virar reclamação depois.",
-          },
-          {
-            type: "note",
-            variant: "danger",
-            title: "Aula com crédito cancelada perde o crédito",
-            text: "Se o aluno agendar uma reposição com crédito e depois cancelá-la, o crédito é consumido. Deixe isso claro no atendimento antes de ele confirmar o horário.",
-          },
-        ],
-      },
-      {
-        id: "mgr-regras-aula",
-        title: "Regras de cancelamento e remarcação",
-        summary: "As regras que você mais vai explicar no atendimento.",
-        keywords: ["regra", "cancelar", "remarcar", "4 horas", "limite", "falta", "política"],
-        blocks: [
-          {
-            type: "p",
-            text: "Domine estas regras: elas são a origem da maior parte das dúvidas que chegam no atendimento.",
-          },
-          {
-            type: "table",
-            headers: ["Situação", "Regra"],
-            rows: [
-              ["Aluno cancela com mais de 4h", "Cancelamento normal, sem falta."],
-              ["Aluno cancela com menos de 4h", "Vira falta — conta como aula dada, sem reposição."],
-              ["Aluno quer remarcar", "Até 2 vezes por mês, com no mínimo 4h de antecedência."],
-              ["Professor cancela", "Crédito automático para o aluno; não gasta a cota mensal dele."],
-              ["Aula já concluída ou com falta", "Não pode ser remarcada."],
-            ],
-          },
-          {
-            type: "note",
-            variant: "info",
-            title: "Exceção é decisão humana",
-            text: "O sistema aplica a regra automaticamente. Abrir exceção (abonar uma falta, liberar uma terceira remarcação) é decisão da coordenação — combine antes de prometer ao aluno.",
-          },
-        ],
-      },
-      {
-        id: "mgr-onboarding",
-        title: "Onboarding de novos alunos",
-        summary: "Acompanhar quem preencheu o perfil de entrada e quem travou.",
-        route: "/hub/manager/students/onboarding",
-        keywords: ["onboarding", "perfil", "novo aluno", "entrada", "questionário", "funil"],
-        blocks: [
-          {
-            type: "p",
-            text: "Todo aluno novo preenche um perfil de entrada — objetivos, nível, disponibilidade e preferências. Essa informação orienta a alocação com o professor certo e o planejamento das primeiras aulas.",
-          },
-          {
-            type: "bullets",
-            items: [
-              "A lista mostra o status de cada perfil; clique para ver as respostas completas.",
-              "Perfis incompletos são o seu alvo de contato ativo — o aluno começou e parou.",
-              "Quanto antes o perfil for concluído, melhor a alocação e menor o risco de troca de professor depois.",
-            ],
-          },
-        ],
-      },
-      {
-        id: "mgr-conversas",
-        title: "Conversas (WhatsApp)",
-        summary: "Atender alunos pelo número oficial da escola.",
-        route: "/hub/manager/conversas",
-        keywords: ["whatsapp", "chat", "conversa", "atendimento", "mensagem", "responder"],
-        blocks: [
-          {
-            type: "p",
-            text: "Caixa de entrada conectada ao WhatsApp da escola. As mensagens dos alunos chegam em tempo real e a resposta sai pelo número oficial.",
-          },
-          {
-            type: "note",
-            variant: "warning",
-            title: "A janela de 24 horas",
-            text: "Você escreve livremente enquanto estiver dentro de **24 horas** desde a última mensagem do aluno. Passado esse prazo, só é possível iniciar contato com um template aprovado — é regra da Meta, não da plataforma. Na dúvida, peça ao admin para disparar o template adequado.",
-          },
-        ],
-      },
-    ],
-  },
-
   // ─────────────────────────────────────────────────────────────
   {
     id: "mgr-aprendizado",
@@ -294,6 +158,82 @@ export const MANAGER_DOCS: DocSection[] = [
 
   // ─────────────────────────────────────────────────────────────
   {
+    id: "cursos",
+    title: "Cursos",
+    description: "Catálogo, estrutura de seções e lições, publicação.",
+    icon: "GraduationCap",
+    articles: [
+      {
+        id: "cursos-catalogo",
+        title: "Catálogo de cursos",
+        summary: "Criar cursos, filtrar por idioma e controlar o que está publicado.",
+        route: "/hub/manager/courses",
+        keywords: ["curso", "catálogo", "publicar", "idioma", "criar", "excluir"],
+        blocks: [
+          {
+            type: "p",
+            text: "Lista todos os cursos da plataforma. Os filtros permitem separar por idioma e por situação (publicado ou rascunho).",
+          },
+          {
+            type: "actions",
+            items: [
+              {
+                label: "Criar curso",
+                does: "Abre o formulário com título, descrição, idioma e imagem de capa.",
+                flow: "O curso nasce como rascunho — invisível para os alunos até você publicar.",
+              },
+              {
+                label: "Menu (⋮) › Editar",
+                does: "Ajusta os dados do curso e a capa.",
+              },
+              {
+                label: "Menu (⋮) › Publicar / Despublicar",
+                does: "Controla a visibilidade do curso para os alunos.",
+                flow: "Despublicar esconde o curso da vitrine, mas mantém o progresso de quem já estava fazendo.",
+              },
+              {
+                label: "Menu (⋮) › Excluir",
+                does: "Remove o curso e todo o seu conteúdo.",
+                warning: "Ação destrutiva: seções, lições e o progresso dos alunos vão junto. Se a intenção é apenas tirar do ar, use despublicar.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: "cursos-conteudo",
+        title: "Seções e lições",
+        summary: "Como o conteúdo do curso é montado e editado.",
+        route: "/hub/manager/courses",
+        keywords: ["lição", "seção", "módulo", "aula", "vídeo", "quiz", "editor"],
+        blocks: [
+          {
+            type: "p",
+            text: "Dentro de um curso o conteúdo é organizado em **seções** (módulos), e cada seção contém **lições**. A ordem em que aparecem é a ordem em que o aluno percorre.",
+          },
+          {
+            type: "steps",
+            title: "Montando um curso do zero",
+            items: [
+              "Crie o curso no catálogo — ele nasce como rascunho.",
+              "Abra o curso e adicione as seções, na sequência pedagógica desejada.",
+              "Dentro de cada seção, adicione as lições.",
+              "Abra cada lição no editor para montar o conteúdo (texto, vídeo, exercícios).",
+              "Revise a ordem e publique o curso para liberar aos alunos.",
+            ],
+          },
+          {
+            type: "note",
+            variant: "info",
+            title: "Publique só quando estiver pronto",
+            text: "Alunos com o curso em andamento veem as alterações imediatamente. Reordenar ou remover lições de um curso já publicado pode confundir quem está no meio da trilha.",
+          },
+        ],
+      },
+    ],
+  },
+
+  {
     id: "mgr-operacao",
     title: "Operação",
     description: "Tarefas da equipe e sua própria conta.",
@@ -347,96 +287,4 @@ export const MANAGER_DOCS: DocSection[] = [
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────
-  {
-    id: "mgr-problemas",
-    title: "Situações Comuns",
-    description: "Os atendimentos que mais aparecem.",
-    icon: "LifeBuoy",
-    articles: [
-      {
-        id: "mgr-aluno-nao-entra",
-        title: "“Não consigo entrar na plataforma”",
-        summary: "O roteiro para destravar o acesso de um aluno.",
-        keywords: ["não entra", "acesso", "senha", "convite", "bloqueado", "login"],
-        blocks: [
-          {
-            type: "steps",
-            items: [
-              "Confirme na lista se a conta está **ativa** — o filtro abre em ativos, então contas encerradas ficam escondidas.",
-              "Confirme o e-mail cadastrado: é ele que identifica a conta.",
-              "Oriente a usar “Esqueci minha senha” na tela de entrada.",
-              "Se a pessoa nunca definiu senha, o convite expirou — peça ao admin para reenviar.",
-              "Lembre de conferir a caixa de spam.",
-            ],
-          },
-        ],
-      },
-      {
-        id: "mgr-aluno-pagou",
-        title: "“Paguei e continua em aberto”",
-        summary: "O que verificar antes de escalar para o admin.",
-        keywords: ["pagou", "pendente", "pix", "não baixou", "atraso", "cobrança"],
-        blocks: [
-          {
-            type: "steps",
-            items: [
-              "Pergunte se o pagamento foi feito pelo PIX gerado na plataforma — outra chave não é reconhecida automaticamente.",
-              "Peça alguns minutos: a baixa depende da confirmação do banco.",
-              "Confira na ficha se o valor pago bate com o valor da parcela.",
-              "Se pagou por fora ou já passou tempo demais, escale ao admin com data, valor e comprovante — só ele confirma pagamento manualmente.",
-            ],
-          },
-          {
-            type: "note",
-            variant: "danger",
-            title: "Nunca prometa a baixa",
-            text: "Confirmação manual é do admin e exige senha. Prometer ao aluno que “já vai constar” cria expectativa que você não controla — diga que vai encaminhar e retornar.",
-          },
-        ],
-      },
-      {
-        id: "mgr-quer-cancelar",
-        title: "“Quero cancelar minha matrícula”",
-        summary: "Como conduzir sem prometer o que não pode.",
-        keywords: ["cancelar", "matrícula", "trancar", "desistir", "multa", "taxa"],
-        blocks: [
-          {
-            type: "bullets",
-            items: [
-              "Entenda o motivo primeiro — boa parte dos pedidos é horário ruim ou desencontro com o professor, e tem solução sem cancelar.",
-              "Encerramento no meio do contrato gera **taxa de cancelamento** de 50% de uma mensalidade.",
-              "Estando na última parcela do contrato, não há taxa.",
-              "Sem contrato assinado, o encerramento é imediato e sem cobrança.",
-              "A execução é sempre do admin: exige senha e cancela aulas futuras de verdade.",
-            ],
-          },
-          {
-            type: "note",
-            variant: "warning",
-            title: "Confirme os valores antes de falar",
-            text: "Consulte a ficha do aluno para ver o estágio do contrato antes de mencionar qualquer valor. Informar taxa errada gera atrito difícil de desfazer.",
-          },
-        ],
-      },
-      {
-        id: "mgr-professor-faltou",
-        title: "“O professor não apareceu”",
-        summary: "Como agir quando a aula não aconteceu por ausência do professor.",
-        keywords: ["professor faltou", "não apareceu", "ausência", "crédito", "reposição"],
-        blocks: [
-          {
-            type: "steps",
-            items: [
-              "Confirme com o professor o que aconteceu — pode ter havido problema técnico dos dois lados.",
-              "Confirmada a ausência, a aula deve ficar registrada como cancelada pelo professor.",
-              "Isso gera automaticamente o crédito de reposição para o aluno.",
-              "Ajude o aluno a agendar a reposição em um horário livre do professor.",
-              "Sendo recorrente com o mesmo professor, comunique a coordenação.",
-            ],
-          },
-        ],
-      },
-    ],
-  },
 ];

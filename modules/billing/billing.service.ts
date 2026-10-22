@@ -1227,18 +1227,8 @@ export const billingService = {
             channels: { inApp: true, push: true },
             actionUrl: "/hub/admin/finances",
           });
-
-          await notificationService.sendNotification({
-            title: "💰 Pagamento Recebido",
-            body: paymentBody,
-            targetType: "role",
-            targetRole: "manager",
-            category: "paymentsMade",
-            channels: { inApp: true, push: true },
-            actionUrl: "/hub/manager/users",
-          });
         } catch (error) {
-          console.error("[BillingService] Failed to send admin/manager payment notification:", error);
+          console.error("[BillingService] Failed to send admin payment notification:", error);
         }
       }
 
@@ -1819,18 +1809,8 @@ export const billingService = {
         channels: { inApp: true, push: true },
         actionUrl: "/hub/admin/finances",
       });
-
-      await notificationService.sendNotification({
-        title: "⚠️ Mensalidade Atrasada",
-        body: overdueBody,
-        targetType: "role",
-        targetRole: "manager",
-        category: "paymentsOverdue",
-        channels: { inApp: true, push: true },
-        actionUrl: "/hub/manager/users",
-      });
     } catch (err) {
-      console.error("[BillingService] Failed to send overdue admin/manager notification:", err);
+      console.error("[BillingService] Failed to send overdue admin notification:", err);
     }
   },
 

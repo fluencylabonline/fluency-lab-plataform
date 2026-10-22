@@ -67,146 +67,7 @@ export const MANAGER_HELP_EN: RoleHelpContent<ManagerHelpRoute> = {
     ],
   },
 
-  "/hub/manager/users": {
-    title: "Users",
-    summary:
-      "The search and the record for students and teachers — the starting point of almost every support case.",
-    docsArticleId: "mgr-ficha-aluno",
-    sections: [
-      {
-        heading: "The search",
-        body: "The search at the top finds people by name, email or phone. Click a card to open that person's full record.",
-      },
-      {
-        heading: "The four filters",
-        body: [
-          "Role: All Roles, Administrator, Teacher, Student or Manager. It opens on Student.",
-          "Status: All, Active or Inactive. It opens on Active — which is why a closed account does not show up until you switch to All or Inactive.",
-          "Contract: All contracts, Active or No Contract. Useful for finding who has not signed yet.",
-          "Payment: All payments, Paid or Pending. Useful for the collections list.",
-        ],
-      },
-      {
-        heading: "When someone says they cannot sign in",
-        body: "The first step is almost always the Status filter: it opens on Active, so a deactivated account disappears from the list and looks like it does not exist. Switch to Inactive before concluding anything.",
-      },
-      {
-        heading: "Adaptive Profile",
-        body: "The button to the right of the filters leads to onboarding: the list of new students' entry profiles, showing who has answered and who stalled midway.",
-      },
-      {
-        heading: "Masked fields",
-        body: "Tax ID, full phone number and address appear hidden, and only the admin can reveal them. If a case requires confirming a document, pass it on.",
-      },
-    ],
-    tour: [
-      {
-        id: "intro",
-        title: "The starting point for support",
-        text: "Almost every support case starts here: find the person and open their record.",
-      },
-      {
-        id: "search",
-        target: "chrome.search",
-        title: "The search",
-        text: "Finds people by name, email or phone. It is the fastest route once the student has identified themselves.",
-      },
-      {
-        id: "filters",
-        target: "users.filters",
-        title: "The four filters",
-        text: "Role (opens on Student), Status (opens on Active), Contract (Active or No Contract) and Payment (Paid or Pending). Combining Contract with Payment builds the day's list of loose ends.",
-      },
-      {
-        id: "status-trap",
-        target: "users.filters",
-        title: "The Status trap",
-        text: "It opens on Active. A student who says they cannot sign in and is missing from the search may simply be deactivated — switch to Inactive before concluding anything.",
-      },
-      {
-        id: "list",
-        target: "users.list",
-        title: "The list",
-        text: "One card per person, with contract and payment status visible at a glance. Click to open the full record.",
-      },
-      {
-        id: "onboarding",
-        target: "users.onboarding",
-        title: "Adaptive Profile",
-        text: "Leads to the list of new students' entry profiles. An incomplete profile is worth chasing: the sooner it is finished, the better the match with the right teacher.",
-      },
-    ],
-  },
 
-  "/hub/manager/users/[userId]": {
-    title: "User record",
-    summary:
-      "The full picture of one person: details, payments, contract, classes and curriculum.",
-    docsArticleId: "mgr-ficha-aluno",
-    sections: [
-      {
-        heading: "The tabs change with the role",
-        body: [
-          "Profile always appears: contact details and registration information.",
-          "For a student: Payment, Contract and Plan, Classes and Curriculum, and Certificate.",
-          "For a teacher: Earnings Statement, Contracts, Schedule and Students.",
-        ],
-      },
-      {
-        heading: "What you resolve from here",
-        body: [
-          "Grant a make-up credit from the classes and curriculum tab.",
-          "Adjust a class's status when the teacher cannot.",
-          "Check contract and payment status before replying to the student.",
-        ],
-      },
-      {
-        heading: "The kinds of credit",
-        body: [
-          "Teacher cancellation: created automatically. Nothing for you to do.",
-          "School delay: for when something on our side spoiled the class.",
-          "Bonus: a courtesy or an agreed compensation. Use it with judgement and record the reason in the case notes.",
-        ],
-      },
-      {
-        heading: "Two traps with credits",
-        body: "Every credit has an expiry date: set a realistic one and tell the student, because an expired credit disappears and turns into a complaint. And if the student books the make-up with a credit and then cancels that class, the credit is consumed anyway — make that clear before they confirm the slot.",
-      },
-      {
-        heading: "What you cannot see or do here",
-        body: "Tax ID, full phone number and address stay masked. Deactivating the account, confirming a payment manually and executing an enrolment cancellation are admin actions, with a password and an audit trail.",
-      },
-    ],
-    tour: [
-      {
-        id: "intro",
-        title: "The full record",
-        text: "Everything about one person, in tabs. Which tabs appear depends on their role.",
-      },
-      {
-        id: "tabs",
-        target: "user-details.tabs",
-        title: "The tabs",
-        text: "Profile always appears. A student has Payment, Contract and Plan, Classes and Curriculum and Certificate. A teacher has Earnings Statement, Contracts, Schedule and Students.",
-      },
-      {
-        id: "credits",
-        target: "user-details.tabs",
-        title: "Granting a credit",
-        text: "From the classes and curriculum tab. Pick the right kind: teacher cancellation is already automatic; school delay is for a failure on our side; bonus is a courtesy, and deserves a recorded reason.",
-      },
-      {
-        id: "credit-traps",
-        title: "Two traps with credits",
-        text: "A credit has an expiry date and disappears when it passes — set a realistic one and tell the student. And a make-up booked with a credit that the student later cancels consumes the credit anyway. Say so before they confirm.",
-      },
-      {
-        id: "masked",
-        title: "What stays with the admin",
-        text: "Tax ID, full phone and address appear masked. Deactivating an account, confirming a payment by hand and executing an enrolment cancellation are theirs too. Pass those on rather than promising.",
-      },
-    ],
-  },
 
   "/hub/manager/students/onboarding": {
     title: "Adaptive Profiles",
@@ -422,65 +283,6 @@ export const MANAGER_HELP_EN: RoleHelpContent<ManagerHelpRoute> = {
     ],
   },
 
-  "/hub/manager/conversas": {
-    title: "Conversations",
-    summary:
-      "The inbox for the school's official WhatsApp, with quick replies and templates.",
-    docsArticleId: "mgr-conversas",
-    sections: [
-      {
-        heading: "How it works",
-        body: "Students' messages arrive here in real time, and your reply goes out from the school's official number. The list on the left holds the conversations; the search above it finds a conversation or a shortcut. The list shows the 200 most recent conversations; the button at its end loads older ones.",
-      },
-      {
-        heading: "The 24-hour window",
-        body: "You can write freely while you are within 24 hours of the student's last message. After that, you can only start contact with an approved template. That is a Meta rule, not a platform one — pushing at the text field will not help. If a message fails to go out, it stays marked as not sent and the text goes back to the field so you can try again.",
-      },
-      {
-        heading: "The buttons in a conversation",
-        body: [
-          "The + at the top of the list starts a new conversation from a template — the route to reaching someone outside the 24-hour window.",
-          "The paperclip sends a photo, audio or document.",
-          "Typing / in the message field opens the quick replies.",
-          "Tapping the contact's name opens their details and labels.",
-        ],
-      },
-      {
-        heading: "Quick replies",
-        body: "They are shortcuts to prewritten text. Type / followed by the shortcut name, like /welcome. They save time and keep the school's tone consistent across the support team.",
-      },
-    ],
-    tour: [
-      {
-        id: "intro",
-        title: "The school's WhatsApp",
-        text: "Students' messages arrive here, and your reply goes out from the school's official number.",
-      },
-      {
-        id: "list",
-        target: "conversas.list",
-        title: "The conversations",
-        text: "The list on the left, with the search above it — which finds both conversations and quick-reply shortcuts.",
-      },
-      {
-        id: "new",
-        target: "conversas.new",
-        title: "New conversation from a template",
-        text: "The route to reaching someone outside the 24-hour window. Outside it, only an approved template goes out.",
-      },
-      {
-        id: "window",
-        title: "The 24-hour window",
-        text: "Within 24 hours of the student's last message you can write freely. After that, only an approved template — a Meta rule, not a platform one.",
-      },
-      {
-        id: "quick",
-        target: "conversas.composer",
-        title: "Quick replies",
-        text: "Type / in the message field to open the prewritten shortcuts, like /welcome. The paperclip beside it sends a photo, audio or document.",
-      },
-    ],
-  },
 
   "/hub/manager/tasks": {
     title: "Tasks",
@@ -904,6 +706,169 @@ export const MANAGER_HELP_EN: RoleHelpContent<ManagerHelpRoute> = {
         id: "meanwhile",
         title: "In the meantime",
         text: "To find where students get stuck, use the student's record (classes and curriculum) and Learning Items, reviewing the ones that look badly classified.",
+      },
+    ],
+  },
+
+  "/hub/manager/courses": {
+    title: "Courses",
+    summary: "The video course catalogue: create, publish and control what students see.",
+    docsArticleId: "cursos-catalogo",
+    sections: [
+      {
+        heading: "Create course",
+        body: "The form asks for a title, description, language and cover image. The course starts as a draft — invisible to students until you publish it.",
+      },
+      {
+        heading: "The menu on each course",
+        body: [
+          "Edit adjusts the details and the cover.",
+          "Publish / Unpublish controls visibility to students. Unpublishing hides it from the shelf but keeps the progress of anyone already taking it.",
+          "Delete removes the course and all its content.",
+        ],
+      },
+      {
+        heading: "Deleting is destructive",
+        body: "Sections, lessons and students' progress go with it and do not come back. If the intention is just to take it off the air, use Unpublish.",
+      },
+      {
+        heading: "Publish only when it is ready",
+        body: "A half-finished published course appears on the student's shelf as though it were complete. Leave it as a draft until the content is done.",
+      },
+    ],
+    tour: [
+      {
+        id: "intro",
+        title: "The course catalogue",
+        text: "The school's video courses. Every course starts as a draft, invisible to students.",
+      },
+      {
+        id: "create",
+        target: "admin-courses.create",
+        title: "Create course",
+        text: "Title, description, language and cover image. It starts as a draft — publishing is a separate, deliberate step.",
+      },
+      {
+        id: "list",
+        target: "admin-courses.list",
+        title: "The courses",
+        text: "Each card's menu has Edit, Publish / Unpublish and Delete. Unpublishing hides it from the shelf but preserves the progress of anyone already taking it.",
+      },
+      {
+        id: "delete",
+        title: "Deleting is destructive",
+        text: "Sections, lessons and students' progress go with it and do not come back. To just take it off the air, use Unpublish.",
+      },
+    ],
+  },
+
+  "/hub/manager/courses/[id]": {
+    title: "Course content",
+    summary: "A course's sections and lessons, in the order the student will work through them.",
+    docsArticleId: "cursos-conteudo",
+    sections: [
+      {
+        heading: "How a course is built",
+        body: "A course has sections, and each section has lessons. You create the sections in content order and add lessons inside each one.",
+      },
+      {
+        heading: "The buttons",
+        body: [
+          "New Section creates a grouping, asking for a title.",
+          "New Lesson creates a lesson inside the section, asking for a title.",
+          "The drag handle reorders sections and lessons.",
+          "The eye shows or hides an item.",
+          "Edit Content opens the lesson editor.",
+        ],
+      },
+      {
+        heading: "The order is what the student sees",
+        body: "The sequence you build here is exactly the sequence in the student's player. Worth reviewing the order before publishing.",
+      },
+      {
+        heading: "An empty section",
+        body: "A section with no lessons appears to the student as an empty block. Either add the first lesson or remove the section before publishing.",
+      },
+    ],
+    tour: [
+      {
+        id: "intro",
+        title: "Building the course",
+        text: "Sections group lessons. You create the sections in content order and put the lessons inside each one.",
+      },
+      {
+        id: "sections",
+        target: "admin-course-detail.sections",
+        title: "Sections and lessons",
+        text: "New Section creates a grouping; New Lesson creates a lesson inside it. The drag handle reorders and the eye shows or hides an item.",
+      },
+      {
+        id: "edit",
+        target: "admin-course-detail.sections",
+        title: "Edit Content",
+        text: "Opens the lesson editor, where the video and text blocks and the quiz go.",
+      },
+      {
+        id: "order",
+        title: "The order is what the student sees",
+        text: "The sequence built here is exactly the student's player order. A section with no lessons appears as an empty block — fill it or remove it before publishing.",
+      },
+    ],
+  },
+
+  "/hub/manager/courses/[id]/lessons/[lessonId]": {
+    title: "Lesson Editor",
+    summary: "The content of a course lesson: video and text blocks, and the assessment.",
+    docsArticleId: "cursos-conteudo",
+    sections: [
+      {
+        heading: "The tabs",
+        body: [
+          "Content is where the video and text blocks go.",
+          "Assessment is the quiz the student answers at the end of the lesson.",
+          "Preview shows the lesson as the student will see it.",
+        ],
+      },
+      {
+        heading: "Content blocks",
+        body: [
+          "Add Video accepts a YouTube or Google Drive link.",
+          "Add Text opens a formatted text editor.",
+          "Blocks appear to the student in the order you place them — you can alternate video and text.",
+        ],
+      },
+      {
+        heading: "Lesson settings",
+        body: "Lesson Title is required. Duration (minutes) is the estimated time shown to the student.",
+      },
+      {
+        heading: "Save Changes",
+        body: "The quiz and the content are saved together. Leaving without saving loses everything built since the last save.",
+      },
+    ],
+    tour: [
+      {
+        id: "intro",
+        title: "The lesson editor",
+        text: "This is where the content the student consumes and the end-of-lesson assessment go.",
+      },
+      {
+        id: "tabs",
+        target: "admin-lesson-editor.tabs",
+        title: "Content, Assessment and Preview",
+        text: "Content holds the video and text blocks. Assessment is the end-of-lesson quiz. Preview shows the lesson as the student will see it — worth checking before publishing the course.",
+      },
+      {
+        id: "blocks",
+        target: "admin-lesson-editor.blocks",
+        title: "Content blocks",
+        text: "Add Video accepts a YouTube or Google Drive link; Add Text opens the formatted editor. Blocks appear in the order you place them, and you can alternate.",
+      },
+      {
+        id: "save",
+        target: "admin-lesson-editor.save",
+        title: "Save Changes",
+        text: "Saves content and quiz together. Leaving without saving loses everything built since the last save.",
       },
     ],
   },
