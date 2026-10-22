@@ -1,6 +1,6 @@
 import { expect, test, describe } from "vitest";
 import { REMINDER_TEMPLATES } from "../reminder-templates";
-import { getLocalTimeDetails, isSameDayInTimeZone } from "../learning.service";
+import { getLocalTimeDetails, isSameDayInTimeZone, startOfDayInTimeZone } from "../learning.service";
 
 describe("Duolingo-Style Reminder Templates", () => {
   test("deve conter todas as categorias necessárias", () => {
@@ -91,3 +91,18 @@ describe("Timezone Helpers", () => {
   });
 });
 
+
+describe("startOfDayInTimeZone", () => {
+  test("23h30 em Brasília (02h30 UTC do dia seguinte) ainda é o mesmo dia do aluno", () => {
+    // 2026-10-22T02:30Z = 21/10 às 23:30 em America/Sao_Paulo (UTC-3)
+    expect(startOfDayInTimeZone(new Date("2026-10-22T02:30:00Z")).toISOString()).toBe("2026-10-21T03:00:00.000Z");
+  });
+
+  test("ao meio-dia o início do dia é 03h UTC do mesmo dia", () => {
+    expect(startOfDayInTimeZone(new Date("2026-10-22T15:00:00Z")).toISOString()).toBe("2026-10-22T03:00:00.000Z");
+  });
+
+  test("exatamente à meia-noite local começa um novo dia", () => {
+    expect(startOfDayInTimeZone(new Date("2026-10-22T03:00:00Z")).toISOString()).toBe("2026-10-22T03:00:00.000Z");
+  });
+});

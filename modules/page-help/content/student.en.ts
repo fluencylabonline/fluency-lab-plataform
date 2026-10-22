@@ -159,8 +159,14 @@ export const STUDENT_HELP_EN: RoleHelpContent<StudentHelpRoute> = {
       {
         id: "path",
         target: "student-notebook.path",
-        title: "Your lesson path",
-        text: "The path shows the lessons of the plan your teacher put together, day by day. Locked ones open as you reach them. With no active plan, the path tells you to talk to your teacher.",
+        title: "Your class path",
+        text: "The path shows the classes of the plan your teacher put together, class by class. Locked ones open as you reach them. With no active plan, the path tells you to talk to your teacher.",
+      },
+      {
+        id: "weekly",
+        target: "student-notebook.weekly",
+        title: "This week's practice",
+        text: "This card has two panels: the plan and this week's practice. Swipe sideways (or tap the little dots) to see the 6 practices of your current class: flashcards, listening gap fill, unscrambling sentences, recall, quiz and listening comprehension. Tap today's practice to start.",
       },
       {
         id: "notebooks",

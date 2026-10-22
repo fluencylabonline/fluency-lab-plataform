@@ -160,8 +160,14 @@ export const STUDENT_HELP_PT: RoleHelpContent<StudentHelpRoute> = {
       {
         id: "path",
         target: "student-notebook.path",
-        title: "Sua trilha de lições",
-        text: "O caminho mostra as lições do plano montado pelo seu professor, dia por dia. As com cadeado abrem quando você chega nelas. Sem plano ativo, a trilha avisa para falar com seu professor.",
+        title: "Sua trilha de aulas",
+        text: "O caminho mostra as aulas do plano montado pelo seu professor, aula por aula. As com cadeado abrem quando você chega nelas. Sem plano ativo, a trilha avisa para falar com seu professor.",
+      },
+      {
+        id: "weekly",
+        target: "student-notebook.weekly",
+        title: "Práticas da semana",
+        text: "Esse cartão tem dois painéis: o plano e as práticas da semana. Deslize para o lado (ou toque nos pontinhos) para ver as 6 práticas da aula atual: flashcards, lacunas com áudio, ordenar frases, recordação, quiz e compreensão auditiva. Toque na prática do dia para começar.",
       },
       {
         id: "notebooks",

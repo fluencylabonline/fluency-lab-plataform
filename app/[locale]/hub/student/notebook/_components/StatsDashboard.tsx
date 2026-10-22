@@ -52,7 +52,8 @@ export function StatsDashboard({
     },
     {
       label: t("practiceDay"),
-      value: stats.currentDay,
+      // Dia do ciclo de 6 práticas da aula atual
+      value: `${stats.currentDay}/6`,
       icon: Calendar,
       color: "text-white",
       bgColor: "bg-purple-600",

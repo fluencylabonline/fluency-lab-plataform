@@ -137,7 +137,7 @@ export function StudentNotebookClient({
             </div>
 
             <div data-tour="student-notebook.path">
-              <LearningPath lessons={roadmap?.lessons || []} />
+              <LearningPath lessons={roadmap?.lessons || []} planId={roadmap?.id ?? null} />
             </div>
           </section>
 

@@ -782,7 +782,9 @@ export const learningService = {
         });
         break;
 
-      case 3: // Unscramble (Structure)
+      case 3: { // Ordenar frases: estruturas (com ordem das palavras) e, se faltar, frases de exemplo do vocabulário
+        const MIN_UNSCRAMBLE = 8;
+
         coreItems.filter(i => i.item.type === "STRUCTURE").forEach(({ item }) => {
           const meta = item.metadata as { examples?: Array<{ text: string; word_order: Array<{ word: string }> }> };
           const example = meta.examples?.[0];
@@ -792,7 +794,7 @@ export const learningService = {
             id: item.id,
             lessonId: activeLessonRecord.lessonId,
             type: "structure",
-            renderMode: "sentence_unscramble",
+            renderMode: mode,
             mainText: example.text,
             unscramble: {
               scrambledWords: [...example.word_order].sort(() => Math.random() - 0.5).map((w) => w.word),
@@ -800,40 +802,76 @@ export const learningService = {
             }
           });
         });
-        break;
 
-      case 5: // Quiz Comprehensive (Sections 1-4)
-      case 6: // Listening Choice (Section 5)
-        if (lesson.quizData?.quiz_sections) {
-          const sections = clampedDay === 5 
-            ? lesson.quizData.quiz_sections.filter(s => s.type !== "comprehension")
-            : lesson.quizData.quiz_sections.filter(s => s.type === "comprehension");
+        // Completa até o mínimo com as frases de exemplo das palavras CORE (o id é o do item, para o SRS registrar o acerto)
+        for (const { item } of coreItems.filter(i => i.item.type === "VOCABULARY")) {
+          if (practiceItems.length >= MIN_UNSCRAMBLE) break;
+          const text = (item.metadata as { examples?: Array<{ text: string }> }).examples?.[0]?.text?.trim();
+          if (!text || practiceItems.some(p => p.mainText === text)) continue;
 
-          sections.forEach(section => {
-            section.questions.forEach((q, idx) => {
-              practiceItems.push({
-                id: `quiz-${section.type}-${idx}`,
-                lessonId: activeLessonRecord.lessonId,
-                type: "item",
-                renderMode: mode,
-                mainText: q.text,
-                quiz: {
-                  question: q.text,
-                  options: q.options,
-                  correctIndex: q.correctIndex ?? 0,
-                  explanation: q.explanation,
-                  sectionType: section.type,
-                  audioSegment: q.audioRange && lesson.media?.url ? {
-                    start: q.audioRange.start,
-                    end: q.audioRange.end,
-                    url: lesson.media.url
-                  } : undefined
-                }
-              });
-            });
+          const words = text.split(/\s+/).filter(Boolean);
+          if (words.length < 3 || words.length > 12) continue;
+
+          // Embaralha de novo se a ordem sorteada sair igual à original
+          let scrambled = [...words];
+          for (let attempt = 0; attempt < 5 && scrambled.join(" ") === words.join(" "); attempt++) {
+            scrambled = [...words].sort(() => Math.random() - 0.5);
+          }
+
+          practiceItems.push({
+            id: item.id,
+            lessonId: activeLessonRecord.lessonId,
+            type: "item",
+            renderMode: mode,
+            mainText: text,
+            unscramble: { scrambledWords: scrambled, correctOrder: words }
           });
         }
         break;
+      }
+
+      case 5: // Quiz (todas as seções, menos as de compreensão)
+      case 6: { // Compreensão auditiva (seção de compreensão, completada com perguntas do áudio até o mínimo)
+        const MIN_LISTENING = 6;
+        const sections = lesson.quizData?.quiz_sections ?? [];
+        const all = sections.flatMap(section =>
+          section.questions.map((q, idx) => ({ type: section.type, q, idx }))
+        );
+
+        const comprehension = all.filter(x => x.type === "comprehension");
+        // Perguntas "timestamp" falam só do áudio: se a compreensão for curta, elas completam o dia 6
+        // (e saem do dia 5, para não repetir).
+        const audioExtras = all
+          .filter(x => x.type === "timestamp" && x.q.audioRange)
+          .slice(0, Math.max(0, MIN_LISTENING - comprehension.length));
+
+        const selected = clampedDay === 6
+          ? [...comprehension, ...audioExtras]
+          : all.filter(x => x.type !== "comprehension" && !audioExtras.includes(x));
+
+        selected.forEach(({ type, q, idx }) => {
+          practiceItems.push({
+            id: `quiz-${type}-${idx}`,
+            lessonId: activeLessonRecord.lessonId,
+            type: "item",
+            renderMode: mode,
+            mainText: q.text,
+            quiz: {
+              question: q.text,
+              options: q.options,
+              correctIndex: q.correctIndex ?? 0,
+              explanation: q.explanation,
+              sectionType: type,
+              audioSegment: q.audioRange && lesson.media?.url ? {
+                start: q.audioRange.start,
+                end: q.audioRange.end,
+                url: lesson.media.url
+              } : undefined
+            }
+          });
+        });
+        break;
+      }
     }
 
     return {
@@ -1003,14 +1041,17 @@ export const learningService = {
     const activePlan = await learningRepository.findActivePlanWithLessons(studentId);
     
     const now = new Date();
-    const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
+    // "Hoje" é o dia do aluno (America/Sao_Paulo), não o do servidor (UTC).
+    const startOfToday = startOfDayInTimeZone(now);
+    const endOfToday = new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000);
 
-    // 1. Items due today (nextReviewDate <= now)
+    // 1. Itens para revisar hoje: vencimento até o fim do dia (inclui os atrasados)
     const dueItems = await db.select({ count: sql<number>`count(*)` })
       .from(studentItemProgress)
       .where(and(
         eq(studentItemProgress.studentId, studentId),
-        sql`${studentItemProgress.nextReviewDate} <= ${now}`,
+        // ISO em UTC: a coluna é timestamp sem fuso e um Date cru iria com o fuso da máquina
+        sql`${studentItemProgress.nextReviewDate} < ${endOfToday.toISOString()}`,
         sql`${studentItemProgress.status} IN ('ACTIVE', 'RECEPTIVE', 'MASTERED')`
       ));
 
@@ -1045,7 +1086,8 @@ export const learningService = {
       reviewedToday: reviewedToday[0]?.count || 0,
       dueToday: dueItems[0]?.count || 0,
       totalLearned: learnedCount[0]?.count || 0,
-      currentDay: activeLesson ? activeLesson.completedPracticeDays + 1 : 1,
+      // Dia do ciclo de 6 dias da aula atual; ao concluir todas as aulas fica em 6 (como na tela de prática).
+      currentDay: activeLesson ? Math.min(6, activeLesson.completedPracticeDays + 1) : 1,
       daysSinceClass: lastClass ? differenceInDays(new Date(), new Date(lastClass.startAt)) : 0,
       hasActiveLesson: !!activeLesson
     };
@@ -1078,7 +1120,7 @@ export const learningService = {
    * Fetches detailed information about items reviewed today.
    */
   async getReviewedItemsDetails(studentId: string): Promise<LearningItemDetail[]> {
-    const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
+    const startOfToday = startOfDayInTimeZone(new Date());
     
     const items = await db.query.studentItemProgress.findMany({
       where: and(
@@ -1267,6 +1309,33 @@ export function getLocalTimeDetails(date: Date, timeZone: string = "America/Sao_
     day: parseInt(getPart("day")),
     hour: parseInt(getPart("hour")),
   };
+}
+
+/** Quanto o relógio do fuso está à frente do UTC (em ms) naquele instante. */
+function timeZoneOffsetMs(date: Date, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hour12: false,
+  }).formatToParts(date);
+  const get = (type: string) => parseInt(parts.find((p) => p.type === type)!.value, 10);
+  const asUtc = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour") % 24, get("minute"), get("second"));
+  return asUtc - Math.floor(date.getTime() / 1000) * 1000;
+}
+
+/**
+ * Instante em que começa o dia de `date` no fuso informado. O servidor roda em UTC, então
+ * `setHours(0,0,0,0)` virava o "dia" às 21h no Brasil; os contadores do aluno usam este início de dia.
+ */
+export function startOfDayInTimeZone(date: Date, timeZone: string = "America/Sao_Paulo"): Date {
+  const { year, month, day } = getLocalTimeDetails(date, timeZone);
+  const utcMidnight = Date.UTC(year, month - 1, day);
+  return new Date(utcMidnight - timeZoneOffsetMs(new Date(utcMidnight), timeZone));
 }
 
 export function isSameDayInTimeZone(date1: Date, date2: Date, timeZone: string = "America/Sao_Paulo"): boolean {

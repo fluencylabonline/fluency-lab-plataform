@@ -142,6 +142,9 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
     setScrambleAnswer([]);
   }, [practiceExampleForCallback]);
 
+  // Evento de "download" da foto no Unsplash: só quando a janela está aberta (hook antes do return antecipado)
+  useTrackUnsplashDownload(vocabMeta?.image_credit, open && !!vocabMeta?.image_url && isVocab);
+
   if (!item) return null;
 
   // --- DATA EXTRACTION ---
@@ -156,7 +159,6 @@ export function WordOfTheDayVault({ open, onOpenChange, item, xpAlreadyClaimed =
   const definition = isStructure ? structMeta?.explanation : mainMeaning.definition;
   const imageUrl = vocabMeta?.image_url;
   const imageCredit = vocabMeta?.image_credit;
-  useTrackUnsplashDownload(imageCredit, !!imageUrl && isVocab);
 
   // Study uses examples[0]; practice uses examples[1] (different from study), fallback to examples[0]
   const examples = (isStructure ? structMeta?.examples : vocabMeta?.examples) || [];
