@@ -133,9 +133,13 @@
   },
   "devDependencies": {
     "@base-ui/react": "^1.4.1",
+    "@breezystack/lamejs": "^1.2.7",
     "@firebase/rules-unit-testing": "^5.0.1",
+    "@google/genai": "^2.30.0",
     "@tailwindcss/postcss": "^4",
+    "@tiptap/html": "^3.22.5",
     "@types/js-cookie": "^3.0.6",
+    "@types/jsdom": "^30.0.0",
     "@types/lodash.throttle": "^4.1.9",
     "@types/node": "^20",
     "@types/pg": "^8.20.0",
