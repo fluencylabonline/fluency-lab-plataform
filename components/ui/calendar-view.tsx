@@ -87,9 +87,9 @@ const CalendarGrid = React.memo(({
 
   return (
     <div className="flex flex-col flex-1">
-      <div className="grid grid-cols-7 border-y border-white/5 bg-muted-foreground/30">
+      <div className="grid grid-cols-7 border-y border-foreground/10 bg-foreground/10 dark:border-white/5 dark:bg-muted-foreground/30">
         {weekDays.map((day: string) => (
-          <div key={day} className="py-2 lg:py-4 text-center text-[9px] lg:text-[10px] font-black text-muted-foreground tracking-[0.1em] lg:tracking-[0.2em]">
+          <div key={day} className="py-2 lg:py-4 text-center text-[9px] lg:text-[10px] font-black text-foreground/70 dark:text-muted-foreground tracking-[0.1em] lg:tracking-[0.2em]">
             {day}
           </div>
         ))}
@@ -107,8 +107,8 @@ const CalendarGrid = React.memo(({
               key={dateKey}
               onClick={() => onDateClick(day)}
               className={cn(
-                "aspect-square lg:aspect-auto lg:min-h-[100px] p-1 lg:p-2 border-b border-r border-white/5 cursor-pointer transition-all duration-200 group relative",
-                !isCurrentMonth && "bg-muted-foreground/30 opacity-20",
+                "aspect-square lg:aspect-auto lg:min-h-[100px] p-1 lg:p-2 border-b border-r border-foreground/10 dark:border-white/5 cursor-pointer transition-all duration-200 group relative",
+                !isCurrentMonth && "bg-foreground/10 opacity-40 dark:bg-muted-foreground/30 dark:opacity-20",
                 isSelected && "bg-primary/10",
                 "hover:bg-primary/15"
               )}
@@ -133,7 +133,7 @@ const CalendarGrid = React.memo(({
                     <div
                       key={event.id}
                       className={cn(
-                        "text-[9px] font-bold px-1.5 py-0.5 rounded-sm bg-primary/10 border border-white/10 text-text/20 truncate",
+                        "text-[9px] font-bold px-1.5 py-0.5 rounded-sm bg-primary/10 border border-primary/20 text-foreground truncate",
                         !!event.isOptimistic && "animate-pulse bg-primary/5 border-dashed border-primary/30 opacity-60"
                       )}
                     >
@@ -210,17 +210,17 @@ const WeekSection = React.memo(({
   const daysInWeek = React.useMemo(() => eachDayOfInterval({ start: weekStart, end: weekEnd }), [weekStart, weekEnd]);
 
   return (
-    <div className="flex flex-col border border-white/5 rounded-md bg-muted/50 overflow-hidden transition-all duration-300">
+    <div className="flex flex-col border border-foreground/10 dark:border-white/5 rounded-md bg-muted/50 overflow-hidden transition-all duration-300">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center justify-between p-3 lg:p-4 hover:bg-white/[0.05] transition-colors group"
+        className="flex items-center justify-between p-3 lg:p-4 hover:bg-foreground/5 dark:hover:bg-white/[0.05] transition-colors group"
       >
         <div className="flex items-center gap-3">
           <div className="flex flex-col items-start text-left">
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
               {locale === "pt" ? `Semana ${weekNumber}` : `Week ${weekNumber}`}
             </span>
-            <span className="text-[11px] font-bold text-muted-foreground/80">
+            <span className="text-[11px] font-bold text-foreground/80">
               {format(weekStart, "d MMM")} - {format(weekEnd, "d MMM")}
             </span>
           </div>
@@ -229,9 +229,9 @@ const WeekSection = React.memo(({
           </Badge>
         </div>
         {isExpanded ? (
-          <ChevronUp className="w-4 h-4 text-muted-foreground group-hover:text-white transition-colors" />
+          <ChevronUp className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-muted-foreground group-hover:text-white transition-colors" />
+          <ChevronDown className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
         )}
       </button>
 
@@ -258,7 +258,7 @@ const WeekSection = React.memo(({
               >
                 <div className="flex items-center gap-2 mb-1">
                   <span className={cn(
-                    "text-[10px] font-black uppercase tracking-tighter opacity-40",
+                    "text-[10px] font-black uppercase tracking-tighter opacity-70",
                     isDaySelected && "text-primary opacity-100"
                   )}>
                     {format(day, "EEEE, d MMM", { locale: dateLocale })}
@@ -282,13 +282,13 @@ const WeekSection = React.memo(({
                   >
                     {renderEventCard ? renderEventCard(event) : (
                       <div className={cn(
-                        "p-4 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 transition-all space-y-3 group",
+                        "p-4 rounded-md border border-foreground/15 dark:border-white/10 bg-foreground/5 dark:bg-white/5 hover:bg-foreground/10 dark:hover:bg-white/10 transition-all space-y-3 group",
                         !!event.isOptimistic && "animate-pulse border-dashed border-primary/20 bg-primary/5 opacity-60"
                       )}>
                         <div className="flex items-start justify-between">
-                          <h4 className="text-sm font-bold text-white group-hover:text-primary transition-colors">{event.title}</h4>
+                          <h4 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{event.title}</h4>
                           <Badge variant="outline" className={cn(
-                            "text-[8px] font-black uppercase tracking-tighter border-white/10",
+                            "text-[8px] font-black uppercase tracking-tighter border-foreground/15 dark:border-white/10",
                             event.type === "replacement" ? "bg-orange-500/10 text-orange-500 border-orange-500/20" : "bg-blue-500/10 text-blue-500 border-blue-500/20",
                             !!event.isOptimistic && "opacity-50"
                           )}>
@@ -371,7 +371,7 @@ const MonthSection = React.memo(({
       ref={assignRef}
       className="space-y-4"
     >
-      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/80 sticky top-0 bg-muted-foreground/15 backdrop-blur-md px-2 py-3 z-10 border-b border-white/5">
+      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary sticky top-0 bg-foreground/10 dark:bg-muted-foreground/15 backdrop-blur-md px-2 py-3 z-10 border-b border-foreground/10 dark:border-white/5">
         {format(monthDate, "MMMM 'de' yyyy", { locale: dateLocale })}
       </h3>
 
@@ -396,7 +396,7 @@ const MonthSection = React.memo(({
             );
           })
         ) : (
-          <div className="py-12 flex flex-col items-center justify-center text-center opacity-20 border border-dashed border-white/10 rounded-md">
+          <div className="py-12 flex flex-col items-center justify-center text-center opacity-20 border border-dashed border-foreground/15 dark:border-white/10 rounded-md">
             <CalendarIcon className="w-6 h-6 mb-2 text-muted-foreground" />
             <p className="text-[9px] font-bold uppercase tracking-widest">
               {locale === "pt" ? "Nenhuma aula programada" : "No classes scheduled"}
@@ -604,7 +604,7 @@ export function CalendarView({
   }, [onDateClick, scrollToDay]);
 
   return (
-    <div className={cn("flex flex-col lg:grid lg:grid-cols-[1fr_400px] gap-0 backdrop-blur-xl border border-white/5 rounded-md overflow-hidden h-[85dvh] lg:h-[85dvh]", className)}>
+    <div className={cn("flex flex-col lg:grid lg:grid-cols-[1fr_400px] gap-0 backdrop-blur-xl border border-foreground/10 dark:border-white/5 rounded-md overflow-hidden h-[85dvh] lg:h-[85dvh]", className)}>
       <div className="flex flex-col border-r border-foreground/10 bg-card/50 sticky top-0 lg:relative z-20">
         <div className="flex items-center justify-between p-4 lg:p-6 bg-background/80 dark:bg-background/40 lg:bg-background dark:lg:bg-background/50 backdrop-blur-md lg:backdrop-blur-none">
           <h2 className="text-md lg:text-xl font-black capitalize tracking-tight text-text">
@@ -616,22 +616,22 @@ export function CalendarView({
               const today = startOfToday();
               setSelectedDate(today);
               scrollToDay(format(today, "yyyy-MM-dd"));
-            }} className="h-8 lg:h-9 text-[10px] font-black uppercase tracking-widest border-white/10 bg-white/5 hover:bg-white/10 transition-all rounded-md">
+            }} className="h-8 lg:h-9 text-[10px] font-black uppercase tracking-widest border-foreground/15 dark:border-white/10 bg-foreground/5 dark:bg-white/5 hover:bg-foreground/10 dark:hover:bg-white/10 transition-all rounded-md">
               {locale === "pt" ? "Hoje" : "Today"}
             </Button>
-            <div className="flex items-center bg-white/5 rounded-md border border-white/10 p-1">
+            <div className="flex items-center bg-foreground/5 dark:bg-white/5 rounded-md border border-foreground/15 dark:border-white/10 p-1">
               <Button variant="ghost" size="icon" onClick={(e) => {
                 e.stopPropagation();
                 const prev = subMonths(currentDate, 1);
                 scrollToMonth(format(prev, "yyyy-MM"));
-              }} className="h-7 w-7 hover:bg-white/10 rounded-sm">
+              }} className="h-7 w-7 hover:bg-foreground/10 dark:hover:bg-white/10 rounded-sm">
                 <ChevronLeft className="w-4 h-4" />
               </Button>
               <Button variant="ghost" size="icon" onClick={(e) => {
                 e.stopPropagation();
                 const next = addMonths(currentDate, 1);
                 scrollToMonth(format(next, "yyyy-MM"));
-              }} className="h-7 w-7 hover:bg-white/10 rounded-sm">
+              }} className="h-7 w-7 hover:bg-foreground/10 dark:hover:bg-white/10 rounded-sm">
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
