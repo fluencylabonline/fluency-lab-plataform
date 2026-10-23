@@ -8,6 +8,7 @@ import { getTranslations } from "next-intl/server";
 import { PageHelpProvider } from "@/modules/page-help/_components/PageHelpProvider";
 import { billingService } from "@/modules/billing/billing.service";
 import { userService } from "@/modules/user/user.service";
+import { schedulingService } from "@/modules/scheduling/scheduling.service";
 
 export async function generateMetadata({
     params,
@@ -47,6 +48,11 @@ export default async function HubLayout({ children }: HubLayoutProps) {
     // Inadimplente desde o mês passado: só a página de pagamento até quitar.
     if (user.role === "student" && await billingService.isStudentBlocked(user.id)) {
         redirect(`/payment-required`);
+    }
+
+    // Professor com aulas demais sem status: só a tela de regularização até informar.
+    if (user.role === "teacher" && await schedulingService.isTeacherBlockedByOverdue(user.id)) {
+        redirect(`/overdue-classes`);
     }
 
     const menuItems = getSidebarItemsByRole(user);

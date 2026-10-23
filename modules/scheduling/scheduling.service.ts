@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { db } from "@/lib/db";
 import { schedulingRepository, DbClient } from "./scheduling.repository";
 import { hasPermission } from "@/lib/rbac";
@@ -42,6 +43,16 @@ import { pickPendingTeacherCancellation } from "./reschedule-notice";
 import { RESCHEDULE_MONTHLY_LIMIT, countQuotaReschedules } from "./reschedule-quota";
 import { addCivilDays, brtCivilDate, brtDayRangeUtc } from "@/modules/billing/billing.dates";
 import { isQuietHours, brtHourMinute, QUIET_HOURS_END } from "@/lib/quiet-hours";
+
+// Aulas "overdue" a partir das quais o perfil do professor mostra só o aviso e
+// o hub inteiro é trocado pela tela de regularização.
+export const OVERDUE_WARNING_THRESHOLD = 3;
+export const OVERDUE_BLOCK_THRESHOLD = 6;
+
+// O layout do hub e a página de perfil leem a contagem no mesmo request.
+const countTeacherOverdueCached = cache((teacherId: string) =>
+  schedulingRepository.countTeacherOverdueSlots(teacherId)
+);
 
 // Aluno bloqueado por inadimplência não remarca aulas. A UI já não deixa ele
 // chegar lá (só vê a página de pagamento), mas Server Actions não passam pelo
@@ -936,10 +947,11 @@ export const schedulingService = {
   async updateClassStatus(
     user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
     classId: string,
-    status: typeof slotInstances.status.enumValues[number]
+    status: typeof slotInstances.status.enumValues[number],
+    auditReason?: string
   ) {
     if (status.startsWith("canceled-")) {
-      return this.cancelClass(user, classId, status);
+      return this.cancelClass(user, classId, status, auditReason);
     }
 
     // RBAC: Admin/Manager can change to any status.
@@ -976,7 +988,7 @@ export const schedulingService = {
       actorRole: user.role,
       previousStatus: slot.status,
       newStatus: status,
-      reason: "Manual override by Manager/Admin",
+      reason: auditReason ?? "Manual override by Manager/Admin",
     });
 
     return { success: true };
@@ -986,7 +998,8 @@ export const schedulingService = {
   async cancelClass(
     user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
     classId: string,
-    reason: typeof slotInstances.status.enumValues[number]
+    reason: typeof slotInstances.status.enumValues[number],
+    auditReason?: string
   ) {
     const slot = await schedulingRepository.findById(classId);
     if (!slot) throw new Error("Slot not found");
@@ -1037,7 +1050,7 @@ export const schedulingService = {
         actorRole: user.role,
         previousStatus: slot.status,
         newStatus: finalStatus,
-        reason: `Canceled with reason: ${reason}`,
+        reason: auditReason ?? `Canceled with reason: ${reason}`,
       });
 
 
@@ -1983,6 +1996,63 @@ export const schedulingService = {
   async getTeacherPendingPastClasses(teacherId: string) {
     const now = new Date();
     return schedulingRepository.findTeacherOverdueClasses(teacherId, now);
+  },
+
+  async getTeacherOverdueSlots(teacherId: string) {
+    return schedulingRepository.findTeacherOverdueSlots(teacherId);
+  },
+
+  async getTeacherOverdueCount(teacherId: string) {
+    return countTeacherOverdueCached(teacherId);
+  },
+
+  async isTeacherBlockedByOverdue(teacherId: string) {
+    return (await countTeacherOverdueCached(teacherId)) >= OVERDUE_BLOCK_THRESHOLD;
+  },
+
+  /**
+   * Resolve uma aula que ficou "overdue": o professor informa o que aconteceu.
+   * Só vale para aula do próprio professor que ainda esteja atrasada.
+   */
+  async resolveOverdueClass(
+    user: { id: string; role: UserRoleInfo["role"] | "admin" | "manager" },
+    classId: string,
+    status: "completed" | "no-show" | "canceled-teacher"
+  ) {
+    const slot = await schedulingRepository.findById(classId);
+    if (!slot) throw new Error("Aula não encontrada.");
+    if (slot.teacherId !== user.id) throw new Error("Unauthorized to change status of this class.");
+    if (slot.status !== "overdue") throw new Error("Esta aula não está mais atrasada.");
+
+    return this.updateClassStatus(
+      user,
+      classId,
+      status,
+      "O professor atualizou o status de forma atrasada."
+    );
+  },
+
+  /**
+   * Aulas do professor que casam com o horário em que ele encerrou a chamada:
+   * o fim da chamada cai entre o início da aula e 30 min depois do fim previsto.
+   * Se o aluno da chamada tem aula nesse horário, só ela entra em `matches`;
+   * `others` traz as demais aulas sem status das últimas 24h para escolha manual.
+   */
+  async findClassesForCallEnd(teacherId: string, studentId: string, endedAt: Date) {
+    const tolerance = 30 * 60 * 1000;
+    const since = new Date(endedAt.getTime() - 24 * 60 * 60 * 1000);
+    const candidates = await schedulingRepository.findTeacherUnresolvedInRange(teacherId, since, endedAt);
+
+    const matches = candidates.filter(
+      (c) =>
+        c.studentId === studentId &&
+        c.startAt.getTime() <= endedAt.getTime() &&
+        endedAt.getTime() <= c.endAt.getTime() + tolerance
+    );
+    const matchIds = new Set(matches.map((m) => m.id));
+    const others = candidates.filter((c) => !matchIds.has(c.id));
+
+    return { matches, others };
   },
 
   async getTeacherCompletedClasses(teacherId: string, start: Date, end: Date) {

@@ -305,6 +305,55 @@ export const schedulingRepository = {
     });
   },
 
+  /** Aulas que o cron já marcou como "overdue" (professor não atualizou o status). */
+  async findTeacherOverdueSlots(teacherId: string) {
+    return db.query.slotInstances.findMany({
+      where: and(
+        eq(slotInstances.teacherId, teacherId),
+        eq(slotInstances.status, "overdue")
+      ),
+      orderBy: [asc(slotInstances.startAt)],
+      with: {
+        student: {
+          columns: {
+            name: true,
+          }
+        }
+      }
+    });
+  },
+
+  async countTeacherOverdueSlots(teacherId: string) {
+    const [row] = await db
+      .select({ total: sql<number>`count(*)::int` })
+      .from(slotInstances)
+      .where(and(
+        eq(slotInstances.teacherId, teacherId),
+        eq(slotInstances.status, "overdue")
+      ));
+    return row?.total ?? 0;
+  },
+
+  /** Aulas ainda sem status final (agendadas ou atrasadas) que começam no intervalo. */
+  async findTeacherUnresolvedInRange(teacherId: string, start: Date, end: Date) {
+    return db.query.slotInstances.findMany({
+      where: and(
+        eq(slotInstances.teacherId, teacherId),
+        inArray(slotInstances.status, ["scheduled", "overdue"]),
+        isNotNull(slotInstances.studentId),
+        between(slotInstances.startAt, start, end)
+      ),
+      orderBy: [asc(slotInstances.startAt)],
+      with: {
+        student: {
+          columns: {
+            name: true,
+          }
+        }
+      }
+    });
+  },
+
   async updateStatusBulk(ids: string[], status: typeof slotInstances.status.enumValues[number]) {
     if (ids.length === 0) return;
     await db.update(slotInstances)

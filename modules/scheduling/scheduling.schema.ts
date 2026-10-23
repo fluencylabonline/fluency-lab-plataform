@@ -230,6 +230,16 @@ export const updateSlotStatusSchema = z.object({
   status: z.enum(slotStatusEnum.enumValues),
 });
 
+export const resolveOverdueClassSchema = z.object({
+  classId: z.uuid(),
+  status: z.enum(["completed", "no-show", "canceled-teacher"]),
+});
+
+export const callEndClassesSchema = z.object({
+  studentId: z.string(),
+  endedAt: z.string().datetime(),
+});
+
 export const grantCreditSchema = z.object({
   studentId: z.string(),
   type: z.enum(creditTypeEnum.enumValues),

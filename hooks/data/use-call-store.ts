@@ -12,9 +12,20 @@ import type { CallState } from "@/modules/call/call.types";
  * Clearing happens when the call ends (handleEndCall / handleStudentLeaveCall).
  */
 
+/** Chamada longa que o professor acabou de encerrar: pergunta se a aula foi dada. */
+export interface PostCallPrompt {
+  studentId: string;
+  /** ISO timestamp de quando o professor encerrou a chamada */
+  endedAt: string;
+}
+
 interface CallStore {
   /** Active call state, or null if no call is in progress */
   callState: CallState | null;
+
+  /** Set when the teacher ends a call long enough to count as a class */
+  postCallPrompt: PostCallPrompt | null;
+  setPostCallPrompt: (prompt: PostCallPrompt | null) => void;
 
   /**
    * True when the student has dismissed the call panel (canceled the join
@@ -41,6 +52,9 @@ interface CallStore {
 export const useCallStore = create<CallStore>((set) => ({
   callState: null,
   isPanelHidden: false,
+  postCallPrompt: null,
+
+  setPostCallPrompt: (prompt) => set({ postCallPrompt: prompt }),
 
   setCallState: (state) => set({ callState: state, isPanelHidden: false }),
 

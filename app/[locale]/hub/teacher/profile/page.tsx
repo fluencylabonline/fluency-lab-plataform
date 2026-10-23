@@ -4,7 +4,12 @@ import { redirect } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { payoutService } from "@/modules/payout/payout.service";
 import { contractService } from "@/modules/contract/contract.service";
-import { schedulingService } from "@/modules/scheduling/scheduling.service";
+import {
+    schedulingService,
+    OVERDUE_WARNING_THRESHOLD,
+    OVERDUE_BLOCK_THRESHOLD,
+} from "@/modules/scheduling/scheduling.service";
+import { OverdueClassesWarning } from "./_components/OverdueClassesWarning";
 import { PayoutSummary } from "./_components/PayoutSummary";
 import { ContractBadge } from "./_components/ContractBadge";
 import { DailyLessonsSummary } from "./_components/DailyLessonsSummary";
@@ -18,13 +23,29 @@ export default async function ProfilePage() {
     if (!user.onboarded) redirect("/onboarding");
 
     // Parallel data fetching for performance
-    const [payoutHistory, projections, activeContract, dailySummary, pendingClasses] = await Promise.all([
+    const [payoutHistory, projections, activeContract, dailySummary, pendingClasses, overdueClasses] = await Promise.all([
         payoutService.getTeacherPayoutHistory(user.id),
         payoutService.getEarningsProjections(user.id),
         contractService.getTeacherActiveContract(user.id),
         schedulingService.getTeacherDailySummary(user.id),
         schedulingService.getTeacherPendingPastClasses(user.id),
+        schedulingService.getTeacherOverdueSlots(user.id),
     ]);
+
+    // Muitas aulas atrasadas: o perfil mostra só o aviso até regularizar.
+    if (overdueClasses.length >= OVERDUE_WARNING_THRESHOLD) {
+        return (
+            <div>
+                <Header title="Perfil" className="contents" user={userService.toSessionDTO(user)} showSubHeader={false} />
+                <main className="container pt-8 pb-24 md:pb-8">
+                    <OverdueClassesWarning
+                        overdueClasses={overdueClasses}
+                        blockThreshold={OVERDUE_BLOCK_THRESHOLD}
+                    />
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div>

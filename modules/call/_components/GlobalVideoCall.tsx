@@ -9,6 +9,10 @@ import { useCallStore } from "@/hooks/data/use-call-store";
 // inclusive landing e páginas públicas.
 const VideoCall = dynamic(() => import("./VideoCall").then((m) => m.VideoCall), { ssr: false });
 const StudentCallListener = dynamic(() => import("./StudentCallListener"), { ssr: false });
+const ClassCompletedPromptVault = dynamic(
+  () => import("./ClassCompletedPromptVault").then((m) => m.ClassCompletedPromptVault),
+  { ssr: false }
+);
 
 /**
  * GlobalVideoCall — mounted once in Providers, independent of route.
@@ -41,6 +45,7 @@ export function GlobalVideoCall() {
           userPhotoUrl={user.photoUrl}
         />
       )}
+      {user.role === "teacher" && <ClassCompletedPromptVault />}
     </>
   );
 }

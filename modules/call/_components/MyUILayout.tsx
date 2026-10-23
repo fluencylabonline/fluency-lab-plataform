@@ -31,6 +31,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/** Chamada mais longa que isso conta como uma aula dada. */
+const MIN_CLASS_CALL_MS = 20 * 60 * 1000;
+
 interface MyUILayoutProps {
   /** Current user's display name */
   userName: string;
@@ -40,7 +43,7 @@ interface MyUILayoutProps {
 
 export const MyUILayout = ({ userName, userRole }: MyUILayoutProps) => {
   const call = useCall();
-  const { callState, clearCall, hidePanel } = useCallStore();
+  const { callState, clearCall, hidePanel, setPostCallPrompt } = useCallStore();
   const isMobile = useIsMobile();
   const pathname = usePathname();
 
@@ -55,6 +58,8 @@ export const MyUILayout = ({ userName, userRole }: MyUILayoutProps) => {
   const constraintsRef = useRef<HTMLDivElement>(null);
   const isJoiningRef = useRef(false);
   const lastAwayRef = useRef<boolean | null>(null);
+  /** Quando o professor clicou em "Iniciar Aula" (mede a duração real da aula) */
+  const joinedAtRef = useRef<number | null>(null);
 
   const {
     useCallCallingState,
@@ -214,6 +219,9 @@ export const MyUILayout = ({ userName, userRole }: MyUILayoutProps) => {
     try {
       isJoiningRef.current = true;
       setHasJoined(true);
+      if (userRole === "teacher" && joinedAtRef.current === null) {
+        joinedAtRef.current = Date.now();
+      }
       await call.join({
         data: {
           settings_override: {
@@ -253,7 +261,21 @@ export const MyUILayout = ({ userName, userRole }: MyUILayoutProps) => {
         studentId,
         notebookId,
       });
+
+      // Chamada longa de professor: depois de limpar a chamada, pergunta se a aula foi dada.
+      const endedAt = Date.now();
+      const joinedAt = joinedAtRef.current;
+      joinedAtRef.current = null;
+      const wasLongCall =
+        userRole === "teacher" &&
+        !!studentId &&
+        joinedAt !== null &&
+        endedAt - joinedAt > MIN_CLASS_CALL_MS;
+
       clearCall();
+      if (wasLongCall) {
+        setPostCallPrompt({ studentId, endedAt: new Date(endedAt).toISOString() });
+      }
       setHasJoined(false);
     } catch (error) {
       console.error("[MyUILayout] End call error:", error);

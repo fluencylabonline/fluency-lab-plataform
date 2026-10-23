@@ -6,6 +6,8 @@ import { userService } from "@/modules/user/user.service";
 import {
   allocateStudentSchema,
   updateSlotStatusSchema,
+  resolveOverdueClassSchema,
+  callEndClassesSchema,
   grantCreditSchema,
   cancelClassSchema,
   rescheduleWithCreditSchema,
@@ -114,7 +116,45 @@ export const updateClassStatusAction = protectedAction
     }
   });
 
-export const grantCreditAction = permissionAction("credits.grant")
+export const resolveOverdueClassAction = protectedAction
+  .metadata({ name: "resolveOverdueClass" })
+  .inputSchema(resolveOverdueClassSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      await schedulingService.resolveOverdueClass(ctx.user, parsedInput.classId, parsedInput.status);
+      refresh();
+      return { success: true };
+    } catch (error) {
+      console.error("[resolveOverdueClassAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+/** Aulas do professor que casam com o horário em que ele encerrou a chamada. */
+export const findClassesForCallEndAction = protectedAction
+  .metadata({ name: "findClassesForCallEnd" })
+  .inputSchema(callEndClassesSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      if (ctx.user.role !== "teacher") return { success: true, matches: [], others: [] };
+      const { matches, others } = await schedulingService.findClassesForCallEnd(
+        ctx.user.id,
+        parsedInput.studentId,
+        new Date(parsedInput.endedAt)
+      );
+      const toDto = (c: (typeof matches)[number]) => ({
+        id: c.id,
+        startAt: c.startAt.toISOString(),
+        studentName: c.student?.name ?? "Aluno",
+      });
+      return { success: true, matches: matches.map(toDto), others: others.map(toDto) };
+    } catch (error) {
+      console.error("[findClassesForCallEndAction] Error:", error);
+      return { success: false, error: (error as Error).message, matches: [], others: [] };
+    }
+  });
+
+export const grantCreditAction =permissionAction("credits.grant")
   .metadata({ name: "grantCredit" })
   .inputSchema(grantCreditSchema)
   .action(async ({ parsedInput, ctx }) => {
