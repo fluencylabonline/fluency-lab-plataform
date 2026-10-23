@@ -13,7 +13,6 @@ import { OverdueClassesPanel } from "@/modules/scheduling/_components/OverdueCla
 import { PayoutSummary } from "./_components/PayoutSummary";
 import { ContractBadge } from "./_components/ContractBadge";
 import { DailyLessonsSummary } from "./_components/DailyLessonsSummary";
-import { PendingClassesWarning } from "./_components/PendingClassesWarning";
 import { userService } from "@/modules/user/user.service";
 
 export default async function ProfilePage() {
@@ -23,12 +22,11 @@ export default async function ProfilePage() {
     if (!user.onboarded) redirect("/onboarding");
 
     // Parallel data fetching for performance
-    const [payoutHistory, projections, activeContract, dailySummary, pendingClasses, overdueClasses] = await Promise.all([
+    const [payoutHistory, projections, activeContract, dailySummary, overdueClasses] = await Promise.all([
         payoutService.getTeacherPayoutHistory(user.id),
         payoutService.getEarningsProjections(user.id),
         contractService.getTeacherActiveContract(user.id),
         schedulingService.getTeacherDailySummary(user.id),
-        schedulingService.getTeacherPendingPastClasses(user.id),
         schedulingService.getTeacherOverdueSlots(user.id),
     ]);
 
@@ -58,7 +56,6 @@ export default async function ProfilePage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column: Basic Info & Stats */}
                     <div className="lg:col-span-1 space-y-6">
-                        <PendingClassesWarning pendingClasses={pendingClasses} />
                         <ProfileCard user={userService.toSessionDTO(user)} />
                         <ContractBadge contract={activeContract} />
                         <DailyLessonsSummary lessons={dailySummary} />

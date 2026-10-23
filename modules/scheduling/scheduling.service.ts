@@ -1993,10 +1993,6 @@ export const schedulingService = {
 
     return totalSent;
   },
-  async getTeacherPendingPastClasses(teacherId: string) {
-    const now = new Date();
-    return schedulingRepository.findTeacherOverdueClasses(teacherId, now);
-  },
 
   async getTeacherOverdueSlots(teacherId: string) {
     return schedulingRepository.findTeacherOverdueSlots(teacherId);

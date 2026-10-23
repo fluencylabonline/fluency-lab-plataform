@@ -287,24 +287,6 @@ export const schedulingRepository = {
     });
   },
 
-  async findTeacherOverdueClasses(teacherId: string, thresholdTime: Date) {
-    return db.query.slotInstances.findMany({
-      where: and(
-        eq(slotInstances.teacherId, teacherId),
-        eq(slotInstances.status, "scheduled"),
-        lte(slotInstances.endAt, thresholdTime)
-      ),
-      orderBy: [asc(slotInstances.startAt)],
-      with: {
-        student: {
-          columns: {
-            name: true,
-          }
-        }
-      }
-    });
-  },
-
   /** Aulas que o cron já marcou como "overdue" (professor não atualizou o status). */
   async findTeacherOverdueSlots(teacherId: string) {
     return db.query.slotInstances.findMany({
