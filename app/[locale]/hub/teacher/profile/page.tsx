@@ -9,7 +9,7 @@ import {
     OVERDUE_WARNING_THRESHOLD,
     OVERDUE_BLOCK_THRESHOLD,
 } from "@/modules/scheduling/scheduling.service";
-import { OverdueClassesWarning } from "./_components/OverdueClassesWarning";
+import { OverdueClassesPanel } from "@/modules/scheduling/_components/OverdueClassesPanel";
 import { PayoutSummary } from "./_components/PayoutSummary";
 import { ContractBadge } from "./_components/ContractBadge";
 import { DailyLessonsSummary } from "./_components/DailyLessonsSummary";
@@ -37,9 +37,13 @@ export default async function ProfilePage() {
         return (
             <div>
                 <Header title="Perfil" className="contents" user={userService.toSessionDTO(user)} showSubHeader={false} />
-                <main className="container pt-8 pb-24 md:pb-8">
-                    <OverdueClassesWarning
-                        overdueClasses={overdueClasses}
+                <main className="container min-h-[calc(100dvh-8rem)] flex items-center justify-center py-8 pb-24 md:pb-8">
+                    <OverdueClassesPanel
+                        classes={overdueClasses.map((c) => ({
+                            id: c.id,
+                            startAt: c.startAt.toISOString(),
+                            studentName: c.student?.name ?? "Aluno",
+                        }))}
                         blockThreshold={OVERDUE_BLOCK_THRESHOLD}
                     />
                 </main>
