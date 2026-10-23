@@ -94,7 +94,7 @@ export function StudentClassesCard({
       icon: "📅"
     },
     completed: {
-      label: t("completed"),
+      label: "Aula dada",
       color: "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/50 dark:text-green-300 dark:border-green-800",
       icon: "✅"
     },
@@ -104,7 +104,7 @@ export function StudentClassesCard({
       icon: "❌"
     },
     "canceled-teacher": {
-      label: t("canceled-teacher"),
+      label: "Cancelada por mim",
       color: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-300 dark:border-red-800",
       icon: "❌"
     },
@@ -119,7 +119,7 @@ export function StudentClassesCard({
       icon: "💳"
     },
     "no-show": {
-      label: t("no-show"),
+      label: "Aluno faltou",
       color: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-300 dark:border-red-800",
       icon: "👤"
     },
@@ -565,7 +565,8 @@ export function StudentClassesCard({
                         </SelectTrigger>
                         <SelectContent className="rounded-md">
                           {Object.entries(statusConfig).map(([key, itemConfig]) => {
-                            const isAllowed = ["completed", "canceled-teacher", "no-show", "scheduled"].includes(key) || key === cls.status;
+                            // "Agendada" é o estado inicial da aula; o professor só marca o que aconteceu.
+                            const isAllowed = ["completed", "no-show", "canceled-teacher"].includes(key) || key === cls.status;
                             if (!isAllowed) return null;
 
                             return (

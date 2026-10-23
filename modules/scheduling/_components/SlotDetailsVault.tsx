@@ -18,6 +18,7 @@ import {
   Repeat,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/ui/use-device";
+import { useUserStore } from "@/modules/user/user.store";
 import { useRouter } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
@@ -271,6 +272,9 @@ export function SlotDetailsVault({
     setConfirmDialog({ isOpen: true, type: "edit", scope: editScope });
   };
 
+  // Professor só marca o que aconteceu na aula; admin/manager mantêm todas as opções.
+  const isTeacherView = useUserStore((s) => s.user?.role) === "teacher";
+
   const statusConfig = useMemo(() => ({
     scheduled: {
       label: tClasses("scheduled"),
@@ -278,7 +282,7 @@ export function SlotDetailsVault({
       icon: "📅"
     },
     completed: {
-      label: tClasses("completed"),
+      label: isTeacherView ? "Aula dada" : tClasses("completed"),
       color: "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/50 dark:text-green-300 dark:border-green-800",
       icon: "✅"
     },
@@ -288,7 +292,7 @@ export function SlotDetailsVault({
       icon: "❌"
     },
     "canceled-teacher": {
-      label: tClasses("canceled-teacher"),
+      label: isTeacherView ? "Cancelada por mim" : tClasses("canceled-teacher"),
       color: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-300 dark:border-red-800",
       icon: "❌"
     },
@@ -303,7 +307,7 @@ export function SlotDetailsVault({
       icon: "💳"
     },
     "no-show": {
-      label: tClasses("no-show"),
+      label: isTeacherView ? "Aluno faltou" : tClasses("no-show"),
       color: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-300 dark:border-red-800",
       icon: "👤"
     },
@@ -322,7 +326,7 @@ export function SlotDetailsVault({
       color: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800",
       icon: "⏰"
     },
-  }), [tClasses]);
+  }), [tClasses, isTeacherView]);
 
   const handleStatusChange = async (status: string) => {
     if (!event) return;
@@ -853,7 +857,10 @@ export function SlotDetailsVault({
                     </SelectTrigger>
                     <SelectContent className="rounded-md">
                       {Object.entries(statusConfig).map(([key, itemConfig]) => {
-                        const isAllowed = ["completed", "canceled-teacher", "no-show", "scheduled"].includes(key) || key === currentStatus;
+                        const allowedKeys = isTeacherView
+                          ? ["completed", "no-show", "canceled-teacher"]
+                          : ["completed", "canceled-teacher", "no-show", "scheduled"];
+                        const isAllowed = allowedKeys.includes(key) || key === currentStatus;
                         if (!isAllowed) return null;
 
                         return (
