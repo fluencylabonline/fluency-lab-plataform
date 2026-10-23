@@ -34,12 +34,12 @@ function getFeedbackConfig(grade?: number, isCorrect?: boolean): FeedbackConfig 
 }
 
 const COLORS = {
-  rose:    { bg: "bg-rose-100 border-rose-200 dark:bg-rose-950 dark:border-rose-900", icon: "text-rose-600", title: "text-rose-800 dark:text-rose-400", btn: "bg-rose-500 hover:bg-rose-600 text-white border-transparent" },
-  amber:   { bg: "bg-amber-100 border-amber-200 dark:bg-amber-950 dark:border-amber-900", icon: "text-amber-600", title: "text-amber-800 dark:text-amber-400", btn: "bg-amber-500 hover:bg-amber-600 text-white border-transparent" },
-  indigo:  { bg: "bg-indigo-100 border-indigo-200 dark:bg-indigo-950 dark:border-indigo-900", icon: "text-indigo-600", title: "text-indigo-800 dark:text-indigo-400", btn: "bg-indigo-500 hover:bg-indigo-600 text-white border-transparent" },
-  emerald: { bg: "bg-emerald-100 border-emerald-200 dark:bg-emerald-950 dark:border-emerald-900", icon: "text-emerald-600", title: "text-emerald-800 dark:text-emerald-400", btn: "bg-emerald-500 hover:bg-emerald-600 text-white border-transparent" },
-  green:   { bg: "bg-green-100 border-green-200 dark:bg-green-950 dark:border-green-900", icon: "text-green-600", title: "text-green-800 dark:text-green-400", btn: "bg-green-500 hover:bg-green-600 text-white border-transparent" },
-  slate:   { bg: "bg-slate-100 border-slate-200 dark:bg-slate-950 dark:border-slate-900", icon: "text-slate-600", title: "text-slate-800 dark:text-slate-400", btn: "bg-slate-500 hover:bg-slate-600 text-white border-transparent" },
+  rose:    { bg: "bg-rose-100 border-rose-200 dark:bg-rose-950 dark:border-rose-900", icon: "text-rose-600", title: "text-rose-800 dark:text-rose-400", btn: "bg-rose-500 hover:bg-rose-600 text-white border-transparent shadow-[0_4px_0_0_#be123c]" },
+  amber:   { bg: "bg-amber-100 border-amber-200 dark:bg-amber-950 dark:border-amber-900", icon: "text-amber-600", title: "text-amber-800 dark:text-amber-400", btn: "bg-amber-500 hover:bg-amber-600 text-white border-transparent shadow-[0_4px_0_0_#b45309]" },
+  indigo:  { bg: "bg-indigo-100 border-indigo-200 dark:bg-indigo-950 dark:border-indigo-900", icon: "text-indigo-600", title: "text-indigo-800 dark:text-indigo-400", btn: "bg-indigo-500 hover:bg-indigo-600 text-white border-transparent shadow-[0_4px_0_0_#3730a3]" },
+  emerald: { bg: "bg-emerald-100 border-emerald-200 dark:bg-emerald-950 dark:border-emerald-900", icon: "text-emerald-600", title: "text-emerald-800 dark:text-emerald-400", btn: "bg-emerald-500 hover:bg-emerald-600 text-white border-transparent shadow-[0_4px_0_0_#047857]" },
+  green:   { bg: "bg-green-100 border-green-200 dark:bg-green-950 dark:border-green-900", icon: "text-green-600", title: "text-green-800 dark:text-green-400", btn: "bg-green-500 hover:bg-green-600 text-white border-transparent shadow-[0_4px_0_0_#15803d]" },
+  slate:   { bg: "bg-slate-100 border-slate-200 dark:bg-slate-950 dark:border-slate-900", icon: "text-slate-600", title: "text-slate-800 dark:text-slate-400", btn: "bg-slate-500 hover:bg-slate-600 text-white border-transparent shadow-[0_4px_0_0_#334155]" },
 };
 
 export function FeedbackSheet({ isOpen, isCorrect, correctAnswer, explanation, grade, onContinue }: FeedbackSheetProps) {
@@ -77,7 +77,7 @@ export function FeedbackSheet({ isOpen, isCorrect, correctAnswer, explanation, g
             <Button
               onClick={onContinue}
               className={cn(
-                "w-full md:w-auto px-8 py-6 text-base font-bold uppercase tracking-wider rounded-md shadow-[0_4px_0_0_rgb(0,0,0,0.2)] active:shadow-none active:translate-y-1 transition-all shrink-0",
+                "w-full md:w-auto px-8 py-6 text-base font-bold uppercase tracking-wider rounded-md active:shadow-none active:translate-y-1 transition-all shrink-0",
                 c.btn
               )}
             >
