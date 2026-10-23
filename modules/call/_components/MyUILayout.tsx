@@ -32,7 +32,8 @@ import {
 import { cn } from "@/lib/utils";
 
 /** Chamada mais longa que isso conta como uma aula dada. */
-const MIN_CLASS_CALL_MS = 20 * 60 * 1000;
+// TEMP (só preview, reverter): 1 min para testar o vault sem esperar 20 min.
+const MIN_CLASS_CALL_MS = 1 * 60 * 1000;
 
 interface MyUILayoutProps {
   /** Current user's display name */
