@@ -12,6 +12,7 @@ import { useFillGrid } from "@/hooks/common/use-fill-grid";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/header";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslations } from "next-intl";
 
 type LessonsPage = { items: LessonSummary[]; total: number };
@@ -20,42 +21,43 @@ type LessonsPage = { items: LessonSummary[]; total: number };
 const GRID_BREAKPOINTS = [[1280, 4], [1024, 3], [640, 2]] as const;
 const INITIAL_PAGE_SIZE = 8;
 
-interface FilterGroupProps {
-  label: string;
-  allLabel: string;
+const ALL = "__all__";
+
+interface FilterSelectProps {
+  /** Rótulo curto mostrado no gatilho, ex.: "Nível". Sem rótulo, mostra só o valor. */
+  label?: string;
+  value: string;
   options: { value: string; label: string }[];
-  selected: string | null;
-  onSelect: (value: string | null) => void;
+  onChange: (value: string) => void;
+  className?: string;
+  tour?: string;
 }
 
-/** Chips de filtro sobre o fundo da cor do tema (contraste com a tela). */
-function FilterGroup({ label, allLabel, options, selected, onSelect }: FilterGroupProps) {
-  const chip = (active: boolean) =>
-    cn(
-      "h-9 shrink-0 whitespace-nowrap rounded-md px-3 text-xs font-semibold transition-colors lg:h-8",
-      active
-        ? "bg-primary-foreground text-primary"
-        : "text-primary-foreground/80 hover:bg-primary-foreground/15 hover:text-primary-foreground"
-    );
-
+/** Select compacto sobre o fundo da cor do tema; o gatilho mostra "Rótulo: valor". */
+function FilterSelect({ label, value, options, onChange, className, tour }: FilterSelectProps) {
+  const current = options.find((option) => option.value === value);
   return (
-    <div className="no-scrollbar -mx-0.5 flex items-center gap-1.5 overflow-x-auto px-0.5 lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0">
-      <span className="mr-1 shrink-0 text-[11px] font-bold uppercase tracking-wider text-primary-foreground/70">{label}</span>
-      <button type="button" className={chip(selected === null)} onClick={() => onSelect(null)}>
-        {allLabel}
-      </button>
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          className={chip(selected === option.value)}
-          aria-pressed={selected === option.value}
-          onClick={() => onSelect(selected === option.value ? null : option.value)}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger
+        data-tour={tour}
+        className={cn(
+          "h-9 w-auto shrink-0 gap-2 rounded-md border-0 bg-primary-foreground/15 px-3 text-xs font-semibold text-primary-foreground shadow-none hover:bg-primary-foreground/25 focus:ring-0 [&_svg]:text-primary-foreground/80 lg:h-8",
+          className
+        )}
+      >
+        <SelectValue>
+          {label && <span className="font-bold uppercase tracking-wider text-primary-foreground/70">{label}: </span>}
+          <span>{current?.label}</span>
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((option) => (
+          <SelectItem key={option.value} value={option.value} className="text-xs">
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
 
@@ -132,57 +134,35 @@ export function LessonList({ initialData, languages, templates }: LessonListProp
       <main className="container pb-24 lg:pb-0">
         {/* No desktop a página não rola: a grade ocupa o espaço que sobra e a paginação navega pelo resto. */}
         <div className="flex flex-col gap-4 lg:h-[calc(100dvh-9rem)]">
-          {/* Alternância Lições | Templates e filtros, lado a lado, na cor do tema */}
+          {/* Tipo, nível e idioma em selects numa linha com rolagem horizontal, na cor do tema */}
           <div
-            className="flex shrink-0 flex-col gap-2 rounded-md bg-primary p-2.5 text-primary-foreground shadow-sm lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-6 lg:gap-y-3 lg:p-3"
+            className="flex shrink-0 items-center gap-2 rounded-md bg-primary p-2.5 text-primary-foreground shadow-sm lg:p-3"
             data-tour="teacher-lessons.filters"
           >
-            <div className="grid w-full grid-cols-2 rounded-md bg-primary-foreground/15 p-1 lg:inline-flex lg:w-auto" role="tablist" data-tour="teacher-lessons.view">
-              {(["lessons", "templates"] as const).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  role="tab"
-                  aria-selected={view === option}
-                  onClick={() => setView(option)}
-                  className={cn(
-                    "h-9 rounded px-4 text-xs font-semibold transition-colors lg:h-8",
-                    view === option
-                      ? "bg-primary-foreground text-primary"
-                      : "text-primary-foreground/80 hover:bg-primary-foreground/15 hover:text-primary-foreground"
-                  )}
-                >
-                  {option === "lessons" ? t("viewLessons") : t("viewTemplates")}
-                </button>
-              ))}
-            </div>
-
-            <div className="hidden h-6 w-px bg-primary-foreground/30 lg:block" />
-
-            {view === "lessons" && (
-              <>
-                <FilterGroup
+            <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-2 overflow-x-auto">
+              <FilterSelect
+                tour="teacher-lessons.view"
+                value={view}
+                options={[
+                  { value: "lessons", label: t("viewLessons") },
+                  { value: "templates", label: t("viewTemplates") },
+                ]}
+                onChange={(next) => setView(next as "lessons" | "templates")}
+              />
+              {view === "lessons" && (
+                <FilterSelect
                   label={t("levelLabel")}
-                  allLabel={t("allLabel")}
-                  options={difficulties.map((d) => ({ value: d, label: d }))}
-                  selected={selectedDifficulty}
-                  onSelect={setSelectedDifficulty}
+                  value={selectedDifficulty ?? ALL}
+                  options={[{ value: ALL, label: t("allLabel") }, ...difficulties.map((d) => ({ value: d, label: d }))]}
+                  onChange={(next) => setSelectedDifficulty(next === ALL ? null : next)}
                 />
-                <div className="hidden h-6 w-px bg-primary-foreground/30 lg:block" />
-              </>
-            )}
-            <FilterGroup
-              label={t("languageLabel")}
-              allLabel={t("allLabel")}
-              options={languages.map((l) => ({ value: l.id, label: l.name }))}
-              selected={selectedLanguage}
-              onSelect={setSelectedLanguage}
-            />
-
-            <div className="flex items-center justify-between gap-3 lg:ml-auto lg:justify-end">
-              <span className="text-[11px] font-semibold text-primary-foreground/80 lg:text-xs">
-                {view === "lessons" ? t("resultsCount", { count: total }) : t("templatesCount", { count: total })}
-              </span>
+              )}
+              <FilterSelect
+                label={t("languageLabel")}
+                value={selectedLanguage ?? ALL}
+                options={[{ value: ALL, label: t("allLabel") }, ...languages.map((l) => ({ value: l.id, label: l.name }))]}
+                onChange={(next) => setSelectedLanguage(next === ALL ? null : next)}
+              />
               {hasFilters && (
                 <button
                   type="button"
@@ -190,13 +170,16 @@ export function LessonList({ initialData, languages, templates }: LessonListProp
                     setSelectedDifficulty(null);
                     setSelectedLanguage(null);
                   }}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary-foreground underline-offset-2 hover:underline"
+                  className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap px-1 text-xs font-semibold text-primary-foreground underline-offset-2 hover:underline"
                 >
                   <X className="h-3.5 w-3.5" />
                   {t("clearFilters")}
                 </button>
               )}
             </div>
+            <span className="shrink-0 whitespace-nowrap text-[11px] font-semibold text-primary-foreground/80 lg:text-xs">
+              {view === "lessons" ? t("resultsCount", { count: total }) : t("templatesCount", { count: total })}
+            </span>
           </div>
 
           {/* Grade (rola por dentro só se a janela for pequena demais para as linhas da página) */}
