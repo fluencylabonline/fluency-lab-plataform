@@ -78,7 +78,7 @@ export function FlashcardExercise({
 
           {/* ── Front ── */}
           <div
-            className="absolute inset-0 rounded-md border border-border/40 bg-accent overflow-hidden flex flex-col"
+            className="absolute inset-0 rounded-md border-2 border-border bg-card shadow-sm dark:border dark:border-border/40 dark:bg-accent dark:shadow-none overflow-hidden flex flex-col"
             style={{ backfaceVisibility: "hidden" }}
           >
             {/* Image — flush, no padding, no border */}
@@ -100,7 +100,7 @@ export function FlashcardExercise({
               {useTTS && (
                 <button
                   onClick={(e) => handleSpeak(e, front)}
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full border border-border/30 bg-muted/50 flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full border border-border bg-muted flex items-center justify-center text-foreground/70 hover:bg-muted-foreground/20 transition-colors"
                   title="Ouvir"
                 >
                   <Volume2 size={15} />
@@ -111,7 +111,7 @@ export function FlashcardExercise({
                 {front}
               </p>
 
-              <span className="absolute bottom-5 text-[10px] uppercase tracking-[0.12em] font-medium text-muted-foreground/60">
+              <span className="absolute bottom-5 text-[10px] uppercase tracking-[0.12em] font-medium text-muted-foreground">
                 Toque para virar
               </span>
             </div>
@@ -119,7 +119,7 @@ export function FlashcardExercise({
 
           {/* ── Back ── */}
           <div
-            className="absolute inset-0 rounded-md border border-border/40 bg-muted/30 overflow-hidden flex flex-col"
+            className="absolute inset-0 rounded-md border-2 border-border bg-card shadow-sm dark:border dark:border-border/40 dark:bg-muted/30 dark:shadow-none overflow-hidden flex flex-col"
             style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
           >
             {/* Same image on back */}
@@ -141,7 +141,7 @@ export function FlashcardExercise({
                 <button
                   onClick={(e) => handleSpeak(e, back)}
                   disabled={isLocked}
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full border border-border/30 bg-muted/50 flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors disabled:opacity-40"
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full border border-border bg-muted flex items-center justify-center text-foreground/70 hover:bg-muted-foreground/20 transition-colors disabled:opacity-40"
                   title="Ouvir tradução"
                 >
                   <Volume2 size={15} />
