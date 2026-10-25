@@ -139,7 +139,7 @@ export function NotebookPlansVault({ open, onOpenChange, studentId }: NotebookPl
 
   return (
     <Vault open={open} onOpenChange={onOpenChange}>
-      <VaultContent className="sm:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
+      <VaultContent className="sm:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden" noPadding={true}>
         {/* HEADER */}
         <VaultHeader className="px-6 py-4 border-b">
           <div className="flex flex-col text-left">
@@ -157,7 +157,7 @@ export function NotebookPlansVault({ open, onOpenChange, studentId }: NotebookPl
         </VaultHeader>
 
         {/* SEARCH BAR */}
-        <div className="px-6 py-3 border-b bg-muted/20">
+        <div className="px-3 py-3 border-b bg-muted/20">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input

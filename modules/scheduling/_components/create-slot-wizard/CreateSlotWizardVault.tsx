@@ -288,10 +288,12 @@ export function CreateSlotWizardVault({
         </VaultBody>
 
         <VaultFooter className="mt-6">
-          <VaultSecondaryButton type="button" onClick={goBack} disabled={isSubmitting}>
-            <ArrowLeft className="mr-1 h-4 w-4" />
-            {t("back") || "Voltar"}
-          </VaultSecondaryButton>
+          {step !== "type" && (
+            <VaultSecondaryButton type="button" onClick={goBack} disabled={isSubmitting}>
+              <ArrowLeft className="mr-1 h-4 w-4" />
+              {t("back") || "Voltar"}
+            </VaultSecondaryButton>
+          )}
 
           {step === "summary" ? (
             <VaultPrimaryButton type="button" onClick={handleCreate} disabled={isSubmitting}>
