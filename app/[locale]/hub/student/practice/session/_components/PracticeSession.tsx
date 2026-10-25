@@ -14,6 +14,7 @@ import { ListeningChoiceExercise } from "./ListeningChoiceExercise";
 import { FeedbackSheet } from "./FeedbackSheet";
 import { PracticeSummary } from "./PracticeSummary";
 import { PracticeExitVault } from "./PracticeExitVault";
+import { SavingSession } from "./SavingSession";
 
 import { processSessionResultsAction } from "@/modules/learning/learning.actions";
 import { useOfflineSyncStore } from "@/hooks/offline/use-offline-sync";
@@ -173,11 +174,7 @@ export function PracticeSession({ session, planId, currentStreak, isReplay = fal
   // ── Render: Loading state ──────────────────────────────────────────
 
   if (isProcessing) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-muted-foreground animate-pulse">Salvando sessão...</p>
-      </div>
-    );
+    return <SavingSession />;
   }
 
   // ── Render: Exercise ───────────────────────────────────────────────
