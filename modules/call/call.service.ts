@@ -50,25 +50,24 @@ async function endCall(
 ): Promise<void> {
   const { adminDb } = await import("@/lib/firebase-admin");
 
-  // 1. Clear Firestore (triggers UI close for student)
-  await adminDb.collection("users").doc(studentId).set(
-    { callId: null, notebookId: null },
-    { merge: true }
-  );
-
-  // 2. Update session in Neon
-  const session = await callRepository.findByStreamId(callId);
-  if (session) {
-    const endedAt = new Date();
-    const durationSeconds = Math.floor(
-      (endedAt.getTime() - session.startedAt.getTime()) / 1000
-    );
-
-    await callRepository.update(callId, {
-      endedAt,
-      durationSeconds,
-    });
-  }
+  // Firestore e Neon são independentes: rodam em paralelo.
+  await Promise.all([
+    // 1. Clear Firestore (triggers UI close for student)
+    adminDb.collection("users").doc(studentId).set(
+      { callId: null, notebookId: null },
+      { merge: true }
+    ),
+    // 2. Update session in Neon
+    (async () => {
+      const session = await callRepository.findByStreamId(callId);
+      if (!session) return;
+      const endedAt = new Date();
+      const durationSeconds = Math.floor(
+        (endedAt.getTime() - session.startedAt.getTime()) / 1000
+      );
+      await callRepository.update(callId, { endedAt, durationSeconds });
+    })(),
+  ]);
 
   if (notebookId) {
     console.log(`[callService] Call ${callId} ended on notebook ${notebookId}`);

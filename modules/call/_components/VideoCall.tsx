@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   BackgroundFiltersProvider,
   StreamCall,
@@ -33,6 +34,8 @@ export function VideoCall({
   userPhotoUrl,
 }: VideoCallProps) {
   const { client, call } = useStreamVideo(userId, userName, userPhotoUrl, userRole);
+  // Lido uma vez: o provider só usa estes valores como padrão inicial.
+  const [savedBlurLevel] = useState(readBlurPreference);
 
   if (!client || !call) {
     return null;
@@ -42,8 +45,8 @@ export function VideoCall({
     <StreamVideo client={client}>
       <StreamCall call={call}>
         <BackgroundFiltersProvider
-          backgroundFilter={readBlurPreference() ? "blur" : undefined}
-          backgroundBlurLevel="high"
+          backgroundFilter={savedBlurLevel ? "blur" : undefined}
+          backgroundBlurLevel={savedBlurLevel ?? "medium"}
           // Modelo e wasm servidos de /public: o CSP não permite o unpkg padrão.
           basePath="/mediapipe"
           onError={(error) => console.error("[VideoCall] Background filter error:", error)}

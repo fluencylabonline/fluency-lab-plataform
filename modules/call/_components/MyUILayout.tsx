@@ -256,12 +256,20 @@ export const MyUILayout = ({ userName, userRole }: MyUILayoutProps) => {
     if (!call) return;
     try {
       setIsEnding(true);
-      await call.endCall();
-      await endCallAction({
-        callId: callState?.callId ?? "",
-        studentId,
-        notebookId,
-      });
+      // Independentes entre si: em paralelo, o tempo é o da mais lenta, não a soma.
+      const [streamResult, serverResult] = await Promise.allSettled([
+        call.endCall(),
+        endCallAction({
+          callId: callState?.callId ?? "",
+          studentId,
+          notebookId,
+        }),
+      ]);
+      if (streamResult.status === "rejected") {
+        console.error("[MyUILayout] Stream endCall error:", streamResult.reason);
+      }
+      // O servidor é quem libera o aluno (Firestore) e fecha a sessão: sem ele, não encerrou.
+      if (serverResult.status === "rejected") throw serverResult.reason;
 
       // Chamada longa de professor: depois de limpar a chamada, pergunta se a aula foi dada.
       const endedAt = Date.now();
