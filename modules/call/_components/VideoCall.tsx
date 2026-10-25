@@ -44,6 +44,9 @@ export function VideoCall({
         <BackgroundFiltersProvider
           backgroundFilter={readBlurPreference() ? "blur" : undefined}
           backgroundBlurLevel="high"
+          // Modelo e wasm servidos de /public: o CSP não permite o unpkg padrão.
+          basePath="/mediapipe"
+          onError={(error) => console.error("[VideoCall] Background filter error:", error)}
         >
           <MyUILayout userName={userName} userRole={userRole} />
         </BackgroundFiltersProvider>

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Maximize2 } from "lucide-react";
 import {
+  DefaultParticipantViewUI,
   ParticipantView,
   type StreamVideoParticipant,
 } from "@stream-io/video-react-sdk";
@@ -129,6 +130,7 @@ export const ParticipantsGrid: React.FC<ParticipantsGridProps> = ({
               <ParticipantView
                 participant={participant}
                 trackType={isScreenSharing ? "screenShareTrack" : "videoTrack"}
+                ParticipantViewUI={<DefaultParticipantViewUI showMenuButton={false} />}
               />
             </div>
           </div>

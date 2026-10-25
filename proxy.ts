@@ -102,7 +102,7 @@ export async function proxy(request: NextRequest) {
   const cspHeader = `
     default-src 'none';
     manifest-src 'self';
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${isDev ? "'unsafe-eval'" : ""} https://apis.google.com https://www.youtube.com https://s.ytimg.com;
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'wasm-unsafe-eval' ${isDev ? "'unsafe-eval'" : ""} https://apis.google.com https://www.youtube.com https://s.ytimg.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     font-src 'self' data: https://fonts.gstatic.com;
     img-src 'self' data: blob: https://firebasestorage.googleapis.com https://images.unsplash.com https://i.ytimg.com https://lh3.googleusercontent.com https://*.stream-io-video.com https://*.stream-io-api.com https://user-images.githubusercontent.com;
@@ -137,5 +137,5 @@ export const config = {
   // - /_next (Next.js internals)
   // - /_static (inside /public)
   // - all root files inside /public (e.g. /favicon.ico)
-  matcher: ["/((?!api|_next|_static|_vercel|[\\w-]+\\.\\w+).*)"],
+  matcher: ["/((?!api|_next|_static|_vercel|mediapipe|[\\w-]+\\.\\w+).*)"],
 };
