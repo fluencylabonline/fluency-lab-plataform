@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ParticipantsGrid } from "./ParticipantsGrid";
 import { JoinUI } from "./JoinUI";
 import { ControlButton } from "./ControlButton";
+import { BackgroundBlurButton } from "./BackgroundBlurButton";
 import { getGlassContainerClasses } from "./StreamUtils";
 import { useCallStore } from "@/hooks/data/use-call-store";
 import { endCallAction } from "@/modules/call/call.actions";
@@ -421,6 +422,7 @@ export const MyUILayout = ({ userName, userRole }: MyUILayoutProps) => {
                 enabledIcon={Camera}
                 disabledIcon={CameraOff}
               />
+              <BackgroundBlurButton />
               {userRole === "teacher" && (
                 <div className="md:flex hidden items-center justify-center">
                   <ScreenShareButton />

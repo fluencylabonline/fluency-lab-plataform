@@ -1,8 +1,13 @@
 "use client";
 
-import { StreamCall, StreamVideo } from "@stream-io/video-react-sdk";
+import {
+  BackgroundFiltersProvider,
+  StreamCall,
+  StreamVideo,
+} from "@stream-io/video-react-sdk";
 import "@stream-io/video-react-sdk/dist/css/styles.css";
 import { MyUILayout } from "./MyUILayout";
+import { readBlurPreference } from "./BackgroundBlurButton";
 import { useStreamVideo } from "@/hooks/data/use-stream-video";
 
 interface VideoCallProps {
@@ -36,7 +41,12 @@ export function VideoCall({
   return (
     <StreamVideo client={client}>
       <StreamCall call={call}>
-        <MyUILayout userName={userName} userRole={userRole} />
+        <BackgroundFiltersProvider
+          backgroundFilter={readBlurPreference() ? "blur" : undefined}
+          backgroundBlurLevel="high"
+        >
+          <MyUILayout userName={userName} userRole={userRole} />
+        </BackgroundFiltersProvider>
       </StreamCall>
     </StreamVideo>
   );

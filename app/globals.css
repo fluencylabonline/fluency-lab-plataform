@@ -357,4 +357,28 @@
 .pwa-initializing body {
   overflow: hidden !important;
   background-color: #212121 !important;
-}
+}
+
+/* Chamada: destaque de quem está falando. O outline do Stream é cortado pelo
+   overflow-hidden do quadro (só os cantos apareciam), então o anel é desenhado
+   por dentro, sobre o vídeo. */
+.call-participant-frame .str-video__participant-view--speaking {
+  outline: none;
+}
+
+.call-participant-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 5;
+  box-shadow: inset 0 0 0 0 transparent;
+  transition: box-shadow 150ms ease-out;
+}
+
+.call-participant-frame:has(.str-video__participant-view--speaking)::after {
+  box-shadow:
+    inset 0 0 0 3px #6366f1,
+    inset 0 0 18px 2px rgb(99 102 241 / 0.55);
+}
