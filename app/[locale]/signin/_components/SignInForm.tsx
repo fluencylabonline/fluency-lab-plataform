@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +23,6 @@ import { LockKeyholeIcon, type LockKeyholeIconHandle } from "@/components/animat
 export function SignInForm() {
   const t = useTranslations("Auth");
   const tv = useTranslations("Validation");
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo");
 
@@ -63,8 +62,11 @@ export function SignInForm() {
     const roleSegment = userRole ? (roleRoutes[userRole] || "student") : "student";
     const targetUrl = redirectTo || `/hub/${roleSegment}/profile`;
 
+    // Navegação completa: com o cookie de sessão já setado, um router.push/refresh
+    // em /signin cai no redirect do proxy para /hub e a requisição RSC desse salto
+    // falha no service worker, deixando o hub só com a sidebar.
     setTimeout(() => {
-      router.push(targetUrl);
+      window.location.assign(targetUrl);
     }, 3000);
   };
 
