@@ -56,6 +56,9 @@ export const BackgroundBlurButton = ({ className }: { className?: string }) => {
     disableBackgroundFilter,
   } = useBackgroundFilters();
   const [open, setOpen] = useState(false);
+  // Valor enquanto o slider é arrastado. Cada mudança real de nível recria o
+  // filtro e reinicia a câmera no SDK, então só aplicamos ao soltar.
+  const [draft, setDraft] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -78,6 +81,12 @@ export const BackgroundBlurButton = ({ className }: { className?: string }) => {
   const applyLevel = (level: number) => {
     applyBackgroundBlurFilter(level);
     saveBlurPreference(level);
+  };
+
+  const commitDraft = () => {
+    if (draft === null) return;
+    if (draft !== currentLevel || !isActive) applyLevel(draft);
+    setDraft(null);
   };
 
   const handleDisable = () => {
@@ -131,8 +140,11 @@ export const BackgroundBlurButton = ({ className }: { className?: string }) => {
             min={MIN_BLUR}
             max={MAX_BLUR}
             step={1}
-            value={currentLevel}
-            onChange={(e) => applyLevel(Number(e.target.value))}
+            value={draft ?? currentLevel}
+            onChange={(e) => setDraft(Number(e.target.value))}
+            onPointerUp={commitDraft}
+            onKeyUp={commitDraft}
+            onBlur={commitDraft}
             aria-label="Intensidade do desfoque"
             className="w-full accent-indigo-600"
           />
