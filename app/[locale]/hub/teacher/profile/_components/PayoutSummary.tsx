@@ -6,15 +6,10 @@ import { Locale } from "@/i18n/config";
 import { format, type Locale as DateFnsLocale } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import {
-  TrendingUp,
   History,
   DollarSign,
-  Calendar,
   ChevronRight,
-  Filter,
   Loader2,
-  Plus,
-  Equal,
   Info,
   GraduationCap
 } from "lucide-react";
@@ -33,6 +28,7 @@ import { resendTeacherPayoutEmailAction, getTeacherProjectionsAction } from "@/m
 import { PayoutDetailsVault } from "@/modules/payout/_components/PayoutDetailsVault";
 import { Vault, VaultContent, VaultHeader, VaultTitle, VaultBody } from "@/components/ui/vault";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface Payout {
   id: string;
@@ -196,6 +192,62 @@ function PayoutRow({ payout, teacherId, formatValue, months, t }: { payout: Payo
   );
 }
 
+function BreakdownRow({
+  dotClassName,
+  title,
+  subtitle,
+  badge,
+  amount,
+  count,
+  info,
+  onOpen,
+}: {
+  dotClassName: string;
+  title: string;
+  subtitle: string;
+  badge?: string;
+  amount: string;
+  count: string;
+  info: string;
+  onOpen: () => void;
+}) {
+  return (
+    <TooltipProvider>
+    <div className="flex items-center gap-2 py-3">
+      <button
+        type="button"
+        onClick={onOpen}
+        className="flex flex-1 items-center gap-3 text-left min-w-0 group"
+      >
+        <span className={cn("w-2.5 h-2.5 rounded-full shrink-0", dotClassName)} />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold text-foreground flex items-center gap-2">
+            {title}
+            {badge && (
+              <Badge variant="secondary" className="text-[8px] font-black uppercase tracking-widest px-1.5 h-4 border-none">
+                {badge}
+              </Badge>
+            )}
+          </p>
+          <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
+        </div>
+        <div className="text-right shrink-0">
+          <p className="text-base font-black text-foreground">{amount}</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{count}</p>
+        </div>
+        <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 group-hover:translate-x-0.5 transition-transform" />
+      </button>
+      <Tooltip>
+        <TooltipTrigger className="p-1 text-muted-foreground hover:text-foreground">
+          <Info className="w-4 h-4" />
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs">{info}</TooltipContent>
+      </Tooltip>
+    </div>
+    </TooltipProvider>
+  );
+}
+
 function EarningsBreakdownVault({
   open,
   onOpenChange,
@@ -313,110 +365,70 @@ export function PayoutSummary({ history, projections: initialProjections, teache
     p.year === filterYear
   );
 
+  const pendingPct = projections.total > 0 ? (projections.pending.amount / projections.total) * 100 : 0;
+
   const periodLabel = filterMonth === -1 ? `${t("wholeYear")} ${filterYear}` : `${months[filterMonth]} ${filterYear}`;
 
   return (
     <div className="space-y-6">
-      {/* Projections Dashboard */}
-      <div className={cn("transition-all duration-300", isLoadingProjections && "opacity-60")}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Pending: always the full backlog, independent of the period filter */}
-          <button
-            type="button"
-            onClick={() => setOpenBreakdown("pending")}
-            className="card p-4 border-l-4 border-l-blue-500 text-left hover:bg-muted/20 transition-colors group"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                  <History className="w-5 h-5" />
-                </div>
-                <span className="text-sm font-medium text-muted-foreground">{t("pendingPayout")}</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 group-hover:translate-x-0.5 transition-transform" />
-            </div>
-            <p className="text-2xl font-bold">{formatValue(projections.pending.amount)}</p>
-            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-              <Badge variant="secondary" className="text-[9px] font-black uppercase tracking-widest px-2 h-4 border-none bg-blue-500/10 text-blue-600">
-                {t("classesCount", { count: projections.pending.count })}
-              </Badge>
-            </div>
-
-            {/* Split the running balance so a growing backlog doesn't hide inside one lump sum */}
-            <div className="flex items-center gap-2 mt-2.5 flex-wrap">
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted/50">
-                <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{t("thisMonth")}</span>
-                <span className="text-xs font-black text-foreground">{formatValue(projections.pending.currentMonthAmount)}</span>
-              </div>
-              {projections.pending.previousMonthsAmount > 0 && (
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-500/10">
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-amber-600">{t("previousMonths")}</span>
-                  <span className="text-xs font-black text-amber-700">{formatValue(projections.pending.previousMonthsAmount)}</span>
-                </div>
-              )}
-            </div>
-
-            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-              {t("pendingDescription")}
-            </p>
-            {projections.pending.previousMonthsAmount > 0 && (
-              <p className="text-[10px] text-amber-600/90 mt-1.5 flex items-start gap-1 leading-relaxed font-medium">
-                <Info className="w-3 h-3 shrink-0 mt-0.5" />
-                {t("pendingBacklogNote")}
-              </p>
-            )}
-            <p className="text-[10px] text-muted-foreground/70 mt-1.5 flex items-start gap-1 leading-relaxed">
-              <Info className="w-3 h-3 shrink-0 mt-0.5" />
-              {t("pendingNotAffectedByFilter")}
-            </p>
-          </button>
-
-          {/* Projected: scheduled classes within the selected period */}
-          <button
-            type="button"
-            onClick={() => setOpenBreakdown("projected")}
-            className="card p-4 border-l-4 border-l-purple-500 text-left hover:bg-muted/20 transition-colors group"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
-                  <Calendar className="w-5 h-5" />
-                </div>
-                <span className="text-sm font-medium text-muted-foreground">{t("projectedEarnings")}</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 group-hover:translate-x-0.5 transition-transform" />
-            </div>
-            <p className="text-2xl font-bold">{formatValue(projections.projected.amount)}</p>
-            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-              <Badge variant="secondary" className="text-[9px] font-black uppercase tracking-widest px-2 h-4 border-none bg-purple-500/10 text-purple-600">
-                {t("classesCount", { count: projections.projected.count })}
-              </Badge>
-              <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{periodLabel}</span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-              {t("projectedDescription")}
-            </p>
-          </button>
+      {/* Single summary card: total up front, the two parts below it */}
+      <div className={cn("card p-5 transition-all duration-300", isLoadingProjections && "opacity-60")}>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">{t("toReceive")}</p>
+            <p className="text-4xl font-black text-foreground mt-1">{formatValue(projections.total)}</p>
+          </div>
+          <div className="flex items-center gap-1">
+            <Select value={filterMonth.toString()} onValueChange={(v) => setFilterMonth(parseInt(v))}>
+              <SelectTrigger className="w-[130px] h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="-1">{t("allMonths")}</SelectItem>
+                {months.map((m, i) => (
+                  <SelectItem key={m} value={i.toString()}>{m}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterYear.toString()} onValueChange={(v) => setFilterYear(parseInt(v))}>
+              <SelectTrigger className="w-[90px] h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[2024, 2025, 2026].map(y => (
+                  <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        {/* Total: explicit sum, so the relationship between the two cards above is obvious */}
-        <div className="card p-4 mt-4 border-l-4 border-l-green-500">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-green-100 text-green-600 rounded-lg">
-              <TrendingUp className="w-5 h-5" />
-            </div>
-            <span className="text-sm font-medium text-muted-foreground">{t("totalExpected")}</span>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap text-sm font-bold">
-            <span className="px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600">{formatValue(projections.pending.amount)}</span>
-            <Plus className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-            <span className="px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600">{formatValue(projections.projected.amount)}</span>
-            <Equal className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-            <span className="text-2xl font-black text-green-700">{formatValue(projections.total)}</span>
-          </div>
-          <p className="text-xs text-green-600/80 mt-2 font-medium">
-            {t("totalDescription", { period: periodLabel })}
-          </p>
+        {/* Proportion between what is already taught and what is still scheduled */}
+        <div className="flex h-2 w-full rounded-full overflow-hidden bg-muted mt-4">
+          <div className="bg-blue-500 transition-all" style={{ width: `${pendingPct}%` }} />
+          <div className="bg-purple-500 transition-all" style={{ width: `${100 - pendingPct}%` }} />
+        </div>
+
+        <div className="mt-4 divide-y divide-border/50">
+          <BreakdownRow
+            dotClassName="bg-blue-500"
+            title={t("taughtLabel")}
+            subtitle={t("taughtSubtitle")}
+            badge={t("accumulatedBadge")}
+            amount={formatValue(projections.pending.amount)}
+            count={t("classesCount", { count: projections.pending.count })}
+            info={`${t("pendingDescription")} ${t("pendingNotAffectedByFilter")}`}
+            onOpen={() => setOpenBreakdown("pending")}
+          />
+          <BreakdownRow
+            dotClassName="bg-purple-500"
+            title={t("scheduledLabel")}
+            subtitle={t("scheduledSubtitle", { period: periodLabel })}
+            amount={formatValue(projections.projected.amount)}
+            count={t("classesCount", { count: projections.projected.count })}
+            info={t("projectedDescription")}
+            onOpen={() => setOpenBreakdown("projected")}
+          />
         </div>
       </div>
 
@@ -449,37 +461,7 @@ export function PayoutSummary({ history, projections: initialProjections, teache
             <h3 className="font-semibold">{t("historyTitle") || "Histórico de Pagamentos"}</h3>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <Select
-              value={filterMonth.toString()}
-              onValueChange={(v) => setFilterMonth(parseInt(v))}
-            >
-              <SelectTrigger className="w-[140px] h-8 border-none bg-transparent hover:bg-muted/50 transition-colors">
-                <SelectValue placeholder={t("allMonths") || "Todos os meses"} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="-1">{t("allMonths") || "Todos os meses"}</SelectItem>
-                {months.map((m, i) => (
-                  <SelectItem key={m} value={i.toString()}>{m}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={filterYear.toString()}
-              onValueChange={(v) => setFilterYear(parseInt(v))}
-            >
-              <SelectTrigger className="w-[100px] h-8 border-none bg-transparent hover:bg-muted/50 transition-colors">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {[2024, 2025, 2026].map(y => (
-                  <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{periodLabel}</span>
         </div>
 
         <div className="divide-y">

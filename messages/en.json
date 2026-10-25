@@ -2258,6 +2258,12 @@
       "title": "Today's Lessons"
     },
     "Payouts": {
+      "toReceive": "You have to receive",
+      "taughtLabel": "Classes already taught",
+      "taughtSubtitle": "Awaiting payment",
+      "accumulatedBadge": "accumulated",
+      "scheduledLabel": "Scheduled classes",
+      "scheduledSubtitle": "Still to happen in {period}",
       "allMonths": "All months",
       "wholeYear": "Year",
       "historyTitle": "Payment History",

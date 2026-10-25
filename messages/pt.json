@@ -2258,6 +2258,12 @@
       "title": "Aulas de Hoje"
     },
     "Payouts": {
+      "toReceive": "Você tem a receber",
+      "taughtLabel": "Aulas já lecionadas",
+      "taughtSubtitle": "Aguardando pagamento",
+      "accumulatedBadge": "acumulado",
+      "scheduledLabel": "Aulas agendadas",
+      "scheduledSubtitle": "Ainda vão acontecer em {period}",
       "allMonths": "Todos os meses",
       "wholeYear": "Ano",
       "historyTitle": "Histórico de Pagamentos",
