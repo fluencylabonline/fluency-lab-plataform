@@ -8,29 +8,35 @@ import { cn } from "@/lib/utils";
 
 export const BLUR_STORAGE_KEY = "fluency:call-background-blur";
 
-export type BlurLevel = "low" | "medium" | "high";
+/**
+ * Intensidade do desfoque. O Stream aceita um número: o raio satura em 10 e o
+ * sigma em ~13, então acima de `MAX_BLUR` não muda mais nada. Os níveis nomeados
+ * do SDK (low/medium/high = 3/5/7) ficavam muito aquém desse teto.
+ */
+export const MIN_BLUR = 1;
+export const MAX_BLUR = 14;
+const DEFAULT_BLUR = 8;
 
-const LEVELS: { value: BlurLevel; label: string }[] = [
-  { value: "low", label: "Leve" },
-  { value: "medium", label: "Médio" },
-  { value: "high", label: "Forte" },
-];
+const clampBlur = (value: number) =>
+  Math.min(MAX_BLUR, Math.max(MIN_BLUR, Math.round(value)));
 
-const DEFAULT_LEVEL: BlurLevel = "medium";
-
-/** Preferência salva: nível do blur, ou null se estava desligado. */
-export function readBlurPreference(): BlurLevel | null {
+/** Preferência salva: intensidade do blur, ou null se estava desligado. */
+export function readBlurPreference(): number | null {
   try {
     const stored = localStorage.getItem(BLUR_STORAGE_KEY);
-    return LEVELS.some((l) => l.value === stored) ? (stored as BlurLevel) : null;
+    if (stored === null || stored === "off") return null;
+    // Valores antigos eram nomeados (low/medium/high)
+    const legacy: Record<string, number> = { low: 3, medium: 5, high: 7 };
+    const value = stored in legacy ? legacy[stored] : Number(stored);
+    return Number.isFinite(value) ? clampBlur(value) : null;
   } catch {
     return null;
   }
 }
 
-function saveBlurPreference(level: BlurLevel | null) {
+function saveBlurPreference(level: number | null) {
   try {
-    localStorage.setItem(BLUR_STORAGE_KEY, level ?? "off");
+    localStorage.setItem(BLUR_STORAGE_KEY, level === null ? "off" : String(level));
   } catch {
     // storage indisponível — a preferência só não persiste
   }
@@ -64,12 +70,12 @@ export const BackgroundBlurButton = ({ className }: { className?: string }) => {
   if (!isSupported) return null;
 
   const isActive = backgroundFilter === "blur";
-  const currentLevel: BlurLevel = LEVELS.some((l) => l.value === backgroundBlurLevel)
-    ? (backgroundBlurLevel as BlurLevel)
-    : DEFAULT_LEVEL;
-  const levelIndex = LEVELS.findIndex((l) => l.value === currentLevel);
+  const currentLevel =
+    typeof backgroundBlurLevel === "number"
+      ? clampBlur(backgroundBlurLevel)
+      : DEFAULT_BLUR;
 
-  const applyLevel = (level: BlurLevel) => {
+  const applyLevel = (level: number) => {
     applyBackgroundBlurFilter(level);
     saveBlurPreference(level);
   };
@@ -122,23 +128,17 @@ export const BackgroundBlurButton = ({ className }: { className?: string }) => {
 
           <input
             type="range"
-            min={0}
-            max={LEVELS.length - 1}
+            min={MIN_BLUR}
+            max={MAX_BLUR}
             step={1}
-            value={levelIndex}
-            onChange={(e) => applyLevel(LEVELS[Number(e.target.value)].value)}
+            value={currentLevel}
+            onChange={(e) => applyLevel(Number(e.target.value))}
             aria-label="Intensidade do desfoque"
             className="w-full accent-indigo-600"
           />
           <div className="mt-1 flex justify-between text-[10px] font-medium text-slate-500 dark:text-slate-400">
-            {LEVELS.map((l) => (
-              <span
-                key={l.value}
-                className={cn(isActive && l.value === currentLevel && "text-indigo-600 dark:text-indigo-400")}
-              >
-                {l.label}
-              </span>
-            ))}
+            <span>Leve</span>
+            <span>Muito desfocado</span>
           </div>
         </div>
       )}

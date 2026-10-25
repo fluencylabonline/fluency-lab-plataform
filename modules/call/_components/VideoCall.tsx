@@ -46,7 +46,7 @@ export function VideoCall({
       <StreamCall call={call}>
         <BackgroundFiltersProvider
           backgroundFilter={savedBlurLevel ? "blur" : undefined}
-          backgroundBlurLevel={savedBlurLevel ?? "medium"}
+          backgroundBlurLevel={savedBlurLevel ?? 8}
           // Modelo e wasm servidos de /public: o CSP não permite o unpkg padrão.
           basePath="/mediapipe"
           onError={(error) => console.error("[VideoCall] Background filter error:", error)}
