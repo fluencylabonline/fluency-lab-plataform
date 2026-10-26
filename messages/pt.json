@@ -4115,5 +4115,72 @@
     "analysisVocabulary": "Vocabulário extraído",
     "analysisStructures": "Estruturas extraídas",
     "lessonId": "ID da lição"
+  },
+  "TrialClass": {
+    "Start": {
+      "title": "Aula experimental",
+      "subtitle": "Inicie uma chamada instantânea e envie o link para o aluno.",
+      "button": "Iniciar chamada",
+      "starting": "Iniciando…",
+      "error": "Não foi possível iniciar a chamada. Tente de novo."
+    },
+    "Visitor": {
+      "title": "Aula experimental",
+      "text": "Peça o link da chamada ao seu professor para entrar."
+    },
+    "Closed": {
+      "endedTitle": "Esta chamada foi encerrada",
+      "endedText": "Peça um novo link ao seu professor.",
+      "notFoundTitle": "Link inválido",
+      "notFoundText": "Confira o link ou peça um novo ao seu professor."
+    },
+    "Lobby": {
+      "title": "Pronto para entrar?",
+      "withHost": "Aula experimental com {host}",
+      "subtitle": "Aula experimental",
+      "nobody": "Ninguém está na chamada ainda.",
+      "inCall": "{count, plural, one {{names} está na chamada.} other {{names} estão na chamada.}}",
+      "nameLabel": "Seu nome",
+      "namePlaceholder": "Como você se chama?",
+      "defaultName": "Visitante",
+      "ask": "Pedir para entrar",
+      "sending": "Enviando…",
+      "waiting": "Aguardando o professor aceitar…",
+      "waitingHint": "Mantenha esta tela aberta.",
+      "cancel": "Cancelar",
+      "denied": "O professor não aceitou o pedido.",
+      "askAgain": "Pedir de novo",
+      "limited": "Muitas tentativas. Aguarde alguns minutos.",
+      "ended": "Esta chamada foi encerrada.",
+      "previewLabel": "Prévia da sua câmera",
+      "cameraOff": "Câmera desligada",
+      "cameraBlocked": "Câmera bloqueada. Libere o acesso no navegador para aparecer na chamada.",
+      "micOn": "Ligar microfone",
+      "micOff": "Desligar microfone",
+      "cameraTurnOn": "Ligar câmera",
+      "cameraTurnOff": "Desligar câmera"
+    },
+    "Room": {
+      "connecting": "Conectando…",
+      "connectError": "Não foi possível conectar à chamada.",
+      "tryAgain": "Tentar de novo",
+      "waitingOthers": "Esperando alguém entrar…",
+      "left": "Você saiu da chamada",
+      "rejoin": "Entrar de novo",
+      "endedByHost": "A chamada foi encerrada",
+      "micOn": "Ligar microfone",
+      "micOff": "Desligar microfone",
+      "cameraOn": "Ligar câmera",
+      "cameraOff": "Desligar câmera",
+      "leave": "Sair da chamada",
+      "endForAll": "Encerrar para todos",
+      "confirmEnd": "Toque para encerrar",
+      "copyLink": "Copiar link",
+      "copied": "Link copiado",
+      "share": "Compartilhar link",
+      "wantsToJoin": "{name} quer entrar",
+      "accept": "Aceitar",
+      "deny": "Recusar"
+    }
   }
 }

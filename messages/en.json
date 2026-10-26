@@ -4116,5 +4116,72 @@
     "analysisVocabulary": "Extracted vocabulary",
     "analysisStructures": "Extracted structures",
     "lessonId": "Lesson ID"
+  },
+  "TrialClass": {
+    "Start": {
+      "title": "Trial class",
+      "subtitle": "Start an instant call and send the link to the student.",
+      "button": "Start call",
+      "starting": "Starting…",
+      "error": "Could not start the call. Please try again."
+    },
+    "Visitor": {
+      "title": "Trial class",
+      "text": "Ask your teacher for the call link to join."
+    },
+    "Closed": {
+      "endedTitle": "This call has ended",
+      "endedText": "Ask your teacher for a new link.",
+      "notFoundTitle": "Invalid link",
+      "notFoundText": "Check the link or ask your teacher for a new one."
+    },
+    "Lobby": {
+      "title": "Ready to join?",
+      "withHost": "Trial class with {host}",
+      "subtitle": "Trial class",
+      "nobody": "No one is in the call yet.",
+      "inCall": "{count, plural, one {{names} is in the call.} other {{names} are in the call.}}",
+      "nameLabel": "Your name",
+      "namePlaceholder": "What is your name?",
+      "defaultName": "Guest",
+      "ask": "Ask to join",
+      "sending": "Sending…",
+      "waiting": "Waiting for the teacher to let you in…",
+      "waitingHint": "Keep this screen open.",
+      "cancel": "Cancel",
+      "denied": "The teacher did not accept the request.",
+      "askAgain": "Ask again",
+      "limited": "Too many attempts. Please wait a few minutes.",
+      "ended": "This call has ended.",
+      "previewLabel": "Your camera preview",
+      "cameraOff": "Camera is off",
+      "cameraBlocked": "Camera blocked. Allow access in your browser to appear in the call.",
+      "micOn": "Turn on microphone",
+      "micOff": "Turn off microphone",
+      "cameraTurnOn": "Turn on camera",
+      "cameraTurnOff": "Turn off camera"
+    },
+    "Room": {
+      "connecting": "Connecting…",
+      "connectError": "Could not connect to the call.",
+      "tryAgain": "Try again",
+      "waitingOthers": "Waiting for someone to join…",
+      "left": "You left the call",
+      "rejoin": "Rejoin",
+      "endedByHost": "The call has ended",
+      "micOn": "Turn on microphone",
+      "micOff": "Turn off microphone",
+      "cameraOn": "Turn on camera",
+      "cameraOff": "Turn off camera",
+      "leave": "Leave call",
+      "endForAll": "End for everyone",
+      "confirmEnd": "Tap to end",
+      "copyLink": "Copy link",
+      "copied": "Link copied",
+      "share": "Share link",
+      "wantsToJoin": "{name} wants to join",
+      "accept": "Accept",
+      "deny": "Decline"
+    }
   }
 }
