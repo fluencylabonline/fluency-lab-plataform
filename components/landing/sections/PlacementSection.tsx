@@ -31,15 +31,15 @@ export function PlacementSection() {
         </div>
 
         {/* Parte 2: teste de nível */}
-        <div className="grid items-center gap-8 lg:grid-cols-[1fr_1fr] lg:gap-16">
+        <div className="grid items-center gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
           <Reveal x={-50} y={0} className="flex flex-col items-start gap-4 lg:order-1">
             <Badge>{t("part2.badge")}</Badge>
             <h3 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight">{t("part2.title")}</h3>
             <p className="text-muted-foreground text-lg max-w-md">{t("part2.text")}</p>
             <SoftCTA>{t("part2.cta")}</SoftCTA>
           </Reveal>
-          <Reveal x={50} y={0} delay={0.1} className="mx-auto w-full max-w-md lg:order-2">
-            <LazyMount placeholder={<Skeleton ratio="3/4" />}><Tablet label={t("part2.deviceLabel")}><PlacementTablet /></Tablet></LazyMount>
+          <Reveal x={50} y={0} delay={0.1} className="mx-auto w-full max-w-xl lg:order-2">
+            <LazyMount placeholder={<Skeleton ratio="960/1093" />}><Tablet label={t("part2.deviceLabel")}><PlacementTablet /></Tablet></LazyMount>
           </Reveal>
         </div>
       </div>

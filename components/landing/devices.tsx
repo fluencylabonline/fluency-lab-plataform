@@ -69,7 +69,7 @@ function Screen({ designW, designH, children, className }: { designW: number; de
 }
 
 export const PHONE = { w: 430, h: 900 };
-export const TABLET = { w: 820, h: 1093 };
+export const TABLET = { w: 960, h: 1093 };
 export const SCREEN = { w: 1280, h: 800 };
 
 export function Phone({ children, className, label }: FrameProps) {

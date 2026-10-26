@@ -1,9 +1,56 @@
 "use client";
 
+import { useState, type CSSProperties, type MouseEvent, type PointerEvent } from "react";
 import { useTranslations } from "next-intl";
+import { ArrowDown } from "lucide-react";
 import { Monitor, Phone } from "../devices";
 import { PrimaryCTA, Reveal } from "../ui";
 import { CollabProvider, HeroLaptopScreen, HeroPhoneScreen } from "../screens/HeroCollab";
+
+/** Título que ganha cor primary num círculo suave sob o cursor (um único raio, não palavra a palavra). */
+function SpotlightTitle({ children }: { children: string }) {
+  const move = (e: PointerEvent<HTMLHeadingElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
+  const leave = (e: PointerEvent<HTMLHeadingElement>) => {
+    e.currentTarget.style.setProperty("--mx", "-999px");
+    e.currentTarget.style.setProperty("--my", "-999px");
+  };
+  return (
+    <h1
+      onPointerMove={move}
+      onPointerLeave={leave}
+      style={{ "--mx": "-999px", "--my": "-999px" } as CSSProperties}
+      className="bg-[radial-gradient(circle_150px_at_var(--mx)_var(--my),var(--color-primary)_0%,var(--color-primary)_55%,transparent_100%),linear-gradient(var(--color-foreground),var(--color-foreground))] bg-clip-text text-transparent text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter leading-[0.98]"
+    >
+      {children}
+    </h1>
+  );
+}
+
+/** Ao clicar, enche de primary de cima para baixo, ganha uma seta para baixo e então rola até a seção. */
+function SeeHowButton({ label }: { label: string }) {
+  const [filled, setFilled] = useState(false);
+  const go = (e: MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setFilled(true);
+    setTimeout(() => document.getElementById("diferenciais")?.scrollIntoView({ behavior: "smooth" }), 450);
+    setTimeout(() => setFilled(false), 1600);
+  };
+  return (
+    <a
+      href="#diferenciais"
+      onClick={go}
+      className={`relative inline-flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-full border-2 px-8 py-4 font-bold transition-colors duration-300 ${filled ? "border-primary text-primary-foreground" : "border-foreground/15"}`}
+    >
+      <span aria-hidden className={`absolute inset-x-0 top-0 bg-primary transition-[height] duration-500 ease-out ${filled ? "h-full" : "h-0"}`} />
+      <span className="relative">{label}</span>
+      <ArrowDown aria-hidden className={`relative size-5 transition-all duration-300 ${filled ? "w-5 opacity-100" : "-ml-2 w-0 opacity-0"}`} />
+    </a>
+  );
+}
 
 export function HeroSection() {
   const t = useTranslations("LandingShowcase.Hero");
@@ -13,16 +60,14 @@ export function HeroSection() {
       <div className="w-full max-w-[1440px] mx-auto grid lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.5fr)] gap-10 items-center">
         <div className="flex flex-col gap-6 text-center lg:text-left items-center lg:items-start">
           <Reveal y={36}>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter leading-[0.98]">{t("title")}</h1>
+            <SpotlightTitle>{t("title")}</SpotlightTitle>
           </Reveal>
           <Reveal delay={0.12}>
             <p className="text-muted-foreground text-lg max-w-lg">{t("subtitle")}</p>
           </Reveal>
           <Reveal delay={0.24} className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <PrimaryCTA />
-            <a href="#diferenciais" className="inline-flex items-center justify-center whitespace-nowrap rounded-full border-2 border-foreground/15 px-8 py-4 font-bold hover:bg-foreground/5 transition-colors">
-              {t("seeHow")}
-            </a>
+            <SeeHowButton label={t("seeHow")} />
           </Reveal>
         </div>
 

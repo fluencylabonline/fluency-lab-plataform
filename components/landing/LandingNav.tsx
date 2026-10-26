@@ -14,7 +14,7 @@ import type { SessionUserDTO } from "@/modules/user/user.schema";
 const LINKS = [
   ["howItWorks", "diferenciais"],
   ["placement", "nivelamento"],
-  ["pricing", "agenda"],
+  ["pricing", "agendar"],
 ] as const;
 
 /** Barra fixa em pílula. O link da seção que está na tela ganha um destaque que desliza entre os itens. */
@@ -38,7 +38,7 @@ export function LandingNav({ user }: { user: SessionUserDTO | null }) {
   // As seções abaixo da dobra carregam depois (dynamic), então o elemento é procurado a cada scroll:
   // vale a seção que cruza uma linha a ~40% da altura da janela.
   useEffect(() => {
-    const ids = ["aula", ...LINKS.map(([, id]) => id), "agendar"];
+    const ids = ["aula", ...LINKS.map(([, id]) => id)];
     let raf = 0;
     const update = () => {
       raf = 0;
@@ -69,7 +69,7 @@ export function LandingNav({ user }: { user: SessionUserDTO | null }) {
 
   return (
     <header className="fixed top-3 md:top-6 inset-x-0 z-50 px-3 md:px-8 pointer-events-none">
-      <div className="mx-auto max-w-5xl flex items-center justify-end sm:justify-between gap-3 rounded-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md pl-2 sm:pl-5 pr-2 py-2 pointer-events-auto">
+      <div className="mx-auto max-w-5xl flex items-center justify-end sm:justify-between gap-3 rounded-full border border-white/40 dark:border-white/10 bg-white/35 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.12)] pl-2 sm:pl-5 pr-2 py-2 pointer-events-auto">
         <a href="#aula" aria-label={t("Nav.homeLabel")} className="hidden sm:block"><Image src={Logo} alt={t("Common.brand")} width={120} style={{ height: "auto" }} priority /></a>
         <nav aria-label={t("Nav.sectionsLabel")} className="hidden lg:flex items-center gap-1">
           {LINKS.map(([key, id]) => {
