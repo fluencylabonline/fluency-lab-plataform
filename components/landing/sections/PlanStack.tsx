@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check, MessageCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 const PEEK = 30;
 
 /** Planos empilhados, um atrás do outro. Toque num card de trás para trazê-lo para a frente. */
-export function PlanStack() {
+export function PlanStack({ href, cta, note }: { href: string; cta: string; note: string }) {
   const t = useTranslations("LandingShowcase.Pricing");
   const items = t.raw("main.items") as string[];
   const reduced = useReducedMotion();
@@ -20,7 +20,7 @@ export function PlanStack() {
 
   return (
     <div>
-      <div className="relative h-[560px]" style={{ paddingTop: PEEK * 2 }}>
+      <div className="relative h-[720px]" style={{ paddingTop: PEEK * 2 }}>
         {[0, 1, 2].map((id) => {
           const pos = order.indexOf(id);
           const front = pos === 0;
@@ -59,6 +59,14 @@ export function PlanStack() {
                       </li>
                     ))}
                   </ul>
+                  {front && (
+                    <div className="mt-auto space-y-3 pt-8">
+                      <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-8 py-5 text-lg font-bold text-primary-foreground shadow-lg transition-transform hover:scale-[1.01] active:scale-95">
+                        <MessageCircle className="size-5" />{cta}
+                      </a>
+                      <p className="text-center text-sm text-muted-foreground">{note}</p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="flex h-full flex-col p-8 md:p-10">

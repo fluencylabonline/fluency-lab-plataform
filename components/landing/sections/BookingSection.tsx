@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, MessageCircle } from "lucide-react";
+import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { SystemSettings } from "@/modules/settings/settings.schema";
 import { Reveal } from "../ui";
@@ -22,15 +22,9 @@ export function BookingSection({ settings }: { settings: SystemSettings }) {
               <li key={b} className="flex items-center gap-3"><span className="size-6 rounded-full bg-white/20 grid place-items-center"><Check className="size-4" /></span>{b}</li>
             ))}
           </ul>
-          <div className="mt-4 max-w-md space-y-4">
-            <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white text-primary px-8 py-5 text-lg font-bold shadow-xl transition-transform hover:scale-[1.01] active:scale-95">
-              <MessageCircle className="size-5" />{t("Common.cta")}
-            </a>
-            <p className="text-sm text-center text-primary-foreground/80">{t("Booking.note")}</p>
-          </div>
         </Reveal>
         <Reveal delay={0.15} className="relative z-10 w-full max-w-md lg:justify-self-end lg:-my-40">
-          <PlanStack />
+          <PlanStack href={href} cta={t("Common.cta")} note={t("Booking.note")} />
         </Reveal>
       </div>
     </section>
