@@ -12,8 +12,8 @@ export function BookingSection({ settings }: { settings: SystemSettings }) {
   const href = `https://wa.me/${settings.whatsappNumber}?text=${encodeURIComponent(settings.whatsappMessage)}`;
 
   return (
-    <section id="agendar" className="scroll-mt-24 mx-3 md:mx-8 my-12 rounded-3xl bg-primary text-primary-foreground px-6 md:px-14 py-16 md:py-20 overflow-hidden relative">
-      <div className="absolute -right-24 -top-24 size-80 rounded-full bg-white/10 blur-3xl" />
+    <section id="agendar" className="scroll-mt-24 mx-3 md:mx-8 my-12 lg:my-28 rounded-3xl bg-primary text-primary-foreground px-6 md:px-14 py-16 md:py-20 relative">
+      <div aria-hidden className="absolute inset-0 overflow-hidden rounded-3xl"><div className="absolute -right-24 -top-24 size-80 rounded-full bg-white/10 blur-3xl" /></div>
       <div className="relative grid lg:grid-cols-2 gap-10 items-center max-w-6xl mx-auto">
         <Reveal className="flex flex-col gap-5">
           <h2 className="text-4xl md:text-6xl font-bold tracking-tighter leading-[0.98]">{t("Booking.title")}</h2>
@@ -29,7 +29,7 @@ export function BookingSection({ settings }: { settings: SystemSettings }) {
             <p className="text-sm text-center text-primary-foreground/80">{t("Booking.note")}</p>
           </div>
         </Reveal>
-        <Reveal delay={0.15} className="w-full max-w-md lg:justify-self-end">
+        <Reveal delay={0.15} className="relative z-10 w-full max-w-md lg:justify-self-end lg:-my-40">
           <PlanStack />
         </Reveal>
       </div>

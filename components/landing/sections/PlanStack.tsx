@@ -37,7 +37,7 @@ export function PlanStack() {
               transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 260, damping: 28 }}
               style={{ zIndex: 10 - pos, top: PEEK * 2 }}
               className={cn(
-                "absolute inset-x-0 bottom-0 origin-top overflow-hidden rounded-3xl border bg-card shadow-xl",
+                "absolute inset-x-0 bottom-0 origin-top overflow-hidden rounded-3xl border bg-card text-card-foreground shadow-2xl shadow-black/30",
                 front ? "border-border" : "cursor-pointer border-border/70 hover:brightness-105"
               )}
             >
