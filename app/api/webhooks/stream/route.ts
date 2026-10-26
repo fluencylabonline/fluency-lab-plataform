@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { callService } from "@/modules/call/call.service";
+import { trialCallService } from "@/modules/trial-call/trial-call.service";
 import { env } from "@/env";
 import crypto from "node:crypto";
 
@@ -48,7 +49,12 @@ export async function POST(req: Request) {
 
       if (streamCallId && transcriptionUrl) {
         console.log(`[Stream Webhook] Processing transcription for ${streamCallId}`);
-        await callService.handleTranscriptionWebhook(streamCallId, transcriptionUrl);
+        // Salas de aula experimental usam o prefixo trial_ e têm tabela própria.
+        if (streamCallId.startsWith("trial_")) {
+          await trialCallService.handleTranscriptionWebhook(streamCallId, transcriptionUrl);
+        } else {
+          await callService.handleTranscriptionWebhook(streamCallId, transcriptionUrl);
+        }
       }
     }
 

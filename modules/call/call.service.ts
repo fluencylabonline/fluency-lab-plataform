@@ -3,6 +3,7 @@ import { StreamClient } from "@stream-io/node-sdk";
 import type { StreamCallCredentials } from "./call.types";
 import { env } from "@/env";
 import { callRepository } from "./call.repository";
+import { parseStreamTranscript } from "./call.transcript";
 
 /**
  * call.service.ts — Business logic for video calls.
@@ -97,40 +98,9 @@ function parseStreamTranscriptionJsonl(
   studentId: string,
   teacherId: string
 ): string {
-  try {
-    const lines = rawText.trim().split("\n");
-    const formattedLines = lines
-      .map((line) => {
-        if (!line.trim()) return "";
-        try {
-          const parsed = JSON.parse(line);
-          const text = parsed.text || parsed.alternative?.transcript || "";
-          if (text) {
-            const rawUserId = parsed.speaker_id || parsed.user_id || parsed.user?.id;
-            let speaker = "Sistema";
-            if (rawUserId) {
-              if (rawUserId === studentId) {
-                speaker = "Aluno";
-              } else if (rawUserId === teacherId) {
-                speaker = "Professor";
-              } else {
-                speaker = rawUserId;
-              }
-            }
-            return `[${speaker}]: ${text}`;
-          }
-        } catch (e) {
-          console.error("[callService] Error parsing transcription line:", e);
-        }
-        return "";
-      })
-      .filter(Boolean);
-
-    return formattedLines.join("\n");
-  } catch (error) {
-    console.error("[callService] Failed to parse transcription:", error);
-    return rawText;
-  }
+  return parseStreamTranscript(rawText, (id) =>
+    id === studentId ? "Aluno" : id === teacherId ? "Professor" : undefined
+  );
 }
 
 /**

@@ -6,7 +6,9 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { trialCallService } from "./trial-call.service";
 import {
   decideRequestSchema,
+  guestEmailSchema,
   requestStatusSchema,
+  saveNotesSchema,
   requestToJoinSchema,
   roomCodeInputSchema,
 } from "./trial-call.schema";
@@ -84,4 +86,54 @@ export const getTrialRequestStatusAction = actionClient
   .schema(requestStatusSchema)
   .action(async ({ parsedInput }) => {
     return { request: await trialCallService.getRequestStatus(parsedInput.code, parsedInput.requestId, parsedInput.guestId) };
+  });
+
+/** Anfitrião: salva as anotações (autosave). */
+export const saveTrialNotesAction = adminAction
+  .metadata({ name: "saveTrialNotes" })
+  .schema(saveNotesSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    await trialCallService.saveNotes(parsedInput.code, ctx.user.id, parsedInput.notes);
+    return { ok: true };
+  });
+
+export const getTrialNotesAction = adminAction
+  .metadata({ name: "getTrialNotes" })
+  .schema(roomCodeInputSchema)
+  .action(async ({ parsedInput, ctx }) => ({
+    notes: await trialCallService.getNotes(parsedInput.code, ctx.user.id),
+  }));
+
+/** Admin: transcrição + anotações de uma aula. */
+export const getTrialTranscriptAction = adminAction
+  .metadata({ name: "getTrialTranscript" })
+  .schema(roomCodeInputSchema)
+  .action(async ({ parsedInput }) => trialCallService.getTranscript(parsedInput.code));
+
+/** Admin: busca a transcrição na Stream quando o webhook não chegou. */
+export const syncTrialTranscriptionAction = adminAction
+  .metadata({ name: "syncTrialTranscription" })
+  .schema(roomCodeInputSchema)
+  .action(async ({ parsedInput }) => ({
+    found: await trialCallService.syncTranscription(parsedInput.code),
+  }));
+
+/** Admin: (re)gera o perfil rascunho com a IA a partir da transcrição + anotações. */
+export const buildTrialProfileAction = adminAction
+  .metadata({ name: "buildTrialProfile" })
+  .schema(roomCodeInputSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const result = await trialCallService.buildProfile(parsedInput.code, ctx.user.id);
+    return { profileId: result.profileId, filled: result.filled.length };
+  });
+
+/** Público: o visitante deixa o e-mail ao fim da chamada. */
+export const saveTrialGuestEmailAction = actionClient
+  .metadata({ name: "saveTrialGuestEmail" })
+  .schema(guestEmailSchema)
+  .action(async ({ parsedInput }) => {
+    const rate = await checkRateLimit("trial-guest-email", await clientIp(), 10, 10 * 60 * 1000);
+    if (!rate.success) return { saved: false };
+    const saved = await trialCallService.saveGuestEmail(parsedInput.code, parsedInput.requestId, parsedInput.guestId, parsedInput.email);
+    return { saved };
   });

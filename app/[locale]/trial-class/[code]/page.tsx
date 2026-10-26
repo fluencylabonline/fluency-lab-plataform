@@ -36,7 +36,10 @@ export default async function TrialRoomPage({ params }: TrialRoomPageProps) {
   const user = await getCurrentUser();
   if (user?.role === "admin") {
     const credentials = await trialCallService.getHostCredentials(code, { id: user.id, name: user.name });
-    if (credentials) return <HostRoom code={code} credentials={credentials} />;
+    if (credentials) {
+      const notes = await trialCallService.getNotes(code, user.id);
+      return <HostRoom code={code} credentials={credentials} notes={notes} />;
+    }
   }
 
   return <Lobby code={code} hostName={state.hostName} initialParticipants={state.participants} />;

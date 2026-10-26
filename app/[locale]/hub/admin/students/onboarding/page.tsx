@@ -1,5 +1,7 @@
 import { getCurrentUser } from "@/lib/auth-server";
 import { learningService } from "@/modules/learning/learning.service";
+import { trialCallService } from "@/modules/trial-call/trial-call.service";
+import { TrialClassesSection } from "@/app/[locale]/hub/admin/students/onboarding/_components/TrialClassesSection";
 import { ProfilesPageClient } from "@/app/[locale]/hub/admin/students/onboarding/_components/ProfilesPageClient";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -25,7 +27,7 @@ export default async function AdminOnboardingProfilesPage() {
     redirect("/hub");
   }
 
-  const profiles = await learningService.getAllProfiles();
+  const [profiles, trialRooms] = await Promise.all([learningService.getAllProfiles(), trialCallService.listForAdmin()]);
 
   const formattedProfiles = profiles.map(p => ({
     id: p.id,
@@ -38,5 +40,12 @@ export default async function AdminOnboardingProfilesPage() {
     } : null
   }));
 
-  return <ProfilesPageClient initialData={formattedProfiles} basePath="/hub/admin/students/onboarding" />;
+  const basePath = "/hub/admin/students/onboarding";
+  return (
+    <ProfilesPageClient
+      initialData={formattedProfiles}
+      basePath={basePath}
+      trialSection={<TrialClassesSection rooms={trialRooms} basePath={basePath} />}
+    />
+  );
 }

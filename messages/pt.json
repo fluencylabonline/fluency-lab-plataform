@@ -4158,7 +4158,8 @@
       "micOn": "Ligar microfone",
       "micOff": "Desligar microfone",
       "cameraTurnOn": "Ligar câmera",
-      "cameraTurnOff": "Desligar câmera"
+      "cameraTurnOff": "Desligar câmera",
+      "consent": "Esta aula é transcrita para montar seu plano de estudos."
     },
     "Room": {
       "connecting": "Conectando…",
@@ -4180,7 +4181,81 @@
       "share": "Compartilhar link",
       "wantsToJoin": "{name} quer entrar",
       "accept": "Aceitar",
-      "deny": "Recusar"
+      "deny": "Recusar",
+      "transcribing": "Transcrição ativa",
+      "notes": "Anotações",
+      "closeNotes": "Fechar anotações",
+      "openHub": "Ver aulas experimentais no hub"
+    },
+    "Notes": {
+      "title": "Anotações do professor",
+      "auto": "Salva automaticamente",
+      "saving": "Salvando…",
+      "saved": "Salvo",
+      "error": "Não foi possível salvar",
+      "goals": "Objetivo do aluno",
+      "goalPlaceholder": "Outro objetivo",
+      "goalSuggestions": [
+        "Viajar",
+        "Trabalho",
+        "Fluência",
+        "Provas",
+        "Morar fora"
+      ],
+      "level": "Nível estimado",
+      "strengths": "Pontos fortes",
+      "improve": "Pontos a melhorar",
+      "itemPlaceholder": "Adicionar item",
+      "add": "Adicionar",
+      "remove": "Remover",
+      "freeText": "Observações",
+      "freePlaceholder": "Ritmo, rotina, preferências, dúvidas do aluno…"
+    },
+    "Email": {
+      "title": "Quer receber o contato do professor?",
+      "subtitle": "Deixe seu e-mail para continuarmos a conversa.",
+      "label": "Seu e-mail",
+      "placeholder": "voce@exemplo.com",
+      "send": "Enviar",
+      "invalid": "Confira o e-mail digitado.",
+      "failed": "Não foi possível salvar. Tente de novo.",
+      "thanks": "Obrigado! Entraremos em contato."
+    },
+    "Admin": {
+      "title": "Aulas experimentais",
+      "start": "Iniciar aula experimental",
+      "empty": "Nenhuma aula experimental ainda. Inicie uma chamada e envie o link ao futuro aluno.",
+      "noGuest": "Sem visitante",
+      "guestFallback": "Aula experimental",
+      "noEmail": "Sem e-mail",
+      "live": "Em andamento",
+      "ended": "Encerrada",
+      "transcription": {
+        "pending": "Transcrição pendente",
+        "available": "Transcrição pronta",
+        "failed": "Transcrição falhou"
+      },
+      "profileDraft": "Perfil em rascunho",
+      "profileActive": "Perfil ativo",
+      "linked": "Aluno vinculado",
+      "details": "Anotações e transcrição",
+      "detailsHint": "Visível só para administradores.",
+      "notes": "Anotações do professor",
+      "level": "Nível",
+      "goals": "Objetivos",
+      "strengths": "Pontos fortes",
+      "improve": "A melhorar",
+      "transcript": "Transcrição",
+      "noTranscript": "A transcrição ainda não chegou.",
+      "sync": "Buscar transcrição",
+      "synced": "Transcrição atualizada.",
+      "notReady": "A transcrição ainda não está disponível.",
+      "build": "Gerar perfil com IA",
+      "rebuild": "Atualizar com IA",
+      "profileUpdated": "Perfil atualizado. Revise antes de ativar.",
+      "profileError": "Não foi possível gerar o perfil.",
+      "review": "Revisar perfil",
+      "loadError": "Não foi possível carregar a aula."
     }
   }
 }

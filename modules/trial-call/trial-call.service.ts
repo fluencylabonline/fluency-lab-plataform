@@ -4,7 +4,12 @@ import { StreamClient } from "@stream-io/node-sdk";
 import { env } from "@/env";
 import { callService } from "@/modules/call/call.service";
 import { userRepository } from "@/modules/user/user.repository";
+import { aiService } from "@/modules/ai/ai.service";
+import { learningRepository } from "@/modules/learning/learning.repository";
+import { mergeAudioExtraction, type SurveyResponses } from "@/modules/learning/learning.extraction";
+import { parseStreamTranscript } from "@/modules/call/call.transcript";
 import { trialCallRepository } from "./trial-call.repository";
+import { emptyTrialNotes, type TrialNotes } from "./trial-call.schema";
 import type {
   PendingTrialRequest,
   TrialCallCredentials,
@@ -43,7 +48,13 @@ async function createRoom(host: { id: string; name: string }) {
   const streamCallId = `trial_${randomUUID()}`;
   await streamClient()
     .video.call("default", streamCallId)
-    .getOrCreate({ data: { created_by: { id: host.id, name: host.name } } });
+    .getOrCreate({
+      data: {
+        created_by: { id: host.id, name: host.name },
+        // A transcrição fica salva e alimenta o perfil do aluno (ver handleTranscriptionWebhook).
+        settings_override: { transcription: { mode: "auto-on", closed_caption_mode: "available", language: "auto" } },
+      },
+    });
 
   // Colisão de código é improvável, mas a coluna é única: tenta de novo.
   for (let attempt = 0; attempt < 5; attempt++) {
@@ -118,6 +129,13 @@ async function requireHostRoom(code: string, hostId: string) {
   return room;
 }
 
+/** Leitura/reprocessamento no hub: qualquer admin (a action já exige o papel), não só o anfitrião. */
+async function requireRoom(code: string) {
+  const room = await trialCallRepository.findRoomByCode(code);
+  if (!room) throw new Error("not_found");
+  return room;
+}
+
 async function getHostCredentials(code: string, host: { id: string; name: string }): Promise<TrialCallCredentials | null> {
   const room = await trialCallRepository.findRoomByCode(code);
   if (!room || room.hostId !== host.id || room.status !== "active") return null;
@@ -153,7 +171,150 @@ async function endRoom(code: string, hostId: string) {
   }
 }
 
+async function getNotes(code: string, hostId: string): Promise<TrialNotes> {
+  const room = await requireHostRoom(code, hostId);
+  return room.notes ?? emptyTrialNotes();
+}
+
+async function saveNotes(code: string, hostId: string, notes: TrialNotes) {
+  const room = await requireHostRoom(code, hostId);
+  await trialCallRepository.saveNotes(room.id, notes);
+}
+
+/** Rótulos da transcrição: o anfitrião é "Professor"; cada visitante, o nome que informou. */
+async function speakerLabels(room: { id: string; hostId: string }) {
+  const approved = await trialCallRepository.listApprovedRequests(room.id);
+  const guests = new Map(approved.map((r) => [r.guestId, r.name]));
+  return (id: string) => (id === room.hostId ? "Professor" : guests.get(id) ?? (id.startsWith("guest_") ? "Visitante" : undefined));
+}
+
+async function storeTranscription(roomId: string, hostId: string, rawJsonl: string, labelFor: (id: string) => string | undefined) {
+  const text = parseStreamTranscript(rawJsonl, labelFor);
+  await trialCallRepository.saveTranscription(roomId, { transcription: text, status: "available" });
+  // O perfil é só um rascunho; falha da IA não pode perder a transcrição já salva.
+  try {
+    await buildProfile(roomId, hostId);
+  } catch (err) {
+    console.error("[trialCallService] Failed to build profile draft:", err);
+  }
+}
+
+/** Chamado pelo webhook da Stream quando a transcrição da sala fica pronta. Idempotente. */
+async function handleTranscriptionWebhook(streamCallId: string, transcriptionUrl: string) {
+  const room = await trialCallRepository.findRoomByStreamCallId(streamCallId);
+  if (!room) return;
+  try {
+    const response = await fetch(transcriptionUrl);
+    if (!response.ok) throw new Error(`Failed to download transcription: ${response.statusText}`);
+    await storeTranscription(room.id, room.hostId, await response.text(), await speakerLabels(room));
+  } catch (err) {
+    console.error("[trialCallService] Error fetching transcription:", err);
+    await trialCallRepository.saveTranscription(room.id, { status: "failed" });
+  }
+}
+
+/** Busca a transcrição direto na Stream (quando o webhook não chegou). Retorna false se ainda não existe. */
+async function syncTranscription(code: string): Promise<boolean> {
+  const room = await requireRoom(code);
+  const res = await streamClient().video.call("default", room.streamCallId).listTranscriptions();
+  const url = res.transcriptions?.[0]?.url;
+  if (!url) return false;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Failed to download transcription: ${response.statusText}`);
+  await storeTranscription(room.id, room.hostId, await response.text(), await speakerLabels(room));
+  return true;
+}
+
+/**
+ * Cria (ou atualiza) o perfil rascunho do aluno com a IA, a partir da transcrição + anotações.
+ * Só preenche campos ainda vazios; o admin revisa e ativa depois.
+ */
+async function buildProfile(roomId: string, userId: string) {
+  const room = await trialCallRepository.findRoomById(roomId);
+  if (!room) throw new Error("Room not found");
+  if (!room.transcription && !room.notes) throw new Error("Nothing to analyze yet");
+
+  const existing = room.profileId ? await learningRepository.findProfileById(room.profileId) : null;
+  const extraction = await aiService.extractStudentProfileFromTranscript({
+    transcript: room.transcription ?? "",
+    notes: (room.notes as Record<string, unknown> | null) ?? null,
+    userId,
+  });
+  const merged = mergeAudioExtraction(existing?.responses as SurveyResponses | undefined, extraction);
+
+  const profile = await learningRepository.upsertProfile(
+    { id: existing?.id, responses: merged.responses, status: "draft" },
+    userId
+  );
+  await trialCallRepository.setProfile(room.id, profile.id);
+  return { profileId: profile.id, filled: merged.filled, evidence: merged.evidence };
+}
+
+async function buildProfileForAdmin(code: string, adminId: string) {
+  const room = await requireRoom(code);
+  return buildProfile(room.id, adminId);
+}
+
+/** O visitante deixa o e-mail ao fim da chamada. O guestId (uuid) é o segredo do pedido. */
+async function saveGuestEmail(code: string, requestId: string, guestId: string, email: string) {
+  const room = await trialCallRepository.findRoomByCode(code);
+  if (!room) return false;
+  const request = await trialCallRepository.findRequest(requestId);
+  if (!request || request.roomId !== room.id || request.guestId !== guestId || request.status !== "approved") return false;
+  await trialCallRepository.setRequestEmail(requestId, email.toLowerCase());
+  return true;
+}
+
+/** Ao criar um aluno: se o e-mail bate com o de uma aula experimental, liga o perfil rascunho a ele. */
+async function linkProfileByEmail(email: string, studentId: string) {
+  const profileId = await trialCallRepository.findUnlinkedProfileByEmail(email);
+  if (!profileId) return null;
+  try {
+    await learningRepository.associateProfileToStudent(profileId, studentId);
+    return profileId;
+  } catch (err) {
+    // O aluno já tem um perfil (índice único): mantém o existente.
+    console.error("[trialCallService] Could not link trial profile:", err);
+    return null;
+  }
+}
+
+async function listForAdmin() {
+  const rooms = await trialCallRepository.listRoomsWithGuests();
+  return rooms.map((room) => {
+    const approved = room.requests.filter((r) => r.status === "approved");
+    const guest = approved[0] ?? room.requests[0];
+    return {
+      id: room.id,
+      code: room.code,
+      status: room.status,
+      createdAt: room.createdAt,
+      guestName: guest?.name ?? null,
+      guestEmail: approved.find((r) => r.email)?.email ?? null,
+      transcriptionStatus: room.transcriptionStatus,
+      hasNotes: !!room.notes,
+      profileId: room.profileId,
+      profileStatus: room.profile?.status ?? null,
+      studentId: room.profile?.studentId ?? null,
+    };
+  });
+}
+
+async function getTranscript(code: string) {
+  const room = await requireRoom(code);
+  return { transcription: room.transcription, status: room.transcriptionStatus, notes: room.notes ?? emptyTrialNotes() };
+}
+
 export const trialCallService = {
+  getNotes,
+  saveNotes,
+  handleTranscriptionWebhook,
+  syncTranscription,
+  buildProfile: buildProfileForAdmin,
+  saveGuestEmail,
+  linkProfileByEmail,
+  listForAdmin,
+  getTranscript,
   createRoom,
   getPublicState,
   requestToJoin,

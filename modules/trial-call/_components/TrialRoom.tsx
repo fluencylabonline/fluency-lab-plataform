@@ -13,11 +13,15 @@ import {
   type Call,
 } from "@stream-io/video-react-sdk";
 import "@stream-io/video-react-sdk/dist/css/styles.css";
-import { Camera, CameraOff, Check, Copy, Loader2, Mic, MicOff, PhoneOff, Power, Share2, X } from "lucide-react";
+import { Camera, CameraOff, Check, Copy, Loader2, Mic, MicOff, NotebookPen, PhoneOff, Power, Share2, X } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { RoundButton } from "./RoundButton";
+import { NotesPanel } from "./NotesPanel";
+import { GuestEmailForm } from "./GuestEmailForm";
 import { decideTrialRequestAction, endTrialRoomAction, listTrialRequestsAction } from "../trial-call.actions";
+import type { TrialNotes } from "../trial-call.schema";
 import type { PendingTrialRequest, TrialCallCredentials } from "../trial-call.types";
 
 interface TrialRoomProps {
@@ -27,12 +31,16 @@ interface TrialRoomProps {
   /** Preferências escolhidas no lobby. */
   initialMic: boolean;
   initialCam: boolean;
+  /** Anfitrião: anotações já salvas. */
+  initialNotes?: TrialNotes;
+  /** Visitante: identifica o pedido aprovado, para salvar o e-mail ao fim da chamada. */
+  guestRef?: { requestId: string; guestId: string };
 }
 
 type Phase = "connecting" | "live" | "left" | "ended" | "error";
 
 /** Sala da aula experimental: vídeo em tela cheia, self-view no canto e controles flutuantes. */
-export function TrialRoom({ code, credentials, isHost, initialMic, initialCam }: TrialRoomProps) {
+export function TrialRoom({ code, credentials, isHost, initialMic, initialCam, initialNotes, guestRef }: TrialRoomProps) {
   const t = useTranslations("TrialClass.Room");
   const [client, setClient] = useState<StreamVideoClient | null>(null);
   const [call, setCall] = useState<Call | null>(null);
@@ -61,6 +69,8 @@ export function TrialRoom({ code, credentials, isHost, initialMic, initialCam }:
         await nextCall.join();
         joined = nextCall;
         if (cancelled) return;
+        // A transcrição vira o perfil do aluno: o anfitrião garante que ela esteja ligada (com repetição).
+        if (isHost) void ensureTranscription(nextCall);
         nextCall.on("call.ended", () => setPhase("ended"));
         setClient(next);
         setCall(nextCall);
@@ -79,12 +89,12 @@ export function TrialRoom({ code, credentials, isHost, initialMic, initialCam }:
       setClient(null);
       setCall(null);
     };
-  }, [credentials, initialCam, initialMic, attempt]);
+  }, [credentials, initialCam, initialMic, attempt, isHost]);
 
   if (phase === "left" || phase === "ended" || phase === "error") {
     return (
       <div className="grid min-h-dvh place-items-center bg-zinc-950 p-6 text-center text-white">
-        <div className="flex max-w-sm flex-col items-center gap-4">
+        <div className="flex w-full max-w-sm flex-col items-center gap-5">
           <h1 className="text-2xl font-bold">
             {phase === "left" ? t("left") : phase === "ended" ? t("endedByHost") : t("connectError")}
           </h1>
@@ -92,6 +102,10 @@ export function TrialRoom({ code, credentials, isHost, initialMic, initialCam }:
             <Button size="lg" className="rounded-full px-8" onClick={() => setAttempt((n) => n + 1)}>
               {phase === "error" ? t("tryAgain") : t("rejoin")}
             </Button>
+          )}
+          {!isHost && guestRef && phase !== "error" && <GuestEmailForm code={code} requestId={guestRef.requestId} guestId={guestRef.guestId} />}
+          {isHost && phase !== "error" && (
+            <Link href="/hub/admin/students/onboarding" className="text-sm font-semibold underline underline-offset-4">{t("openHub")}</Link>
           )}
         </div>
       </div>
@@ -109,16 +123,38 @@ export function TrialRoom({ code, credentials, isHost, initialMic, initialCam }:
   return (
     <StreamVideo client={client}>
       <StreamCall call={call}>
-        <RoomView code={code} isHost={isHost} onLeft={() => setPhase("left")} onEnded={() => setPhase("ended")} />
+        <RoomView code={code} isHost={isHost} initialNotes={initialNotes} onLeft={() => setPhase("left")} onEnded={() => setPhase("ended")} />
       </StreamCall>
     </StreamVideo>
   );
 }
 
-function RoomView({ code, isHost, onLeft, onEnded }: { code: string; isHost: boolean; onLeft: () => void; onEnded: () => void }) {
+/** Liga a transcrição da sala; tenta de novo se a Stream ainda não aceitou. Falhar não derruba a aula. */
+async function ensureTranscription(call: Call) {
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      await call.startTranscription();
+      return;
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+  }
+}
+
+interface RoomViewProps {
+  code: string;
+  isHost: boolean;
+  initialNotes?: TrialNotes;
+  onLeft: () => void;
+  onEnded: () => void;
+}
+
+function RoomView({ code, isHost, initialNotes, onLeft, onEnded }: RoomViewProps) {
   const t = useTranslations("TrialClass.Room");
   const call = useCall();
-  const { useRemoteParticipants, useLocalParticipant, useMicrophoneState, useCameraState, useCallCallingState } = useCallStateHooks();
+  const [notesOpen, setNotesOpen] = useState(false);
+  const { useRemoteParticipants, useLocalParticipant, useMicrophoneState, useCameraState, useCallCallingState, useIsCallTranscribingInProgress } = useCallStateHooks();
+  const transcribing = useIsCallTranscribingInProgress();
   const remote = useRemoteParticipants();
   const local = useLocalParticipant();
   const { isMute: micMuted } = useMicrophoneState();
@@ -132,7 +168,8 @@ function RoomView({ code, isHost, onLeft, onEnded }: { code: string; isHost: boo
   const main = remote[0];
 
   return (
-    <div className="relative h-dvh w-full overflow-hidden bg-zinc-950 text-white">
+    <div className="flex h-dvh w-full overflow-hidden bg-zinc-950 text-white">
+    <div className="relative min-w-0 flex-1 overflow-hidden">
       {/* vídeo principal: o outro participante; sozinho, a própria imagem ocupa a tela */}
       <div className="absolute inset-0 [&_.str-video__participant-view]:h-full [&_.str-video__participant-view]:w-full [&_.str-video__participant-view]:max-h-none [&_.str-video__participant-view]:max-w-none [&_.str-video__participant-view]:rounded-none [&_video]:object-cover">
         {main ? (
@@ -157,13 +194,43 @@ function RoomView({ code, isHost, onLeft, onEnded }: { code: string; isHost: boo
 
       {isHost && <HostBar code={code} />}
 
+      {transcribing && (
+        <p className="pointer-events-none absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1 text-xs font-medium backdrop-blur">
+          <span className="size-2 animate-pulse rounded-full bg-red-500" aria-hidden />
+          {t("transcribing")}
+        </p>
+      )}
+
       {/* controles */}
       <div className="absolute inset-x-0 bottom-0 z-20 flex justify-center gap-3 bg-gradient-to-t from-black/70 to-transparent px-4 pb-6 pt-10">
         <RoundButton label={micMuted ? t("micOn") : t("micOff")} icon={micMuted ? MicOff : Mic} tone={micMuted ? "off" : "default"} onClick={() => call?.microphone.toggle()} />
         <RoundButton label={camMuted ? t("cameraOn") : t("cameraOff")} icon={camMuted ? CameraOff : Camera} tone={camMuted ? "off" : "default"} onClick={() => call?.camera.toggle()} />
+        {isHost && initialNotes && (
+          <span className="lg:hidden">
+            <RoundButton label={t("notes")} icon={NotebookPen} onClick={() => setNotesOpen(true)} />
+          </span>
+        )}
         <RoundButton label={t("leave")} icon={PhoneOff} tone="danger" onClick={() => call?.leave().catch(() => undefined)} />
         {isHost && <EndForAllButton code={code} onEnded={onEnded} />}
       </div>
+    </div>
+
+    {isHost && initialNotes && (
+      // Um único painel (um só autosave): coluna à direita no desktop, folha por cima do vídeo no celular.
+      <aside
+        aria-label={t("notes")}
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-40 h-[75dvh] rounded-t-3xl border-t border-border bg-background shadow-2xl transition-transform duration-300",
+          "lg:static lg:z-auto lg:h-auto lg:w-[360px] lg:shrink-0 lg:translate-y-0 lg:rounded-none lg:border-l lg:border-t-0 lg:shadow-none",
+          notesOpen ? "translate-y-0" : "translate-y-full"
+        )}
+      >
+        <button type="button" aria-label={t("closeNotes")} onClick={() => setNotesOpen(false)} className="absolute right-3 top-3 z-10 grid size-9 place-items-center rounded-full bg-muted text-foreground lg:hidden">
+          <X className="size-4" aria-hidden />
+        </button>
+        <NotesPanel code={code} initialNotes={initialNotes} />
+      </aside>
+    )}
     </div>
   );
 }

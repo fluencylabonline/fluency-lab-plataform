@@ -24,7 +24,7 @@ type Step =
   | { kind: "denied" }
   | { kind: "limited" }
   | { kind: "ended" }
-  | { kind: "joined"; credentials: TrialCallCredentials; mic: boolean; cam: boolean };
+  | { kind: "joined"; credentials: TrialCallCredentials; mic: boolean; cam: boolean; requestId: string; guestId: string };
 
 /** Lobby do visitante: prévia da câmera, nome e um único botão para pedir entrada. */
 export function Lobby({ code, hostName, initialParticipants }: LobbyProps) {
@@ -64,7 +64,7 @@ export function Lobby({ code, hostName, initialParticipants }: LobbyProps) {
       if (request.status === "approved") {
         const { micOn, camOn } = preview;
         preview.stop();
-        setStep({ kind: "joined", credentials: request.credentials, mic: micOn, cam: camOn });
+        setStep({ kind: "joined", credentials: request.credentials, mic: micOn, cam: camOn, requestId: waitingId.requestId, guestId: waitingId.guestId });
       } else if (request.status === "denied") setStep({ kind: "denied" });
       else if (request.status === "ended") setStep({ kind: "ended" });
     };
@@ -86,7 +86,7 @@ export function Lobby({ code, hostName, initialParticipants }: LobbyProps) {
   };
 
   if (step.kind === "joined") {
-    return <TrialRoom code={code} credentials={step.credentials} isHost={false} initialMic={step.mic} initialCam={step.cam} />;
+    return <TrialRoom code={code} credentials={step.credentials} isHost={false} initialMic={step.mic} initialCam={step.cam} guestRef={{ requestId: step.requestId, guestId: step.guestId }} />;
   }
 
   if (step.kind === "ended") {
@@ -155,6 +155,7 @@ export function Lobby({ code, hostName, initialParticipants }: LobbyProps) {
             <Button size="lg" className="h-12 rounded-full text-base font-bold" disabled={busy} onClick={ask}>
               {step.kind === "sending" ? t("sending") : step.kind === "denied" ? t("askAgain") : t("ask")}
             </Button>
+            <p className="text-xs text-muted-foreground">{t("consent")}</p>
           </div>
         )}
       </div>

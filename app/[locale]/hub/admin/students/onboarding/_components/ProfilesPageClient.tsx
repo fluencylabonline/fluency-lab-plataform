@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, type ReactNode } from "react";
 import { Header } from "@/components/layout/header";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import {
-  Sparkles,
-  Mic,
   User,
   Calendar,
   MoreHorizontal,
@@ -21,7 +19,6 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useRouter } from "@/i18n/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,11 +54,12 @@ interface Profile {
 interface ProfilesPageClientProps {
   initialData: Profile[];
   basePath?: string;
+  /** Aulas experimentais (origem dos perfis), mostradas acima da lista. */
+  trialSection?: ReactNode;
 }
 
-export function ProfilesPageClient({ initialData, basePath = "/hub/admin/students/onboarding" }: ProfilesPageClientProps) {
+export function ProfilesPageClient({ initialData, basePath = "/hub/admin/students/onboarding", trialSection }: ProfilesPageClientProps) {
   const t = useTranslations("Survey");
-  const router = useRouter();
   const [search, setSearch] = useState("");
   const [isPending, startTransition] = useTransition();
   const [profileToDelete, setProfileToDelete] = useState<string | null>(null);
@@ -94,21 +92,11 @@ export function ProfilesPageClient({ initialData, basePath = "/hub/admin/student
         title="Perfis Adaptativos"
         subtitle="Gerencie os perfis pedagógicos e diagnósticos dos seus alunos."
         onSearchChange={setSearch}
-        actions={[{
-          label: "Novo Perfil",
-          icon: <Sparkles className="h-4 w-4" />,
-          onClick: () => router.push(`${basePath}/new`),
-          dataTour: "manager-onboarding.new"
-        }, {
-          label: "Perfil por Áudio",
-          icon: <Mic className="h-4 w-4" />,
-          onClick: () => router.push(`${basePath}/from-audio`),
-          dataTour: "manager-onboarding.audio"
-        }]}
         backHref={basePath.split("/students/onboarding")[0] + "/users"}
       />
 
       <div className="container">
+        {trialSection}
         {/* Profiles Grid/List */}
         <div className="flex flex-col gap-2" data-tour="manager-onboarding.list">
           {filteredProfiles.length > 0 ? (
@@ -193,14 +181,8 @@ export function ProfilesPageClient({ initialData, basePath = "/hub/admin/student
               </div>
               <h3 className="text-xl font-bold mb-1">{t('noProfilesFound') || "Nenhum perfil encontrado"}</h3>
               <p className="text-muted-foreground text-center max-w-xs mb-6">
-                {search ? `Não encontramos perfis para "${search}"` : "Comece criando o primeiro perfil pedagógico de aluno."}
+                {search ? `Não encontramos perfis para "${search}"` : "Os perfis nascem das aulas experimentais."}
               </p>
-              <Link
-                href={`${basePath}/new`}
-                className={cn(buttonVariants({ variant: "default" }), "gap-2 font-bold")}
-              >
-                <Sparkles className="h-4 w-4 fill-primary-foreground/20" /> Criar Primeiro Perfil
-              </Link>
             </div>
           )}
         </div>

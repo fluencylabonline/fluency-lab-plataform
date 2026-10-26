@@ -4159,7 +4159,8 @@
       "micOn": "Turn on microphone",
       "micOff": "Turn off microphone",
       "cameraTurnOn": "Turn on camera",
-      "cameraTurnOff": "Turn off camera"
+      "cameraTurnOff": "Turn off camera",
+      "consent": "This class is transcribed to build your study plan."
     },
     "Room": {
       "connecting": "Connecting…",
@@ -4181,7 +4182,81 @@
       "share": "Share link",
       "wantsToJoin": "{name} wants to join",
       "accept": "Accept",
-      "deny": "Decline"
+      "deny": "Decline",
+      "transcribing": "Transcription on",
+      "notes": "Notes",
+      "closeNotes": "Close notes",
+      "openHub": "See trial classes in the hub"
+    },
+    "Notes": {
+      "title": "Teacher notes",
+      "auto": "Saved automatically",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "error": "Could not save",
+      "goals": "Student goal",
+      "goalPlaceholder": "Another goal",
+      "goalSuggestions": [
+        "Travel",
+        "Work",
+        "Fluency",
+        "Exams",
+        "Moving abroad"
+      ],
+      "level": "Estimated level",
+      "strengths": "Strengths",
+      "improve": "Things to improve",
+      "itemPlaceholder": "Add item",
+      "add": "Add",
+      "remove": "Remove",
+      "freeText": "Observations",
+      "freePlaceholder": "Pace, routine, preferences, student questions…"
+    },
+    "Email": {
+      "title": "Want to hear from your teacher?",
+      "subtitle": "Leave your email so we can keep in touch.",
+      "label": "Your email",
+      "placeholder": "you@example.com",
+      "send": "Send",
+      "invalid": "Please check the email you typed.",
+      "failed": "Could not save. Please try again.",
+      "thanks": "Thank you! We will be in touch."
+    },
+    "Admin": {
+      "title": "Trial classes",
+      "start": "Start trial class",
+      "empty": "No trial classes yet. Start a call and send the link to the prospective student.",
+      "noGuest": "No visitor",
+      "guestFallback": "Trial class",
+      "noEmail": "No email",
+      "live": "In progress",
+      "ended": "Ended",
+      "transcription": {
+        "pending": "Transcript pending",
+        "available": "Transcript ready",
+        "failed": "Transcript failed"
+      },
+      "profileDraft": "Draft profile",
+      "profileActive": "Active profile",
+      "linked": "Student linked",
+      "details": "Notes and transcript",
+      "detailsHint": "Visible to admins only.",
+      "notes": "Teacher notes",
+      "level": "Level",
+      "goals": "Goals",
+      "strengths": "Strengths",
+      "improve": "To improve",
+      "transcript": "Transcript",
+      "noTranscript": "The transcript has not arrived yet.",
+      "sync": "Fetch transcript",
+      "synced": "Transcript updated.",
+      "notReady": "The transcript is not available yet.",
+      "build": "Generate profile with AI",
+      "rebuild": "Update with AI",
+      "profileUpdated": "Profile updated. Review it before activating.",
+      "profileError": "Could not generate the profile.",
+      "review": "Review profile",
+      "loadError": "Could not load the class."
     }
   }
 }

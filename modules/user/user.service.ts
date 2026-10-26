@@ -191,6 +191,16 @@ export const userService = {
       user.locale as "pt" | "en"
     );
 
+    // Aula experimental com o mesmo e-mail: liga o perfil gerado ao novo aluno. Não deve impedir o cadastro.
+    if (user.role === "student") {
+      try {
+        const { trialCallService } = await import("@/modules/trial-call/trial-call.service");
+        await trialCallService.linkProfileByEmail(email, user.id);
+      } catch (err) {
+        console.error("[userService] Failed to link trial profile:", err);
+      }
+    }
+
     // Enviar convite via WhatsApp (se houver telefone)
     if (user.cellphone) {
       await communicationService.sendWelcomeWhatsApp(

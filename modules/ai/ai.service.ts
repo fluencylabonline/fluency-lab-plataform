@@ -103,14 +103,8 @@ function cleanJsonString(str: string): string {
   return content.substring(start, lastIndex + 1);
 }
 
-const PROFILE_AUDIO_PROMPT = `You are assisting an English/language teacher who just had an onboarding conversation with a prospective student (a recorded call or WhatsApp voice messages). The audio may contain both the teacher and the student: only what the STUDENT says (or confirms) counts as an answer.
-
-Fill the student profile questionnaire with ONLY what was clearly stated or directly confirmed. If something was not mentioned, OMIT the field. Never guess, never infer from tone, never invent. Free-text values must be written in Brazilian Portuguese, short and factual.
-
-Return JSON: {"responses": {"step1": {...}, ...}, "evidence": {"step1.fullName": "short quote", ...}}.
-"evidence" has one short literal quote (max 15 words, original language) for every field you filled, keyed "stepN.field".
-
-FIELDS (type / allowed values):
+/** Campos do questionário de perfil (tipo / valores permitidos), compartilhado pelos prompts de extração. */
+const PROFILE_FIELDS_SPEC = `FIELDS (type / allowed values):
 step1: fullName (string), approximateAge (string, e.g. "34"), isMinor (boolean), guardianName (string), guardianContact (string), occupation (string: profession or school grade)
 step2: previousStudy (boolean), previousStudyDetails (string), studyDuration ("less_than_6m"|"6m_to_2y"|"more_than_2y"), selfAssessedLevel ("A1"|"A2"|"B1"|"B2"|"C1"|"C2", only if the student states or clearly describes it)
 step3: mainGoals (array of "fluency"|"travel"|"work"|"exams"|"hobby"|"moving"|"other"), customGoal (string, when "other"), targetDeadline (string), deadlineReason (string), specificMotivation (string), commitmentLevel (integer 1-10, only if a number or clear degree was given)
@@ -121,6 +115,24 @@ step7: preferredMethods (up to 3 of "visual"|"auditory"|"reading"|"practical"|"g
 step8: mainDifficulties (array of "Pronúncia"|"Gramática"|"Vocabulário"|"Escuta"|"Falar em público"), whatWorked (string), whatDidntWork (string), specialNeeds (string), speakingAnxiety ("none"|"low"|"medium"|"high"|"very_high")
 step9: languageVariant (string, e.g. American/British), accentGoal ("intelligible"|"natural"), classExpectations (up to 3 of "conversation_focus"|"grammar_focus"|"exam_prep"|"business"), learningPace ("intense"|"moderate"|"relaxed"|"flexible"), correctionStyle ("immediate"|"important_only"|"end_of_lesson"|"gentle")
 step10: otherLanguages (string), generalObservations (string: anything relevant about the student not covered above), restrictions (string), questions (string: questions the student asked)`;
+
+const PROFILE_AUDIO_PROMPT = `You are assisting an English/language teacher who just had an onboarding conversation with a prospective student (a recorded call or WhatsApp voice messages). The audio may contain both the teacher and the student: only what the STUDENT says (or confirms) counts as an answer.
+
+Fill the student profile questionnaire with ONLY what was clearly stated or directly confirmed. If something was not mentioned, OMIT the field. Never guess, never infer from tone, never invent. Free-text values must be written in Brazilian Portuguese, short and factual.
+
+Return JSON: {"responses": {"step1": {...}, ...}, "evidence": {"step1.fullName": "short quote", ...}}.
+"evidence" has one short literal quote (max 15 words, original language) for every field you filled, keyed "stepN.field".
+
+${PROFILE_FIELDS_SPEC}`;
+
+const PROFILE_TRANSCRIPT_PROMPT = `You are assisting an English/language school. A teacher just ran a trial class (a video call) with a prospective student. You receive the call transcript and the teacher's own notes. Only what the STUDENT says (or confirms) counts as an answer, except the teacher notes, which are authoritative about level, goals, strengths and what to improve.
+
+Fill the student profile questionnaire with ONLY what was clearly stated or directly confirmed. If something was not mentioned, OMIT the field. Never guess, never infer from tone, never invent. Free-text values must be written in Brazilian Portuguese, short and factual. Map teacher notes like this: level -> step2.selfAssessedLevel; goals -> step3.mainGoals/customGoal/specificMotivation; "improve" -> step8.mainDifficulties/whatDidntWork; strengths and free text -> step10.generalObservations.
+
+Return JSON: {"responses": {"step1": {...}, ...}, "evidence": {"step1.fullName": "short quote", ...}}.
+"evidence" has one short literal quote (max 15 words, original language) for every field you filled, keyed "stepN.field". For fields taken from the teacher notes use the quote "(anotação do professor)".
+
+${PROFILE_FIELDS_SPEC}`;
 
 export const aiService = {
   /**
@@ -239,6 +251,43 @@ export const aiService = {
       await unlink(tmpPath).catch(() => undefined);
       if (uploadedName) await fileManager.deleteFile(uploadedName).catch(() => undefined);
     }
+  },
+
+  /**
+   * Reads the transcript of a trial class plus the teacher's own notes and fills whatever
+   * the student said that answers the profile survey. The teacher's notes win over the
+   * transcript when they disagree (especially the level). Same contract as the audio extraction.
+   */
+  async extractStudentProfileFromTranscript(params: {
+    transcript: string;
+    notes: Record<string, unknown> | null;
+    userId: string;
+  }): Promise<{
+    responses: Record<string, Record<string, unknown> | null>;
+    evidence: Record<string, string | null>;
+  }> {
+    const limit = await checkRateLimit("gemini_profile_transcript", params.userId, 30);
+    if (!limit.success) throw new Error("Rate limit exceeded for AI transcript analysis");
+
+    const model = genAI.getGenerativeModel({
+      model: `models/${MODELS.fast}`,
+      generationConfig: { responseMimeType: "application/json", temperature: 0.1 },
+    });
+
+    const prompt = `${PROFILE_TRANSCRIPT_PROMPT}
+
+TEACHER NOTES (authoritative; JSON, may be empty):
+${JSON.stringify(params.notes ?? {}, null, 2)}
+
+TRANSCRIPT (lines are "[Speaker]: text"; "Professor" is the teacher, any other speaker is the student):
+${params.transcript.slice(0, 60000)}`;
+
+    const result = await model.generateContent(prompt);
+    const parsed = JSON.parse(cleanJsonString(result.response.text()));
+    return {
+      responses: parsed?.responses && typeof parsed.responses === "object" ? parsed.responses : {},
+      evidence: parsed?.evidence && typeof parsed.evidence === "object" ? parsed.evidence : {},
+    };
   },
 
   /**
