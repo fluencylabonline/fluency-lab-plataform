@@ -1,34 +1,11 @@
 "use client";
 
-import { useState, type CSSProperties, type MouseEvent, type PointerEvent } from "react";
+import { useState, type MouseEvent } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowDown } from "lucide-react";
 import { Monitor, Phone } from "../devices";
 import { PrimaryCTA, Reveal } from "../ui";
 import { CollabProvider, HeroLaptopScreen, HeroPhoneScreen } from "../screens/HeroCollab";
-
-/** Título que ganha cor primary num círculo suave sob o cursor (um único raio, não palavra a palavra). */
-function SpotlightTitle({ children }: { children: string }) {
-  const move = (e: PointerEvent<HTMLHeadingElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
-    e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
-  };
-  const leave = (e: PointerEvent<HTMLHeadingElement>) => {
-    e.currentTarget.style.setProperty("--mx", "-999px");
-    e.currentTarget.style.setProperty("--my", "-999px");
-  };
-  return (
-    <h1
-      onPointerMove={move}
-      onPointerLeave={leave}
-      style={{ "--mx": "-999px", "--my": "-999px" } as CSSProperties}
-      className="bg-[radial-gradient(circle_150px_at_var(--mx)_var(--my),var(--color-primary)_0%,var(--color-primary)_55%,transparent_100%),linear-gradient(var(--color-foreground),var(--color-foreground))] bg-clip-text text-transparent text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter leading-[0.98]"
-    >
-      {children}
-    </h1>
-  );
-}
 
 /** Ao clicar, enche de primary de cima para baixo, ganha uma seta para baixo e então rola até a seção. */
 function SeeHowButton({ label }: { label: string }) {
@@ -60,7 +37,7 @@ export function HeroSection() {
       <div className="w-full max-w-[1440px] mx-auto grid lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.5fr)] gap-10 items-center">
         <div className="flex flex-col gap-6 text-center lg:text-left items-center lg:items-start">
           <Reveal y={36}>
-            <SpotlightTitle>{t("title")}</SpotlightTitle>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter leading-[0.98]">{t("title")}</h1>
           </Reveal>
           <Reveal delay={0.12}>
             <p className="text-muted-foreground text-lg max-w-lg">{t("subtitle")}</p>
