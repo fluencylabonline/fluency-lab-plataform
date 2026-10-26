@@ -126,7 +126,7 @@ export function LandingNav({ user }: { user: SessionUserDTO | null }) {
               )}
             </AnimatePresence>
           </div>
-          <a href="#agendar" className={cn("rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap transition-colors", active === "agendar" ? "bg-primary/80 text-primary-foreground ring-2 ring-primary/30" : "bg-primary text-primary-foreground")}><span className="sm:hidden">{t("Nav.ctaShort")}</span><span className="hidden sm:inline">{t("Common.cta")}</span></a>
+          <a href="#agendar" className={cn("flex min-h-[44px] items-center rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap transition-colors", active === "agendar" ? "bg-primary/80 text-primary-foreground ring-2 ring-primary/30" : "bg-primary text-primary-foreground")}><span className="sm:hidden">{t("Nav.ctaShort")}</span><span className="hidden sm:inline">{t("Common.cta")}</span></a>
         </div>
       </div>
     </header>
