@@ -709,28 +709,6 @@
     },
     "title": "Visão Geral"
   },
-  "EditScreen": {
-    "document": {
-      "p1Highlight": "nem tudo são flores.",
-      "p1Part1": "Hoje em dia, muitas pessoas sonham em morar fora. No entanto,",
-      "p1Part2": "O choque cultural e as barreiras linguísticas são desafios reais.",
-      "p2Placeholder": " permite que você mantenha suas raízes... ",
-      "p2Text": "Por outro lado, ficar no seu país",
-      "p3": "Em conclusão, ambas as opções têm prós e contras.",
-      "p4": "O que você acha sobre isso?",
-      "teacherName": "Professora Sarah",
-      "title": "Morar fora vs. Morar no seu país de origem"
-    },
-    "header": {
-      "collabWriting": "Escrita Colaborativa",
-      "share": "Compartilhar",
-      "unit": "Unidade 4: Redes Sociais"
-    },
-    "suggestion": {
-      "text": "Tente usar mais conectivos como 'além disso' ou 'no entanto'.",
-      "title": "Sugestão"
-    }
-  },
   "EmptyResults": {
     "adjustSearch": "Tente ajustar seus termos de busca.",
     "withoutSearch": "Nenhum dado disponível no momento.",
@@ -1006,46 +984,6 @@
     "wordLadderTitle": "Word Ladder"
   },
   "LandingPage": {
-    "Comparison": {
-      "badge": "Diferenciais",
-      "description": "Você já tentou aprender com apps e desistiu. Ou fez aulas genéricas que não levaram a lugar nenhum. A gente sabe — e criamos algo totalmente diferente.",
-      "items": {
-        "apps": {
-          "description": "Chega de exercícios repetitivos e decorar palavras soltas sem acompanhamento real. Na Fluency Lab você tem um tutor dedicado e um método natural para falar de verdade — no seu ritmo.",
-          "problems": "Exercícios repetitivos,Decorar palavras soltas,Sem acompanhamento real,90% desistem no caminho",
-          "problemTitle": "O Problema dos Apps",
-          "solutions": "Aprenda como aprendeu português,Sem decoreba forçada,Tutor dedicado que te conhece,Planejamento anti-desistência",
-          "solutionTitle": "Método Natural Fluency Lab",
-          "title": "Apps (Duolingo, Babbel)"
-        },
-        "marketplaces": {
-          "description": "Chega de aulas isoladas e ter que gerenciar tudo sozinho sem um currículo estruturado. Na Fluency Lab você tem um plano feito 100% para você, alinhado aos seus objetivos.",
-          "problems": "Cada aula é isolada,Sem currículo estruturado,Você que tem que gerenciar tudo",
-          "problemTitle": "O Problema dos Marketplaces",
-          "solutions": "Plano feito 100% para você,Cronograma baseado nos seus objetivos,A gente gerencia seu aprendizado",
-          "solutionTitle": "Currículo Personalizado",
-          "title": "Marketplaces (Preply, iTalki)"
-        },
-        "traditional": {
-          "description": "Chega de turmas com ritmo fixo, conteúdo genérico e horários inflexíveis. Na Fluency Lab o ritmo e os temas se adaptam totalmente à sua rotina e preferências.",
-          "problems": "Turmas com ritmo fixo,Conteúdo genérico para todos,Horários inflexíveis",
-          "problemTitle": "O Problema das Escolas Online",
-          "solutions": "Ritmo adaptado a você,Temas que você gosta,Horários que funcionam pra você",
-          "solutionTitle": "Totalmente Seu",
-          "title": "Escolas Tradicionais"
-        }
-      },
-      "labels": {
-        "fluencyLab": "Fluency Lab",
-        "others": "Outros"
-      },
-      "cta": {
-        "description": "Sem ruído. Sem sistemas complicados. Apenas seu aprendizado, no seu ritmo.",
-        "button": "Começar gratuitamente"
-      },
-      "mobileSwipe": "Deslize para ver mais →",
-      "title": "Por que a Fluency Lab é diferente?"
-    },
     "Footer": {
       "backToTop": "Voltar ao topo",
       "brand": {
@@ -1093,139 +1031,518 @@
           "title": "Suporte"
         }
       }
+    }
+  },
+  "LandingShowcase": {
+    "Common": {
+      "brand": "FluencyLab",
+      "cta": "Agendar aula experimental"
     },
-    "heroCard": {
-      "defaultName": "João",
-      "greeting": {
-        "afternoon": "Boa tarde,",
-        "morning": "Bom dia,",
-        "night": "Boa noite,"
-      },
-      "lessonLabel": "AULA DO DIA",
-      "lessonSubtitle": "Nível Intermediário • 15 min",
-      "lessonTitle": "Cafeteria em Paris",
-      "progressGrowth": "+4% essa semana",
-      "progressTitle": "Fluência Total",
-      "reviewCount": "3 palavras",
-      "reviewTitle": "Revisão",
-      "words": {
-        "bread": "Bread",
-        "breadTrans": "Pão",
-        "water": "Water",
-        "waterTrans": "Água"
+    "Nav": {
+      "homeLabel": "FluencyLab, início",
+      "sectionsLabel": "Seções",
+      "howItWorks": "Como funciona",
+      "placement": "Nivelamento",
+      "pricing": "Preço",
+      "login": "Login",
+      "continue": "Continuar",
+      "signOut": "Sair da conta"
+    },
+    "Hero": {
+      "title": "Você já começou um idioma três vezes. Dessa vez, alguém vai estar do seu lado.",
+      "subtitle": "Aulas feitas sob medida, com um tutor que te conhece pelo nome e uma plataforma que mostra cada passo da sua evolução. Sem decoreba.",
+      "seeHow": "Ver como funciona",
+      "monitorLabel": "Monitor do professor: caderno colaborativo e videochamada",
+      "phoneLabel": "Celular do aluno: caderno com a chamada em PiP"
+    },
+    "Differentials": {
+      "badge": "Por que somos diferentes",
+      "title": "Não é só aula. É um sistema que te acompanha.",
+      "cta": "Quero meu plano personalizado",
+      "items": [
+        {
+          "badge": "Prática no app",
+          "title": "Você pratica todas as habilidades: fala, escuta, leitura e escrita.",
+          "text": "Exercícios curtos, com resposta na hora, como na sessão de prática do app. Tente responder aqui ao lado."
+        },
+        {
+          "badge": "Prática de 7 dias",
+          "title": "Você sempre sabe o que estudar, como e por quanto tempo.",
+          "text": "Cada dia da trilha tem um tipo de prática. Toque nos dias e marque as tarefas que já fez."
+        },
+        {
+          "badge": "Plano de aulas",
+          "title": "Montamos tudo personalizado para você.",
+          "text": "O Roteiro mostra as lições programadas para o seu objetivo e o seu prazo, com o avanço de cada uma."
+        }
+      ]
+    },
+    "Collab": {
+      "teacher": "Luara",
+      "student": "Aluno",
+      "you": "Você",
+      "me": "Eu",
+      "docTitle": "My weekend",
+      "prompt": "Tell me about your weekend. Use the past tense!",
+      "sentence": "Yesterday I goed to the beach with my family.",
+      "fixFrom": "goed",
+      "fixTo": "went",
+      "note": "Muito bem! Agora me conta: what did you do at the beach?",
+      "commentBy": "Comentário · {teacher}",
+      "paragraph": "Parágrafo",
+      "teacherView": "Visão do professor",
+      "collabNotebook": "Caderno colaborativo",
+      "captions": "CC",
+      "controls": {
+        "mic": "Microfone",
+        "camera": "Câmera",
+        "blur": "Desfoque de fundo",
+        "shareScreen": "Compartilhar tela",
+        "minimize": "Minimizar",
+        "maximize": "Maximizar",
+        "endClass": "Encerrar aula",
+        "leaveClass": "Sair da aula",
+        "more": "Mais opções"
       }
     },
-    "heroSubtitle": "Uma plataforma que acompanha <br> cada passo do seu progresso. Simples assim.",
-    "HowItWorks": {
-      "learnMore": "Saber mais",
-      "plus": "+",
-      "steps": {
-        "complete": {
-          "description": "Tudo que você aprende fica registrado na nossa plataforma: vocabulário dominado, tópicos estudados, evolução ao longo do tempo. Mais: tem videoaulas gravadas pra você revisar qualquer assunto quando quiser.",
-          "id": "03",
-          "subtitle": "Veja seu progresso acontecendo",
-          "title": "Plataforma Completa"
-        },
-        "dedicated": {
-          "description": "Não é só 'marcar aula e tchau'. Seu tutor te conhece, lembra dos seus objetivos, ajusta o plano quando precisa, e faz um atendimento pensado para você continuar. É tipo ter um personal trainer do idioma.",
-          "id": "04",
-          "subtitle": "A gente não deixa você desistir",
-          "title": "Tutores Dedicados"
-        },
-        "natural": {
-          "description": "Sabe como você aprendeu português? Sem ficar decorando conjugação e listinha de vocabulário. Nosso método é o mesmo: você adquire o idioma naturalmente, através de conversas reais, contexto, e imersão. Nada de flashcards chatos.",
-          "id": "02",
-          "subtitle": "Aprenda sem decorar",
-          "title": "Método Natural"
-        },
-        "personalized": {
-          "description": "Não tem aula 'padrão' aqui. A gente monta um plano de estudos único pra você: baseado no seu nível atual, suas metas (viagem? trabalho? prova?), seus prazos, e até nos assuntos que você curte. Quer aprender inglês falando sobre tecnologia? Bora.",
-          "id": "01",
-          "subtitle": "Seu cronograma, seus objetivos",
-          "title": "Plano Personalizado"
-        }
+    "Placement": {
+      "badge": "Nivelamento inicial",
+      "title": "Começamos entendendo você.",
+      "subtitle": "Duas partes: uma conversa com um professor e um teste na plataforma.",
+      "part1": {
+        "badge": "Parte 1",
+        "title": "Uma conversa com um professor.",
+        "text": "Na aula experimental você conhece a escola e conta seus objetivos. Ele anota seu nível estimado, seus pontos fortes e o que precisa melhorar.",
+        "deviceLabel": "Notebook com a videochamada da aula experimental e anotações do professor"
       },
-      "title": "Como funciona"
+      "part2": {
+        "badge": "Parte 2",
+        "title": "Um teste que se ajusta a você.",
+        "text": "Acertou, a próxima pergunta fica mais difícil. Errou, fica mais fácil. Responda ao teste ao lado e veja seu nível de A1 a C2, com o mapa de habilidades.",
+        "cta": "Fazer meu nivelamento grátis",
+        "deviceLabel": "Teste de nivelamento adaptativo"
+      }
     },
-    "nav": {
-      "about": "Quem somos",
+    "PlacementTest": {
+      "estimatedLevel": "Nível estimado",
+      "resultDesc": "Você acertou {hits} de {total} questões!",
+      "accuracy": "Precisão",
+      "avgTime": "Tempo médio",
+      "avgSeconds": "{seconds}s",
+      "skillsAnalysis": "Análise de habilidades",
+      "retry": "Refazer o teste",
+      "playAudio": "Tocar áudio",
+      "skip": "Pular",
+      "check": "Verificar",
+      "correct": "Correto",
+      "incorrect": "Incorreto",
+      "correctSolution": "Solução correta:",
       "continue": "Continuar",
-      "faq": "Perguntas Frequentes",
-      "login": "Login",
-      "menu": "Menu",
-      "plans": "Planos",
-      "signOut": "Sair da conta",
-      "switchAccount": "Entrar com outra conta",
-      "team": "Nosso Time"
-    },
-    "primaryCta": "Quero minha aula gratuita",
-    "secondaryCta": "Metodologia",
-    "subtitle": "Aulas personalizadas com tutores dedicados, método natural sem decoreba.",
-    "Team": {
-      "badge": "Nossos Experts",
-      "cta": "Quero marcar uma aula teste",
-      "description": "Tutores dedicados prontos para personalizar sua jornada de aprendizado baseada nos seus objetivos reais. Não somos apenas professores, somos parceiros na sua evolução.",
-      "members": {
-        "deise": {
-          "bio": "Coordenadora de curso, gerencia a escola e os professores.",
-          "name": "Deise Laiane",
-          "role": "CEO",
-          "rating": "4.9 · 120 alunos"
-        },
-        "luara": {
-          "bio": "Professora de inglês com anos de experiência, focada no ensino de adultos.",
-          "name": "Luara",
-          "role": "Professora de Inglês",
-          "rating": "5.0 · 150 alunos"
-        },
-        "gideon": {
-          "bio": "Professor nativo de inglês, focado em conversação e fluência prática.",
-          "name": "Gideon",
-          "role": "Professor Nativo de Inglês",
-          "rating": "4.9 · 90 alunos"
-        },
-        "giulia": {
-          "bio": "Professora de inglês, focada no ensino de crianças e adolescentes.",
-          "name": "Giulia",
-          "role": "Professora de Inglês",
-          "rating": "4.8 · 110 alunos"
-        },
-        "lucas": {
-          "bio": "Professora de inglês, focada em gramática e conversação.",
-          "name": "Lucas",
-          "role": "Professor de Inglês",
-          "rating": "4.8 · 110 alunos"
-        },
-        "bianca": {
-          "bio": "Professora de inglês, focada no ensino dinâmico e interativo.",
-          "name": "Bianca",
-          "role": "Professora de Inglês",
-          "rating": "4.8 · 110 alunos"
-        }
-      },
-      "tags": {
-        "management": "Gestão",
-        "coordination": "Coordenação",
-        "adults": "Adultos",
-        "experience": "Experiência",
-        "native": "Nativo",
-        "conversation": "Conversação",
-        "kidsTeens": "Kids & Teens",
-        "english": "Inglês",
+      "finish": "Finalizar",
+      "skills": {
         "grammar": "Gramática",
-        "kids": "Kids",
-        "dynamicAndInteractive": "Dinâmico e Interativo"
+        "vocabulary": "Vocabulário",
+        "reading": "Leitura",
+        "listening": "Escuta"
       },
-      "mobileSwipe": "Deslize para ver →",
-      "stats": {
-        "rating": "4.9/5",
-        "ratingLabel": "Avaliação Média",
-        "tutors": "+150",
-        "tutorsLabel": "Alunos"
-      },
-      "title": "Conheça nosso time de <primary>profissionais</primary>"
+      "questions": [
+        {
+          "level": 0,
+          "skill": "grammar",
+          "content": "Choose the correct option.",
+          "context": "She ___ a student.",
+          "options": [
+            "is",
+            "are",
+            "am"
+          ],
+          "correct": 0
+        },
+        {
+          "level": 0,
+          "skill": "vocabulary",
+          "content": "What is the opposite of “hot”?",
+          "options": [
+            "cold",
+            "big",
+            "fast"
+          ],
+          "correct": 0
+        },
+        {
+          "level": 1,
+          "skill": "grammar",
+          "content": "Choose the correct option.",
+          "context": "Yesterday we ___ to the cinema.",
+          "options": [
+            "go",
+            "went",
+            "gone"
+          ],
+          "correct": 1
+        },
+        {
+          "level": 1,
+          "skill": "reading",
+          "content": "“Tom gets up at 7 and has coffee.” What does Tom do first?",
+          "options": [
+            "Has coffee",
+            "Gets up",
+            "Goes to work"
+          ],
+          "correct": 1
+        },
+        {
+          "level": 2,
+          "skill": "listening",
+          "content": "Listen to the snippet and choose the word that correctly fills the gap.",
+          "context": "She ___ a lot of progress in her studies since she joined the academy.",
+          "options": [
+            "made",
+            "did",
+            "has did"
+          ],
+          "correct": 0,
+          "audio": true
+        },
+        {
+          "level": 2,
+          "skill": "grammar",
+          "content": "Choose the correct option.",
+          "context": "If I ___ more time, I would travel more.",
+          "options": [
+            "have",
+            "had",
+            "will have"
+          ],
+          "correct": 1
+        },
+        {
+          "level": 3,
+          "skill": "vocabulary",
+          "content": "Which word is closest to “reluctant”?",
+          "options": [
+            "unwilling",
+            "eager",
+            "careless"
+          ],
+          "correct": 0
+        },
+        {
+          "level": 3,
+          "skill": "reading",
+          "content": "“Despite the rain, the match went ahead.” The match was…",
+          "options": [
+            "cancelled",
+            "postponed",
+            "played"
+          ],
+          "correct": 2
+        },
+        {
+          "level": 4,
+          "skill": "grammar",
+          "content": "Choose the correct option.",
+          "context": "Had I known, I ___ differently.",
+          "options": [
+            "would act",
+            "would have acted",
+            "will act"
+          ],
+          "correct": 1
+        },
+        {
+          "level": 4,
+          "skill": "vocabulary",
+          "content": "“Her argument was cogent.” It was…",
+          "options": [
+            "confusing",
+            "convincing",
+            "boring"
+          ],
+          "correct": 1
+        },
+        {
+          "level": 5,
+          "skill": "grammar",
+          "content": "Choose the correct option.",
+          "context": "Not only ___ late, but he also forgot the files.",
+          "options": [
+            "he arrived",
+            "did he arrive",
+            "arrived he"
+          ],
+          "correct": 1
+        },
+        {
+          "level": 5,
+          "skill": "reading",
+          "content": "“The findings were, at best, equivocal.” They were…",
+          "options": [
+            "clear",
+            "ambiguous",
+            "false"
+          ],
+          "correct": 1
+        }
+      ]
     },
-    "title": "Aprenda um idioma de verdade, sem desistir no meio do caminho"
+    "TrialCall": {
+      "classTimer": "Aula experimental · {time}",
+      "captionsOn": "CC ativado",
+      "teacherName": "Luara",
+      "teacherLabel": "Luara · professora",
+      "studentName": "Marina",
+      "caption": "“I want to improve my English for my next trip to Canada.”",
+      "mic": "Microfone",
+      "camera": "Câmera",
+      "notesTitle": "Anotações do professor",
+      "autosaved": "salvo automaticamente",
+      "goal": "Objetivo do aluno",
+      "goals": [
+        "Viajar para o Canadá",
+        "Falar sem travar",
+        "Prazo: 6 meses"
+      ],
+      "level": "Nível estimado",
+      "strengthsTitle": "Pontos fortes",
+      "strengths": [
+        "Boa leitura e vocabulário",
+        "Entende bem quando o professor fala devagar",
+        "Muito motivada"
+      ],
+      "improveTitle": "Pontos a melhorar",
+      "improve": [
+        "Listening em velocidade normal",
+        "Confiança para falar",
+        "Tempos verbais no passado"
+      ]
+    },
+    "Pricing": {
+      "badge": "Agenda, cancelamento e reposição",
+      "title": "Imprevisto? Cancele e reponha sua aula em poucos toques.",
+      "subtitle": "Veja suas aulas por mês, o assunto de cada uma, seus créditos e quantos reagendamentos ainda tem.",
+      "phoneLabel": "Celular do aluno: lista de aulas, créditos e reagendamentos",
+      "viewPlan": "Ver este plano",
+      "perMonth": "/mês",
+      "main": {
+        "label": "Mensalidade",
+        "status": "Disponível",
+        "price": "R$ 165",
+        "items": [
+          "Aulas ao vivo com tutor dedicado",
+          "Plano de estudos feito sob medida para você",
+          "App de prática diária com revisão inteligente",
+          "Caderno colaborativo e aulas gravadas",
+          "Nivelamento adaptativo e acompanhamento da evolução",
+          "Cancelamento e reagendamento de aulas pela plataforma"
+        ]
+      },
+      "soon": {
+        "label": "Novo plano",
+        "status": "Em breve",
+        "price": "R$ 000",
+        "note": "Estamos preparando novos planos"
+      }
+    },
+    "Schedule": {
+      "title": "Minhas aulas",
+      "close": "Fechar",
+      "credits": "Créditos",
+      "reschedulesLeft": "Reagend. no mês",
+      "creditsHint": "Aulas canceladas viram reposição usando um crédito.",
+      "classCount": "{count, plural, one {# aula} other {# aulas}}",
+      "teacher": "Luara",
+      "teacherLabel": "Professor",
+      "subject": "Assunto",
+      "date": "Data",
+      "time": "Horário",
+      "status": {
+        "scheduled": "Agendada",
+        "rescheduled": "Reagendada",
+        "canceled": "Cancelada"
+      },
+      "dates": {
+        "month": "MMMM 'de' yyyy",
+        "weekdayDay": "EEEE, d 'de' MMMM",
+        "weekdayDayTime": "EEEE, d 'de' MMMM 'às' HH:mm"
+      },
+      "subjects": [
+        "Pedindo no restaurante",
+        "Pedindo direções",
+        "Transporte público",
+        "Imprevistos em viagem",
+        "Revisão do módulo 2"
+      ],
+      "canceledNotice": "Esta aula foi cancelada. Use um crédito para reagendá-la.",
+      "reschedule": "Reagendar aula",
+      "cancel": "Cancelar aula",
+      "cancelTitle": "Cancelar aula?",
+      "cancelBody": "A aula fica cancelada e você poderá reagendá-la usando um crédito.",
+      "cancelConfirm": "Sim, cancelar aula",
+      "back": "Voltar",
+      "rescheduleTitle": "Reagendar aula",
+      "confirmTitle": "Confirmar reagendamento",
+      "pickSlot": "Escolha um novo horário",
+      "continue": "Continuar",
+      "originalClass": "Aula original",
+      "newDate": "Nova data",
+      "costCredit": "Será consumido 1 crédito.",
+      "costReschedule": "Será consumido 1 dos seus reagendamentos do mês."
+    },
+    "PracticeQuiz": {
+      "correct": "Correto!",
+      "incorrect": "Incorreto",
+      "correctAnswer": "Resposta correta:",
+      "continue": "Continuar",
+      "questions": [
+        {
+          "section": "Vocabulário",
+          "question": "Como se diz “pão” em inglês?",
+          "options": [
+            "Bread",
+            "Bred",
+            "Breed"
+          ],
+          "correct": 0,
+          "explanation": "Bread = pão. Não confunda com “bred”, que é outra palavra."
+        },
+        {
+          "section": "Estrutura",
+          "question": "Qual frase é mais educada para pedir um café?",
+          "options": [
+            "I want a coffee.",
+            "I would like a coffee.",
+            "Give me coffee."
+          ],
+          "correct": 1,
+          "explanation": "“I would like” é o jeito natural e educado de pedir."
+        },
+        {
+          "section": "Gramática",
+          "question": "I ___ to the beach on Sunday.",
+          "options": [
+            "goed",
+            "went",
+            "gone"
+          ],
+          "correct": 1,
+          "explanation": "“Go” é irregular: no passado vira “went”."
+        }
+      ]
+    },
+    "PracticePage": {
+      "header": {
+        "title": "Prática Diária",
+        "description": "Sua trilha de aprendizagem adaptativa e roteiro de estudos."
+      },
+      "profile": {
+        "name": "Ana Souza",
+        "role": "Estudante FluencyLab",
+        "streak": "Dias de Ofensiva",
+        "xp": "Pontos de XP"
+      },
+      "tabs": {
+        "practice": "Prática",
+        "roadmap": "Roteiro",
+        "history": "Histórico"
+      },
+      "dates": {
+        "weekdayDay": "EEEE, d 'de' MMMM",
+        "day": "d 'de' MMMM"
+      },
+      "path": {
+        "title": "Minha Trilha",
+        "subtitle": "Dia {day} de {total} · {plan}",
+        "planName": "Inglês para viajar",
+        "label": "Plano",
+        "today": "HOJE",
+        "dayLabel": "Dia {n}"
+      },
+      "days": [
+        {
+          "mode": "Flashcards com imagem",
+          "tasks": [
+            "Ver os cartões novos",
+            "Ouvir a pronúncia"
+          ]
+        },
+        {
+          "mode": "Lacunas com áudio",
+          "tasks": [
+            "Ouvir o áudio da aula",
+            "Completar as lacunas"
+          ]
+        },
+        {
+          "mode": "Ordenar frases",
+          "tasks": [
+            "Ordenar 6 frases",
+            "Ler em voz alta"
+          ]
+        },
+        {
+          "mode": "Flashcards de recordação",
+          "tasks": [
+            "Revisar as palavras da semana",
+            "Marcar o que ainda erra"
+          ]
+        },
+        {
+          "mode": "Quiz da aula",
+          "tasks": [
+            "10 perguntas mistas",
+            "Revisar os erros"
+          ]
+        },
+        {
+          "mode": "Compreensão auditiva",
+          "tasks": [
+            "Ouvir 5 diálogos curtos",
+            "Responder às perguntas"
+          ]
+        }
+      ],
+      "roadmap": {
+        "title": "Roadmap",
+        "subtitle": "Sua jornada de lições programadas",
+        "current": "Atual",
+        "adaptive": "Prática Adaptativa",
+        "daysProgress": "{done}/{total} Dias",
+        "continue": "Continuar Prática",
+        "lessons": [
+          "No aeroporto",
+          "Check-in no hotel",
+          "Pedindo no restaurante",
+          "Pedindo direções",
+          "Transporte público"
+        ]
+      },
+      "history": {
+        "title": "Concluídos",
+        "subtitle": "Revisite lições e planos passados",
+        "completedOn": "Concluído em {date}",
+        "items": [
+          "Inglês para viajar · módulo 0",
+          "Primeiros passos"
+        ]
+      },
+      "sheet": {
+        "total": "~{min} min no total",
+        "minutes": "{min} min",
+        "locked": "Conclua o dia anterior para liberar este.",
+        "done": "Dia concluído! +{xp} XP"
+      }
+    },
+    "Booking": {
+      "title": "Sua primeira aula é por nossa conta.",
+      "items": [
+        "Conheça seu tutor e a plataforma por dentro",
+        "Descubra seu nível e saia com um plano",
+        "Sem cartão e sem compromisso"
+      ],
+      "note": "Você combina o melhor horário com a gente pelo WhatsApp."
+    }
   },
   "LearnedItemsVault": {
     "description": "Estes são os itens que você já domina no seu aprendizado adaptativo.",
@@ -2089,9 +2406,6 @@
       "namePlaceholder": "Ex: Maria Gabi Silva",
       "nicknamePlaceholder": "Ex: Gabi"
     }
-  },
-  "PathScreen": {
-    "unit": "Unidade 4"
   },
   "Placement": {
     "title": "Nivelamento",

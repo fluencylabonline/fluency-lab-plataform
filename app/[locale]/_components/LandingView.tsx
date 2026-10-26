@@ -1,110 +1,37 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+
 import dynamic from "next/dynamic";
 import { useDevice } from "@/hooks/ui/use-device";
-import { LandingNavbar } from "@/components/landing/LandingNavbar";
-import { LandingHero } from "@/components/landing/LandingHero";
 import { PwaWelcomeScreen } from "@/components/landing/PwaWelcomeScreen";
+import { LandingNav } from "@/components/landing/LandingNav";
+import { HeroSection } from "@/components/landing/sections/HeroSection";
+import { BookingSection } from "@/components/landing/sections/BookingSection";
 import type { SessionUserDTO } from "@/modules/user/user.schema";
-import { SystemSettings } from "@/modules/settings/settings.schema";
+import type { SystemSettings } from "@/modules/settings/settings.schema";
 
-// Seções below-the-fold: carregadas apenas após o hero ser exibido
-const ComparisonSection = dynamic(
-  () => import("@/components/landing/ComparisonSection"),
-  { ssr: false }
-);
-const HowItWorks = dynamic(
-  () => import("@/components/landing/HowItWorks"),
-  { ssr: false }
-);
-const TeamSection = dynamic(
-  () => import("@/components/landing/TeamSection"),
-  { ssr: false }
-);
-const Footer = dynamic(
-  () => import("@/components/landing/Footer"),
-  { ssr: false }
-);
+// Abaixo da dobra: carregadas à parte (cada uma traz seus mockups)
+const DifferentialsSection = dynamic(() => import("@/components/landing/sections/DifferentialsSection").then((m) => m.DifferentialsSection), { ssr: false });
+const PlacementSection = dynamic(() => import("@/components/landing/sections/PlacementSection").then((m) => m.PlacementSection), { ssr: false });
+const PricingSection = dynamic(() => import("@/components/landing/sections/PricingSection").then((m) => m.PricingSection), { ssr: false });
+const Footer = dynamic(() => import("@/components/landing/Footer"), { ssr: false });
 
+/** Landing "mostre, não conte": cada seção exibe a plataforma funcionando em mockups. */
 export function LandingView({ user, settings }: { user: SessionUserDTO | null; settings: SystemSettings }) {
   const { isStandalone } = useDevice();
-  const [videoSrc, setVideoSrc] = useState<string>("");
-
-  const comparisonWrapperRef = useRef<HTMLDivElement>(null);
-  const [isComparisonActive, setIsComparisonActive] = useState(false);
-
-  useEffect(() => {
-    const el = comparisonWrapperRef.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsComparisonActive(entry.isIntersecting),
-      {
-        threshold: 0,
-        rootMargin: "-100px 0px -70% 0px",
-      }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 1000], ["0%", "20%"]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setVideoSrc("./videos/landing.webm");
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+  if (isStandalone) return <PwaWelcomeScreen />;
 
   return (
-    <>
-      {!isStandalone ? (
-        <div className="min-h-screen bg-slate-200/50 dark:bg-slate-950 p-2 md:p-4 flex flex-col font-sans transition-colors duration-300 relative">
-          <div className="absolute inset-0 bg-[url('/textures/cubes.png')] opacity-[0.03] dark:opacity-[0.08] pointer-events-none" />
-
-          <div className="relative max-h-[97vh] lg:min-h-[96vh] flex-1 rounded-3xl overflow-hidden flex flex-col">
-            <motion.video
-              src={videoSrc || undefined}
-              poster="/videos/landing-poster.webp"
-              autoPlay
-              loop
-              muted
-              playsInline
-              style={{ y, scale: 1.15 }}
-              className="absolute top-0 left-0 w-full h-full object-cover"
-            />
-
-            <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/20 to-transparent dark:from-black/65 dark:via-black/30 dark:to-black/5 lg:bg-gradient-to-r lg:from-black/45 lg:via-black/10 lg:to-transparent lg:dark:from-black/65 lg:dark:via-black/20 lg:dark:to-transparent z-1 pointer-events-none" />
-
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-linear-to-b from-black/20 to-transparent dark:from-black/35 z-1" />
-
-            <div id="about" className="relative z-3 flex flex-col flex-1">
-              <LandingNavbar user={user} compact={isComparisonActive} />
-              <LandingHero user={user} settings={settings} />
-            </div>
-          </div>
-
-          <div id="plans" ref={comparisonWrapperRef} className="relative mb-12">
-            <ComparisonSection settings={settings}/>
-          </div>
-
-          <div id="team" className="relative mb-12">
-            <TeamSection settings={settings}/>
-          </div>
-
-          <div id="faq" className="relative mb-12">
-            <HowItWorks />
-          </div>
-
-          <Footer settings={settings} />
-        </div>
-      ) : (
-        <PwaWelcomeScreen />
-      )}
-    </>
+    <div className="min-h-screen bg-slate-200/50 dark:bg-slate-950 p-2 md:p-4 flex flex-col font-sans transition-colors duration-300 relative">
+      <div className="absolute inset-0 bg-[url('/textures/cubes.png')] opacity-[0.03] dark:opacity-[0.08] pointer-events-none" />
+      <LandingNav user={user} />
+      <main className="relative">
+        <HeroSection />
+        <DifferentialsSection />
+        <PlacementSection />
+        <PricingSection />
+        <BookingSection settings={settings} />
+      </main>
+      <Footer settings={settings} />
+    </div>
   );
 }
