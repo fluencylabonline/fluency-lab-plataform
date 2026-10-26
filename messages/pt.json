@@ -1046,7 +1046,8 @@
       "pricing": "Preço",
       "login": "Login",
       "continue": "Continuar",
-      "signOut": "Sair da conta"
+      "signOut": "Sair da conta",
+      "ctaShort": "Agendar aula"
     },
     "Hero": {
       "title": "Você já começou um idioma três vezes. Dessa vez, alguém vai estar do seu lado.",

@@ -1046,7 +1046,8 @@
       "pricing": "Pricing",
       "login": "Log in",
       "continue": "Continue",
-      "signOut": "Sign out"
+      "signOut": "Sign out",
+      "ctaShort": "Book a class"
     },
     "Hero": {
       "title": "You have started a language three times. This time, someone will be by your side.",

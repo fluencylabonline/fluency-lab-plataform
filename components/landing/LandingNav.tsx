@@ -69,8 +69,8 @@ export function LandingNav({ user }: { user: SessionUserDTO | null }) {
 
   return (
     <header className="fixed top-3 md:top-6 inset-x-0 z-50 px-3 md:px-8 pointer-events-none">
-      <div className="mx-auto max-w-5xl flex items-center justify-between gap-3 rounded-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md pl-5 pr-2 py-2 pointer-events-auto">
-        <a href="#aula" aria-label={t("Nav.homeLabel")}><Image src={Logo} alt={t("Common.brand")} width={120} style={{ height: "auto" }} priority /></a>
+      <div className="mx-auto max-w-5xl flex items-center justify-end sm:justify-between gap-3 rounded-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md pl-2 sm:pl-5 pr-2 py-2 pointer-events-auto">
+        <a href="#aula" aria-label={t("Nav.homeLabel")} className="hidden sm:block"><Image src={Logo} alt={t("Common.brand")} width={120} style={{ height: "auto" }} priority /></a>
         <nav aria-label={t("Nav.sectionsLabel")} className="hidden lg:flex items-center gap-1">
           {LINKS.map(([key, id]) => {
             const on = active === id;
@@ -126,7 +126,7 @@ export function LandingNav({ user }: { user: SessionUserDTO | null }) {
               )}
             </AnimatePresence>
           </div>
-          <a href="#agendar" className={cn("rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap transition-colors", active === "agendar" ? "bg-primary/80 text-primary-foreground ring-2 ring-primary/30" : "bg-primary text-primary-foreground")}>{t("Common.cta")}</a>
+          <a href="#agendar" className={cn("rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap transition-colors", active === "agendar" ? "bg-primary/80 text-primary-foreground ring-2 ring-primary/30" : "bg-primary text-primary-foreground")}><span className="sm:hidden">{t("Nav.ctaShort")}</span><span className="hidden sm:inline">{t("Common.cta")}</span></a>
         </div>
       </div>
     </header>
