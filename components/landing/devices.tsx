@@ -74,18 +74,18 @@ export const SCREEN = { w: 1280, h: 800 };
 
 export function Phone({ children, className, label }: FrameProps) {
   return (
-    <div className={cn("relative mx-auto w-full", className)} role="group" aria-label={label}>
+    <div className={cn("relative mx-auto w-full [container-type:inline-size]", className)} role="group" aria-label={label}>
       {/* botões laterais: ação + volume à esquerda, power à direita */}
       <span aria-hidden className="absolute -left-[3px] top-[13%] h-[3.5%] w-[3px] rounded-l bg-zinc-400 dark:bg-zinc-500" />
       <span aria-hidden className="absolute -left-[3px] top-[19%] h-[7%] w-[3px] rounded-l bg-zinc-400 dark:bg-zinc-500" />
       <span aria-hidden className="absolute -left-[3px] top-[28%] h-[7%] w-[3px] rounded-l bg-zinc-400 dark:bg-zinc-500" />
       <span aria-hidden className="absolute -right-[3px] top-[24%] h-[11%] w-[3px] rounded-r bg-zinc-400 dark:bg-zinc-500" />
       {/* borda metálica + moldura escura */}
-      <div className="rounded-[2.4rem] bg-gradient-to-b from-zinc-300 to-zinc-500 p-[2px] shadow-2xl shadow-black/30 dark:from-zinc-400 dark:to-zinc-600">
-        <div className="relative rounded-[2.3rem] bg-zinc-950 p-[9px]">
+      <div className="rounded-[12.5cqw] bg-gradient-to-b from-zinc-300 to-zinc-500 p-[2px] shadow-2xl shadow-black/30 dark:from-zinc-400 dark:to-zinc-600">
+        <div className="relative rounded-[12cqw] bg-zinc-950 p-[3cqw]">
           {/* Dynamic Island */}
-          <span aria-hidden className="absolute left-1/2 top-[17px] z-50 aspect-[3.4/1] w-[25%] -translate-x-1/2 rounded-full bg-black ring-1 ring-white/5" />
-          <Screen designW={PHONE.w} designH={PHONE.h} className="rounded-[1.8rem] ring-1 ring-white/10">
+          <span aria-hidden className="absolute left-1/2 top-[5.5cqw] z-50 aspect-[3.4/1] w-[25%] -translate-x-1/2 rounded-full bg-black ring-1 ring-white/5" />
+          <Screen designW={PHONE.w} designH={PHONE.h} className="rounded-[9.5cqw] ring-1 ring-white/10">
             {children}
           </Screen>
         </div>
