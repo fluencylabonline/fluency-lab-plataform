@@ -63,20 +63,15 @@ export function DownloadClient({ translations: t }: DownloadClientProps) {
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
-            <header className="sticky top-0 w-full border-b bg-background">
-              <div className="flex h-fit items-center justify-between">
-                <BackButton href="/" />
-                <div className="flex items-center gap-4">
-                  <LanguageSwitcher />
-                  <ThemeSwitcher />
-                </div>
-              </div>
-            </header>
-      {/* Background Glow */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-[-10%] left-[-20%] w-[80vw] h-[80vw] rounded-full bg-violet-500/10 blur-[120px] dark:bg-violet-600/5" />
-        <div className="absolute bottom-[-10%] right-[-20%] w-[80vw] h-[80vw] rounded-full bg-blue-500/10 blur-[120px] dark:bg-blue-600/5" />
-      </div>
+      <header className="sticky top-0 w-full border-b">
+        <div className="flex h-fit items-center justify-between">
+          <BackButton href="/" />
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher />
+            <ThemeSwitcher />
+          </div>
+        </div>
+      </header>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center max-w-md w-full mx-auto relative z-10 space-y-8">
