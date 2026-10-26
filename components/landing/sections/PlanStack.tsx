@@ -62,7 +62,7 @@ export function PlanStack({ href, cta, note }: { href: string; cta: string; note
                   {front && (
                     <div className="mt-auto space-y-2 pt-5 pb-2 md:space-y-3 md:pt-8">
                       <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-base font-bold text-primary-foreground md:px-8 md:py-5 md:text-lg shadow-lg transition-transform hover:scale-[1.01] active:scale-95">
-                        <MessageCircle className="size-5" />{cta}
+                        {cta}
                       </a>
                     </div>
                   )}
