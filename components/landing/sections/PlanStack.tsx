@@ -20,7 +20,7 @@ export function PlanStack({ href, cta, note }: { href: string; cta: string; note
 
   return (
     <div>
-      <div className="relative h-[720px]" style={{ paddingTop: PEEK * 2 }}>
+      <div className="relative h-[600px] md:h-[720px]" style={{ paddingTop: PEEK * 2 }}>
         {[0, 1, 2].map((id) => {
           const pos = order.indexOf(id);
           const front = pos === 0;
@@ -42,33 +42,33 @@ export function PlanStack({ href, cta, note }: { href: string; cta: string; note
               )}
             >
               {id === 0 ? (
-                <div className="flex h-full flex-col p-8 md:p-10">
+                <div className="flex h-full flex-col p-5 md:p-10">
                   <div className="flex items-center justify-between">
                     <p className="text-xs font-black uppercase tracking-widest text-primary">{t("main.label")}</p>
                     <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-600">{t("main.status")}</span>
                   </div>
                   <div className="mt-2 flex items-end gap-2">
-                    <span className="text-6xl font-bold tracking-tighter md:text-7xl">{t("main.price")}</span>
-                    <span className="pb-2 text-lg font-semibold text-muted-foreground">{t("perMonth")}</span>
+                    <span className="text-5xl font-bold tracking-tighter md:text-7xl">{t("main.price")}</span>
+                    <span className="pb-1.5 text-base font-semibold md:pb-2 md:text-lg text-muted-foreground">{t("perMonth")}</span>
                   </div>
-                  <ul className="mt-8 space-y-4">
+                  <ul className="mt-5 space-y-2.5 md:mt-8 md:space-y-4">
                     {items.map((item) => (
-                      <li key={item} className="flex items-start gap-3 text-base font-medium">
-                        <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-emerald-500 text-white"><Check className="size-4" /></span>
+                      <li key={item} className="flex items-start gap-3 text-sm font-medium md:text-base">
+                        <span className="mt-0.5 grid size-5 shrink-0 md:size-6 place-items-center rounded-full bg-emerald-500 text-white"><Check className="size-3.5 md:size-4" /></span>
                         {item}
                       </li>
                     ))}
                   </ul>
                   {front && (
-                    <div className="mt-auto space-y-3 pt-8 pb-2">
-                      <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-8 py-5 text-lg font-bold text-primary-foreground shadow-lg transition-transform hover:scale-[1.01] active:scale-95">
+                    <div className="mt-auto space-y-2 pt-5 pb-2 md:space-y-3 md:pt-8">
+                      <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-base font-bold text-primary-foreground md:px-8 md:py-5 md:text-lg shadow-lg transition-transform hover:scale-[1.01] active:scale-95">
                         <MessageCircle className="size-5" />{cta}
                       </a>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="flex h-full flex-col p-8 md:p-10">
+                <div className="flex h-full flex-col p-5 md:p-10">
                   <div className="flex items-center justify-between">
                     <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">{t("soon.label")}</p>
                     <span className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary">{t("soon.status")}</span>
