@@ -69,7 +69,7 @@ export function LandingNav({ user }: { user: SessionUserDTO | null }) {
 
   return (
     <header className="fixed top-3 md:top-6 inset-x-0 z-50 px-3 md:px-8 pointer-events-none">
-      <div className="mx-auto max-w-5xl flex items-center justify-end sm:justify-between gap-3 rounded-full border border-white/40 dark:border-white/10 bg-white/35 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.12)] pl-2 sm:pl-5 pr-2 py-2 pointer-events-auto">
+      <div className="mx-auto w-fit max-w-full sm:w-full sm:max-w-5xl flex items-center justify-center sm:justify-between gap-2 sm:gap-3 rounded-full border border-white/40 dark:border-white/10 bg-white/35 dark:bg-white/5 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.12)] p-1.5 sm:py-2 sm:pl-5 sm:pr-2 pointer-events-auto">
         <a href="#aula" aria-label={t("Nav.homeLabel")} className="hidden sm:block"><Image src={Logo} alt={t("Common.brand")} width={120} style={{ height: "auto" }} priority /></a>
         <nav aria-label={t("Nav.sectionsLabel")} className="hidden lg:flex items-center gap-1">
           {LINKS.map(([key, id]) => {
@@ -88,7 +88,7 @@ export function LandingNav({ user }: { user: SessionUserDTO | null }) {
               <Link
                 href={user ? "/hub" : "/signin"}
                 aria-disabled={isLoggingOut}
-                className={cn("flex min-h-[44px] items-center gap-2 whitespace-nowrap rounded-full bg-black/5 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-black/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/20", isLoggingOut && "pointer-events-none opacity-50")}
+                className={cn("flex min-h-[44px] items-center gap-2 whitespace-nowrap rounded-full bg-black/5 px-3 sm:px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-black/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/20", isLoggingOut && "pointer-events-none opacity-50")}
               >
                 {isLoggingOut ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -126,7 +126,7 @@ export function LandingNav({ user }: { user: SessionUserDTO | null }) {
               )}
             </AnimatePresence>
           </div>
-          <a href="#agendar" className={cn("flex min-h-[44px] items-center rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap transition-colors", active === "agendar" ? "bg-primary/80 text-primary-foreground ring-2 ring-primary/30" : "bg-primary text-primary-foreground")}><span className="sm:hidden">{t("Nav.ctaShort")}</span><span className="hidden sm:inline">{t("Common.cta")}</span></a>
+          <a href="#agendar" className={cn("flex min-h-[44px] items-center rounded-full px-3.5 sm:px-4 py-2 text-sm font-bold whitespace-nowrap transition-colors", active === "agendar" ? "bg-primary/80 text-primary-foreground ring-2 ring-primary/30" : "bg-primary text-primary-foreground")}><span className="sm:hidden">{t("Nav.ctaShort")}</span><span className="hidden sm:inline">{t("Common.cta")}</span></a>
         </div>
       </div>
     </header>
