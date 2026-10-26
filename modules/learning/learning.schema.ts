@@ -370,10 +370,3 @@ export const surveyStepSchemas = {
 
 export type SurveyStepKey = keyof typeof surveyStepSchemas;
 
-/** Input of the "fill profile from audio" flow. */
-export const fillProfileFromAudioSchema = z.object({
-  storagePath: z.string().min(1).max(512),
-  mimeType: z.string().min(1).max(100),
-  profileId: z.uuid().optional(),
-  studentId: z.string().optional(),
-});

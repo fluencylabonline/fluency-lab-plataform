@@ -317,18 +317,6 @@ export const ADMIN_HELP_EN: RoleHelpContent<AdminHelpRoute> = {
         text: "Every new student fills in an entry profile. It is what guides matching them with the right teacher.",
       },
       {
-        id: "new",
-        target: "manager-onboarding.new",
-        title: "New Profile",
-        text: "Creates a profile from scratch — useful when a student was enrolled without going through the questionnaire.",
-      },
-      {
-        id: "audio",
-        target: "manager-onboarding.audio",
-        title: "Profile from Audio",
-        text: "Uploads the intro conversation and the AI fills the questionnaire with what it heard. You review and complete the rest.",
-      },
-      {
         id: "list",
         target: "manager-onboarding.list",
         title: "The list",
@@ -338,39 +326,6 @@ export const ADMIN_HELP_EN: RoleHelpContent<AdminHelpRoute> = {
         id: "why",
         title: "Incomplete is money standing still",
         text: "A student without a finished profile is matched in the dark, and reassigning later is costly. Treat the incomplete list as a work queue.",
-      },
-    ],
-  },
-
-  "/hub/admin/students/onboarding/from-audio": {
-    title: "Profile from Audio",
-    summary:
-      "Upload the intro conversation with the student and the AI fills the questionnaire with what they said.",
-    sections: [
-      {
-        heading: "How it works",
-        body: "Pick the audio (WhatsApp, mp3, m4a or mp4 video). The AI listens, fills only the fields that are still empty and leaves blank whatever was not said. Then you review the profile in the questionnaire.",
-      },
-      {
-        heading: "From your phone",
-        body: "On Android, with the app installed, share the WhatsApp audio and pick FluencyLab from the share list. On iPhone, use the Select audio button.",
-      },
-      {
-        heading: "Privacy",
-        body: "The audio is sent to the AI for analysis and deleted right after. Let the student know the conversation will be analysed.",
-      },
-    ],
-    tour: [
-      {
-        id: "intro",
-        title: "Profile from Audio",
-        text: "Upload the intro conversation and the AI fills in the questionnaire for you.",
-      },
-      {
-        id: "upload",
-        target: "onboarding-audio.upload",
-        title: "Upload the audio",
-        text: "Pick one or more files. Calls of 15 to 25 minutes work well. The AI fills only what is still empty.",
       },
     ],
   },

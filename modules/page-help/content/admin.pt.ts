@@ -318,18 +318,6 @@ export const ADMIN_HELP_PT: RoleHelpContent<AdminHelpRoute> = {
         text: "Todo aluno novo preenche um perfil de entrada. É ele que orienta a alocação com o professor certo.",
       },
       {
-        id: "new",
-        target: "manager-onboarding.new",
-        title: "Novo Perfil",
-        text: "Cria um perfil do zero — útil quando o aluno foi matriculado sem passar pelo questionário.",
-      },
-      {
-        id: "audio",
-        target: "manager-onboarding.audio",
-        title: "Perfil por Áudio",
-        text: "Envia a conversa inicial e a IA preenche o questionário com o que ouviu. Você revisa e completa o resto.",
-      },
-      {
         id: "list",
         target: "manager-onboarding.list",
         title: "A lista",
@@ -339,39 +327,6 @@ export const ADMIN_HELP_PT: RoleHelpContent<AdminHelpRoute> = {
         id: "why",
         title: "Incompleto é dinheiro parado",
         text: "Aluno sem perfil concluído é alocado no escuro, e realocar depois custa caro. Trate a lista de incompletos como fila de trabalho.",
-      },
-    ],
-  },
-
-  "/hub/admin/students/onboarding/from-audio": {
-    title: "Perfil por Áudio",
-    summary:
-      "Envie a conversa inicial com o aluno e a IA preenche o questionário com o que ele disse.",
-    sections: [
-      {
-        heading: "Como funciona",
-        body: "Selecione o áudio (WhatsApp, mp3, m4a ou vídeo mp4). A IA ouve, preenche só os campos que ainda estão vazios e deixa em branco o que não foi dito. Depois você revisa o perfil no questionário.",
-      },
-      {
-        heading: "Pelo celular",
-        body: "No Android, com o app instalado, compartilhe o áudio do WhatsApp escolhendo o FluencyLab na lista de compartilhamento. No iPhone, use o botão Selecionar áudio.",
-      },
-      {
-        heading: "Privacidade",
-        body: "O áudio é enviado para a IA analisar e apagado logo em seguida. Avise o aluno de que a conversa será analisada.",
-      },
-    ],
-    tour: [
-      {
-        id: "intro",
-        title: "Perfil por Áudio",
-        text: "Envie a conversa inicial e a IA preenche o questionário por você.",
-      },
-      {
-        id: "upload",
-        target: "onboarding-audio.upload",
-        title: "Envie o áudio",
-        text: "Selecione um ou mais arquivos. Chamadas de 15 a 25 minutos funcionam bem. A IA preenche só o que ainda está vazio.",
       },
     ],
   },

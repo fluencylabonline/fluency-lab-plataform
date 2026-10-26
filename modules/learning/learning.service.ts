@@ -22,11 +22,6 @@ import { userRepository } from "@/modules/user/user.repository";
 import { differenceInDays } from "date-fns";
 import { StudentLearningStats, LearningItemDetail, StudentRoadmap } from "./learning.types";
 import { REMINDER_TEMPLATES } from "./reminder-templates";
-import { mergeAudioExtraction, type SurveyResponses } from "./learning.extraction";
-import { adminStorage } from "@/lib/firebase-admin";
-import { env } from "@/env";
-
-const PROFILE_AUDIO_MAX_BYTES = 200 * 1024 * 1024;
 
 export const learningService = {
   // Profiles
@@ -37,52 +32,6 @@ export const learningService = {
       responses: data.responses,
       status: "draft",
     }, userId);
-  },
-
-  /**
-   * Fills the survey draft from an onboarding audio already uploaded to Storage.
-   * Only empty fields are filled; the audio is deleted after the analysis.
-   */
-  async fillProfileFromAudio(
-    data: { storagePath: string; mimeType: string; profileId?: string; studentId?: string },
-    userId: string,
-  ) {
-    // ABAC: the upload rule scopes the folder to the uploader; enforce it here too.
-    if (!data.storagePath.startsWith(`profile-audio/${userId}/`) || data.storagePath.includes("..")) {
-      throw new Error("Arquivo de áudio inválido");
-    }
-
-    let existing: SurveyResponses | undefined;
-    if (data.profileId) {
-      const profile = await learningRepository.findProfileById(data.profileId);
-      if (!profile) throw new Error("Perfil não encontrado");
-      existing = profile.responses as SurveyResponses;
-    }
-
-    const file = adminStorage.bucket(env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET).file(data.storagePath);
-    try {
-      const [metadata] = await file.getMetadata();
-      if (Number(metadata.size) > PROFILE_AUDIO_MAX_BYTES) throw new Error("Arquivo de áudio muito grande");
-      const [audio] = await file.download();
-
-      const extraction = await aiService.extractStudentProfileFromAudio({
-        audio,
-        mimeType: data.mimeType,
-        userId,
-      });
-      const merged = mergeAudioExtraction(existing, extraction);
-
-      const profile = await learningRepository.upsertProfile({
-        id: data.profileId,
-        studentId: data.studentId,
-        responses: merged.responses,
-        status: "draft",
-      }, userId);
-
-      return { profileId: profile.id, filled: merged.filled, evidence: merged.evidence };
-    } finally {
-      await file.delete().catch(() => undefined);
-    }
   },
 
   async finalizeProfile(profileId: string, userId?: string) {

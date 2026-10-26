@@ -137,7 +137,6 @@ export type AdminHelpRoute =
   | "/hub/admin/users"
   | "/hub/admin/users/[userId]"
   | "/hub/admin/students/onboarding"
-  | "/hub/admin/students/onboarding/from-audio"
   | "/hub/admin/students/onboarding/[profileId]"
   | "/hub/admin/students/onboarding/[profileId]/view"
   | "/hub/admin/finances"
