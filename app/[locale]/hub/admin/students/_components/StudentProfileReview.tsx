@@ -167,7 +167,7 @@ export function StudentProfileReview({ profileId, initialData, basePath = "/hub/
     <div className="relative flex min-h-screen flex-col">
       <Header title={t("title")} showSubHeader={false} backHref={basePath} />
 
-      <main className="container max-w-2xl flex-1 space-y-4 py-6 pb-32" data-tour="manager-onboarding.form">
+      <main className="container max-w-2xl flex-1 space-y-4 py-6 pb-12" data-tour="manager-onboarding.form">
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
 
         {problems.labels.length > 0 && (
@@ -287,10 +287,7 @@ export function StudentProfileReview({ profileId, initialData, basePath = "/hub/
         <Section title={t("sections.notes")}>
           <Field label={t("fields.step10.generalObservations")}><Textarea rows={4} value={get("step10", "generalObservations", "")} onChange={(e) => set("step10", "generalObservations", e.target.value)} /></Field>
         </Section>
-      </main>
-
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur">
-        <div className="mx-auto flex max-w-2xl gap-3">
+        <div className="flex gap-3 pt-2">
           <Button variant="outline" className="h-11 flex-1" disabled={busy !== null || !dirty} onClick={save}>
             {busy === "save" && <Loader2 className="size-4 animate-spin" aria-hidden />}
             {t("save")}
@@ -300,7 +297,8 @@ export function StudentProfileReview({ profileId, initialData, basePath = "/hub/
             {t("finalize")}
           </Button>
         </div>
-      </div>
+      </main>
+
     </div>
   );
 }
