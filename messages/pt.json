@@ -2729,7 +2729,9 @@
       "status": "Status",
       "teacher": "Professor",
       "time": "Horário",
-      "teacherFallback": "Professor FluencyLab"
+      "teacherFallback": "Professor FluencyLab",
+      "topic": "Tema",
+      "topicTbd": "A definir"
     },
     "Error": {
       "generic": "Ocorreu um erro. Tente novamente."

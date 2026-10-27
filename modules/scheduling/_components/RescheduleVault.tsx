@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { Vault, VaultHeader, VaultTitle, VaultBody, VaultContent, VaultPrimaryButton, VaultSecondaryButton } from "@/components/ui/vault";
+import { Vault, VaultHeader, VaultTitle, VaultBody, VaultContent, VaultFooter, VaultPrimaryButton, VaultSecondaryButton } from "@/components/ui/vault";
 import { VaultLoadingOverlay } from "@/components/ui/vault-loading-overlay";
 import { getTeacherAvailabilityAction, rescheduleAction } from "@/modules/scheduling/scheduling.actions";
 import { format, addDays } from "date-fns";
@@ -261,9 +261,14 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, rescheduleS
               </>
             )}
 
-            <div className="pt-4 border-t flex flex-col gap-3">
+            <VaultFooter>
+              <VaultSecondaryButton 
+                onClick={() => isConfirming ? setIsConfirming(false) : onOpenChange(false)}
+                disabled={overlayState !== "idle"}
+              >
+                {isConfirming ? (t("Actions.back") || "Voltar") : (t("Actions.cancel") || "Cancelar")}
+              </VaultSecondaryButton>
               <VaultPrimaryButton
-                className="w-full"
                 disabled={overlayState !== "idle" || !selectedSlotId || (!usesCredit && quotaExhausted)}
                 onClick={handleConfirm}
               >
@@ -271,13 +276,7 @@ export function RescheduleVault({ open, onOpenChange, selectedClass, rescheduleS
                   ? (t("Reschedule.confirmFinal") || "Confirmar e Salvar")
                   : (t("Reschedule.confirm") || "Confirmar Reagendamento")}
               </VaultPrimaryButton>
-              <VaultSecondaryButton 
-                onClick={() => isConfirming ? setIsConfirming(false) : onOpenChange(false)}
-                disabled={overlayState !== "idle"}
-              >
-                {isConfirming ? (t("Actions.back") || "Voltar") : (t("Actions.cancel") || "Cancelar")}
-              </VaultSecondaryButton>
-            </div>
+            </VaultFooter>
           </div>
         </VaultBody>
       </VaultContent>

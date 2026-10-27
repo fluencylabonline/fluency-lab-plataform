@@ -8,7 +8,7 @@ import { enUS, ptBR } from "date-fns/locale";
 import { AlertCircle, ChevronDown, Clock, Info, Loader2, RefreshCw, Ticket, User } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
-import { Vault, VaultBody, VaultContent, VaultHeader, VaultPrimaryButton, VaultSecondaryButton, VaultTitle } from "@/components/ui/vault";
+import { Vault, VaultBody, VaultContent, VaultFooter, VaultHeader, VaultPrimaryButton, VaultSecondaryButton, VaultTitle } from "@/components/ui/vault";
 import { VaultLoadingOverlay } from "@/components/ui/vault-loading-overlay";
 import { cn } from "@/lib/utils";
 import { RescheduleVault } from "@/modules/scheduling/_components/RescheduleVault";
@@ -268,6 +268,7 @@ export function StudentSchedule({ studentId, initialClasses, balance, reschedule
             {selected && actions && (
               <div className="flex flex-col gap-4 pb-2">
                 <dl className="grid gap-3 text-sm">
+                  <div><dt className="text-xs text-muted-foreground">{t("Details.topic")}</dt><dd className="font-medium">{selected.lessonTitle || t("Details.topicTbd")}</dd></div>
                   <div><dt className="text-xs text-muted-foreground">{t("Details.date")}</dt><dd className="font-medium capitalize">{format(new Date(selected.startAt), "PPPP", { locale: dateLocale })}</dd></div>
                   <div><dt className="text-xs text-muted-foreground">{t("Details.time")}</dt><dd className="font-medium">{format(new Date(selected.startAt), "HH:mm")} – {format(new Date(selected.endAt), "HH:mm")}</dd></div>
                   <div><dt className="text-xs text-muted-foreground">{t("Details.teacher")}</dt><dd className="font-medium">{selected.teacherName || t("Details.teacherFallback")}</dd></div>
@@ -287,14 +288,19 @@ export function StudentSchedule({ studentId, initialClasses, balance, reschedule
                 {actions.quotaExhausted && <Notice tone="muted">{t("Policy.quotaExhausted")}</Notice>}
 
                 {confirming ? (
-                  <div className="flex flex-col gap-3 border-t pt-4">
+                  <>
                     <p className="text-center text-sm text-muted-foreground">{actions.cancelIsNoShow ? t("CancelConfirm.descriptionNoShow") : t("CancelConfirm.description")}</p>
-                    <VaultPrimaryButton variant="destructive" className="w-full" disabled={overlay !== "idle"} onClick={cancel}>{t("CancelConfirm.confirm")}</VaultPrimaryButton>
-                    <VaultSecondaryButton className="w-full" disabled={overlay !== "idle"} onClick={() => setConfirming(false)}>{t("CancelConfirm.back")}</VaultSecondaryButton>
-                  </div>
+                    <VaultFooter>
+                      <VaultSecondaryButton disabled={overlay !== "idle"} onClick={() => setConfirming(false)}>{t("CancelConfirm.back")}</VaultSecondaryButton>
+                      <VaultPrimaryButton variant="destructive" disabled={overlay !== "idle"} onClick={cancel}>{t("CancelConfirm.confirm")}</VaultPrimaryButton>
+                    </VaultFooter>
+                  </>
                 ) : (
                   (actions.canReschedule || actions.canCancel || actions.canReplaceWithCredit || actions.hasRecessActivity) && (
-                    <div className="flex flex-col gap-3 border-t pt-4">
+                    <VaultFooter>
+                      {actions.canCancel && (
+                        <VaultSecondaryButton onClick={() => setConfirming(true)}>{t("Actions.cancel")}</VaultSecondaryButton>
+                      )}
                       {actions.canReschedule && (
                         <VaultPrimaryButton variant="default" onClick={() => { setDetailOpen(false); setRescheduleOpen(true); }}>{t("Actions.reschedule")}</VaultPrimaryButton>
                       )}
@@ -304,10 +310,7 @@ export function StudentSchedule({ studentId, initialClasses, balance, reschedule
                       {actions.hasRecessActivity && (
                         <VaultPrimaryButton variant="default" onClick={() => { setDetailOpen(false); router.push(`/hub/student/recess/${selected.id}`); }}>{t("Actions.viewRecessActivity")}</VaultPrimaryButton>
                       )}
-                      {actions.canCancel && (
-                        <VaultPrimaryButton variant="secondary" onClick={() => setConfirming(true)}>{t("Actions.cancel")}</VaultPrimaryButton>
-                      )}
-                    </div>
+                    </VaultFooter>
                   )
                 )}
               </div>
