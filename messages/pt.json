@@ -2707,38 +2707,29 @@
   },
   "Schedule": {
     "Actions": {
-      "back": "Voltar",
       "cancel": "Cancelar Aula",
       "canceling": "Cancelando aula...",
       "reschedule": "Reagendar Aula",
-      "viewDetails": "Ver Aula",
-      "viewRecessActivity": "Ver atividade de recesso"
+      "viewRecessActivity": "Ver atividade de recesso",
+      "replaceWithCredit": "Repor com crédito",
+      "back": "Voltar"
     },
     "CancelConfirm": {
       "back": "Voltar",
       "confirm": "Sim, cancelar aula",
       "description": "Você tem certeza que deseja cancelar esta aula? Esta ação não pode ser desfeita.",
-      "title": "Confirmar Cancelamento"
-    },
-    "Credits": {
-      "bonus": "Créditos Bônus",
-      "lateStudents": "Atraso Aluno",
-      "rescheduleQuota": "Cota de Reagendamento",
-      "teacherCancellation": "Canc. Professor",
-      "title": "Seus Créditos",
-      "totalCredits": "Total de Créditos",
-      "used": "usado"
+      "descriptionNoShow": "Faltam menos de 4h: cancelar agora será registrado como falta e não gera reposição."
     },
     "Default": {
       "classTitle": "Aula de Inglês"
     },
-    "description": "Gerencie suas aulas e créditos de reposição.",
+    "description": "Suas próximas aulas, créditos e remarcações.",
     "Details": {
-      "cancelPolicy": "Cancelamentos feitos com menos de 4h de antecedência serão considerados No-Show.",
       "date": "Data",
       "status": "Status",
       "teacher": "Professor",
-      "time": "Horário"
+      "time": "Horário",
+      "teacherFallback": "Professor FluencyLab"
     },
     "Error": {
       "generic": "Ocorreu um erro. Tente novamente."
@@ -2748,17 +2739,16 @@
       "canceledStudent": "Aulas canceladas por você não podem ser remarcadas.",
       "canceledTeacher": "Esta aula foi cancelada pelo professor. Use seu crédito de reposição para remarcá-la.",
       "within4h": "Faltam menos de 4h para esta aula. Não é mais possível remarcar. Cancelar será registrado como No-Show.",
-      "teacherRecess": "Seu professor está de recesso neste dia.",
       "teacherRecessFallback": "Uma atividade alternativa foi disponibilizada para você.",
-      "teacherRecessNoFallback": "A coordenação vai definir uma atividade alternativa em breve."
+      "teacherRecessNoFallback": "A coordenação vai definir uma atividade alternativa em breve.",
+      "canceledTeacherNoCredit": "Esta aula foi cancelada pelo professor, mas você não tem crédito de reposição ativo. Fale com a coordenação.",
+      "quotaExhausted": "Você já usou as remarcações deste mês. Elas voltam no próximo mês."
     },
     "Reschedule": {
       "confirm": "Confirmar Reagendamento",
       "confirmFinal": "Confirmar e Salvar",
       "confirmTitle": "Confirmar Reagendamento",
-      "creditNotice": "Se você tiver créditos, eles serão listados aqui para uso.",
       "creditNoticeConfirm": "Será consumido 1 crédito de reposição.",
-      "limitNotice": "Limite de 2 reagendamentos por mês (não acumulativo).",
       "loadingSlots": "Buscando horários disponíveis...",
       "monthlyQuota": "Cota Mensal",
       "newDate": "Nova Data",
@@ -2769,7 +2759,6 @@
       "saving": "Salvando reagendamento...",
       "selectSlot": "Escolha um novo horário",
       "title": "Reagendar Aula",
-      "useCredit": "Ou use um crédito",
       "used": "usados",
       "creditMode": "Reposição com crédito",
       "creditModeDesc": "Esta aula foi cancelada pelo professor. Você usa 1 crédito de reposição, sem gastar sua cota mensal."
@@ -2778,7 +2767,28 @@
       "canceled": "Aula cancelada com sucesso!",
       "rescheduled": "Aula reagendada com sucesso!"
     },
-    "title": "Meu Cronograma"
+    "title": "Minhas aulas",
+    "Summary": {
+      "credits": "Créditos",
+      "reschedules": "Remarcações no mês",
+      "note": "Aula cancelada pelo professor vira reposição usando um crédito."
+    },
+    "List": {
+      "count": "{count, plural, one {# aula} other {# aulas}}",
+      "empty": "Você não tem aulas agendadas.",
+      "loadMore": "Ver mais meses",
+      "past": "Aulas anteriores",
+      "pastEmpty": "Nenhuma aula anterior neste período.",
+      "loadPast": "Ver meses anteriores"
+    },
+    "Status": {
+      "scheduled": "Agendada",
+      "completed": "Concluída",
+      "canceled": "Cancelada",
+      "noShow": "Falta",
+      "recess": "Recesso",
+      "overdue": "Pendente"
+    }
   },
   "Settings": {
     "appearanceDesc": "Personalize o visual da plataforma conforme sua preferência.",
@@ -3708,12 +3718,12 @@
     "schedule": {
       "steps": {
         "calendar": {
-          "title": "Calendário de Aulas",
-          "description": "Visualize e gerencie seus horários agendados e de reposição.",
-          "content1": "O calendário centraliza sua rotina com a FluencyLab:",
-          "item1": "<strongNode>Agendamentos Ativos:</strongNode> As datas e horários em azul são suas próximas aulas programadas.",
-          "item2": "<strongNode>Histórico e Status:</strongNode> Aulas concluídas ficam em verde, faltas em amarelo e desmarcações em cinza.",
-          "item3": "<strongNode>Remarcar ou Cancelar:</strongNode> Clique sobre a aula agendada (azul) no calendário para abrir os detalhes e escolher se deseja reagendar ou cancelar a aula."
+          "title": "Lista de Aulas",
+          "description": "Veja e gerencie suas aulas agendadas e de reposição.",
+          "content1": "A tela Minhas aulas reúne sua rotina com a FluencyLab:",
+          "item1": "<strongNode>Próximas aulas:</strongNode> aparecem em lista, mês a mês, com dia, horário e professor.",
+          "item2": "<strongNode>Histórico e situação:</strongNode> cada aula tem uma etiqueta (agendada, concluída, falta, cancelada). As anteriores ficam recolhidas no fim da página.",
+          "item3": "<strongNode>Remarcar ou Cancelar:</strongNode> toque na aula agendada para abrir os detalhes e escolher se deseja reagendar ou cancelar."
         },
         "credits": {
           "title": "Saldo de Créditos",

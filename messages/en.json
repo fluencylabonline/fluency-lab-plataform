@@ -2707,38 +2707,29 @@
   },
   "Schedule": {
     "Actions": {
-      "back": "Back",
       "cancel": "Cancel Class",
       "canceling": "Canceling class...",
       "reschedule": "Reschedule Class",
-      "viewDetails": "View Class",
-      "viewRecessActivity": "View recess activity"
+      "viewRecessActivity": "View recess activity",
+      "replaceWithCredit": "Make up with credit",
+      "back": "Back"
     },
     "CancelConfirm": {
       "back": "Back",
       "confirm": "Yes, cancel class",
       "description": "Are you sure you want to cancel this class? This action cannot be undone.",
-      "title": "Confirm Cancellation"
-    },
-    "Credits": {
-      "bonus": "Bonus Credits",
-      "lateStudents": "Student Late",
-      "rescheduleQuota": "Reschedule Quota",
-      "teacherCancellation": "Teacher Canc.",
-      "title": "Your Credits",
-      "totalCredits": "Total Credits",
-      "used": "used"
+      "descriptionNoShow": "Less than 4 hours left: canceling now is recorded as a missed class and gives no makeup."
     },
     "Default": {
       "classTitle": "English Class"
     },
-    "description": "Manage your classes and makeup credits.",
+    "description": "Your upcoming classes, credits and reschedules.",
     "Details": {
-      "cancelPolicy": "Cancellations made with less than 4h notice will be considered No-Show.",
       "date": "Date",
       "status": "Status",
       "teacher": "Teacher",
-      "time": "Time"
+      "time": "Time",
+      "teacherFallback": "FluencyLab teacher"
     },
     "Error": {
       "generic": "An error occurred. Please try again."
@@ -2748,17 +2739,16 @@
       "canceledStudent": "Classes canceled by you cannot be rescheduled.",
       "canceledTeacher": "This class was canceled by the teacher. Use your makeup credit to reschedule it.",
       "within4h": "Less than 4 hours until this class. Rescheduling is no longer possible. Canceling will be recorded as No-Show.",
-      "teacherRecess": "Your teacher is on recess on this day.",
       "teacherRecessFallback": "An alternative activity is available for you.",
-      "teacherRecessNoFallback": "The school will set an alternative activity soon."
+      "teacherRecessNoFallback": "The school will set an alternative activity soon.",
+      "canceledTeacherNoCredit": "This class was canceled by the teacher, but you have no active makeup credit. Please contact the coordination.",
+      "quotaExhausted": "You have used this month's reschedules. They come back next month."
     },
     "Reschedule": {
       "confirm": "Confirm Reschedule",
       "confirmFinal": "Confirm and Save",
       "confirmTitle": "Confirm Reschedule",
-      "creditNotice": "If you have credits, they will be listed here for use.",
       "creditNoticeConfirm": "1 makeup credit will be consumed.",
-      "limitNotice": "Limit of 2 reschedules per month (non-accumulative).",
       "loadingSlots": "Fetching available slots...",
       "monthlyQuota": "Monthly Quota",
       "newDate": "New Date",
@@ -2769,7 +2759,6 @@
       "saving": "Saving reschedule...",
       "selectSlot": "Choose a new slot",
       "title": "Reschedule Class",
-      "useCredit": "Or use a credit",
       "used": "used",
       "creditMode": "Make-up with credit",
       "creditModeDesc": "This class was canceled by your teacher. You use 1 make-up credit, without spending your monthly quota."
@@ -2778,7 +2767,28 @@
       "canceled": "Class cancelled successfully!",
       "rescheduled": "Class rescheduled successfully!"
     },
-    "title": "My Schedule"
+    "title": "My classes",
+    "Summary": {
+      "credits": "Credits",
+      "reschedules": "Reschedules this month",
+      "note": "A class canceled by the teacher becomes a makeup class using one credit."
+    },
+    "List": {
+      "count": "{count, plural, one {# class} other {# classes}}",
+      "empty": "You have no scheduled classes.",
+      "loadMore": "Show more months",
+      "past": "Past classes",
+      "pastEmpty": "No past classes in this period.",
+      "loadPast": "Show earlier months"
+    },
+    "Status": {
+      "scheduled": "Scheduled",
+      "completed": "Completed",
+      "canceled": "Canceled",
+      "noShow": "Missed",
+      "recess": "Recess",
+      "overdue": "Pending"
+    }
   },
   "Settings": {
     "appearanceDesc": "Customize the platform look to your preference.",
@@ -3709,12 +3719,12 @@
     "schedule": {
       "steps": {
         "calendar": {
-          "title": "Class Calendar",
+          "title": "Class List",
           "description": "View and manage your scheduled and makeup classes.",
-          "content1": "The calendar centralizes your routine with FluencyLab:",
-          "item1": "<strongNode>Active Bookings:</strongNode> Dates and times in blue represent your next scheduled classes.",
-          "item2": "<strongNode>History & Status:</strongNode> Completed classes are shown in green, no-shows in yellow, and cancellations in gray.",
-          "item3": "<strongNode>Reschedule or Cancel:</strongNode> Click on a scheduled class (blue) in the calendar to open its details and choose to reschedule or cancel it."
+          "content1": "The My classes screen brings your FluencyLab routine together:",
+          "item1": "<strongNode>Upcoming classes:</strongNode> shown as a list, month by month, with day, time and teacher.",
+          "item2": "<strongNode>History and status:</strongNode> each class has a label (scheduled, completed, missed, canceled). Past classes are collapsed at the bottom of the page.",
+          "item3": "<strongNode>Reschedule or Cancel:</strongNode> tap a scheduled class to open its details and choose to reschedule or cancel it."
         },
         "credits": {
           "title": "Credits Balance",

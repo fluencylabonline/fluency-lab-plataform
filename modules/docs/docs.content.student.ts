@@ -98,14 +98,14 @@ export const STUDENT_DOCS: DocSection[] = [
     articles: [
       {
         id: "aluno-calendario",
-        title: "Seu calendário de aulas",
+        title: "Sua lista de aulas",
         summary: "Onde ver suas próximas aulas e regras de tolerância de atraso.",
         route: "/hub/student/schedule",
         keywords: ["agenda", "calendário", "aula", "horário", "videochamada", "entrar", "atraso"],
         blocks: [
           {
             type: "p",
-            text: "O calendário mostra todas as suas aulas agendadas. Clique em uma aula para ver os detalhes, entrar na videochamada no horário, cancelar ou remarcar.",
+            text: "A tela Minhas aulas mostra suas aulas em lista, mês a mês. Toque em uma aula para ver os detalhes, entrar na videochamada no horário, cancelar ou remarcar.",
           },
           {
             type: "note",
@@ -137,7 +137,7 @@ export const STUDENT_DOCS: DocSection[] = [
         blocks: [
           {
             type: "p",
-            text: "Você pode cancelar uma aula pelo calendário, clicando nela e escolhendo cancelar. O que muda é **quando** você faz isso.",
+            text: "Você pode cancelar uma aula em Minhas aulas, tocando nela e escolhendo cancelar. O que muda é **quando** você faz isso.",
           },
           {
             type: "note",
@@ -195,7 +195,7 @@ export const STUDENT_DOCS: DocSection[] = [
         blocks: [
           {
             type: "p",
-            text: "Crédito é o direito a uma aula extra. Ele aparece no seu calendário e é usado na hora de agendar uma reposição.",
+            text: "Crédito é o direito a uma aula extra. Ele aparece no topo de Minhas aulas e é usado na hora de agendar uma reposição.",
           },
           {
             type: "fields",
