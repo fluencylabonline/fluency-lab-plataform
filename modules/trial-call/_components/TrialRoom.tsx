@@ -69,8 +69,6 @@ export function TrialRoom({ code, credentials, isHost, initialMic, initialCam, i
         await nextCall.join();
         joined = nextCall;
         if (cancelled) return;
-        // A transcrição vira o perfil do aluno: o anfitrião garante que ela esteja ligada (com repetição).
-        if (isHost) void ensureTranscription(nextCall);
         nextCall.on("call.ended", () => setPhase("ended"));
         setClient(next);
         setCall(nextCall);
@@ -89,7 +87,7 @@ export function TrialRoom({ code, credentials, isHost, initialMic, initialCam, i
       setClient(null);
       setCall(null);
     };
-  }, [credentials, initialCam, initialMic, attempt, isHost]);
+  }, [credentials, initialCam, initialMic, attempt]);
 
   if (phase === "left" || phase === "ended" || phase === "error") {
     return (
@@ -129,18 +127,6 @@ export function TrialRoom({ code, credentials, isHost, initialMic, initialCam, i
   );
 }
 
-/** Liga a transcrição da sala; tenta de novo se a Stream ainda não aceitou. Falhar não derruba a aula. */
-async function ensureTranscription(call: Call) {
-  for (let attempt = 0; attempt < 4; attempt++) {
-    try {
-      await call.startTranscription();
-      return;
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-    }
-  }
-}
-
 interface RoomViewProps {
   code: string;
   isHost: boolean;
@@ -155,6 +141,7 @@ function RoomView({ code, isHost, initialNotes, onLeft, onEnded }: RoomViewProps
   const [notesOpen, setNotesOpen] = useState(false);
   const { useRemoteParticipants, useLocalParticipant, useMicrophoneState, useCameraState, useCallCallingState, useIsCallTranscribingInProgress } = useCallStateHooks();
   const transcribing = useIsCallTranscribingInProgress();
+  const transcriptionTries = useRef(0);
   const remote = useRemoteParticipants();
   const local = useLocalParticipant();
   const { isMute: micMuted } = useMicrophoneState();
@@ -165,13 +152,24 @@ function RoomView({ code, isHost, initialNotes, onLeft, onEnded }: RoomViewProps
     if (callingState === CallingState.LEFT) onLeft();
   }, [callingState, onLeft]);
 
+  // A sala já pede transcrição automática; só se ela não estiver ligada o anfitrião tenta iniciar
+  // (no máximo 2 vezes, e sem barulho: a Stream responde 400 quando ela já está em andamento).
+  useEffect(() => {
+    if (!isHost || !call || callingState !== CallingState.JOINED || transcribing || transcriptionTries.current >= 2) return;
+    const timer = setTimeout(() => {
+      transcriptionTries.current += 1;
+      call.startTranscription().catch(() => undefined);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [isHost, call, callingState, transcribing]);
+
   const main = remote[0];
 
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-zinc-950 text-white">
     <div className="relative min-w-0 flex-1 overflow-hidden">
       {/* vídeo principal: o outro participante; sozinho, a própria imagem ocupa a tela */}
-      <div className="absolute inset-0 [&_.str-video__participant-view]:h-full [&_.str-video__participant-view]:w-full [&_.str-video__participant-view]:max-h-none [&_.str-video__participant-view]:max-w-none [&_.str-video__participant-view]:rounded-none [&_video]:object-cover">
+      <div className="absolute inset-0 [&_.str-video__participant-view]:size-full! [&_.str-video__participant-view]:max-h-none! [&_.str-video__participant-view]:max-w-none! [&_.str-video__participant-view]:aspect-auto! [&_.str-video__participant-view]:rounded-none! [&_.str-video__video-placeholder]:aspect-auto! [&_.str-video__video]:object-cover!">
         {main ? (
           <ParticipantView participant={main} />
         ) : local ? (
@@ -187,7 +185,7 @@ function RoomView({ code, isHost, initialNotes, onLeft, onEnded }: RoomViewProps
 
       {/* self-view */}
       {main && local && (
-        <div className="absolute bottom-28 right-3 z-10 w-28 overflow-hidden rounded-2xl border border-white/30 bg-zinc-800 shadow-xl sm:bottom-6 sm:right-6 sm:w-48 [&_.str-video__participant-view]:aspect-[3/4] sm:[&_.str-video__participant-view]:aspect-video [&_.str-video__participant-view]:w-full [&_video]:object-cover">
+        <div className="absolute bottom-28 right-3 z-10 w-28 overflow-hidden rounded-2xl border border-white/30 bg-zinc-800 shadow-xl sm:bottom-6 sm:right-6 sm:w-48 [&_.str-video__participant-view]:aspect-[3/4]! sm:[&_.str-video__participant-view]:aspect-video! [&_.str-video__participant-view]:w-full! [&_.str-video__participant-view]:max-w-none! [&_.str-video__video-placeholder]:aspect-auto! [&_.str-video__video]:object-cover!">
           <ParticipantView participant={local} />
         </div>
       )}
