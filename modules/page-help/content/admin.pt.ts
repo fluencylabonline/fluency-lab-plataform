@@ -291,12 +291,8 @@ export const ADMIN_HELP_PT: RoleHelpContent<AdminHelpRoute> = {
         body: "Todo aluno novo preenche um perfil de entrada — objetivos, nível, disponibilidade e preferências. É o que orienta a alocação com o professor certo e o planejamento das primeiras aulas.",
       },
       {
-        heading: "Novo Perfil",
-        body: "O botão do topo cria um perfil do zero — útil quando o aluno foi matriculado sem passar pelo questionário.",
-      },
-      {
-        heading: "Perfil por Áudio",
-        body: "Envie o áudio da chamada inicial ou do WhatsApp e a IA preenche o que o aluno disse. Campos não mencionados ficam em branco para você completar. No Android, também dá para compartilhar o áudio direto do WhatsApp para o app.",
+        heading: "De onde vêm os perfis",
+        body: "Os perfis nascem das aulas experimentais: o professor anota durante a chamada, a transcrição fica salva e a IA monta um rascunho do perfil. Aqui você inicia a aula, vê as anotações e a transcrição e abre o rascunho para revisar.",
       },
       {
         heading: "O menu de cada item",
@@ -332,47 +328,39 @@ export const ADMIN_HELP_PT: RoleHelpContent<AdminHelpRoute> = {
   },
 
   "/hub/admin/students/onboarding/[profileId]": {
-    title: "Questionário do aluno",
-    summary: "O perfil de entrada do aluno, para preencher ou corrigir.",
+    title: "Perfil do aluno",
+    summary: "O rascunho gerado pela aula experimental, para conferir, corrigir e ativar.",
     docsArticleId: "onboarding",
     sections: [
       {
-        heading: "Preencher por áudio",
-        body: "Com o perfil já criado, o botão do topo abre a tela de áudio: a IA preenche só os campos ainda vazios com o que o aluno disse na conversa. Salve o passo atual antes de sair.",
+        heading: "O que é esta tela",
+        body: "Todos os campos do perfil numa página só. O que a IA entendeu da transcrição e das suas anotações já vem preenchido; o que não foi dito fica em branco para você completar.",
       },
       {
-        heading: "O que é este formulário",
-        body: "O questionário de entrada respondido na matrícula: objetivo com o idioma, experiência anterior, disponibilidade, nível que o aluno atribui a si mesmo e o quanto pretende se dedicar.",
+        heading: "O que falta",
+        body: "O aviso no topo lista os campos obrigatórios que ainda faltam. Só dá para finalizar com todos preenchidos.",
       },
       {
-        heading: "Quando você preenche por ele",
-        body: "Quando o aluno travou no meio e não retoma sozinho. Preencher durante um atendimento costuma ser mais rápido que insistir por mensagem.",
-      },
-      {
-        heading: "Responda como o aluno responderia",
-        body: "As respostas alimentam o diagnóstico pedagógico e a alocação. Chutar nível ou objetivo para destravar o cadastro estraga justamente o que o formulário serve para produzir.",
-      },
-      {
-        heading: "Depois de concluir",
-        body: "Com o perfil completo, o diagnóstico pedagógico pode ser gerado e, a partir dele, o plano de estudos.",
+        heading: "Depois de finalizar",
+        body: "O perfil é ativado, o resumo pedagógico é gerado e, a partir dele, o diagnóstico e o plano de estudos. Se o aluno já tiver conta com o mesmo e-mail, o perfil já está ligado a ele.",
       },
     ],
     tour: [
       {
         id: "intro",
-        title: "O perfil de entrada",
-        text: "O questionário que o aluno responde na matrícula. Você pode preencher ou corrigir.",
+        title: "O perfil do aluno",
+        text: "Gerado pela IA a partir da aula experimental. Confira e corrija antes de ativar.",
       },
       {
         id: "form",
         target: "manager-onboarding.form",
-        title: "As perguntas",
-        text: "Objetivo, experiência anterior, disponibilidade, nível autoatribuído e comprometimento. Avance pelos passos até o fim.",
+        title: "Os campos",
+        text: "Objetivo, nível, disponibilidade, dificuldades e preferências. Corrija o que a IA entendeu errado.",
       },
       {
-        id: "honesty",
-        title: "Responda como o aluno responderia",
-        text: "As respostas alimentam o diagnóstico e a alocação. Chutar só para destravar o cadastro estraga o que o formulário serve para produzir.",
+        id: "finish",
+        title: "Salvar ou finalizar",
+        text: "Salve o rascunho para continuar depois, ou finalize para ativar o perfil.",
       },
     ],
   },

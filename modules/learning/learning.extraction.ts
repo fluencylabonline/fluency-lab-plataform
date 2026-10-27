@@ -19,7 +19,7 @@ export interface AudioExtractionResult {
 }
 
 /**
- * Mirrors the defaults of `StudentProfileSurvey`. A draft saved by the wizard
+ * Mirrors the defaults of the profile review form. A draft saved by it
  * contains these values even when nobody touched the field, so a value equal to
  * its default is treated as "empty" and may be overwritten by the AI.
  */

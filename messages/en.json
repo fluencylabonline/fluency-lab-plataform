@@ -2954,18 +2954,7 @@
     "toBeImplemented": "Coming soon"
   },
   "Survey": {
-    "classesPerWeek": "Aulas por semana",
-    "favoriteTopics": "Temas favoritos de conversa",
-    "finalNotes": "Final notes",
-    "mainDifficulties": "Principais dificuldades",
-    "noProfilesFound": "Nenhum perfil encontrado",
-    "preferredPace": "Ritmo de aula preferido",
-    "professionalArea": "Área profissional",
-    "selfDeclaredLevel": "Nível autodeclarado",
-    "speakingAnxiety": "Ansiedade ao falar",
-    "step": "step",
-    "T": "T",
-    "usageAtWork": "Uso do idioma no trabalho"
+    "noProfilesFound": "Nenhum perfil encontrado"
   },
   "Suspended": {
     "backToLogin": "Back to login",
@@ -4257,6 +4246,155 @@
       "profileError": "Could not generate the profile.",
       "review": "Review profile",
       "loadError": "Could not load the class."
+    }
+  },
+  "ProfileReview": {
+    "title": "Student profile",
+    "subtitle": "Check what was filled in, fix what is needed and activate the profile.",
+    "save": "Save draft",
+    "saved": "Draft saved",
+    "saveError": "Could not save.",
+    "finalize": "Finish and activate",
+    "finalized": "Profile activated!",
+    "finalizeError": "Could not finish the profile.",
+    "missing": "Still missing:",
+    "missingToast": "Fill in the missing fields before finishing.",
+    "sections": {
+      "basic": "Basic information",
+      "history": "Study history",
+      "goals": "Goals",
+      "time": "Available time",
+      "career": "Career",
+      "interests": "Interests",
+      "style": "Learning style",
+      "blocks": "Blockers",
+      "custom": "Personalization",
+      "notes": "Notes"
+    },
+    "fields": {
+      "step1": {
+        "fullName": "Full name",
+        "approximateAge": "Approximate age",
+        "occupation": "Occupation",
+        "isMinor": "The student is a minor"
+      },
+      "step2": {
+        "selfAssessedLevel": "Level",
+        "previousStudy": "Has studied this language before",
+        "previousStudyDetails": "Previous study details"
+      },
+      "step3": {
+        "mainGoals": "Goals",
+        "customGoal": "What other goal?",
+        "specificMotivation": "Motivation",
+        "commitmentLevel": "Commitment"
+      },
+      "step4": {
+        "weeklyFrequency": "Classes per week",
+        "dailyStudyTime": "Daily self-study"
+      },
+      "step5": {
+        "professionalArea": "Professional area",
+        "employmentStatus": "Employment status",
+        "usageType": "Language use at work",
+        "technicalVocabNeeded": "Needs technical vocabulary"
+      },
+      "step6": {
+        "conversationTopics": "Favorite conversation topics"
+      },
+      "step7": {
+        "preferredMethods": "Most effective methods (up to 3)",
+        "activityPreferences": "Activity preference (1 to 5)"
+      },
+      "step8": {
+        "mainDifficulties": "Main difficulties",
+        "speakingAnxiety": "Speaking anxiety"
+      },
+      "step9": {
+        "classExpectations": "Class expectations (up to 3)",
+        "learningPace": "Class pace",
+        "accentGoal": "Accent goal",
+        "correctionStyle": "Correction style"
+      },
+      "step10": {
+        "generalObservations": "General notes"
+      }
+    },
+    "options": {
+      "goals": {
+        "fluency": "General fluency",
+        "travel": "Travel",
+        "work": "Work",
+        "exams": "Certifications",
+        "hobby": "Hobby",
+        "moving": "Moving abroad",
+        "other": "Other"
+      },
+      "daily": {
+        "none": "Classes only",
+        "5_30min": "5 to 30 min",
+        "30_60min": "30 to 60 min",
+        "1h_plus": "Over 1 hour"
+      },
+      "employment": {
+        "employed": "Employed",
+        "seeking": "Job seeking",
+        "student": "Student/Other"
+      },
+      "usage": {
+        "writing": "Writing",
+        "speaking": "Speaking",
+        "balanced": "Balanced"
+      },
+      "methods": {
+        "visual": "Visual",
+        "auditory": "Auditory",
+        "reading": "Reading and writing",
+        "practical": "Speaking practice",
+        "grammar": "Grammar"
+      },
+      "activities": [
+        "Conversation",
+        "Listening",
+        "Reading",
+        "Grammar",
+        "Group activities"
+      ],
+      "difficulties": [
+        "Pronunciation",
+        "Grammar",
+        "Vocabulary",
+        "Listening",
+        "Public speaking"
+      ],
+      "anxiety": {
+        "none": "None",
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "very_high": "Very high"
+      },
+      "expectations": {
+        "conversation_focus": "Conversation",
+        "grammar_focus": "Grammar",
+        "exam_prep": "Exams",
+        "business": "Business"
+      },
+      "pace": {
+        "intense": "Intense and focused",
+        "moderate": "Moderate and steady",
+        "relaxed": "Relaxed, no pressure"
+      },
+      "accent": {
+        "intelligible": "Understandable",
+        "natural": "Native-like"
+      },
+      "correction": {
+        "immediate": "Immediate",
+        "important_only": "Serious errors only",
+        "end_of_lesson": "End of class",
+        "gentle": "Subtle and guided"
+      }
     }
   }
 }

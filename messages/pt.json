@@ -2953,18 +2953,7 @@
     "toBeImplemented": "Em breve"
   },
   "Survey": {
-    "classesPerWeek": "Aulas por semana",
-    "favoriteTopics": "Temas favoritos de conversa",
-    "finalNotes": "Observações finais",
-    "mainDifficulties": "Principais dificuldades",
-    "noProfilesFound": "Nenhum perfil encontrado",
-    "preferredPace": "Ritmo de aula preferido",
-    "professionalArea": "Área profissional",
-    "selfDeclaredLevel": "Nível autodeclarado",
-    "speakingAnxiety": "Ansiedade ao falar",
-    "step": "step",
-    "T": "T",
-    "usageAtWork": "Uso do idioma no trabalho"
+    "noProfilesFound": "Nenhum perfil encontrado"
   },
   "Suspended": {
     "backToLogin": "Voltar para o login",
@@ -4256,6 +4245,155 @@
       "profileError": "Não foi possível gerar o perfil.",
       "review": "Revisar perfil",
       "loadError": "Não foi possível carregar a aula."
+    }
+  },
+  "ProfileReview": {
+    "title": "Perfil do aluno",
+    "subtitle": "Confira o que foi preenchido, corrija o que for preciso e ative o perfil.",
+    "save": "Salvar rascunho",
+    "saved": "Rascunho salvo",
+    "saveError": "Não foi possível salvar.",
+    "finalize": "Finalizar e ativar",
+    "finalized": "Perfil ativado!",
+    "finalizeError": "Não foi possível finalizar o perfil.",
+    "missing": "Falta preencher:",
+    "missingToast": "Preencha os campos pendentes antes de finalizar.",
+    "sections": {
+      "basic": "Informações básicas",
+      "history": "Histórico de estudo",
+      "goals": "Objetivos",
+      "time": "Tempo disponível",
+      "career": "Carreira",
+      "interests": "Interesses",
+      "style": "Estilo de aprendizado",
+      "blocks": "Bloqueios",
+      "custom": "Personalização",
+      "notes": "Observações"
+    },
+    "fields": {
+      "step1": {
+        "fullName": "Nome completo",
+        "approximateAge": "Idade aproximada",
+        "occupation": "Ocupação",
+        "isMinor": "O aluno é menor de idade"
+      },
+      "step2": {
+        "selfAssessedLevel": "Nível",
+        "previousStudy": "Já estudou este idioma antes",
+        "previousStudyDetails": "Detalhes do estudo anterior"
+      },
+      "step3": {
+        "mainGoals": "Objetivos",
+        "customGoal": "Qual outro objetivo?",
+        "specificMotivation": "Motivação",
+        "commitmentLevel": "Comprometimento"
+      },
+      "step4": {
+        "weeklyFrequency": "Aulas por semana",
+        "dailyStudyTime": "Estudo autônomo diário"
+      },
+      "step5": {
+        "professionalArea": "Área profissional",
+        "employmentStatus": "Situação de emprego",
+        "usageType": "Uso do idioma no trabalho",
+        "technicalVocabNeeded": "Precisa de vocabulário técnico"
+      },
+      "step6": {
+        "conversationTopics": "Temas favoritos de conversa"
+      },
+      "step7": {
+        "preferredMethods": "Métodos mais eficazes (até 3)",
+        "activityPreferences": "Preferência de atividades (1 a 5)"
+      },
+      "step8": {
+        "mainDifficulties": "Principais dificuldades",
+        "speakingAnxiety": "Ansiedade ao falar"
+      },
+      "step9": {
+        "classExpectations": "Expectativas das aulas (até 3)",
+        "learningPace": "Ritmo de aula",
+        "accentGoal": "Objetivo de sotaque",
+        "correctionStyle": "Estilo de correção"
+      },
+      "step10": {
+        "generalObservations": "Observações gerais"
+      }
+    },
+    "options": {
+      "goals": {
+        "fluency": "Fluência geral",
+        "travel": "Viagens",
+        "work": "Trabalho",
+        "exams": "Certificações",
+        "hobby": "Hobby",
+        "moving": "Morar fora",
+        "other": "Outro"
+      },
+      "daily": {
+        "none": "Apenas aulas",
+        "5_30min": "5 a 30 min",
+        "30_60min": "30 a 60 min",
+        "1h_plus": "Mais de 1 hora"
+      },
+      "employment": {
+        "employed": "Empregado",
+        "seeking": "Buscando emprego",
+        "student": "Estudante/Outro"
+      },
+      "usage": {
+        "writing": "Escrita",
+        "speaking": "Fala",
+        "balanced": "Equilibrado"
+      },
+      "methods": {
+        "visual": "Visual",
+        "auditory": "Auditivo",
+        "reading": "Leitura e escrita",
+        "practical": "Prática oral",
+        "grammar": "Gramática"
+      },
+      "activities": [
+        "Conversação",
+        "Escuta",
+        "Leitura",
+        "Gramática",
+        "Dinâmicas"
+      ],
+      "difficulties": [
+        "Pronúncia",
+        "Gramática",
+        "Vocabulário",
+        "Escuta",
+        "Falar em público"
+      ],
+      "anxiety": {
+        "none": "Zero",
+        "low": "Baixa",
+        "medium": "Média",
+        "high": "Alta",
+        "very_high": "Máxima"
+      },
+      "expectations": {
+        "conversation_focus": "Conversação",
+        "grammar_focus": "Gramática",
+        "exam_prep": "Provas",
+        "business": "Negócios"
+      },
+      "pace": {
+        "intense": "Intenso e focado",
+        "moderate": "Moderado e constante",
+        "relaxed": "Relaxado, sem pressão"
+      },
+      "accent": {
+        "intelligible": "Compreensível",
+        "natural": "Nativo (natural)"
+      },
+      "correction": {
+        "immediate": "Imediata",
+        "important_only": "Só erros graves",
+        "end_of_lesson": "No fim da aula",
+        "gentle": "Sutil e guiada"
+      }
     }
   }
 }
