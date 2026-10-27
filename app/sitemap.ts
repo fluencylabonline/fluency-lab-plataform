@@ -4,17 +4,17 @@ import { env } from "@/env";
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = env.NEXT_PUBLIC_APP_URL || "https://fluency-lab-plataform.vercel.app";
 
-  const staticRoutes = [
-    "",
-    "/privacy",
-    "/terms",
-    "/certificate",
+  const routes = [
+    { path: "", priority: 1.0 },
+    { path: "/faq", priority: 0.7 },
+    { path: "/download", priority: 0.6 },
+    { path: "/privacy", priority: 0.3 },
+    { path: "/terms", priority: 0.3 },
   ];
 
-  return staticRoutes.map((route) => ({
-    url: `${baseUrl}${route}`,
-    lastModified: new Date(),
+  return routes.map(({ path, priority }) => ({
+    url: `${baseUrl}${path}`,
     changeFrequency: "monthly" as const,
-    priority: route === "" ? 1.0 : 0.5,
+    priority,
   }));
 }

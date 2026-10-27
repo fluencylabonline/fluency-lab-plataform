@@ -11,7 +11,9 @@ export async function generateMetadata({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Legal" });
   return {
-    title: t("terms.title"),
+    title: `${t("terms.title")} | FluencyLab`,
+    description: t("terms.subtitle"),
+    alternates: { canonical: "/terms" },
   };
 }
 

@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import { certificateService } from "@/modules/certificate/certificate.service";
 import { format } from "date-fns";
 import { CheckCircle2, XCircle, Award, Calendar, Clock, User, Languages } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 interface VerifyCertificatePageProps {
   params: Promise<{

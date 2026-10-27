@@ -7,6 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${t("title") || "Instale o FluencyLab"} | FluencyLab`,
     description: t("subtitle") || "Adicione a plataforma à sua tela inicial para uma experiência rápida e fluida.",
+    alternates: { canonical: "/download" },
   };
 }
 

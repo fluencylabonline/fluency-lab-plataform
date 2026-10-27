@@ -57,6 +57,7 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/_next") ||
     pathname.startsWith("/static") ||
     pathname.startsWith("/api") ||
+    pathname === "/opengraph-image" ||
     pathname.includes(".") ||
     pathname === "/favicon.ico" ||
     pathname === "/sw.js";

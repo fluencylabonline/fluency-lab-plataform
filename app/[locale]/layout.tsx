@@ -31,9 +31,6 @@ export async function generateMetadata({
     description: t("description"),
     metadataBase,
     manifest: "/manifest.json",
-    alternates: {
-      canonical: "/",
-    },
     robots: {
       index: true,
       follow: true,
@@ -48,23 +45,15 @@ export async function generateMetadata({
     openGraph: {
       title: t("title"),
       description: t("description"),
-      url: baseUrl,
       siteName: "Fluency Lab",
       type: "website",
-      images: [
-        {
-          url: "/brand/logo.png",
-          width: 1200,
-          height: 630,
-          alt: "Fluency Lab",
-        },
-      ],
+      images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "FluencyLab" }],
     },
     twitter: {
       card: "summary_large_image",
+      images: ["/opengraph-image"],
       title: t("title"),
       description: t("description"),
-      images: ["/brand/logo.png"],
     },
     icons: {
       apple: "/icons/ios/180.png",
@@ -120,8 +109,6 @@ export default async function RootLayout({
           as="image"
           href="/icons/android/launchericon-transparent-512x512.png"
         />
-        {/* Preconnect: estabelece TCP/TLS antecipadamente para origens críticas */}
-        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
         {/* DNS-prefetch: resolve o DNS do Firebase Auth sem abrir conexão antecipada */}
         <link rel="dns-prefetch" href="https://firebaseapp.com" />
       </head>

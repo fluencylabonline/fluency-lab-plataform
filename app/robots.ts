@@ -20,10 +20,6 @@ export default function robots(): MetadataRoute.Robots {
           "/offline",
         ],
       },
-      {
-        userAgent: "GPTBot",
-        disallow: "/",
-      },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
   };

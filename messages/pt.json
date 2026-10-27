@@ -3404,8 +3404,9 @@
   },
   "Metadata": {
     "root": {
-      "title": "FluencyLab",
-      "description": "Plataforma de ensino de idiomas"
+      "title": "FluencyLab | Aulas de inglês online com professor e plataforma própria",
+      "description": "Aulas de inglês sob medida com um tutor que te conhece pelo nome e uma plataforma que mostra sua evolução. Agende sua aula experimental.",
+      "ogTagline": "Aulas de inglês sob medida, com um tutor ao seu lado."
     },
     "hub": {
       "title": "Hub - Fluency Lab"

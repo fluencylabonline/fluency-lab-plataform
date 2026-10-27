@@ -9,11 +9,11 @@ import { BookingSection } from "@/components/landing/sections/BookingSection";
 import type { SessionUserDTO } from "@/modules/user/user.schema";
 import type { SystemSettings } from "@/modules/settings/settings.schema";
 
-// Abaixo da dobra: carregadas à parte (cada uma traz seus mockups)
-const DifferentialsSection = dynamic(() => import("@/components/landing/sections/DifferentialsSection").then((m) => m.DifferentialsSection), { ssr: false });
-const PlacementSection = dynamic(() => import("@/components/landing/sections/PlacementSection").then((m) => m.PlacementSection), { ssr: false });
-const PricingSection = dynamic(() => import("@/components/landing/sections/PricingSection").then((m) => m.PricingSection), { ssr: false });
-const Footer = dynamic(() => import("@/components/landing/Footer"), { ssr: false });
+// Abaixo da dobra: JS carregado à parte (cada uma traz seus mockups), mas o HTML sai renderizado no servidor para SEO
+const DifferentialsSection = dynamic(() => import("@/components/landing/sections/DifferentialsSection").then((m) => m.DifferentialsSection));
+const PlacementSection = dynamic(() => import("@/components/landing/sections/PlacementSection").then((m) => m.PlacementSection));
+const PricingSection = dynamic(() => import("@/components/landing/sections/PricingSection").then((m) => m.PricingSection));
+const Footer = dynamic(() => import("@/components/landing/Footer"));
 
 /** Manchas de cor muito difusas (cores da escola) espalhadas pela página, sobre fundo branco / escuro. */
 const GLOWS = [
