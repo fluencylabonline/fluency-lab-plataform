@@ -255,7 +255,8 @@
       "weakPassword": "Password too weak. Please choose a stronger password.",
       "invalidToken": "Invalid or expired code.",
       "sessionExpired": "Session expired. Please try signing in again.",
-      "accountSuspended": "Your account has been suspended. Please contact your administrator."
+      "accountSuspended": "Your account has been suspended. Please contact your administrator.",
+      "tooManyAttempts": "Too many attempts. Please wait a few minutes and try again."
     },
     "forgotPassword": "Forgot your password?",
     "forgotPasswordSubtitle": "Don't worry, we'll help you.",

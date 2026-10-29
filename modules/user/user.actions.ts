@@ -13,7 +13,7 @@ import { env } from "@/env";
 import { communicationService } from "@/modules/communication/communication.service";
 import { notificationService } from "@/modules/notification/notification.service";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { decrypt } from "@/lib/cryptography";
+import { decrypt, encrypt } from "@/lib/cryptography";
 import { verifySudoMode, getCurrentUser } from "@/lib/auth-server";
 
 // --- Funções Auxiliares Privadas ---
@@ -61,24 +61,24 @@ export const loginAction = actionClient
         return { success: false, error: "accountSuspended" };
       }
 
-      const sessionCookie = await userService.createSessionCookie(idToken, rememberMe);
       const cookieStore = await cookies();
       const maxAge = rememberMe ? 60 * 60 * 24 * 14 : 60 * 60 * 24 * 7; // 14 days or 1 week
 
       if (user?.mfaEnabled) {
-        // Set a temporary "mfa_pending" cookie instead of "session"
-        cookieStore.set("mfa_pending", sessionCookie, {
+        // A sessão só é criada depois do TOTP. Até lá, guardamos o idToken criptografado
+        // (o cookie não serve como sessão nem pode ser lido pelo cliente).
+        cookieStore.set("mfa_pending", encrypt(JSON.stringify({ uid, idToken })), {
           maxAge: 300, // 5 minutes
           httpOnly: true,
           secure: process.env.NODE_ENV !== "development",
           path: "/",
           sameSite: "lax",
         });
-        
-        // Also store rememberMe flag temporarily if needed, or pass it from UI
-        // We'll pass it from UI for simplicity in VerifyMfaVault
+
         return { success: true, mfaRequired: true };
       }
+
+      const sessionCookie = await userService.createSessionCookie(idToken, rememberMe);
 
       // Standard login (No MFA)
       cookieStore.set("session", sessionCookie, {
@@ -108,16 +108,29 @@ export const verifyMfaLoginAction = actionClient
       const mfaPendingCookie = cookieStore.get("mfa_pending");
       if (!mfaPendingCookie) return { success: false, error: "sessionExpired" };
 
-      const sessionCookie = mfaPendingCookie.value;
-      const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+      let pending: { uid: string; idToken: string };
+      try {
+        pending = JSON.parse(decrypt(mfaPendingCookie.value));
+      } catch {
+        cookieStore.delete("mfa_pending");
+        return { success: false, error: "sessionExpired" };
+      }
 
-      const user = await userService.getUserById(decodedClaims.uid);
+      const decodedToken = await adminAuth.verifyIdToken(pending.idToken, true);
+      if (decodedToken.uid !== pending.uid) return { success: false, error: "sessionExpired" };
+
+      const limit = await checkRateLimit("mfa_verify", decodedToken.uid, 5, 5 * 60 * 1000);
+      if (!limit.success) return { success: false, error: "tooManyAttempts" };
+
+      const user = await userService.getUserById(decodedToken.uid);
       if (user && !user.isActive) {
         return { success: false, error: "accountSuspended" };
       }
-      
-      const isValid = await userService.verifyMfaToken(decodedClaims.uid, parsedInput.token);
+
+      const isValid = await userService.verifyMfaToken(decodedToken.uid, parsedInput.token);
       if (!isValid) return { success: false, error: "invalidToken" };
+
+      const sessionCookie = await userService.createSessionCookie(pending.idToken, parsedInput.rememberMe);
 
       // Success! Set the real session cookie
       cookieStore.set("session", sessionCookie, {
