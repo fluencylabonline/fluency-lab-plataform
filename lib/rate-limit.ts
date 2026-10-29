@@ -1,7 +1,7 @@
 import "server-only";
 import { db } from "./db";
 import { rateLimits } from "@/modules/curriculum/curriculum.schema";
-import { and, eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 export async function checkRateLimit(
   serviceName: string,
@@ -11,46 +11,31 @@ export async function checkRateLimit(
 ) {
   const now = new Date();
   const windowStart = new Date(now.getTime() - windowMs);
+  const windowExpired = sql`${rateLimits.windowStart} < ${windowStart.toISOString()}::timestamp`;
 
-  // 1. Get or create record for this window
-  let [record] = await db.select()
-    .from(rateLimits)
-    .where(
-      and(
-        eq(rateLimits.serviceName, serviceName),
-        eq(rateLimits.identifier, identifier)
-      )
-    );
+  // Upsert atômico: abre uma janela nova (count = 1) ou incrementa a atual numa única
+  // instrução, para que requisições simultâneas não passem do limite.
+  const [record] = await db.insert(rateLimits)
+    .values({
+      serviceName,
+      identifier,
+      windowStart: now,
+      count: 1,
+    })
+    .onConflictDoUpdate({
+      target: [rateLimits.serviceName, rateLimits.identifier],
+      set: {
+        count: sql`CASE WHEN ${windowExpired} THEN 1 ELSE ${rateLimits.count} + 1 END`,
+        windowStart: sql`CASE WHEN ${windowExpired} THEN ${now.toISOString()}::timestamp ELSE ${rateLimits.windowStart} END`,
+      },
+    })
+    .returning({ count: rateLimits.count });
 
-  if (!record || record.windowStart < windowStart) {
-    // Reset or initial
-    [record] = await db.insert(rateLimits)
-      .values({
-        serviceName,
-        identifier,
-        windowStart: now,
-        count: 1,
-      })
-      .onConflictDoUpdate({
-        target: [rateLimits.serviceName, rateLimits.identifier],
-        set: { windowStart: now, count: 1 }
-      })
-      .returning();
-    
-    return { success: true, remaining: limit - 1 };
-  }
-
-  if (record.count >= limit) {
+  if (record.count > limit) {
     return { success: false, remaining: 0 };
   }
 
-  // 2. Increment
-  const [updated] = await db.update(rateLimits)
-    .set({ count: sql`${rateLimits.count} + 1` })
-    .where(eq(rateLimits.id, record.id))
-    .returning();
-
-  return { success: true, remaining: limit - updated.count };
+  return { success: true, remaining: limit - record.count };
 }
 
 export async function checkDailyBudget(
