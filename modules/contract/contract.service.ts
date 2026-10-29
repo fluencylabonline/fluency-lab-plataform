@@ -96,6 +96,99 @@ export const contractService = {
   },
 
   /**
+   * Gera o documento assinado de um template: injeta os dados (snapshot),
+   * calcula o hash de integridade e salva o PDF com o selo de verificação.
+   * Usado na assinatura pelo usuário e na renovação automática.
+   */
+  async buildSignedDocument(params: {
+    template: { name: string; content: string; region: "BR" | "US" };
+    user: NonNullable<Awaited<ReturnType<typeof userService.getUser>>>;
+    instanceId: string;
+    guardianData?: GuardianData;
+    durationMonths: number;
+  }) {
+    const { template, user, instanceId, guardianData, durationMonths } = params;
+
+    // Configurações da escola (Escola Única)
+    const schoolSettings = await contractRepository.getSchoolSettings();
+    if (!schoolSettings) {
+      throw new Error("Configurações da escola (CNPJ/Endereço) não encontradas no sistema.");
+    }
+
+    const decryptedTaxId = user.taxId && user.taxId.includes(":") ? decrypt(user.taxId) : user.taxId;
+    const decryptedBusinessTaxId = user.businessTaxId && user.businessTaxId.includes(":") ? decrypt(user.businessTaxId) : user.businessTaxId;
+    const decryptedPixKey = user.pixKey && user.pixKey.includes(":") ? decrypt(user.pixKey) : user.pixKey;
+
+    // Injeção de Dados e Geração de Conteúdo Final (Snapshot)
+    const finalContent = injectTemplateData(template.content, {
+      user: {
+        name: user.name,
+        email: user.email,
+        taxId: decryptedTaxId ?? "",
+        businessTaxId: decryptedBusinessTaxId ?? "",
+        pixKey: decryptedPixKey ?? "",
+      },
+      guardian: guardianData,
+      school: {
+        ...schoolSettings,
+        // O CNPJ é guardado criptografado; sem isso o contrato assinado
+        // renderizaria o ciphertext no lugar do número.
+        taxId: schoolSettings.taxId.includes(":")
+          ? decrypt(schoolSettings.taxId)
+          : schoolSettings.taxId,
+      },
+      date: new Date().toLocaleDateString(template.region === "US" ? "en-US" : "pt-BR"),
+      contract: {
+        durationMonths,
+      },
+    });
+
+    // Integridade: Hash SHA-256 do conteúdo + metadados
+    const metadata = { userId: user.id, timestamp: new Date().toISOString() };
+    const hashData = finalContent + JSON.stringify(metadata);
+    const integrityHash = generateIntegrityHash(hashData, metadata);
+
+    // Geração de PDF e Upload para Firebase Storage
+    // Adicionamos o Integrity Hash e o link de verificação no PDF
+    const signeeName = guardianData
+      ? `${guardianData.name} (Responsável por ${user.name})`
+      : user.name;
+
+    const baseUrl = env.NEXT_PUBLIC_APP_URL.endsWith("/")
+      ? env.NEXT_PUBLIC_APP_URL.slice(0, -1)
+      : env.NEXT_PUBLIC_APP_URL;
+    const verificationUrl = `${baseUrl}/verify/${integrityHash}`;
+    const pdfBytes = await this.generatePDF(
+      template.name,
+      finalContent,
+      signeeName,
+      { hash: integrityHash, url: verificationUrl }
+    );
+    const pdfPath = `contracts/${user.id}/${instanceId}_${Date.now()}.pdf`;
+
+    const bucket = adminStorage.bucket(env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
+
+    try {
+      const file = bucket.file(pdfPath);
+      await file.save(Buffer.from(pdfBytes), {
+        metadata: {
+          contentType: "application/pdf",
+          metadata: {
+            ownerId: user.id,
+            instanceId: instanceId,
+            hash: integrityHash
+          }
+        },
+      });
+    } catch (error) {
+      console.error("[ContractService.buildSignedDocument] PDF Storage Error:", error);
+      throw new Error("Erro ao salvar o arquivo PDF do contrato.");
+    }
+
+    return { finalContent, integrityHash, pdfPath, pdfBytes };
+  },
+
+  /**
    * Realiza a assinatura digital de um contrato com auditoria forense.
    */
   async signContract(
@@ -131,91 +224,25 @@ export const contractService = {
       throw new Error("Usuário associado ao contrato não encontrado.");
     }
 
-    // 2. Busca configurações da escola (Escola Única)
-    const schoolSettings = await contractRepository.getSchoolSettings();
-    if (!schoolSettings) {
-      throw new Error("Configurações da escola (CNPJ/Endereço) não encontradas no sistema.");
-    }
-
-    // 2.5 Obter duração em meses
+    // 2. Obter duração em meses
     const subscription = await billingService.getActiveSubscription(userId);
     const durationMonths = instance.durationMonths || 
       (user.role === "teacher" ? instance.template.durationMonths : subscription?.plan?.durationMonths) || 
       6;
 
-    const decryptedTaxId = user.taxId && user.taxId.includes(":") ? decrypt(user.taxId) : user.taxId;
-    const decryptedBusinessTaxId = user.businessTaxId && user.businessTaxId.includes(":") ? decrypt(user.businessTaxId) : user.businessTaxId;
-    const decryptedPixKey = user.pixKey && user.pixKey.includes(":") ? decrypt(user.pixKey) : user.pixKey;
-
-    // 3. Injeção de Dados e Geração de Conteúdo Final (Snapshot)
-    const finalContent = injectTemplateData(instance.template.content, {
-      user: {
-        name: user.name,
-        email: user.email,
-        taxId: decryptedTaxId ?? "",
-        businessTaxId: decryptedBusinessTaxId ?? "",
-        pixKey: decryptedPixKey ?? "",
-      },
-      guardian: guardianData,
-      school: {
-        ...schoolSettings,
-        // O CNPJ é guardado criptografado; sem isso o contrato assinado
-        // renderizaria o ciphertext no lugar do número.
-        taxId: schoolSettings.taxId.includes(":")
-          ? decrypt(schoolSettings.taxId)
-          : schoolSettings.taxId,
-      },
-      date: new Date().toLocaleDateString("pt-BR"),
-      contract: {
-        durationMonths,
-      },
+    const { finalContent, integrityHash, pdfPath, pdfBytes } = await this.buildSignedDocument({
+      template: instance.template,
+      user,
+      instanceId,
+      guardianData,
+      durationMonths,
     });
-
-    // 4. Integridade: Hash SHA-256 do conteúdo + metadados
-    const metadata = { userId, timestamp: new Date().toISOString() };
-    const hashData = finalContent + JSON.stringify(metadata);
-    const integrityHash = generateIntegrityHash(hashData, metadata);
 
     // 5. Segurança: Criptografia de dados sensíveis do responsável (PII)
     // Se o aluno for menor, salvamos os dados do responsável criptografados na instância.
     const encryptedGuardianData = guardianData ? encrypt(JSON.stringify(guardianData)) : null;
 
-    // 6. Geração de PDF e Upload para Firebase Storage
-    // Adicionamos o Integrity Hash e o link de verificação no PDF
-    const signeeName = guardianData 
-      ? `${guardianData.name} (Responsável por ${user.name})` 
-      : user.name;
-
-    const baseUrl = env.NEXT_PUBLIC_APP_URL.endsWith("/")
-      ? env.NEXT_PUBLIC_APP_URL.slice(0, -1)
-      : env.NEXT_PUBLIC_APP_URL;
-    const verificationUrl = `${baseUrl}/verify/${integrityHash}`;
-    const pdfBytes = await this.generatePDF(
-      instance.template.name, 
-      finalContent, 
-      signeeName,
-      { hash: integrityHash, url: verificationUrl }
-    );
-    const pdfPath = `contracts/${userId}/${instanceId}_${Date.now()}.pdf`;
-
     const bucket = adminStorage.bucket(env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
-
-    try {
-      const file = bucket.file(pdfPath);
-      await file.save(Buffer.from(pdfBytes), {
-        metadata: { 
-          contentType: "application/pdf",
-          metadata: {
-            ownerId: userId,
-            instanceId: instanceId,
-            hash: integrityHash
-          }
-        },
-      });
-    } catch (error) {
-      console.error("[ContractService.signContract] PDF Storage Error:", error);
-      throw new Error("Erro ao salvar o arquivo PDF do contrato.");
-    }
 
     // 6.5 Calcular expiração baseada na duração obtida
     const expiresAt = addMonths(new Date(), durationMonths);
@@ -370,40 +397,60 @@ export const contractService = {
       throw new Error("A assinatura atual tem parcelas em aberto; quite-as antes de renovar.");
     }
 
-    // Renovação automática repete os termos já assinados (mesmo template e
-    // texto); a manual vai para assinatura com a versão mais recente.
-    const template = isAuto
-      ? oldInstance.template
-      : await contractRepository.findActiveTemplateByType(
-          oldInstance.template.type,
-          oldInstance.template.region
-        );
+    // Toda renovação usa a versão mais recente do template.
+    const template = await contractRepository.findActiveTemplateByType(
+      oldInstance.template.type,
+      oldInstance.template.region
+    );
     if (!template) throw new Error("Nenhum template ativo encontrado para renovação.");
+    const templateChanged = template.id !== oldInstance.templateId;
 
     const durationMonths = oldSubscription.plan?.durationMonths ?? oldInstance.durationMonths ?? 6;
     const now = new Date();
+    const newInstanceId = crypto.randomUUID();
 
-    // 1. Encerra a assinatura antiga e abre o novo ciclo de cobrança
+    // 1. Na automática, gera o documento assinado com o template novo antes de
+    // mexer na cobrança: se falhar, nada muda. Mantém o responsável (menor de
+    // idade) que assinou o contrato anterior.
+    let signed: { finalContent: string; integrityHash: string; pdfPath: string } | null = null;
+    if (isAuto) {
+      const user = await userService.getUser(studentId);
+      if (!user) throw new Error("Usuário associado ao contrato não encontrado.");
+      const guardianData = typeof oldInstance.guardianData === "string"
+        ? (JSON.parse(decrypt(oldInstance.guardianData)) as GuardianData)
+        : undefined;
+      signed = await this.buildSignedDocument({
+        template,
+        user,
+        instanceId: newInstanceId,
+        guardianData,
+        durationMonths,
+      });
+    }
+
+    // 2. Encerra a assinatura antiga e abre o novo ciclo de cobrança
     const newSubscription = await billingService.renewSubscription(oldSubscription.id, now);
 
-    // 2. Marca o contrato antigo como expirado (está sendo substituído)
+    // 3. Marca o contrato antigo como expirado (está sendo substituído)
     await contractRepository.updateInstance(oldInstance.id, { status: "expired" });
 
-    // 3. Cria a nova instância de contrato vinculada à nova assinatura
+    // 4. Cria a nova instância de contrato vinculada à nova assinatura
     const newInstance = await contractRepository.insertInstance({
+      id: newInstanceId,
       templateId: template.id,
       userId: studentId,
       subscriptionId: newSubscription.id,
       parentInstanceId: oldInstance.id,
-      status: isAuto ? "signed" : "pending",
+      status: signed ? "signed" : "pending",
       autoRenew: oldInstance.autoRenew,
-      signedAt: isAuto ? now : null,
+      signedAt: signed ? now : null,
       // Sem expiresAt o cron nunca mais pegaria este contrato. A manual recebe
       // o prazo ao ser assinada (signContract).
-      expiresAt: isAuto ? addMonths(now, durationMonths) : null,
-      signedContent: isAuto ? oldInstance.signedContent : null,
-      integrityHash: isAuto ? oldInstance.integrityHash : null,
-      guardianData: isAuto ? oldInstance.guardianData : null,
+      expiresAt: signed ? addMonths(now, durationMonths) : null,
+      signedContent: signed?.finalContent ?? null,
+      integrityHash: signed?.integrityHash ?? null,
+      pdfUrl: signed?.pdfPath ?? null,
+      guardianData: signed ? oldInstance.guardianData : null,
       durationMonths,
     });
 
@@ -413,7 +460,10 @@ export const contractService = {
         oldInstance.user.name,
         template.name,
         true,
-        oldInstance.user.locale === "en" ? "en" : "pt"
+        oldInstance.user.locale === "en" ? "en" : "pt",
+        templateChanged
+          ? `${env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "")}/hub/${oldInstance.template.type}/contract`
+          : null
       );
     }
 

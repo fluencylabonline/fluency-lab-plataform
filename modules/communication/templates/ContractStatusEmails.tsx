@@ -58,7 +58,11 @@ export const ContractExpiringEmail: React.FC<ContractStatusEmailProps & { daysLe
 );
 
 // 3. Renewed Email
-export const ContractRenewedEmail: React.FC<ContractStatusEmailProps & { isAuto: boolean; locale?: "pt" | "en" }> = ({ name, contractName, isAuto, locale = "pt" }) => (
+export const ContractRenewedEmail: React.FC<ContractStatusEmailProps & {
+  isAuto: boolean;
+  locale?: "pt" | "en";
+  changedContractUrl?: string | null;
+}> = ({ name, contractName, isAuto, locale = "pt", changedContractUrl }) => (
   <Html>
     <Head />
     <Body style={emailStyles.main}>
@@ -71,6 +75,16 @@ export const ContractRenewedEmail: React.FC<ContractStatusEmailProps & { isAuto:
             <Heading style={emailStyles.heading}>Agreement Renewed! 🚀</Heading>
             <Text style={emailStyles.paragraph}>Hi, <strong>{name}</strong>!</Text>
             <Text style={emailStyles.paragraph}>Your agreement <strong>{contractName}</strong> has been successfully renewed{isAuto ? " automatically" : ""}.</Text>
+            {changedContractUrl && (
+              <>
+                <Text style={emailStyles.paragraph}>
+                  <strong>Important:</strong> this renewal uses the latest version of the agreement, which includes changes from the version you previously signed. Please review the updated terms on the platform.
+                </Text>
+                <Section style={emailStyles.buttonSection}>
+                  <EmailButton href={changedContractUrl}>View Agreement</EmailButton>
+                </Section>
+              </>
+            )}
             <Text style={emailStyles.paragraph}>We wish you great classes and lots of progress on your fluency journey!</Text>
           </>
         ) : (
@@ -78,6 +92,16 @@ export const ContractRenewedEmail: React.FC<ContractStatusEmailProps & { isAuto:
             <Heading style={emailStyles.heading}>Contrato Renovado! 🚀</Heading>
             <Text style={emailStyles.paragraph}>Olá, <strong>{name}</strong>!</Text>
             <Text style={emailStyles.paragraph}>O contrato <strong>{contractName}</strong> foi renovado com sucesso{isAuto ? " automaticamente" : ""}.</Text>
+            {changedContractUrl && (
+              <>
+                <Text style={emailStyles.paragraph}>
+                  <strong>Atenção:</strong> esta renovação usa a versão mais recente do contrato, que teve mudanças em relação à versão que você assinou anteriormente. Confira os termos atualizados na plataforma.
+                </Text>
+                <Section style={emailStyles.buttonSection}>
+                  <EmailButton href={changedContractUrl}>Ver Contrato</EmailButton>
+                </Section>
+              </>
+            )}
             <Text style={emailStyles.paragraph}>Desejamos ótimas aulas e muito progresso em sua jornada de fluência!</Text>
           </>
         )}

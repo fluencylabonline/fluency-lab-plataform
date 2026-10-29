@@ -650,12 +650,20 @@ export class CommunicationService {
     }
   }
 
-  async sendContractRenewedEmail(email: string, name: string, contractName: string, isAuto: boolean, locale: "pt" | "en" = "pt") {
+  /** `changedContractUrl`: preenchido quando a renovação trocou a versão do contrato. */
+  async sendContractRenewedEmail(
+    email: string,
+    name: string,
+    contractName: string,
+    isAuto: boolean,
+    locale: "pt" | "en" = "pt",
+    changedContractUrl: string | null = null
+  ) {
     try {
       await this.sendEmail({
         to: email,
         subject: locale === "en" ? "🚀 Agreement Renewed - Fluency Lab" : "🚀 Contrato Renovado - Fluency Lab",
-        template: React.createElement(ContractRenewedEmail, { name, contractName, isAuto, locale }),
+        template: React.createElement(ContractRenewedEmail, { name, contractName, isAuto, locale, changedContractUrl }),
       });
     } catch (error) {
       console.error("[CommunicationService.sendContractRenewedEmail] Error:", error);
