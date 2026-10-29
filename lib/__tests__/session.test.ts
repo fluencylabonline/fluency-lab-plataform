@@ -13,6 +13,7 @@ vi.mock("@/lib/firebase-admin", () => ({
     verifyIdToken: vi.fn(),
     createSessionCookie: vi.fn(),
     revokeRefreshTokens: vi.fn(),
+    deleteUser: vi.fn().mockResolvedValue(undefined),
   },
 }));
 
@@ -191,6 +192,29 @@ describe("Session Flow - Cookie Security", () => {
       expect(result.data?.error).toBe("sessionExpired");
       expect(adminAuth.createSessionCookie).not.toHaveBeenCalled();
     });
+  });
+
+  it("[SESSION] loginAction sem convite SHOULD apagar a conta criada no Firebase Auth", async () => {
+    vi.mocked(adminAuth.verifyIdToken).mockResolvedValue({ uid: "stranger-uid", email: "stranger@test.com" } as unknown as Awaited<ReturnType<typeof adminAuth.verifyIdToken>>);
+    vi.mocked(userRepository.findById).mockResolvedValue(undefined);
+    vi.mocked(userRepository.findByEmail).mockResolvedValue(undefined);
+
+    const result = await loginAction({ idToken: "fake-token" });
+
+    expect(result.data).toEqual({ success: false, error: "notInvited" });
+    expect(adminAuth.deleteUser).toHaveBeenCalledWith("stranger-uid");
+    expect(adminAuth.createSessionCookie).not.toHaveBeenCalled();
+  });
+
+  it("[SESSION] loginAction sem registro no banco mas com role SHOULD NOT apagar a conta", async () => {
+    vi.mocked(adminAuth.verifyIdToken).mockResolvedValue({ uid: "staff-uid", email: "staff@test.com", role: "teacher" } as unknown as Awaited<ReturnType<typeof adminAuth.verifyIdToken>>);
+    vi.mocked(userRepository.findById).mockResolvedValue(undefined);
+    vi.mocked(userRepository.findByEmail).mockResolvedValue(undefined);
+
+    const result = await loginAction({ idToken: "fake-token" });
+
+    expect(result.data).toEqual({ success: false, error: "notInvited" });
+    expect(adminAuth.deleteUser).not.toHaveBeenCalled();
   });
 
   it("[SESSION] logoutAction SHOULD delete both session and mfa_pending cookies", async () => {
