@@ -3,63 +3,42 @@ import { billingService } from "@/modules/billing/billing.service";
 import { env } from "@/env";
 import crypto from "node:crypto";
 
+function safeEqual(a: Buffer, b: Buffer) {
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
 export async function POST(req: Request) {
+  // 1. Secret do webhook: o AbacatePay envia em ?webhookSecret= (configurado no painel)
+  const providedSecret = new URL(req.url).searchParams.get("webhookSecret") ?? "";
+  if (!safeEqual(Buffer.from(providedSecret), Buffer.from(env.ABACATEPAY_WEBHOOK_SECRET))) {
+    console.error("[AbacatePay Webhook] Unauthorized: invalid webhookSecret.");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const signature = req.headers.get("x-webhook-signature");
-  
+
   if (!signature) {
     console.error("[AbacatePay Webhook] Missing x-webhook-signature header");
     return NextResponse.json({ error: "Missing signature" }, { status: 401 });
   }
 
-  // 1. Signature validation logic
+  // 2. Assinatura HMAC-SHA256 do corpo, calculada com a chave pública do AbacatePay
   const rawBody = await req.text();
 
-  // Try all possible candidate keys in the system for maximum resilience
-  const candidateKeys = [
-    env.ABACATEPAY_WEBHOOK_SECRET,
-    env.ABACATEPAY_PUBLIC_KEY,
-    env.ABACATEPAY_API_KEY,
-  ].filter((key): key is string => !!key);
-
-  let sigBuffer: Buffer;
-  try {
-    // Attempt to parse based on length and hexadecimal characters
-    if (signature.length === 64 && /^[0-9a-fA-F]+$/.test(signature)) {
-      sigBuffer = Buffer.from(signature, "hex");
-    } else {
-      sigBuffer = Buffer.from(signature, "base64");
-    }
-  } catch (e) {
-    console.error("[AbacatePay Webhook] Failed to parse signature from header:", e);
-    return NextResponse.json({ error: "Invalid signature format" }, { status: 401 });
+  if (!env.ABACATEPAY_PUBLIC_KEY) {
+    console.error("[AbacatePay Webhook] ABACATEPAY_PUBLIC_KEY não configurada.");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
   }
 
-  let isValid = false;
-  let matchingKeyIndex = -1;
+  const expected = crypto.createHmac("sha256", env.ABACATEPAY_PUBLIC_KEY).update(rawBody).digest();
+  const sigBuffer = signature.length === 64 && /^[0-9a-fA-F]+$/.test(signature)
+    ? Buffer.from(signature, "hex")
+    : Buffer.from(signature, "base64");
 
-  for (let i = 0; i < candidateKeys.length; i++) {
-    const expectedBuffer = crypto
-      .createHmac("sha256", candidateKeys[i])
-      .update(rawBody)
-      .digest();
-
-    if (
-      sigBuffer.length === expectedBuffer.length &&
-      crypto.timingSafeEqual(sigBuffer, expectedBuffer)
-    ) {
-      isValid = true;
-      matchingKeyIndex = i;
-      break;
-    }
-  }
-
-  if (!isValid) {
+  if (!safeEqual(sigBuffer, expected)) {
     console.error("[AbacatePay Webhook] Unauthorized: Invalid signature.");
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
-
-  const keyNames = ["ABACATEPAY_WEBHOOK_SECRET", "ABACATEPAY_PUBLIC_KEY", "ABACATEPAY_API_KEY"];
-  console.log(`[AbacatePay Webhook] Signature verified successfully using key: ${keyNames[matchingKeyIndex]}`);
 
   try {
     const event = JSON.parse(rawBody);

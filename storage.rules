@@ -23,11 +23,12 @@ service firebase.storage {
 
       // Only the uploader (manager/admin) can write their own media
       // Validates:
-      // 1. User is authenticated
+      // 1. User is authenticated and is staff (admin/manager)
       // 2. Authentication UID matches the path
       // 3. File size is under 100MB
       // 4. Content type is audio or video
       allow write: if request.auth != null
+                    && (request.auth.token.role == 'admin' || request.auth.token.role == 'manager')
                     && request.auth.uid == userId
                     && request.resource.size < 100 * 1024 * 1024
                     && (request.resource.contentType.matches('audio/.*')
@@ -84,8 +85,12 @@ service firebase.storage {
     }
 
     match /notebooks/{notebookId}/{userId}/{fileName} {
-      // Notebook images and audio recordings are readable by authenticated users
-      allow read: if request.auth != null;
+      // Reads via SDK only for the uploader and staff; the notebook itself embeds the
+      // tokenized download URL, which does not go through these rules.
+      allow read: if request.auth != null
+                   && (request.auth.uid == userId
+                       || request.auth.token.role == 'admin'
+                       || request.auth.token.role == 'manager');
       
       // Validates:
       // 1. User is authenticated and matches the folder userId
@@ -99,8 +104,11 @@ service firebase.storage {
     }
 
     match /notebooks/audio/{userId}/{fileName} {
-      // Notebook audios are readable by authenticated users
-      allow read: if request.auth != null;
+      // Reads via SDK only for the uploader and staff (the notebook embeds the tokenized URL)
+      allow read: if request.auth != null
+                   && (request.auth.uid == userId
+                       || request.auth.token.role == 'admin'
+                       || request.auth.token.role == 'manager');
       
       // Validates:
       // 1. User is authenticated and matches the folder userId
@@ -124,8 +132,11 @@ service firebase.storage {
     }
 
     match /documents/{userId}/{allPaths=**} {
-      // Documents are only accessible by the owner
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Documents are only readable by the owner
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // Uploads are handled via Server API (Firebase Admin SDK)
+      allow write: if false;
     }
 
     match /payouts/{teacherId}/receipts/{fileName} {
@@ -155,6 +166,31 @@ service firebase.storage {
                     && request.resource.contentType == 'application/pdf';
     }
 
+
+    match /finance/attachments/{fileName} {
+      // Transaction receipts: staff only (admin/manager)
+      allow read: if request.auth != null
+                   && (request.auth.token.role == 'admin' || request.auth.token.role == 'manager');
+      allow write: if request.auth != null
+                    && (request.auth.token.role == 'admin' || request.auth.token.role == 'manager')
+                    && request.resource.size < 10 * 1024 * 1024
+                    && (request.resource.contentType.matches('application/pdf')
+                        || request.resource.contentType.matches('image/.*')
+                        || request.resource.contentType.matches('application/(msword|vnd\\.openxmlformats-officedocument\\.wordprocessingml\\.document)'));
+    }
+
+    match /media-library/{userId}/{fileName} {
+      // Library audio is played through a plain ?alt=media URL (no token), so it must be
+      // publicly readable. File names are random UUIDs.
+      allow read: if true;
+
+      // Uploads go through a signed URL (Admin SDK); direct writes only by staff
+      allow write: if request.auth != null
+                    && (request.auth.token.role == 'admin' || request.auth.token.role == 'manager')
+                    && request.auth.uid == userId
+                    && request.resource.size < 100 * 1024 * 1024
+                    && request.resource.contentType.matches('audio/.*');
+    }
 
     match /whatsapp_attachments/{conversationId}/{fileName} {
       // Accessible by anyone with the link (for Meta Graph API to fetch)

@@ -89,3 +89,15 @@
     transform: rotate(360deg);
   }
 }
+
+// Ripple de toque do Button (PWA Android)
+@keyframes buttonRipple {
+  from {
+    transform: scale(0);
+    opacity: 0.3;
+  }
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
