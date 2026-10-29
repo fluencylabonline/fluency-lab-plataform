@@ -51,18 +51,22 @@ export async function POST(req: Request) {
       } else {
         console.warn(`[Stripe Webhook] No installment found for Stripe PaymentIntent ID: ${intent.id}`);
       }
-    } else if (event.type === "checkout.session.completed") {
+    } else if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
       const session = event.data.object;
       const installmentId = session.metadata?.installmentId;
       const paymentIntentId = typeof session.payment_intent === "string"
         ? session.payment_intent
         : session.id;
 
-      if (installmentId) {
-        console.log(`[Stripe Webhook] Checkout Session completed. Marking installment ${installmentId} as PAID with ID ${paymentIntentId}`);
+      // "completed" também é enviado para pagamentos assíncronos ainda não liquidados;
+      // nesse caso a baixa acontece no async_payment_succeeded.
+      if (session.payment_status !== "paid") {
+        console.log(`[Stripe Webhook] Checkout Session ${session.id} sem pagamento confirmado (${session.payment_status}). Aguardando.`);
+      } else if (installmentId) {
+        console.log(`[Stripe Webhook] Checkout Session paid. Marking installment ${installmentId} as PAID with ID ${paymentIntentId}`);
         await billingService.markInstallmentAsPaid(installmentId, paymentIntentId);
       } else {
-        console.warn(`[Stripe Webhook] Checkout Session ${session.id} completed but missing installmentId in metadata`);
+        console.warn(`[Stripe Webhook] Checkout Session ${session.id} paid but missing installmentId in metadata`);
       }
     }
 
