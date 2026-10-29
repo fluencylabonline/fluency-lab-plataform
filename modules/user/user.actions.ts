@@ -713,6 +713,8 @@ export const sendCustomPasswordResetAction = actionClient
     }
   });
 
+const PASSWORD_CHANGE_CONFIRMATION_WINDOW_MS = 15 * 60 * 1000;
+
 export const sendPasswordResetConfirmationAction = actionClient
   .metadata({ name: "sendPasswordResetConfirmation" })
   .inputSchema(
@@ -727,10 +729,17 @@ export const sendPasswordResetConfirmationAction = actionClient
       const limit = await checkRateLimit("password_reset_confirm", parsedInput.email, 3, 300 * 1000);
       if (!limit.success) return { success: false, error: "rateLimitExceeded" };
 
+      // Sempre responde sucesso: a resposta não pode revelar se o e-mail tem conta.
       const user = await userService.getUserByEmail(parsedInput.email);
-      if (!user) return { success: false, error: "userNotFound" };
+      if (!user) return { success: true };
 
-      // 2. Send customized/branded confirmation email via Resend
+      // 2. Só envia se a senha acabou de mudar: o Firebase atualiza tokensValidAfterTime
+      // ao redefinir a senha. Evita usar a action para disparar e-mails falsos.
+      const authUser = await adminAuth.getUser(user.id);
+      const changedAt = authUser.tokensValidAfterTime ? new Date(authUser.tokensValidAfterTime).getTime() : 0;
+      if (Date.now() - changedAt > PASSWORD_CHANGE_CONFIRMATION_WINDOW_MS) return { success: true };
+
+      // 3. Send customized/branded confirmation email via Resend
       await communicationService.sendPasswordResetConfirmationEmail(
         user.email,
         user.name,
