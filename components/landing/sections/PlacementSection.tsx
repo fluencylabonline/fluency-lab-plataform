@@ -3,8 +3,12 @@
 import { useTranslations } from "next-intl";
 import { LazyMount, Laptop, Tablet } from "../devices";
 import { Badge, LandingSection, Reveal, Skeleton, SoftCTA } from "../ui";
-import { PlacementTablet } from "../screens/PlacementTablet";
+import { lazy, Suspense } from "react";
 import { TrialCall } from "../screens/TrialCall";
+
+// recharts (~85 KB gzip) só é baixado quando o LazyMount monta o tablet perto da viewport.
+// React.lazy em vez de next/dynamic: o next/dynamic adiciona um preload do chunk no HTML.
+const PlacementTablet = lazy(() => import("../screens/PlacementTablet").then((m) => ({ default: m.PlacementTablet })));
 
 export function PlacementSection() {
   const t = useTranslations("LandingShowcase.Placement");
@@ -39,7 +43,7 @@ export function PlacementSection() {
             <SoftCTA>{t("part2.cta")}</SoftCTA>
           </Reveal>
           <Reveal x={50} y={0} delay={0.1} className="mx-auto w-full max-w-xl lg:order-2">
-            <LazyMount placeholder={<Skeleton ratio="960/1093" />}><Tablet label={t("part2.deviceLabel")}><PlacementTablet /></Tablet></LazyMount>
+            <LazyMount placeholder={<Skeleton ratio="960/1093" />}><Tablet label={t("part2.deviceLabel")}><Suspense fallback={<Skeleton ratio="960/1093" />}><PlacementTablet /></Suspense></Tablet></LazyMount>
           </Reveal>
         </div>
       </div>
