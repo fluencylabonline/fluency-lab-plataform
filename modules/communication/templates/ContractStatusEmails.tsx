@@ -58,7 +58,7 @@ export const ContractExpiringEmail: React.FC<ContractStatusEmailProps & { daysLe
 );
 
 // 3. Renewed Email
-export const ContractRenewedEmail: React.FC<ContractStatusEmailProps & { isAuto: boolean }> = ({ name, contractName, isAuto }) => (
+export const ContractRenewedEmail: React.FC<ContractStatusEmailProps & { isAuto: boolean; locale?: "pt" | "en" }> = ({ name, contractName, isAuto, locale = "pt" }) => (
   <Html>
     <Head />
     <Body style={emailStyles.main}>
@@ -66,10 +66,21 @@ export const ContractRenewedEmail: React.FC<ContractStatusEmailProps & { isAuto:
         <Section style={emailStyles.header}>
           <Img src={"https://raw.githubusercontent.com/devmatheusfernandes/fluencylab-school/refs/heads/main/public/brand/Logo.png"} alt="Fluency Lab" style={emailStyles.logo} />
         </Section>
-        <Heading style={emailStyles.heading}>Contrato Renovado! 🚀</Heading>
-        <Text style={emailStyles.paragraph}>Olá, <strong>{name}</strong>!</Text>
-        <Text style={emailStyles.paragraph}>O contrato <strong>{contractName}</strong> foi renovado com sucesso{isAuto ? " automaticamente" : ""}.</Text>
-        <Text style={emailStyles.paragraph}>Desejamos ótimas aulas e muito progresso em sua jornada de fluência!</Text>
+        {locale === "en" ? (
+          <>
+            <Heading style={emailStyles.heading}>Agreement Renewed! 🚀</Heading>
+            <Text style={emailStyles.paragraph}>Hi, <strong>{name}</strong>!</Text>
+            <Text style={emailStyles.paragraph}>Your agreement <strong>{contractName}</strong> has been successfully renewed{isAuto ? " automatically" : ""}.</Text>
+            <Text style={emailStyles.paragraph}>We wish you great classes and lots of progress on your fluency journey!</Text>
+          </>
+        ) : (
+          <>
+            <Heading style={emailStyles.heading}>Contrato Renovado! 🚀</Heading>
+            <Text style={emailStyles.paragraph}>Olá, <strong>{name}</strong>!</Text>
+            <Text style={emailStyles.paragraph}>O contrato <strong>{contractName}</strong> foi renovado com sucesso{isAuto ? " automaticamente" : ""}.</Text>
+            <Text style={emailStyles.paragraph}>Desejamos ótimas aulas e muito progresso em sua jornada de fluência!</Text>
+          </>
+        )}
       </Container>
     </Body>
   </Html>

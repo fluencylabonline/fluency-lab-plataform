@@ -363,48 +363,57 @@ export const contractService = {
       throw new Error("Nenhuma assinatura ativa encontrada para renovação.");
     }
 
-    // 0. Marca o contrato antigo como expirado (está sendo substituído)
-    await contractRepository.updateInstance(oldInstance.id, { status: "expired" });
+    // Débito em aberto bloqueia a renovação: ao encerrar a assinatura antiga,
+    // as parcelas não pagas sairiam do fluxo de inadimplência.
+    const unpaid = await billingService.getUnpaidInstallments(oldSubscription.id);
+    if (unpaid.length > 0) {
+      throw new Error("A assinatura atual tem parcelas em aberto; quite-as antes de renovar.");
+    }
 
-    // 1. Marca a assinatura antiga como concluída ("finished")
-    await billingService.updateSubscription(oldSubscription.id, { status: "finished" });
-
-    // 2. Cria uma NOVA assinatura idêntica para o novo ciclo de vigência
-    // Usando o mesmo planId (que pode ser o plano reajustado ou migrado do estudante) e o mesmo dia de vencimento
-    const newSubscription = await billingService.createSubscription(
-      studentId,
-      oldSubscription.planId,
-      oldSubscription.dueDay
-    );
-
-    // 3. Busca a versão mais recente do template do contrato
-    const template = await contractRepository.findActiveTemplateByType(
-      oldInstance.template.type, 
-      oldInstance.template.region
-    );
+    // Renovação automática repete os termos já assinados (mesmo template e
+    // texto); a manual vai para assinatura com a versão mais recente.
+    const template = isAuto
+      ? oldInstance.template
+      : await contractRepository.findActiveTemplateByType(
+          oldInstance.template.type,
+          oldInstance.template.region
+        );
     if (!template) throw new Error("Nenhum template ativo encontrado para renovação.");
 
-    // 4. Cria a nova instância de contrato vinculada ao ID da nova assinatura gerada
+    const durationMonths = oldSubscription.plan?.durationMonths ?? oldInstance.durationMonths ?? 6;
+    const now = new Date();
+
+    // 1. Encerra a assinatura antiga e abre o novo ciclo de cobrança
+    const newSubscription = await billingService.renewSubscription(oldSubscription.id, now);
+
+    // 2. Marca o contrato antigo como expirado (está sendo substituído)
+    await contractRepository.updateInstance(oldInstance.id, { status: "expired" });
+
+    // 3. Cria a nova instância de contrato vinculada à nova assinatura
     const newInstance = await contractRepository.insertInstance({
       templateId: template.id,
       userId: studentId,
-      subscriptionId: newSubscription.id, // Vínculo correto com o novo ciclo!
+      subscriptionId: newSubscription.id,
       parentInstanceId: oldInstance.id,
       status: isAuto ? "signed" : "pending",
       autoRenew: oldInstance.autoRenew,
-      signedAt: isAuto ? new Date() : null,
+      signedAt: isAuto ? now : null,
+      // Sem expiresAt o cron nunca mais pegaria este contrato. A manual recebe
+      // o prazo ao ser assinada (signContract).
+      expiresAt: isAuto ? addMonths(now, durationMonths) : null,
       signedContent: isAuto ? oldInstance.signedContent : null,
       integrityHash: isAuto ? oldInstance.integrityHash : null,
       guardianData: isAuto ? oldInstance.guardianData : null,
-      durationMonths: oldSubscription?.plan?.durationMonths ?? oldInstance.durationMonths ?? 6,
+      durationMonths,
     });
 
     if (isAuto && oldInstance.user?.email) {
       await communicationService.sendContractRenewedEmail(
-        oldInstance.user.email, 
-        oldInstance.user.name, 
-        template.name, 
-        true
+        oldInstance.user.email,
+        oldInstance.user.name,
+        template.name,
+        true,
+        oldInstance.user.locale === "en" ? "en" : "pt"
       );
     }
 
@@ -421,10 +430,23 @@ export const contractService = {
     const now = new Date();
     const expiredInstances = await contractRepository.findExpiredSignedInstances(now);
 
-    const result = { renewed: 0, markedExpired: 0, failed: 0 };
+    const result = { renewed: 0, markedExpired: 0, deferred: 0, failed: 0 };
 
     for (const instance of expiredInstances) {
       try {
+        // Com parcelas em aberto o contrato fica como está: a inadimplência
+        // segue na assinatura atual e a renovação sai no dia seguinte à quitação.
+        const activeSub = instance.autoRenew
+          ? await billingService.getActiveSubscription(instance.userId)
+          : null;
+        if (activeSub) {
+          const unpaid = await billingService.getUnpaidInstallments(activeSub.id);
+          if (unpaid.length > 0) {
+            result.deferred++;
+            continue;
+          }
+        }
+
         if (instance.autoRenew) {
           await this.renewContract(instance.id, true);
           result.renewed++;

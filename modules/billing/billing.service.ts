@@ -24,6 +24,7 @@ import {
   monthsPastDue,
   isUnderPolicy,
   dueCivilDate,
+  renewalDueDates,
   type CivilDate,
   DELINQUENCY_REMINDER_INTERVAL_DAYS,
   DELINQUENCY_BLOCKED_REMINDER_INTERVAL_DAYS,
@@ -508,6 +509,78 @@ export const billingService = {
     }
 
     return subscription.subscription;
+  },
+
+  /** Parcelas ainda não pagas (pendentes ou vencidas) de uma assinatura. */
+  async getUnpaidInstallments(subscriptionId: string) {
+    const installments = await this.getInstallmentsBySubscriptionId(subscriptionId);
+    return installments.filter((i) => i.status === "pending" || i.status === "overdue");
+  },
+
+  /**
+   * Abre o novo ciclo de cobrança na renovação de contrato. Diferente de
+   * createSubscription (onboarding), não usa a data de início das aulas nem
+   * pro-rata: todas as parcelas têm o valor cheio do plano e continuam de onde
+   * a assinatura anterior parou (ver renewalDueDates).
+   *
+   * Quem chama garante que a assinatura antiga está quitada — ao virar
+   * "finished", parcelas em aberto saem do fluxo de inadimplência.
+   */
+  async renewSubscription(oldSubscriptionId: string, now: Date = new Date()) {
+    const oldSub = await billingRepository.findSubscriptionById(oldSubscriptionId);
+    if (!oldSub?.plan) throw new Error("Assinatura não encontrada para renovação.");
+    const plan = oldSub.plan;
+
+    const oldInstallments = await this.getInstallmentsBySubscriptionId(oldSub.id);
+    const lastDueDate = oldInstallments
+      .filter((i) => i.status !== "cancelled")
+      .reduce<Date | null>((latest, i) => (!latest || i.dueDate > latest ? i.dueDate : latest), null);
+
+    const dueDates = renewalDueDates({
+      lastDueDate,
+      dueDay: oldSub.dueDay,
+      count: plan.durationMonths,
+      today: brtCivilDate(now),
+    });
+
+    const { subscription, firstInstallment } = await db.transaction(async (tx) => {
+      await tx.update(subscriptionsTable)
+        .set({ status: "finished" })
+        .where(eq(subscriptionsTable.id, oldSub.id));
+
+      const [sub] = await tx.insert(subscriptionsTable).values({
+        studentId: oldSub.studentId,
+        planId: oldSub.planId,
+        dueDay: oldSub.dueDay,
+        status: "active",
+        startDate: now,
+        endDate: addMonths(now, plan.durationMonths),
+      }).returning();
+
+      const created = await tx.insert(installmentsTable).values(
+        dueDates.map((dueDate, i) => ({
+          subscriptionId: sub.id,
+          status: "pending" as const,
+          dueDate,
+          amount: plan.price,
+          orderIndex: i + 1,
+        }))
+      ).returning();
+
+      return { subscription: sub, firstInstallment: created[0] };
+    });
+
+    // Mesma janela do cron de cobrança (7 dias). Fora dela o cron gera a
+    // cobrança perto do vencimento — uma sessão Stripe dura só 24h.
+    if (firstInstallment && firstInstallment.dueDate <= addDays(now, 7)) {
+      try {
+        await this.generateInvoiceForInstallment(firstInstallment.id);
+      } catch (error) {
+        console.error("[BillingService.renewSubscription] Failed to generate first invoice:", error);
+      }
+    }
+
+    return subscription;
   },
 
   async updateSubscription(id: string, data: Partial<Subscription>) {

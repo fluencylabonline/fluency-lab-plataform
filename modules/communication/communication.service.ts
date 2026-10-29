@@ -650,12 +650,12 @@ export class CommunicationService {
     }
   }
 
-  async sendContractRenewedEmail(email: string, name: string, contractName: string, isAuto: boolean) {
+  async sendContractRenewedEmail(email: string, name: string, contractName: string, isAuto: boolean, locale: "pt" | "en" = "pt") {
     try {
       await this.sendEmail({
         to: email,
-        subject: "🚀 Contrato Renovado - Fluency Lab",
-        template: React.createElement(ContractRenewedEmail, { name, contractName, isAuto }),
+        subject: locale === "en" ? "🚀 Agreement Renewed - Fluency Lab" : "🚀 Contrato Renovado - Fluency Lab",
+        template: React.createElement(ContractRenewedEmail, { name, contractName, isAuto, locale }),
       });
     } catch (error) {
       console.error("[CommunicationService.sendContractRenewedEmail] Error:", error);

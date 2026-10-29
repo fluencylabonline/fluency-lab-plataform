@@ -89,5 +89,30 @@ export function isUnderPolicy(dueDate: Date, policyStart: Date | null): boolean 
   return new Date(dueDate).getTime() >= policyStart.getTime();
 }
 
+/**
+ * Vencimentos do novo ciclo na renovação de contrato. A cobrança continua de
+ * onde a assinatura anterior parou: a 1ª parcela é a do mês seguinte à última
+ * parcela antiga, no dia de vencimento do aluno, e as demais seguem mês a mês.
+ * Nada nasce vencido: se o cron rodar com atraso, o ciclo começa no mês
+ * corrente e uma 1ª parcela cujo dia já passou vence hoje.
+ */
+export function renewalDueDates(params: {
+  lastDueDate: Date | null;
+  dueDay: number;
+  count: number;
+  today: CivilDate;
+}): Date[] {
+  const { lastDueDate, dueDay, count, today } = params;
+  const nextMonth = lastDueDate ? monthIndex(dueCivilDate(lastDueDate)) + 1 : monthIndex(today);
+  const firstMonth = Math.max(nextMonth, monthIndex(today));
+
+  return Array.from({ length: count }, (_, i) => {
+    const m = firstMonth + i;
+    const due: CivilDate = { year: Math.floor(m / 12), month: m % 12, day: dueDay };
+    const effective = i === 0 && civilDaysBetween(due, today) > 0 ? today : due;
+    return new Date(Date.UTC(effective.year, effective.month, effective.day));
+  });
+}
+
 export const DELINQUENCY_REMINDER_INTERVAL_DAYS = 3;
 export const DELINQUENCY_BLOCKED_REMINDER_INTERVAL_DAYS = 7;
