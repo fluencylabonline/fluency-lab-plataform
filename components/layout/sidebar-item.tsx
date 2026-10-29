@@ -122,7 +122,6 @@ export default function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
               >
                 <Link
                   href={subItem.href}
-                  prefetch={true}
                   className={twMerge(
                     "flex items-center h-10 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors duration-200",
                     isPathActive(pathname, subItem.href) &&
@@ -155,7 +154,7 @@ export default function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
   }
 
   return (
-    <Link href={item.href} prefetch={true}>
+    <Link href={item.href}>
       <motion.div
         whileHover={{ x: isCollapsed ? 0 : 4, scale: isCollapsed ? 1.05 : 1 }}
         whileTap={{ scale: 0.95 }}

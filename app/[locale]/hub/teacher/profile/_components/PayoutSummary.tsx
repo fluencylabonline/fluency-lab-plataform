@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Locale } from "@/i18n/config";
 import { format, type Locale as DateFnsLocale } from "date-fns";
@@ -97,6 +97,8 @@ function groupClassesByMonth(classes: EarningsBreakdownItem[], dateLocale: DateF
 interface PayoutSummaryProps {
   history: Payout[];
   projections: Projections;
+  /** Mês/ano a que `projections` se refere (calculado no servidor). */
+  projectionsPeriod: { month: number; year: number };
   teacherId: string;
 }
 
@@ -317,7 +319,7 @@ function EarningsBreakdownVault({
   );
 }
 
-export function PayoutSummary({ history, projections: initialProjections, teacherId }: PayoutSummaryProps) {
+export function PayoutSummary({ history, projections: initialProjections, projectionsPeriod, teacherId }: PayoutSummaryProps) {
   const t = useTranslations("Profile.Payouts");
   const tm = useTranslations("Months");
   const locale = useLocale() as Locale;
@@ -329,7 +331,16 @@ export function PayoutSummary({ history, projections: initialProjections, teache
   const [isLoadingProjections, setIsLoadingProjections] = useState(false);
   const [openBreakdown, setOpenBreakdown] = useState<"pending" | "projected" | null>(null);
 
+  // Na primeira renderização as projeções do servidor já servem, a menos que o
+  // mês local do navegador seja outro (virada do mês: servidor em UTC).
+  const isFirstRun = useRef(true);
+
   useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      if (filterMonth === projectionsPeriod.month && filterYear === projectionsPeriod.year) return;
+    }
+
     const fetchProjections = async () => {
       setIsLoadingProjections(true);
       try {
@@ -349,7 +360,7 @@ export function PayoutSummary({ history, projections: initialProjections, teache
     };
 
     fetchProjections();
-  }, [filterMonth, filterYear, teacherId]);
+  }, [filterMonth, filterYear, teacherId, projectionsPeriod.month, projectionsPeriod.year]);
 
   const formatValue = (amount: number) => formatCurrency(amount, locale);
 
