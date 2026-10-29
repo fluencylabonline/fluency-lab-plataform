@@ -1,0 +1,232 @@
+{
+  "title": "Estrutura de nós e exercícios do Tiptap para importar lições",
+  "version": "1.0",
+  "generatedFrom": [
+    "components/tiptap-extension/*",
+    "app/[locale]/hub/manager/learning/lessons/[lessonId]/_components/steps/LessonContentStep.tsx",
+    "components/lesson/lesson-content-view.tsx",
+    "scripts/workbooks/ptbr/json-to-tiptap.ts"
+  ],
+  "howToUse": "Monte o campo contentJson da lição como um documento Tiptap: { \"type\": \"doc\", \"content\": [ ...nós ] }. Os nós abaixo são os únicos que o editor de lições aceita. Qualquer 'type' fora desta lista faz o editor/visualizador descartar o documento inteiro (conteúdo aparece vazio). Depois de montar o JSON, gere também o contentText (texto puro) para a IA extrair os itens de aprendizado.",
+
+  "document": {
+    "root": { "type": "doc", "content": [] },
+    "rules": [
+      "Todo documento começa com exatamente um heading nível 1 (título da lição).",
+      "Nunca use nós de texto vazios: { \"type\": \"text\", \"text\": \"\" } é inválido. Omita o texto.",
+      "Nós 'atom' (quiz, audioSync, speaking, youtubeSync, lyricsSync) não têm 'content', só 'attrs'.",
+      "nodeId deve ser único dentro da lição (use algo como quiz_<idDaLicao>_<secao>).",
+      "Atributos precisam ser JSON serializável (sem funções, sem undefined)."
+    ]
+  },
+
+  "registeredInLessonEditor": {
+    "note": "Extensões ativas no editor de lições (LessonContentStep). O visualizador de leitura (LessonContentView) hoje só registra uma parte delas: ver 'knownLimitations'.",
+    "standard": [
+      "StarterKit (doc, paragraph, text, heading, bold, italic, underline, strike, code, codeBlock, blockquote, bulletList, orderedList, listItem, hardBreak, horizontalRule, link, undoRedo)",
+      "TextAlign (heading, paragraph)",
+      "TaskList + TaskItem (aninhável)",
+      "Highlight (multicolor)",
+      "Image",
+      "Typography",
+      "TableKit (table, tableRow, tableHeader, tableCell)",
+      "TextStyle + Color",
+      "ImageUploadNode (só no editor, é só um placeholder de upload)"
+    ],
+    "custom": ["quiz", "audioSync", "speaking", "youtubeSync", "lyricsSync"]
+  },
+
+  "contentNodes": {
+    "heading": { "type": "heading", "attrs": { "level": 1 }, "content": [{ "type": "text", "text": "Título" }] },
+    "paragraph": { "type": "paragraph", "content": [{ "type": "text", "text": "Texto", "marks": [{ "type": "bold" }, { "type": "italic" }] }] },
+    "blockquote": { "type": "blockquote", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Dica ou leitura em destaque" }] }] },
+    "bulletList": { "type": "bulletList", "content": [{ "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "item" }] }] }] },
+    "orderedList": { "type": "orderedList", "content": [{ "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "item" }] }] }] },
+    "taskList": {
+      "type": "taskList",
+      "content": [{ "type": "taskItem", "attrs": { "checked": false }, "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Marque quando terminar" }] }] }]
+    },
+    "table": {
+      "type": "table",
+      "content": [
+        { "type": "tableRow", "content": [{ "type": "tableHeader", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Português", "marks": [{ "type": "bold" }] }] }] }, { "type": "tableHeader", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "English", "marks": [{ "type": "bold" }] }] }] }] },
+        { "type": "tableRow", "content": [{ "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Eu sou aluno." }] }] }, { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "I am a student." }] }] }] }
+      ]
+    },
+    "horizontalRule": { "type": "horizontalRule" },
+    "image": { "type": "image", "attrs": { "src": "https://...", "alt": "descrição" } },
+    "codeBlock": { "type": "codeBlock", "content": [{ "type": "text", "text": "texto pré-formatado" }] },
+    "marks": ["bold", "italic", "underline", "strike", "code", "link { href }", "highlight { color }", "textStyle { color }"]
+  },
+
+  "exercises": {
+    "summary": "Exercícios que podem ser criados DENTRO do conteúdo da lição (nós Tiptap interativos). Há 5 nós; só o 'quiz' corrige respostas automaticamente. Outros tipos de exercício (flashcard, completar por arrastar, desembaralhar, ouvir e escolher) NÃO são nós do Tiptap: eles são gerados automaticamente pelo ciclo de prática de 6 dias a partir dos itens de aprendizado e do quiz da lição (quizData).",
+
+    "quiz": {
+      "node": "quiz",
+      "file": "components/tiptap-extension/quiz/QuizNode.ts",
+      "whenToUse": "Perguntas com resposta única e verificável: múltipla escolha e completar/escrita curta. O aluno responde uma por vez, vê se acertou, a explicação e o resultado final. O progresso fica salvo no próprio nó (studentAnswers).",
+      "attrs": {
+        "nodeId": "string, único na lição",
+        "questions": "array de QuizQuestion (abaixo)",
+        "studentAnswers": "objeto { [questionId]: resposta }, comece sempre com {}",
+        "submitted": "boolean, comece sempre com false"
+      },
+      "QuizQuestion": {
+        "id": "string único dentro do nó",
+        "type": "\"multiple-choice\" | \"written\" (são os dois únicos tipos suportados)",
+        "category": "\"comprehension\" | \"grammar\" | \"vocabulary\" | \"review\"",
+        "questionText": "string, enunciado exibido ao aluno",
+        "options": "só em multiple-choice: [{ id, text }], 2 a 4 opções (ids 'A','B','C','D')",
+        "correctOptionId": "só em multiple-choice: id de uma das options",
+        "correctWrittenAnswer": "só em written: resposta esperada (comparação ignora maiúsculas, acentos e pontuação via normalizeText)",
+        "explanations": "objeto: para multiple-choice use uma chave por id de opção ('A','B',...) e/ou 'general'; para written use 'general'"
+      },
+      "example_multipleChoice": {
+        "type": "quiz",
+        "attrs": {
+          "nodeId": "quiz_L01_practice1",
+          "questions": [
+            {
+              "id": "p1-mc-1",
+              "type": "multiple-choice",
+              "category": "vocabulary",
+              "questionText": "Which sentence expresses “I am a student.”?",
+              "options": [
+                { "id": "A", "text": "Eu sou aluno." },
+                { "id": "B", "text": "Ele é americano." },
+                { "id": "C", "text": "Você é professor." }
+              ],
+              "correctOptionId": "A",
+              "explanations": { "A": "Eu + sou = I am.", "B": "Means “He is American.”", "C": "Means “You are a teacher.”", "general": "Correct answer: Eu sou aluno." }
+            }
+          ],
+          "studentAnswers": {},
+          "submitted": false
+        }
+      },
+      "example_written": {
+        "type": "quiz",
+        "attrs": {
+          "nodeId": "quiz_L01_gap",
+          "questions": [
+            {
+              "id": "p1-gap-1",
+              "type": "written",
+              "category": "grammar",
+              "questionText": "________ sou aluno.  (I am a student.)",
+              "correctWrittenAnswer": "Eu",
+              "explanations": { "general": "Eu sou aluno." }
+            }
+          ],
+          "studentAnswers": {},
+          "submitted": false
+        }
+      },
+      "bestPractices": [
+        "Use 'written' só quando houver UMA resposta correta curta (uma palavra ou expressão). Traduções livres, redações e respostas abertas NÃO devem virar quiz.",
+        "Agrupe de 4 a 12 perguntas por nó; vários nós na mesma lição são permitidos (um por seção).",
+        "Em 'written', repita a frase completa em explanations.general para o aluno ver a resposta no contexto.",
+        "O gabarito fica nos atributos do nó (visível no JSON da lição, mas não na tela antes de responder)."
+      ],
+      "validation": [
+        "type é 'multiple-choice' ou 'written'.",
+        "multiple-choice: options.length >= 2 e correctOptionId existe em options.",
+        "written: correctWrittenAnswer não vazio.",
+        "ids de pergunta únicos dentro do nó."
+      ]
+    },
+
+    "audioSync": {
+      "node": "audioSync",
+      "file": "components/tiptap-extension/audio-sync/AudioSyncNode.ts",
+      "whenToUse": "Player de áudio dentro da lição, com transcrição opcional (compreensão auditiva).",
+      "attrs": {
+        "nodeId": "string, único na lição",
+        "url": "URL do áudio (Firebase Storage)",
+        "title": "título exibido",
+        "transcription": "texto puro da transcrição (mostrado sob o player; string livre, não é JSON)"
+      },
+      "example": { "type": "audioSync", "attrs": { "nodeId": "audio_L01_1", "url": "https://firebasestorage.googleapis.com/...", "title": "Listen and repeat", "transcription": "Eu sou Ana. Eu sou aluna." } }
+    },
+
+    "speaking": {
+      "node": "speaking",
+      "file": "components/tiptap-extension/speaking-recorder/SpeakingRecorderNode.ts",
+      "whenToUse": "Exercício de fala: o aluno grava a própria voz e o áudio fica anexado ao nó. Coloque a instrução/pergunta em um parágrafo logo antes do nó. Não há correção automática.",
+      "attrs": {
+        "nodeId": "string, único na lição",
+        "audioUrl": "deixe '' na importação (preenchido quando o aluno grava)",
+        "filePath": "deixe '' na importação (caminho no Storage da gravação)"
+      },
+      "example": { "type": "speaking", "attrs": { "nodeId": "speaking_L01_1", "audioUrl": "", "filePath": "" } }
+    },
+
+    "youtubeSync": {
+      "node": "youtubeSync",
+      "file": "components/tiptap-extension/youtube-sync/YoutubeSyncNode.ts",
+      "whenToUse": "Vídeo do YouTube embutido na lição.",
+      "attrs": { "nodeId": "string, único na lição", "url": "URL do vídeo do YouTube" },
+      "example": { "type": "youtubeSync", "attrs": { "nodeId": "yt_L01_1", "url": "https://www.youtube.com/watch?v=XXXXXXXXXXX" } }
+    },
+
+    "lyricsSync": {
+      "node": "lyricsSync",
+      "file": "components/tiptap-extension/lyrics-sync/LyricsSyncNode.ts",
+      "whenToUse": "Exercício de música: o vídeo toca e pausa a cada 1 ou 2 linhas para o aluno completar a palavra que falta (pontuação e sequência de acertos). Exige letra sincronizada em formato LRC.",
+      "attrs": {
+        "nodeId": "string, único na lição",
+        "videoUrl": "URL do vídeo do YouTube da música",
+        "track": "nome da música",
+        "artist": "artista",
+        "lrc": "letra sincronizada em LRC: uma linha por trecho, no formato [mm:ss.xx] texto",
+        "pauseEvery": "1 ou 2 (pausa a cada N linhas)"
+      },
+      "example": {
+        "type": "lyricsSync",
+        "attrs": {
+          "nodeId": "lyrics_L20_1",
+          "videoUrl": "https://www.youtube.com/watch?v=XXXXXXXXXXX",
+          "track": "Nome da música",
+          "artist": "Artista",
+          "lrc": "[00:12.50] Primeira linha da letra\n[00:16.20] Segunda linha da letra",
+          "pauseEvery": 1
+        }
+      }
+    }
+  },
+
+  "nonInteractiveExerciseFormats": {
+    "note": "Formatos de prática que NÃO têm nó próprio e são montados com nós padrão. Não há correção automática.",
+    "translationList": "orderedList com uma frase por item + parágrafo de instrução em itálico antes.",
+    "readingWithQuestions": "blockquote com o texto + orderedList com as perguntas.",
+    "writingPrompt": "parágrafo de instrução (ex.: 'Write 4–6 sentences...') seguido, se quiser, de um nó 'speaking' ou espaço livre.",
+    "substitutionDrill": "table com colunas 'Start from' | 'Now say'.",
+    "selfCheckChecklist": "taskList com itens para o aluno marcar (o estado 'checked' não é salvo por aluno no conteúdo da lição).",
+    "mistakesTable": "table com colunas '✗ Not this' | '✓ Say this' | 'Why'."
+  },
+
+  "generatedAutomaticallyNotAuthoredInTiptap": {
+    "note": "Gerados pela plataforma depois que a lição fica 'ready'. Você não cria estes no JSON do conteúdo.",
+    "lessonQuiz": "lesson.quizData (quiz_sections com perguntas e audioRange), gerado por curriculumService.generateQuiz a partir do contentText, dos itens e da transcrição; usado no ciclo de prática.",
+    "practiceCycle": "Ciclo de 6 dias com flashcards, completar frase, desembaralhar, quiz e compreensão, montados a partir dos learning items CORE e do quizData (modules/learning/learning.service.ts).",
+    "learningItems": "Vocabulário e estruturas extraídos do texto da lição pela IA (parseLessonContent) e enriquecidos (tradução, exemplos, imagem)."
+  },
+
+  "knownLimitations": [
+    "components/lesson/lesson-content-view.tsx (visualizador de leitura usado no gerente e no professor) registra só AudioSyncNode e QuizNode. Um documento com 'speaking', 'youtubeSync' ou 'lyricsSync' aparece vazio nesse visualizador até esses nós serem registrados nele. O editor de lições e o caderno (NotebookEditor) registram todos.",
+    "O quiz só tem 2 tipos de pergunta (multiple-choice e written). Verdadeiro/falso pode ser feito como multiple-choice com 2 opções; associação e ordenação de frases não existem como nó.",
+    "A correção de 'written' ignora maiúsculas, acentos e pontuação, mas não aceita sinônimos: só uma resposta correta por pergunta.",
+    "O QuizView e os demais nós usam um papel global (globalThis.__userRole): o gerente/professor vê o editor do quiz; o aluno vê o jogo.",
+    "docs: components/tiptap-extension/EXTENSIONS_GUIDE.md descreve uma extensão 'Questions' antiga que não existe mais no repositório; o nó atual é 'quiz'."
+  ],
+
+  "importChecklist": [
+    "1. Converta cada seção da aula para os nós acima (heading, paragraph, table, blockquote, listas).",
+    "2. Para cada exercício com resposta única, crie um nó 'quiz' (multiple-choice ou written) com gabarito e explicações.",
+    "3. Exercícios abertos (tradução, escrita, fala) ficam como texto ou 'speaking', sem gabarito no conteúdo.",
+    "4. Valide: um único h1, nenhum text vazio, nodeIds únicos, quizzes com gabarito válido.",
+    "5. Gere contentText (generateText com as mesmas extensões, incluindo um nó 'quiz' de esquema com renderText) e siga o pipeline normal (áudio, transcrição, itens, quizData, finalize).",
+    "6. Referência de implementação: scripts/workbooks/ptbr/json-to-tiptap.ts (conversor usado na apostila de português)."
+  ]
+}

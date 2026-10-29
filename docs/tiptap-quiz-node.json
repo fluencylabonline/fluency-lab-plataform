@@ -1,0 +1,141 @@
+{
+  "title": "Nó Tiptap `quiz` (quiz interativo dentro da lição)",
+  "version": "1.0",
+  "files": {
+    "node": "components/tiptap-extension/quiz/QuizNode.ts",
+    "view": "components/tiptap-extension/quiz/QuizView.tsx",
+    "types": "components/tiptap-extension/quiz/quiz.types.ts"
+  },
+
+  "purpose": "Perguntas com resposta única e verificável (múltipla escolha e completar/escrita curta) dentro do conteúdo da lição. O aluno responde uma pergunta por vez, vê na hora se acertou e a explicação, e no fim vê o resultado. O progresso fica salvo no próprio nó.",
+
+  "node": {
+    "name": "quiz",
+    "group": "block",
+    "atom": true,
+    "draggable": true,
+    "note": "Nó 'atom': não tem 'content', só 'attrs'. Pode haver vários nós quiz na mesma lição (um por seção)."
+  },
+
+  "attrs": {
+    "nodeId": { "type": "string", "required": true, "default": null, "description": "Identificador único dentro da lição. Sugestão: quiz_<idDaLicao>_<secao>." },
+    "questions": { "type": "QuizQuestion[]", "required": true, "default": [], "description": "Lista de perguntas (estrutura abaixo)." },
+    "studentAnswers": { "type": "{ [questionId: string]: string }", "required": true, "default": {}, "description": "Respostas do aluno. Na importação use sempre {}. Para multiple-choice guarda o id da opção; para written guarda o texto digitado." },
+    "submitted": { "type": "boolean", "required": true, "default": false, "description": "true depois que o aluno conclui o quiz. Na importação use sempre false." }
+  },
+
+  "QuizQuestion": {
+    "id": { "type": "string", "required": true, "description": "Único dentro do nó. Ex.: p1-mc-1, p1-gap-2." },
+    "type": { "type": "\"multiple-choice\" | \"written\"", "required": true, "description": "São os dois únicos tipos suportados." },
+    "category": { "type": "\"comprehension\" | \"grammar\" | \"vocabulary\" | \"review\"", "required": true, "description": "Classificação pedagógica da pergunta." },
+    "questionText": { "type": "string", "required": true, "description": "Enunciado exibido ao aluno." },
+    "options": { "type": "{ id: string, text: string }[]", "required": "só em multiple-choice", "description": "2 a 4 opções; ids 'A','B','C','D'." },
+    "correctOptionId": { "type": "string", "required": "só em multiple-choice", "description": "Id de uma das options." },
+    "correctWrittenAnswer": { "type": "string", "required": "só em written", "description": "Resposta esperada. A comparação ignora maiúsculas/minúsculas, acentos e pontuação, e colapsa espaços. Não aceita sinônimos: só uma resposta correta." },
+    "explanations": {
+      "type": "{ A?: string, B?: string, C?: string, D?: string, general?: string }",
+      "required": true,
+      "description": "multiple-choice: uma chave por id de opção (mostrada conforme a opção escolhida) e/ou 'general'. written: use 'general' (mostrada após a resposta; ideal repetir a frase completa)."
+    }
+  },
+
+  "examples": {
+    "multipleChoice": {
+      "type": "quiz",
+      "attrs": {
+        "nodeId": "quiz_L01_practice1",
+        "questions": [
+          {
+            "id": "p1-mc-1",
+            "type": "multiple-choice",
+            "category": "vocabulary",
+            "questionText": "Which sentence expresses “I am a student.”?",
+            "options": [
+              { "id": "A", "text": "Eu sou aluno." },
+              { "id": "B", "text": "Ele é americano." },
+              { "id": "C", "text": "Você é professor." }
+            ],
+            "correctOptionId": "A",
+            "explanations": {
+              "A": "Eu + sou = I am.",
+              "B": "Means “He is American.”",
+              "C": "Means “You are a teacher.”",
+              "general": "Correct answer: Eu sou aluno."
+            }
+          }
+        ],
+        "studentAnswers": {},
+        "submitted": false
+      }
+    },
+    "written": {
+      "type": "quiz",
+      "attrs": {
+        "nodeId": "quiz_L01_gap",
+        "questions": [
+          {
+            "id": "p1-gap-1",
+            "type": "written",
+            "category": "grammar",
+            "questionText": "________ sou aluno.  (I am a student.)",
+            "correctWrittenAnswer": "Eu",
+            "explanations": { "general": "Eu sou aluno." }
+          }
+        ],
+        "studentAnswers": {},
+        "submitted": false
+      }
+    },
+    "trueFalseAsMultipleChoice": {
+      "type": "quiz",
+      "attrs": {
+        "nodeId": "quiz_L02_tf",
+        "questions": [
+          {
+            "id": "tf-1",
+            "type": "multiple-choice",
+            "category": "comprehension",
+            "questionText": "True or false: “Ela é brasileira” means “She is American.”",
+            "options": [
+              { "id": "A", "text": "True" },
+              { "id": "B", "text": "False" }
+            ],
+            "correctOptionId": "B",
+            "explanations": { "general": "Brasileira = Brazilian." }
+          }
+        ],
+        "studentAnswers": {},
+        "submitted": false
+      }
+    }
+  },
+
+  "validationRules": [
+    "type é exatamente 'multiple-choice' ou 'written'.",
+    "multiple-choice: options.length >= 2 e correctOptionId existe entre os ids de options.",
+    "written: correctWrittenAnswer não vazio.",
+    "ids de pergunta únicos dentro do nó; nodeId único na lição.",
+    "studentAnswers = {} e submitted = false na importação.",
+    "Nenhum campo undefined (JSON serializável).",
+    "O nó fica no nível de bloco do doc (filho direto de 'doc'), nunca dentro de parágrafo, lista ou tabela."
+  ],
+
+  "bestPractices": [
+    "Agrupe de 4 a 12 perguntas por nó e use um nó por seção (ex.: Practice 1, Practice 2, Homework).",
+    "Use 'written' só quando houver UMA resposta curta e certa (uma palavra ou expressão). Traduções livres, redações e respostas abertas não devem virar quiz.",
+    "Em 'written', coloque a dica/tradução entre parênteses no questionText e a frase completa em explanations.general.",
+    "Em multiple-choice, escreva a explicação de cada opção quando possível (o aluno vê a explicação da opção que escolheu).",
+    "O gabarito fica nos atributos do nó: está no JSON da lição, mas não aparece na tela antes de o aluno responder."
+  ],
+
+  "behavior": {
+    "student": "Vê o jogo: responde uma pergunta por vez, confirma, recebe feedback (certo/errado + explicação) e ao final vê o resumo. Pode retomar de onde parou porque o progresso é salvo em studentAnswers.",
+    "managerOrTeacher": "Vê a versão de edição do nó (o papel vem de globalThis.__userRole; padrão 'student')."
+  },
+
+  "howToBuildInAScript": {
+    "reference": "scripts/workbooks/ptbr/json-to-tiptap.ts (funções mcQuestions, gapQuestions e quizNode)",
+    "contentText": "Para gerar o contentText com generateText, registre um nó de esquema 'quiz' (mesmos attrs, sem a view React) com renderText que junte os questionText das perguntas.",
+    "registration": "O nó precisa estar registrado em todo editor/visualizador que renderiza a lição. Hoje estão registrados: LessonContentStep (editor), NotebookEditor e components/lesson/lesson-content-view.tsx (leitura)."
+  }
+}
