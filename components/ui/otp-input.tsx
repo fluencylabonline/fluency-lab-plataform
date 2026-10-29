@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { Delete } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +37,9 @@ export function OtpInput({
 }: OtpInputProps) {
   const boxesRef = useRef<HTMLDivElement>(null);
   const valueRef = useRef(value);
-  valueRef.current = value;
+  useLayoutEffect(() => {
+    valueRef.current = value;
+  }, [value]);
 
   // Bloqueado enquanto verifica ou depois de acertar. No erro continua
   // liberado para apagar.

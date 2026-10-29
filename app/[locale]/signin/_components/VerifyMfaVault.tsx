@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Shield } from "lucide-react";
 import { 
@@ -52,13 +52,15 @@ export function VerifyMfaVault({ open, onOpenChange, onSuccess, rememberMe = fal
     setStatus("idle");
   }, []);
 
-  // limpa o estado ao fechar/reabrir o vault
-  useEffect(() => {
+  // limpa o estado ao fechar o vault (ajuste durante o render, sem effect)
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (!open) {
       setCode("");
       setStatus("idle");
     }
-  }, [open]);
+  }
 
   return (
     <Vault open={open} onOpenChange={onOpenChange}>
