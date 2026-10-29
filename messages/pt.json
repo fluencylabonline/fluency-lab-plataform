@@ -255,7 +255,8 @@
       "weakPassword": "Senha muito fraca. Escolha uma senha mais forte.",
       "invalidToken": "Código inválido ou expirado.",
       "sessionExpired": "Sessão expirada. Tente entrar novamente.",
-      "accountSuspended": "Sua conta foi suspensa. Entre em contato com o administrador."
+      "accountSuspended": "Sua conta foi suspensa. Entre em contato com o administrador.",
+      "tooManyAttempts": "Muitas tentativas. Aguarde alguns minutos e tente novamente."
     },
     "forgotPassword": "Esqueceu a senha?",
     "forgotPasswordSubtitle": "Não se preocupe, nós ajudamos você.",
