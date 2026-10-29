@@ -2,7 +2,6 @@
 
 import { forwardRef, useEffect, useState } from "react";
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
-import { motion, AnimatePresence } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 import { useDevice } from "@/hooks/ui/use-device";
@@ -100,29 +99,23 @@ const Button = forwardRef<React.ComponentRef<typeof ButtonPrimitive>, ButtonProp
       >
         {isStandalone && os === "android" && (
           <span className="absolute inset-0 overflow-hidden rounded-[inherit] pointer-events-none">
-            <AnimatePresence>
-              {ripples.map((ripple) => (
-                <motion.span
-                  key={ripple.id}
-                  initial={{ scale: 0, opacity: 0.3 }}
-                  animate={{ scale: 4, opacity: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.6, ease: "easeOut" }}
-                  onAnimationComplete={() => {
-                    setRipples((prev) => prev.filter((r) => r.id !== ripple.id));
-                  }}
-                  className="absolute rounded-full bg-foreground/20 dark:bg-foreground/30"
-                  style={{
-                    top: ripple.y,
-                    left: ripple.x,
-                    width: "100px",
-                    height: "100px",
-                    marginTop: "-50px",
-                    marginLeft: "-50px",
-                  }}
-                />
-              ))}
-            </AnimatePresence>
+            {ripples.map((ripple) => (
+              <span
+                key={ripple.id}
+                onAnimationEnd={() => {
+                  setRipples((prev) => prev.filter((r) => r.id !== ripple.id));
+                }}
+                className="absolute rounded-full bg-foreground/20 dark:bg-foreground/30 animate-[buttonRipple_0.6s_ease-out_forwards]"
+                style={{
+                  top: ripple.y,
+                  left: ripple.x,
+                  width: "100px",
+                  height: "100px",
+                  marginTop: "-50px",
+                  marginLeft: "-50px",
+                }}
+              />
+            ))}
           </span>
         )}
 
