@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Activity, BookOpen, Clock, Tag, Edit2 } from "lucide-react";
 import Link from "next/link";
+import { useLocale } from "next-intl";
 
 interface RecessActivityCardProps {
   activity: {
@@ -18,6 +19,8 @@ interface RecessActivityCardProps {
 }
 
 export function RecessActivityCard({ activity }: RecessActivityCardProps) {
+  const locale = useLocale();
+
   return (
     <div className="item h-full flex flex-col overflow-hidden group">
       <div className="p-4 pb-2 space-y-1">
@@ -55,10 +58,12 @@ export function RecessActivityCard({ activity }: RecessActivityCardProps) {
       </div>
       
       <div className="p-4 pt-0 gap-2 flex items-center">
-        <Button variant="ghost" className="flex-1 justify-between h-9 text-xs font-semibold group/btn" size="sm">
-          Visualizar Detalhes
-          <Activity className="w-4 h-4 opacity-50 group-hover/btn:opacity-100 transition-opacity" />
-        </Button>
+        <Link href={`/${locale}/hub/teacher/lessons/${activity.id}`} className="flex-1">
+          <Button variant="ghost" className="w-full justify-between h-9 text-xs font-semibold group/btn" size="sm">
+            Visualizar Detalhes
+            <Activity className="w-4 h-4 opacity-50 group-hover/btn:opacity-100 transition-opacity" />
+          </Button>
+        </Link>
         {activity.teacherId && (
           <Link href={`/hub/teacher/recess/${activity.id}`}>
             <Button variant="outline" size="icon" className="h-9 w-9 rounded-lg">
