@@ -1615,18 +1615,53 @@ export const billingService = {
       const subscriptionId = meta.subscriptionId || meta.subscription?.id;
       const type = meta.type || meta.info?.type;
 
+      // O payload do webhook não é confiável por si só: só dá baixa se a cobrança
+      // pertence ao registro citado no metadata E o AbacatePay confirma que está paga.
       if (installmentId) {
-        console.log("[AbacatePay Webhook] Attempting to mark installment as paid:", installmentId);
-        await this.markInstallmentAsPaid(installmentId, resource.id);
+        const installment = await billingRepository.findInstallmentById(installmentId);
+        if (!installment || installment.abacatePayBillingId !== resource.id) {
+          console.warn(`[AbacatePay Webhook] Cobrança ${resource.id} não corresponde à parcela ${installmentId}. Ignorando.`);
+        } else if (await this.isAbacatePayChargePaid(resource.id)) {
+          console.log("[AbacatePay Webhook] Attempting to mark installment as paid:", installmentId);
+          await this.markInstallmentAsPaid(installmentId, resource.id);
+        } else {
+          console.warn(`[AbacatePay Webhook] Cobrança ${resource.id} não está paga no AbacatePay. Ignorando.`);
+        }
       } else {
         console.warn("[AbacatePay Webhook] No installmentId found in metadata");
       }
 
       // Handle Cancellation Fee
       if (type === "cancellation_fee" && subscriptionId) {
-        await this.confirmCancellationFeePayment(subscriptionId);
+        const sub = await billingRepository.findSubscriptionById(subscriptionId);
+        if (!sub || sub.cancellationFeeInstallmentId !== resource.id) {
+          console.warn(`[AbacatePay Webhook] Cobrança ${resource.id} não corresponde à taxa de cancelamento de ${subscriptionId}. Ignorando.`);
+        } else if (await this.isAbacatePayChargePaid(resource.id)) {
+          await this.confirmCancellationFeePayment(subscriptionId);
+        } else {
+          console.warn(`[AbacatePay Webhook] Taxa de cancelamento ${resource.id} não está paga no AbacatePay. Ignorando.`);
+        }
       }
     }
+  },
+
+  /**
+   * Consulta no AbacatePay se a cobrança está paga. Lança erro se a consulta falhar,
+   * para o webhook responder 500 e o AbacatePay reenviar o evento depois.
+   */
+  async isAbacatePayChargePaid(chargeId: string): Promise<boolean> {
+    const res = await fetch(`https://api.abacatepay.com/v2/transparents/check?id=${encodeURIComponent(chargeId)}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${env.ABACATEPAY_API_KEY}`,
+      },
+    });
+    if (!res.ok) {
+      throw new Error(`Falha ao consultar a cobrança ${chargeId} no AbacatePay (HTTP ${res.status}).`);
+    }
+    const result = await res.json();
+    return result?.data?.id === chargeId && result?.data?.status === "PAID";
   },
 
   // Confirms a cancellation-fee payment (called by the webhook, or manually by an admin):
