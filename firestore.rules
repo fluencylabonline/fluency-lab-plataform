@@ -24,16 +24,18 @@ service cloud.firestore {
     }
 
     match /Notebooks/{notebookId} {
-      // Allow read/write for the notebook document itself
-      allow read, write: if request.auth != null && (
+      // The notebook document is written only by the server (Admin SDK)
+      allow read: if request.auth != null && (
         isStaff() ||
-        (resource == null && request.resource.data.teacherId == request.auth.uid) || // Allow creation by teacher
-        (resource != null && (resource.data.studentId == request.auth.uid || resource.data.teacherId == request.auth.uid))
+        resource.data.studentId == request.auth.uid ||
+        resource.data.teacherId == request.auth.uid
       );
+      allow write: if false;
 
-      // Allow full access to subcollections (yjs, history, etc) if parent access is valid
+      // Subcollections (legacy yjs/history): readable by participants, written only by the server
       match /{allPaths=**} {
-        allow read, write: if canAccessNotebook(notebookId);
+        allow read: if canAccessNotebook(notebookId);
+        allow write: if false;
       }
     }
   }

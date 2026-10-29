@@ -5,7 +5,7 @@
         ".read": "auth != null && (auth.token.role == 'admin' || auth.token.role == 'manager' || data.child('metadata/studentId').val() == auth.uid || data.child('metadata/teacherId').val() == auth.uid)",
 
         "metadata": {
-          ".write": "auth != null && (!data.exists() || auth.token.role == 'admin' || auth.token.role == 'manager' || data.parent().child('metadata/studentId').val() == auth.uid || data.parent().child('metadata/teacherId').val() == auth.uid)"
+          ".write": "false"
         },
         "content": {
           ".write": "auth != null && (auth.token.role == 'admin' || auth.token.role == 'manager' || data.parent().child('metadata/studentId').val() == auth.uid || data.parent().child('metadata/teacherId').val() == auth.uid)"
@@ -21,25 +21,25 @@
     "youtube-sync": {
       "$nodeId": {
         ".read": "auth != null",
-        ".write": "auth != null && (!data.exists() || data.child('lastUpdatedBy').val() == auth.uid || newData.child('lastUpdatedBy').val() == auth.uid)"
+        ".write": "auth != null && newData.child('lastUpdatedBy').val() == auth.uid"
       }
     },
     "lyrics-sync": {
       "$nodeId": {
         ".read": "auth != null",
-        ".write": "auth != null && (!data.exists() || data.child('lastUpdatedBy').val() == auth.uid || newData.child('lastUpdatedBy').val() == auth.uid)"
+        ".write": "auth != null && newData.child('lastUpdatedBy').val() == auth.uid"
       }
     },
     "audio-sync": {
       "$nodeId": {
         ".read": "auth != null",
-        ".write": "auth != null && (!data.exists() || data.child('lastUpdatedBy').val() == auth.uid || newData.child('lastUpdatedBy').val() == auth.uid)"
+        ".write": "auth != null && newData.child('lastUpdatedBy').val() == auth.uid"
       }
     },
     "interactive-quiz": {
       "$nodeId": {
         ".read": "auth != null",
-        ".write": "auth != null && (!data.exists() || data.child('lastUpdatedBy').val() == auth.uid || newData.child('lastUpdatedBy').val() == auth.uid)"
+        ".write": "auth != null && newData.child('lastUpdatedBy').val() == auth.uid"
       }
     },
     "notification_sync_signal": {
