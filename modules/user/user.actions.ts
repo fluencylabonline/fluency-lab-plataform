@@ -53,7 +53,16 @@ export const loginAction = actionClient
 
         user = await userService.syncUser(uid, sanitizedData);
       } catch (error) {
-        if ((error as Error).message === "NOT_INVITED") return { success: false, error: "notInvited" };
+        if ((error as Error).message === "NOT_INVITED") {
+          // Login com Google de quem não tem convite cria a conta no Firebase Auth.
+          // Convites sempre criam a conta com role, então sem role ela é descartável.
+          if (!decodedToken.role) {
+            await adminAuth.deleteUser(uid).catch((deleteError) =>
+              console.error("[loginAction] Failed to delete uninvited auth user:", deleteError)
+            );
+          }
+          return { success: false, error: "notInvited" };
+        }
         throw error;
       }
 
