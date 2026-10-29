@@ -21,10 +21,14 @@ export default async function ProfilePage() {
     if (!user) redirect("/signin");
     if (!user.onboarded) redirect("/onboarding");
 
+    // O mês das projeções vai junto para o cliente não buscar de novo o mesmo período.
+    const now = new Date();
+    const projectionsPeriod = { month: now.getMonth(), year: now.getFullYear() };
+
     // Parallel data fetching for performance
     const [payoutHistory, projections, activeContract, dailySummary, overdueClasses] = await Promise.all([
         payoutService.getTeacherPayoutHistory(user.id),
-        payoutService.getEarningsProjections(user.id),
+        payoutService.getEarningsProjections(user.id, projectionsPeriod.month, projectionsPeriod.year),
         contractService.getTeacherActiveContract(user.id),
         schedulingService.getTeacherDailySummary(user.id),
         schedulingService.getTeacherOverdueSlots(user.id),
@@ -66,6 +70,7 @@ export default async function ProfilePage() {
                         <PayoutSummary
                             history={payoutHistory}
                             projections={projections}
+                            projectionsPeriod={projectionsPeriod}
                             teacherId={user.id}
                         />
                     </div>

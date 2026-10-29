@@ -46,7 +46,6 @@ export default function VaultItem({
     <Link
       ref={linkRef}
       href={item.href}
-      prefetch={true}
       className={twMerge(
         "flex flex-1 min-w-[80px] shrink-0",
         isActive && "min-w-max"
