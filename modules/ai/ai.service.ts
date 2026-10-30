@@ -1,6 +1,6 @@
 import "server-only";
 import { GoogleGenerativeAI, SchemaType, Schema } from "@google/generative-ai";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import { QuizData, CEFRLevel, QuizItem, AnalysisResult, LearningItemMetadata } from "@/modules/curriculum/curriculum.types";
 import type { QuizData as NotebookQuizData } from "@/components/tiptap-extension/quiz/quiz.types";
 import { checkRateLimit, checkDailyBudget } from "@/lib/rate-limit";

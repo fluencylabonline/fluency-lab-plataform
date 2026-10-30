@@ -11,7 +11,7 @@ import { payoutsTable } from "../payout/payout.schema";
 import { transactionsTable } from "./finance.schema";
 import { and, between, eq, inArray, isNull, sql } from "drizzle-orm";
 import { stripe } from "@/lib/stripe";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import { UnifiedTransaction, TeacherPayoutProjection, AIExpenseProjection } from "./finance.types";
 import { slotInstances } from "../scheduling/scheduling.schema";
 

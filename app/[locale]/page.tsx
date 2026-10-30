@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { env } from "@/env";
+import { env } from "@/env/client";
 import { LandingView } from "./_components/LandingView";
 import { getCurrentUser } from "@/lib/auth-server";
 import { settingsService } from "@/modules/settings/settings.service";

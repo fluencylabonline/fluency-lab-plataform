@@ -1,6 +1,6 @@
 import { aiRepository } from "@/modules/ai/ai.repository";
 import { NextResponse } from "next/server";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import crypto from "node:crypto";
 
 /**

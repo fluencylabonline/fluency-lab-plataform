@@ -1,7 +1,7 @@
 import "server-only";
 import { StreamClient } from "@stream-io/node-sdk";
 import type { StreamCallCredentials } from "./call.types";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import { callRepository } from "./call.repository";
 import { parseStreamTranscript } from "./call.transcript";
 

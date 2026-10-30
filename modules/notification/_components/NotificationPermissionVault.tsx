@@ -16,7 +16,7 @@ import {
 import { useNotificationPermission } from "@/hooks/notification/use-notification-permission";
 import { useNotificationStore } from "@/hooks/notification/use-notification-store";
 import { saveSubscriptionAction } from "@/modules/notification/notification.actions";
-import { env } from "@/env";
+import { env } from "@/env/client";
 
 import { useUserStore } from "@/modules/user/user.store";
 

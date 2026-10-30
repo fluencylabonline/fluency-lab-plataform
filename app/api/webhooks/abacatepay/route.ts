@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { billingService } from "@/modules/billing/billing.service";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import crypto from "node:crypto";
 
 function safeEqual(a: Buffer, b: Buffer) {

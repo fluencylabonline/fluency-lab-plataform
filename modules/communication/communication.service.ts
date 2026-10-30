@@ -1,6 +1,6 @@
 import "server-only";
 import { resend } from "@/lib/resend";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import { communicationRepository } from "./communication.repository";
 import { decrypt } from "@/lib/cryptography";
 import { whatsappConversationsTable } from "./communication.schema";

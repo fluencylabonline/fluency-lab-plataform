@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { contractService } from "@/modules/contract/contract.service";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import { isQuietHours } from "@/lib/quiet-hours";
 
 import crypto from "node:crypto";

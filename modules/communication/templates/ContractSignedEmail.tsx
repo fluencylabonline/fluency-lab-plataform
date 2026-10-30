@@ -11,7 +11,7 @@ import {
 } from "@react-email/components";
 import { EmailButton } from "./components/EmailButton";
 import { emailStyles } from "./email-styles";
-import { env } from "@/env";
+import { env } from "@/env/client";
 
 interface ContractSignedEmailProps {
   name: string;

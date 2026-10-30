@@ -1,6 +1,6 @@
 import "server-only";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import { checkDailyBudget, checkRateLimit } from "@/lib/rate-limit";
 import { aiRepository } from "@/modules/ai/ai.repository";
 import { generateHash } from "@/modules/ai/ai.utils";

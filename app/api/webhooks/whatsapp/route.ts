@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import { communicationRepository } from "@/modules/communication/communication.repository";
 import { communicationService } from "@/modules/communication/communication.service";
 import crypto from "node:crypto";

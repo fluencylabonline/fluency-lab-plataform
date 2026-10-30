@@ -4,7 +4,7 @@ import { POST } from "@/app/api/webhooks/stripe/route";
 import { stripe } from "@/lib/stripe";
 import { billingService } from "../billing.service";
 
-vi.mock("@/env", () => ({ env: { STRIPE_WEBHOOK_SECRET: "whsec_test" } }));
+vi.mock("@/env/server", () => ({ env: { STRIPE_WEBHOOK_SECRET: "whsec_test" } }));
 vi.mock("@/lib/stripe", () => ({ stripe: { webhooks: { constructEvent: vi.fn() } } }));
 vi.mock("@/lib/db", () => ({ db: { query: { installmentsTable: { findFirst: vi.fn() } } } }));
 vi.mock("../billing.service", () => ({ billingService: { markInstallmentAsPaid: vi.fn() } }));

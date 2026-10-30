@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toggleNotificationAction } from "@/modules/user/user.actions";
 import { saveSubscriptionAction } from "@/modules/notification/notification.actions";
 import { notify } from "@/components/ui/toaster";
-import { env } from "@/env";
+import { env } from "@/env/client";
 
 interface XPHeaderProps {
   user: {

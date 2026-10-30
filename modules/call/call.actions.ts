@@ -88,7 +88,7 @@ export const generateStreamTokenAction = protectedAction
       throw new Error("Cannot generate a token for another user");
     }
 
-    const { env } = await import("@/env");
+    const { env } = await import("@/env/client");
     const token = await callService.generateStreamToken(parsedInput.userId);
 
     return {

@@ -1,6 +1,6 @@
 import "server-only";
 import crypto from "crypto";
-import { env } from "@/env";
+import { env } from "@/env/server";
 
 /**
  * Facilitador de Criptografia (FluencyLab)

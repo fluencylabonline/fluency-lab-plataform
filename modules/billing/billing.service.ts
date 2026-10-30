@@ -8,7 +8,7 @@ import { communicationService } from "../communication/communication.service";
 import { notificationService } from "../notification/notification.service";
 import { addMonths, startOfDay, setDate, addDays, endOfDay, endOfMonth, startOfMonth, getDate, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import { db } from "@/lib/db";
 import { Installment, installmentsTable, Subscription, abacatePayWebhookSchema, abacatePayMetadataSchema, subscriptionsTable } from "./billing.schema";
 import { eq, asc, and, ne, gte } from "drizzle-orm";

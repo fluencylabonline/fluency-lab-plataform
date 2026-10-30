@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import { billingService } from "@/modules/billing/billing.service";
 import { db } from "@/lib/db";
 import { installmentsTable } from "@/modules/billing/billing.schema";

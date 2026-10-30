@@ -8,7 +8,7 @@ import TeacherPayoutEmail from "../communication/templates/TeacherPayoutEmail";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { payoutsTable } from "./payout.schema";
-import { env } from "@/env";
+import { env } from "@/env/server";
 
 export const payoutService = {
   async getTeacherUnpaidClasses(teacherId: string, month: number, year: number) {

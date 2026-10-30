@@ -3,7 +3,7 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { cookies, headers } from "next/headers";
 import { Providers } from "@/components/layout/providers";
 import { Quicksand } from "next/font/google";
-import { env } from "@/env";
+import { env } from "@/env/client";
 import "../globals.css";
 
 const quicksand = Quicksand({

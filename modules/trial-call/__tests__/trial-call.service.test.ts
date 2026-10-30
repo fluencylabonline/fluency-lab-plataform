@@ -43,7 +43,7 @@ vi.mock("@/modules/user/user.repository", () => ({
   userRepository: { findById: vi.fn().mockResolvedValue({ name: "Luara Souza" }) },
 }));
 
-vi.mock("@/env", () => ({
+vi.mock("@/env/server", () => ({
   env: { NEXT_PUBLIC_STREAM_API_KEY: "key", STREAM_SECRET: "secret" },
 }));
 

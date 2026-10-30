@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { env } from "@/env";
+import { env } from "@/env/client";
 
 /**
  * App cliente do Firebase. Cada serviço (auth, storage, firestore, rtdb) fica

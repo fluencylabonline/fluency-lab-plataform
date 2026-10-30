@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { certificateRepository } from "@/modules/certificate/certificate.repository";
 import { adminStorage } from "@/lib/firebase-admin";
 import { subYears } from "date-fns";
-import { env } from "@/env";
+import { env } from "@/env/server";
 
 import crypto from "node:crypto";
 

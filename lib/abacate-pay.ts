@@ -1,6 +1,6 @@
 import "server-only";
 import { AbacatePay } from "@abacatepay/sdk";
-import { env } from "@/env";
+import { env } from "@/env/server";
 
 if (!env.ABACATEPAY_API_KEY) {
   throw new Error("Missing ABACATEPAY_API_KEY environment variable");

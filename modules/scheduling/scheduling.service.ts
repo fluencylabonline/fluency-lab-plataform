@@ -19,7 +19,7 @@ import { planLessons } from "@/modules/learning/learning.schema";
 import { communicationService } from "@/modules/communication/communication.service";
 import { userService } from "@/modules/user/user.service";
 import { curriculumService } from "@/modules/curriculum/curriculum.service";
-import { env } from "@/env";
+import { env } from "@/env/client";
 import { decrypt } from "@/lib/cryptography";
 import {
   addWeeks,

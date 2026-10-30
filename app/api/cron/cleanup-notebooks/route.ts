@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { notebookService } from "@/modules/notebook/notebook.service";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import crypto from "node:crypto";
 
 export async function POST(req: Request) {

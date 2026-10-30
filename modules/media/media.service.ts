@@ -1,5 +1,5 @@
 import "server-only";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import admin from "firebase-admin";
 import type { ImageCredit } from "@/modules/curriculum/curriculum.types";

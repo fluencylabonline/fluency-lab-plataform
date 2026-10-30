@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import crypto from "node:crypto";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import { isQuietHours } from "@/lib/quiet-hours";
 import {
   HOLIDAY_RECESS_CAMPAIGNS,

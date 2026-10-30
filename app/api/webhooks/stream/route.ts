@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { callService } from "@/modules/call/call.service";
 import { trialCallService } from "@/modules/trial-call/trial-call.service";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import crypto from "node:crypto";
 
 /**

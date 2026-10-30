@@ -6,7 +6,7 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { adminStorage } from "@/lib/firebase-admin";
 import { injectTemplateData } from "./contract.service.utils";
 import { communicationService } from "../communication/communication.service";
-import { env } from "@/env";
+import { env } from "@/env/client";
 import { billingService } from "../billing/billing.service";
 import { addMonths } from "date-fns";
 import { ContractSignatureMetadata, SchoolSettings, ContractInstance } from "./contract.schema";

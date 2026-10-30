@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { env } from "@/env";
+import { env } from "@/env/client";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = env.NEXT_PUBLIC_APP_URL || "https://fluency-lab-plataform.vercel.app";

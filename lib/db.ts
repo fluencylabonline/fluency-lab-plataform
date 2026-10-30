@@ -2,7 +2,7 @@ import "server-only";
 import { neonConfig, Pool } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import ws from "ws";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import * as userSchema from "@/modules/user/user.schema";
 import * as notificationSchema from "@/modules/notification/notification.schema";
 import * as billingSchema from "@/modules/billing/billing.schema";

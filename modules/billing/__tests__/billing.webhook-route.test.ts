@@ -4,7 +4,7 @@ import crypto from "node:crypto";
 import { POST } from "@/app/api/webhooks/abacatepay/route";
 import { billingService } from "../billing.service";
 
-vi.mock("@/env", () => ({
+vi.mock("@/env/server", () => ({
   env: {
     ABACATEPAY_WEBHOOK_SECRET: "test-webhook-secret",
     ABACATEPAY_PUBLIC_KEY: "test-public-key",

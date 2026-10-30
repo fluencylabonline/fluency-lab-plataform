@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { saveSubscriptionAction } from "@/modules/notification/notification.actions";
 import { trackPwaInstallationAction } from "@/modules/user/user.actions";
-import { env } from "@/env";
+import { env } from "@/env/client";
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);

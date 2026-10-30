@@ -9,7 +9,7 @@ import { locales } from "@/i18n/config";
 import { revalidatePath } from "next/cache";
 import { adminAuth } from "@/lib/firebase-admin";
 import { NewUser, createUserSchema, requestNewInviteSchema, updateUserSchema, notificationPrefsSchema, lgpdConsentSchema } from "./user.schema";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import { communicationService } from "@/modules/communication/communication.service";
 import { notificationService } from "@/modules/notification/notification.service";
 import { checkRateLimit } from "@/lib/rate-limit";

@@ -6,8 +6,8 @@ import { vi } from 'vitest';
 config({ path: path.resolve(__dirname, '.env.test') });
 
 // Mock @/env globally to bypass T3 validation during tests
-vi.mock('@/env', () => ({
-  env: {
+const testEnv = vi.hoisted(() => ({
+
     RESEND_API_KEY: 'test',
     DATABASE_URL: 'postgres://test:test@localhost:5432/test',
     FIREBASE_PROJECT_ID: 'test',
@@ -35,8 +35,10 @@ vi.mock('@/env', () => ({
     NEXT_PUBLIC_FIREBASE_DATABASE_URL: 'test',
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: 'test',
     NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
-  },
-}));
+  }));
+
+vi.mock('@/env/server', () => ({ env: testEnv }));
+vi.mock('@/env/client', () => ({ env: testEnv }));
 
 // Mock firebase-admin globally to avoid PEM issues in tests
 vi.mock('web-push', () => {

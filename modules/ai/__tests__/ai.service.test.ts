@@ -40,7 +40,7 @@ vi.mock("@/lib/rate-limit", () => ({
   checkDailyBudget: vi.fn().mockResolvedValue({ success: true }),
 }));
 
-vi.mock("@/env", () => ({
+vi.mock("@/env/server", () => ({
   env: {
     GEMINI_API_KEY: "test-key",
   },

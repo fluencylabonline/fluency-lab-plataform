@@ -1,6 +1,6 @@
 import "server-only";
 import admin from "firebase-admin";
-import { env } from "@/env";
+import { env } from "@/env/server";
 
 /**
  * Initialize Firebase Admin SDK.

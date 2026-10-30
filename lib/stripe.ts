@@ -1,6 +1,6 @@
 import "server-only";
 import Stripe from "stripe";
-import { env } from "@/env";
+import { env } from "@/env/server";
 
 // Ensure the secret key exists before initializing, but handle cases in test gracefully
 const stripeSecretKey = env.STRIPE_SECRET_KEY || "mock_secret_key";

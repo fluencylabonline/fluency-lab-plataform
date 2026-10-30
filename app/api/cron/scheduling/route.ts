@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { schedulingService } from "@/modules/scheduling/scheduling.service";
-import { env } from "@/env";
+import { env } from "@/env/server";
 
 import crypto from "node:crypto";
 

@@ -3,7 +3,7 @@ import { userRepository } from "./user.repository";
 import { adminAuth, adminStorage } from "@/lib/firebase-admin";
 import type { User, NewUser, NotificationPrefs, SettingsUserDTO, AdminUserDTO, SessionUserDTO, TeacherOptionDTO, AdminUserDetailDTO } from "./user.schema";
 import type { OnboardingProfile } from "@/modules/onboarding/onboarding.types";
-import { env } from "@/env";
+import { env } from "@/env/client";
 import { communicationService } from "@/modules/communication/communication.service";
 import { abacate } from "@/lib/abacate-pay";
 import { encrypt, decrypt } from "@/lib/cryptography";

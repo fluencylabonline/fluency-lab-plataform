@@ -1,6 +1,6 @@
 import "server-only";
 import webpush from "web-push";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import { notificationRepository } from "./notification.repository";
 import { SendNotificationValues } from "./notification.schema";
 import { db } from "@/lib/db";

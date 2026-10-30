@@ -1,7 +1,7 @@
 import "server-only";
 import { randomInt, randomUUID } from "node:crypto";
 import { StreamClient } from "@stream-io/node-sdk";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import { callService } from "@/modules/call/call.service";
 import { userRepository } from "@/modules/user/user.repository";
 import { aiService } from "@/modules/ai/ai.service";

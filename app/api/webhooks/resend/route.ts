@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resend } from "@/lib/resend";
-import { env } from "@/env";
+import { env } from "@/env/server";
 import { communicationService } from "@/modules/communication/communication.service";
 import { communicationRepository } from "@/modules/communication/communication.repository";
 

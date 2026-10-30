@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { certificateService } from "@/modules/certificate/certificate.service";
 import { adminStorage } from "@/lib/firebase-admin";
 import { communicationService } from "@/modules/communication/communication.service";
-import { env } from "@/env";
+import { env } from "@/env/client";
 
 export async function PUT(
   req: Request,
