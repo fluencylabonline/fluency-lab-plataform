@@ -27,7 +27,7 @@ export async function generateMetadata({
   try {
     metadataBase = new URL(baseUrl);
   } catch {
-    metadataBase = new URL("https://fluency-lab-plataform.vercel.app");
+    metadataBase = new URL("https://www.fluencylab.me");
   }
 
   return {

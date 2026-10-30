@@ -1063,7 +1063,7 @@ export class CommunicationService {
 
       // O link final que o botão do WhatsApp vai abrir
       // Nota: No dashboard da Meta, o botão deve estar configurado como URL dinâmica.
-      // Ex: https://fluency-lab-plataform.vercel.app/{{1}}
+      // Ex: https://www.fluencylab.me/{{1}}
       const dynamicUrlSuffix = `create-password?oobCode=${oobCode}`;
 
       return await this.sendWhatsAppTemplate({
