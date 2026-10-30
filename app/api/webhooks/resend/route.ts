@@ -7,34 +7,35 @@ import { communicationRepository } from "@/modules/communication/communication.r
 export async function POST(req: NextRequest) {
   const webhookSecret = env.RESEND_WEBHOOK_SECRET;
 
+  if (!webhookSecret) {
+    console.error("[Resend Webhook] RESEND_WEBHOOK_SECRET is not configured. Rejecting request.");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+  }
+
   const rawBody = await req.text();
 
-  if (webhookSecret) {
-    const svixId = req.headers.get("svix-id");
-    const svixTimestamp = req.headers.get("svix-timestamp");
-    const svixSignature = req.headers.get("svix-signature");
+  const svixId = req.headers.get("svix-id");
+  const svixTimestamp = req.headers.get("svix-timestamp");
+  const svixSignature = req.headers.get("svix-signature");
 
-    if (!svixId || !svixTimestamp || !svixSignature) {
-      console.error("[Resend Webhook] Missing svix headers");
-      return NextResponse.json({ error: "Missing svix headers" }, { status: 400 });
-    }
+  if (!svixId || !svixTimestamp || !svixSignature) {
+    console.error("[Resend Webhook] Missing svix headers");
+    return NextResponse.json({ error: "Missing svix headers" }, { status: 400 });
+  }
 
-    try {
-      resend.webhooks.verify({
-        payload: rawBody,
-        headers: {
-          id: svixId,
-          timestamp: svixTimestamp,
-          signature: svixSignature,
-        },
-        webhookSecret,
-      });
-    } catch (err) {
-      console.error("[Resend Webhook] Signature verification failed:", err);
-      return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
-    }
-  } else {
-    console.warn("[Resend Webhook] RESEND_WEBHOOK_SECRET is not configured. Signature verification bypassed.");
+  try {
+    resend.webhooks.verify({
+      payload: rawBody,
+      headers: {
+        id: svixId,
+        timestamp: svixTimestamp,
+        signature: svixSignature,
+      },
+      webhookSecret,
+    });
+  } catch (err) {
+    console.error("[Resend Webhook] Signature verification failed:", err);
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
   try {
