@@ -1068,13 +1068,13 @@ export class CommunicationService {
 
       return await this.sendWhatsAppTemplate({
         to: data.cellphone,
-        templateName: "welcome_first", // Nome do modelo pronto da Meta
+        templateName: "welcome_first_v4",
         languageCode,
         components: [
           {
             type: "body",
             parameters: [
-              { type: "text", parameter_name: "name", text: data.name },
+              { type: "text", text: data.name },
             ]
           },
           {
@@ -2177,6 +2177,7 @@ export class CommunicationService {
       "payment_overdue_v4",
       "payment_overdue_v5",
       "welcome_first",
+      "welcome_first_v4",
       "talk_to_person",
       "class_scheduled_student_v1",
     ];

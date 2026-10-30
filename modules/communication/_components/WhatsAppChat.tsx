@@ -66,6 +66,7 @@ const WHATSAPP_TEMPLATES_WHITELIST = [
   "payment_overdue_v4",
   "payment_overdue_v5",
   "welcome_first",
+  "welcome_first_v4",
   "talk_to_person",
   "class_scheduled_student_v1",
 ];
