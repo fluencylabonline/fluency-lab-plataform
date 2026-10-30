@@ -88,7 +88,7 @@ export function QuizView({ node, updateAttributes }: NodeViewProps) {
     submitted: boolean; 
     currentIndex: number;
   }) => {
-    if (!nodeId) return;
+    if (!nodeId || !notebookId) return;
     const payload = {
       studentAnswers: nextState.studentAnswers,
       submitted: nextState.submitted,
@@ -96,13 +96,13 @@ export function QuizView({ node, updateAttributes }: NodeViewProps) {
       lastUpdatedBy: myUserId,
       updatedAt: Date.now(),
     };
-    set(ref(rtdb, `interactive-quiz/${nodeId}`), payload).catch(console.error);
+    set(ref(rtdb, `interactive-quiz/${notebookId}/${nodeId}`), payload).catch(console.error);
   };
 
   useEffect(() => {
-    if (!nodeId) return;
+    if (!nodeId || !notebookId) return;
 
-    const syncRef = ref(rtdb, `interactive-quiz/${nodeId}`);
+    const syncRef = ref(rtdb, `interactive-quiz/${notebookId}/${nodeId}`);
 
     const handleSnapshot = (snapshot: DataSnapshot) => {
       const state = snapshot.val();

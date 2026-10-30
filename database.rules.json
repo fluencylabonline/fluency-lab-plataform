@@ -19,27 +19,35 @@
     },
 
     "youtube-sync": {
-      "$nodeId": {
-        ".read": "auth != null",
-        ".write": "auth != null && newData.child('lastUpdatedBy').val() == auth.uid"
+      "$notebookId": {
+        "$nodeId": {
+          ".read": "auth != null && (auth.token.role == 'admin' || auth.token.role == 'manager' || root.child('notebooks').child($notebookId).child('metadata/studentId').val() == auth.uid || root.child('notebooks').child($notebookId).child('metadata/teacherId').val() == auth.uid)",
+          ".write": "auth != null && (auth.token.role == 'admin' || auth.token.role == 'manager' || root.child('notebooks').child($notebookId).child('metadata/studentId').val() == auth.uid || root.child('notebooks').child($notebookId).child('metadata/teacherId').val() == auth.uid) && newData.child('lastUpdatedBy').val() == auth.uid"
+        }
       }
     },
     "lyrics-sync": {
-      "$nodeId": {
-        ".read": "auth != null",
-        ".write": "auth != null && newData.child('lastUpdatedBy').val() == auth.uid"
+      "$notebookId": {
+        "$nodeId": {
+          ".read": "auth != null && (auth.token.role == 'admin' || auth.token.role == 'manager' || root.child('notebooks').child($notebookId).child('metadata/studentId').val() == auth.uid || root.child('notebooks').child($notebookId).child('metadata/teacherId').val() == auth.uid)",
+          ".write": "auth != null && (auth.token.role == 'admin' || auth.token.role == 'manager' || root.child('notebooks').child($notebookId).child('metadata/studentId').val() == auth.uid || root.child('notebooks').child($notebookId).child('metadata/teacherId').val() == auth.uid) && newData.child('lastUpdatedBy').val() == auth.uid"
+        }
       }
     },
     "audio-sync": {
-      "$nodeId": {
-        ".read": "auth != null",
-        ".write": "auth != null && newData.child('lastUpdatedBy').val() == auth.uid"
+      "$notebookId": {
+        "$nodeId": {
+          ".read": "auth != null && (auth.token.role == 'admin' || auth.token.role == 'manager' || root.child('notebooks').child($notebookId).child('metadata/studentId').val() == auth.uid || root.child('notebooks').child($notebookId).child('metadata/teacherId').val() == auth.uid)",
+          ".write": "auth != null && (auth.token.role == 'admin' || auth.token.role == 'manager' || root.child('notebooks').child($notebookId).child('metadata/studentId').val() == auth.uid || root.child('notebooks').child($notebookId).child('metadata/teacherId').val() == auth.uid) && newData.child('lastUpdatedBy').val() == auth.uid"
+        }
       }
     },
     "interactive-quiz": {
-      "$nodeId": {
-        ".read": "auth != null",
-        ".write": "auth != null && newData.child('lastUpdatedBy').val() == auth.uid"
+      "$notebookId": {
+        "$nodeId": {
+          ".read": "auth != null && (auth.token.role == 'admin' || auth.token.role == 'manager' || root.child('notebooks').child($notebookId).child('metadata/studentId').val() == auth.uid || root.child('notebooks').child($notebookId).child('metadata/teacherId').val() == auth.uid)",
+          ".write": "auth != null && (auth.token.role == 'admin' || auth.token.role == 'manager' || root.child('notebooks').child($notebookId).child('metadata/studentId').val() == auth.uid || root.child('notebooks').child($notebookId).child('metadata/teacherId').val() == auth.uid) && newData.child('lastUpdatedBy').val() == auth.uid"
+        }
       }
     },
     "notification_sync_signal": {

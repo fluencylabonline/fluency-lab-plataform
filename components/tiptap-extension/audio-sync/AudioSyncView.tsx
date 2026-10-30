@@ -78,7 +78,9 @@ export function AudioSyncView({ node, selected }: NodeViewProps) {
           "anonymous",
         updatedAt: Date.now(),
       };
-      set(ref(rtdb, `audio-sync/${nodeId}`), state).catch(console.error);
+      const notebookId = (globalThis as Record<string, unknown>).__notebookId as string | undefined;
+      if (!notebookId) return;
+      set(ref(rtdb, `audio-sync/${notebookId}/${nodeId}`), state).catch(console.error);
     },
     [nodeId, speed, syncEnabled]
   );
@@ -87,7 +89,9 @@ export function AudioSyncView({ node, selected }: NodeViewProps) {
   useEffect(() => {
     if (!nodeId || !syncEnabled) return;
 
-    const syncRef = ref(rtdb, `audio-sync/${nodeId}`);
+    const notebookId = (globalThis as Record<string, unknown>).__notebookId as string | undefined;
+    if (!notebookId) return;
+    const syncRef = ref(rtdb, `audio-sync/${notebookId}/${nodeId}`);
 
     const handleSnapshot = (snapshot: DataSnapshot) => {
       const state: AudioSyncState | null = snapshot.val();

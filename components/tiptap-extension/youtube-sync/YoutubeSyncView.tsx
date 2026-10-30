@@ -137,7 +137,9 @@ export function YouTubeSyncView({
           "anonymous",
         updatedAt: Date.now(),
       };
-      set(ref(rtdb, `youtube-sync/${nodeId}`), state).catch(console.error);
+      const notebookId = (globalThis as Record<string, unknown>).__notebookId as string | undefined;
+      if (!notebookId) return;
+      set(ref(rtdb, `youtube-sync/${notebookId}/${nodeId}`), state).catch(console.error);
     },
     [nodeId, url, speed],
   );
@@ -236,9 +238,10 @@ export function YouTubeSyncView({
 
   // ── Escutar Firebase e sincronizar ────────────────────────────────────────
   useEffect(() => {
-    if (!nodeId) return;
+    const notebookId = (globalThis as Record<string, unknown>).__notebookId as string | undefined;
+    if (!nodeId || !notebookId) return;
 
-    const syncRef = ref(rtdb, `youtube-sync/${nodeId}`);
+    const syncRef = ref(rtdb, `youtube-sync/${notebookId}/${nodeId}`);
 
     const handleSnapshot = (snapshot: DataSnapshot) => {
       const state: YouTubeSyncState | null = snapshot.val();

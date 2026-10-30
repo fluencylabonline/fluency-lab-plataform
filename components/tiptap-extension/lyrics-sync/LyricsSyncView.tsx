@@ -310,7 +310,9 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
         ...customState,
       };
 
-      set(ref(rtdb, `lyrics-sync/${attrs.nodeId}`), fullState).catch(console.error);
+      const notebookId = (globalThis as Record<string, unknown>).__notebookId as string | undefined;
+      if (!notebookId) return;
+      set(ref(rtdb, `lyrics-sync/${notebookId}/${attrs.nodeId}`), fullState).catch(console.error);
     },
     [] // Intentionally empty — reads live data from refs only
   );
@@ -496,9 +498,10 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
   // ── RTDB Subscription (Receive State Changes) ───────────────────────────────
 
   useEffect(() => {
-    if (!nodeId) return;
+    const notebookId = (globalThis as Record<string, unknown>).__notebookId as string | undefined;
+    if (!nodeId || !notebookId) return;
 
-    const syncRef = ref(rtdb, `lyrics-sync/${nodeId}`);
+    const syncRef = ref(rtdb, `lyrics-sync/${notebookId}/${nodeId}`);
 
     const handleSnapshot = (snapshot: DataSnapshot) => {
       const state: LyricsSyncState | null = snapshot.val();
