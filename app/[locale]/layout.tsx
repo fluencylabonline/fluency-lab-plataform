@@ -1,9 +1,12 @@
 import type { Metadata, Viewport } from "next";
+import { hasLocale } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { cookies, headers } from "next/headers";
+import { notFound } from "next/navigation";
 import { Providers } from "@/components/layout/providers";
 import { Quicksand } from "next/font/google";
 import { env } from "@/env/client";
+import { routing } from "@/i18n/routing";
 import "../globals.css";
 
 const quicksand = Quicksand({
@@ -16,6 +19,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({ locale, namespace: "Metadata.root" });
   const baseUrl = env.NEXT_PUBLIC_APP_URL;
 
@@ -89,6 +93,7 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
   const messages = await getMessages();
   const cookieStore = await cookies();
   const nonce = (await headers()).get("x-nonce") || undefined;
