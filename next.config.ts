@@ -16,6 +16,7 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   logging: {
     serverFunctions: false, //Deactivate custom logs with sensitive information
   },
