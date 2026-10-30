@@ -128,8 +128,13 @@ export default function Footer({ settings }: { settings: SystemSettings }) {
               </p>
             </div>
 
+            {/* method="post": antes da hidratação o submit nativo não pode jogar o e-mail na URL (GET) */}
             <form
-              onSubmit={handleSubmit(onSubmit)}
+              method="post"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void handleSubmit(onSubmit)(event);
+              }}
               className="flex w-full max-w-md gap-2 flex-col sm:flex-row"
             >
               <div className="relative w-full">
