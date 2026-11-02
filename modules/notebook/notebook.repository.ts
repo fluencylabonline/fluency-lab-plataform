@@ -1,7 +1,7 @@
 import "server-only";
 import { db } from "@/lib/db";
 import { notebooksTable, notebookSessionsTable, notebookAssetsTable, notebookQuizLimitsTable } from "./notebook.schema";
-import { eq, and, lte, isNull, or, ilike } from "drizzle-orm";
+import { eq, and, lte, isNull, or, ilike, sql } from "drizzle-orm";
 
 export const notebookRepository = {
   async findById(id: string) {
@@ -204,32 +204,51 @@ export const notebookRepository = {
     return record?.count ?? 0;
   },
 
-  async incrementQuizLimitCount(teacherId: string, studentId: string): Promise<number> {
-    const existing = await db.query.notebookQuizLimitsTable.findFirst({
-      where: and(
-        eq(notebookQuizLimitsTable.teacherId, teacherId),
-        eq(notebookQuizLimitsTable.studentId, studentId)
-      ),
-    });
+  /**
+   * Reserva atomicamente uma geração de quiz para o par professor/aluno. Devolve o novo contador,
+   * ou null se o limite já foi atingido. O lock consultivo serializa cliques/abas simultâneas
+   * (a tabela não tem índice único, então um upsert sozinho não basta).
+   */
+  async reserveQuizSlot(teacherId: string, studentId: string, max: number): Promise<number | null> {
+    return db.transaction(async (tx) => {
+      await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`quiz-limit:${teacherId}:${studentId}`}))`);
 
-    if (existing) {
-      const [updated] = await db
+      const existing = await tx.query.notebookQuizLimitsTable.findFirst({
+        where: and(
+          eq(notebookQuizLimitsTable.teacherId, teacherId),
+          eq(notebookQuizLimitsTable.studentId, studentId)
+        ),
+      });
+
+      if (!existing) {
+        const [inserted] = await tx
+          .insert(notebookQuizLimitsTable)
+          .values({ teacherId, studentId, count: 1 })
+          .returning();
+        return inserted.count;
+      }
+      if (existing.count >= max) return null;
+
+      const [updated] = await tx
         .update(notebookQuizLimitsTable)
         .set({ count: existing.count + 1 })
         .where(eq(notebookQuizLimitsTable.id, existing.id))
         .returning();
       return updated.count;
-    } else {
-      const [inserted] = await db
-        .insert(notebookQuizLimitsTable)
-        .values({
-          teacherId,
-          studentId,
-          count: 1,
-        })
-        .returning();
-      return inserted.count;
-    }
+    });
+  },
+
+  /** Devolve uma geração reservada quando a IA falhou (tentativa sem resultado não conta no limite). */
+  async releaseQuizSlot(teacherId: string, studentId: string): Promise<void> {
+    await db
+      .update(notebookQuizLimitsTable)
+      .set({ count: sql`greatest(${notebookQuizLimitsTable.count} - 1, 0)` })
+      .where(
+        and(
+          eq(notebookQuizLimitsTable.teacherId, teacherId),
+          eq(notebookQuizLimitsTable.studentId, studentId)
+        )
+      );
   },
 };
 

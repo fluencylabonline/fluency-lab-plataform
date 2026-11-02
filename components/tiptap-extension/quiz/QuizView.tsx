@@ -23,6 +23,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { generateNotebookQuizAction, getQuizLimitCountAction } from "@/modules/notebook/notebook.actions";
+import { MAX_QUIZ_GENERATIONS_PER_STUDENT } from "@/modules/notebook/notebook.constants";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -357,7 +358,7 @@ export function QuizView({ node, updateAttributes }: NodeViewProps) {
                   <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 font-medium">
                     <Info className="w-4 h-4 shrink-0" />
                     <span>
-                      {t("generator.limitWarning", { count: limitCount }) || `Você utilizou ${limitCount} de 3 gerações de quiz IA gratuitas para este aluno.`}
+                      {t("generator.limitWarning", { count: limitCount, max: MAX_QUIZ_GENERATIONS_PER_STUDENT }) || `Você utilizou ${limitCount} de ${MAX_QUIZ_GENERATIONS_PER_STUDENT} gerações de quiz IA gratuitas para este aluno.`}
                     </span>
                   </div>
                 )}
@@ -365,7 +366,7 @@ export function QuizView({ node, updateAttributes }: NodeViewProps) {
                 <button
                   type="button"
                   onClick={handleGenerateQuiz}
-                  disabled={limitCount !== null && limitCount >= 3}
+                  disabled={limitCount !== null && limitCount >= MAX_QUIZ_GENERATIONS_PER_STUDENT}
                   className="w-full inline-flex items-center justify-center gap-2 h-12 text-base font-bold uppercase rounded-xl cursor-pointer transition-all duration-100 border-2 border-transparent bg-primary text-primary-foreground border-b-[4px] border-b-primary/80 hover:brightness-105 active:translate-y-[2px] active:border-b-[2px] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Sparkles className="w-5 h-5" />

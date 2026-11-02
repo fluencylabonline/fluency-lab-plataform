@@ -423,11 +423,11 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
               {/* Idioma e Nível Lado a Lado */}
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Idioma" required error={errors.language?.message}>
-                  <Select onValueChange={(val) => setValue("language", val, { shouldValidate: true })}>
+                  <Select value={watch("language")} onValueChange={(val) => setValue("language", val, { shouldValidate: true })}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione o idioma" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent layerClassName="z-[120]">
                       <SelectItem value="en">Inglês</SelectItem>
                       <SelectItem value="es">Espanhol</SelectItem>
                       <SelectItem value="fr">Francês</SelectItem>
@@ -439,11 +439,11 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
                 </Field>
 
                 <Field label="Nível Aproximado" required error={errors.level?.message}>
-                  <Select onValueChange={(val) => setValue("level", val, { shouldValidate: true })}>
+                  <Select value={watch("level")} onValueChange={(val) => setValue("level", val, { shouldValidate: true })}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione o nível" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent layerClassName="z-[120]">
                       <SelectItem value="A1">A1 (Iniciante)</SelectItem>
                       <SelectItem value="A2">A2 (Básico)</SelectItem>
                       <SelectItem value="B1">B1 (Intermediário)</SelectItem>

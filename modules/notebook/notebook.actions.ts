@@ -201,7 +201,8 @@ export const generateNotebookQuizAction = protectedAction
       parsedInput.content,
       parsedInput.nativeLanguage,
       parsedInput.targetLanguage,
-      parsedInput.level
+      parsedInput.level,
+      user.role === "admin"
     );
 
     refresh();

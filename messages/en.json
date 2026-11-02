@@ -3554,7 +3554,10 @@
     "speedTooltip": "Synchronized playback speed",
     "normal": "Normal",
     "viewTranscription": "View Transcription",
-    "hideTranscription": "Hide Transcription"
+    "hideTranscription": "Hide Transcription",
+    "shareTranscription": "Show transcription to the student",
+    "transcriptionVisible": "The student can see the transcription.",
+    "transcriptionHidden": "Hidden from the student."
   },
   "Quiz": {
     "generator": {
@@ -3566,7 +3569,7 @@
       "select": "Select",
       "targetLanguage": "Learned Language",
       "targetLevel": "Target Level (CEFR)",
-      "limitWarning": "You have used {count} of 3 free AI quiz generations for this student.",
+      "limitWarning": "You have used {count} of {max} free AI quiz generations for this student.",
       "submitBtn": "Generate Smart Quiz (10 Questions)",
       "levels": {
         "A1": "A1 (Beginner)",

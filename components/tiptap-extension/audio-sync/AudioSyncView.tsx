@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
-import { ref, onValue, set, off, type DataSnapshot } from "firebase/database";
+import { ref, onValue, update, off, type DataSnapshot } from "firebase/database";
 import { rtdb } from "@/lib/firebase-rtdb";
 import { 
   Play, 
@@ -27,6 +28,8 @@ export interface AudioSyncState {
   playbackRate: number;
   lastUpdatedBy: string;
   updatedAt: number;
+  /** Liberado pelo professor: quando falso ou ausente, o aluno não vê a transcrição. */
+  showTranscription?: boolean;
 }
 
 const SYNC_TOLERANCE_SEC = 1.5; // Diferença máxima aceitável antes de pular (seek)
@@ -37,6 +40,9 @@ export function AudioSyncView({ node, selected }: NodeViewProps) {
   // Só o caderno (que define __notebookId) sincroniza play/pause entre professor e aluno. Numa lição, que é
   // compartilhada por todos, cada pessoa controla o seu próprio player.
   const syncEnabled = !!(globalThis as Record<string, unknown>).__notebookId;
+  // Professor/admin controlam a liberação da transcrição; o aluno só vê o que foi liberado.
+  const userRole = ((globalThis as Record<string, unknown>).__userRole as string | undefined) ?? "student";
+  const canControlTranscription = syncEnabled && userRole !== "student";
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isSyncingRef = useRef(false);
@@ -52,6 +58,12 @@ export function AudioSyncView({ node, selected }: NodeViewProps) {
   const [volume, setVolume] = useState(80);
   const [isMuted, setIsMuted] = useState(false);
   const [speedOpen, setSpeedOpen] = useState(false);
+  const [speedMenuPos, setSpeedMenuPos] = useState<{ left: number; top?: number; bottom?: number } | null>(null);
+  const speedButtonRef = useRef<HTMLButtonElement | null>(null);
+  const speedMenuRef = useRef<HTMLDivElement | null>(null);
+
+  // Transcrição liberada pelo professor (vem do RTDB). Padrão: oculta.
+  const [transcriptionShared, setTranscriptionShared] = useState(false);
   
   // Accordion da transcrição
   const [isTranscriptionOpen, setIsTranscriptionOpen] = useState(false);
@@ -80,10 +92,29 @@ export function AudioSyncView({ node, selected }: NodeViewProps) {
       };
       const notebookId = (globalThis as Record<string, unknown>).__notebookId as string | undefined;
       if (!notebookId) return;
-      set(ref(rtdb, `audio-sync/${notebookId}/${nodeId}`), state).catch(console.error);
+      // update (não set) para não apagar o showTranscription definido pelo professor
+      update(ref(rtdb, `audio-sync/${notebookId}/${nodeId}`), { ...state }).catch(console.error);
     },
     [nodeId, speed, syncEnabled]
   );
+
+  // ── Professor libera/oculta a transcrição para o aluno ─────────────────────
+  const toggleTranscriptionShared = (next: boolean) => {
+    setTranscriptionShared(next);
+    const audio = audioRef.current;
+    const notebookId = (globalThis as Record<string, unknown>).__notebookId as string | undefined;
+    if (!nodeId || !syncEnabled || !notebookId) return;
+    // A regra do RTDB exige lastUpdatedBy = quem escreve, então reenviamos o estado atual de
+    // reprodução junto: assim o aluno não aplica um estado antigo ao receber a mudança.
+    update(ref(rtdb, `audio-sync/${notebookId}/${nodeId}`), {
+      playing: isPlaying,
+      currentTime: audio?.currentTime ?? 0,
+      playbackRate: speed,
+      lastUpdatedBy: ((globalThis as Record<string, unknown>).__userId as string) ?? "anonymous",
+      updatedAt: Date.now(),
+      showTranscription: next,
+    }).catch(console.error);
+  };
 
   // ── Escutar RTDB para aplicar estado remoto ─────────────────────────────────
   useEffect(() => {
@@ -96,7 +127,9 @@ export function AudioSyncView({ node, selected }: NodeViewProps) {
     const handleSnapshot = (snapshot: DataSnapshot) => {
       const state: AudioSyncState | null = snapshot.val();
       const audio = audioRef.current;
-      if (!state || !audio) return;
+      if (!state) return;
+      setTranscriptionShared(!!state.showTranscription);
+      if (!audio) return;
 
       // Anti-loop: ignora modificações causadas por si mesmo
       const myId =
@@ -241,12 +274,39 @@ export function AudioSyncView({ node, selected }: NodeViewProps) {
     setIsMuted(!isMuted);
   };
 
-  // Fecha o dropdown de velocidade ao clicar fora
+  // O menu de velocidade vai num portal (o card tem overflow-hidden e cortava as opções de cima).
+  const openSpeedMenu = () => {
+    const btn = speedButtonRef.current;
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const MENU_HEIGHT = 180;
+    const left = Math.max(8, Math.min(rect.right - 80, window.innerWidth - 88));
+    // Abre para baixo se couber; senão, para cima.
+    if (window.innerHeight - rect.bottom >= MENU_HEIGHT + 8) {
+      setSpeedMenuPos({ left, top: rect.bottom + 8 });
+    } else {
+      setSpeedMenuPos({ left, bottom: window.innerHeight - rect.top + 8 });
+    }
+    setSpeedOpen(true);
+  };
+
+  // Fecha o menu ao clicar fora, rolar ou redimensionar
   useEffect(() => {
     if (!speedOpen) return;
-    const handleOutsideClick = () => setSpeedOpen(false);
-    document.addEventListener("click", handleOutsideClick);
-    return () => document.removeEventListener("click", handleOutsideClick);
+    const close = () => setSpeedOpen(false);
+    const handlePointerDown = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (speedMenuRef.current?.contains(target) || speedButtonRef.current?.contains(target)) return;
+      close();
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+    };
   }, [speedOpen]);
 
   return (
@@ -371,10 +431,8 @@ export function AudioSyncView({ node, selected }: NodeViewProps) {
             <div className="relative">
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSpeedOpen(!speedOpen);
-                }}
+                ref={speedButtonRef}
+                onClick={() => (speedOpen ? setSpeedOpen(false) : openSpeedMenu())}
                 disabled={!isReady}
                 className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-md border border-amber-500/20 text-amber-600 dark:text-amber-400 bg-amber-500/5 dark:bg-amber-500/10 hover:bg-amber-500/10 dark:hover:bg-amber-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                 title={t("speedTooltip") || "Velocidade de reprodução sincronizada"}
@@ -383,31 +441,37 @@ export function AudioSyncView({ node, selected }: NodeViewProps) {
                 <span>{speed === 1 ? "1.0x" : `${speed}x`}</span>
               </button>
 
-              {speedOpen && (
-                <div className="absolute bottom-full mb-2 right-0 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-1 w-20 flex flex-col gap-0.5 z-10 shadow-lg" onClick={(e) => e.stopPropagation()}>
-                  {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
-                    <button
-                      key={rate}
-                      type="button"
-                      onClick={() => handleSpeedChange(rate)}
-                      className={`w-full text-left px-2 py-1 text-[11.5px] rounded font-medium transition-colors ${
-                        speed === rate 
-                          ? "bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold" 
-                          : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                      }`}
-                    >
-                      {rate === 1 ? (t("normal") || "Normal") : `${rate}x`}
-                    </button>
-                  ))}
-                </div>
-              )}
+              {speedOpen && speedMenuPos && typeof document !== "undefined" &&
+                createPortal(
+                  <div
+                    ref={speedMenuRef}
+                    style={{ position: "fixed", left: speedMenuPos.left, top: speedMenuPos.top, bottom: speedMenuPos.bottom }}
+                    className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-1 w-20 flex flex-col gap-0.5 z-[200] shadow-lg"
+                  >
+                    {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
+                      <button
+                        key={rate}
+                        type="button"
+                        onClick={() => handleSpeedChange(rate)}
+                        className={`w-full text-left px-2 py-1 text-[11.5px] rounded font-medium transition-colors ${
+                          speed === rate
+                            ? "bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold"
+                            : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        }`}
+                      >
+                        {rate === 1 ? (t("normal") || "Normal") : `${rate}x`}
+                      </button>
+                    ))}
+                  </div>,
+                  document.body
+                )}
             </div>
 
           </div>
         </div>
 
         {/* Seção da Transcrição Expansível */}
-        {transcription && (
+        {transcription && (!syncEnabled || canControlTranscription || transcriptionShared) && (
           <div className="border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/20">
             <button
               type="button"
@@ -444,6 +508,27 @@ export function AudioSyncView({ node, selected }: NodeViewProps) {
               )}
             </AnimatePresence>
           </div>
+        )}
+
+        {/* Professor: liberar a transcrição para o aluno (padrão: oculta) */}
+        {transcription && canControlTranscription && (
+          <label className="flex items-center justify-between gap-3 px-4 py-2.5 border-t border-zinc-200 dark:border-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
+            <span>
+              {t("shareTranscription") || "Mostrar transcrição para o aluno"}
+              <span className="block text-[11px] font-normal text-zinc-500 dark:text-zinc-400">
+                {transcriptionShared
+                  ? (t("transcriptionVisible") || "O aluno está vendo a transcrição.")
+                  : (t("transcriptionHidden") || "Oculta para o aluno.")}
+              </span>
+            </span>
+            <input
+              type="checkbox"
+              role="switch"
+              checked={transcriptionShared}
+              onChange={(e) => toggleTranscriptionShared(e.target.checked)}
+              className="h-4 w-4 accent-amber-500 cursor-pointer"
+            />
+          </label>
         )}
 
         {/* Elemento de Áudio Oculto */}
