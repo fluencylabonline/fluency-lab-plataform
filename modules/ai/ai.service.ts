@@ -1194,7 +1194,7 @@ ${safeContent}
 
     if (userId) {
       const limit = await checkRateLimit("gemini_notebook_quiz_gen", userId, 10);
-      if (!limit.success) throw new Error("Rate limit exceeded for AI Quiz generation");
+      if (!limit.success) throw new Error("Limite diário de gerações de quiz por IA atingido. Tente novamente amanhã.");
     }
 
     const model = genAI.getGenerativeModel({

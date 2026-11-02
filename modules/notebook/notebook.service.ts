@@ -4,6 +4,10 @@ import type { Notebook, NotebookListItem, NotebookSearchHit } from "./notebook.s
 import { getContentSnippet } from "@/utils/html-text";
 import { adminStorage } from "@/lib/firebase-admin";
 import { aiService } from "@/modules/ai/ai.service";
+import { MAX_QUIZ_GENERATIONS_PER_STUDENT } from "./notebook.constants";
+
+// Teto do texto enviado à IA (custo/tokens); o caderno inteiro raramente passa disso.
+const MAX_QUIZ_CONTENT_CHARS = 30000;
 
 export const notebookService = {
   /**
@@ -322,29 +326,44 @@ export const notebookService = {
     content: string,
     nativeLanguage: string,
     targetLanguage: string,
-    level: string
+    level: string,
+    isAdmin = false
   ) {
     // 1. Verify access to the notebook
     const notebook = await notebookRepository.findById(notebookId);
     if (!notebook) throw new Error("Notebook not found");
-
-    // 2. Check the generation limit (Max 3 quizzes per student by this teacher)
-    const currentCount = await notebookRepository.getQuizLimitCount(teacherId, studentId);
-    if (currentCount >= 3) {
-      throw new Error("Você atingiu o limite de 3 quizes gerados para este aluno.");
+    if (notebook.studentId !== studentId || (!isAdmin && notebook.teacherId !== teacherId)) {
+      throw new Error("Você não tem acesso a este caderno.");
     }
 
-    // 3. Call AI Service to generate the quiz questions
-    const quizData = await aiService.generateNotebookQuizFromContent(
-      content,
-      nativeLanguage,
-      targetLanguage,
-      level,
-      teacherId
+    // 2. Reserve one generation atomically. The pair comes from the notebook itself (not from the
+    // client), so the limit cannot be dodged by sending another studentId, and concurrent clicks
+    // cannot both pass the check.
+    const limitStudentId = notebook.studentId;
+    const limitTeacherId = notebook.teacherId;
+    const newCount = await notebookRepository.reserveQuizSlot(
+      limitTeacherId,
+      limitStudentId,
+      MAX_QUIZ_GENERATIONS_PER_STUDENT
     );
+    if (newCount === null) {
+      throw new Error(`Você atingiu o limite de ${MAX_QUIZ_GENERATIONS_PER_STUDENT} quizes gerados para este aluno.`);
+    }
 
-    // 4. Increment the generation limit counter
-    const newCount = await notebookRepository.incrementQuizLimitCount(teacherId, studentId);
+    // 3. Call AI Service. If it fails (provider error, rate limit), give the slot back.
+    let quizData;
+    try {
+      quizData = await aiService.generateNotebookQuizFromContent(
+        content.slice(0, MAX_QUIZ_CONTENT_CHARS),
+        nativeLanguage,
+        targetLanguage,
+        level,
+        teacherId
+      );
+    } catch (error) {
+      await notebookRepository.releaseQuizSlot(limitTeacherId, limitStudentId).catch(console.error);
+      throw error;
+    }
 
     return {
       quizData,

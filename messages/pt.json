@@ -3553,7 +3553,10 @@
     "speedTooltip": "Velocidade de reprodução sincronizada",
     "normal": "Normal",
     "viewTranscription": "Visualizar Transcrição",
-    "hideTranscription": "Ocultar Transcrição"
+    "hideTranscription": "Ocultar Transcrição",
+    "shareTranscription": "Mostrar transcrição para o aluno",
+    "transcriptionVisible": "O aluno está vendo a transcrição.",
+    "transcriptionHidden": "Oculta para o aluno."
   },
   "Quiz": {
     "generator": {
@@ -3565,7 +3568,7 @@
       "select": "Selecione",
       "targetLanguage": "Idioma Aprendido",
       "targetLevel": "Nível Alvo (CEFR)",
-      "limitWarning": "Você utilizou {count} de 3 gerações de quiz IA gratuitas para este aluno.",
+      "limitWarning": "Você utilizou {count} de {max} gerações de quiz IA gratuitas para este aluno.",
       "submitBtn": "Gerar Quiz Inteligente (10 Perguntas)",
       "levels": {
         "A1": "A1 (Iniciante)",
