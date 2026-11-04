@@ -174,7 +174,8 @@
       "success": "Transaction registered successfully!",
       "title": "Register Transaction",
       "trigger": "New Transaction",
-      "type": "Type"
+      "type": "Type",
+      "createCategory": "Create \"{name}\""
     },
     "status": {
       "all": "All status",
@@ -256,7 +257,8 @@
       "invalidToken": "Invalid or expired code.",
       "sessionExpired": "Session expired. Please try signing in again.",
       "accountSuspended": "Your account has been suspended. Please contact your administrator.",
-      "tooManyAttempts": "Too many attempts. Please wait a few minutes and try again."
+      "tooManyAttempts": "Too many attempts. Please wait a few minutes and try again.",
+      "invalidLinkTitle": "Invalid or expired link"
     },
     "forgotPassword": "Forgot your password?",
     "forgotPasswordSubtitle": "Don't worry, we'll help you.",
@@ -624,7 +626,8 @@
     "addAttachment": "Add attachment",
     "attachmentTooLarge": "Attachments can be up to 50MB.",
     "attachmentUploaded": "Attachment uploaded. Save the lesson to publish it.",
-    "attachmentUploadError": "Could not upload the attachment. Use PDF, image, audio, Word, Excel, PowerPoint or ZIP."
+    "attachmentUploadError": "Could not upload the attachment. Use PDF, image, audio, Word, Excel, PowerPoint or ZIP.",
+    "noDescription": "No description."
   },
   "Dashboard": {
     "academic": {
@@ -939,7 +942,8 @@
         "codeExpiredTitle": "This PIX code has expired",
         "codeExpiredDesc": "It can no longer be paid. Generate a new code to continue.",
         "pixExpiredTitle": "This PIX code has expired",
-        "pixExpiredDesc": "It can no longer be used to pay. Generate a new code to continue."
+        "pixExpiredDesc": "It can no longer be used to pay. Generate a new code to continue.",
+        "stripe_instructions_desc": "To pay, click the button below to go to the secure checkout."
       },
       "ProgressHero": {
         "classes": "Classes",
@@ -1973,7 +1977,19 @@
     "structure": "Structure",
     "course_item": "Course Item",
     "global_item": "Global Item",
-    "details": "Details"
+    "details": "Details",
+    "all_items": "All items",
+    "content_type": "Content type",
+    "difficulty": "Difficulty",
+    "empty_items_desc": "Try refining your search or filters to explore the curriculum.",
+    "empty_items_title": "No items found",
+    "pattern": "Pattern",
+    "recess_activity": "Recess activity",
+    "recess_activity_desc": "Mark this lesson as fallback content for teachers' recess.",
+    "showing_items": "{count, plural, one {Showing # item} other {Showing # items}}",
+    "structure_type": "Structure type",
+    "sync_error": "Sync error",
+    "sync_error_desc": "Unable to synchronize with the learning items repository."
   },
   "Procedures": {
     "title": "Procedures",
@@ -3358,7 +3374,8 @@
     "view": "View",
     "viewTranscript": "View transcript",
     "waitingPayment": "Waiting for Payment",
-    "watchRecording": "Watch recording"
+    "watchRecording": "Watch recording",
+    "copyError": "Error copying the code."
   },
   "UserRoles": {
     "admin": "Administrator",
@@ -3406,7 +3423,9 @@
     "typeWhatYouHear": "Type the word...",
     "usageExample": "Usage Example",
     "wellDone": "Well done!",
-    "xpEarned": "+10 XP earned! Keep it up!"
+    "xpEarned": "+10 XP earned! Keep it up!",
+    "typeFullSentence": "Write the full sentence",
+    "typeSentence": "Type the sentence..."
   },
   "Metadata": {
     "root": {
@@ -3490,7 +3509,8 @@
       "verify": "Verify Signature",
       "view": "View Model",
       "activate": "Activate Model",
-      "delete": "Delete Model"
+      "delete": "Delete Model",
+      "renew": "Renew contract"
     },
     "verify": {
       "title": "Signature Validation",
@@ -3543,7 +3563,9 @@
       "templateActivated": "Contract template activated successfully!",
       "activateTemplateError": "Failed to activate contract template.",
       "templateDeleted": "Contract template deleted successfully!",
-      "deleteTemplateError": "Failed to delete contract template."
+      "deleteTemplateError": "Failed to delete contract template.",
+      "contractRenewed": "Contract renewed successfully!",
+      "renewError": "Error renewing contract."
     }
   },
   "AudioSync": {

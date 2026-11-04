@@ -1,5 +1,6 @@
 import { getRequestConfig } from "next-intl/server";
 import { routing } from "./routing";
+import { getMessageFallback, onIntlError } from "@/lib/i18n-fallback";
 
 export default getRequestConfig(async ({ requestLocale }) => {
   // requestLocale is resolved by next-intl middleware/proxy
@@ -15,5 +16,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     locale,
     messages: (await import(`../messages/${locale}.json`)).default,
     timeZone: "America/Sao_Paulo",
+    onError: onIntlError,
+    getMessageFallback,
   };
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { NextIntlClientProvider, AbstractIntlMessages } from "next-intl";
+import { getMessageFallback, onIntlError } from "@/lib/i18n-fallback";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
@@ -44,7 +45,13 @@ export function Providers({ children, locale, messages, themeMode, nonce }: Prov
         speed={200}
         shadow="0 0 10px hsl(var(--primary)),0 0 5px hsl(var(--primary))"
       />
-      <NextIntlClientProvider messages={messages} locale={locale} timeZone="America/Sao_Paulo">
+      <NextIntlClientProvider
+        messages={messages}
+        locale={locale}
+        timeZone="America/Sao_Paulo"
+        onError={onIntlError}
+        getMessageFallback={getMessageFallback}
+      >
         <SWRConfig
           value={{
             provider: () => new Map(),

@@ -174,7 +174,8 @@
       "success": "Transação cadastrada com sucesso!",
       "title": "Cadastrar Transação",
       "trigger": "Nova Transação",
-      "type": "Tipo"
+      "type": "Tipo",
+      "createCategory": "Criar \"{name}\""
     },
     "status": {
       "all": "Todos os status",
@@ -256,7 +257,8 @@
       "invalidToken": "Código inválido ou expirado.",
       "sessionExpired": "Sessão expirada. Tente entrar novamente.",
       "accountSuspended": "Sua conta foi suspensa. Entre em contato com o administrador.",
-      "tooManyAttempts": "Muitas tentativas. Aguarde alguns minutos e tente novamente."
+      "tooManyAttempts": "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
+      "invalidLinkTitle": "Link inválido ou expirado"
     },
     "forgotPassword": "Esqueceu a senha?",
     "forgotPasswordSubtitle": "Não se preocupe, nós ajudamos você.",
@@ -624,7 +626,8 @@
     "addAttachment": "Adicionar anexo",
     "attachmentTooLarge": "O anexo deve ter no máximo 50MB.",
     "attachmentUploaded": "Anexo enviado. Salve a aula para publicar.",
-    "attachmentUploadError": "Erro ao enviar o anexo. Use PDF, imagem, áudio, Word, Excel, PowerPoint ou ZIP."
+    "attachmentUploadError": "Erro ao enviar o anexo. Use PDF, imagem, áudio, Word, Excel, PowerPoint ou ZIP.",
+    "noDescription": "Sem descrição."
   },
   "Dashboard": {
     "academic": {
@@ -939,7 +942,8 @@
         "codeExpiredTitle": "Este código PIX expirou",
         "codeExpiredDesc": "Ele não pode mais ser pago. Gere um código novo para continuar.",
         "pixExpiredTitle": "Este código PIX expirou",
-        "pixExpiredDesc": "Ele não pode mais ser usado para pagar. Gere um novo código para continuar."
+        "pixExpiredDesc": "Ele não pode mais ser usado para pagar. Gere um novo código para continuar.",
+        "stripe_instructions_desc": "Para efetuar o pagamento, clique no botão abaixo para ir ao checkout seguro."
       },
       "ProgressHero": {
         "classes": "Aulas",
@@ -1973,7 +1977,19 @@
     "structure": "Estrutura",
     "course_item": "Item do Curso",
     "global_item": "Item Global",
-    "details": "Detalhes"
+    "details": "Detalhes",
+    "all_items": "Todos os itens",
+    "content_type": "Tipo de conteúdo",
+    "difficulty": "Dificuldade",
+    "empty_items_desc": "Ajuste a busca ou os filtros para explorar o currículo.",
+    "empty_items_title": "Nenhum item encontrado",
+    "pattern": "Padrão",
+    "recess_activity": "Atividade de recesso",
+    "recess_activity_desc": "Marcar esta lição como conteúdo de reserva para o recesso dos professores.",
+    "showing_items": "{count, plural, one {Exibindo # item} other {Exibindo # itens}}",
+    "structure_type": "Tipo de estrutura",
+    "sync_error": "Erro de sincronização",
+    "sync_error_desc": "Não foi possível sincronizar com o repositório de itens."
   },
   "Procedures": {
     "title": "Procedimentos",
@@ -2894,7 +2910,8 @@
     "cancelConfirm": "Sim, desejo cancelar",
     "keepAccount": "Manter minha conta",
     "app": "Aplicativo",
-    "appDescription": "Gerencie as configurações do aplicativo e atualizações."
+    "appDescription": "Gerencie as configurações do aplicativo e atualizações.",
+    "cancellationRequestSuccess": "Solicitação enviada!"
   },
   "PendingCancellation": {
     "title": "Cancelamento Pendente",
@@ -3357,7 +3374,8 @@
     "view": "Visualizar",
     "viewTranscript": "Ver transcrição",
     "waitingPayment": "Aguardando Pagamento",
-    "watchRecording": "Ver gravação"
+    "watchRecording": "Ver gravação",
+    "copyError": "Erro ao copiar o código."
   },
   "UserRoles": {
     "admin": "Administrador",
@@ -3405,7 +3423,9 @@
     "typeWhatYouHear": "Digite a palavra...",
     "usageExample": "Exemplo de Uso",
     "wellDone": "Muito bem!",
-    "xpEarned": "+10 XP ganhos! Continue assim!"
+    "xpEarned": "+10 XP ganhos! Continue assim!",
+    "typeFullSentence": "Escreva a frase completa",
+    "typeSentence": "Digite a frase..."
   },
   "Metadata": {
     "root": {
@@ -3489,7 +3509,8 @@
       "verify": "Verificar Assinatura",
       "view": "Visualizar Modelo",
       "activate": "Ativar Modelo",
-      "delete": "Excluir Modelo"
+      "delete": "Excluir Modelo",
+      "renew": "Renovar contrato"
     },
     "verify": {
       "title": "Validação de Assinatura",
@@ -3542,7 +3563,9 @@
       "templateActivated": "Template de contrato ativado com sucesso!",
       "activateTemplateError": "Falha ao ativar o template de contrato.",
       "templateDeleted": "Template de contrato excluído com sucesso!",
-      "deleteTemplateError": "Falha ao excluir o template de contrato."
+      "deleteTemplateError": "Falha ao excluir o template de contrato.",
+      "contractRenewed": "Contrato renovado com sucesso!",
+      "renewError": "Erro ao renovar contrato."
     }
   },
   "AudioSync": {
