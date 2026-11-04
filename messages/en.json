@@ -2773,7 +2773,12 @@
     "advanceTooShort": "Notice must be given at least {days} days in advance",
     "durationTooLong": "Duration cannot exceed {days} days",
     "noActivitiesTitle": "No recess activities available",
-    "noActivitiesDesc": "The recess activity library is empty. Go to Recess > Activities and create a lesson (it doesn't have to be yours — any activity in the library works for other teachers too) before continuing."
+    "noActivitiesDesc": "The recess activity library is empty. Go to Recess > Activities and create a lesson (it doesn't have to be yours — any activity in the library works for other teachers too) before continuing.",
+    "validation": {
+      "titleRequired": "Title is required",
+      "languageRequired": "Select a language",
+      "nativeLanguageRequired": "Select the native language"
+    }
   },
   "ReplayConfirmVault": {
     "cancel": "Cancel",
@@ -4715,7 +4720,9 @@
     "cancelDescription": "<strong>{name}</strong>'s class will be marked as cancelled by you. It won't be paid and the student will get 1 make-up credit and a notification.",
     "back": "Back",
     "processing": "Processing...",
-    "confirmCancel": "Yes, cancel"
+    "confirmCancel": "Yes, cancel",
+    "banner": "{count, plural, one {You have # class without a status and it isn't included in your payment.} other {You have # classes without a status and they aren't included in your payment.}} At {max} the system locks until you update them.",
+    "updateNow": "Update now"
   },
   "Languages": {
     "portuguese": "Portuguese",
@@ -4886,5 +4893,40 @@
     "pasteValidUrl": "Paste a valid YouTube URL.",
     "insertWithUrl": "Insert with URL",
     "insertEmpty": "Insert empty"
+  },
+  "TeacherRecessLibrary": {
+    "title": "Recess library",
+    "subtitle": "Fallback activities to keep students engaged while you're away",
+    "communicateTitle": "Report your recess",
+    "communicateDescription": "Planning a break? Report the dates at least 30 days in advance. A recess can't last more than 15 consecutive days.",
+    "createLesson": "Create a lesson",
+    "attention": "<strong>Heads up:</strong> for each affected student you must pick a fallback activity from this library. Global activities are available, but you can create your own. Without an activity selected for each affected class, the recess can't be confirmed.",
+    "availableTitle": "Available activities",
+    "availableDescription": "Lessons marked as fallback content for recess periods.",
+    "activitiesCount": "{count, plural, one {# activity} other {# activities}}",
+    "emptyTitle": "No activities found",
+    "emptyDescription": "You don't have any recess activities linked yet. Ask your coordinator to release global activities or create new lessons marked as \"Recess activity\"."
+  },
+  "TeacherLessonVault": {
+    "loading": "Loading lesson details...",
+    "audio": "Class audio",
+    "content": "Lesson content",
+    "noContent": "No text content available.",
+    "learningItems": "Learning items",
+    "vocabulary": "Vocabulary",
+    "noVocabulary": "No vocabulary listed."
+  },
+  "TeacherSchedule": {
+    "makeup": "Make-up",
+    "available": "Available",
+    "title": "My schedule",
+    "subtitle": "Manage your classes and recess periods",
+    "classFallback": "Class",
+    "selectValidPeriod": "Select a valid period.",
+    "required": "Required field"
+  },
+  "TeacherStudentDetails": {
+    "pedagogicalProfile": "Learning profile",
+    "planDescription": "Progress and scheduled lessons."
   }
 }

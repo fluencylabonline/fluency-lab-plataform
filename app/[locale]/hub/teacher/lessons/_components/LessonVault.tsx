@@ -11,6 +11,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Badge } from "@/components/ui/badge";
 import { AudioLines, MessageSquare, ListChecks } from "lucide-react";
 import { VideoPlayer } from "@/components/ui/video-player";
+import { useTranslations } from "next-intl";
 
 interface LessonVaultProps {
   lessonId: string | null;
@@ -18,6 +19,7 @@ interface LessonVaultProps {
 }
 
 export function LessonVault({ lessonId, onClose }: LessonVaultProps) {
+  const t = useTranslations("TeacherLessonVault");
   const [lesson, setLesson] = useState<LessonWithDetails | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -43,7 +45,7 @@ export function LessonVault({ lessonId, onClose }: LessonVaultProps) {
         {loading ? (
           <div className="py-20 flex flex-col items-center justify-center gap-4">
             <LoadingSpinner className="w-8 h-8" />
-            <p className="text-sm text-muted-foreground animate-pulse">Carregando detalhes da lição...</p>
+            <p className="text-sm text-muted-foreground animate-pulse">{t("loading")}</p>
           </div>
         ) : lesson ? (
           <>
@@ -61,7 +63,7 @@ export function LessonVault({ lessonId, onClose }: LessonVaultProps) {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground">
                     <AudioLines className="w-4 h-4" />
-                    Áudio da Aula
+                    {t("audio")}
                   </div>
                   <VideoPlayer url={lesson.media.url} provider="storage" className="aspect-[16/2] bg-muted/50" />
                 </div>
@@ -71,14 +73,14 @@ export function LessonVault({ lessonId, onClose }: LessonVaultProps) {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground">
                   <MessageSquare className="w-4 h-4" />
-                  Conteúdo da Lição
+                  {t("content")}
                 </div>
                 <div className="bg-muted/30 p-6 rounded-2xl border border-border/50">
                   <div className="prose prose-sm dark:prose-invert max-w-none">
                     {lesson.contentText ? (
                       <p className="whitespace-pre-wrap leading-relaxed">{lesson.contentText}</p>
                     ) : (
-                      <p className="italic text-muted-foreground">Nenhum conteúdo de texto disponível.</p>
+                      <p className="italic text-muted-foreground">{t("noContent")}</p>
                     )}
                   </div>
                 </div>
@@ -88,13 +90,13 @@ export function LessonVault({ lessonId, onClose }: LessonVaultProps) {
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground">
                   <ListChecks className="w-4 h-4" />
-                  Itens de Aprendizado
+                  {t("learningItems")}
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Vocabulary */}
                   <div className="space-y-3">
-                    <h4 className="text-xs font-bold uppercase text-primary/70 px-1">Vocabulário</h4>
+                    <h4 className="text-xs font-bold uppercase text-primary/70 px-1">{t("vocabulary")}</h4>
                     <div className="space-y-2">
                       {lesson.items?.filter(i => i.item.type === "VOCABULARY").map((li, idx) => (
                         <div key={idx} className="flex items-center justify-between p-3 bg-background border border-border/50 rounded-md hover:border-primary/30 transition-colors">
@@ -103,7 +105,7 @@ export function LessonVault({ lessonId, onClose }: LessonVaultProps) {
                         </div>
                       ))}
                       {lesson.items?.filter(i => i.item.type === "VOCABULARY").length === 0 && (
-                        <p className="text-xs text-muted-foreground italic px-1">Nenhum vocabulário listado.</p>
+                        <p className="text-xs text-muted-foreground italic px-1">{t("noVocabulary")}</p>
                       )}
                     </div>
                   </div>

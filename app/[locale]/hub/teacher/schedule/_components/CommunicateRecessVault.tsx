@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import useSWR from "swr";
 import { useTranslations } from "next-intl";
+import { useValidationMessage } from "@/hooks/use-validation-message";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -69,7 +70,7 @@ interface ImpactData {
 
 const fallbackSchema = z.object({
   config: z.record(z.string(), z.object({
-    lessonId: z.string().min(1, "Campo obrigatório"),
+    lessonId: z.string().min(1, "TeacherSchedule.required"),
     message: z.string().optional()
   }))
 });
@@ -79,6 +80,8 @@ type FallbackFormValues = z.infer<typeof fallbackSchema>;
 export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateRecessVaultProps) {
   const t = useTranslations("Recess");
   const tCommon = useTranslations("Common");
+  const tSchedule = useTranslations("TeacherSchedule");
+  const vm = useValidationMessage();
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<Step>("dates");
   const [date, setDate] = useState<DateRange | undefined>({
@@ -123,7 +126,7 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
 
   const handleNextToImpact = () => {
     if (!date?.from || !date?.to) {
-      notify.error("Selecione um período válido.");
+      notify.error(tSchedule("selectValidPeriod"));
       return;
     }
 
@@ -416,7 +419,7 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
                                   </SelectContent>
                                 </Select>
                                 {fieldState.error && (
-                                  <p className="text-xs text-destructive font-medium">{fieldState.error.message}</p>
+                                  <p className="text-xs text-destructive font-medium">{vm(fieldState.error.message)}</p>
                                 )}
                               </div>
                             )}

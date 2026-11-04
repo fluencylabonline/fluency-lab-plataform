@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { CalendarEvent } from "@/components/ui/calendar-view";
 import { userService } from "@/modules/user/user.service";
 import { pageTitle } from "@/lib/page-metadata";
+import { getTranslations } from "next-intl/server";
 
 export const generateMetadata = pageTitle("teacherSchedule");
 
@@ -21,10 +22,11 @@ export default async function TeacherSchedulePage() {
   const end = endOfMonth(addMonths(new Date(), 3));
   
   const classes = await schedulingService.getTeacherClasses(user.id, start, end);
+  const tSchedule = await getTranslations("TeacherSchedule");
   
   const events: CalendarEvent[] = classes.map(cls => ({
     id: cls.id,
-    title: cls.student?.name || (cls.status === "available" ? "Disponível" : "Aula"),
+    title: cls.student?.name || (cls.status === "available" ? tSchedule("available") : tSchedule("classFallback")),
     start: cls.startAt,
     end: cls.endAt,
     studentName: cls.student?.name || undefined,

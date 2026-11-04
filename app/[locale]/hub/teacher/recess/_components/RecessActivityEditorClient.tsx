@@ -28,11 +28,12 @@ import { z } from "zod";
 import { Field } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslations } from "next-intl";
+import { useValidationMessage } from "@/hooks/use-validation-message";
 
 const activityFormSchema = z.object({
-  title: z.string().min(1, "O título é obrigatório"),
-  languageId: z.string().uuid("Selecione um idioma"),
-  nativeLanguageId: z.string().uuid("Selecione o idioma nativo"),
+  title: z.string().min(1, "Recess.validation.titleRequired"),
+  languageId: z.string().uuid("Recess.validation.languageRequired"),
+  nativeLanguageId: z.string().uuid("Recess.validation.nativeLanguageRequired"),
   difficulty: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]),
   contentJson: z.any().optional(),
 });
@@ -54,6 +55,7 @@ export function RecessActivityEditorClient({
 }: RecessActivityEditorClientProps) {
   const t = useTranslations("Recess");
   const tCommon = useTranslations("Common");
+  const vm = useValidationMessage();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("content");
 
@@ -121,13 +123,13 @@ export function RecessActivityEditorClient({
           <div className="lg:col-span-4 space-y-6">
             <div className="card p-6 space-y-6">
               <form onSubmit={handleSubmit(handleSave)} className="space-y-4">
-                <Field label={t('title') || "Título"} required error={errors.title?.message} data-tour="teacher-recess-editor.meta">
+                <Field label={t('title') || "Título"} required error={vm(errors.title?.message)} data-tour="teacher-recess-editor.meta">
                   <Input {...form.register("title")} placeholder={t('titlePlaceholder') || "Ex: Prática de Conversação"} />
                 </Field>
 
                 <div className="grid grid-cols-1 gap-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <Field label={tCommon('language') || "Idioma Alvo"} required error={errors.languageId?.message}>
+                    <Field label={tCommon('language') || "Idioma Alvo"} required error={vm(errors.languageId?.message)}>
                       <Select 
                         onValueChange={(val) => form.setValue("languageId", val, { shouldDirty: true })}
                         defaultValue={form.getValues("languageId")}
@@ -143,7 +145,7 @@ export function RecessActivityEditorClient({
                       </Select>
                     </Field>
 
-                    <Field label={tCommon('level') || "Nível"} required error={errors.difficulty?.message}>
+                    <Field label={tCommon('level') || "Nível"} required error={vm(errors.difficulty?.message)}>
                       <Select 
                         onValueChange={(val: ActivityFormValues["difficulty"]) => form.setValue("difficulty", val, { shouldDirty: true })}
                         defaultValue={form.getValues("difficulty")}
@@ -160,7 +162,7 @@ export function RecessActivityEditorClient({
                     </Field>
                   </div>
 
-                  <Field label={tCommon('native_language') || "Idioma Nativo"} required error={errors.nativeLanguageId?.message}>
+                  <Field label={tCommon('native_language') || "Idioma Nativo"} required error={vm(errors.nativeLanguageId?.message)}>
                     <Select 
                       onValueChange={(val) => form.setValue("nativeLanguageId", val, { shouldDirty: true })}
                       defaultValue={form.getValues("nativeLanguageId")}

@@ -2773,7 +2773,12 @@
     "advanceTooShort": "Aviso prévio precisa ser de pelo menos {days} dias corridos",
     "durationTooLong": "Duração não pode passar de {days} dias corridos",
     "noActivitiesTitle": "Nenhuma atividade de recesso disponível",
-    "noActivitiesDesc": "A biblioteca de atividades de recesso está vazia. Vá em Recesso > Atividades e crie uma lição (não precisa ser sua — qualquer atividade da biblioteca serve para outros professores também) antes de continuar."
+    "noActivitiesDesc": "A biblioteca de atividades de recesso está vazia. Vá em Recesso > Atividades e crie uma lição (não precisa ser sua — qualquer atividade da biblioteca serve para outros professores também) antes de continuar.",
+    "validation": {
+      "titleRequired": "O título é obrigatório",
+      "languageRequired": "Selecione um idioma",
+      "nativeLanguageRequired": "Selecione o idioma nativo"
+    }
   },
   "ReplayConfirmVault": {
     "cancel": "Cancelar",
@@ -4715,7 +4720,9 @@
     "cancelDescription": "A aula de <strong>{name}</strong> será marcada como cancelada por você. Ela não será paga e o aluno receberá 1 crédito de reposição e uma notificação.",
     "back": "Voltar",
     "processing": "Processando...",
-    "confirmCancel": "Sim, cancelar"
+    "confirmCancel": "Sim, cancelar",
+    "banner": "{count, plural, one {Você tem # aula sem status informado e ela não entra no seu pagamento.} other {Você tem # aulas sem status informado e elas não entram no seu pagamento.}} Com {max} o sistema trava até você atualizar.",
+    "updateNow": "Atualizar agora"
   },
   "Languages": {
     "portuguese": "Português",
@@ -4886,5 +4893,40 @@
     "pasteValidUrl": "Cole uma URL válida do YouTube.",
     "insertWithUrl": "Inserir com URL",
     "insertEmpty": "Inserir vazio"
+  },
+  "TeacherRecessLibrary": {
+    "title": "Biblioteca de recesso",
+    "subtitle": "Atividades de fallback para garantir o engajamento dos alunos durante suas ausências",
+    "communicateTitle": "Comunique seu recesso",
+    "communicateDescription": "Planejando um descanso? Informe as datas com pelo menos 30 dias de antecedência. O recesso não pode durar mais de 15 dias corridos.",
+    "createLesson": "Criar uma lição",
+    "attention": "<strong>Atenção:</strong> para cada aluno afetado, você deve selecionar uma atividade de fallback desta biblioteca. Atividades globais estão disponíveis, mas você pode criar as suas próprias. Sem uma atividade selecionada para cada aula afetada, o recesso não pode ser confirmado.",
+    "availableTitle": "Atividades disponíveis",
+    "availableDescription": "Lições marcadas como conteúdo de fallback para períodos de recesso.",
+    "activitiesCount": "{count, plural, one {# atividade} other {# atividades}}",
+    "emptyTitle": "Nenhuma atividade encontrada",
+    "emptyDescription": "Você ainda não tem atividades de recesso vinculadas. Peça ao seu coordenador para liberar atividades globais ou crie novas lições marcadas como \"Atividade de recesso\"."
+  },
+  "TeacherLessonVault": {
+    "loading": "Carregando detalhes da lição...",
+    "audio": "Áudio da aula",
+    "content": "Conteúdo da lição",
+    "noContent": "Nenhum conteúdo de texto disponível.",
+    "learningItems": "Itens de aprendizado",
+    "vocabulary": "Vocabulário",
+    "noVocabulary": "Nenhum vocabulário listado."
+  },
+  "TeacherSchedule": {
+    "makeup": "Reposição",
+    "available": "Disponível",
+    "title": "Minha agenda",
+    "subtitle": "Gerencie suas aulas e períodos de recesso",
+    "classFallback": "Aula",
+    "selectValidPeriod": "Selecione um período válido.",
+    "required": "Campo obrigatório"
+  },
+  "TeacherStudentDetails": {
+    "pedagogicalProfile": "Perfil pedagógico",
+    "planDescription": "Progresso e lições agendadas."
   }
 }

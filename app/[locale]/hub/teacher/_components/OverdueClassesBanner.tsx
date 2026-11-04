@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { AlertTriangle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface OverdueClassesBannerProps {
   count: number;
@@ -10,6 +11,7 @@ interface OverdueClassesBannerProps {
 }
 
 export function OverdueClassesBanner({ count, blockThreshold }: OverdueClassesBannerProps) {
+  const t = useTranslations("OverdueClasses");
   return (
     <div className="bg-red-600 dark:bg-red-950 text-white px-4 py-3 sm:py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left animate-in slide-in-from-top duration-300 relative z-40 border-b border-red-700 dark:border-red-900/50 shadow-sm w-full">
       <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
@@ -17,8 +19,7 @@ export function OverdueClassesBanner({ count, blockThreshold }: OverdueClassesBa
           <AlertTriangle className="w-5 h-5 text-red-100" />
         </div>
         <p className="text-sm font-medium leading-normal tracking-wide">
-          Você tem {count} {count === 1 ? "aula" : "aulas"} sem status informado e elas não entram no seu pagamento.
-          Com {blockThreshold} o sistema trava até você atualizar.
+          {t("banner", { count, max: blockThreshold })}
         </p>
       </div>
       <Link href="/overdue-classes">
@@ -26,7 +27,7 @@ export function OverdueClassesBanner({ count, blockThreshold }: OverdueClassesBa
           size="sm"
           className="bg-white hover:bg-zinc-100 text-red-700 dark:bg-zinc-100 dark:text-red-950 font-bold shadow-md rounded-md transition-all hover:scale-[1.02] active:scale-[0.98] gap-1 shrink-0 w-full sm:w-auto"
         >
-          Atualizar agora
+          {t("updateNow")}
           <ArrowRight className="w-4 h-4" />
         </Button>
       </Link>

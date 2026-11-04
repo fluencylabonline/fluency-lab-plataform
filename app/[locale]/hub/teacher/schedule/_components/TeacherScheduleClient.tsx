@@ -29,6 +29,7 @@ export function TeacherScheduleClient({
   initialEvents,
   user,
 }: TeacherScheduleClientProps) {
+  const tSchedule = useTranslations("TeacherSchedule");
   const t = useTranslations("UserManagement");
   const tRecess = useTranslations("Recess");
   const router = useRouter();
@@ -87,7 +88,7 @@ export function TeacherScheduleClient({
 
       newOptimisticEvents.push({
         id: `optimistic-${Date.now()}-${i}`,
-        title: data.type === "REPOSICAO" ? "Reposição" : "Disponível",
+        title: data.type === "REPOSICAO" ? tSchedule("makeup") : tSchedule("available"),
         start,
         end,
         status: "available",
@@ -142,7 +143,7 @@ export function TeacherScheduleClient({
 
         newOptimisticEvents.push({
           id: `optimistic-${Date.now()}-${ruleIndex}-${i}`,
-          title: data.type === "REPOSICAO" ? "Reposição" : "Disponível",
+          title: data.type === "REPOSICAO" ? tSchedule("makeup") : tSchedule("available"),
           start,
           end,
           status: "available",
@@ -240,8 +241,8 @@ export function TeacherScheduleClient({
   return (
     <div className={isStandalone ? "" : "flex flex-col gap-2"}>
       <Header 
-        title="Minha Agenda" 
-        subtitle="Gerencie suas aulas e períodos de recesso"
+        title={tSchedule("title")}
+        subtitle={tSchedule("subtitle")}
         className="contents"
         user={user}
         actions={showInHeader ? headerActionsList : undefined}

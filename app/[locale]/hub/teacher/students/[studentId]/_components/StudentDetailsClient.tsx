@@ -26,6 +26,7 @@ import type { NotebookListItem } from "@/modules/notebook/notebook.schema";
 import { StudentDetailsWizard } from "./StudentDetailsWizard";
 import { useWizard } from "@/hooks/ui/use-wizard";
 import { useRegisterPageHelp } from "@/modules/page-help/_components/PageHelpProvider";
+import { useTranslations } from "next-intl";
 
 interface StudentDetailsClientProps {
   studentId: string;
@@ -44,6 +45,7 @@ export function StudentDetailsClient({
   initialRoadmap,
   profileId,
 }: StudentDetailsClientProps) {
+  const t = useTranslations("TeacherStudentDetails");
   const router = useRouter();
   const [isNotebooksOpen, setIsNotebooksOpen] = useState(false);
   const [isPlanOpen, setIsPlanOpen] = useState(false);
@@ -63,7 +65,7 @@ export function StudentDetailsClient({
     ...(profileId ? [{
       icon: <User className="h-5 w-5" />,
       onClick: () => router.push(`/hub/teacher/students/${studentId}/profile`),
-      label: "Perfil Pedagógico",
+      label: t("pedagogicalProfile"),
     }] : []),
     {
       icon: <NotebookIcon className="h-5 w-5" />,
@@ -149,7 +151,7 @@ export function StudentDetailsClient({
               Plano de Estudos
             </VaultTitle>
             <VaultDescription>
-              Progresso e lições agendadas.
+              {t("planDescription")}
             </VaultDescription>
           </VaultHeader>
           <VaultBody className="p-0 h-full overflow-hidden">

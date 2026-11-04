@@ -8,6 +8,7 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { redirect } from "next/navigation";
 import { pageTitle } from "@/lib/page-metadata";
+import { getTranslations } from "next-intl/server";
 
 export const generateMetadata = pageTitle("recess");
 
@@ -19,12 +20,14 @@ export default async function RecessActivitiesPage() {
   }
 
   const activities = await curriculumService.getRecessActivities(user.id);
+  const t = await getTranslations("TeacherRecessLibrary");
+  const strong = (chunks: React.ReactNode) => <span className="font-bold">{chunks}</span>;
 
   return (
     <div className="flex flex-col min-h-screen pb-20 md:pb-0">
       <Header
-        title="Biblioteca de Recesso"
-        subtitle="Atividades de fallback para garantir o engajamento dos alunos durante suas ausências"
+        title={t("title")}
+        subtitle={t("subtitle")}
         className="contents"
         backHref="/hub/teacher/schedule"
       />
@@ -38,12 +41,10 @@ export default async function RecessActivitiesPage() {
             </div>
             <div className="space-y-1">
               <h3 className="font-bold text-xl tracking-tight">
-                Comunique seu Recesso
+                {t("communicateTitle")}
               </h3>
               <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-                Planejando um descanso? Informe as datas com pelo menos 30 dias
-                de antecedência. O recesso não pode durar mais de 15 dias
-                corridos.
+                {t("communicateDescription")}
               </p>
             </div>
           </div>
@@ -56,7 +57,7 @@ export default async function RecessActivitiesPage() {
                 "gap-2 h-11 px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all",
             })}
           >
-            Criar uma lição
+            {t("createLesson")}
           </Link>
         </div>
 
@@ -64,11 +65,7 @@ export default async function RecessActivitiesPage() {
         <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-950/20 rounded-md border border-amber-200 dark:border-amber-900/50">
           <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-500 shrink-0" />
           <p className="text-xs md:text-sm text-amber-800 dark:text-amber-400 font-medium leading-tight">
-            <span className="font-bold">Atenção:</span> Para cada aluno afetado,
-            você deve selecionar uma atividade de fallback desta biblioteca.
-            Atividades globais estão disponíveis, mas você pode criar as suas
-            próprias. Sem uma atividade selecionada para cada aula afetada, o
-            recesso não pode ser confirmado.
+            {t.rich("attention", { strong })}
           </p>
         </div>
 
@@ -76,24 +73,22 @@ export default async function RecessActivitiesPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold tracking-tight">
-                Atividades Disponíveis
+                {t("availableTitle")}
               </h2>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Lições marcadas como conteúdo de fallback para períodos de
-                recesso.
+                {t("availableDescription")}
               </p>
             </div>
             <div className="text-sm font-semibold bg-muted px-3 py-1.5 rounded-full border border-border/50">
-              {activities.length}{" "}
-              {activities.length === 1 ? "atividade" : "atividades"}
+              {t("activitiesCount", { count: activities.length })}
             </div>
           </div>
 
           {activities.length === 0 ? (
             <div className="py-12 bg-muted/20 rounded-3xl border-2 border-dashed border-border/50">
               <EmptyResults
-                title="Nenhuma atividade encontrada"
-                description="Você ainda não tem atividades de recesso vinculadas. Peça ao seu coordenador para liberar atividades globais ou crie novas lições marcadas como 'Atividade de Recesso'."
+                title={t("emptyTitle")}
+                description={t("emptyDescription")}
               />
             </div>
           ) : (
