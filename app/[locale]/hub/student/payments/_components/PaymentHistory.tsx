@@ -136,7 +136,7 @@ export function PaymentHistory({ initialData }: PaymentHistoryProps) {
       }
     } catch (error) {
       console.error("Error regenerating payment:", error);
-      notify.error("Erro ao processar solicitação.");
+      notify.error(tProfile("requestError"));
     } finally {
       setIsRegenerating(null);
     }

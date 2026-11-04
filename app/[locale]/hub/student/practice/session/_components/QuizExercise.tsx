@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { PracticeAudioPlayer } from "./PracticeAudioPlayer";
 import { Volume2, Eye } from "lucide-react";
 import type { PracticeQuizQuestion } from "@/modules/learning/learning.types";
+import { useTranslations } from "next-intl";
 
 interface QuizExerciseProps extends PracticeQuizQuestion {
   language?: string;
@@ -22,6 +23,7 @@ export function QuizExercise({
   language,
   onComplete 
 }: QuizExerciseProps) {
+  const t = useTranslations("Practice.session");
   const [selected, setSelected] = useState<number | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showOptions, setShowOptions] = useState(!audioSegment);
@@ -63,7 +65,7 @@ export function QuizExercise({
             {!showOptions && (
               <Button variant="ghost" size="sm" onClick={() => setShowOptions(true)} className="text-muted-foreground">
                 <Eye className="mr-2 h-4 w-4" />
-                Ver opções
+                {t("showOptions")}
               </Button>
             )}
           </div>
@@ -73,7 +75,7 @@ export function QuizExercise({
       {!showOptions ? (
         <div className="h-48 flex flex-col items-center justify-center bg-muted/30 rounded-2xl border-2 border-dashed border-border text-muted-foreground">
           <Volume2 className="h-10 w-10 mb-3 opacity-30" />
-          <p className="text-sm">Ouça o áudio para ver as opções...</p>
+          <p className="text-sm">{t("listenForOptions")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 mt-4 animate-in fade-in slide-in-from-bottom-4 duration-300">

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Volume2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface GapFillExerciseProps {
   sentenceWithGap: string;
@@ -21,6 +22,7 @@ export function GapFillExercise({
   language = "en-US",
   onComplete,
 }: GapFillExerciseProps) {
+  const t = useTranslations("Practice.session");
   const [answer, setAnswer] = useState("");
   const [isLocked, setIsLocked] = useState(false);
   const [prevSentence, setPrevSentence] = useState(sentenceWithGap);
@@ -61,7 +63,7 @@ export function GapFillExercise({
       {/* Instruction + TTS button */}
       <div className="flex items-center gap-3">
         <h2 className="text-xl font-bold text-foreground text-center">
-          Ouça e preencha a lacuna
+          {t("gapFillTitle")}
         </h2>
         <Button
           variant="ghost"

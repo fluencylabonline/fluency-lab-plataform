@@ -20,6 +20,7 @@ import { processSessionResultsAction } from "@/modules/learning/learning.actions
 import { useOfflineSyncStore } from "@/hooks/offline/use-offline-sync";
 
 import type { PracticeItem, PracticeResult, DailyPracticeSession } from "@/modules/learning/learning.types";
+import { useTranslations } from "next-intl";
 
 interface PracticeSessionProps {
   session: DailyPracticeSession;
@@ -43,6 +44,7 @@ const SLIDE_VARIANTS = {
 };
 
 export function PracticeSession({ session, planId, currentStreak, isReplay = false }: PracticeSessionProps) {
+  const t = useTranslations("Practice.session");
   const router = useRouter();
   const savePractice = useOfflineSyncStore((state) => state.savePractice);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -93,12 +95,12 @@ export function PracticeSession({ session, planId, currentStreak, isReplay = fal
         setXpGained(res.data.xpGained ?? 0);
       }
     } catch {
-      notify.error("Erro ao salvar sessão. Tente novamente.");
+      notify.error(t("saveError"));
     } finally {
       setIsProcessing(false);
       setIsCompleted(true);
     }
-  }, [planId, results, isReplay, currentStreak]);
+  }, [t, planId, results, isReplay, currentStreak]);
 
   const closeFeedback = useCallback(() => {
     setFeedback({ isOpen: false, isCorrect: false });

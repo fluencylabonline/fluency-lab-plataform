@@ -944,7 +944,9 @@
         "codeExpiredDesc": "Ele não pode mais ser pago. Gere um código novo para continuar.",
         "pixExpiredTitle": "Este código PIX expirou",
         "pixExpiredDesc": "Ele não pode mais ser usado para pagar. Gere um novo código para continuar.",
-        "stripe_instructions_desc": "Para efetuar o pagamento, clique no botão abaixo para ir ao checkout seguro."
+        "stripe_instructions_desc": "Para efetuar o pagamento, clique no botão abaixo para ir ao checkout seguro.",
+        "requestError": "Erro ao processar a solicitação.",
+        "generateCodeError": "Erro ao gerar o código de pagamento."
       },
       "ProgressHero": {
         "classes": "Aulas",
@@ -2600,7 +2602,50 @@
     "roadmapDesc": "Sua jornada de lições programadas",
     "roadmapTab": "Roteiro",
     "roadmapTitle": "Roadmap",
-    "userNotFound": "Usuário não encontrado"
+    "userNotFound": "Usuário não encontrado",
+    "feedback": {
+      "continue": "Continuar",
+      "keepPracticing": "Continue praticando!",
+      "keepPracticingMsg": "Revisar é o caminho para a fluência.",
+      "goodEffort": "Bom esforço!",
+      "goodEffortMsg": "A prática leva à perfeição.",
+      "veryGood": "Muito bem!",
+      "veryGoodMsg": "Você está indo bem.",
+      "excellent": "Excelente!",
+      "excellentMsg": "Muito fácil para você?",
+      "correct": "Correto!",
+      "incorrect": "Incorreto"
+    },
+    "session": {
+      "listenTranslation": "Ouvir tradução",
+      "gapFillTitle": "Ouça e preencha a lacuna",
+      "saveError": "Erro ao salvar a sessão. Tente novamente.",
+      "showOptions": "Ver opções",
+      "listenForOptions": "Ouça o áudio para ver as opções...",
+      "saving": "Salvando sessão",
+      "exitTitle": "Deseja mesmo sair?",
+      "exitDescription": "Seu progresso nesta lição será salvo para você continuar depois, mas você <strong>não ganhará XP</strong> até concluí-la totalmente.",
+      "keepPracticing": "Continuar praticando",
+      "exitNow": "Sair agora",
+      "completeTitle": "Sessão completa!",
+      "completeSubtitle": "Você praticou como um campeão.",
+      "xpGained": "XP ganho",
+      "streak": "Sequência",
+      "accuracy": "Acertos"
+    },
+    "roadmap": {
+      "adaptivePractice": "Prática adaptativa",
+      "daysProgress": "{done}/{total} dias",
+      "continuePractice": "Continuar prática"
+    },
+    "notifications": {
+      "unsupported": "Seu navegador não suporta notificações",
+      "permissionNeeded": "Você precisa permitir notificações no navegador",
+      "setupError": "Erro ao configurar notificações no navegador",
+      "enabled": "Notificações ativadas com sucesso!",
+      "disabled": "Notificações desativadas",
+      "updateError": "Erro ao atualizar preferências"
+    }
   },
   "Profile": {
     "Contract": {

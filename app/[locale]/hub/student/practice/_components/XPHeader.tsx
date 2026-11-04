@@ -8,6 +8,7 @@ import { toggleNotificationAction } from "@/modules/user/user.actions";
 import { saveSubscriptionAction } from "@/modules/notification/notification.actions";
 import { notify } from "@/components/ui/toaster";
 import { env } from "@/env/client";
+import { useTranslations } from "next-intl";
 
 interface XPHeaderProps {
   user: {
@@ -20,6 +21,7 @@ interface XPHeaderProps {
 }
 
 export function XPHeader({ user }: XPHeaderProps) {
+  const t = useTranslations("Practice.notifications");
   const [isPending, startTransition] = useTransition();
 
   const handleToggleNotifications = () => {
@@ -30,13 +32,13 @@ export function XPHeader({ user }: XPHeaderProps) {
       if (nextState) {
         try {
           if (!("Notification" in window)) {
-            notify.error("Seu navegador não suporta notificações");
+            notify.error(t("unsupported"));
             return;
           }
 
           const permission = await Notification.requestPermission();
           if (permission !== "granted") {
-            notify.error("Você precisa permitir notificações no navegador");
+            notify.error(t("permissionNeeded"));
             return;
           }
 
@@ -49,7 +51,7 @@ export function XPHeader({ user }: XPHeaderProps) {
           await saveSubscriptionAction({ subscription });
         } catch (error) {
           console.error("[Push] Subscription error:", error);
-          notify.error("Erro ao configurar notificações no navegador");
+          notify.error(t("setupError"));
           return;
         }
       }
@@ -63,11 +65,11 @@ export function XPHeader({ user }: XPHeaderProps) {
       if (result?.data) {
         notify.success(
           nextState 
-            ? "Notificações ativadas com sucesso!"
-            : "Notificações desativadas"
+            ? t("enabled")
+            : t("disabled")
         );
       } else {
-        notify.error("Erro ao atualizar preferências");
+        notify.error(t("updateError"));
       }
     });
   };

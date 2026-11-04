@@ -7,12 +7,14 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { RoadmapLesson } from "@/modules/learning/learning.types";
+import { useTranslations } from "next-intl";
 
 interface RoadmapTimelineProps {
   lessons: RoadmapLesson[];
 }
 
 export function RoadmapTimeline({ lessons }: RoadmapTimelineProps) {
+  const t = useTranslations("Practice.roadmap");
   return (
     <div className="relative pl-8 space-y-8 before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
       {lessons.map((lesson) => {
@@ -67,8 +69,8 @@ export function RoadmapTimeline({ lessons }: RoadmapTimelineProps) {
               {/* Progress Bar */}
               <div className="mt-4">
                 <div className="flex justify-between text-[10px] mb-1 font-bold uppercase text-muted-foreground">
-                  <span>Prática Adaptativa</span>
-                  <span>{lesson.completedPracticeDays}/6 Dias</span>
+                  <span>{t("adaptivePractice")}</span>
+                  <span>{t("daysProgress", { done: lesson.completedPracticeDays, total: 6 })}</span>
                 </div>
                 <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                   <div
@@ -80,7 +82,7 @@ export function RoadmapTimeline({ lessons }: RoadmapTimelineProps) {
 
               {isCurrent && (
                 <Button className="w-full mt-4 h-9 text-xs font-bold gap-2" size="sm">
-                  Continuar Prática
+                  {t("continuePractice")}
                 </Button>
               )}
             </div>

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Flame, Star, Trophy } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface PracticeSummaryProps {
   xpGained: number;
@@ -12,6 +13,7 @@ interface PracticeSummaryProps {
 }
 
 export function PracticeSummary({ xpGained, streak, accuracy, onGoBack }: PracticeSummaryProps) {
+  const t = useTranslations("Practice.session");
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
       {/* Trophy */}
@@ -29,16 +31,16 @@ export function PracticeSummary({ xpGained, streak, accuracy, onGoBack }: Practi
             className="absolute inset-0 bg-yellow-400/20 blur-3xl rounded-full -z-10"
           />
         </div>
-        <h1 className="text-4xl font-black text-yellow-500 mt-4">Sessão Completa!</h1>
-        <p className="text-lg text-muted-foreground mt-1">Você praticou como um campeão.</p>
+        <h1 className="text-4xl font-black text-yellow-500 mt-4">{t("completeTitle")}</h1>
+        <p className="text-lg text-muted-foreground mt-1">{t("completeSubtitle")}</p>
       </motion.div>
 
       {/* Stats */}
       <div className="flex flex-row items-stretch justify-center gap-3 w-full max-w-md mb-10">
         {[
-          { label: "XP Ganho", value: `+${xpGained}`, icon: <Star className="fill-white w-5 h-5" />, bg: "bg-yellow-400 border-yellow-600" },
-          { label: "Sequência", value: streak, icon: <Flame className="fill-white w-5 h-5" />, bg: "bg-orange-500 border-orange-700" },
-          { label: "Acertos", value: `${Math.round(accuracy)}%`, icon: null, bg: "bg-emerald-500 border-emerald-700" },
+          { label: t("xpGained"), value: `+${xpGained}`, icon: <Star className="fill-white w-5 h-5" />, bg: "bg-yellow-400 border-yellow-600" },
+          { label: t("streak"), value: streak, icon: <Flame className="fill-white w-5 h-5" />, bg: "bg-orange-500 border-orange-700" },
+          { label: t("accuracy"), value: `${Math.round(accuracy)}%`, icon: null, bg: "bg-emerald-500 border-emerald-700" },
         ].map(({ label, value, icon, bg }, i) => (
           <motion.div
             key={label}

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, XCircle, RotateCw, ThumbsUp, Medal, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface FeedbackSheetProps {
   isOpen: boolean;
@@ -22,15 +23,16 @@ type FeedbackConfig = {
   buttonText: string;
 };
 
-function getFeedbackConfig(grade?: number, isCorrect?: boolean): FeedbackConfig {
+function getFeedbackConfig(t: (key: string) => string, grade?: number, isCorrect?: boolean): FeedbackConfig {
+  const buttonText = t("continue");
   if (grade !== undefined) {
-    if (grade <= 2) return { title: "Continue praticando!", message: "Revisar é o caminho para a fluência.", colorKey: "rose", icon: <RotateCw size={28} />, buttonText: "Continuar" };
-    if (grade === 3) return { title: "Bom esforço!", message: "A prática leva à perfeição.", colorKey: "amber", icon: <ThumbsUp size={28} />, buttonText: "Continuar" };
-    if (grade === 4) return { title: "Muito bem!", message: "Você está indo bem.", colorKey: "indigo", icon: <Medal size={28} />, buttonText: "Continuar" };
-    return { title: "Excelente!", message: "Muito fácil para você?", colorKey: "emerald", icon: <Sparkles size={28} />, buttonText: "Continuar" };
+    if (grade <= 2) return { title: t("keepPracticing"), message: t("keepPracticingMsg"), colorKey: "rose", icon: <RotateCw size={28} />, buttonText };
+    if (grade === 3) return { title: t("goodEffort"), message: t("goodEffortMsg"), colorKey: "amber", icon: <ThumbsUp size={28} />, buttonText };
+    if (grade === 4) return { title: t("veryGood"), message: t("veryGoodMsg"), colorKey: "indigo", icon: <Medal size={28} />, buttonText };
+    return { title: t("excellent"), message: t("excellentMsg"), colorKey: "emerald", icon: <Sparkles size={28} />, buttonText };
   }
-  if (isCorrect) return { title: "Correto!", message: null, colorKey: "green", icon: <CheckCircle2 size={28} />, buttonText: "Continuar" };
-  return { title: "Incorreto", message: null, colorKey: "rose", icon: <XCircle size={28} />, buttonText: "Continuar" };
+  if (isCorrect) return { title: t("correct"), message: null, colorKey: "green", icon: <CheckCircle2 size={28} />, buttonText };
+  return { title: t("incorrect"), message: null, colorKey: "rose", icon: <XCircle size={28} />, buttonText };
 }
 
 const COLORS = {
@@ -43,7 +45,8 @@ const COLORS = {
 };
 
 export function FeedbackSheet({ isOpen, isCorrect, correctAnswer, explanation, grade, onContinue }: FeedbackSheetProps) {
-  const config = getFeedbackConfig(grade, isCorrect);
+  const t = useTranslations("Practice.feedback");
+  const config = getFeedbackConfig(t, grade, isCorrect);
   const c = COLORS[config.colorKey];
 
   return (

@@ -132,12 +132,12 @@ export function StudentPaymentStatusCard({
       } else {
         notify.error(
           result?.data?.error ||
-            "Erro ao gerar código de pagamento.",
+            t("generateCodeError"),
         );
       }
     } catch (error) {
       console.error("Error generating payment code:", error);
-      notify.error("Erro ao gerar código de pagamento.");
+      notify.error(t("generateCodeError"));
     } finally {
       setIsGenerating(false);
     }

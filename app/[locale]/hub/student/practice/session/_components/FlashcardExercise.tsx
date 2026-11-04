@@ -6,6 +6,7 @@ import { Volume2 } from "lucide-react";
 import Image from "next/image";
 import { UnsplashCredit, useTrackUnsplashDownload } from "@/components/ui/unsplash-credit";
 import type { ImageCredit } from "@/modules/curriculum/curriculum.types";
+import { useTranslations } from "next-intl";
 
 interface FlashcardExerciseProps {
   front: string;
@@ -34,6 +35,7 @@ export function FlashcardExercise({
   language = "en-US",
   onResult,
 }: FlashcardExerciseProps) {
+  const t = useTranslations("Practice.session");
   const [isFlipped, setIsFlipped] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   useTrackUnsplashDownload(imageCredit, !!imageUrl);
@@ -142,7 +144,8 @@ export function FlashcardExercise({
                   onClick={(e) => handleSpeak(e, back)}
                   disabled={isLocked}
                   className="absolute top-3 right-3 w-8 h-8 rounded-full border border-border bg-muted flex items-center justify-center text-foreground/70 hover:bg-muted-foreground/20 transition-colors disabled:opacity-40"
-                  title="Ouvir tradução"
+                  title={t("listenTranslation")}
+                  aria-label={t("listenTranslation")}
                 >
                   <Volume2 size={15} />
                 </button>

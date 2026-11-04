@@ -11,6 +11,7 @@ import {
   VaultPrimaryButton, 
   VaultSecondaryButton 
 } from "@/components/ui/vault";
+import { useTranslations } from "next-intl";
 
 interface PracticeExitVaultProps {
   isOpen: boolean;
@@ -23,26 +24,27 @@ export function PracticeExitVault({
   onOpenChange,
   onConfirm,
 }: PracticeExitVaultProps) {
+  const t = useTranslations("Practice.session");
   return (
     <Vault open={isOpen} onOpenChange={onOpenChange}>
       <VaultContent showHandle={false}>
         <VaultHeader showCloseButton={false}>
           <VaultIcon type="warning" />
-          <VaultTitle>Deseja mesmo sair?</VaultTitle>
+          <VaultTitle>{t("exitTitle")}</VaultTitle>
           <VaultDescription>
-            Seu progresso nesta lição será salvo para que você continue depois, mas você **não ganhará XP** até concluí-la totalmente.
+            {t.rich("exitDescription", { strong: (chunks) => <strong>{chunks}</strong> })}
           </VaultDescription>
         </VaultHeader>
 
         <VaultFooter>
           <VaultSecondaryButton onClick={() => onOpenChange(false)}>
-            Continuar Praticando
+            {t("keepPracticing")}
           </VaultSecondaryButton>
           <VaultPrimaryButton 
             onClick={onConfirm}
             variant="destructive"
           >
-            Sair Agora
+            {t("exitNow")}
           </VaultPrimaryButton>
         </VaultFooter>
       </VaultContent>

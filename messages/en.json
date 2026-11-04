@@ -944,7 +944,9 @@
         "codeExpiredDesc": "It can no longer be paid. Generate a new code to continue.",
         "pixExpiredTitle": "This PIX code has expired",
         "pixExpiredDesc": "It can no longer be used to pay. Generate a new code to continue.",
-        "stripe_instructions_desc": "To pay, click the button below to go to the secure checkout."
+        "stripe_instructions_desc": "To pay, click the button below to go to the secure checkout.",
+        "requestError": "Error processing the request.",
+        "generateCodeError": "Error generating the payment code."
       },
       "ProgressHero": {
         "classes": "Classes",
@@ -2600,7 +2602,50 @@
     "roadmapDesc": "Your journey of scheduled lessons",
     "roadmapTab": "Roadmap",
     "roadmapTitle": "Roadmap",
-    "userNotFound": "User not found"
+    "userNotFound": "User not found",
+    "feedback": {
+      "continue": "Continue",
+      "keepPracticing": "Keep practicing!",
+      "keepPracticingMsg": "Reviewing is the path to fluency.",
+      "goodEffort": "Good effort!",
+      "goodEffortMsg": "Practice makes perfect.",
+      "veryGood": "Very good!",
+      "veryGoodMsg": "You're doing well.",
+      "excellent": "Excellent!",
+      "excellentMsg": "Too easy for you?",
+      "correct": "Correct!",
+      "incorrect": "Incorrect"
+    },
+    "session": {
+      "listenTranslation": "Listen to the translation",
+      "gapFillTitle": "Listen and fill in the gap",
+      "saveError": "Error saving the session. Please try again.",
+      "showOptions": "Show options",
+      "listenForOptions": "Listen to the audio to see the options...",
+      "saving": "Saving session",
+      "exitTitle": "Do you really want to leave?",
+      "exitDescription": "Your progress in this lesson will be saved so you can continue later, but you <strong>won't earn XP</strong> until you finish it.",
+      "keepPracticing": "Keep practicing",
+      "exitNow": "Leave now",
+      "completeTitle": "Session complete!",
+      "completeSubtitle": "You practiced like a champion.",
+      "xpGained": "XP earned",
+      "streak": "Streak",
+      "accuracy": "Accuracy"
+    },
+    "roadmap": {
+      "adaptivePractice": "Adaptive practice",
+      "daysProgress": "{done}/{total} days",
+      "continuePractice": "Continue practice"
+    },
+    "notifications": {
+      "unsupported": "Your browser doesn't support notifications",
+      "permissionNeeded": "You need to allow notifications in the browser",
+      "setupError": "Error setting up notifications in the browser",
+      "enabled": "Notifications turned on!",
+      "disabled": "Notifications turned off",
+      "updateError": "Error updating preferences"
+    }
   },
   "Profile": {
     "Contract": {

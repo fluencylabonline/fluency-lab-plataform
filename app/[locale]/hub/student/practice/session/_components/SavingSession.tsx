@@ -2,10 +2,12 @@
 
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const DOTS = [0, 1, 2];
 
 export function SavingSession() {
+  const t = useTranslations("Practice.session");
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8">
       <div className="relative flex h-28 w-28 items-center justify-center">
@@ -50,7 +52,7 @@ export function SavingSession() {
       </div>
 
       <div className="flex items-center gap-1 text-muted-foreground">
-        <span className="text-sm font-medium">Salvando sessão</span>
+        <span className="text-sm font-medium">{t("saving")}</span>
         {DOTS.map((i) => (
           <motion.span
             key={i}
