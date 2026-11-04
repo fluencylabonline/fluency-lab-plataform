@@ -2664,7 +2664,7 @@
     "evaluation": "Avaliação",
     "fallbackActivities": "Atividades de Fallback",
     "fallbackActivitiesDesc": "Selecione uma atividade para cada aluno realizar durante sua ausência.",
-    "fallbackConfiguredFor": "Fallback configurado para ${impactData?.totalStudents || 0} alunos",
+    "fallbackConfiguredFor": "{count, plural, one {Fallback configurado para # aluno} other {Fallback configurado para # alunos}}",
     "finishScheduling": "Finalizar Agendamento",
     "impactSLANok": "Atenção: Seu pedido não atende ao prazo mínimo de aviso e precisará de revisão manual.",
     "impactSLAOk": "Seu pedido atende às regras de aviso prévio e duração e será agendado direto.",
