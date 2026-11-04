@@ -242,7 +242,7 @@ export function PayoutDetailsVault({
             {/* Receipt Fields Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Valor do Repasse</span>
+                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Valor do Repasse</span>
                 <p className="text-2xl font-black text-green-600 mt-0.5">
                   {(payout.amount / 100).toLocaleString("pt-BR", {
                     style: "currency",
@@ -251,25 +251,25 @@ export function PayoutDetailsVault({
                 </p>
               </div>
               <div>
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Competência Referente</span>
+                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Competência Referente</span>
                 <p className="text-sm font-black text-foreground capitalize mt-1">
                   {competenceLabel}
                 </p>
               </div>
               <div>
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Data do Pagamento</span>
+                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Data do Pagamento</span>
                 <p className="text-sm font-bold text-foreground mt-1">
                   {format(new Date(payout.createdAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                 </p>
               </div>
               <div>
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Identificador PIX</span>
+                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Identificador PIX</span>
                 <p className="text-xs font-mono text-muted-foreground break-all mt-1">
                   {payout.externalId}
                 </p>
               </div>
               <div className="sm:col-span-2 border-t pt-3 border-border/50">
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Chave PIX de Destino</span>
+                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Chave PIX de Destino</span>
                 <p className="text-xs font-black text-foreground mt-1 capitalize">
                   {payout.pixKeyType === "cnpj" ? "CNPJ" : payout.pixKeyType === "cpf" ? "CPF" : payout.pixKeyType === "email" ? "E-mail" : payout.pixKeyType === "phone" ? "Celular" : payout.pixKeyType === "random" ? "Chave Aleatória" : payout.pixKeyType}: <span className="font-mono text-muted-foreground tracking-tight">{payout.pixKey}</span>
                 </p>
@@ -285,7 +285,7 @@ export function PayoutDetailsVault({
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-border/50 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                      <tr className="border-b border-border/50 text-[11px] font-black text-muted-foreground uppercase tracking-widest">
                         <th className="pb-2 pl-0">Aluno</th>
                         <th className="pb-2">Data/Hora</th>
                         <th className="pb-2 text-right pr-0">Valor</th>

@@ -789,7 +789,7 @@ export function CreateSlotVault({
                                 </div>
 
                                 {conflictInfo?.hasConflict && (
-                                  <span className="text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 px-1.5 py-0.5 rounded border border-rose-500/20">
+                                  <span className="text-[11px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 px-1.5 py-0.5 rounded border border-rose-500/20">
                                     Conflito
                                   </span>
                                 )}

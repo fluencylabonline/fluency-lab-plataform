@@ -125,7 +125,7 @@ export function StepBestPractices({ role }: { role?: User["role"] }) {
                             <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
                                 {t("finish.installOnPhone")}
                             </p>
-                            <p className="max-w-[140px] text-[9px] leading-snug text-slate-500 dark:text-slate-400">
+                            <p className="max-w-[140px] text-[11px] leading-snug text-slate-500 dark:text-slate-400">
                                 {t("finish.installOnPhoneDesc")}
                             </p>
                         </div>

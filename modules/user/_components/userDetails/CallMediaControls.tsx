@@ -97,10 +97,10 @@ export function CallMediaControls({ callSession, canViewRecordings }: CallMediaC
           variant="outline"
           className={
             hasTranscript
-              ? "text-[9px] h-4 font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+              ? "text-[11px] h-4 font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
               : callSession.transcriptionStatus === "failed"
-                ? "text-[9px] h-4 font-black uppercase tracking-widest bg-destructive/10 text-destructive border-destructive/20"
-                : "text-[9px] h-4 font-black uppercase tracking-widest bg-amber-500/10 text-amber-600 border-amber-500/20"
+                ? "text-[11px] h-4 font-black uppercase tracking-widest bg-destructive/10 text-destructive border-destructive/20"
+                : "text-[11px] h-4 font-black uppercase tracking-widest bg-amber-500/10 text-amber-600 border-amber-500/20"
           }
         >
           {hasTranscript

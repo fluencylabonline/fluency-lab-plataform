@@ -89,7 +89,7 @@ const CalendarGrid = React.memo(({
     <div className="flex flex-col flex-1">
       <div className="grid grid-cols-7 border-y border-foreground/10 bg-foreground/10 dark:border-white/5 dark:bg-muted-foreground/30">
         {weekDays.map((day: string) => (
-          <div key={day} className="py-2 lg:py-4 text-center text-[9px] lg:text-[10px] font-black text-foreground/70 dark:text-muted-foreground tracking-[0.1em] lg:tracking-[0.2em]">
+          <div key={day} className="py-2 lg:py-4 text-center text-[11px] lg:text-[10px] font-black text-foreground/70 dark:text-muted-foreground tracking-[0.1em] lg:tracking-[0.2em]">
             {day}
           </div>
         ))}
@@ -133,7 +133,7 @@ const CalendarGrid = React.memo(({
                     <div
                       key={event.id}
                       className={cn(
-                        "text-[9px] font-bold px-1.5 py-0.5 rounded-sm bg-primary/10 border border-primary/20 text-foreground truncate",
+                        "text-[11px] font-bold px-1.5 py-0.5 rounded-sm bg-primary/10 border border-primary/20 text-foreground truncate",
                         !!event.isOptimistic && "animate-pulse bg-primary/5 border-dashed border-primary/30 opacity-60"
                       )}
                     >
@@ -224,7 +224,7 @@ const WeekSection = React.memo(({
               {format(weekStart, "d MMM")} - {format(weekEnd, "d MMM")}
             </span>
           </div>
-          <Badge variant="outline" className="text-[9px] font-black bg-primary/5 text-primary border-primary/20 px-1.5 h-5">
+          <Badge variant="outline" className="text-[11px] font-black bg-primary/5 text-primary border-primary/20 px-1.5 h-5">
             {events.length} {locale === "pt" ? "aulas" : "classes"}
           </Badge>
         </div>
@@ -398,7 +398,7 @@ const MonthSection = React.memo(({
         ) : (
           <div className="py-12 flex flex-col items-center justify-center text-center opacity-20 border border-dashed border-foreground/15 dark:border-white/10 rounded-md">
             <CalendarIcon className="w-6 h-6 mb-2 text-muted-foreground" />
-            <p className="text-[9px] font-bold uppercase tracking-widest">
+            <p className="text-[11px] font-bold uppercase tracking-widest">
               {locale === "pt" ? "Nenhuma aula programada" : "No classes scheduled"}
             </p>
           </div>

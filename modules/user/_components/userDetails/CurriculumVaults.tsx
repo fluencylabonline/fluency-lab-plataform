@@ -300,7 +300,7 @@ export function CurriculumVaults({
                             <BookOpen className="h-4 w-4 text-muted-foreground" />
                             <span>{lesson.title}</span>
                           </div>
-                          <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[9px] uppercase font-bold tracking-wider px-1.5 h-4 shrink-0">
+                          <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[11px] uppercase font-bold tracking-wider px-1.5 h-4 shrink-0">
                             Recesso
                           </Badge>
                         </div>

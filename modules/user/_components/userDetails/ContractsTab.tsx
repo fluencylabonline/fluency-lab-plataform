@@ -64,7 +64,7 @@ export function ContractsTab({
                   {contract.title || t("contract")}
                 </p>
                 <div className="flex items-center gap-2.5 mt-1">
-                  <Badge variant="outline" className="text-[9px] h-4 font-black uppercase tracking-widest bg-muted/30">
+                  <Badge variant="outline" className="text-[11px] h-4 font-black uppercase tracking-widest bg-muted/30">
                     v{contract.version || "1.0"}
                   </Badge>
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
@@ -82,11 +82,11 @@ export function ContractsTab({
                 return (
                   <div className="flex items-center gap-2 mr-2">
                     {!isExpired ? (
-                      <Badge variant="outline" className="text-[9px] h-4 font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                      <Badge variant="outline" className="text-[11px] h-4 font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
                         {t("valid")}
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-[9px] h-4 font-black uppercase tracking-widest bg-destructive/10 text-destructive border-destructive/20">
+                      <Badge variant="outline" className="text-[11px] h-4 font-black uppercase tracking-widest bg-destructive/10 text-destructive border-destructive/20">
                         {t("expired")}
                       </Badge>
                     )}

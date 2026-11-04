@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { ArrowLeft, Search, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { cn } from "@/lib/utils";
@@ -56,6 +57,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
     className,
     ...props
 }, ref) => {
+    const tc = useTranslations("Common");
     const { user: storeUser, hasHydrated } = useUserStore();
     const isMobile = useIsMobile();
     const [isSearchOpen, setIsSearchOpen] = React.useState(false);
@@ -99,6 +101,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                 key={index}
                                 href={act.href}
                                 data-tour={act.dataTour}
+                                aria-label={isMobileSlot ? act.label : undefined}
                                 className={cn(
                                     buttonVariants({
                                         variant: isMobileSlot ? "ghost" : "outline",
@@ -120,6 +123,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                             key={index}
                             onClick={act.onClick}
                             data-tour={act.dataTour}
+                            aria-label={isMobileSlot ? act.label : undefined}
                             variant={isMobileSlot ? "ghost" : "outline"}
                             size={isMobileSlot ? "icon" : "sm"}
                             className={cn("h-9", isMobileSlot && "h-10 w-10", act.className)}
@@ -152,10 +156,10 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                     autoFocus
                                     value={searchValue}
                                     onChange={handleSearch}
-                                    placeholder="Buscar..."
+                                    placeholder={`${tc("search")}...`}
                                     className="flex-1 border-none bg-transparent shadow-none focus-visible:ring-0 px-1 text-base"
                                 />
-                                <Button variant="ghost" size="icon" onClick={closeSearch} className="shrink-0">
+                                <Button variant="ghost" size="icon" onClick={closeSearch} className="shrink-0" aria-label={tc("close")}>
                                     <X className="h-5 w-5" />
                                 </Button>
                             </motion.div>
@@ -178,7 +182,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                             })}
                                         >
                                             <ArrowLeft className="h-5 w-5" />
-                                            <span className="sr-only">Voltar</span>
+                                            <span className="sr-only">{tc("back")}</span>
                                         </Link>
                                     ) : (
                                         isMobile ? renderActions(true) : null
@@ -197,7 +201,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                     {isMobile ? (
                                         <>
                                             {onSearchChange && (
-                                                <Button variant="ghost" size="icon" data-tour="chrome.search" onClick={() => setIsSearchOpen(true)}>
+                                                <Button variant="ghost" size="icon" data-tour="chrome.search" onClick={() => setIsSearchOpen(true)} aria-label={tc("search")}>
                                                     <Search className="h-5 w-5" />
                                                 </Button>
                                             )}
@@ -226,13 +230,14 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                                                                 autoFocus
                                                                                 value={searchValue}
                                                                                 onChange={handleSearch}
-                                                                                placeholder="Buscar..."
+                                                                                placeholder={`${tc("search")}...`}
                                                                             />
                                                                             <Button
                                                                                 variant="ghost"
                                                                                 size="icon"
                                                                                 className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-transparent"
                                                                                 onClick={closeSearch}
+                                                                                aria-label={tc("close")}
                                                                             >
                                                                                 <X className="h-4 w-4" />
                                                                             </Button>
@@ -251,7 +256,8 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                                                             data-tour="chrome.search"
                                                                             className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full"
                                                                             onClick={() => setIsSearchOpen(true)}
-                                                                            title="Buscar"
+                                                                            title={tc("search")}
+                                                                            aria-label={tc("search")}
                                                                         >
                                                                             <Search className="h-4 w-4" />
                                                                         </Button>
@@ -269,6 +275,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                                             size="icon"
                                                             className={cn("h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full", act.className)}
                                                             title={act.label}
+                                                            aria-label={act.label}
                                                         >
                                                             {act.icon}
                                                         </Button>
@@ -330,13 +337,14 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                                             autoFocus
                                                             value={searchValue}
                                                             onChange={handleSearch}
-                                                            placeholder="Buscar..."
+                                                            placeholder={`${tc("search")}...`}
                                                         />
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
                                                             className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full hover:bg-transparent"
                                                             onClick={closeSearch}
+                                                            aria-label={tc("close")}
                                                         >
                                                             <X className="h-4 w-4" />
                                                         </Button>
@@ -355,6 +363,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({
                                                         data-tour="chrome.search"
                                                         className="rounded-full"
                                                         onClick={() => setIsSearchOpen(true)}
+                                                        aria-label={tc("search")}
                                                     >
                                                         <Search className="h-4 w-4" />
                                                     </Button>

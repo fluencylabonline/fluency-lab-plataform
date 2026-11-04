@@ -289,7 +289,7 @@ export function ItemsList({ initialData, languages }: ItemsListProps) {
                                     </div>
                                     
                                     <div className="px-2 py-1 bg-muted/30 rounded-md">
-                                        <span className="text-[9px] font-black font-mono text-muted-foreground/40 uppercase tracking-tighter">
+                                        <span className="text-[11px] font-black font-mono text-muted-foreground/40 uppercase tracking-tighter">
                                             #{item.id.split('_').pop()?.substring(0, 8)}
                                         </span>
                                     </div>

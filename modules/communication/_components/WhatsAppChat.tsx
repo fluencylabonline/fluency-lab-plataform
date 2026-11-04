@@ -1041,7 +1041,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                       <span
                         key={lbl.id}
                         className={cn(
-                          "text-[9px] font-bold px-1.5 py-0.5 rounded-md border shrink-0 select-none animate-in scale-in duration-200",
+                          "text-[11px] font-bold px-1.5 py-0.5 rounded-md border shrink-0 select-none animate-in scale-in duration-200",
                           colors.bg,
                           colors.text,
                           colors.border
@@ -1074,7 +1074,7 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                         <Wifi className={cn("w-3 h-3 shrink-0", open ? "text-emerald-500" : "text-muted-foreground")} />
                         <span
                           className={cn(
-                            "text-[9px] font-semibold tracking-wide uppercase select-none",
+                            "text-[11px] font-semibold tracking-wide uppercase select-none",
                             open ? "text-emerald-500" : "text-muted-foreground",
                           )}
                         >
@@ -1446,10 +1446,10 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                             {t.name}
                           </span>
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                            <span className="text-[11px] font-semibold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                               {t.language.replace("_", "-")}
                             </span>
-                            <span className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                            <span className="text-[11px] font-semibold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                               {t.category}
                             </span>
                             {isSelected && (
@@ -1554,10 +1554,10 @@ export function WhatsAppChat({ currentUser }: WhatsAppChatProps) {
                             {t.name}
                           </span>
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                            <span className="text-[11px] font-semibold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                               {t.language.replace("_", "-")}
                             </span>
-                            <span className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                            <span className="text-[11px] font-semibold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                               {t.category}
                             </span>
                             {isSelected && (

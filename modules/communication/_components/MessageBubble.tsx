@@ -319,7 +319,7 @@ function MessageBubbleComponent({ msg, templates = [], onResendSuccess }: Messag
 
         {pixPayload && (
           <div className="mt-3 p-3 bg-[#ffffff] dark:bg-[#182229] rounded-xl border border-emerald-500/20 dark:border-border/30 space-y-2.5 max-w-[200px] mx-auto animate-in fade-in slide-in-from-top-1 text-center">
-            <span className="text-[9px] uppercase font-extrabold text-emerald-600 dark:text-emerald-400 tracking-wider block">⚡ QR Code Pix</span>
+            <span className="text-[11px] uppercase font-extrabold text-emerald-600 dark:text-emerald-400 tracking-wider block">⚡ QR Code Pix</span>
             <div className="flex justify-center bg-white p-2 rounded-lg border border-border/10">
               <QRCodeSVG value={pixPayload} size={110} />
             </div>

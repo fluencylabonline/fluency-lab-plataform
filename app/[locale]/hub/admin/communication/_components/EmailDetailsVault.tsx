@@ -56,7 +56,7 @@ export function EmailDetailsVault({ open, onOpenChange, email, isLoadingBody = f
                 Enviado
               </Badge>
             )}
-            <Badge variant="outline" className="uppercase text-[9px]">
+            <Badge variant="outline" className="uppercase text-[11px]">
               {email.status}
             </Badge>
           </div>

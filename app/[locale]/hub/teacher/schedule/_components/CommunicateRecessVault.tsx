@@ -272,7 +272,7 @@ export function CommunicateRecessVault({ teacherId, iconOnly }: CommunicateReces
                           <p className="text-[10px] text-red-600 font-bold">
                             {t('rulesViolated') || "Não é possível agendar este período"}
                           </p>
-                          <p className="text-[9px] text-red-600/80">
+                          <p className="text-[11px] text-red-600/80">
                             {daysAdvance < RECESS_MIN_ADVANCE_DAYS && (t('advanceTooShort', { days: RECESS_MIN_ADVANCE_DAYS }) || `• Aviso prévio precisa ser de pelo menos ${RECESS_MIN_ADVANCE_DAYS} dias corridos`)}
                             {daysAdvance < RECESS_MIN_ADVANCE_DAYS && duration > RECESS_MAX_DURATION_DAYS && <br />}
                             {duration > RECESS_MAX_DURATION_DAYS && (t('durationTooLong', { days: RECESS_MAX_DURATION_DAYS }) || `• Duração não pode passar de ${RECESS_MAX_DURATION_DAYS} dias corridos`)}

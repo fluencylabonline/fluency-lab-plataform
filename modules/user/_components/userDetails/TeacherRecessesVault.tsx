@@ -104,7 +104,7 @@ export function TeacherRecessesVault({
                         <Clock className="w-3.5 h-3.5" />
                         Cadastrado em {format(new Date(recess.createdAt), "dd/MM/yyyy")}
                       </span>
-                      <Badge variant={isPast ? "secondary" : "default"} className="text-[9px] uppercase font-black px-2">
+                      <Badge variant={isPast ? "secondary" : "default"} className="text-[11px] uppercase font-black px-2">
                         {isPast ? "Passado" : "Agendado"}
                       </Badge>
                     </div>

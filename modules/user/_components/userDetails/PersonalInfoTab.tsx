@@ -179,7 +179,7 @@ export function PersonalInfoTab({
             </p>
             <Badge
               variant={user.isActive ? "default" : "secondary"}
-              className="mt-2 text-[9px] h-4 font-black"
+              className="mt-2 text-[11px] h-4 font-black"
             >
               {user.isActive ? t("active") : t("inactive")}
             </Badge>
@@ -228,7 +228,7 @@ export function PersonalInfoTab({
                       : `(••) •••••-${user.cellphone?.slice(-4)}`}
                   </span>
                   {isAdmin && !revealedValues.cellphone && (
-                    <span className="text-[9px] text-primary font-bold uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-[11px] text-primary font-bold uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">
                       {t("view")}
                     </span>
                   )}
@@ -542,7 +542,7 @@ export function PersonalInfoTab({
                       <Badge
                         key={langId}
                         variant="secondary"
-                        className="text-[9px] font-black uppercase py-0 px-1.5 h-4"
+                        className="text-[11px] font-black uppercase py-0 px-1.5 h-4"
                       >
                         {langId}
                       </Badge>

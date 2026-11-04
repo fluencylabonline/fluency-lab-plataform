@@ -136,11 +136,11 @@ export function PracticePagePhone({ tab, onTab }: { tab: Tab; onTab: (t: Tab) =>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex items-center gap-3 bg-orange-500/10 p-3 rounded-md border border-orange-500/20">
               <div className="w-10 h-10 rounded-lg bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20"><Flame className="w-6 h-6 text-white fill-white" /></div>
-              <div><span className="block text-2xl font-black text-orange-600 leading-none">12</span><span className="text-[9px] font-bold uppercase text-orange-600/70 tracking-wider">{t("profile.streak")}</span></div>
+              <div><span className="block text-2xl font-black text-orange-600 leading-none">12</span><span className="text-[11px] font-bold uppercase text-orange-600/70 tracking-wider">{t("profile.streak")}</span></div>
             </div>
             <div className="flex items-center gap-3 bg-primary/10 p-3 rounded-md border border-primary/20">
               <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20"><Trophy className="w-6 h-6 text-white" /></div>
-              <div><span className="block text-2xl font-black text-primary leading-none">{xp}</span><span className="text-[9px] font-bold uppercase text-primary/70 tracking-wider">{t("profile.xp")}</span></div>
+              <div><span className="block text-2xl font-black text-primary leading-none">{xp}</span><span className="text-[11px] font-bold uppercase text-primary/70 tracking-wider">{t("profile.xp")}</span></div>
             </div>
           </div>
         </div>

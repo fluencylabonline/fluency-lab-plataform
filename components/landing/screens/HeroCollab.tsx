@@ -407,7 +407,7 @@ export function HeroPhoneScreen() {
       {!docked ? (
         <Pip
           className="top-[52px] right-3 h-[104px] aspect-video"
-          remote={<><Tile name={t("teacher")} photo={TEACHER} speaking={actor === "teacher"} className="size-full aspect-auto rounded-none" /><span className="absolute top-1.5 left-1.5 z-20 rounded-full bg-indigo-600/90 px-1.5 text-[9px] font-bold text-white">{t("captions")}</span></>}
+          remote={<><Tile name={t("teacher")} photo={TEACHER} speaking={actor === "teacher"} className="size-full aspect-auto rounded-none" /><span className="absolute top-1.5 left-1.5 z-20 rounded-full bg-indigo-600/90 px-1.5 text-[11px] font-bold text-white">{t("captions")}</span></>}
           onMax={() => setDocked(true)}
           mic={mic}
           cam={cam}

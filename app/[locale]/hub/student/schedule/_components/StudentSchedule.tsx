@@ -166,7 +166,7 @@ export function StudentSchedule({ studentId, initialClasses, balance, reschedule
         >
           <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary" aria-hidden>
             <span className="text-lg font-black leading-none">{format(start, "d")}</span>
-            <span className="text-[9px] font-bold uppercase leading-none">{format(start, "EEE", { locale: dateLocale })}</span>
+            <span className="text-[11px] font-bold uppercase leading-none">{format(start, "EEE", { locale: dateLocale })}</span>
           </span>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-bold">{title(cls)}</span>

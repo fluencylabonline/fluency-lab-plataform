@@ -488,7 +488,7 @@ function EditPlanVault({
                         {lesson.title}
                       </p>
                       {lesson.isDraft && (
-                        <Badge className="h-4 text-[9px] uppercase bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800 font-bold px-1.5 mt-0.5">
+                        <Badge className="h-4 text-[11px] uppercase bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800 font-bold px-1.5 mt-0.5">
                           Rascunho
                         </Badge>
                       )}
@@ -820,7 +820,7 @@ export function StudentPlanCard({
                               })}
                             </h4>
                             {lesson.isDraft && (
-                              <Badge className="h-4 text-[9px] uppercase bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800 font-bold px-1.5">
+                              <Badge className="h-4 text-[11px] uppercase bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800 font-bold px-1.5">
                                 {t("isDraft") || "Rascunho"}
                               </Badge>
                             )}

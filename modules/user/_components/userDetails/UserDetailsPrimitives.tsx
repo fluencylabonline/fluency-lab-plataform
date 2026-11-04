@@ -54,7 +54,7 @@ export function StatBlock({
         }`}
     >
       <span
-        className={`text-[9px] font-black uppercase tracking-[0.25em] ${green ? "text-green-600" : accent ? "text-primary" : "text-muted-foreground"
+        className={`text-[11px] font-black uppercase tracking-[0.25em] ${green ? "text-green-600" : accent ? "text-primary" : "text-muted-foreground"
           }`}
       >
         {label}

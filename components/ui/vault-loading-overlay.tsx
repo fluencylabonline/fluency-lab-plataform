@@ -228,7 +228,7 @@ export function VaultLoadingOverlay({
                 {/* Header strip — month label */}
                 <div
                   className={cn(
-                    "h-5 w-full flex items-center justify-center text-[9px] font-bold uppercase tracking-widest text-primary-foreground transition-colors duration-300",
+                    "h-5 w-full flex items-center justify-center text-[11px] font-bold uppercase tracking-widest text-primary-foreground transition-colors duration-300",
                     state === "loading" && "bg-primary",
                     state === "success" && "bg-emerald-500",
                     state === "error" && "bg-destructive"

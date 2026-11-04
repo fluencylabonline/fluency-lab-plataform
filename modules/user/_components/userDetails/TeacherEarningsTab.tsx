@@ -250,7 +250,7 @@ export function TeacherEarningsTab({
                         currency: "BRL",
                       })}
                     </p>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-green-600">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-green-600">
                       {t(`status.${cls.status}`) || cls.status}
                     </span>
                     {cls.payoutId && (
@@ -259,7 +259,7 @@ export function TeacherEarningsTab({
                           PAGA
                         </Badge>
                         {cls.payout?.createdAt && (
-                          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5 whitespace-nowrap">
+                          <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5 whitespace-nowrap">
                             pago em {format(new Date(cls.payout.createdAt), "dd/MM")}
                           </span>
                         )}
@@ -361,7 +361,7 @@ function PayoutHistoryRow({
                   currency: "BRL"
                 })}
               </p>
-              <span className="text-[9px] font-black uppercase tracking-widest text-green-600">
+              <span className="text-[11px] font-black uppercase tracking-widest text-green-600">
                 CONCLUÍDO
               </span>
             </div>

@@ -91,7 +91,7 @@ export function StatsDashboard({
             <item.icon className={`${item.color} w-5 h-5 opacity-80 relative z-10`} />
             <div className="relative z-10">
               <p className={`text-2xl font-bold tracking-tight ${item.color}`}>{item.value}</p>
-              <p className={`text-[9px] uppercase tracking-widest font-black opacity-70 ${item.color}`}>
+              <p className={`text-[11px] uppercase tracking-widest font-black opacity-70 ${item.color}`}>
                 {item.label}
               </p>
             </div>

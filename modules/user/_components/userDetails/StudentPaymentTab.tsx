@@ -106,11 +106,11 @@ export function StudentPaymentTab({
               </p>
             </div>
             {isFeeExpired ? (
-              <Badge variant="outline" className="text-[9px] h-4 font-black uppercase tracking-widest bg-red-500/10 text-red-500 border-red-500/20">
+              <Badge variant="outline" className="text-[11px] h-4 font-black uppercase tracking-widest bg-red-500/10 text-red-500 border-red-500/20">
                 Código Expirado
               </Badge>
             ) : (
-              <Badge variant="outline" className="text-[9px] h-4 font-black uppercase tracking-widest bg-amber-500/10 text-amber-500 border-amber-500/20">
+              <Badge variant="outline" className="text-[11px] h-4 font-black uppercase tracking-widest bg-amber-500/10 text-amber-500 border-amber-500/20">
                 Aguardando Pagamento
               </Badge>
             )}
@@ -226,7 +226,7 @@ export function StudentPaymentTab({
             <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">
               {t("currentPlan")}
             </p>
-            <Badge variant="default" className="text-[9px] h-4 font-black">
+            <Badge variant="default" className="text-[11px] h-4 font-black">
               {t("activeBadge")}
             </Badge>
           </div>
@@ -295,7 +295,7 @@ export function StudentPaymentTab({
                 <div className="flex items-center gap-4 shrink-0">
                   <Badge
                     variant={inst.status === "paid" ? "default" : inst.status === "overdue" ? "destructive" : "secondary"}
-                    className="text-[9px] h-4 font-black px-2"
+                    className="text-[11px] h-4 font-black px-2"
                   >
                     {inst.status}
                   </Badge>
@@ -545,7 +545,7 @@ export function StudentPaymentTab({
                         : "ENCERRADO"}
                     </p>
                   </div>
-                  <Badge variant="outline" className="text-[9px] h-4 font-black uppercase tracking-widest opacity-60">
+                  <Badge variant="outline" className="text-[11px] h-4 font-black uppercase tracking-widest opacity-60">
                     {sub.status}
                   </Badge>
                 </div>

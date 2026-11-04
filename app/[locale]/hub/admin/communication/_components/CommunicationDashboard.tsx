@@ -339,7 +339,7 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, initi
                     </div>
                     <p className="text-xs text-muted-foreground line-clamp-1">{item.body}</p>
                     <div className="mt-2 flex items-center gap-2">
-                      <Badge variant="secondary" className="text-[9px] px-1.5 h-4">
+                      <Badge variant="secondary" className="text-[11px] px-1.5 h-4">
                         Para: {item.userName || "Desconhecido"}
                       </Badge>
                     </div>
@@ -401,7 +401,7 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, initi
                     <div className="flex justify-between items-start">
                       <Badge
                         variant={template.status === "APPROVED" ? "default" : "secondary"}
-                        className={`text-[9px] uppercase tracking-wider font-bold h-5 ${template.status === "APPROVED" ? "bg-green-500 hover:bg-green-600" :
+                        className={`text-[11px] uppercase tracking-wider font-bold h-5 ${template.status === "APPROVED" ? "bg-green-500 hover:bg-green-600" :
                           template.status === "REJECTED" ? "bg-red-500 hover:bg-red-600" : ""
                           }`}
                       >
@@ -424,7 +424,7 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, initi
                   </div>
 
                   <div className="pt-3 border-t flex justify-between items-center">
-                    <span className="text-[9px] text-muted-foreground font-mono">ID: {template.id.slice(0, 12)}...</span>
+                    <span className="text-[11px] text-muted-foreground font-mono">ID: {template.id.slice(0, 12)}...</span>
                     <Button
                       variant="ghost"
                       size="xs"
@@ -448,7 +448,7 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, initi
             <div className="card p-4 flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-muted-foreground">Cota Mensal</span>
-                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-[9px] font-bold">
+                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-[11px] font-bold">
                   Usage API Beta
                 </Badge>
               </div>
@@ -610,15 +610,15 @@ export function CommunicationDashboard({ initialTemplates, initialHistory, initi
                     </p>
                     <div className="mt-2 flex items-center gap-2">
                       {item.direction === "inbound" ? (
-                        <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[9px] px-1.5 h-4 flex items-center gap-0.5 font-bold">
+                        <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[11px] px-1.5 h-4 flex items-center gap-0.5 font-bold">
                           <ArrowDownLeft className="w-2.5 h-2.5" /> Recebido
                         </Badge>
                       ) : (
-                        <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 text-[9px] px-1.5 h-4 flex items-center gap-0.5 font-bold">
+                        <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 text-[11px] px-1.5 h-4 flex items-center gap-0.5 font-bold">
                           <ArrowUpRight className="w-2.5 h-2.5" /> Enviado
                         </Badge>
                       )}
-                      <Badge variant="outline" className="text-[9px] px-1.5 h-4 uppercase font-semibold">
+                      <Badge variant="outline" className="text-[11px] px-1.5 h-4 uppercase font-semibold">
                         {item.status}
                       </Badge>
                     </div>

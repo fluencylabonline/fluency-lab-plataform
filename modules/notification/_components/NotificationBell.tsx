@@ -19,8 +19,10 @@ import { useParams, useRouter } from "next/navigation";
 import { notify } from "@/components/ui/toaster";
 import { type Notification } from "@/modules/notification/notification.schema";
 import { NotificationDetail } from "./NotificationDetail";
+import { useTranslations } from "next-intl";
 
 export function NotificationBell() {
+  const tCommon = useTranslations("Common");
   const { locale } = useParams();
   const dateLocale = locale === "pt" ? ptBR : enUS;
   const { notifications, isLoading, markAsRead, markAllAsRead, clearAll } = useNotifications();
@@ -80,10 +82,16 @@ export function NotificationBell() {
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative rounded-full" data-tour="chrome.notifications">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative rounded-full"
+          data-tour="chrome.notifications"
+          aria-label={unreadCount > 0 ? `${tCommon("notifications")} (${unreadCount})` : tCommon("notifications")}
+        >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+            <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground" aria-hidden="true">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}

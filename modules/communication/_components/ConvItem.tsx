@@ -58,7 +58,7 @@ function ConvItemComponent({ conv, isSelected, onClick }: ConvItemProps) {
                 <span
                   key={lbl.id}
                   className={cn(
-                    "text-[9px] font-bold px-1.5 py-0.5 rounded-md border",
+                    "text-[11px] font-bold px-1.5 py-0.5 rounded-md border",
                     colors.bg,
                     colors.text,
                     colors.border

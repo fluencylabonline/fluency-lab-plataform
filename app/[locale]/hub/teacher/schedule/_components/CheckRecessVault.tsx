@@ -70,7 +70,7 @@ function RecessList({ recesses }: { recesses: RecessRequest[] }) {
           <div className="flex justify-between items-start">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <Badge variant={recess.isValidated ? "default" : "secondary"} className="text-[9px] uppercase h-5">
+                <Badge variant={recess.isValidated ? "default" : "secondary"} className="text-[11px] uppercase h-5">
                   {recess.isValidated ? (t('approved') || "Aprovado") : (t('underReview') || "Em Revisão")}
                 </Badge>
                 <span className="text-[10px] text-muted-foreground">
@@ -82,12 +82,12 @@ function RecessList({ recesses }: { recesses: RecessRequest[] }) {
 
           <div className="flex items-center justify-between gap-4 p-3 bg-background rounded-md border border-border/30">
             <div className="flex flex-col gap-2">
-              <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">{t('start') || "Início"}</span>
+              <span className="text-[11px] uppercase font-bold text-muted-foreground tracking-wider">{t('start') || "Início"}</span>
               <span className="text-sm font-bold">{format(new Date(recess.startDate), "dd 'de' MMM", { locale: ptBR })}</span>
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
             <div className="flex flex-col text-right gap-2">
-              <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">{t('end') || "Fim"}</span>
+              <span className="text-[11px] uppercase font-bold text-muted-foreground tracking-wider">{t('end') || "Fim"}</span>
               <span className="text-sm font-bold">{format(new Date(recess.endDate), "dd 'de' MMM", { locale: ptBR })}</span>
             </div>
           </div>

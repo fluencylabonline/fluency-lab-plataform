@@ -161,7 +161,7 @@ export function TimeStep({ teacherId, date, selected, onChange, onBusyChange }: 
             >
               {start}
               {hasConflict && !isSelected && (
-                <span className="text-[9px] font-black uppercase leading-none tracking-wider">
+                <span className="text-[11px] font-black uppercase leading-none tracking-wider">
                   {t("timeConflict") || "Conflito"}
                 </span>
               )}

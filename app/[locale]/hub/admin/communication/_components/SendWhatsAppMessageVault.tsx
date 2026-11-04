@@ -266,7 +266,7 @@ export function SendWhatsAppMessageVault({ open, onOpenChange, templates }: Send
                           {p.type === "body" ? `Corpo {{${p.index + 1}}}` : `Botão (URL)`}
                         </Label>
                         {p.type === "body" && (
-                          <span className={cn("text-[9px]", isTooLong ? "text-destructive font-bold" : "text-muted-foreground")}>
+                          <span className={cn("text-[11px]", isTooLong ? "text-destructive font-bold" : "text-muted-foreground")}>
                             {p.value.length}/30
                           </span>
                         )}
@@ -277,7 +277,7 @@ export function SendWhatsAppMessageVault({ open, onOpenChange, templates }: Send
                         placeholder={p.type === "button" ? "Sufixo da URL (ex: welcome-link)" : "Valor..."}
                         className={cn("h-9 text-sm", isTooLong && "border-destructive! focus-visible:ring-destructive!")}
                       />
-                      {isTooLong && <p className="text-[9px] text-destructive italic">Limite de 30 caracteres excedido!</p>}
+                      {isTooLong && <p className="text-[11px] text-destructive italic">Limite de 30 caracteres excedido!</p>}
                     </div>
                   );
                 })}

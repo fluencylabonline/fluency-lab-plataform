@@ -146,7 +146,7 @@ export function PlansPageClient({ initialPlans, languages, user }: PlansPageClie
                           {plan.name}
                         </h3>
                         {!plan.isActive && (
-                          <Badge variant="outline" className="text-[9px] uppercase font-bold py-0 h-4 border-muted-foreground/30 text-muted-foreground">
+                          <Badge variant="outline" className="text-[11px] uppercase font-bold py-0 h-4 border-muted-foreground/30 text-muted-foreground">
                             {t("inactive") || "Inativo"}
                           </Badge>
                         )}
@@ -196,7 +196,7 @@ export function PlansPageClient({ initialPlans, languages, user }: PlansPageClie
                         <Clock className="w-3.5 h-3.5 text-primary" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[9px] uppercase font-bold text-muted-foreground leading-none">{t("frequency") || "Frequência"}</span>
+                        <span className="text-[11px] uppercase font-bold text-muted-foreground leading-none">{t("frequency") || "Frequência"}</span>
                         <span className="text-xs font-black text-foreground">{t("classesPerWeekLabel", { count: plan.classesPerWeek || 0 }) || `${plan.classesPerWeek}x / sem`}</span>
                       </div>
                     </div>
@@ -205,7 +205,7 @@ export function PlansPageClient({ initialPlans, languages, user }: PlansPageClie
                         <Calendar className="w-3.5 h-3.5 text-primary" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[9px] uppercase font-bold text-muted-foreground leading-none">{t("contract") || "Contrato"}</span>
+                        <span className="text-[11px] uppercase font-bold text-muted-foreground leading-none">{t("contract") || "Contrato"}</span>
                         <span className="text-xs font-black text-foreground">{t("monthsCount", { count: plan.durationMonths || 0 }) || `${plan.durationMonths} meses`}</span>
                       </div>
                     </div>

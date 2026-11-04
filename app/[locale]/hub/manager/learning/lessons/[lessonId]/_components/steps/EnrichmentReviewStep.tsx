@@ -448,17 +448,17 @@ function ItemCard({
                     </span>
                     <div className="flex items-center gap-1.5">
                         {item.metadata?.level && (
-                            <Badge variant="outline" className="text-[9px] h-4 py-0 px-1.5 opacity-70 font-bold bg-background/50 uppercase">
+                            <Badge variant="outline" className="text-[11px] h-4 py-0 px-1.5 opacity-70 font-bold bg-background/50 uppercase">
                                 {item.metadata.level}
                             </Badge>
                         )}
                         {item.type === "STRUCTURE" && structureMetadata?.structure_type && (
-                            <Badge className="text-[9px] h-4 py-0 px-1.5 bg-amber-500/20 text-amber-600 dark:text-amber-400 border-none font-bold">
+                            <Badge className="text-[11px] h-4 py-0 px-1.5 bg-amber-500/20 text-amber-600 dark:text-amber-400 border-none font-bold">
                                 {structureMetadata.structure_type}
                             </Badge>
                         )}
                         {item.type === "STRUCTURE" && structureMetadata?.syntactic_pattern && (
-                            <Badge variant="outline" className="text-[9px] h-4 py-0 px-1.5 border-amber-500/30 text-amber-600 font-black">
+                            <Badge variant="outline" className="text-[11px] h-4 py-0 px-1.5 border-amber-500/30 text-amber-600 font-black">
                                 {structureMetadata.syntactic_pattern}
                             </Badge>
                         )}
@@ -484,7 +484,7 @@ function ItemCard({
                         {vocabMetadata.forms && Object.keys(vocabMetadata.forms).length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-1">
                                 {Object.entries(vocabMetadata.forms).map(([key, val]) => (
-                                    <span key={key} className="text-[9px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground border border-border/50">
+                                    <span key={key} className="text-[11px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground border border-border/50">
                                         <span className="opacity-50 mr-1">{key}:</span>{val as string}
                                     </span>
                                 ))}
@@ -513,7 +513,7 @@ function ItemCard({
                                             <div className="flex flex-wrap gap-1 mt-2.5">
                                                 {example.word_order.map((token, idx) => (
                                                     <div key={idx} className="flex flex-col items-center">
-                                                        <span className="text-[9px] font-medium px-1.5 py-0.5 bg-primary/5 text-primary rounded border border-primary/10">
+                                                        <span className="text-[11px] font-medium px-1.5 py-0.5 bg-primary/5 text-primary rounded border border-primary/10">
                                                             {token.word}
                                                         </span>
                                                         <span className="text-[7px] uppercase font-black opacity-40 mt-0.5 tracking-tighter">
@@ -536,7 +536,7 @@ function ItemCard({
                 <Badge
                     variant={isCore ? "default" : "outline"}
                     className={cn(
-                        "text-[9px] font-black shrink-0 px-1.5 h-4 tracking-tighter",
+                        "text-[11px] font-black shrink-0 px-1.5 h-4 tracking-tighter",
                         isCore ? "bg-amber-500 hover:bg-amber-500 text-white border-transparent" : "opacity-40"
                     )}
                 >

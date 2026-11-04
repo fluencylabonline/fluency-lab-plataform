@@ -141,7 +141,7 @@ function StatusBadge({ status }: { status: Status }) {
     rescheduled: "bg-orange-500/10 text-orange-500 border-orange-500/20",
     canceled: "bg-red-500/10 text-red-500 border-red-500/20",
   };
-  return <Badge variant="outline" className={cn("text-[9px] font-black uppercase tracking-tighter", styles[status])}>{t(`status.${status}`)}</Badge>;
+  return <Badge variant="outline" className={cn("text-[11px] font-black uppercase tracking-tighter", styles[status])}>{t(`status.${status}`)}</Badge>;
 }
 
 const cap = (x: string) => x.charAt(0).toUpperCase() + x.slice(1);
@@ -183,11 +183,11 @@ export function StudentSchedulePhone() {
           <div className="grid grid-cols-2 gap-3">
             <div className="flex items-center gap-3 rounded-md border border-purple-500/20 bg-purple-500/10 p-3">
               <span className="size-10 rounded-lg bg-purple-500 grid place-items-center"><Ticket className="size-5 text-white" /></span>
-              <div><span className="block text-2xl font-black leading-none text-purple-600">{s.bonus}</span><span className="text-[9px] font-bold uppercase tracking-wider text-purple-600/70">{t("credits")}</span></div>
+              <div><span className="block text-2xl font-black leading-none text-purple-600">{s.bonus}</span><span className="text-[11px] font-bold uppercase tracking-wider text-purple-600/70">{t("credits")}</span></div>
             </div>
             <div className="flex items-center gap-3 rounded-md border border-amber-500/20 bg-amber-500/10 p-3">
               <span className="size-10 rounded-lg bg-amber-500 grid place-items-center"><RotateCcw className="size-5 text-white" /></span>
-              <div><span className="block text-2xl font-black leading-none text-amber-600">{s.left}<span className="text-sm font-bold">/{LIMIT}</span></span><span className="text-[9px] font-bold uppercase tracking-wider text-amber-600/70">{t("reschedulesLeft")}</span></div>
+              <div><span className="block text-2xl font-black leading-none text-amber-600">{s.left}<span className="text-sm font-bold">/{LIMIT}</span></span><span className="text-[11px] font-bold uppercase tracking-wider text-amber-600/70">{t("reschedulesLeft")}</span></div>
             </div>
           </div>
           <p className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground"><ShieldCheck className="size-3.5 shrink-0" />{t("creditsHint")}</p>

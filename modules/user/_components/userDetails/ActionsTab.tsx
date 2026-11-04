@@ -258,11 +258,11 @@ export function ActionsTab({
                 <div className="flex flex-col gap-6 items-center">
                   <div className="text-center">
                     {isFeeExpired ? (
-                      <Badge variant="outline" className="mb-2 font-black uppercase tracking-widest text-[9px] bg-red-500/10 text-red-500 border-red-500/20">
+                      <Badge variant="outline" className="mb-2 font-black uppercase tracking-widest text-[11px] bg-red-500/10 text-red-500 border-red-500/20">
                         Código PIX expirado
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="mb-2 font-black uppercase tracking-widest text-[9px] bg-amber-500/10 text-amber-500 border-amber-500/20">{t("waitingPayment")}</Badge>
+                      <Badge variant="outline" className="mb-2 font-black uppercase tracking-widest text-[11px] bg-amber-500/10 text-amber-500 border-amber-500/20">{t("waitingPayment")}</Badge>
                     )}
                     <p className="font-black text-sm tracking-tight">{t("feeGenerated")}</p>
                     {feeAmount && (
