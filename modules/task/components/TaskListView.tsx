@@ -78,7 +78,9 @@ export function TaskListView({ tasks, isLoading, initialInboxStatuses }: TaskLis
 
       <Shimmer loading={isLoading && tasks.length === 0} templateProps={{ tasks: mockTasks }}>
         {filteredTasks.length === 0 && !isLoading ? (
-          <EmptyResults title={t("noTasksFound")} description={t("tryDifferentSearch")} />
+          search.trim()
+            ? <EmptyResults searchQuery={search} title={t("noTasksFound")} description={t("tryDifferentSearch")} />
+            : <EmptyResults title={t("noTasksYet")} description={t("noTasksYetDesc")} />
         ) : (
           <Accordion 
             multiple

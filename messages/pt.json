@@ -3115,7 +3115,9 @@
       "statusNameRequired": "Nome da coluna é obrigatório",
       "titleRequired": "Título é obrigatório"
     },
-    "weekly": "Semanal"
+    "weekly": "Semanal",
+    "noTasksYet": "Nenhuma tarefa ainda",
+    "noTasksYetDesc": "Crie a primeira tarefa para começar a organizar o trabalho."
   },
   "UserManagement": {
     "accountActions": "Ações de Conta",

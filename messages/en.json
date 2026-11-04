@@ -3115,7 +3115,9 @@
       "statusNameRequired": "Column name is required",
       "titleRequired": "Title is required"
     },
-    "weekly": "Weekly"
+    "weekly": "Weekly",
+    "noTasksYet": "No tasks yet",
+    "noTasksYetDesc": "Create the first task to start organizing the work."
   },
   "UserManagement": {
     "accountActions": "Account Actions",
