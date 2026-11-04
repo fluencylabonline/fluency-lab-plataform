@@ -2993,9 +2993,20 @@
   },
   "Suspended": {
     "backToLogin": "Voltar para o login",
-    "description": "Você se despediu, mas saiba que as portas estarão sempre abertas. Sua jornada de aprendizado pode continuar quando você estiver pronto.",
     "talkToUs": "Falar com a gente",
-    "title": "Sentiremos sua falta!"
+    "cancelled": {
+      "title": "Sentiremos sua falta!",
+      "description": "Você se despediu, mas saiba que as portas estarão sempre abertas. Sua jornada de aprendizado pode continuar quando você estiver pronto."
+    },
+    "suspended": {
+      "title": "Sua conta está suspensa",
+      "description": "O acesso à plataforma foi pausado pela escola. Fale com a gente para entender o motivo e regularizar."
+    },
+    "delinquency": {
+      "title": "Sua matrícula foi cancelada",
+      "description": "A matrícula foi cancelada por mensalidades em aberto. Fale com a gente para regularizar e voltar a estudar."
+    },
+    "slogan": "FluencyLab — Onde seu futuro fala todas as línguas."
   },
   "Tasks": {
     "deleteProjectWarning": "Esta ação não pode ser desfeita.",

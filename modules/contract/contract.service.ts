@@ -355,6 +355,7 @@ export const contractService = {
     // 2. Deactivate user and clear pending cancellation info
     await userService.updateUser(instance.userId, { 
       isActive: false,
+      deactivationReason: "cancelled",
       cancellationPending: false,
       cancellationPixCode: null,
       cancellationPixImage: null,

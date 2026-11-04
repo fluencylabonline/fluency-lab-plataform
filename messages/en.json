@@ -2993,9 +2993,20 @@
   },
   "Suspended": {
     "backToLogin": "Back to login",
-    "description": "You've said goodbye, but know that our doors will always be open. Your learning journey can continue whenever you're ready.",
     "talkToUs": "Talk to us",
-    "title": "We'll miss you!"
+    "cancelled": {
+      "title": "We'll miss you!",
+      "description": "You've said goodbye, but know that our doors will always be open. Your learning journey can continue whenever you're ready."
+    },
+    "suspended": {
+      "title": "Your account is suspended",
+      "description": "The school has paused your access to the platform. Talk to us to understand why and sort it out."
+    },
+    "delinquency": {
+      "title": "Your enrollment was cancelled",
+      "description": "Your enrollment was cancelled due to unpaid monthly fees. Talk to us to settle it and get back to studying."
+    },
+    "slogan": "FluencyLab — Where your future speaks every language."
   },
   "Tasks": {
     "deleteProjectWarning": "This action cannot be undone.",

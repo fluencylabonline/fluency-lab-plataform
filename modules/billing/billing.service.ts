@@ -2247,6 +2247,8 @@ export const billingService = {
       await this.updateSubscription(sub.id, { status: "cancelled" });
       await userService.updateUser(student.id, { isActive: false });
     }
+    // finalizeCancellation marca "cancelled"; aqui o motivo real é inadimplência.
+    await userService.updateUser(student.id, { deactivationReason: "delinquency" });
     await this.updateSubscription(sub.id, { cancellationDate: new Date() });
 
     // Aluno

@@ -13,6 +13,9 @@ export const roleEnum = pgEnum("role", [
 export const localeEnum = pgEnum("locale_enum", locales);
 
 // Table
+export const DEACTIVATION_REASONS = ["cancelled", "delinquency", "admin"] as const;
+export type DeactivationReason = (typeof DEACTIVATION_REASONS)[number];
+
 export const usersTable = pgTable("users", {
   id: text("id").primaryKey(), // Using Firebase UID as primary key
   email: text("email").notNull().unique(),
@@ -108,6 +111,9 @@ export const usersTable = pgTable("users", {
   // jeito de saber que expirou era o aluno tentar pagar e falhar — agora dá
   // pra avisar e oferecer "gerar novo código" antes disso acontecer.
   cancellationPixExpiresAt: timestamp("cancellation_pix_expires_at"),
+  // Por que a conta está inativa: define o texto da tela /suspended
+  // (despedida só para quem cancelou). Null quando ativa.
+  deactivationReason: text("deactivation_reason").$type<DeactivationReason>(),
 
   // PWA Tracking
   pwaInstalled: boolean("pwa_installed").notNull().default(false),

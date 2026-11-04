@@ -33,7 +33,7 @@ export default async function SuspendedPage() {
                 <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] rounded-full bg-violet-500/5 blur-[120px]" />
             </div>
 
-            <SuspendedContent whatsappNumber={whatsappNumber} />
+            <SuspendedContent whatsappNumber={whatsappNumber} reason={user.deactivationReason ?? null} />
         </div>
     );
 }

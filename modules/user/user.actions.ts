@@ -615,7 +615,7 @@ export const requestSelfCancellationAction = protectedAction
         // Sem contrato: cancela direto
         const { schedulingService } = await import("../scheduling/scheduling.service");
         await schedulingService.cancelFutureClassesForStudent(ctx.user.id);
-        await userService.updateUser(ctx.user.id, { isActive: false });
+        await userService.updateUser(ctx.user.id, { isActive: false, deactivationReason: "cancelled" });
         await communicationService.sendFarewellEmail(ctx.user.email, ctx.user.name, ctx.user.locale as "pt" | "en");
         return { success: true, feeRequired: false };
       }

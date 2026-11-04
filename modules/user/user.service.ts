@@ -111,6 +111,10 @@ export const userService = {
   },
 
   async updateUser(id: string, data: Partial<NewUser>): Promise<User | undefined> {
+    // Reativar limpa o motivo; desativar sem motivo explícito = ação do admin.
+    if (data.isActive === true) data = { ...data, deactivationReason: null };
+    else if (data.isActive === false && data.deactivationReason === undefined) data = { ...data, deactivationReason: "admin" };
+
     const updatedUser = await userRepository.update(id, data);
     
     // Sync role to Firebase Auth if it was updated

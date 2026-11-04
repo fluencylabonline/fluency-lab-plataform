@@ -1,13 +1,26 @@
 "use client";
 
-import { LogOut, MessageCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { LogOut, MessageCircle, ShieldAlert } from "lucide-react";
+import type { DeactivationReason } from "@/modules/user/user.schema";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-export function SuspendedContent({ whatsappNumber }: { whatsappNumber: string | null }) {
+export function SuspendedContent({
+    whatsappNumber,
+    reason,
+}: {
+    whatsappNumber: string | null;
+    reason: DeactivationReason | null;
+}) {
     const t = useTranslations("Suspended");
+    // Despedida só para quem cancelou; suspensão (admin/inadimplência) diz como regularizar.
+    // Contas antigas sem motivo registrado recebem o texto neutro de suspensão.
+    const isFarewell = reason === "cancelled";
+    const variant = isFarewell ? "cancelled" : reason === "delinquency" ? "delinquency" : "suspended";
+    const Icon = isFarewell ? LogOut : ShieldAlert;
     const router = useRouter();
 
     const handleLogout = async () => {
@@ -21,46 +34,42 @@ export function SuspendedContent({ whatsappNumber }: { whatsappNumber: string | 
             <div className="relative inline-flex">
                 <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
                 <div className="relative bg-slate-100 dark:bg-slate-900 p-6 rounded-full border border-white/10">
-                    <LogOut className="w-12 h-12 text-primary" />
+                    <Icon className="w-12 h-12 text-primary" />
                 </div>
             </div>
 
             <div className="space-y-4">
                 <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-                    {t("title") || "Sentiremos sua falta!"}
+                    {t(`${variant}.title`)}
                 </h1>
                 <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed">
-                    {t("description") || "Você se despediu, mas saiba que as portas estarão sempre abertas. Sua jornada de aprendizado pode continuar quando você estiver pronto."}
+                    {t(`${variant}.description`)}
                 </p>
             </div>
 
             <div className="pt-4 flex flex-col gap-3">
                 {whatsappNumber && (
-                    <Button
-                        className="h-12 text-base font-medium rounded-md"
+                    <a
+                        href={`https://wa.me/${whatsappNumber}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn(buttonVariants(), "h-12 text-base font-medium rounded-md flex items-center justify-center gap-2")}
                     >
-                        <a
-                            href={`https://wa.me/${whatsappNumber}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2"
-                        >
-                            <MessageCircle className="w-5 h-5" />
-                            {t("talkToUs") || "Falar com a gente"}
-                        </a>
-                    </Button>
+                        <MessageCircle className="w-5 h-5" />
+                        {t("talkToUs")}
+                    </a>
                 )}
 
                 <button
                     onClick={handleLogout}
                     className="text-sm text-slate-500 hover:text-primary transition-colors py-2 font-medium"
                 >
-                    {t("backToLogin") || "Voltar para o login"}
+                    {t("backToLogin")}
                 </button>
             </div>
 
             <p className="text-xs text-slate-500/50 pt-8 italic">
-                FluencyLab — Onde seu futuro fala todas as línguas.
+                {t("slogan")}
             </p>
         </div>
     );
