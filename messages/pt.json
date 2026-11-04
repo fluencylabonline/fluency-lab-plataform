@@ -4416,5 +4416,12 @@
         "gentle": "Sutil e guiada"
       }
     }
+  },
+  "Errors": {
+    "title": "Algo deu errado",
+    "description": "Não foi possível carregar esta página. Tente de novo; se continuar, fale com a escola.",
+    "retry": "Tentar de novo",
+    "home": "Ir para o início",
+    "reference": "Referência: {digest}"
   }
 }

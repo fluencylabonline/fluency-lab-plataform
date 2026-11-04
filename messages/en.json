@@ -4417,5 +4417,12 @@
         "gentle": "Subtle and guided"
       }
     }
+  },
+  "Errors": {
+    "title": "Something went wrong",
+    "description": "We couldn't load this page. Please try again; if it keeps happening, contact the school.",
+    "retry": "Try again",
+    "home": "Go to home",
+    "reference": "Reference: {digest}"
   }
 }
