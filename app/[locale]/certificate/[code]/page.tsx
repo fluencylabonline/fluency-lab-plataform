@@ -94,7 +94,7 @@ export default async function VerifyCertificatePage({ params }: VerifyCertificat
             <XCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-destructive">Certificado Não Encontrado</h2>
             <p className="text-muted-foreground mt-2">
-              Não foi possível encontrar um certificado com o código <span className="font-mono font-bold text-foreground">&quo t;{code}&quot;</span>.
+              Não foi possível encontrar um certificado com o código <span className="font-mono font-bold text-foreground">&quot;{code}&quot;</span>.
               Certifique-se de que o código está correto ou entre em contato com o suporte.
             </p>
           </div>

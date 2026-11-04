@@ -80,7 +80,9 @@ export async function proxy(request: NextRequest) {
     const isPublicPage =
       ["/", "/privacy", "/terms", "/certificate", "/create-password", "/reset-password", "/offline", "/download", "/faq"].includes(
         normalizedPath,
-      ) || normalizedPath.startsWith("/verify") || normalizedPath.startsWith("/trial-class");
+      ) || normalizedPath.startsWith("/verify") || normalizedPath.startsWith("/trial-class")
+      // Verificação pública do certificado (QR/link impresso no PDF).
+      || normalizedPath.startsWith("/certificate/");
 
     if (!session && !isAuthPage && !isPublicPage) {
       // Redirect unauthenticated users to signin
