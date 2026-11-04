@@ -1,12 +1,14 @@
 "use client";
 import { motion } from "framer-motion";
 import { FinishedState } from "@/modules/immersion/immersion.types";
+import { useTranslations } from "next-intl";
 
 type WordleResultBannerProps = {
   finished: FinishedState;
 };
 
 export function WordleResultBanner({ finished }: WordleResultBannerProps) {
+  const t = useTranslations("Immersion.wordle");
   if (!finished) return null;
 
   return (
@@ -15,7 +17,7 @@ export function WordleResultBanner({ finished }: WordleResultBannerProps) {
       animate={{ opacity: 1, y: 0 }}
       className="text-center font-bold p-3 rounded-lg bg-neutral-100 dark:bg-neutral-800"
     >
-      {finished === "win" ? "🎉 Você acertou!" : `🥺 Errou.`}
+      {finished === "win" ? t("won") : t("lost")}
     </motion.div>
   );
 }

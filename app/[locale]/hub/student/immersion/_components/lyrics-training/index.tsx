@@ -24,6 +24,7 @@ import { LyricsTrainingResultBanner } from "./LyricsTrainingResultBanner";
 import { LyricsTrainingState } from "@/modules/immersion/immersion.types";
 import { Header } from "@/components/layout/header";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useTranslations } from "next-intl";
 
 function normalizeWord(s: string): string {
   return s
@@ -40,6 +41,7 @@ interface LyricsTrainingGameProps {
 export default function LyricsTrainingGame({
   initialProgress,
 }: LyricsTrainingGameProps) {
+  const t = useTranslations("Immersion.lyrics");
   const {
     loading,
     status,
@@ -148,7 +150,7 @@ export default function LyricsTrainingGame({
                     <Input
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Digite o nome da música ou artista..."
+                      placeholder={t("searchPlaceholder")}
                       className="h-12 rounded-2xl bg-muted/30"
                       onKeyDown={(e) => e.key === "Enter" && searchYouTube()}
                     />
@@ -206,7 +208,7 @@ export default function LyricsTrainingGame({
                   </div>
                 ) : (
                   <div className="text-sm text-muted-foreground/60 text-center py-8 border-2 border-dashed border-border/50 rounded-2xl">
-                    Procure uma música e selecione um vídeo.
+                    {t("searchHint")}
                   </div>
                 )}
 
@@ -306,8 +308,7 @@ export default function LyricsTrainingGame({
                     )}
                   </div>
                   <div className="text-sm text-muted-foreground max-w-sm mt-2">
-                    Prepare-se! Clique em iniciar, ouça com atenção e digite as
-                    palavras que faltam.
+                    {t("getReady")}
                   </div>
                 </div>
 
@@ -412,7 +413,8 @@ export default function LyricsTrainingGame({
                       className="rounded-full w-9 h-9 hover:bg-background shadow-sm"
                       onClick={chooseAnotherSong}
                       disabled={!isPlayerReady}
-                      title="Trocar música"
+                      title={t("changeSong")}
+                      aria-label={t("changeSong")}
                     >
                       <Music2 className="w-3 h-3" />
                     </Button>
@@ -479,7 +481,7 @@ export default function LyricsTrainingGame({
                         onClick={continueAfterCorrect}
                         disabled={!isPlayerReady}
                       >
-                        Continuar para o próximo{" "}
+                        {t("continueNext")}{" "}
                         <Play className="w-4 h-4 ml-2" />
                       </Button>
                     </div>
@@ -510,7 +512,7 @@ export default function LyricsTrainingGame({
                             style={{ animationDelay: "300ms" }}
                           />
                         </div>
-                        Ouvindo... aguarde a próxima lacuna.
+                        {t("listening")}
                       </div>
                     </div>
                   )}

@@ -14,6 +14,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useTranslations } from "next-intl";
 
 type WordleHistoryModalProps = {
   open: boolean;
@@ -26,6 +27,7 @@ export function WordleHistoryModal({
   onOpenChange,
   entries,
 }: WordleHistoryModalProps) {
+  const t = useTranslations("Immersion.wordle");
   const groups: { dayLabel: string; entries: PlayedEntry[] }[] = [];
   const map = new Map<string, PlayedEntry[]>();
 
@@ -53,7 +55,7 @@ export function WordleHistoryModal({
       <VaultContent className="max-w-md">
         <VaultHeader>
           <VaultTitle className="text-xl tracking-wide">
-            Histórico de Jogadas
+            {t("historyTitle")}
           </VaultTitle>
         </VaultHeader>
 

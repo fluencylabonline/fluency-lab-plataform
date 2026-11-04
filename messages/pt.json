@@ -4679,5 +4679,76 @@
     "french": "Francês",
     "german": "Alemão",
     "italian": "Italiano"
+  },
+  "Immersion": {
+    "carousel": {
+      "practice": "Prática",
+      "underConstruction": "Em construção"
+    },
+    "lyrics": {
+      "searchPlaceholder": "Digite o nome da música ou artista...",
+      "searchHint": "Procure uma música e selecione um vídeo.",
+      "getReady": "Prepare-se! Clique em iniciar, ouça com atenção e digite as palavras que faltam.",
+      "changeSong": "Trocar música",
+      "continueNext": "Continuar para o próximo",
+      "listening": "Ouvindo... aguarde a próxima lacuna.",
+      "finished": "Você terminou!",
+      "song": "Música",
+      "playerLoading": "O player ainda está carregando...",
+      "connectionFailed": "Falha na conexão."
+    },
+    "wordLadder": {
+      "options": "Opções",
+      "notEnoughWords": "Poucas palavras no seu vocabulário para gerar um desafio.",
+      "congrats": "Parabéns!",
+      "gameOver": "Fim de jogo",
+      "completed": "{count, plural, one {Você completou a escada em # passo!} other {Você completou a escada em # passos!}}",
+      "notReached": "Você não conseguiu chegar ao objetivo.",
+      "start": "Início",
+      "undo": "Desfazer último passo",
+      "fewWords": "Poucas palavras disponíveis para este idioma",
+      "noSolution": "Não foi possível gerar um desafio com solução",
+      "noSolutionDesc": "Seu vocabulário atual é limitado para este idioma.",
+      "wordNotFound": "Palavra não encontrada",
+      "wordNotFoundDesc": "Não está no seu vocabulário disponível",
+      "wordUsed": "Palavra já usada",
+      "deadEnd": "Essa palavra não leva ao objetivo!",
+      "deadEndDesc": "Você pode desfazer o movimento para tentar outro caminho.",
+      "noPath": "Não há caminho disponível até o objetivo",
+      "searchingDictionary": "Buscando no dicionário...",
+      "detailsNotFound": "Não conseguimos encontrar os detalhes para esta palavra.",
+      "noDefinition": "Nenhuma definição encontrada.",
+      "easy": "Fácil",
+      "medium": "Médio",
+      "hard": "Difícil",
+      "settings": "Configurações",
+      "difficultyNext": "Dificuldade (próximo jogo)",
+      "hint": "Dica",
+      "hintDesc": "Revelar próxima palavra",
+      "solution": "Solução",
+      "solutionDesc": "Revelar todo o caminho",
+      "won": "Você conseguiu!",
+      "reachedGoal": "{count, plural, one {Você chegou em {goal} em # passo.} other {Você chegou em {goal} em # passos.}}",
+      "missedGoal": "Você não chegou em {goal} a tempo."
+    },
+    "wordle": {
+      "history": "Histórico",
+      "noWords": "Sem palavras disponíveis no seu vocabulário.",
+      "congrats": "Parabéns!",
+      "tooBad": "Que pena...",
+      "guessed": "{count, plural, one {Você acertou a palavra em # tentativa!} other {Você acertou a palavra em # tentativas!}}",
+      "wordWas": "Não foi desta vez. A palavra era:",
+      "wordNotFound": "Palavra não encontrada",
+      "wordNotFoundDesc": "Não está no seu vocabulário disponível",
+      "historyTitle": "Histórico de jogadas",
+      "won": "🎉 Você acertou!",
+      "lost": "🥺 Errou."
+    },
+    "details": {
+      "notFound": "Não conseguimos encontrar as definições para esta palavra agora.",
+      "noImage": "Nenhuma imagem disponível.",
+      "noDefinition": "Nenhuma definição encontrada.",
+      "synonyms": "Sinônimos"
+    }
   }
 }

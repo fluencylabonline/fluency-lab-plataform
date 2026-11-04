@@ -21,6 +21,7 @@ import {
   recordImmersionResultAction 
 } from "@/modules/immersion/immersion.actions";
 import { pickTargetWord, getAvailableWords } from "../Database";
+import { useTranslations } from "next-intl";
 
 const guessResultScore: Record<CellState, number> = {
   empty: 0,
@@ -42,6 +43,7 @@ export function useWordleGame({
   initialHistory,
   selectedLang: serverSelectedLang,
 }: WordleGameProps) {
+  const t = useTranslations("Immersion.wordle");
   // Persistence logic: LocalStorage vs Server
   const initialPersisted = useMemo(() => loadPersistedWordleState(), []);
   
@@ -167,8 +169,8 @@ export function useWordleGame({
     // or we could implement a check against a larger list if we had one.
     if (!availableWordSet.has(normalized)) {
       triggerShake();
-      toast.error("Palavra não encontrada", {
-        description: "Não está no seu vocabulário disponível",
+      toast.error(t("wordNotFound"), {
+        description: t("wordNotFoundDesc"),
       });
       return;
     }
@@ -220,7 +222,7 @@ export function useWordleGame({
         setHistoryEntries(prev => [result, ...prev]);
       }
     }
-  }, [availableWordSet, current, finished, guesses, length, maxAttempts, selectedLang, syncToServer, target, triggerShake]);
+  }, [t, availableWordSet, current, finished, guesses, length, maxAttempts, selectedLang, syncToServer, target, triggerShake]);
 
   const onLetter = useCallback(
     (ch: string) => setCurrent((p) => (p.length >= length ? p : p + ch)),

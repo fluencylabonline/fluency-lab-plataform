@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { WordLookup } from "../WordLookup";
 import { ImmersionButton } from "../ImmersionButton";
+import { useTranslations } from "next-intl";
 
 type WordleDetailsModalProps = {
   open: boolean;
@@ -27,6 +28,7 @@ export function WordleDetailsModal({
   lang,
   onPlayAgain,
 }: WordleDetailsModalProps) {
+  const t = useTranslations("Immersion.details");
   return (
     <Vault open={open} onOpenChange={onOpenChange}>
       <VaultContent className="max-w-md">
@@ -56,7 +58,7 @@ export function WordleDetailsModal({
                   <div className="flex flex-col items-center justify-center gap-4 py-10 text-center bg-muted/20 rounded-2xl border border-dashed border-border/60 mx-1">
                     <div className="text-4xl opacity-50">📚</div>
                     <div className="text-muted-foreground text-sm max-w-[220px]">
-                      Não conseguimos encontrar as definições para esta palavra agora.
+                      {t("notFound")}
                     </div>
                     <Button
                       variant="secondary"
@@ -80,7 +82,7 @@ export function WordleDetailsModal({
                         </div>
                       ) : !image ? (
                         <p className="text-sm italic text-muted-foreground text-center py-2">
-                          Nenhuma imagem disponível.
+                          {t("noImage")}
                         </p>
                       ) : (
                         <div className="space-y-2">
@@ -124,7 +126,7 @@ export function WordleDetailsModal({
                       </h3>
                       {details.definitions.length === 0 ? (
                         <p className="text-sm italic text-muted-foreground">
-                          Nenhuma definição encontrada.
+                          {t("noDefinition")}
                         </p>
                       ) : (
                         <ul className="space-y-3">
@@ -147,7 +149,7 @@ export function WordleDetailsModal({
                     {details.synonyms.length > 0 && (
                       <div className="bg-muted/30 p-4 rounded-2xl border border-border/40 space-y-3">
                         <h3 className="flex items-center gap-2 text-xs font-bold text-foreground uppercase tracking-wider opacity-80">
-                          <span className="text-primary text-base">✨</span> Sinônimos
+                          <span className="text-primary text-base">✨</span> {t("synonyms")}
                         </h3>
                         <div className="flex flex-wrap gap-2">
                           {details.synonyms.slice(0, 6).map((s, idx) => (

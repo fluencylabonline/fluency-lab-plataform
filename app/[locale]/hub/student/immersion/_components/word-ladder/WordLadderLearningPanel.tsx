@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import { WordLookup } from "../WordLookup";
+import { useTranslations } from "next-intl";
 
 type WordLadderLearningPanelProps = {
   word: string;
@@ -16,6 +17,7 @@ export function WordLadderLearningPanel({
   lang,
   enabled,
 }: WordLadderLearningPanelProps) {
+  const t = useTranslations("Immersion.wordLadder");
   return (
     <WordLookup word={word} lang={lang} enabled={enabled}>
       {({ detailsLoading, details, imageLoading, image, retry }) => (
@@ -41,13 +43,13 @@ export function WordLadderLearningPanel({
               <div className="flex flex-col items-center justify-center py-12 gap-4">
                 <Spinner className="w-8 h-8 text-primary animate-spin-slow" />
                 <span className="text-sm text-muted-foreground font-medium animate-pulse">
-                  Buscando no dicionário...
+                  {t("searchingDictionary")}
                 </span>
               </div>
             ) : !details ? (
               <div className="flex flex-col items-center justify-center gap-4 py-10 text-center bg-muted/20 rounded-2xl border border-dashed border-border/60">
                 <div className="text-muted-foreground text-sm max-w-[260px]">
-                  Não conseguimos encontrar os detalhes para esta palavra.
+                  {t("detailsNotFound")}
                 </div>
                 <Button
                   variant="secondary"
@@ -120,7 +122,7 @@ export function WordLadderLearningPanel({
                   </h3>
                   {details.definitions.length === 0 ? (
                     <p className="text-sm italic text-muted-foreground pl-7">
-                      Nenhuma definição encontrada.
+                      {t("noDefinition")}
                     </p>
                   ) : (
                     <ul className="space-y-3 pl-1 text-foreground/90 text-[15px] leading-relaxed">

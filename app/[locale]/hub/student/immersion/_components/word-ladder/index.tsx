@@ -17,8 +17,10 @@ import { LanguageSelect } from "../LanguageSelect";
 import { useWordLadderGame, WordLadderGameProps } from "./useWordLadderGame";
 import { WordDetailsModal } from "../WordDetailsModal";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useTranslations } from "next-intl";
 
 export default function WordLadderGame(props: WordLadderGameProps) {
+  const t = useTranslations("Immersion.wordLadder");
   const {
     loading,
     status,
@@ -73,7 +75,7 @@ export default function WordLadderGame(props: WordLadderGameProps) {
     {
       icon: <Settings2 className="w-5 h-5" />,
       onClick: () => setOptionsOpen(true),
-      label: "Opções",
+      label: t("options"),
       className: "rounded-full"
     }
   ];
@@ -91,7 +93,7 @@ export default function WordLadderGame(props: WordLadderGameProps) {
         <div className="container flex-1 flex flex-col items-center justify-center gap-4 p-4 text-center">
           <div className="text-3xl">🧩</div>
           <div className="text-muted-foreground font-medium">
-            Poucas palavras no seu vocabulário para gerar um desafio.
+            {t("notEnoughWords")}
           </div>
           <ImmersionButton 
             variant="outline"
@@ -201,17 +203,17 @@ export default function WordLadderGame(props: WordLadderGameProps) {
                       {status === "win" ? "🎉" : "🥺"}
                     </div>
                     <h2 className="text-3xl font-black uppercase tracking-tighter">
-                      {status === "win" ? "Parabéns!" : "Fim de jogo"}
+                      {status === "win" ? t("congrats") : t("gameOver")}
                     </h2>
                     <p className="text-muted-foreground font-medium">
                       {status === "win" 
-                        ? `Você completou a escada em ${steps.length - 1} passos!` 
-                        : "Você não conseguiu chegar ao objetivo."}
+                        ? t("completed", { count: steps.length - 1 })
+                        : t("notReached")}
                     </p>
                     
                     <div className="mt-2 flex items-center gap-4 px-6 py-3 rounded-2xl bg-primary/10 border border-primary/20">
                       <div className="flex flex-col">
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Início</span>
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">{t("start")}</span>
                         <span className="text-xl font-black tracking-widest text-primary uppercase">{startWord}</span>
                       </div>
                       <ArrowRight className="w-5 h-5 text-primary/40" />
@@ -230,7 +232,7 @@ export default function WordLadderGame(props: WordLadderGameProps) {
                         onClick={() => undo()}
                       >
                         <Undo2 className="w-5 h-5 mr-2" />
-                        Desfazer último passo
+                        {t("undo")}
                       </ImmersionButton>
                     )}
                     

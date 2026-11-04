@@ -1,6 +1,7 @@
 "use client";
 
 import { ImmersionButton } from "../ImmersionButton";
+import { useTranslations } from "next-intl";
 
 type WordLadderResultBannerProps = {
   status: "win" | "end";
@@ -17,12 +18,13 @@ export function WordLadderResultBanner({
   goalWord,
   onPlayAgain,
 }: WordLadderResultBannerProps) {
+  const t = useTranslations("Immersion.wordLadder");
 
-  const title = status === "win" ? "Você conseguiu!" : "Fim de jogo";
+  const title = status === "win" ? t("won") : t("gameOver");
   const subtitle =
     status === "win"
-      ? `Você chegou em ${goalWord.toUpperCase()} em ${stepsCount} passos.`
-      : `Você não chegou em ${goalWord.toUpperCase()} a tempo.`;
+      ? t("reachedGoal", { goal: goalWord.toUpperCase(), count: stepsCount })
+      : t("missedGoal", { goal: goalWord.toUpperCase() });
 
   return (
     <div className="w-full flex flex-col items-center max-w-lg rounded-3xl border border-border/50 bg-background/80 backdrop-blur-md p-6 shadow-xl ring-1 ring-black/5 dark:ring-white/5">

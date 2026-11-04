@@ -7,6 +7,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   wordle: ALargeSmall,
@@ -27,10 +28,11 @@ interface ActivityCarouselProps {
 }
 
 export function ActivityCarousel({ items }: ActivityCarouselProps) {
+  const t = useTranslations("Immersion.carousel");
   return (
     <div className="space-y-4" data-tour="student-immersion.activities">
       <h3 className="text-lg font-bold text-muted-foreground ml-1">
-        Prática
+        {t("practice")}
       </h3>
       
       <Carousel
@@ -63,7 +65,7 @@ export function ActivityCarousel({ items }: ActivityCarouselProps) {
                     {item.comingSoon && (
                       <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white/90 backdrop-blur-md border border-white/10">
                         <Construction className="h-3 w-3" />
-                        Em construção
+                        {t("underConstruction")}
                       </div>
                     )}
                   </div>

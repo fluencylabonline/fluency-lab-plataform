@@ -4679,5 +4679,76 @@
     "french": "French",
     "german": "German",
     "italian": "Italian"
+  },
+  "Immersion": {
+    "carousel": {
+      "practice": "Practice",
+      "underConstruction": "Under construction"
+    },
+    "lyrics": {
+      "searchPlaceholder": "Type the song or artist name...",
+      "searchHint": "Search for a song and pick a video.",
+      "getReady": "Get ready! Click start, listen carefully and type the missing words.",
+      "changeSong": "Change song",
+      "continueNext": "Continue to the next",
+      "listening": "Listening... wait for the next gap.",
+      "finished": "You finished!",
+      "song": "Song",
+      "playerLoading": "The player is still loading...",
+      "connectionFailed": "Connection failed."
+    },
+    "wordLadder": {
+      "options": "Options",
+      "notEnoughWords": "Too few words in your vocabulary to build a challenge.",
+      "congrats": "Congratulations!",
+      "gameOver": "Game over",
+      "completed": "{count, plural, one {You completed the ladder in # step!} other {You completed the ladder in # steps!}}",
+      "notReached": "You didn't reach the goal.",
+      "start": "Start",
+      "undo": "Undo last step",
+      "fewWords": "Too few words available for this language",
+      "noSolution": "Couldn't build a solvable challenge",
+      "noSolutionDesc": "Your current vocabulary is limited for this language.",
+      "wordNotFound": "Word not found",
+      "wordNotFoundDesc": "It's not in your available vocabulary",
+      "wordUsed": "Word already used",
+      "deadEnd": "This word doesn't lead to the goal!",
+      "deadEndDesc": "You can undo the move to try another path.",
+      "noPath": "There's no path to the goal",
+      "searchingDictionary": "Searching the dictionary...",
+      "detailsNotFound": "We couldn't find the details for this word.",
+      "noDefinition": "No definition found.",
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard",
+      "settings": "Settings",
+      "difficultyNext": "Difficulty (next game)",
+      "hint": "Hint",
+      "hintDesc": "Reveal the next word",
+      "solution": "Solution",
+      "solutionDesc": "Reveal the whole path",
+      "won": "You did it!",
+      "reachedGoal": "{count, plural, one {You reached {goal} in # step.} other {You reached {goal} in # steps.}}",
+      "missedGoal": "You didn't reach {goal} in time."
+    },
+    "wordle": {
+      "history": "History",
+      "noWords": "No words available in your vocabulary.",
+      "congrats": "Congratulations!",
+      "tooBad": "Too bad...",
+      "guessed": "{count, plural, one {You guessed the word in # try!} other {You guessed the word in # tries!}}",
+      "wordWas": "Not this time. The word was:",
+      "wordNotFound": "Word not found",
+      "wordNotFoundDesc": "It's not in your available vocabulary",
+      "historyTitle": "Game history",
+      "won": "🎉 You got it!",
+      "lost": "🥺 Missed."
+    },
+    "details": {
+      "notFound": "We couldn't find the definitions for this word right now.",
+      "noImage": "No image available.",
+      "noDefinition": "No definition found.",
+      "synonyms": "Synonyms"
+    }
   }
 }

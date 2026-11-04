@@ -17,8 +17,10 @@ import { Header } from "@/components/layout/header";
 import { History } from "lucide-react";
 import { LanguageSelect } from "../LanguageSelect";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useTranslations } from "next-intl";
 
 export default function WordleGame(props: WordleGameProps) {
+  const t = useTranslations("Immersion.wordle");
   const {
     loading,
     target,
@@ -66,7 +68,7 @@ export default function WordleGame(props: WordleGameProps) {
     {
       icon: <History className="w-5 h-5" />,
       onClick: () => setHistoryOpen(true),
-      label: "Histórico",
+      label: t("history"),
       className: "rounded-full"
     }
   ];
@@ -83,7 +85,7 @@ export default function WordleGame(props: WordleGameProps) {
         <div className="container flex-1 flex flex-col items-center justify-center gap-4 p-4 text-center">
           <div className="text-3xl">🧩</div>
           <div className="text-muted-foreground font-medium">
-            Sem palavras disponíveis no seu vocabulário.
+            {t("noWords")}
           </div>
           <ImmersionButton 
             variant="outline"
@@ -179,12 +181,12 @@ export default function WordleGame(props: WordleGameProps) {
                       {finished === "win" ? "🎉" : "🥺"}
                     </div>
                     <h2 className="text-3xl font-black uppercase tracking-tighter">
-                      {finished === "win" ? "Parabéns!" : "Que pena..."}
+                      {finished === "win" ? t("congrats") : t("tooBad")}
                     </h2>
                     <p className="text-muted-foreground font-medium">
                       {finished === "win" 
-                        ? `Você acertou a palavra em ${guesses.length} ${guesses.length === 1 ? 'tentativa' : 'tentativas'}!` 
-                        : "Não foi desta vez. A palavra era:"}
+                        ? t("guessed", { count: guesses.length })
+                        : t("wordWas")}
                     </p>
                     
                     <div className="mt-2 px-6 py-3 rounded-2xl bg-primary/10 border border-primary/20">

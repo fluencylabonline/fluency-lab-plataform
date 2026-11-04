@@ -140,6 +140,7 @@ interface LyricsTrainingProps {
 }
 
 export function useLyricsTrainingGame({ initialProgress }: LyricsTrainingProps) {
+  const t = useTranslations("Immersion.lyrics");
   const tLyrics = useTranslations("LyricsSync");
   // Persistence logic: LocalStorage vs Server
   const initialPersisted = useMemo(() => loadPersistedLyricsTrainingState(), []);
@@ -411,7 +412,7 @@ export function useLyricsTrainingGame({ initialProgress }: LyricsTrainingProps) 
     (resumeIndex?: number, preserveProgress?: boolean) => {
       if (!synced.length) return;
       if (!isPlayerReady) {
-        toast.error("O player ainda está carregando...");
+        toast.error(t("playerLoading"));
         return;
       }
       pauseLockIndexRef.current = null;
@@ -442,7 +443,7 @@ export function useLyricsTrainingGame({ initialProgress }: LyricsTrainingProps) 
       });
       startLoop();
     },
-    [computeGapForIndex, isPlayerReady, safePlayerCall, startLoop, synced]
+    [t, computeGapForIndex, isPlayerReady, safePlayerCall, startLoop, synced]
   );
 
   const stopPlayback = useCallback(() => {
@@ -628,11 +629,11 @@ export function useLyricsTrainingGame({ initialProgress }: LyricsTrainingProps) 
       const items = Array.isArray(data?.items) ? data.items : [];
       setResults(items);
     } catch {
-      setSearchError("Falha na conexão.");
+      setSearchError(t("connectionFailed"));
     } finally {
       setSearching(false);
     }
-  }, [search]);
+  }, [t, search]);
 
   const chooseVideo = useCallback((item: YouTubeVideo) => {
     const url = `https://www.youtube.com/watch?v=${item.videoId}`;

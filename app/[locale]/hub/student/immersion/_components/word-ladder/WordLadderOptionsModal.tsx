@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Vault, VaultContent, VaultHeader, VaultTitle } from "@/components/ui/vault";
 import { Lightbulb, Eye, GraduationCap, BarChart } from "lucide-react";
 import { Difficulty } from "@/modules/immersion/immersion.types";
+import { useTranslations } from "next-intl";
 
 interface WordLadderOptionsModalProps {
   open: boolean;
@@ -30,23 +31,24 @@ export function WordLadderOptionsModal({
   canHint,
   canReveal
 }: WordLadderOptionsModalProps) {
+  const t = useTranslations("Immersion.wordLadder");
   const difficulties: { label: string; value: Difficulty; color: string }[] = [
-    { label: "Fácil", value: "easy", color: "text-green-500" },
-    { label: "Médio", value: "medium", color: "text-yellow-500" },
-    { label: "Difícil", value: "hard", color: "text-red-500" },
+    { label: t("easy"), value: "easy", color: "text-green-500" },
+    { label: t("medium"), value: "medium", color: "text-yellow-500" },
+    { label: t("hard"), value: "hard", color: "text-red-500" },
   ];
 
   return (
     <Vault open={open} onOpenChange={onOpenChange}>
       <VaultContent className="p-6">
         <VaultHeader>
-          <VaultTitle>Configurações</VaultTitle>
+          <VaultTitle>{t("settings")}</VaultTitle>
         </VaultHeader>
         
         <div className="flex flex-col gap-4 mt-6">
           <div className="flex flex-col gap-2">
             <span className="text-sm font-semibold text-muted-foreground ml-1 flex items-center gap-2">
-              <BarChart className="w-4 h-4" /> Dificuldade (próximo jogo)
+              <BarChart className="w-4 h-4" /> {t("difficultyNext")}
             </span>
             <div className="flex bg-muted/50 p-1 rounded-2xl gap-1">
               {difficulties.map((d) => (
@@ -90,8 +92,8 @@ export function WordLadderOptionsModal({
           >
             <Lightbulb className="w-5 h-5 text-yellow-500" />
             <div className="flex flex-col items-start">
-              <span className="font-bold">Dica</span>
-              <span className="text-xs opacity-70">Revelar próxima palavra</span>
+              <span className="font-bold">{t("hint")}</span>
+              <span className="text-xs opacity-70">{t("hintDesc")}</span>
             </div>
           </Button>
 
@@ -106,8 +108,8 @@ export function WordLadderOptionsModal({
           >
             <Eye className="w-5 h-5 text-blue-500" />
             <div className="flex flex-col items-start">
-              <span className="font-bold">Solução</span>
-              <span className="text-xs opacity-70">Revelar todo o caminho</span>
+              <span className="font-bold">{t("solution")}</span>
+              <span className="text-xs opacity-70">{t("solutionDesc")}</span>
             </div>
           </Button>
         </div>

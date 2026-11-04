@@ -21,6 +21,7 @@ import {
 } from "@/modules/immersion/immersion.actions";
 import { getAvailableWordsAction } from "@/modules/immersion/immersion.actions";
 import { useLanguages } from "@/hooks/data/use-languages";
+import { useTranslations } from "next-intl";
 
 const DEFAULT_LENGTH = 5 as const;
 const MAX_PATH_LENGTH = WORD_LADDER_MAX_ROWS;
@@ -231,6 +232,7 @@ export function useWordLadderGame({
   initialHistory,
   selectedLang: serverSelectedLang,
 }: WordLadderGameProps) {
+  const t = useTranslations("Immersion.wordLadder");
   const initialPersisted = useMemo(() => loadPersistedWordLadderState(), []);
   
   const baseState = useMemo(() => {
@@ -343,7 +345,7 @@ export function useWordLadderGame({
         setGoalWord("");
         setSteps([]);
         setLoading(false);
-        toast.error("Poucas palavras disponíveis para este idioma");
+        toast.error(t("fewWords"));
         return;
       }
 
@@ -352,8 +354,8 @@ export function useWordLadderGame({
       
       if (!puzzle) {
         setLoading(false);
-        toast.error("Não foi possível gerar um desafio com solução", {
-          description: "Seu vocabulário atual é limitado para este idioma.",
+        toast.error(t("noSolution"), {
+          description: t("noSolutionDesc"),
         });
         setStartWord("");
         setGoalWord("");
@@ -382,7 +384,7 @@ export function useWordLadderGame({
       syncToServer(newState);
       setLoading(false);
     },
-    [length, learningMode, difficulty, syncToServer]
+    [t, length, learningMode, difficulty, syncToServer]
   );
 
   const undo = useCallback(() => {
@@ -428,8 +430,8 @@ export function useWordLadderGame({
 
     if (!availableWordSet.has(normalized)) {
       triggerShake();
-      toast.error("Palavra não encontrada", {
-        description: "Não está no seu vocabulário disponível",
+      toast.error(t("wordNotFound"), {
+        description: t("wordNotFoundDesc"),
       });
       return;
     }
@@ -443,7 +445,7 @@ export function useWordLadderGame({
 
     if (steps.includes(normalized)) {
       triggerShake();
-      toast.error("Palavra já usada");
+      toast.error(t("wordUsed"));
       return;
     }
 
@@ -457,8 +459,8 @@ export function useWordLadderGame({
     const nextSolution = shortestPath(normalized, goalWord, patternIndex, exclude);
 
     if (!nextSolution && !isWin) {
-      toast.warning("Essa palavra não leva ao objetivo!", {
-        description: "Você pode desfazer o movimento para tentar outro caminho.",
+      toast.warning(t("deadEnd"), {
+        description: t("deadEndDesc"),
         action: {
           label: "Desfazer",
           onClick: () => undo(),
@@ -507,7 +509,7 @@ export function useWordLadderGame({
         setHistoryEntries(prev => [resultEntry, ...prev]);
       }
     }
-  }, [loading, finished, goalWord, current, length, availableWordSet, steps, patternIndex, startWord, learningMode, selectedLang, syncToServer, triggerShake, undo, difficulty]);
+  }, [t, loading, finished, goalWord, current, length, availableWordSet, steps, patternIndex, startWord, learningMode, selectedLang, syncToServer, triggerShake, undo, difficulty]);
 
   const onLetter = useCallback(
     (ch: string) => setCurrent((p) => (p.length >= length ? p : p + ch)),
@@ -519,14 +521,14 @@ export function useWordLadderGame({
   const hint = useCallback(() => {
     if (loading || finished) return;
     if (!solution || solution.length <= 1) {
-      toast.error("Não há caminho disponível até o objetivo");
+      toast.error(t("noPath"));
       return;
     }
     const next = solution[1]; 
     if (!next) return;
     setCurrent(next);
     toast.message("Dica aplicada");
-  }, [finished, loading, solution]);
+  }, [t, finished, loading, solution]);
 
   const revealSolution = useCallback(() => {
     if (!solution) return;

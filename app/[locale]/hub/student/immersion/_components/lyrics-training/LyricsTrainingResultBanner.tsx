@@ -1,6 +1,7 @@
 "use client";
 
 import { ImmersionButton } from "../ImmersionButton";
+import { useTranslations } from "next-intl";
 
 type LyricsTrainingResultBannerProps = {
   score: number;
@@ -19,6 +20,7 @@ export function LyricsTrainingResultBanner({
   onPlayAgain,
   onNewSong,
 }: LyricsTrainingResultBannerProps) {
+  const t = useTranslations("Immersion.lyrics");
   return (
     <div className="w-full flex flex-col items-center max-w-lg rounded-3xl border border-border/50 bg-background/80 backdrop-blur-md p-6 shadow-xl ring-1 ring-black/5 dark:ring-white/5">
       <div className="flex flex-col items-center justify-center space-y-2 pb-4 border-b border-border/50 text-center w-full">
@@ -26,10 +28,10 @@ export function LyricsTrainingResultBanner({
           Lyrics Training
         </span>
         <h2 className="text-2xl font-black tracking-wide text-foreground">
-          Você terminou!
+          {t("finished")}
         </h2>
         <p className="text-sm text-muted-foreground font-medium">
-          {track ? track : "Música"} {artist ? `• ${artist}` : ""}
+          {track ? track : t("song")} {artist ? `• ${artist}` : ""}
         </p>
         <div className="flex items-center gap-3 text-xs text-muted-foreground/80 pt-1">
           <span>Pontos: {score}</span>
@@ -46,7 +48,7 @@ export function LyricsTrainingResultBanner({
           tone="secondary"
           onClick={onNewSong}
         >
-          Trocar música
+          {t("changeSong")}
         </ImmersionButton>
       </div>
     </div>

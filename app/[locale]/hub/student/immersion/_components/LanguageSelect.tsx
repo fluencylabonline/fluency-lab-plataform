@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslations } from "next-intl";
 
 type LanguageSelectProps = {
   value: string;
@@ -17,17 +18,19 @@ type LanguageSelectProps = {
   getLabel?: (code: string) => ReactNode;
 };
 
-function defaultLanguageLabel(code: string) {
+const LANGUAGE_KEYS = {
+  en: "english",
+  pt: "portuguese",
+  es: "spanish",
+  de: "german",
+  fr: "french",
+  it: "italian",
+} as const;
+
+function defaultLanguageLabel(code: string, tLang: (key: (typeof LANGUAGE_KEYS)[keyof typeof LANGUAGE_KEYS]) => string) {
   const normalized = code.toLowerCase();
-  const map: Record<string, string> = {
-    en: "Inglês",
-    pt: "Português",
-    es: "Espanhol",
-    de: "Alemão",
-    fr: "Francês",
-    it: "Italiano",
-  };
-  return map[normalized] ?? normalized.toUpperCase();
+  const key = LANGUAGE_KEYS[normalized as keyof typeof LANGUAGE_KEYS];
+  return key ? tLang(key) : normalized.toUpperCase();
 }
 
 export function LanguageSelect({
@@ -37,6 +40,7 @@ export function LanguageSelect({
   disabled,
   getLabel,
 }: LanguageSelectProps) {
+  const tLang = useTranslations("Languages");
   const safeValue = (value || "").toLowerCase();
   const safeOptions = (options.length ? options : safeValue ? [safeValue] : [])
     .map((x) => x.toLowerCase())
@@ -61,7 +65,7 @@ export function LanguageSelect({
       <SelectContent>
         {safeOptions.map((code) => (
           <SelectItem key={code} value={code}>
-            {getLabel ? getLabel(code) : defaultLanguageLabel(code)}
+            {getLabel ? getLabel(code) : defaultLanguageLabel(code, tLang)}
           </SelectItem>
         ))}
       </SelectContent>
