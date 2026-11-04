@@ -19,5 +19,5 @@ describe("i18n: chaves de tradução", () => {
     const used = findUsedKeys(ROOT, ["app", "modules", "components", "hooks", "lib"]);
     const missing = [...new Set(used.filter((u) => !ptKeys.has(u.key)).map((u) => `${u.key}  <- ${u.file}`))].sort();
     expect(missing).toEqual([]);
-  });
+  }, 60_000); // varre o repositório inteiro
 });
