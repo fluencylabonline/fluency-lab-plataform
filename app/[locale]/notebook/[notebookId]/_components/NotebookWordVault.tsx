@@ -9,6 +9,7 @@ import {
   VaultDescription,
   VaultBody
 } from "@/components/ui/vault";
+import { useTranslations } from "next-intl";
 
 interface WordInfo {
   word: string;
@@ -24,6 +25,7 @@ interface NotebookWordVaultProps {
 }
 
 export function NotebookWordVault({ wordInfo, onClose }: NotebookWordVaultProps) {
+  const t = useTranslations("NotebookDictionary");
   return (
     <Vault open={!!wordInfo} onOpenChange={(open) => !open && onClose()}>
       <VaultContent showHandle>
@@ -48,7 +50,7 @@ export function NotebookWordVault({ wordInfo, onClose }: NotebookWordVaultProps)
           {/* Definição */}
           <div className="space-y-1.5">
             <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Definição
+              {t("definition")}
             </h4>
             <p className="text-base text-foreground font-medium leading-relaxed bg-muted/40 p-4 rounded-xl border border-border/50">
               {wordInfo?.definition}
@@ -78,7 +80,7 @@ export function NotebookWordVault({ wordInfo, onClose }: NotebookWordVaultProps)
           {wordInfo?.synonyms && wordInfo.synonyms.length > 0 && (
             <div className="space-y-2">
               <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Sinônimos
+                {t("synonyms")}
               </h4>
               <div className="flex flex-wrap gap-1.5">
                 {wordInfo.synonyms.map((syn, i) => (

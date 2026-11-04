@@ -4795,5 +4795,96 @@
       "noDefinition": "Nenhuma definição encontrada.",
       "synonyms": "Sinônimos"
     }
+  },
+  "NotebookActivities": {
+    "lyricsTraining": {
+      "title": "Lyrics Training (treino de música)",
+      "description": "Crie um exercício de completar lacunas em tempo real baseado em um clipe do YouTube e letra sincronizada."
+    },
+    "youtubeSync": {
+      "title": "YouTube sincronizado",
+      "description": "Incorpore um vídeo do YouTube sincronizado em tempo real entre professor e aluno."
+    },
+    "audioSync": {
+      "title": "Áudio sincronizado",
+      "description": "Incorpore um áudio sincronizado em tempo real entre professor e aluno."
+    },
+    "quiz": {
+      "title": "Quiz da IA (10 perguntas)",
+      "description": "Incorpore um quiz interativo de 10 perguntas geradas sobre o conteúdo da aula e corrigidas por IA."
+    },
+    "speaking": {
+      "title": "Gravador de voz (speaking)",
+      "description": "Insira um gravador de áudio no caderno para o aluno praticar a leitura e registrar sua voz."
+    }
+  },
+  "NotebookDictionary": {
+    "notFound": "Significado não encontrado.",
+    "singleWordOnly": "Selecione apenas uma palavra.",
+    "dictionary": "Dicionário / significado",
+    "definition": "Definição",
+    "synonyms": "Sinônimos"
+  },
+  "NotebookToolbar": {
+    "plansAndLessons": "Planos e lições do aluno",
+    "readerSettings": "Configurações do leitor",
+    "collaboratorMe": "{name} (você)",
+    "collaboratorOther": "{name} – clique para ir até o cursor",
+    "table": {
+      "insert": "Inserir tabela (3x3)",
+      "rowAbove": "↑ Linha",
+      "rowBelow": "↓ Linha",
+      "deleteRow": "Excluir linha",
+      "colLeft": "← Col",
+      "colRight": "Col →",
+      "deleteCol": "Excluir col",
+      "merge": "Mesclar",
+      "split": "Dividir",
+      "header": "Cabeçalho"
+    }
+  },
+  "SpeakingRecorder": {
+    "playError": "Erro ao reproduzir o áudio.",
+    "unsupported": "Seu navegador não oferece suporte para gravação de áudio.",
+    "micDenied": "Acesso ao microfone negado ou não encontrado.",
+    "nothingToSave": "Nenhuma gravação pronta ou caderno inválido.",
+    "uploadError": "Erro ao salvar o áudio no servidor.",
+    "sent": "Gravação enviada com sucesso!",
+    "registerError": "Erro ao registrar a gravação.",
+    "syncError": "Falha ao sincronizar o áudio.",
+    "removed": "Gravação removida do editor. O arquivo será excluído permanentemente em breve.",
+    "title": "Speaking practice (gravador de voz)",
+    "subtitle": "Grave sua pronúncia dos textos e envie para acompanhamento",
+    "delete": "Excluir gravação",
+    "recordedAudio": "Áudio gravado",
+    "recording": "Gravando sua voz...",
+    "localPreview": "Prévia da gravação local",
+    "temporary": "Temporário",
+    "recordAgain": "Gravar novamente",
+    "uploading": "Enviando ({progress}%)",
+    "saveToNotebook": "Salvar no caderno",
+    "start": "Iniciar gravação",
+    "clickToRecord": "Clique no microfone para gravar",
+    "readAloud": "Diga em voz alta o trecho selecionado",
+    "stop": "Parar gravação"
+  },
+  "YoutubeSync": {
+    "loadError": "Não foi possível carregar o vídeo.",
+    "searchFailed": "Não foi possível buscar vídeos.",
+    "searchError": "Erro na pesquisa de vídeos.",
+    "invalidUrl": "URL do YouTube inválida.",
+    "title": "YouTube sincronizado",
+    "description": "Pesquise vídeos diretamente ou cole um link para assistir com sincronização em tempo real.",
+    "searchTab": "Pesquisar vídeo",
+    "pasteTab": "Colar link",
+    "searchPlaceholder": "Pesquise por títulos, assuntos...",
+    "confirm": "Confirmar",
+    "speed": "Velocidade de reprodução",
+    "changeVideo": "Trocar vídeo",
+    "change": "Trocar",
+    "insertTitle": "Inserir YouTube sincronizado",
+    "pasteValidUrl": "Cole uma URL válida do YouTube.",
+    "insertWithUrl": "Inserir com URL",
+    "insertEmpty": "Inserir vazio"
   }
 }

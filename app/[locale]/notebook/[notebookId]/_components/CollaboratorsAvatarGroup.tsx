@@ -9,6 +9,7 @@ import {
   AvatarGroupCount,
   AvatarImage,
 } from "@/components/ui/avatar";
+import { useTranslations } from "next-intl";
 
 interface CollaboratorsAvatarGroupProps {
   user: {
@@ -35,6 +36,7 @@ export function CollaboratorsAvatarGroup({
   user,
   awareness,
 }: CollaboratorsAvatarGroupProps) {
+  const t = useTranslations("NotebookToolbar");
   const [onlineUsers, setOnlineUsers] = useState<
     { uid: string; name: string; color: string; photoUrl?: string | null }[]
   >([]);
@@ -123,7 +125,7 @@ export function CollaboratorsAvatarGroup({
           <div 
             key={onlineUser.uid} 
             className="relative group cursor-pointer"
-            title={`${onlineUser.name} ${isMe ? "(Você) - Clique para focar" : "- Clique para focar no cursor"}`}
+            title={isMe ? t("collaboratorMe", { name: onlineUser.name }) : t("collaboratorOther", { name: onlineUser.name })}
             onClick={() => !isMe && handleAvatarClick(onlineUser.name, onlineUser.color)}
           >
             <Avatar

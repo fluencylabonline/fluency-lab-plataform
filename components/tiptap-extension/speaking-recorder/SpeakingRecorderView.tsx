@@ -19,8 +19,10 @@ import { notify } from "@/components/ui/toaster";
 import { storage } from "@/lib/firebase-storage";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { registerNotebookAssetAction } from "@/modules/notebook/notebook.actions";
+import { useTranslations } from "next-intl";
 
 export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) {
+  const t = useTranslations("SpeakingRecorder");
   const { nodeId, audioUrl } = node.attrs;
 
   // Globals from Editor context
@@ -66,7 +68,7 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
         setIsPlaying(true);
       }).catch((err) => {
         console.error("Audio playback error:", err);
-        notify.error("Erro ao reproduzir o áudio.");
+        notify.error(t("playError"));
       });
     }
   };
@@ -114,7 +116,7 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
   const startRecording = async () => {
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        notify.error("Seu navegador não oferece suporte para gravação de áudio.");
+        notify.error(t("unsupported"));
         return;
       }
 
@@ -155,7 +157,7 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
       setLocalUrl(null);
     } catch (err) {
       console.error("Microphone access error:", err);
-      notify.error("Acesso ao microfone negado ou não encontrado.");
+      notify.error(t("micDenied"));
     }
   };
 
@@ -174,7 +176,7 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
 
   const handleUploadAudio = async () => {
     if (!audioBlob || !notebookId) {
-      notify.error("Nenhuma gravação pronta ou caderno inválido.");
+      notify.error(t("nothingToSave"));
       return;
     }
 
@@ -196,7 +198,7 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
       },
       (error) => {
         console.error("Storage upload error:", error);
-        notify.error("Erro ao salvar áudio no servidor.");
+        notify.error(t("uploadError"));
         setIsUploading(false);
       },
       async () => {
@@ -217,13 +219,13 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
               audioUrl: downloadUrl,
               filePath: storagePath,
             });
-            notify.success("Gravação de fala enviada com sucesso!");
+            notify.success(t("sent"));
           } else {
-            notify.error("Erro ao registrar gravação no banco de dados.");
+            notify.error(t("registerError"));
           }
         } catch (err) {
           console.error("Error finalizing audio upload:", err);
-          notify.error("Falha ao sincronizar o áudio no banco de dados.");
+          notify.error(t("syncError"));
         } finally {
           setIsUploading(false);
           setUploadProgress(0);
@@ -240,7 +242,7 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
       filePath: "",
     });
     resetRecording();
-    notify.success("Gravação removida do editor. O arquivo será excluído permanentemente em breve.");
+    notify.success(t("removed"));
   };
 
   // Determine permissions: students and teachers can manage their recordings
@@ -259,10 +261,10 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
             </div>
             <div>
               <h4 className="font-bold text-sm text-foreground">
-                Speaking Practice (Gravador de Voz)
+                {t("title")}
               </h4>
               <p className="text-xs text-muted-foreground font-normal">
-                Grave sua pronúncia dos textos e envie para acompanhamento
+                {t("subtitle")}
               </p>
             </div>
           </div>
@@ -272,7 +274,8 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
             <button
               onClick={handleDeleteAudio}
               className="p-2 hover:bg-red-500/10 hover:text-red-500 text-muted-foreground rounded-lg transition-colors cursor-pointer"
-              title="Excluir gravação"
+              title={t("delete")}
+              aria-label={t("delete")}
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -295,7 +298,7 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
                 <div className="flex items-center gap-2 justify-between text-xs text-muted-foreground font-medium">
                   <span className="flex items-center gap-1">
                     <FileAudio className="w-3.5 h-3.5 text-indigo-500" />
-                    Áudio Gravado
+                    {t("recordedAudio")}
                   </span>
                   <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
                 </div>
@@ -341,7 +344,7 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
                   <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping" />
                   {formatTime(seconds)}
                 </span>
-                <p className="text-xs text-muted-foreground">Gravando sua voz...</p>
+                <p className="text-xs text-muted-foreground">{t("recording")}</p>
                 
                 {/* Simulated Audio Wave Visualizer */}
                 <div className="flex items-center gap-1 h-6 mt-2">
@@ -362,7 +365,7 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
               /* Local preview before upload */
               <div className="w-full flex flex-col gap-3">
                 <p className="text-xs font-semibold text-center text-amber-600 dark:text-amber-400">
-                  Visualização da gravação local
+                  {t("localPreview")}
                 </p>
 
                 {/* Mini Local Player */}
@@ -376,7 +379,7 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
 
                   <div className="flex flex-col flex-1 gap-1 min-w-0">
                     <div className="flex items-center gap-2 justify-between text-xs text-muted-foreground">
-                      <span>Temporário</span>
+                      <span>{t("temporary")}</span>
                       <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
                     </div>
                     <input
@@ -407,7 +410,7 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
                     className="btn flex items-center gap-1.5 px-3 py-1.5 border border-muted hover:bg-muted text-xs font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
-                    Gravar Novamente
+                    {t("recordAgain")}
                   </button>
                   <button
                     onClick={handleUploadAudio}
@@ -417,12 +420,12 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
                     {isUploading ? (
                       <>
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        Enviando ({uploadProgress}%)
+                        {t("uploading", { progress: uploadProgress })}
                       </>
                     ) : (
                       <>
                         <Upload className="w-3.5 h-3.5" />
-                        Salvar no Caderno
+                        {t("saveToNotebook")}
                       </>
                     )}
                   </button>
@@ -434,13 +437,14 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
                 <button
                   onClick={startRecording}
                   className="w-14 h-14 flex items-center justify-center bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 hover:scale-105 hover:rotate-6 text-white rounded-full transition-all duration-200 cursor-pointer"
-                  title="Iniciar gravação"
+                  title={t("start")}
+                  aria-label={t("start")}
                 >
                   <Mic className="w-6 h-6" />
                 </button>
                 <div className="text-center">
-                  <p className="text-xs font-bold text-foreground">Clique no microfone para gravar</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Diga em voz alta o trecho selecionado</p>
+                  <p className="text-xs font-bold text-foreground">{t("clickToRecord")}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{t("readAloud")}</p>
                 </div>
               </div>
             )}
@@ -452,7 +456,7 @@ export function SpeakingRecorderView({ node, updateAttributes }: NodeViewProps) 
                 className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
               >
                 <Square className="w-3.5 h-3.5 fill-current" />
-                Parar Gravação
+                {t("stop")}
               </button>
             )}
           </div>

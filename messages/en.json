@@ -4795,5 +4795,96 @@
       "noDefinition": "No definition found.",
       "synonyms": "Synonyms"
     }
+  },
+  "NotebookActivities": {
+    "lyricsTraining": {
+      "title": "Lyrics Training (song practice)",
+      "description": "Create a real-time fill-in-the-gaps exercise based on a YouTube clip and synced lyrics."
+    },
+    "youtubeSync": {
+      "title": "Synced YouTube",
+      "description": "Embed a YouTube video synced in real time between teacher and student."
+    },
+    "audioSync": {
+      "title": "Synced audio",
+      "description": "Embed an audio track synced in real time between teacher and student."
+    },
+    "quiz": {
+      "title": "AI quiz (10 questions)",
+      "description": "Embed an interactive 10-question quiz generated from the class content and graded by AI."
+    },
+    "speaking": {
+      "title": "Voice recorder (speaking)",
+      "description": "Add an audio recorder to the notebook so the student can practice reading aloud and record their voice."
+    }
+  },
+  "NotebookDictionary": {
+    "notFound": "Meaning not found.",
+    "singleWordOnly": "Select a single word only.",
+    "dictionary": "Dictionary / meaning",
+    "definition": "Definition",
+    "synonyms": "Synonyms"
+  },
+  "NotebookToolbar": {
+    "plansAndLessons": "Student's plans and lessons",
+    "readerSettings": "Reader settings",
+    "collaboratorMe": "{name} (you)",
+    "collaboratorOther": "{name} – click to jump to their cursor",
+    "table": {
+      "insert": "Insert table (3x3)",
+      "rowAbove": "↑ Row",
+      "rowBelow": "↓ Row",
+      "deleteRow": "Delete row",
+      "colLeft": "← Col",
+      "colRight": "Col →",
+      "deleteCol": "Delete col",
+      "merge": "Merge",
+      "split": "Split",
+      "header": "Header"
+    }
+  },
+  "SpeakingRecorder": {
+    "playError": "Error playing the audio.",
+    "unsupported": "Your browser doesn't support audio recording.",
+    "micDenied": "Microphone access denied or not found.",
+    "nothingToSave": "No recording ready or invalid notebook.",
+    "uploadError": "Error saving the audio to the server.",
+    "sent": "Recording sent successfully!",
+    "registerError": "Error registering the recording.",
+    "syncError": "Failed to sync the audio.",
+    "removed": "Recording removed from the editor. The file will be permanently deleted soon.",
+    "title": "Speaking practice (voice recorder)",
+    "subtitle": "Record your pronunciation of the texts and send it for review",
+    "delete": "Delete recording",
+    "recordedAudio": "Recorded audio",
+    "recording": "Recording your voice...",
+    "localPreview": "Local recording preview",
+    "temporary": "Temporary",
+    "recordAgain": "Record again",
+    "uploading": "Uploading ({progress}%)",
+    "saveToNotebook": "Save to notebook",
+    "start": "Start recording",
+    "clickToRecord": "Click the microphone to record",
+    "readAloud": "Read the selected passage out loud",
+    "stop": "Stop recording"
+  },
+  "YoutubeSync": {
+    "loadError": "Couldn't load the video.",
+    "searchFailed": "Couldn't search for videos.",
+    "searchError": "Error searching for videos.",
+    "invalidUrl": "Invalid YouTube URL.",
+    "title": "Synced YouTube",
+    "description": "Search for videos or paste a link to watch with real-time sync.",
+    "searchTab": "Search video",
+    "pasteTab": "Paste link",
+    "searchPlaceholder": "Search by title, topic...",
+    "confirm": "Confirm",
+    "speed": "Playback speed",
+    "changeVideo": "Change video",
+    "change": "Change",
+    "insertTitle": "Insert synced YouTube",
+    "pasteValidUrl": "Paste a valid YouTube URL.",
+    "insertWithUrl": "Insert with URL",
+    "insertEmpty": "Insert empty"
   }
 }

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/vault";
 
 import type { Editor } from "@tiptap/react";
+import { useTranslations } from "next-intl";
 
 interface ActivityOption {
   id: string;
@@ -28,8 +29,8 @@ interface ActivityOption {
 const ACTIVITIES_OPTIONS: ActivityOption[] = [
   {
     id: "lyrics-training",
-    title: "Lyrics Training (Treino de Música)",
-    description: "Crie um exercício de completar lacunas em tempo real baseado em um clipe do YouTube e letra sincronizada.",
+    title: "lyricsTraining.title",
+    description: "lyricsTraining.description",
     icon: Music,
     iconBgClass: "bg-primary/10",
     iconColorClass: "text-primary",
@@ -37,8 +38,8 @@ const ACTIVITIES_OPTIONS: ActivityOption[] = [
   },
   {
     id: "youtube-sync",
-    title: "YouTube Sincronizado",
-    description: "Incorpore um vídeo do YouTube sincronizado em tempo real entre professor e aluno.",
+    title: "youtubeSync.title",
+    description: "youtubeSync.description",
     icon: Play,
     iconBgClass: "bg-red-500/10",
     iconColorClass: "text-red-500",
@@ -46,8 +47,8 @@ const ACTIVITIES_OPTIONS: ActivityOption[] = [
   },
   {
     id: "audio-sync",
-    title: "Áudio Sincronizado",
-    description: "Incorpore um áudio sincronizado em tempo real entre professor e aluno.",
+    title: "audioSync.title",
+    description: "audioSync.description",
     icon: Music2,
     iconBgClass: "bg-amber-500/10",
     iconColorClass: "text-amber-500",
@@ -55,8 +56,8 @@ const ACTIVITIES_OPTIONS: ActivityOption[] = [
   },
   {
     id: "quiz-generator",
-    title: "Quiz da IA (10 Perguntas)",
-    description: "Incorpore um quiz interativo de 10 perguntas geradas sobre o conteúdo da aula e corrigidas por IA.",
+    title: "quiz.title",
+    description: "quiz.description",
     icon: FileQuestionMark,
     iconBgClass: "bg-indigo-500/10",
     iconColorClass: "text-indigo-500",
@@ -64,8 +65,8 @@ const ACTIVITIES_OPTIONS: ActivityOption[] = [
   },
   {
     id: "speaking-recorder",
-    title: "Gravador de Voz (Speaking)",
-    description: "Insira um gravador de áudio no caderno para o aluno praticar a leitura e registrar sua voz.",
+    title: "speaking.title",
+    description: "speaking.description",
     icon: Mic,
     iconBgClass: "bg-pink-500/10",
     iconColorClass: "text-pink-600",
@@ -79,6 +80,7 @@ interface NotebookActivitiesVaultProps {
 }
 
 export function NotebookActivitiesVault({ open, onOpenChange }: NotebookActivitiesVaultProps) {
+  const t = useTranslations("NotebookActivities");
   const { editor } = useTiptapEditor();
   const [isAudioSyncOpen, setIsAudioSyncOpen] = useState(false);
 
@@ -127,10 +129,10 @@ export function NotebookActivitiesVault({ open, onOpenChange }: NotebookActiviti
                     </div>
                     <div className="space-y-1">
                       <h4 className="font-bold text-base text-foreground">
-                        {option.title}
+                        {t(option.title)}
                       </h4>
                       <p className="text-sm text-muted-foreground font-normal leading-normal">
-                        {option.description}
+                        {t(option.description)}
                       </p>
                     </div>
                   </button>

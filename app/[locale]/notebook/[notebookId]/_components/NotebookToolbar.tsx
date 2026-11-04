@@ -50,6 +50,7 @@ import {
   GraduationCap,
   Table as TableIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 // ─── AnimateHeight ────────────────────────────────────────────────
 //
@@ -134,6 +135,7 @@ export function NotebookToolbar({
   awareness,
   studentId,
 }: NotebookToolbarProps) {
+  const t = useTranslations("NotebookToolbar");
   const [isToolsVaultOpen, setIsToolsVaultOpen] = useState(false);
   const [isSettingsVaultOpen, setIsSettingsVaultOpen] = useState(false);
   const [isPlansVaultOpen, setIsPlansVaultOpen] = useState(false);
@@ -217,7 +219,7 @@ export function NotebookToolbar({
                 <Button
                   type="button"
                   variant="ghost"
-                  tooltip="Planos e Lições do Aluno"
+                  tooltip={t("plansAndLessons")}
                   onClick={() => setIsPlansVaultOpen(true)}
                 >
                   <GraduationCap className="tiptap-button-icon text-indigo-500 w-4 h-4" />
@@ -229,7 +231,7 @@ export function NotebookToolbar({
             <Button
               type="button"
               variant="ghost"
-              tooltip="Configurações do Leitor"
+              tooltip={t("readerSettings")}
               onClick={() => setIsSettingsVaultOpen(true)}
               className="tiptap-button shrink-0"
             >
@@ -377,7 +379,7 @@ export function NotebookToolbar({
                   <Button
                     type="button"
                     variant="ghost"
-                    tooltip="Planos e Lições do Aluno"
+                    tooltip={t("plansAndLessons")}
                     onClick={() => setIsPlansVaultOpen(true)}
                   >
                     <GraduationCap className="tiptap-button-icon text-indigo-500 w-4 h-4" />
@@ -389,7 +391,7 @@ export function NotebookToolbar({
               <Button
                 type="button"
                 variant="ghost"
-                tooltip="Configurações do Leitor"
+                tooltip={t("readerSettings")}
                 onClick={() => setIsSettingsVaultOpen(true)}
                 className="tiptap-button shrink-0"
               >

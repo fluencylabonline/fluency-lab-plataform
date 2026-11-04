@@ -9,12 +9,15 @@ import { Button } from "@/components/ui/button";
 import { notify } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
 import { NotebookWordVault } from "./NotebookWordVault";
+import { useTranslations } from "next-intl";
 
 interface NotebookBubbleMenuProps {
   editor: Editor | null;
 }
 
 export function NotebookBubbleMenu({ editor }: NotebookBubbleMenuProps) {
+  const tLang = useTranslations("Languages");
+  const t = useTranslations("NotebookDictionary");
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const [isWordLoading, setIsWordLoading] = useState<boolean>(false);
   const [wordInfo, setWordInfo] = useState<{
@@ -186,15 +189,9 @@ export function NotebookBubbleMenu({ editor }: NotebookBubbleMenuProps) {
       const synonyms = data.synonyms?.slice(0, 5) || [];
       const examples = data.examples?.slice(0, 3) || [];
       
-      const langNames: Record<string, string> = {
-        en: "Inglês",
-        pt: "Português",
-        es: "Espanhol",
-        fr: "Francês",
-        de: "Alemão",
-        it: "Italiano",
-      };
-      const langText = langNames[primaryLang] || (primaryLang ? primaryLang.toUpperCase() : "Inglês");
+      const langKeys = { en: "english", pt: "portuguese", es: "spanish", fr: "french", de: "german", it: "italian" } as const;
+      const langKey = langKeys[primaryLang as keyof typeof langKeys];
+      const langText = langKey ? tLang(langKey) : primaryLang ? primaryLang.toUpperCase() : tLang("english");
 
       setWordInfo({
         word,
@@ -204,7 +201,7 @@ export function NotebookBubbleMenu({ editor }: NotebookBubbleMenuProps) {
         language: langText
       });
     } catch {
-      notify.error("Significado não encontrado.");
+      notify.error(t("notFound"));
       setWordInfo(null);
     } finally {
       setIsWordLoading(false);
@@ -227,7 +224,7 @@ export function NotebookBubbleMenu({ editor }: NotebookBubbleMenuProps) {
     if (wordClean.split(/\s+/).length === 1) {
       fetchWordInfo(wordClean.toLowerCase());
     } else {
-      notify.error("Por favor, selecione apenas uma única palavra.");
+      notify.error(t("singleWordOnly"));
     }
   };
 
@@ -269,7 +266,8 @@ export function NotebookBubbleMenu({ editor }: NotebookBubbleMenuProps) {
             onClick={showWordDefinition}
             isLoading={isWordLoading}
             className="h-8 w-8 p-0"
-            title="Dicionário / Significado"
+            title={t("dictionary")}
+            aria-label={t("dictionary")}
           >
             <BookOpen className="w-4 h-4" />
           </Button>

@@ -34,6 +34,7 @@ import {
 
 // Hooks
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
+import { useTranslations } from "next-intl";
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -155,6 +156,7 @@ function TextAlignPanelContent({ onSelect }: { onSelect: () => void }) {
 // ─── Table Panel ────────────────────────────────────────────────
 
 function TablePanelContent({ onSelect }: { onSelect: () => void }) {
+  const t = useTranslations("NotebookToolbar.table");
   const { editor } = useTiptapEditor();
 
   if (!editor || !editor.isEditable) return null;
@@ -179,7 +181,7 @@ function TablePanelContent({ onSelect }: { onSelect: () => void }) {
           }}
         >
           <TableIcon className="tiptap-button-icon text-muted-foreground w-4 h-4" />
-          <span className="tiptap-button-text">Inserir Tabela (3x3)</span>
+          <span className="tiptap-button-text">{t("insert")}</span>
         </Button>
       </ToolbarGroup>
     );
@@ -210,7 +212,7 @@ function TablePanelContent({ onSelect }: { onSelect: () => void }) {
             showTooltip={false}
             onClick={run(() => editor.chain().focus().addRowBefore().run())}
           >
-            <span className="tiptap-button-text">↑ Linha</span>
+            <span className="tiptap-button-text">{t("rowAbove")}</span>
           </Button>
           <Button
             type="button"
@@ -218,7 +220,7 @@ function TablePanelContent({ onSelect }: { onSelect: () => void }) {
             showTooltip={false}
             onClick={run(() => editor.chain().focus().addRowAfter().run())}
           >
-            <span className="tiptap-button-text">↓ Linha</span>
+            <span className="tiptap-button-text">{t("rowBelow")}</span>
           </Button>
           <Button
             type="button"
@@ -228,7 +230,7 @@ function TablePanelContent({ onSelect }: { onSelect: () => void }) {
             className="text-destructive hover:bg-destructive/10 hover:text-destructive"
           >
             <Trash2 className="tiptap-button-icon w-4 h-4" />
-            <span className="tiptap-button-text">Excluir Linha</span>
+            <span className="tiptap-button-text">{t("deleteRow")}</span>
           </Button>
         </ToolbarGroup>
       </div>
@@ -242,7 +244,7 @@ function TablePanelContent({ onSelect }: { onSelect: () => void }) {
             showTooltip={false}
             onClick={run(() => editor.chain().focus().addColumnBefore().run())}
           >
-            <span className="tiptap-button-text">← Col</span>
+            <span className="tiptap-button-text">{t("colLeft")}</span>
           </Button>
           <Button
             type="button"
@@ -250,7 +252,7 @@ function TablePanelContent({ onSelect }: { onSelect: () => void }) {
             showTooltip={false}
             onClick={run(() => editor.chain().focus().addColumnAfter().run())}
           >
-            <span className="tiptap-button-text">Col →</span>
+            <span className="tiptap-button-text">{t("colRight")}</span>
           </Button>
           <Button
             type="button"
@@ -260,7 +262,7 @@ function TablePanelContent({ onSelect }: { onSelect: () => void }) {
             className="text-destructive hover:bg-destructive/10 hover:text-destructive"
           >
             <Trash2 className="tiptap-button-icon w-4 h-4" />
-            <span className="tiptap-button-text">Excluir Col</span>
+            <span className="tiptap-button-text">{t("deleteCol")}</span>
           </Button>
         </ToolbarGroup>
       </div>
@@ -275,7 +277,7 @@ function TablePanelContent({ onSelect }: { onSelect: () => void }) {
             onClick={run(() => editor.chain().focus().mergeCells().run())}
           >
             <Merge className="tiptap-button-icon text-muted-foreground w-4 h-4" />
-            <span className="tiptap-button-text">Mesclar</span>
+            <span className="tiptap-button-text">{t("merge")}</span>
           </Button>
           <Button
             type="button"
@@ -284,7 +286,7 @@ function TablePanelContent({ onSelect }: { onSelect: () => void }) {
             onClick={run(() => editor.chain().focus().splitCell().run())}
           >
             <Split className="tiptap-button-icon text-muted-foreground w-4 h-4" />
-            <span className="tiptap-button-text">Dividir</span>
+            <span className="tiptap-button-text">{t("split")}</span>
           </Button>
           <Button
             type="button"
@@ -293,7 +295,7 @@ function TablePanelContent({ onSelect }: { onSelect: () => void }) {
             onClick={run(() => editor.chain().focus().toggleHeaderRow().run())}
           >
             <Heading className="tiptap-button-icon text-muted-foreground w-4 h-4" />
-            <span className="tiptap-button-text">Cabeçalho</span>
+            <span className="tiptap-button-text">{t("header")}</span>
           </Button>
         </ToolbarGroup>
 

@@ -11,12 +11,14 @@
 import { useState } from "react";
 import { Editor } from "@tiptap/react";
 import { extractYouTubeId } from "./YoutubeSyncView";
+import { useTranslations } from "next-intl";
 
 interface Props {
   editor: Editor | null;
 }
 
 export function YoutubeSyncToolbarButton({ editor }: Props) {
+  const t = useTranslations("YoutubeSync");
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
@@ -25,7 +27,7 @@ export function YoutubeSyncToolbarButton({ editor }: Props) {
     if (!editor) return;
     const trimmed = url.trim();
     if (!extractYouTubeId(trimmed)) {
-      setError("Cole uma URL válida do YouTube.");
+      setError(t("pasteValidUrl"));
       return;
     }
     editor.chain().focus().insertYouTubeSync({ url: trimmed }).run();
@@ -44,7 +46,7 @@ export function YoutubeSyncToolbarButton({ editor }: Props) {
     <div style={{ position: "relative", display: "inline-block" }}>
       <button
         onClick={() => setOpen((v) => !v)}
-        title="Inserir YouTube sincronizado"
+        title={t("insertTitle")}
         style={{
           padding: "6px 10px",
           borderRadius: 6,
@@ -80,7 +82,7 @@ export function YoutubeSyncToolbarButton({ editor }: Props) {
           }}
         >
           <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 500 }}>
-            Inserir YouTube sincronizado
+            {t("insertTitle")}
           </p>
 
           <input
@@ -126,7 +128,7 @@ export function YoutubeSyncToolbarButton({ editor }: Props) {
                 opacity: url.trim() ? 1 : 0.5,
               }}
             >
-              Inserir com URL
+              {t("insertWithUrl")}
             </button>
             <button
               onClick={handleInsertEmpty}
@@ -140,7 +142,7 @@ export function YoutubeSyncToolbarButton({ editor }: Props) {
                 cursor: "pointer",
               }}
             >
-              Inserir vazio
+              {t("insertEmpty")}
             </button>
           </div>
         </div>

@@ -21,6 +21,7 @@ import {
 import type { YouTubeVideo } from "@/modules/media/media.service";
 import type { YouTubeNodeAttributes } from "./YoutubeSyncNode";
 import { extractYouTubeId } from "@/lib/video-url";
+import { useTranslations } from "next-intl";
 import "./youtube-sync.css";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -88,6 +89,7 @@ export function YouTubeSyncView({
   updateAttributes,
   selected,
 }: NodeViewProps) {
+  const t = useTranslations("YoutubeSync");
   const { nodeId, url } = node.attrs as YouTubeNodeAttributes;
 
   const playerRef = useRef<YouTubePlayerInstance | null>(null);
@@ -212,7 +214,7 @@ export function YouTubeSyncView({
             }
           },
           onError: () => {
-            if (!destroyed) setError("Não foi possível carregar o vídeo.");
+            if (!destroyed) setError(t("loadError"));
           },
         },
       });
@@ -344,12 +346,12 @@ export function YouTubeSyncView({
         `/api/editor/youtube-search?q=${encodeURIComponent(query)}&maxResults=6`
       );
       if (!response.ok) {
-        throw new Error("Não foi possível buscar vídeos.");
+        throw new Error(t("searchFailed"));
       }
       const data = (await response.json()) as { items: YouTubeVideo[] };
       setSearchResults(data.items || []);
     } catch (err) {
-      const errMsg = err instanceof Error ? err.message : "Erro na pesquisa de vídeos.";
+      const errMsg = err instanceof Error ? err.message : t("searchError");
       setError(errMsg);
       setSearchResults([]);
     } finally {
@@ -362,7 +364,7 @@ export function YouTubeSyncView({
     const trimmed = inputUrl.trim();
     if (!trimmed) return;
     if (!extractYouTubeId(trimmed)) {
-      setError("URL do YouTube inválida.");
+      setError(t("invalidUrl"));
       return;
     }
     setError(null);
@@ -386,9 +388,9 @@ export function YouTubeSyncView({
             <div className="yt-sync-input-icon">
               <Video size={20} />
             </div>
-            <h3 className="yt-sync-title">YouTube Sincronizado</h3>
+            <h3 className="yt-sync-title">{t("title")}</h3>
             <p className="yt-sync-subtitle">
-              Pesquise vídeos diretamente ou cole um link para assistir com sincronização em tempo real.
+              {t("description")}
             </p>
           </div>
 
@@ -402,7 +404,7 @@ export function YouTubeSyncView({
               className={`yt-sync-tab-btn ${activeTab === "search" ? "active" : ""}`}
             >
               <Search size={14} />
-              Pesquisar Vídeo
+              {t("searchTab")}
             </button>
             <button
               onClick={() => {
@@ -412,7 +414,7 @@ export function YouTubeSyncView({
               className={`yt-sync-tab-btn ${activeTab === "url" ? "active" : ""}`}
             >
               <LinkIcon size={14} />
-              Colar Link
+              {t("pasteTab")}
             </button>
           </div>
 
@@ -422,7 +424,7 @@ export function YouTubeSyncView({
               <form onSubmit={handleSearch} className="yt-sync-search-form">
                 <input
                   type="text"
-                  placeholder="Pesquise por títulos, assuntos..."
+                  placeholder={t("searchPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="yt-sync-search-input"
@@ -479,7 +481,7 @@ export function YouTubeSyncView({
                   className="yt-sync-url-input"
                 />
                 <button onClick={handleUrlSubmit} className="yt-sync-confirm-btn">
-                  Confirmar
+                  {t("confirm")}
                 </button>
               </div>
             </div>
@@ -562,7 +564,8 @@ export function YouTubeSyncView({
                 }}
                 disabled={!isReady}
                 className="yt-sync-speed-btn"
-                title="Velocidade de reprodução"
+                title={t("speed")}
+                aria-label={t("speed")}
               >
                 <Gauge size={14} />
                 <span>{speed === 1 ? "Normal" : `${speed}x`}</span>
@@ -597,10 +600,11 @@ export function YouTubeSyncView({
             <button
               className="yt-sync-change-btn"
               onClick={() => updateAttributes({ url: "" })}
-              title="Trocar vídeo"
+              title={t("changeVideo")}
+              aria-label={t("changeVideo")}
             >
               <RefreshCw size={12} />
-              Trocar
+              {t("change")}
             </button>
           </div>
         </div>
