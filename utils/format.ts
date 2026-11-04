@@ -2,18 +2,19 @@ import type { Locale } from "@/i18n/config";
 
 /**
  * Format a value in cents to a currency string.
+ * A moeda vem do dado (BRL por padrão); o idioma só define o formato do número.
  * @example formatCurrency(1500) → "R$ 15,00"
- * @example formatCurrency(1500, "en") → "$15.00"
+ * @example formatCurrency(1500, "en") → "R$15.00"
+ * @example formatCurrency(1500, "en", "USD") → "$15.00"
  */
 export function formatCurrency(
   valueInCents: number,
   locale: Locale = "pt",
-  currency?: string
+  currency: string = "BRL"
 ): string {
-  const targetCurrency = currency || (locale === "pt" ? "BRL" : "USD");
-  return new Intl.NumberFormat(locale, {
+  return new Intl.NumberFormat(locale === "pt" ? "pt-BR" : "en-US", {
     style: "currency",
-    currency: targetCurrency,
+    currency,
   }).format(valueInCents / 100);
 }
 

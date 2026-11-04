@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Plus, Edit2, Calendar, Clock, Trash2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import type { Locale } from "@/i18n/config";
 import { Button } from "@/components/ui/button";
 import { Plan } from "@/modules/billing/billing.schema";
 import { formatCurrency } from "@/utils/format";
@@ -45,6 +46,7 @@ export function PlansPageClient({ initialPlans, languages, user }: PlansPageClie
   const [isDeleting, setIsDeleting] = useState(false);
 
   const t = useTranslations("Billing");
+  const locale = useLocale() as Locale;
 
   const handleSuccess = (updatedPlan: Plan) => {
     setPlans((currentPlans) => {
@@ -222,7 +224,7 @@ export function PlansPageClient({ initialPlans, languages, user }: PlansPageClie
                   <div className="flex flex-col">
                     <span className="text-[10px] uppercase font-black text-muted-foreground/60">{t("monthlyInvestment") || "Investimento Mensal"}</span>
                     <span className="text-2xl font-black tracking-tighter text-primary">
-                      {formatCurrency(plan.price)}
+                      {formatCurrency(plan.price, locale, plan.currency)}
                     </span>
                   </div>
                 </div>

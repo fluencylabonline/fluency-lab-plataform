@@ -362,7 +362,8 @@ export function PayoutSummary({ history, projections: initialProjections, projec
     fetchProjections();
   }, [filterMonth, filterYear, teacherId, projectionsPeriod.month, projectionsPeriod.year]);
 
-  const formatValue = (amount: number) => formatCurrency(amount, locale);
+  // Repasse ao professor é sempre em reais (PIX); o idioma só muda o formato.
+  const formatValue = (amount: number) => formatCurrency(amount, locale, "BRL");
 
   const monthKeys = [
     "january", "february", "march", "april", "may", "june",
