@@ -1,10 +1,7 @@
-import { Metadata } from "next";
 import { DocsPageContent } from "@/modules/docs/_components/DocsPageContent";
+import { pageTitle } from "@/lib/page-metadata";
 
-export const metadata: Metadata = {
-  title: "Central de Ajuda",
-  description: "Como usar a plataforma: telas, botões e fluxos.",
-};
+export const generateMetadata = pageTitle("helpCenter");
 
 export default async function DocsPage() {
   return <DocsPageContent />;
