@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import useSWR from "swr";
-import { getStudentLessonsAction } from "@/modules/learning/learning.actions";
+import {
+  getStudentLessonsAction,
+  searchCatalogLessonsAction,
+} from "@/modules/learning/learning.actions";
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 import {
   Vault,
@@ -22,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search,
   FileText,
@@ -31,6 +35,7 @@ import {
   Calendar,
   BookOpen,
   CheckCircle2,
+  Library,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
@@ -54,6 +59,12 @@ interface StudentLessonsData {
   classLessons: EnrichedLesson[];
 }
 
+interface CatalogLesson {
+  id: string;
+  title: string;
+  difficulty: string;
+}
+
 interface NotebookPlansVaultProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -64,12 +75,29 @@ export function NotebookPlansVault({ open, onOpenChange, studentId }: NotebookPl
   const t = useTranslations("Learning");
   const { editor } = useTiptapEditor();
   const [searchQuery, setSearchQuery] = useState("");
+  const [tab, setTab] = useState<"plans" | "catalog">("plans");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeAccordion, setActiveAccordion] = useState<string[]>(["active-plan"]);
 
   const { data: result, isLoading } = useSWR(
     open && studentId ? ["student-lessons", studentId] : null,
     () => getStudentLessonsAction({ studentId })
   );
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedQuery(searchQuery.trim()), 300);
+    return () => clearTimeout(id);
+  }, [searchQuery]);
+
+  const { data: catalogResult, isLoading: isCatalogLoading } = useSWR(
+    open && tab === "catalog" ? ["catalog-lessons", debouncedQuery] : null,
+    () => searchCatalogLessonsAction({ query: debouncedQuery }),
+    { keepPreviousData: true }
+  );
+
+  const catalogLessons = (catalogResult?.data?.success
+    ? catalogResult.data.data
+    : []) as CatalogLesson[];
 
   const studentData = (result?.data?.success ? result.data.data : null) as StudentLessonsData | null;
 
@@ -156,12 +184,28 @@ export function NotebookPlansVault({ open, onOpenChange, studentId }: NotebookPl
           </div>
         </VaultHeader>
 
+        {/* TABS */}
+        <div className="px-3 pt-3">
+          <Tabs value={tab} onValueChange={(v) => setTab(v as "plans" | "catalog")}>
+            <TabsList className="w-full">
+              <TabsTrigger value="plans" className="flex-1">
+                <GraduationCap className="w-3.5 h-3.5" />
+                {t("tab_student_plans")}
+              </TabsTrigger>
+              <TabsTrigger value="catalog" className="flex-1">
+                <Library className="w-3.5 h-3.5" />
+                {t("tab_catalog")}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
         {/* SEARCH BAR */}
         <div className="px-3 py-3 border-b bg-muted/20">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={t("search_lessons") || "Buscar lição em todos os planos..."}
+              placeholder={tab === "catalog" ? t("search_catalog") : t("search_lessons")}
               className="pl-9 pr-9 bg-background h-10 border-muted"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -180,7 +224,45 @@ export function NotebookPlansVault({ open, onOpenChange, studentId }: NotebookPl
         {/* CONTENT AREA */}
         <VaultBody className="flex-1 overflow-hidden p-0">
           <ScrollArea className="h-[45vh] w-full px-6 py-4">
-            {isLoading ? (
+            {tab === "catalog" ? (
+              isCatalogLoading && catalogLessons.length === 0 ? (
+                renderSkeletons()
+              ) : catalogLessons.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="bg-muted rounded-full p-4 mb-4">
+                    <BookOpen className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-bold">{t("no_lessons_found")}</h3>
+                  <p className="text-muted-foreground text-sm max-w-xs mt-1 font-normal">
+                    {t("catalog_no_results")}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col space-y-1">
+                  {catalogLessons.map((lesson) => (
+                    <div
+                      key={lesson.id}
+                      className="flex items-center justify-between gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="p-1.5 bg-primary/10 text-primary rounded shrink-0">
+                          <FileText className="w-3.5 h-3.5" />
+                        </div>
+                        <span
+                          className="font-semibold text-sm text-foreground truncate"
+                          title={lesson.title}
+                        >
+                          {lesson.title}
+                        </span>
+                      </div>
+                      <Badge variant="secondary" className="shrink-0 text-[10px] font-bold">
+                        {lesson.difficulty}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : isLoading ? (
               renderSkeletons()
             ) : !hasResults ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">

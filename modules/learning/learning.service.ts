@@ -15,7 +15,7 @@ import {
 import { lessons, languages } from "@/modules/curriculum/curriculum.schema";
 import { usersTable, type NotificationPrefs } from "@/modules/user/user.schema";
 import { slotInstances } from "@/modules/scheduling/scheduling.schema";
-import { eq, and, asc, gte, desc, sql, inArray, isNotNull } from "drizzle-orm";
+import { eq, and, asc, gte, desc, sql, inArray, isNotNull, isNull, ilike } from "drizzle-orm";
 import { aiService } from "@/modules/ai/ai.service";
 import { notificationService } from "@/modules/notification/notification.service";
 import { userRepository } from "@/modules/user/user.repository";
@@ -1239,7 +1239,30 @@ export const learningService = {
         : null,
       classLessons: extraLessons,
     };
-  }
+  },
+
+  /**
+   * Busca no catálogo da plataforma (lições publicadas) por título.
+   * Serve para o professor checar se um assunto improvisado já existe.
+   * Retorna só título e nível — sem conteúdo.
+   */
+  async searchCatalogLessons(query: string) {
+    const term = query.trim().replace(/[\\%_]/g, (c) => "\\" + c);
+    const rows = await db
+      .select({ id: lessons.id, title: lessons.title, difficulty: lessons.difficulty })
+      .from(lessons)
+      .where(
+        and(
+          eq(lessons.status, "ready"),
+          isNull(lessons.deletedAt),
+          isNull(lessons.teacherId),
+          term ? ilike(lessons.title, `%${term}%`) : undefined
+        )
+      )
+      .orderBy(asc(lessons.title))
+      .limit(50);
+    return rows;
+  },
 };
 
 export function getLocalTimeDetails(date: Date, timeZone: string = "America/Sao_Paulo") {

@@ -57,6 +57,10 @@ const getStudentLessonsSchema = z.object({
   studentId: z.string(),
 });
 
+const searchCatalogLessonsSchema = z.object({
+  query: z.string().max(100),
+});
+
 const reorderLessonsSchema = z.object({
   planId: z.uuid(),
   lessonIds: z.array(z.uuid()),
@@ -620,6 +624,19 @@ export const getStudentLessonsAction = permissionAction("material.view")
       return { success: true, data };
     } catch (error) {
       console.error("[getStudentLessonsAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const searchCatalogLessonsAction = permissionAction("material.view")
+  .metadata({ name: "searchCatalogLessons" })
+  .schema(searchCatalogLessonsSchema)
+  .action(async ({ parsedInput }) => {
+    try {
+      const data = await learningService.searchCatalogLessons(parsedInput.query);
+      return { success: true, data };
+    } catch (error) {
+      console.error("[searchCatalogLessonsAction] Error:", error);
       return { success: false, error: (error as Error).message };
     }
   });
