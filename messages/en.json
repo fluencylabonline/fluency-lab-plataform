@@ -627,7 +627,8 @@
     "attachmentTooLarge": "Attachments can be up to 50MB.",
     "attachmentUploaded": "Attachment uploaded. Save the lesson to publish it.",
     "attachmentUploadError": "Could not upload the attachment. Use PDF, image, audio, Word, Excel, PowerPoint or ZIP.",
-    "noDescription": "No description."
+    "noDescription": "No description.",
+    "videoLinkInvalid": "Use an https YouTube or Google Drive link (e.g. https://youtu.be/... or https://drive.google.com/file/d/.../view)."
   },
   "Dashboard": {
     "academic": {

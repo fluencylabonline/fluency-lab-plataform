@@ -627,7 +627,8 @@
     "attachmentTooLarge": "O anexo deve ter no máximo 50MB.",
     "attachmentUploaded": "Anexo enviado. Salve a aula para publicar.",
     "attachmentUploadError": "Erro ao enviar o anexo. Use PDF, imagem, áudio, Word, Excel, PowerPoint ou ZIP.",
-    "noDescription": "Sem descrição."
+    "noDescription": "Sem descrição.",
+    "videoLinkInvalid": "Use um link https do YouTube ou do Google Drive (ex.: https://youtu.be/... ou https://drive.google.com/file/d/.../view)."
   },
   "Dashboard": {
     "academic": {

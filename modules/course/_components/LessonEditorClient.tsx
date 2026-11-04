@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { parseVideoUrl } from "@/lib/video-url";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
@@ -106,6 +107,14 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes, 
   const handleSave = async (values: LessonFormValues) => {
     let finalQuizId = selectedQuizId;
 
+    const hasInvalidVideo = (values.contentBlocks || []).some(
+      (b) => b.type === "video" && !parseVideoUrl(b.url)
+    );
+    if (hasInvalidVideo) {
+      notify.error(t("videoLinkInvalid"));
+      return;
+    }
+
     const promise = (async () => {
       // If we are editing questions but haven't saved the quiz yet, or if we want to update it
       if (isCreatingQuiz || (quizQuestions.length > 0 && !selectedQuizId)) {
@@ -206,9 +215,8 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes, 
 
   const updateVideoBlock = (index: number, url: string) => {
     const currentBlocks = [...(form.getValues("contentBlocks") || [])];
-    let provider: "youtube" | "drive" | "storage" = "storage";
-    if (url.includes("youtube.com") || url.includes("youtu.be")) provider = "youtube";
-    else if (url.includes("drive.google.com")) provider = "drive";
+    // Guarda o texto digitado (para o usuário corrigir); o provider vem do parser.
+    const provider = parseVideoUrl(url)?.provider ?? "storage";
     currentBlocks[index] = { type: "video", url, provider };
     form.setValue("contentBlocks", currentBlocks, { shouldDirty: true });
   };
@@ -401,7 +409,12 @@ export function LessonEditorClient({ initialLesson, courseId, availableQuizzes, 
                               onChange={(e) => updateVideoBlock(index, e.target.value)}
                             />
                           </div>
-                          {block.url && (
+                          {block.url && !parseVideoUrl(block.url) && (
+                            <p role="alert" className="text-sm text-destructive px-2">
+                              {t("videoLinkInvalid")}
+                            </p>
+                          )}
+                          {block.url && parseVideoUrl(block.url) && (
                             <div className="aspect-video rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800">
                               <VideoPlayer url={block.url} provider={block.provider} />
                             </div>

@@ -5,6 +5,7 @@ import { courseService } from "./course.service";
 import { z } from "zod";
 import { refresh } from "next/cache";
 import { insertCourseSchema } from "./course.schema";
+import { parseVideoUrl } from "@/lib/video-url";
 
 export const createCourseAction = permissionAction("course.manage")
   .metadata({ name: "createCourse" })
@@ -163,7 +164,18 @@ export const updateLessonAction = permissionAction("course.manage")
     data: z.object({
       title: z.string().optional(),
       duration: z.string().optional(),
-      contentBlocks: z.array(z.any()).optional(),
+      contentBlocks: z
+        .array(z.any())
+        .optional()
+        .superRefine((blocks, ctx) => {
+          blocks?.forEach((block, i) => {
+            if (block?.type !== "video") return;
+            const parsed = typeof block.url === "string" ? parseVideoUrl(block.url) : null;
+            if (!parsed || parsed.provider !== block.provider) {
+              ctx.addIssue({ code: "custom", path: [i, "url"], message: "Courses.videoLinkInvalid" });
+            }
+          });
+        }),
       quizId: z.string().uuid().nullable().optional(),
     })
   }))
