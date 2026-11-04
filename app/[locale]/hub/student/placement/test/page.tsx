@@ -2,6 +2,9 @@ import { startPlacementTestAction } from "@/modules/placement/placement.actions"
 import { curriculumService } from "@/modules/curriculum/curriculum.service";
 import { redirect } from "next/navigation";
 import { TestEngine } from "../_components/TestEngine";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("placementTest");
 
 interface TestPageProps {
   params: Promise<{ locale: string }>;

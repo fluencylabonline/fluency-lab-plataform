@@ -3,6 +3,9 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
 import { LessonList } from "./_components/LessonList";
 import { learningService } from "@/modules/learning/learning.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("lessons");
 
 export default async function LessonsPage() {
   const user = await getCurrentUser();

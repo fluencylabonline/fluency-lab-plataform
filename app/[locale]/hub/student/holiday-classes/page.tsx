@@ -8,6 +8,9 @@ import { Header } from "@/components/layout/header";
 import { EmptyResults } from "@/components/ui/empty";
 import { Progress } from "@/components/ui/progress";
 import { holidayRecessDates, isHolidayRecessPeriod } from "@/lib/holiday-recess";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("holidayClasses");
 
 /** Todas as aulas de recesso gravadas (pacotes publicados), disponíveis o ano todo. */
 export default async function StudentHolidayClassesPage() {

@@ -6,6 +6,9 @@ import { billingService } from "@/modules/billing/billing.service";
 import { PaymentHistory, type PaymentRecord } from "./_components/PaymentHistory";
 import { redirect } from "next/navigation";
 import { userService } from "@/modules/user/user.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("payments");
 
 export default async function PaymentsPage() {
   const t = await getTranslations("Hub.Payments");

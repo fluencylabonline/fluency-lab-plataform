@@ -2,6 +2,9 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { billingService } from "@/modules/billing/billing.service";
 import { ReceiptView, type Receipt } from "./_components/ReceiptView";
 import { redirect, notFound } from "next/navigation";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("receipt");
 
 interface ReceiptPageProps {
   params: Promise<{ id: string }>;

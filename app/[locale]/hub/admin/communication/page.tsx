@@ -6,6 +6,9 @@ import { CommunicationDashboard } from "./_components/CommunicationDashboard";
 
 import { EmailMessageDetail } from "./_components/EmailDetailsVault";
 import { userService } from "@/modules/user/user.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("adminCommunication");
 
 export default async function AdminCommunicationPage() {
   const user = await getCurrentUser();

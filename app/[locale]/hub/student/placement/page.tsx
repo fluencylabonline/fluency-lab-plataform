@@ -3,6 +3,9 @@ import { PlacementDashboard } from "./_components/PlacementDashboard";
 import { getCurrentUser } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
 import { userService } from "@/modules/user/user.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("placement");
 
 export default async function PlacementPage() {
     const user = await getCurrentUser();

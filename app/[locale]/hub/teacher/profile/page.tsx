@@ -14,6 +14,9 @@ import { PayoutSummary } from "./_components/PayoutSummary";
 import { ContractBadge } from "./_components/ContractBadge";
 import { DailyLessonsSummary } from "./_components/DailyLessonsSummary";
 import { userService } from "@/modules/user/user.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("myProfile");
 
 export default async function ProfilePage() {
     const user = await getCurrentUser();

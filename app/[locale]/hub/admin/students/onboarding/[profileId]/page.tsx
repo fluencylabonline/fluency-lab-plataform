@@ -2,6 +2,9 @@ import { learningService } from "@/modules/learning/learning.service";
 import { StudentProfileReview } from "@/app/[locale]/hub/admin/students/_components/StudentProfileReview";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("profileReview");
 
 interface ReviewPageProps {
   params: Promise<{

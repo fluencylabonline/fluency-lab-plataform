@@ -1,6 +1,9 @@
 import { getCurrentUser } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
 import { MyCoursesClient } from "../../_components/MyCoursesClient";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("myCourses");
 
 export default async function ManagerMyCoursesPage() {
   const user = await getCurrentUser();

@@ -5,6 +5,9 @@ import { curriculumService } from "@/modules/curriculum/curriculum.service";
 import { placementService } from "@/modules/placement/placement.service";
 import { PlacementClient } from "./_components/PlacementClient";
 import { userService } from "@/modules/user/user.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("placementBank");
 
 export default async function PlacementManagerPage() {
     const user = await getCurrentUser();

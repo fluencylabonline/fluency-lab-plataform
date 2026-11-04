@@ -3,6 +3,9 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { courseService } from "@/modules/course/course.service";
 import { userService } from "@/modules/user/user.service";
 import { CoursePlayerClient } from "../../../_components/CoursePlayerClient";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("holidayClass");
 
 interface HolidayClassPageProps {
   params: Promise<{ id: string; locale: string }>;

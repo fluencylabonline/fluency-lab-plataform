@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { schedulingService } from "@/modules/scheduling/scheduling.service";
 import { StudentsList } from "./_components/StudentsList";
 import { getTranslations } from "next-intl/server";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("teacherStudents");
 
 export default async function TeacherStudentsPage() {
   const user = await getCurrentUser();

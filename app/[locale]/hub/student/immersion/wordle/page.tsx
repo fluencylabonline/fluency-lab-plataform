@@ -2,6 +2,9 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { immersionService } from "@/modules/immersion/immersion.service";
 import WordleGame from "../_components/wordle";
 import { WordleState, PlayedEntry } from "@/modules/immersion/immersion.types";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("wordle");
 
 export default async function WordlePage() {
   const user = await getCurrentUser();

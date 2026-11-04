@@ -18,7 +18,7 @@ export async function generateMetadata({
     const { locale } = await params;
     const t = await getTranslations({ locale, namespace: "Metadata.hub" });
     return {
-        title: t("title"),
+        title: { template: "%s | FluencyLab", default: t("title") },
     };
 }
 

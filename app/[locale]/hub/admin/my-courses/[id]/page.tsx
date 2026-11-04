@@ -3,6 +3,9 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { redirect, notFound } from "next/navigation";
 import { CoursePlayerClient } from "../../../_components/CoursePlayerClient";
 import { userService } from "@/modules/user/user.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("course");
 
 interface CoursePageProps {
   params: Promise<{ id: string; locale: string }>;

@@ -9,6 +9,9 @@ import { schedulingService } from "@/modules/scheduling/scheduling.service";
 import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { EmptyResults } from "@/components/ui/empty";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("recess");
 
 type RecessItem = Awaited<ReturnType<typeof schedulingService.getStudentRecessActivities>>[number];
 

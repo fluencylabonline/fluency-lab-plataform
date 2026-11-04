@@ -3,6 +3,9 @@ import { contractService } from "@/modules/contract/contract.service";
 import { userService } from "@/modules/user/user.service";
 import { getCurrentUser } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("adminContracts");
 
 export default async function AdminContractsPage() {
   const user = await getCurrentUser();

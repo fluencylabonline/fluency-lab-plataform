@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { Header } from "@/components/layout/header";
 import { MediaLibraryClient } from "./_components/MediaLibraryClient";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("media");
 
 export default async function MediaLibraryPage() {
     const user = await getCurrentUser();

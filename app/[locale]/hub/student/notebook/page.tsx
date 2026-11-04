@@ -4,6 +4,9 @@ import { StudentNotebookClient } from "./_components/StudentNotebookClient";
 import { redirect } from "next/navigation";
 import { notebookService } from "@/modules/notebook/notebook.service";
 import { curriculumService } from "@/modules/curriculum/curriculum.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("notebook");
 
 export default async function NotebookPage() {
   const user = await getCurrentUser();

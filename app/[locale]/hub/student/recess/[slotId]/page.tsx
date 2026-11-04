@@ -6,6 +6,9 @@ import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/header";
 import { RecessActivityClient } from "./_components/RecessActivityClient";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("recessClass");
 
 interface RecessPageProps {
   params: Promise<{ slotId: string; locale: string }>;

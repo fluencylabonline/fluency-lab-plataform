@@ -7,6 +7,9 @@ import { notFound, redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { PathEditor } from "./_components/PathEditor";
 import { userService } from "@/modules/user/user.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("learningPlan");
 
 interface PlanEditorPageProps {
     params: Promise<{ id: string, locale: string }>;

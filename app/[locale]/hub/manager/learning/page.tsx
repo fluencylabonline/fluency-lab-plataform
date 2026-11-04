@@ -19,6 +19,9 @@ import { Link } from "@/i18n/navigation";
 import { LanguagesVault } from "./_components/LanguagesVault";
 import { CreatePlanVault } from "./_components/CreatePlanVault";
 import { userService } from "@/modules/user/user.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("learning");
 
 
 const quickActions = (languages: LanguageWithLessons[], t: (key: string) => string) => [

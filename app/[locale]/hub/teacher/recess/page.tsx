@@ -7,6 +7,9 @@ import { Calendar, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { redirect } from "next/navigation";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("recess");
 
 export default async function RecessActivitiesPage() {
   const user = await getCurrentUser();

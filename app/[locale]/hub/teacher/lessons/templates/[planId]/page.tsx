@@ -7,6 +7,9 @@ import { Header } from "@/components/layout/header";
 import { learningService } from "@/modules/learning/learning.service";
 import { cn } from "@/lib/utils";
 import { levelBadgeClass } from "../../_components/level-style";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("lessonTemplate");
 
 interface TemplatePageProps {
   params: Promise<{ planId: string; locale: string }>;

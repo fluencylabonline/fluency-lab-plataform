@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { LessonEditor } from "./_components/LessonEditor";
 import { Header } from "@/components/layout/header";
 import { RecessActivityEditorClient } from "@/app/[locale]/hub/teacher/recess/_components/RecessActivityEditorClient";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("lessonEditor");
 
 interface LessonPageProps {
     params: Promise<{

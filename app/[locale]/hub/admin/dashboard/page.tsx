@@ -12,6 +12,9 @@ import { PwaStatsVault } from "./_components/PwaStatsVault";
 import { PeriodFilter } from "./_components/PeriodFilter";
 import { TodayClassesVault } from "./_components/TodayClassesVault";
 import { userService } from "@/modules/user/user.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("adminDashboard");
 
 interface PageProps {
   searchParams: Promise<{ period?: string }>;

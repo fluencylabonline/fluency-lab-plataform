@@ -6,6 +6,9 @@ import { userService } from "@/modules/user/user.service";
 import { schedulingService } from "@/modules/scheduling/scheduling.service";
 import { contractService } from "@/modules/contract/contract.service";
 import { billingService } from "@/modules/billing/billing.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("adminUsers");
 
 export default async function AdminUsersPage() {
   const user = await getCurrentUser();

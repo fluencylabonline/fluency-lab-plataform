@@ -5,6 +5,9 @@ import { addMonths, startOfMonth, endOfMonth } from "date-fns";
 import { redirect } from "next/navigation";
 import { CalendarEvent } from "@/components/ui/calendar-view";
 import { userService } from "@/modules/user/user.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("teacherSchedule");
 
 export default async function TeacherSchedulePage() {
   const user = await getCurrentUser();

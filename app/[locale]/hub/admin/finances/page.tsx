@@ -13,6 +13,9 @@ interface FinancesPageProps {
 }
 
 import { startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("adminFinances");
 
 export default async function AdminFinancesPage({ searchParams }: FinancesPageProps) {
 

@@ -3,6 +3,9 @@ import { notFound, redirect } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { LessonViewer } from "../_components/LessonViewer";
 import type { LessonWithDetails } from "@/modules/curriculum/curriculum.types";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("lesson");
 
 interface LessonViewPageProps {
     params: Promise<{

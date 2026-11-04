@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 import { SettingsPageContent } from "@/modules/user/_components/SettingsPageContent";
 import { NotificationPrefs, notificationPrefsSchema } from "@/modules/user/user.schema";
 import { getTranslations } from "next-intl/server";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("settings");
 
 export default async function TeacherSettingsPage() {
   const sessionUser = await getCurrentUser();

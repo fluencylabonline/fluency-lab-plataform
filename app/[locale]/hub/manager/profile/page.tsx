@@ -4,6 +4,9 @@ import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { Header } from "@/components/layout/header";
 import { userService } from "@/modules/user/user.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("myProfile");
 
 export default async function ProfilePage() {
     const user = await getCurrentUser();

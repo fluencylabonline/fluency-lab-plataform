@@ -2,6 +2,9 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { immersionService } from "@/modules/immersion/immersion.service";
 import WordLadderGame from "../_components/word-ladder";
 import { WordLadderState, PlayedEntry } from "@/modules/immersion/immersion.types";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("wordLadder");
 
 export default async function WordLadderPage() {
   const user = await getCurrentUser();

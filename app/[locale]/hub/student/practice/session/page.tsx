@@ -6,6 +6,9 @@ import { PracticeErrorView } from "./_components/PracticeErrorView";
 import type { DailyPracticeSession } from "@/modules/learning/learning.types";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("practiceSession");
 
 interface SessionPageProps {
   searchParams: Promise<{ day?: string; planId?: string; replay?: string }>;

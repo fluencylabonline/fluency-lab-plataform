@@ -7,6 +7,9 @@ import { notFound } from "next/navigation";
 import { UserDetailsClient } from "@/modules/user/_components/UserDetailsClient";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { schedulingService } from "@/modules/scheduling/scheduling.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("userDetails");
 
 interface UserDetailsPageProps {
   params: Promise<{

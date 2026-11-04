@@ -7,6 +7,9 @@ import {
 } from "lucide-react";
 import { ActivityCarousel } from "./_components/ActivityCarousel";
 import { getTranslations } from "next-intl/server";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("immersion");
 
 export default async function ImmersionPage() {
   const t = await getTranslations("StudentImmersion");

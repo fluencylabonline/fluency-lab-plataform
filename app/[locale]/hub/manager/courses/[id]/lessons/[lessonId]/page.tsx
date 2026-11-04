@@ -3,6 +3,9 @@ import { courseService } from "@/modules/course/course.service";
 import { notFound, redirect } from "next/navigation";
 import { hasPermission } from "@/lib/rbac";
 import { LessonEditorClient } from "@/modules/course/_components/LessonEditorClient";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("lessonEditor");
 
 interface LessonPageProps {
   params: Promise<{

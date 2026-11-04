@@ -3,6 +3,9 @@ import { curriculumService } from "@/modules/curriculum/curriculum.service";
 import { RecessActivityEditorClient } from "../_components/RecessActivityEditorClient";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("recessRequest");
 
 interface EditRecessActivityPageProps {
   params: Promise<{

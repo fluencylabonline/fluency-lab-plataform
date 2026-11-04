@@ -2,6 +2,9 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { immersionService } from "@/modules/immersion/immersion.service";
 import LyricsTrainingGame from "../_components/lyrics-training";
 import { LyricsTrainingState } from "@/modules/immersion/immersion.types";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("lyrics");
 
 export default async function LyricsTrainingPage() {
   const user = await getCurrentUser();

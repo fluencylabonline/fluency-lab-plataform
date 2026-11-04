@@ -3,6 +3,9 @@ import { curriculumService } from "@/modules/curriculum/curriculum.service";
 import { getCurrentUser } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
 import { PlansPageClient } from "./_components/PlansPageClient";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("adminPlans");
 
 export default async function AdminPlansPage() {
   const user = await getCurrentUser();

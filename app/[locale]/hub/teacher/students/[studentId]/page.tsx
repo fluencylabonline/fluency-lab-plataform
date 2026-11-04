@@ -6,6 +6,9 @@ import { notebookService } from "@/modules/notebook/notebook.service";
 import { learningService } from "@/modules/learning/learning.service";
 import { StudentDetailsClient } from "./_components/StudentDetailsClient";
 import { startOfMonth, endOfMonth } from "date-fns";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("student");
 
 interface StudentDetailsPageProps {
   params: Promise<{

@@ -2571,7 +2571,7 @@
     "noPracticeItemsForDay": "No practice item available for this day.",
     "noPracticeItemsFound": "We didn't find practice items for this lesson. Please contact your teacher.",
     "pageDescription": "Your adaptive learning path and study roadmap.",
-    "pageTitle": "Daily Practice | FluencyLab",
+    "pageTitle": "Daily Practice",
     "practiceTab": "Practice",
     "roadmapDesc": "Your journey of scheduled lessons",
     "roadmapTab": "Roadmap",
@@ -3449,23 +3449,72 @@
       "ogTagline": "Tailor-made English lessons, with a tutor by your side."
     },
     "hub": {
-      "title": "Hub - Fluency Lab"
+      "title": "FluencyLab"
     },
     "login": {
       "title": "Login - Fluency Lab"
     },
     "tasks": {
-      "title": "Tasks | FluencyLab"
+      "title": "Tasks"
     },
     "onboarding": {
-      "title": "Adaptive Profiles | FluencyLab",
+      "title": "Adaptive Profiles",
       "description": "Manage students' pedagogical profiles."
     },
     "diagnosis": {
-      "title": "Pedagogical Diagnosis | FluencyLab"
+      "title": "Pedagogical Diagnosis"
     },
     "notebook": {
       "description": "{title}'s Notebook"
+    },
+    "pages": {
+      "adminCommunication": "Notifications",
+      "adminContracts": "Contracts",
+      "adminConversations": "Conversations",
+      "adminDashboard": "Dashboard",
+      "adminForecast": "Financial forecast",
+      "adminFinances": "Finances",
+      "adminPlans": "Plans",
+      "course": "Course",
+      "myCourses": "My learning",
+      "myProfile": "My profile",
+      "settings": "Settings",
+      "profileReview": "Profile review",
+      "userDetails": "User",
+      "adminUsers": "Users",
+      "receipt": "Receipt",
+      "lessonEditor": "Edit lesson",
+      "managerCourses": "Courses",
+      "holidayClass": "Recess class",
+      "holidayClasses": "Recess classes",
+      "learningPlan": "Study plan",
+      "learningItems": "Learning items",
+      "lesson": "Lesson",
+      "lessons": "Lessons",
+      "media": "Media",
+      "learning": "Learning",
+      "placementBank": "Placement bank",
+      "home": "Home",
+      "contract": "Contract",
+      "studentCourses": "Courses",
+      "lyrics": "Lyrics",
+      "immersion": "Immersion",
+      "wordLadder": "Word ladder",
+      "wordle": "Wordle",
+      "notebook": "Notebook",
+      "payments": "Payments",
+      "placement": "Placement",
+      "placementTest": "Placement test",
+      "practiceSession": "Practice",
+      "recessClass": "Recess class",
+      "recess": "Recess",
+      "studentSchedule": "Calendar",
+      "lessonTemplate": "Plan template",
+      "recessRequest": "Recess",
+      "newRecess": "Report recess",
+      "teacherSchedule": "My schedule",
+      "student": "Student",
+      "teacherStudents": "Students"
     }
   },
   "NotFound": {

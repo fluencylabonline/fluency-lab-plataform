@@ -4,6 +4,9 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { curriculumService } from "@/modules/curriculum/curriculum.service";
 import { LearningItemsClient } from "./_components/LearningItemsClient";
 import { Header } from "@/components/layout/header";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("learningItems");
 
 export default async function LearningItemsPage() {
     const user = await getCurrentUser();

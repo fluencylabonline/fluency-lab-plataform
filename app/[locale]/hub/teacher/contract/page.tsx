@@ -4,6 +4,9 @@ import { ContractDetails } from "@/modules/contract/ContractDetails";
 import { redirect } from "next/navigation";
 import type { ContractWithTemplate } from "@/modules/contract/contract.types";
 import { decrypt } from "@/lib/cryptography";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("contract");
 
 export default async function ContractPage() {
   const user = await getCurrentUser();

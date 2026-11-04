@@ -6,6 +6,9 @@ import { SettingsPageContent } from "@/modules/user/_components/SettingsPageCont
 import { notificationPrefsSchema } from "@/modules/user/user.schema";
 import { getTranslations } from "next-intl/server";
 import { settingsService } from "@/modules/settings/settings.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("settings");
 
 export default async function AdminSettingsPage() {
   const sessionUser = await getCurrentUser();

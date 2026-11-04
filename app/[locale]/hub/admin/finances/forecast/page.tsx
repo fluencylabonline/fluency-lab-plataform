@@ -3,6 +3,9 @@ import { getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/header";
 import { ForecastDetailsTable } from "./_components/ForecastDetailsTable";
 import { ForecastFilters } from "./_components/ForecastFilters";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("adminForecast");
 
 interface ForecastPageProps {
   searchParams: Promise<{

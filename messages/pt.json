@@ -2571,7 +2571,7 @@
     "noPracticeItemsForDay": "Nenhum item de prática disponível para este dia.",
     "noPracticeItemsFound": "Não encontramos itens de prática para esta lição. Entre em contato com seu professor.",
     "pageDescription": "Sua trilha de aprendizagem adaptativa e roteiro de estudos.",
-    "pageTitle": "Prática Diária | FluencyLab",
+    "pageTitle": "Prática Diária",
     "practiceTab": "Prática",
     "roadmapDesc": "Sua jornada de lições programadas",
     "roadmapTab": "Roteiro",
@@ -3449,23 +3449,72 @@
       "ogTagline": "Aulas de inglês sob medida, com um tutor ao seu lado."
     },
     "hub": {
-      "title": "Hub - Fluency Lab"
+      "title": "FluencyLab"
     },
     "login": {
       "title": "Login - Fluency Lab"
     },
     "tasks": {
-      "title": "Tarefas | FluencyLab"
+      "title": "Tarefas"
     },
     "onboarding": {
-      "title": "Perfis Adaptativos | FluencyLab",
+      "title": "Perfis Adaptativos",
       "description": "Gerencie os perfis pedagógicos dos alunos."
     },
     "diagnosis": {
-      "title": "Diagnóstico Pedagógico | FluencyLab"
+      "title": "Diagnóstico Pedagógico"
     },
     "notebook": {
       "description": "Notebook de {title}"
+    },
+    "pages": {
+      "adminCommunication": "Notificações",
+      "adminContracts": "Contratos",
+      "adminConversations": "Conversas",
+      "adminDashboard": "Dashboard",
+      "adminForecast": "Previsão financeira",
+      "adminFinances": "Financeiro",
+      "adminPlans": "Planos",
+      "course": "Curso",
+      "myCourses": "Meu aprendizado",
+      "myProfile": "Meu perfil",
+      "settings": "Configurações",
+      "profileReview": "Revisão de perfil",
+      "userDetails": "Usuário",
+      "adminUsers": "Usuários",
+      "receipt": "Recibo",
+      "lessonEditor": "Editar lição",
+      "managerCourses": "Cursos",
+      "holidayClass": "Aula de recesso",
+      "holidayClasses": "Aulas de recesso",
+      "learningPlan": "Plano de estudos",
+      "learningItems": "Itens de aprendizagem",
+      "lesson": "Lição",
+      "lessons": "Lições",
+      "media": "Mídias",
+      "learning": "Aprendizado",
+      "placementBank": "Banco de nivelamento",
+      "home": "Início",
+      "contract": "Contrato",
+      "studentCourses": "Cursos",
+      "lyrics": "Letras",
+      "immersion": "Imersão",
+      "wordLadder": "Escada de palavras",
+      "wordle": "Wordle",
+      "notebook": "Caderno",
+      "payments": "Pagamentos",
+      "placement": "Nivelamento",
+      "placementTest": "Teste de nivelamento",
+      "practiceSession": "Prática",
+      "recessClass": "Aula de recesso",
+      "recess": "Recesso",
+      "studentSchedule": "Calendário",
+      "lessonTemplate": "Modelo de plano",
+      "recessRequest": "Recesso",
+      "newRecess": "Comunicar recesso",
+      "teacherSchedule": "Minha agenda",
+      "student": "Aluno",
+      "teacherStudents": "Alunos"
     }
   },
   "NotFound": {

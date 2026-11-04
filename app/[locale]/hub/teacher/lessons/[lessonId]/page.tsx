@@ -2,6 +2,9 @@ import { curriculumService } from "@/modules/curriculum/curriculum.service";
 import { getCurrentUser } from "@/lib/auth-server";
 import { notFound, redirect } from "next/navigation";
 import { LessonDetailView } from "../_components/LessonDetailView";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("lesson");
 
 interface LessonPageProps {
   params: Promise<{

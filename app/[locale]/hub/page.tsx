@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
 import { UserRoles } from "@/lib/rbac";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("home");
 
 /**
  * Hub Redirector Page

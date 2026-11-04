@@ -12,6 +12,9 @@ import { type PlacementTest } from "@/modules/placement/placement.schema";
 import { StudentProfileClient } from "./_components/StudentProfileClient";
 import { holidayRecessDates, isHolidayRecessPeriod } from "@/lib/holiday-recess";
 import { recessNoticeCount } from "@/modules/scheduling/recess-notice";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("myProfile");
 
 /** Course ID that exists only in production — kept server-side to avoid leaking in the client bundle. */
 const WELCOME_COURSE_ID = "0ece3db9-ccb1-4e8f-bd46-6f649d010762";

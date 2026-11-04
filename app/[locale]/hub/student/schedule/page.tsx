@@ -2,6 +2,9 @@ import { endOfMonth, startOfDay, startOfMonth, addMonths } from "date-fns";
 import { getCurrentUser } from "@/lib/auth-server";
 import { schedulingService } from "@/modules/scheduling/scheduling.service";
 import { StudentSchedule } from "./_components/StudentSchedule";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("studentSchedule");
 
 /** Meses já carregados no servidor (o atual e os dois seguintes); o resto vem pelo botão "ver mais". */
 const MONTHS_AHEAD = 3;

@@ -4,6 +4,9 @@ import { hasPermission } from "@/lib/rbac";
 import { courseService } from "@/modules/course/course.service";
 import { CoursePageClient } from "@/modules/course/_components/CoursePageClient";
 import { userService } from "@/modules/user/user.service";
+import { pageTitle } from "@/lib/page-metadata";
+
+export const generateMetadata = pageTitle("managerCourses");
 
 export default async function ManagerCoursesPage() {
   const user = await getCurrentUser();
