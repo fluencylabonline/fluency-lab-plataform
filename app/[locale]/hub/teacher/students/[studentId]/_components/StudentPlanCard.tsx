@@ -137,7 +137,7 @@ function AddLessonVault({
         setAddingId(null);
       });
     },
-    [planId, onAdded]
+    [planId, onAdded, t]
   );
 
   return (

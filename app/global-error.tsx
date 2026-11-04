@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 
 /**
  * Último recurso: o próprio layout falhou, então não há provider de i18n nem CSS
@@ -31,9 +32,9 @@ export default function GlobalError({
               >
                 Tentar de novo / Retry
               </button>
-              <a href="/" style={{ padding: "10px 18px", color: "inherit" }}>
+              <Link href="/" style={{ padding: "10px 18px", color: "inherit" }}>
                 Início / Home
-              </a>
+              </Link>
             </div>
             {error.digest && <p style={{ marginTop: 24, fontSize: 12, opacity: 0.5 }}>ref: {error.digest}</p>}
           </div>
