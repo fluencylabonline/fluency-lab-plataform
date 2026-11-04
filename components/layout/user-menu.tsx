@@ -59,6 +59,10 @@ export function UserMenu({ user }: UserMenuProps) {
 
     const unreadCount = notifications?.filter((n) => !n.isRead).length || 0;
 
+    // Admin e manager usam a plataforma só em português (decisão de produto, F05):
+    // o seletor some, exceto para quem já está em inglês poder voltar.
+    const showLanguageSwitch = (user.role !== "admin" && user.role !== "manager") || locale !== "pt";
+
     const handleLogout = async () => {
         await authClient.signOut();
     };
@@ -115,6 +119,7 @@ export function UserMenu({ user }: UserMenuProps) {
                             </Link>
                         </DropdownMenuItem>
                     ))}
+                    {showLanguageSwitch && (<>
                     <DropdownMenuSeparator />
                     <DropdownMenuSub>
                         <DropdownMenuSubTrigger>
@@ -135,6 +140,7 @@ export function UserMenu({ user }: UserMenuProps) {
                             </DropdownMenuSubContent>
                         </DropdownMenuPortal>
                     </DropdownMenuSub>
+                    </>)}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                         className="text-destructive focus:text-destructive cursor-pointer"
@@ -233,6 +239,7 @@ export function UserMenu({ user }: UserMenuProps) {
                     </div>
 
                     {/* Language row */}
+                    {showLanguageSwitch && (
                     <div className="px-3 py-3">
                         <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60 mb-2">
                             {tCommon("language")}
@@ -253,6 +260,7 @@ export function UserMenu({ user }: UserMenuProps) {
                             ))}
                         </div>
                     </div>
+                    )}
                 </div>
 
                 {/* Nav links */}
