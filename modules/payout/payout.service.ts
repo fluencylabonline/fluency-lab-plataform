@@ -2,7 +2,8 @@ import "server-only";
 import { payoutRepository } from "./payout.repository";
 import { userService } from "@/modules/user/user.service";
 import { decrypt } from "@/lib/cryptography";
-import { sendPix } from "@/lib/abacate-pay";
+import { sendPix, PixProviderRejectedError } from "@/lib/abacate-pay";
+import { createHash } from "crypto";
 import { resend } from "@/lib/resend";
 import TeacherPayoutEmail from "../communication/templates/TeacherPayoutEmail";
 import { db } from "@/lib/db";
@@ -23,50 +24,71 @@ export const payoutService = {
       throw new Error("Professor não encontrado ou sem chave PIX configurada.");
     }
 
-    const classes = await this.getTeacherUnpaidClasses(teacherId, month, year);
-    if (classes.length === 0) {
-      throw new Error("Não há aulas pendentes de pagamento para este período.");
-    }
+    const start = new Date(year, month, 1);
+    const end = new Date(year, month + 1, 0, 23, 59, 59);
+    const description = `Pagamento FluencyLab - ${month + 1}/${year}`;
+    const pixKey = teacher.pixKey;
+    const pixKeyType = teacher.pixType;
 
-    const totalAmount = classes.reduce((sum, cls) => sum + (cls.teacherHourlyRate ?? teacher.teacherHourlyRate), 0);
-
-    if (totalAmount < 350) {
-      throw new Error("O valor mínimo para saque é R$ 3,50.");
-    }
-
-    const externalId = `payout-${teacherId}-${month + 1}-${year}-${Date.now()}`;
-
-    const decryptedPixKey = teacher.pixKey.includes(":") ? decrypt(teacher.pixKey) : teacher.pixKey;
-
-    // 2. Call AbacatePay
-    const abacateResponse = await sendPix({
-      amount: totalAmount,
-      pixKey: decryptedPixKey,
-      pixKeyType: teacher.pixType,
-      externalId,
-      description: `Pagamento FluencyLab - ${month + 1}/${year}`,
-    });
-
-    // 3. Create Payout Record & Link Classes
-    const payout = await payoutRepository.createPayout({
-      teacherId,
-      amount: totalAmount,
-      month,
-      year,
-      status: "completed", // AbacatePay payouts are usually immediate or pending, but we assume success if no error
-      abacatePayoutId: abacateResponse.id,
-      pixKey: teacher.pixKey,
-      pixKeyType: teacher.pixType,
-      externalId,
-      description: `Pagamento FluencyLab - ${month + 1}/${year}`,
-      metadata: {
-        classIds: classes.map(c => c.id),
-        teacherName: teacher.name,
-        emailSent: false
+    // 1. Reserva atômica: payout "pending" + aulas vinculadas ANTES do dinheiro sair.
+    const { payout: reserved, classes } = await payoutRepository.reservePayout(
+      teacherId, month, year, start, end,
+      (unpaid) => {
+        if (unpaid.length === 0) {
+          throw new Error("Não há aulas pendentes de pagamento para este período.");
+        }
+        const amount = unpaid.reduce((sum, cls) => sum + (cls.teacherHourlyRate ?? teacher.teacherHourlyRate), 0);
+        if (amount < 350) {
+          throw new Error("O valor mínimo para saque é R$ 3,50.");
+        }
+        // Determinístico: o mesmo conjunto de aulas gera sempre o mesmo externalId (coluna unique).
+        const classIds = unpaid.map((c) => c.id).sort();
+        const hash = createHash("sha256").update(classIds.join(",")).digest("hex").slice(0, 16);
+        return {
+          teacherId,
+          amount,
+          month,
+          year,
+          pixKey,
+          pixKeyType,
+          externalId: `payout-${teacherId}-${year}-${month + 1}-${hash}`,
+          description,
+          metadata: { classIds, teacherName: teacher.name, emailSent: false },
+        };
       }
-    });
+    );
+    const totalAmount = reserved.amount;
 
-    await payoutRepository.linkClassesToPayout(classes.map(c => c.id), payout.id);
+    const decryptedPixKey = pixKey.includes(":") ? decrypt(pixKey) : pixKey;
+
+    // 2. Envia o PIX
+    let abacateResponse: Awaited<ReturnType<typeof sendPix>>;
+    try {
+      abacateResponse = await sendPix({
+        amount: totalAmount,
+        pixKey: decryptedPixKey,
+        pixKeyType,
+        externalId: reserved.externalId,
+        description,
+      });
+    } catch (err) {
+      if (err instanceof PixProviderRejectedError) {
+        // Recusa explícita: nada foi enviado, libera as aulas para nova tentativa.
+        await payoutRepository.updatePayout(reserved.id, { status: "failed" });
+        await payoutRepository.releasePayoutClasses(reserved.id);
+        throw err;
+      }
+      // Rede/timeout: não sabemos se o PIX saiu. Mantém "pending" e as aulas vinculadas
+      // para impedir um segundo pagamento; precisa de conferência manual no AbacatePay.
+      console.error("[payoutService] PIX send outcome unknown, payout left pending:", reserved.id, err);
+      throw new Error("Não foi possível confirmar o envio do PIX. O repasse ficou pendente; confira no AbacatePay antes de tentar de novo.");
+    }
+
+    // 3. Finaliza o registro
+    const payout = await payoutRepository.updatePayout(reserved.id, {
+      status: "completed",
+      abacatePayoutId: abacateResponse.id,
+    });
 
     // Record gateway transfer fee in the finance ledger as an expense
     try {

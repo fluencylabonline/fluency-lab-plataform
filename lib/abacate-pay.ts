@@ -63,6 +63,17 @@ export async function createPixCharge(payload: {
 }
 
 /**
+ * O provedor respondeu e recusou explicitamente a operação (nada foi enviado).
+ * Diferente de erro de rede/timeout, em que não se sabe se o PIX saiu.
+ */
+export class PixProviderRejectedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PixProviderRejectedError";
+  }
+}
+
+/**
  * Helper to send a PIX transfer to a third party (e.g., teacher) using AbacatePay.
  * Docs: POST /pix/send
  */
@@ -94,7 +105,7 @@ export async function sendPix(payload: {
 
   if (!result.success) {
     console.error("[AbacatePay] Send PIX Error:", result.error);
-    throw new Error(result.error || "Failed to send PIX");
+    throw new PixProviderRejectedError(result.error || "Failed to send PIX");
   }
 
   return result.data as {
