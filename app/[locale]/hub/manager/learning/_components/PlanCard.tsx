@@ -149,7 +149,7 @@ export function PlanCard({ plan }: PlanCardProps) {
                             {plan.lessonsCount}
                         </span>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {t("lessons") || "Lessons"}
+                            {t("lessonsUnit", { count: plan.lessonsCount })}
                         </span>
                     </div>
 

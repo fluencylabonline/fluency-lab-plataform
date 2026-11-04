@@ -144,7 +144,7 @@ export function LessonsList({ initialLessons, languages, searchQuery }: LessonsL
                 </div>
 
                 <div className="self-start text-xs font-medium text-muted-foreground uppercase tracking-widest bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
-                    {filteredLessons.length} {t("lessons") || "Lessons"}
+                    {filteredLessons.length} {t("lessonsUnit", { count: filteredLessons.length })}
                 </div>
             </div>
 

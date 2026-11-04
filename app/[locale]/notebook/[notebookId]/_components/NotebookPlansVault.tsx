@@ -222,7 +222,7 @@ export function NotebookPlansVault({ open, onOpenChange, studentId }: NotebookPl
                               {t("active_plan") || "Plano Ativo"}
                             </Badge>
                             <span className="text-xs text-muted-foreground font-normal">
-                              {filteredActivePlan.lessons.length} {t("lessons") || "lições"}
+                              {filteredActivePlan.lessons.length} {t("lessonsUnit", { count: filteredActivePlan.lessons.length })}
                             </span>
                           </div>
                         </div>
@@ -289,7 +289,7 @@ export function NotebookPlansVault({ open, onOpenChange, studentId }: NotebookPl
                               {t("outside_plan") || "Fora do Plano"}
                             </Badge>
                             <span className="text-xs text-muted-foreground font-normal">
-                              {filteredClassLessons.length} {t("lessons") || "lições"}
+                              {filteredClassLessons.length} {t("lessonsUnit", { count: filteredClassLessons.length })}
                             </span>
                           </div>
                         </div>

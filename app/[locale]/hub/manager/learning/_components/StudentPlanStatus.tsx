@@ -60,7 +60,7 @@ export function StudentPlanStatus({ studentId }: StudentPlanStatusProps) {
                             {hasGap ? t("curriculum_gap_detected") || "Curriculum Gap Detected" : t("curriculum_optimized") || "Curriculum Optimized"}
                         </h4>
                         <Badge variant={hasGap ? "destructive" : "default"} className="font-bold">
-                            {hasGap ? `-${gapData.gap} ${t("lessons") || "Lessons"}` : t("completed") || "Completed"}
+                            {hasGap ? `-${gapData.gap} ${t("lessonsUnit", { count: gapData.gap })}` : t("completed") || "Completed"}
                         </Badge>
                     </div>
 
