@@ -14,6 +14,7 @@ import {
   Globe2 
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { fetchSyncedLyrics } from "@/lib/lrclib";
 
 import { TeacherLyricsView } from "./TeacherLyricsView";
 import { StudentLyricsView } from "./StudentLyricsView";
@@ -157,21 +158,6 @@ function loadYouTubeAPI(): Promise<void> {
     script.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(script);
   });
-}
-
-// Fetch synced LRC lyrics from LrcLib
-async function fetchLrcData(track: string, artist: string): Promise<string | null> {
-  try {
-    const q = new URLSearchParams({ track_name: track, artist_name: artist });
-    const r = await fetch(`https://lrclib.net/api/search?${q.toString()}`);
-    if (!r.ok) return null;
-    const arr = (await r.json()) as Array<{ syncedLyrics?: string }>;
-    if (!Array.isArray(arr)) return null;
-    const item = arr.find((x) => typeof x.syncedLyrics === "string" && x.syncedLyrics.length > 0);
-    return item ? (item.syncedLyrics as string) : null;
-  } catch {
-    return null;
-  }
 }
 
 // ─── Component View ───────────────────────────────────────────────────────────
@@ -840,11 +826,12 @@ export function LyricsSyncView({ node, updateAttributes, selected }: NodeViewPro
     }
     setLoadingLyrics(true);
     try {
-      const lyrics = await fetchLrcData(trackInput, artistInput);
-      if (!lyrics) {
-        toast.error(t("setup.lyricsNotFoundError") || "Não conseguimos encontrar a letra sincronizada para essa música.");
+      const result = await fetchSyncedLyrics(trackInput, artistInput);
+      if (result.status !== "ok") {
+        toast.error(result.status === "error" ? t("setup.lyricsServiceUnavailable") : t("setup.lyricsNotFoundError"));
         return;
       }
+      const lyrics = result.lyrics;
       setLrcInput(lyrics);
       
       // Persist the song setup on the Node View wrapper attributes

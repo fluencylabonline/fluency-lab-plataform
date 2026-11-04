@@ -58,30 +58,6 @@ function parseLrc(lrc: string): LrcLine[] {
   return out.sort((a, b) => a.ms - b.ms);
 }
 
-async function fetchLrcData(
-  track: string,
-  artist: string
-): Promise<string | null> {
-  try {
-    const q = new URLSearchParams({ track_name: track, artist_name: artist });
-    const r = await fetch(`https://lrclib.net/api/search?${q.toString()}`);
-    if (!r.ok) return null;
-    const arr: unknown[] = await r.json();
-    if (!Array.isArray(arr)) return null;
-    const item = arr.find((x): x is { syncedLyrics: string } => {
-      if (!x || typeof x !== "object") return false;
-      const candidate = x as Record<string, unknown>;
-      return (
-        typeof candidate.syncedLyrics === "string" &&
-        candidate.syncedLyrics.length > 0
-      );
-    });
-    return item ? item.syncedLyrics : null;
-  } catch {
-    return null;
-  }
-}
-
 function normalizeWord(s: string): string {
   return s
     .normalize("NFD")
@@ -156,12 +132,15 @@ import {
   recordImmersionResultAction 
 } from "@/modules/immersion/immersion.actions";
 import { LyricsTrainingState, CellState } from "@/modules/immersion/immersion.types";
+import { useTranslations } from "next-intl";
+import { fetchSyncedLyrics } from "@/lib/lrclib";
 
 interface LyricsTrainingProps {
   initialProgress: LyricsTrainingState | null;
 }
 
 export function useLyricsTrainingGame({ initialProgress }: LyricsTrainingProps) {
+  const tLyrics = useTranslations("LyricsSync");
   // Persistence logic: LocalStorage vs Server
   const initialPersisted = useMemo(() => loadPersistedLyricsTrainingState(), []);
 
@@ -674,13 +653,14 @@ export function useLyricsTrainingGame({ initialProgress }: LyricsTrainingProps) 
     if (!videoUrl || !track || !artist) return;
     setLoadingLyrics(true);
     try {
-      const data = await fetchLrcData(track, artist);
-      if (!data) {
-        toast.error("Não conseguimos encontrar a letra sincronizada.");
+      const result = await fetchSyncedLyrics(track, artist);
+      if (result.status !== "ok") {
+        toast.error(result.status === "error" ? tLyrics("setup.lyricsServiceUnavailable") : tLyrics("setup.lyricsNotFoundError"));
         setLrc("");
         setSynced([]);
         return;
       }
+      const data = result.lyrics;
       setLrc(data);
       const lines = parseLrc(data);
       setSynced(lines);
@@ -688,7 +668,7 @@ export function useLyricsTrainingGame({ initialProgress }: LyricsTrainingProps) 
     } finally {
       setLoadingLyrics(false);
     }
-  }, [artist, resetSong, track, videoUrl]);
+  }, [artist, resetSong, tLyrics, track, videoUrl]);
 
   const status = useMemo(() => {
     if (loading) return "loading" as const;

@@ -3686,7 +3686,8 @@
       "lyricsLoadError": "Erro ao carregar letra.",
       "fillFieldsWarning": "Por favor, preencha todos os campos do vídeo.",
       "videoLoadError": "Não foi possível carregar o vídeo.",
-      "searchError": "Erro ao buscar vídeos."
+      "searchError": "Erro ao buscar vídeos.",
+      "lyricsServiceUnavailable": "O serviço de letras está indisponível agora. Tente de novo em instantes."
     },
     "student": {
       "pointsLabel": "Pontos",

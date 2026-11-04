@@ -3686,7 +3686,8 @@
       "lyricsLoadError": "Error loading lyrics.",
       "fillFieldsWarning": "Please fill in all video fields.",
       "videoLoadError": "Could not load the video.",
-      "searchError": "Error searching for videos."
+      "searchError": "Error searching for videos.",
+      "lyricsServiceUnavailable": "The lyrics service is unavailable right now. Please try again in a moment."
     },
     "student": {
       "pointsLabel": "Points",
