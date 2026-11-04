@@ -49,6 +49,7 @@ export function QuizView({ node, updateAttributes }: NodeViewProps) {
   const params = useParams();
   const notebookId = params?.notebookId as string;
   const t = useTranslations("Quiz");
+  const tLang = useTranslations("Languages");
 
   const userRole = (globalThis as Record<string, unknown>).__userRole as string ?? "student";
   const myUserId = (globalThis as Record<string, unknown>).__userId as string ?? "anonymous";
@@ -305,12 +306,12 @@ export function QuizView({ node, updateAttributes }: NodeViewProps) {
                         <SelectValue placeholder={t("generator.select") || "Selecione"} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Português">Português</SelectItem>
-                        <SelectItem value="Espanhol">Espanhol</SelectItem>
-                        <SelectItem value="Inglês">Inglês</SelectItem>
-                        <SelectItem value="Francês">Francês</SelectItem>
-                        <SelectItem value="Alemão">Alemão</SelectItem>
-                        <SelectItem value="Italiano">Italiano</SelectItem>
+                        <SelectItem value="Português">{tLang("portuguese")}</SelectItem>
+                        <SelectItem value="Espanhol">{tLang("spanish")}</SelectItem>
+                        <SelectItem value="Inglês">{tLang("english")}</SelectItem>
+                        <SelectItem value="Francês">{tLang("french")}</SelectItem>
+                        <SelectItem value="Alemão">{tLang("german")}</SelectItem>
+                        <SelectItem value="Italiano">{tLang("italian")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -324,12 +325,12 @@ export function QuizView({ node, updateAttributes }: NodeViewProps) {
                         <SelectValue placeholder={t("generator.select") || "Selecione"} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Inglês">Inglês</SelectItem>
-                        <SelectItem value="Espanhol">Espanhol</SelectItem>
-                        <SelectItem value="Francês">Francês</SelectItem>
-                        <SelectItem value="Italiano">Italiano</SelectItem>
-                        <SelectItem value="Alemão">Alemão</SelectItem>
-                        <SelectItem value="Português">Português</SelectItem>
+                        <SelectItem value="Inglês">{tLang("english")}</SelectItem>
+                        <SelectItem value="Espanhol">{tLang("spanish")}</SelectItem>
+                        <SelectItem value="Francês">{tLang("french")}</SelectItem>
+                        <SelectItem value="Italiano">{tLang("italian")}</SelectItem>
+                        <SelectItem value="Alemão">{tLang("german")}</SelectItem>
+                        <SelectItem value="Português">{tLang("portuguese")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

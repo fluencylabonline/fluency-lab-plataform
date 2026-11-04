@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
+import { useValidationMessage } from "@/hooks/use-validation-message";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -78,20 +80,20 @@ const ACCEPTED_AUDIO_TYPES = [
 // Zod Schema para Validação do Formulário no Cliente
 const uploadFormSchema = z.object({
   title: z.string()
-    .min(1, "O título é obrigatório")
-    .max(100, "O título deve ter no máximo 100 caracteres"),
-  language: z.string().min(1, "O idioma é obrigatório"),
-  level: z.string().min(1, "O nível é obrigatório"),
-  transcription: z.string().min(1, "A transcrição é obrigatória"),
+    .min(1, "AudioSync.vault.validation.titleRequired")
+    .max(100, "AudioSync.vault.validation.titleMax"),
+  language: z.string().min(1, "AudioSync.vault.validation.languageRequired"),
+  level: z.string().min(1, "AudioSync.vault.validation.levelRequired"),
+  transcription: z.string().min(1, "AudioSync.vault.validation.transcriptionRequired"),
   file: z.any()
-    .refine((files) => files && files.length > 0, "O arquivo de áudio é obrigatório")
+    .refine((files) => files && files.length > 0, "AudioSync.vault.validation.fileRequired")
     .refine(
       (files) => files && files[0]?.size <= MAX_FILE_SIZE, 
-      "O arquivo deve ter no máximo 8MB"
+      "AudioSync.vault.validation.fileMax"
     )
     .refine(
       (files) => files && ACCEPTED_AUDIO_TYPES.includes(files[0]?.type),
-      "Formato inválido. Use MP3, WAV, M4A, OGG ou AAC"
+      "AudioSync.vault.validation.fileFormat"
     ),
 });
 
@@ -99,6 +101,9 @@ type UploadFormValues = z.infer<typeof uploadFormSchema>;
 
 export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
   const { editor } = useTiptapEditor();
+  const t = useTranslations("AudioSync.vault");
+  const tLang = useTranslations("Languages");
+  const vm = useValidationMessage();
   const [activeTab, setActiveTab] = useState<"library" | "upload">("library");
 
   // Estados da Biblioteca
@@ -140,11 +145,11 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
       if (result?.data?.success) {
         setAudios(result.data.audios as DBConfigAudio[]);
       } else {
-        notify.error("Erro ao carregar biblioteca de áudios.");
+        notify.error(t("libraryLoadError"));
       }
     } catch (error) {
       console.error("Failed to load audio library:", error);
-      notify.error("Erro ao conectar ao servidor.");
+      notify.error(t("connectionError"));
     } finally {
       setIsLoadingLibrary(false);
     }
@@ -182,7 +187,7 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
       },
       (error) => {
         console.error("Firebase Storage Upload Error:", error);
-        notify.error("Falha ao fazer upload do arquivo para o Storage.");
+        notify.error(t("uploadError"));
         setIsUploading(false);
       },
       async () => {
@@ -207,15 +212,15 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
               transcription: values.transcription.trim(),
             }).run();
 
-            notify.success("Áudio criado e inserido com sucesso!");
+            notify.success(t("createdAndInserted"));
             reset();
             onOpenChange(false);
           } else {
-            notify.error(dbResult?.serverError || "Erro ao salvar metadados do áudio.");
+            notify.error(dbResult?.serverError || t("metadataSaveError"));
           }
         } catch (error) {
           console.error("Failed to complete audio creation:", error);
-          notify.error("Falha ao salvar no banco de dados.");
+          notify.error(t("dbSaveError"));
         } finally {
           setIsUploading(false);
           setUploadProgress(0);
@@ -234,7 +239,7 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
       transcription: audio.transcription,
     }).run();
 
-    notify.success(`Áudio "${audio.title}" inserido!`);
+    notify.success(t("inserted", { title: audio.title }));
     onOpenChange(false);
   };
 
@@ -258,11 +263,11 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
               <Music className="w-5 h-5" />
             </div>
             <VaultTitle className="text-left font-bold">
-              Áudio Sincronizado
+              {t("title")}
             </VaultTitle>
           </div>
           <VaultDescription className="text-left">
-            Incorpore uma trilha de áudio com transcrição integrada e controle síncrono em tempo real.
+            {t("description")}
           </VaultDescription>
         </VaultHeader>
 
@@ -279,7 +284,7 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            Escolher da Biblioteca
+            {t("tabLibrary")}
           </button>
           <button
             onClick={() => setActiveTab("upload")}
@@ -289,7 +294,7 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            Upload de Áudio
+            {t("tabUpload")}
           </button>
         </div>
 
@@ -302,7 +307,7 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Pesquisar por título, idioma ou nível..."
+                  placeholder={t("searchPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="input w-full pl-9 pr-4 py-2 border rounded-xl text-sm"
@@ -313,7 +318,7 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
               {isLoadingLibrary ? (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
                   <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
-                  <p className="text-sm text-muted-foreground">Carregando biblioteca global...</p>
+                  <p className="text-sm text-muted-foreground">{t("loadingLibrary")}</p>
                 </div>
               ) : filteredAudios.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -345,11 +350,9 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
                 <div className="py-8">
                   <Empty className="border-none py-8">
                     <EmptyHeader>
-                      <EmptyTitle>Nenhum áudio encontrado</EmptyTitle>
+                      <EmptyTitle>{t("emptyTitle")}</EmptyTitle>
                       <EmptyDescription>
-                        {searchQuery
-                          ? "Tente buscar por termos diferentes ou confira o idioma/nível."
-                          : "Ainda não existem áudios na biblioteca. Clique na aba Upload para cadastrar o primeiro!"}
+                        {searchQuery ? t("emptySearch") : t("emptyLibrary")}
                       </EmptyDescription>
                     </EmptyHeader>
                   </Empty>
@@ -362,7 +365,7 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               
               {/* Drag and Drop / Input de arquivo */}
-              <Field label="Arquivo de Áudio" required error={errors.file?.message as string}>
+              <Field label={t("fileLabel")} required error={vm(errors.file?.message as string | undefined)}>
                 <div 
                   onClick={() => fileInputRef.current?.click()}
                   className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-2 ${
@@ -390,7 +393,7 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
                           {selectedFile.name}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB de 8 MB
+                          {t("fileSize", { size: (selectedFile.size / (1024 * 1024)).toFixed(2) })}
                         </p>
                       </div>
                     </>
@@ -399,10 +402,10 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
                       <UploadCloud className="w-10 h-10 text-muted-foreground" />
                       <div>
                         <p className="text-sm font-bold text-foreground">
-                          Clique para selecionar ou arraste o áudio aqui
+                          {t("dropHint")}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Formatos suportados: MP3, WAV, M4A, OGG, AAC (Máximo 8MB)
+                          {t("formatsHint")}
                         </p>
                       </div>
                     </>
@@ -411,10 +414,10 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
               </Field>
 
               {/* Título do Áudio */}
-              <Field label="Título do Áudio" required error={errors.title?.message}>
+              <Field label={t("titleLabel")} required error={vm(errors.title?.message)}>
                 <Input
                   type="text"
-                  placeholder="Ex: Diálogo sobre direções em Nova York"
+                  placeholder={t("titlePlaceholder")}
                   className="w-full border rounded-xl"
                   {...register("title")}
                 />
@@ -422,43 +425,43 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
 
               {/* Idioma e Nível Lado a Lado */}
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Idioma" required error={errors.language?.message}>
+                <Field label={t("languageLabel")} required error={vm(errors.language?.message)}>
                   <Select value={watch("language")} onValueChange={(val) => setValue("language", val, { shouldValidate: true })}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione o idioma" />
+                      <SelectValue placeholder={t("languagePlaceholder")} />
                     </SelectTrigger>
                     <SelectContent layerClassName="z-[120]">
-                      <SelectItem value="en">Inglês</SelectItem>
-                      <SelectItem value="es">Espanhol</SelectItem>
-                      <SelectItem value="fr">Francês</SelectItem>
-                      <SelectItem value="it">Italiano</SelectItem>
-                      <SelectItem value="de">Alemão</SelectItem>
-                      <SelectItem value="pt">Português</SelectItem>
+                      <SelectItem value="en">{tLang("english")}</SelectItem>
+                      <SelectItem value="es">{tLang("spanish")}</SelectItem>
+                      <SelectItem value="fr">{tLang("french")}</SelectItem>
+                      <SelectItem value="it">{tLang("italian")}</SelectItem>
+                      <SelectItem value="de">{tLang("german")}</SelectItem>
+                      <SelectItem value="pt">{tLang("portuguese")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </Field>
 
-                <Field label="Nível Aproximado" required error={errors.level?.message}>
+                <Field label={t("levelLabel")} required error={vm(errors.level?.message)}>
                   <Select value={watch("level")} onValueChange={(val) => setValue("level", val, { shouldValidate: true })}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione o nível" />
+                      <SelectValue placeholder={t("levelPlaceholder")} />
                     </SelectTrigger>
                     <SelectContent layerClassName="z-[120]">
-                      <SelectItem value="A1">A1 (Iniciante)</SelectItem>
-                      <SelectItem value="A2">A2 (Básico)</SelectItem>
-                      <SelectItem value="B1">B1 (Intermediário)</SelectItem>
-                      <SelectItem value="B2">B2 (Intermediário Avançado)</SelectItem>
-                      <SelectItem value="C1">C1 (Avançado)</SelectItem>
-                      <SelectItem value="C2">C2 (Fluente)</SelectItem>
+                      <SelectItem value="A1">{t("levels.A1")}</SelectItem>
+                      <SelectItem value="A2">{t("levels.A2")}</SelectItem>
+                      <SelectItem value="B1">{t("levels.B1")}</SelectItem>
+                      <SelectItem value="B2">{t("levels.B2")}</SelectItem>
+                      <SelectItem value="C1">{t("levels.C1")}</SelectItem>
+                      <SelectItem value="C2">{t("levels.C2")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </Field>
               </div>
 
               {/* Transcrição Escrita */}
-              <Field label="Transcrição Completa" required error={errors.transcription?.message}>
+              <Field label={t("transcriptionLabel")} required error={vm(errors.transcription?.message)}>
                 <Textarea
-                  placeholder="Insira aqui todo o texto falado no áudio para o acompanhamento do aluno..."
+                  placeholder={t("transcriptionPlaceholder")}
                   rows={4}
                   className="w-full border rounded-xl min-h-[100px]"
                   {...register("transcription")}
@@ -471,7 +474,7 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
                   <div className="flex justify-between text-xs font-semibold text-amber-700">
                     <span className="flex items-center gap-1.5">
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      Fazendo upload do áudio...
+                      {t("uploading")}
                     </span>
                     <span>{uploadProgress}%</span>
                   </div>
@@ -494,7 +497,7 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
                   disabled={isUploading}
                   className="btn px-4 py-2 border rounded-xl text-sm font-medium hover:bg-muted"
                 >
-                  Cancelar
+                  {t("cancel")}
                 </button>
                 <button
                   type="submit"
@@ -504,10 +507,10 @@ export function AudioSyncVault({ open, onOpenChange }: AudioSyncVaultProps) {
                   {isUploading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Salvando...
+                      {t("saving")}
                     </>
                   ) : (
-                    "Cadastrar e Inserir"
+                    t("submit")
                   )}
                 </button>
               </VaultFooter>

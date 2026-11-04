@@ -2569,7 +2569,12 @@
     "moveDown": "Mover para baixo",
     "removeLesson": "Remover lição",
     "saving": "Salvando...",
-    "saveOrder": "Salvar ordem"
+    "saveOrder": "Salvar ordem",
+    "addLessonDescription": "Pesquise e adicione lições do currículo ao plano de estudos.",
+    "lessonsCount": "{count, plural, one {# lição} other {# lições}}",
+    "editSequenceDescription": "Reordene ou remova lições do plano. Adicione novas do currículo.",
+    "useButtonBelow": "Use o botão abaixo para adicionar do currículo.",
+    "addLesson": "Adicionar lição"
   },
   "Practice": {
     "completedDesc": "Revisite lições e planos passados",
@@ -3666,7 +3671,59 @@
     "hideTranscription": "Ocultar Transcrição",
     "shareTranscription": "Mostrar transcrição para o aluno",
     "transcriptionVisible": "O aluno está vendo a transcrição.",
-    "transcriptionHidden": "Oculta para o aluno."
+    "transcriptionHidden": "Oculta para o aluno.",
+    "vault": {
+      "validation": {
+        "titleRequired": "O título é obrigatório",
+        "titleMax": "O título deve ter no máximo 100 caracteres",
+        "languageRequired": "O idioma é obrigatório",
+        "levelRequired": "O nível é obrigatório",
+        "transcriptionRequired": "A transcrição é obrigatória",
+        "fileRequired": "O arquivo de áudio é obrigatório",
+        "fileMax": "O arquivo deve ter no máximo 8MB",
+        "fileFormat": "Formato inválido. Use MP3, WAV, M4A, OGG ou AAC"
+      },
+      "libraryLoadError": "Erro ao carregar a biblioteca de áudios.",
+      "connectionError": "Erro ao conectar ao servidor.",
+      "uploadError": "Falha ao enviar o arquivo.",
+      "createdAndInserted": "Áudio criado e inserido com sucesso!",
+      "metadataSaveError": "Erro ao salvar os dados do áudio.",
+      "dbSaveError": "Falha ao salvar no banco de dados.",
+      "inserted": "Áudio \"{title}\" inserido!",
+      "title": "Áudio sincronizado",
+      "description": "Incorpore uma trilha de áudio com transcrição integrada e controle sincronizado em tempo real.",
+      "tabLibrary": "Escolher da biblioteca",
+      "tabUpload": "Enviar áudio",
+      "searchPlaceholder": "Pesquisar por título, idioma ou nível...",
+      "loadingLibrary": "Carregando a biblioteca...",
+      "emptyTitle": "Nenhum áudio encontrado",
+      "emptySearch": "Tente buscar por termos diferentes ou confira o idioma/nível.",
+      "emptyLibrary": "Ainda não existem áudios na biblioteca. Clique na aba Enviar áudio para cadastrar o primeiro!",
+      "fileLabel": "Arquivo de áudio",
+      "fileSize": "{size} MB de 8 MB",
+      "dropHint": "Clique para selecionar ou arraste o áudio aqui",
+      "formatsHint": "Formatos suportados: MP3, WAV, M4A, OGG, AAC (máximo 8MB)",
+      "titleLabel": "Título do áudio",
+      "titlePlaceholder": "Ex.: Diálogo sobre direções em Nova York",
+      "languageLabel": "Idioma",
+      "languagePlaceholder": "Selecione o idioma",
+      "levelLabel": "Nível aproximado",
+      "levelPlaceholder": "Selecione o nível",
+      "levels": {
+        "A1": "A1 (Iniciante)",
+        "A2": "A2 (Básico)",
+        "B1": "B1 (Intermediário)",
+        "B2": "B2 (Intermediário avançado)",
+        "C1": "C1 (Avançado)",
+        "C2": "C2 (Fluente)"
+      },
+      "transcriptionLabel": "Transcrição completa",
+      "transcriptionPlaceholder": "Insira aqui todo o texto falado no áudio para o acompanhamento do aluno...",
+      "uploading": "Enviando o áudio...",
+      "cancel": "Cancelar",
+      "saving": "Salvando...",
+      "submit": "Cadastrar e inserir"
+    }
   },
   "Quiz": {
     "generator": {
@@ -4614,5 +4671,13 @@
     "back": "Voltar",
     "processing": "Processando...",
     "confirmCancel": "Sim, cancelar"
+  },
+  "Languages": {
+    "portuguese": "Português",
+    "english": "Inglês",
+    "spanish": "Espanhol",
+    "french": "Francês",
+    "german": "Alemão",
+    "italian": "Italiano"
   }
 }

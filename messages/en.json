@@ -2569,7 +2569,12 @@
     "moveDown": "Move down",
     "removeLesson": "Remove lesson",
     "saving": "Saving...",
-    "saveOrder": "Save order"
+    "saveOrder": "Save order",
+    "addLessonDescription": "Search and add curriculum lessons to the study plan.",
+    "lessonsCount": "{count, plural, one {# lesson} other {# lessons}}",
+    "editSequenceDescription": "Reorder or remove lessons from the plan. Add new ones from the curriculum.",
+    "useButtonBelow": "Use the button below to add from the curriculum.",
+    "addLesson": "Add lesson"
   },
   "Practice": {
     "completedDesc": "Revisit past lessons and plans",
@@ -3666,7 +3671,59 @@
     "hideTranscription": "Hide Transcription",
     "shareTranscription": "Show transcription to the student",
     "transcriptionVisible": "The student can see the transcription.",
-    "transcriptionHidden": "Hidden from the student."
+    "transcriptionHidden": "Hidden from the student.",
+    "vault": {
+      "validation": {
+        "titleRequired": "Title is required",
+        "titleMax": "Title must be at most 100 characters",
+        "languageRequired": "Language is required",
+        "levelRequired": "Level is required",
+        "transcriptionRequired": "Transcription is required",
+        "fileRequired": "The audio file is required",
+        "fileMax": "The file must be at most 8MB",
+        "fileFormat": "Invalid format. Use MP3, WAV, M4A, OGG or AAC"
+      },
+      "libraryLoadError": "Error loading the audio library.",
+      "connectionError": "Error connecting to the server.",
+      "uploadError": "Failed to upload the file.",
+      "createdAndInserted": "Audio created and inserted successfully!",
+      "metadataSaveError": "Error saving the audio details.",
+      "dbSaveError": "Failed to save to the database.",
+      "inserted": "Audio \"{title}\" inserted!",
+      "title": "Synced audio",
+      "description": "Embed an audio track with built-in transcription and real-time synced playback.",
+      "tabLibrary": "Choose from library",
+      "tabUpload": "Upload audio",
+      "searchPlaceholder": "Search by title, language or level...",
+      "loadingLibrary": "Loading the library...",
+      "emptyTitle": "No audio found",
+      "emptySearch": "Try different terms or check the language/level.",
+      "emptyLibrary": "There's no audio in the library yet. Click the Upload audio tab to add the first one!",
+      "fileLabel": "Audio file",
+      "fileSize": "{size} MB of 8 MB",
+      "dropHint": "Click to select or drag the audio here",
+      "formatsHint": "Supported formats: MP3, WAV, M4A, OGG, AAC (max 8MB)",
+      "titleLabel": "Audio title",
+      "titlePlaceholder": "E.g. Dialogue about directions in New York",
+      "languageLabel": "Language",
+      "languagePlaceholder": "Select the language",
+      "levelLabel": "Approximate level",
+      "levelPlaceholder": "Select the level",
+      "levels": {
+        "A1": "A1 (Beginner)",
+        "A2": "A2 (Elementary)",
+        "B1": "B1 (Intermediate)",
+        "B2": "B2 (Upper intermediate)",
+        "C1": "C1 (Advanced)",
+        "C2": "C2 (Proficient)"
+      },
+      "transcriptionLabel": "Full transcription",
+      "transcriptionPlaceholder": "Enter here all the text spoken in the audio so the student can follow along...",
+      "uploading": "Uploading the audio...",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "submit": "Save and insert"
+    }
   },
   "Quiz": {
     "generator": {
@@ -4614,5 +4671,13 @@
     "back": "Back",
     "processing": "Processing...",
     "confirmCancel": "Yes, cancel"
+  },
+  "Languages": {
+    "portuguese": "Portuguese",
+    "english": "English",
+    "spanish": "Spanish",
+    "french": "French",
+    "german": "German",
+    "italian": "Italian"
   }
 }

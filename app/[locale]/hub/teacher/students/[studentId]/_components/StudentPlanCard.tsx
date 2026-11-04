@@ -146,7 +146,7 @@ function AddLessonVault({
         <VaultHeader>
           <VaultTitle>{t("addLessonTitle")}</VaultTitle>
           <VaultDescription>
-            Pesquise e adicione lições do currículo ao plano de estudos.
+            {t("addLessonDescription")}
           </VaultDescription>
         </VaultHeader>
         <VaultBody>
@@ -340,7 +340,7 @@ function AssignTemplateVault({
                         variant="outline"
                         className="text-[10px] rounded-full"
                       >
-                        {tpl.lessons.length} lições
+                        {t("lessonsCount", { count: tpl.lessons.length })}
                       </Badge>
                     </div>
                   </div>
@@ -461,7 +461,7 @@ function EditPlanVault({
           <VaultHeader>
             <VaultTitle>{t("editSequenceTitle")}</VaultTitle>
             <VaultDescription>
-              Reordene ou remova lições do plano. Adicione novas do currículo.
+              {t("editSequenceDescription")}
             </VaultDescription>
           </VaultHeader>
           <VaultBody>
@@ -471,7 +471,7 @@ function EditPlanVault({
                   <ListOrdered className="h-8 w-8 mx-auto mb-2 opacity-30" />
                   <p className="text-sm">{t("planHasNoLessons")}</p>
                   <p className="text-xs mt-1">
-                    Use o botão abaixo para adicionar do currículo.
+                    {t("useButtonBelow")}
                   </p>
                 </div>
               ) : (
@@ -537,7 +537,7 @@ function EditPlanVault({
           </VaultBody>
           <VaultFooter>
             <VaultSecondaryButton onClick={() => setIsAddOpen(true)}>
-              Adicionar Lição
+              {t("addLesson")}
             </VaultSecondaryButton>
             <VaultPrimaryButton
               onClick={saveOrder}
