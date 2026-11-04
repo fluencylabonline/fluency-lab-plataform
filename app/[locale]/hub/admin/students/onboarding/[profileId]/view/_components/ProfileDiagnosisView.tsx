@@ -193,7 +193,7 @@ export function ProfileDiagnosisView({ profile, basePath = "/hub/admin/students/
         title={profile.student?.name || "Diagnóstico do Aluno"}
         subtitle="Análise pedagógica gerada por inteligência artificial com base no perfil e nivelamento."
         className="contents"
-        backHref={(profile.studentId && role === "teacher") ? `/hub/teacher/students/${profile.studentId}` : (profile.studentId && role === "admin") ? `/hub/admin/students/${profile.studentId}` : basePath}
+        backHref={(profile.studentId && role === "teacher") ? `/hub/teacher/students/${profile.studentId}` : (profile.studentId && role === "admin") ? `/hub/admin/users/${profile.studentId}` : basePath}
       >
         <div className="flex items-center gap-3 mt-6">
           <Link href={basePath}>
