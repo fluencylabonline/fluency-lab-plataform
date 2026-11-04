@@ -223,7 +223,7 @@ export function CreateCourseVault({ open, onOpenChange, onSuccess, kind = "cours
               >
                 <VaultInput
                   {...form.register("duration")}
-                  placeholder="Ex: 10h"
+                  placeholder="Ex: 10h, 1h30, 45min"
                   className="h-12 rounded-2xl"
                 />
               </VaultField>

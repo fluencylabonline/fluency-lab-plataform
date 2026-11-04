@@ -14,6 +14,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { usersTable } from "../user/user.schema";
 import type { JSONContent } from "@tiptap/core";
+import { normalizeCourseDuration, COURSE_DURATION_ERROR } from "./course.duration";
 
 // ================= TYPES =================
 
@@ -171,7 +172,11 @@ export const courseEnrollmentsRelations = relations(courseEnrollmentsTable, ({ o
 export const insertCourseSchema = createInsertSchema(coursesTable, {
   title: (s) => s.min(3, "O título deve ter pelo menos 3 caracteres"),
   description: (s) => s.min(10, "A descrição deve ter pelo menos 10 caracteres"),
-  duration: (s) => s.regex(/^\d+h?$/, "A duração deve ser um número ou seguir o formato '10h'"),
+  // Aceita 10h, 1h30, 1h 30min, 90min; salva normalizado (ver course.duration.ts).
+  duration: (s) =>
+    s
+      .refine((v) => !v || normalizeCourseDuration(v) !== null, COURSE_DURATION_ERROR)
+      .transform((v) => (v ? normalizeCourseDuration(v) ?? v : v)),
   language: (s) => s.min(2, "Selecione um idioma"),
   imageUrl: (s) => s.url("URL da imagem inválida"),
   roles: z.array(z.string()).min(1, "Selecione pelo menos um papel"),
