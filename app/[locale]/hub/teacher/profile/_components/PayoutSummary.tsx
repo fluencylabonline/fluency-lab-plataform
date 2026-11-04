@@ -371,6 +371,9 @@ export function PayoutSummary({ history, projections: initialProjections, projec
   ] as const;
 
   const months = monthKeys.map(key => tm(key));
+  // Anos com repasse possível: de 2024 até o ano que vem (antes era fixo até 2026).
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: currentYear + 2 - 2024 }, (_, i) => 2024 + i);
 
   const filteredHistory = history.filter(p =>
     (filterMonth === -1 || p.month === filterMonth) &&
@@ -385,14 +388,14 @@ export function PayoutSummary({ history, projections: initialProjections, projec
     <div className="space-y-6">
       {/* Single summary card: total up front, the two parts below it */}
       <div className={cn("card p-5 transition-all duration-300", isLoadingProjections && "opacity-60")}>
-        <div className="flex items-start justify-between gap-4">
-          <div>
+        <div className="flex flex-col-reverse sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+          <div className="min-w-0">
             <p className="text-sm font-medium text-muted-foreground">{t("toReceive")}</p>
-            <p className="text-4xl font-black text-foreground mt-1">{formatValue(projections.total)}</p>
+            <p className="text-3xl sm:text-4xl font-black text-foreground mt-1 break-words">{formatValue(projections.total)}</p>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 w-full sm:w-auto">
             <Select value={filterMonth.toString()} onValueChange={(v) => setFilterMonth(parseInt(v))}>
-              <SelectTrigger className="w-[130px] h-8">
+              <SelectTrigger className="flex-1 min-w-0 sm:flex-none sm:w-[130px] h-8">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -403,11 +406,11 @@ export function PayoutSummary({ history, projections: initialProjections, projec
               </SelectContent>
             </Select>
             <Select value={filterYear.toString()} onValueChange={(v) => setFilterYear(parseInt(v))}>
-              <SelectTrigger className="w-[90px] h-8">
+              <SelectTrigger className="w-[90px] shrink-0 h-8">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {[2024, 2025, 2026].map(y => (
+                {yearOptions.map(y => (
                   <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
                 ))}
               </SelectContent>
