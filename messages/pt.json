@@ -4415,7 +4415,10 @@
         "end_of_lesson": "No fim da aula",
         "gentle": "Sutil e guiada"
       }
-    }
+    },
+    "notFound": "Perfil não encontrado.",
+    "invalidSurvey": "O questionário está incompleto ou tem respostas inválidas.",
+    "finalizeFailedDraftKept": "As respostas foram salvas, mas não foi possível ativar o perfil agora. Tente finalizar de novo em instantes."
   },
   "Errors": {
     "title": "Algo deu errado",

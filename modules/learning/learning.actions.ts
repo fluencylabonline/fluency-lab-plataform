@@ -1,6 +1,7 @@
 "use server";
 
-import { protectedAction, permissionAction } from "@/lib/safe-action";
+import { protectedAction, permissionAction, managerAction } from "@/lib/safe-action";
+import { getTranslations } from "next-intl/server";
 import { learningService } from "./learning.service";
 import { z } from "zod";
 import { refresh } from "next/cache";
@@ -71,10 +72,14 @@ const removeLessonFromPlanSchema = z.object({
   lessonId: z.uuid(),
 });
 
+// Rascunho aceita respostas parciais; o limite de tamanho impede payloads enormes.
+const MAX_PROFILE_RESPONSES_CHARS = 100_000;
 const saveProfileSurveySchema = z.object({
   id: z.uuid().optional(),
   studentId: z.string().optional(),
-  responses: z.any(),
+  responses: z
+    .record(z.string(), z.unknown())
+    .refine((r) => JSON.stringify(r).length <= MAX_PROFILE_RESPONSES_CHARS, "responses too large"),
 });
 
 const finalizeProfileSchema = z.object({
@@ -324,7 +329,9 @@ export const getStudentPlansAction = permissionAction("material.view")
 /**
  * Action to save a draft of the student profile survey.
  */
-export const saveProfileSurveyAction = protectedAction
+// Só a revisão do admin/manager usa estas actions; antes qualquer usuário logado
+// podia sobrescrever (ou finalizar, gastando IA) o perfil de outro aluno pelo id.
+export const saveProfileSurveyAction = managerAction
   .metadata({ name: "saveProfileSurvey" })
   .schema(saveProfileSurveySchema)
   .action(async ({ parsedInput, ctx }) => {
@@ -335,22 +342,30 @@ export const saveProfileSurveyAction = protectedAction
 /**
  * Action to finalize the student profile, triggering AI analysis and embedding.
  */
-export const finalizeProfileAction = protectedAction
+export const finalizeProfileAction = managerAction
   .metadata({ name: "finalizeProfile" })
   .schema(finalizeProfileSchema)
   .action(async ({ parsedInput, ctx }) => {
+    const t = await getTranslations("ProfileReview");
+
     // 1. Fetch current profile to validate responses against full schema
     const profile = await learningService.findProfileById(parsedInput.profileId);
-    if (!profile) return { success: false, error: "Perfil não encontrado" };
+    if (!profile) return { success: false, error: t("notFound") };
 
     const validation = studentProfileSurveySchema.safeParse(profile.responses);
     if (!validation.success) {
-      return { success: false, error: "Questionário incompleto ou inválido" };
+      return { success: false, error: t("invalidSurvey") };
     }
 
-    const result = await learningService.finalizeProfile(parsedInput.profileId, ctx.user.id);
-    refresh();
-    return { success: true, profile: result };
+    try {
+      const result = await learningService.finalizeProfile(parsedInput.profileId, ctx.user.id);
+      refresh();
+      return { success: true, profile: result };
+    } catch (error) {
+      // Falha da IA/embedding: o rascunho continua salvo, só não foi ativado.
+      console.error("[finalizeProfileAction] Error:", error);
+      return { success: false, error: t("finalizeFailedDraftKept") };
+    }
   });
 
 /**

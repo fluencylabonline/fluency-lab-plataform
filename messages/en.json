@@ -4416,7 +4416,10 @@
         "end_of_lesson": "End of class",
         "gentle": "Subtle and guided"
       }
-    }
+    },
+    "notFound": "Profile not found.",
+    "invalidSurvey": "The survey is incomplete or has invalid answers.",
+    "finalizeFailedDraftKept": "The answers were saved, but the profile couldn't be activated right now. Try finalizing again in a moment."
   },
   "Errors": {
     "title": "Something went wrong",

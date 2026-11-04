@@ -30,7 +30,9 @@ export const learningService = {
       id: data.id,
       studentId: data.studentId,
       responses: data.responses,
-      status: "draft",
+      // Perfil novo nasce rascunho; salvar um perfil já ativo não o rebaixa
+      // (antes, um "Finalizar" que falhava deixava o aluno sem perfil ativo).
+      ...(data.id ? {} : { status: "draft" as const }),
     }, userId);
   },
 

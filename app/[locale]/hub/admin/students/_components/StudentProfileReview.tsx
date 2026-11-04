@@ -149,6 +149,7 @@ export function StudentProfileReview({ profileId, initialData, basePath = "/hub/
     setBusy("finalize");
     try {
       if (!(await persist())) return notify.error(t("saveError"));
+      setDirty(false);
       const res = await finalizeProfileAction({ profileId });
       if (!res?.data?.success) return notify.error(res?.data?.error || t("finalizeError"));
       notify.success(t("finalized"));

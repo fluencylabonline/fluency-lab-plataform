@@ -261,48 +261,48 @@ export const step1Schema = z.object({
   fullName: z.string().min(3, "Nome muito curto"),
   approximateAge: z.string().min(1, "Informe a idade aproximada"),
   isMinor: z.boolean().default(false),
-  guardianName: z.string().optional(),
-  guardianContact: z.string().optional(),
+  guardianName: z.string().max(2000).optional(),
+  guardianContact: z.string().max(2000).optional(),
   occupation: z.string().min(2, "Informe sua profissão ou série escolar"),
 });
 
 export const step2Schema = z.object({
   languageOfInterest: z.string().uuid("Selecione um idioma").optional(),
   previousStudy: z.boolean(),
-  previousStudyDetails: z.string().optional(),
+  previousStudyDetails: z.string().max(2000).optional(),
   studyDuration: z.enum(["less_than_6m", "6m_to_2y", "more_than_2y"]).optional(),
   selfAssessedLevel: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]),
 });
 
 export const step3Schema = z.object({
   mainGoals: z.array(z.string()).min(1, "Selecione pelo menos um objetivo"),
-  customGoal: z.string().optional(),
-  targetDeadline: z.string().optional(),
-  deadlineReason: z.string().optional(),
-  specificMotivation: z.string().optional(),
+  customGoal: z.string().max(2000).optional(),
+  targetDeadline: z.string().max(2000).optional(),
+  deadlineReason: z.string().max(2000).optional(),
+  specificMotivation: z.string().max(2000).optional(),
   commitmentLevel: z.number().min(1).max(10),
 });
 
 export const step4Schema = z.object({
   weeklyFrequency: z.number().min(1).max(7),
-  preferredTimes: z.string().optional(),
+  preferredTimes: z.string().max(2000).optional(),
   dailyStudyTime: z.enum(["none", "5_30min", "30_60min", "1h_plus"]),
 });
 
 export const step5Schema = z.object({
-  employmentStatus: z.string().optional(),
-  professionalArea: z.string().optional(),
+  employmentStatus: z.string().max(2000).optional(),
+  professionalArea: z.string().max(2000).optional(),
   professionalUse: z.array(z.string()).optional(),
   usageType: z.enum(["writing", "speaking", "balanced"]),
   technicalVocabNeeded: z.boolean().default(false).optional(),
-  currentUsageFrequency: z.string().optional(),
+  currentUsageFrequency: z.string().max(2000).optional(),
 });
 
 export const step6Schema = z.object({
   hobbies: z.array(z.string()).optional(),
-  mediaConsumptionFrequency: z.string().optional(),
+  mediaConsumptionFrequency: z.string().max(2000).optional(),
   contentTypes: z.array(z.string()).optional(),
-  conversationTopics: z.string().optional(),
+  conversationTopics: z.string().max(2000).optional(),
 });
 
 export const step7Schema = z.object({
@@ -312,14 +312,14 @@ export const step7Schema = z.object({
 
 export const step8Schema = z.object({
   mainDifficulties: z.array(z.string()).min(1, "Selecione pelo menos uma dificuldade"),
-  whatWorked: z.string().optional(),
-  whatDidntWork: z.string().optional(),
-  specialNeeds: z.string().optional(),
+  whatWorked: z.string().max(2000).optional(),
+  whatDidntWork: z.string().max(2000).optional(),
+  specialNeeds: z.string().max(2000).optional(),
   speakingAnxiety: z.enum(["none", "low", "medium", "high", "very_high"]),
 });
 
 export const step9Schema = z.object({
-  languageVariant: z.string().optional(),
+  languageVariant: z.string().max(2000).optional(),
   accentGoal: z.enum(["intelligible", "natural"]).optional(),
   classExpectations: z.array(z.string()).max(3, "Selecione no máximo 3 expectativas"),
   learningPace: z.enum(["intense", "moderate", "relaxed", "flexible"]),
@@ -327,10 +327,10 @@ export const step9Schema = z.object({
 });
 
 export const step10Schema = z.object({
-  otherLanguages: z.string().optional(),
-  generalObservations: z.string().optional(),
-  restrictions: z.string().optional(),
-  questions: z.string().optional(),
+  otherLanguages: z.string().max(2000).optional(),
+  generalObservations: z.string().max(2000).optional(),
+  restrictions: z.string().max(2000).optional(),
+  questions: z.string().max(2000).optional(),
 });
 
 export const studentProfileSurveySchema = z.object({
