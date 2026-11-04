@@ -22,7 +22,8 @@ function normalizePathname(pathname: string): string {
   for (const locale of routing.locales) {
     if (pathname === `/${locale}`) return "/";
     if (pathname.startsWith(`/${locale}/`)) {
-      return pathname.slice(`/${locale}`.length + 1) || "/";
+      // Mantém a barra inicial: "/pt/faq" → "/faq" (antes virava "faq").
+      return pathname.slice(`/${locale}`.length) || "/";
     }
   }
   return pathname;
