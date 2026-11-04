@@ -6,7 +6,6 @@ import { createTransactionSchema, upsertFiscalConfigSchema } from "./finance.sch
 import { refresh } from "next/cache";
 import { z } from "zod";
 
-import { payoutService } from "../payout/payout.service";
 
 export const createTransactionAction = protectedAction
   .metadata({ name: "createTransaction" })
@@ -62,35 +61,6 @@ export const deleteTransactionAction = protectedAction
     } catch (error) {
       console.error("[deleteTransactionAction] Error:", error);
       return { success: false, error: "Falha ao deletar transação" };
-    }
-  });
-
-export const payTeacherAction = protectedAction
-  .metadata({ name: "payTeacher" })
-  .schema(z.object({
-    teacherId: z.string(),
-    month: z.number(),
-    year: z.number(),
-    password: z.string().optional(),
-  }))
-  .action(async ({ parsedInput, ctx }) => {
-    if (ctx.user.role !== "admin" && ctx.user.role !== "manager") {
-      return { success: false, error: "Acesso negado" };
-    }
-
-    try {
-      // Re-using the payoutService logic directly
-      await payoutService.processPayout(
-        parsedInput.teacherId,
-        parsedInput.month,
-        parsedInput.year
-      );
-
-      refresh();
-      return { success: true };
-    } catch (error) {
-      console.error("[payTeacherAction] Error:", error);
-      return { success: false, error: (error as Error).message };
     }
   });
 

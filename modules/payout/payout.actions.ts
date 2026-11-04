@@ -9,6 +9,9 @@ import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { payoutsTable } from "./payout.schema";
 
+const monthSchema = z.number().int().min(0).max(11);
+const yearSchema = z.number().int().min(2020).max(2100);
+
 export const checkCurrentSudoRequirementAction = protectedAction
   .schema(z.void())
   .metadata({ name: "checkCurrentSudoRequirementAction" })
@@ -24,8 +27,8 @@ export const checkCurrentSudoRequirementAction = protectedAction
 export const processTeacherPayoutAction = permissionAction("class.update.any")
   .schema(z.object({
     teacherId: z.string(),
-    month: z.number().min(0).max(11),
-    year: z.number(),
+    month: monthSchema,
+    year: yearSchema,
     password: z.string().optional(),
   }))
   .metadata({ name: "processTeacherPayoutAction" })
@@ -54,8 +57,8 @@ export const processTeacherPayoutAction = permissionAction("class.update.any")
 export const getTeacherUnpaidClassesAction = protectedAction
   .schema(z.object({
     teacherId: z.string(),
-    month: z.number().min(0).max(11),
-    year: z.number(),
+    month: monthSchema,
+    year: yearSchema,
   }))
   .metadata({ name: "getTeacherUnpaidClassesAction" })
   .action(async ({ parsedInput, ctx }) => {
@@ -109,8 +112,8 @@ export const resendTeacherPayoutEmailAction = protectedAction
 export const getTeacherProjectionsAction = protectedAction
   .schema(z.object({
     teacherId: z.string(),
-    month: z.number(),
-    year: z.number(),
+    month: z.number().int().min(-1).max(11), // -1 = ano inteiro
+    year: yearSchema,
   }))
   .metadata({ name: "getTeacherProjectionsAction" })
   .action(async ({ parsedInput, ctx }) => {
