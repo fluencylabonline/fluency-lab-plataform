@@ -373,7 +373,11 @@
     "delete": "Delete",
     "deleting": "Deleting...",
     "planDeleted": "Plan deleted successfully!",
-    "planDeleteError": "Cannot delete the plan because it has associated enrollments."
+    "planDeleteError": "Cannot delete the plan because it has associated enrollments.",
+    "errors": {
+      "missingFiscalData": "To generate the charge, complete the student's (or guardian's) tax ID and phone in Settings, or contact the school.",
+      "pixGeneration": "We couldn't generate the PIX charge right now. Try again in a few minutes or contact the school."
+    }
   },
   "Certificates": {
     "description": "O certificado será gerado automaticamente com base no progresso do aluno (aulas completadas e último nivelamento).",

@@ -2,6 +2,8 @@ import "server-only";
 import { cache } from "react";
 import { billingRepository } from "./billing.repository";
 import { abacate, createPixCharge } from "@/lib/abacate-pay";
+import { buildPixDescription } from "@/lib/pix-description";
+import { MissingFiscalDataError } from "@/lib/payment-errors";
 import { createStripeCheckoutSession, stripe } from "@/lib/stripe";
 import { userService } from "../user/user.service";
 import { communicationService } from "../communication/communication.service";
@@ -77,20 +79,32 @@ async function createCancellationFeePix(
   feeAmount: number,
   subscriptionId: string,
 ) {
-  let taxId = student.taxId || "00000000000";
-  let cellphone = student.cellphone || "00000000000";
+  // Mesma regra da mensalidade: menor de idade cobra no CPF do responsável e,
+  // sem CPF/telefone, não emite (nada de CPF "00000000000" no provedor).
+  let taxId = student.taxId;
+  let cellphone = student.cellphone;
+  let customerName = student.name || "Aluno";
 
-  if (taxId.includes(":")) taxId = decrypt(taxId);
-  if (cellphone.includes(":")) cellphone = decrypt(cellphone);
+  if (taxId?.includes(":")) taxId = decrypt(taxId);
+  if (cellphone?.includes(":")) cellphone = decrypt(cellphone);
 
-  taxId = taxId.replace(/\D/g, "");
-  cellphone = cellphone.replace(/\D/g, "");
+  if (student.guardianTaxId) {
+    taxId = student.guardianTaxId.includes(":") ? decrypt(student.guardianTaxId) : student.guardianTaxId;
+    customerName = student.guardianName || customerName;
+  }
+
+  taxId = taxId?.replace(/\D/g, "") ?? "";
+  cellphone = cellphone?.replace(/\D/g, "") ?? "";
+
+  if (!taxId || !cellphone) {
+    throw new MissingFiscalDataError();
+  }
 
   const pix = await createPixCharge({
     amount: feeAmount,
-    description: `Taxa de Cancelamento - ${planName}`.slice(0, 30),
+    description: buildPixDescription("Taxa Cancelamento", planName),
     customer: {
-      name: student.name || "Aluno",
+      name: customerName,
       email: student.email || "",
       taxId,
       cellphone,
@@ -803,7 +817,11 @@ export const billingService = {
 
     const pix = await createPixCharge({
       amount: installment.amount,
-      description: `Mensalidade ${sub?.plan?.name || "Plano"} - ${installment.orderIndex}/${sub?.plan?.durationMonths || ""}`.slice(0, 30),
+      description: buildPixDescription(
+        "Mensalidade",
+        sub?.plan?.name || "Plano",
+        sub?.plan?.durationMonths ? `${installment.orderIndex}/${sub.plan.durationMonths}` : `${installment.orderIndex}`
+      ),
       expiresIn,
       customer: {
         name,

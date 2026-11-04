@@ -216,7 +216,7 @@ export const userService = {
     return user;
   },
 
-  async syncAbacatePayCustomer(userId: string): Promise<string> {
+  async syncAbacatePayCustomer(userId: string): Promise<string | null> {
     const user = await userRepository.findById(userId);
     if (!user) throw new Error("Usuário não encontrado");
 
@@ -234,12 +234,21 @@ export const userService = {
       // Cellphone usually stays the same or can be guardian's too, but we use the one provided
     }
 
+    // Sem CPF/telefone reais não cria o cliente (antes ia "00000000000").
+    // A cobrança cria o cliente depois, quando o cadastro estiver completo.
+    const sanitizedTaxId = taxId?.replace(/\D/g, "");
+    const sanitizedCellphone = cellphone?.replace(/\D/g, "");
+    if (!sanitizedTaxId || !sanitizedCellphone) {
+      console.warn(`[userService] User ${user.id} missing taxId or cellphone; AbacatePay customer not created`);
+      return null;
+    }
+
     // Create in AbacatePay
     const customer = await abacate.customers.create({
       name,
       email: user.email,
-      taxId: taxId || "00000000000", 
-      cellphone: cellphone || "00000000000",
+      taxId: sanitizedTaxId,
+      cellphone: sanitizedCellphone,
       metadata: { userId: user.id } as Record<string, string | number | boolean>,
     });
 

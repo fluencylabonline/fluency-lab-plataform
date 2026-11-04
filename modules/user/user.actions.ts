@@ -526,7 +526,8 @@ export const requestStudentDeactivationAction = adminAction
       return result;
     } catch (error) {
       console.error("[requestStudentDeactivationAction] Error:", error);
-      return { success: false, error: (error as Error).message };
+      const { toUserFacingBillingError } = await import("../billing/billing.errors");
+      return { success: false, error: await toUserFacingBillingError(error) };
     }
   });
 
@@ -639,7 +640,8 @@ export const requestSelfCancellationAction = protectedAction
       return result as { success: boolean; error?: string; feeRequired?: boolean; pixCode?: string; pixImage?: string; amount?: number };
     } catch (error) {
       console.error("[requestSelfCancellationAction] Error:", error);
-      return { success: false, error: (error as Error).message } as { success: boolean; error?: string; feeRequired?: boolean };
+      const { toUserFacingBillingError } = await import("../billing/billing.errors");
+      return { success: false, error: await toUserFacingBillingError(error) } as { success: boolean; error?: string; feeRequired?: boolean };
     }
   });
 

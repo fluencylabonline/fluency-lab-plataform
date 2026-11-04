@@ -373,7 +373,11 @@
     "delete": "Excluir",
     "deleting": "Excluindo...",
     "planDeleted": "Plano excluído com sucesso!",
-    "planDeleteError": "Não é possível excluir o plano pois possui matrículas associadas."
+    "planDeleteError": "Não é possível excluir o plano pois possui matrículas associadas.",
+    "errors": {
+      "missingFiscalData": "Para gerar a cobrança, complete o CPF e o telefone do aluno (ou do responsável) em Configurações, ou fale com a escola.",
+      "pixGeneration": "Não foi possível gerar a cobrança PIX agora. Tente de novo em alguns minutos ou fale com a escola."
+    }
   },
   "Certificates": {
     "description": "O certificado será gerado automaticamente com base no progresso do aluno (aulas completadas e último nivelamento).",

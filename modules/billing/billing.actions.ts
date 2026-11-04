@@ -1,5 +1,6 @@
 "use server";
 
+import { toUserFacingBillingError } from "./billing.errors";
 import { adminAction, protectedAction, managerAction } from "@/lib/safe-action";
 import { createPlanSchema, createSubscriptionSchema, updatePlanSchema, updateInstallmentSchema, changeStudentPlanSchema } from "./billing.schema";
 import { billingService } from "./billing.service";
@@ -319,8 +320,7 @@ export const regenerateCancellationFeeAction = protectedAction
       return { success: true, ...result };
     } catch (error) {
       console.error("[regenerateCancellationFeeAction] Error:", error);
-      const errorMessage = error instanceof Error ? error.message : "Erro ao gerar novo código de pagamento";
-      return { success: false, error: errorMessage };
+      return { success: false, error: await toUserFacingBillingError(error) };
     }
   });
 

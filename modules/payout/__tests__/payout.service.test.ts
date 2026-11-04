@@ -8,10 +8,7 @@ vi.mock("@/lib/cryptography", () => ({ decrypt: (v: string) => v }));
 vi.mock("../../communication/templates/TeacherPayoutEmail", () => ({ default: () => null }));
 vi.mock("../../finance/finance.service", () => ({ financeService: { createTransaction: vi.fn() } }));
 
-vi.mock("@/lib/abacate-pay", () => {
-  class PixProviderRejectedError extends Error {}
-  return { sendPix: vi.fn(), PixProviderRejectedError };
-});
+vi.mock("@/lib/abacate-pay", () => ({ sendPix: vi.fn() }));
 
 vi.mock("../../user/user.service", () => ({
   userService: {
@@ -31,7 +28,8 @@ vi.mock("../payout.repository", () => ({
 
 import { payoutService } from "../payout.service";
 import { payoutRepository } from "../payout.repository";
-import { sendPix, PixProviderRejectedError } from "@/lib/abacate-pay";
+import { sendPix } from "@/lib/abacate-pay";
+import { PixProviderRejectedError } from "@/lib/payment-errors";
 
 const classes = [
   { id: "c2", teacherHourlyRate: 5000, startAt: new Date(), status: "completed", student: { name: "A" } },

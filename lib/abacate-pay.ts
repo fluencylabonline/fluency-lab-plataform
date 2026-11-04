@@ -1,6 +1,7 @@
 import "server-only";
 import { AbacatePay } from "@abacatepay/sdk";
 import { env } from "@/env/server";
+import { PixProviderRejectedError } from "./payment-errors";
 
 if (!env.ABACATEPAY_API_KEY) {
   throw new Error("Missing ABACATEPAY_API_KEY environment variable");
@@ -51,7 +52,7 @@ export async function createPixCharge(payload: {
 
   if (!result.success) {
     console.error("[AbacatePay] API Error Details:", result.error);
-    throw new Error(result.error || "Failed to create PIX checkout");
+    throw new PixProviderRejectedError(result.error || "Failed to create PIX checkout");
   }
 
   return result.data as {
@@ -60,17 +61,6 @@ export async function createPixCharge(payload: {
     brCodeBase64: string;
     expiresAt: string;
   };
-}
-
-/**
- * O provedor respondeu e recusou explicitamente a operação (nada foi enviado).
- * Diferente de erro de rede/timeout, em que não se sabe se o PIX saiu.
- */
-export class PixProviderRejectedError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "PixProviderRejectedError";
-  }
 }
 
 /**
