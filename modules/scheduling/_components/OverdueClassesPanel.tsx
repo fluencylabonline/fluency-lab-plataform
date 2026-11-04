@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useFormatter } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { capitalizeFirst } from "@/utils/format";
 import { AlertOctagon, Ban, CheckCircle2, Loader2, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,9 +32,9 @@ import { resolveOverdueClassAction } from "@/modules/scheduling/scheduling.actio
 type ResolvedStatus = "completed" | "no-show" | "canceled-teacher";
 
 const STATUS_OPTIONS = [
-  { value: "completed", label: "Aula dada", icon: CheckCircle2, color: "text-emerald-500" },
-  { value: "no-show", label: "Aluno faltou", icon: UserX, color: "text-amber-500" },
-  { value: "canceled-teacher", label: "Cancelada por mim", icon: Ban, color: "text-red-500" },
+  { value: "completed", labelKey: "statusCompleted", icon: CheckCircle2, color: "text-emerald-500" },
+  { value: "no-show", labelKey: "statusNoShow", icon: UserX, color: "text-amber-500" },
+  { value: "canceled-teacher", labelKey: "statusCanceledByMe", icon: Ban, color: "text-red-500" },
 ] as const;
 
 export interface OverdueClassItem {
@@ -54,6 +54,7 @@ export function OverdueClassesPanel({ classes, blockThreshold, showBackToHub }: 
   const router = useRouter();
   // Fuso fixo America/Sao_Paulo (provider): evita hidratação #418 e dia/hora errados.
   const fmt = useFormatter();
+  const t = useTranslations("OverdueClasses");
   const [savingId, setSavingId] = useState<string | null>(null);
   const [confirmCancel, setConfirmCancel] = useState<OverdueClassItem | null>(null);
 
@@ -67,10 +68,10 @@ export function OverdueClassesPanel({ classes, blockThreshold, showBackToHub }: 
     setSavingId(null);
     setConfirmCancel(null);
     if (result?.data?.success) {
-      notify.success("Status da aula atualizado.");
+      notify.success(t("statusUpdated"));
       router.refresh();
     } else {
-      notify.error(result?.data?.error || "Não foi possível atualizar a aula.");
+      notify.error(result?.data?.error || t("updateError"));
     }
   };
 
@@ -88,20 +89,18 @@ export function OverdueClassesPanel({ classes, blockThreshold, showBackToHub }: 
         <div className="p-3 rounded-full bg-red-500/15 ring-8 ring-red-500/5">
           <AlertOctagon className="w-7 h-7 text-red-500" />
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight">Aulas sem status informado</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
         <p className="text-sm text-muted-foreground leading-relaxed max-w-lg">
-          {isBlocked
-            ? "O acesso à plataforma está travado. Informe o que aconteceu em cada aula para voltar a usar o sistema."
-            : `Informe o que aconteceu em cada aula. Com ${blockThreshold} aulas atrasadas o sistema trava até você informar todas.`}{" "}
-          Aulas sem status não entram no seu pagamento.
+          {isBlocked ? t("blockedDescription") : t("description", { count: blockThreshold })}{" "}
+          {t("notPaidNote")}
         </p>
       </div>
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Aulas atrasadas</span>
+          <span className="text-muted-foreground">{t("overdueLabel")}</span>
           <span className={cn("font-semibold tabular-nums", isBlocked ? "text-red-500" : "text-amber-500")}>
-            {total} de {blockThreshold}
+            {t("progress", { total, max: blockThreshold })}
           </span>
         </div>
         <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
@@ -146,14 +145,14 @@ export function OverdueClassesPanel({ classes, blockThreshold, showBackToHub }: 
                   onValueChange={(v) => handleSelect(c, v as ResolvedStatus)}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="O que aconteceu?" />
+                    <SelectValue placeholder={t("whatHappened")} />
                   </SelectTrigger>
                   <SelectContent>
                     {STATUS_OPTIONS.map((o) => (
                       <SelectItem key={o.value} value={o.value}>
                         <span className="flex items-center gap-2">
                           <o.icon className={cn("w-4 h-4", o.color)} />
-                          {o.label}
+                          {t(o.labelKey)}
                         </span>
                       </SelectItem>
                     ))}
@@ -168,7 +167,7 @@ export function OverdueClassesPanel({ classes, blockThreshold, showBackToHub }: 
 
       {showBackToHub && !isBlocked && (
         <Link href="/hub" className="self-center">
-          <Button variant="outline">Voltar ao hub</Button>
+          <Button variant="outline">{t("backToHub")}</Button>
         </Link>
       )}
 
@@ -177,22 +176,24 @@ export function OverdueClassesPanel({ classes, blockThreshold, showBackToHub }: 
           <VaultHeader>
             <VaultIcon type="warning" />
             <div className="flex flex-col">
-              <VaultTitle>Cancelar esta aula?</VaultTitle>
+              <VaultTitle>{t("cancelTitle")}</VaultTitle>
               <VaultDescription>
-                A aula de <strong>{confirmCancel?.studentName}</strong> será marcada como cancelada por você.
-                Ela não será paga e o aluno receberá 1 crédito de reposição e uma notificação.
+                {t.rich("cancelDescription", {
+                  name: confirmCancel?.studentName ?? "",
+                  strong: (chunks) => <strong>{chunks}</strong>,
+                })}
               </VaultDescription>
             </div>
           </VaultHeader>
           <VaultFooter>
             <VaultSecondaryButton onClick={() => setConfirmCancel(null)} disabled={savingId !== null}>
-              Voltar
+              {t("back")}
             </VaultSecondaryButton>
             <VaultPrimaryButton
               onClick={() => confirmCancel && save(confirmCancel, "canceled-teacher")}
               disabled={savingId !== null}
             >
-              {savingId ? "Processando..." : "Sim, cancelar"}
+              {savingId ? t("processing") : t("confirmCancel")}
             </VaultPrimaryButton>
           </VaultFooter>
         </VaultContent>

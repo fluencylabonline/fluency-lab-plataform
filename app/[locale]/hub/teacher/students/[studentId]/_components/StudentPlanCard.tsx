@@ -111,6 +111,7 @@ function AddLessonVault({
   existingLessonIds,
   onAdded,
 }: AddLessonVaultProps) {
+  const t = useTranslations("PlanCard");
   const [search, setSearch] = useState("");
   const [isPending, startTransition] = useTransition();
   const [addingId, setAddingId] = useState<string | null>(null);
@@ -128,10 +129,10 @@ function AddLessonVault({
         setAddingId(lessonId);
         const result = await addLessonToPlanAction({ planId, lessonId });
         if (result?.data?.success) {
-          notify.success("Lição adicionada ao plano!");
+          notify.success(t("lessonAdded"));
           onAdded();
         } else {
-          notify.error(result?.serverError ?? "Erro ao adicionar lição.");
+          notify.error(result?.serverError ?? t("lessonAddError"));
         }
         setAddingId(null);
       });
@@ -143,7 +144,7 @@ function AddLessonVault({
     <Vault open={open} onOpenChange={onOpenChange}>
       <VaultContent className="max-w-xl max-h-[85vh]">
         <VaultHeader>
-          <VaultTitle>Adicionar Lição ao Plano</VaultTitle>
+          <VaultTitle>{t("addLessonTitle")}</VaultTitle>
           <VaultDescription>
             Pesquise e adicione lições do currículo ao plano de estudos.
           </VaultDescription>
@@ -155,7 +156,7 @@ function AddLessonVault({
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Pesquisar lições..."
+                placeholder={t("searchLessonsPlaceholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2.5 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
@@ -182,7 +183,7 @@ function AddLessonVault({
               ) : lessons.length === 0 ? (
                 <div className="py-12 text-center text-muted-foreground">
                   <BookOpen className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">Nenhuma lição encontrada.</p>
+                  <p className="text-sm">{t("noLessonsFound")}</p>
                 </div>
               ) : (
                 lessons.map((lesson) => {
@@ -253,6 +254,7 @@ function AssignTemplateVault({
   studentId,
   onAssigned,
 }: AssignTemplateVaultProps) {
+  const t = useTranslations("PlanCard");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -272,11 +274,11 @@ function AssignTemplateVault({
         studentId,
       });
       if (result?.data?.success) {
-        notify.success("Plano atribuído com sucesso!");
+        notify.success(t("planAssigned"));
         onAssigned();
         onOpenChange(false);
       } else {
-        notify.error(result?.serverError ?? "Erro ao atribuir o plano.");
+        notify.error(result?.serverError ?? t("planAssignError"));
       }
     });
   };
@@ -307,7 +309,7 @@ function AssignTemplateVault({
             ) : templates.length === 0 ? (
               <div className="py-12 text-center text-muted-foreground">
                 <GraduationCap className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                <p className="text-sm">Nenhum template disponível.</p>
+                <p className="text-sm">{t("noTemplates")}</p>
               </div>
             ) : (
               templates.map((tpl) => (
@@ -391,6 +393,7 @@ function EditPlanVault({
   initialLessons,
   onSaved,
 }: EditPlanVaultProps) {
+  const t = useTranslations("PlanCard");
   const [lessons, setLessons] = useState(
     [...initialLessons].sort((a, b) => a.order - b.order)
   );
@@ -423,10 +426,10 @@ function EditPlanVault({
       const result = await removeLessonFromPlanAction({ planId, lessonId });
       if (result?.data?.success) {
         setLessons((prev) => prev.filter((l) => l.id !== lessonId));
-        notify.success("Lição removida do plano.");
+        notify.success(t("lessonRemoved"));
         onSaved();
       } else {
-        notify.error(result?.serverError ?? "Erro ao remover lição.");
+        notify.error(result?.serverError ?? t("lessonRemoveError"));
       }
     });
   };
@@ -436,11 +439,11 @@ function EditPlanVault({
       const lessonIds = lessons.map((l) => l.id);
       const result = await reorderLessonsAction({ planId, lessonIds });
       if (result?.data?.success) {
-        notify.success("Ordem das lições salva!");
+        notify.success(t("orderSaved"));
         setIsDirty(false);
         onSaved();
       } else {
-        notify.error(result?.serverError ?? "Erro ao salvar a ordem.");
+        notify.error(result?.serverError ?? t("orderSaveError"));
       }
     });
   };
@@ -456,7 +459,7 @@ function EditPlanVault({
       <Vault open={open} onOpenChange={handleOpenChange}>
         <VaultContent className="max-w-2xl max-h-[90vh]">
           <VaultHeader>
-            <VaultTitle>Editar Sequência de Lições</VaultTitle>
+            <VaultTitle>{t("editSequenceTitle")}</VaultTitle>
             <VaultDescription>
               Reordene ou remova lições do plano. Adicione novas do currículo.
             </VaultDescription>
@@ -466,7 +469,7 @@ function EditPlanVault({
               {lessons.length === 0 ? (
                 <div className="py-12 text-center text-muted-foreground">
                   <ListOrdered className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">Este plano não possui lições.</p>
+                  <p className="text-sm">{t("planHasNoLessons")}</p>
                   <p className="text-xs mt-1">
                     Use o botão abaixo para adicionar do currículo.
                   </p>
@@ -501,7 +504,8 @@ function EditPlanVault({
                         disabled={index === 0 || isPending}
                         onClick={() => move(index, "up")}
                         className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-muted transition-colors disabled:opacity-30 disabled:pointer-events-none"
-                        title="Mover para cima"
+                        title={t("moveUp")}
+                        aria-label={t("moveUp")}
                       >
                         <ChevronUp className="h-4 w-4" />
                       </button>
@@ -510,7 +514,8 @@ function EditPlanVault({
                         disabled={index === lessons.length - 1 || isPending}
                         onClick={() => move(index, "down")}
                         className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-muted transition-colors disabled:opacity-30 disabled:pointer-events-none"
-                        title="Mover para baixo"
+                        title={t("moveDown")}
+                        aria-label={t("moveDown")}
                       >
                         <ChevronDown className="h-4 w-4" />
                       </button>
@@ -519,7 +524,8 @@ function EditPlanVault({
                         disabled={isPending}
                         onClick={() => remove(lesson.id)}
                         className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-colors disabled:opacity-30 disabled:pointer-events-none"
-                        title="Remover lição"
+                        title={t("removeLesson")}
+                        aria-label={t("removeLesson")}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -540,10 +546,10 @@ function EditPlanVault({
               {isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Salvando...
+                  {t("saving")}
                 </>
               ) : (
-                "Salvar Ordem"
+                t("saveOrder")
               )}
             </VaultPrimaryButton>
           </VaultFooter>

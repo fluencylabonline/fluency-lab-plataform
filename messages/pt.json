@@ -2550,7 +2550,26 @@
     "planEditorDescription": "Gerencie as lições e objetivos do plano de estudos.",
     "save": "Salvar Alterações",
     "searchPlaceholder": "Filtrar lições...",
-    "title": "Plano de Estudos"
+    "title": "Plano de Estudos",
+    "lessonAdded": "Lição adicionada ao plano!",
+    "lessonAddError": "Erro ao adicionar lição.",
+    "addLessonTitle": "Adicionar lição ao plano",
+    "searchLessonsPlaceholder": "Pesquisar lições...",
+    "noLessonsFound": "Nenhuma lição encontrada.",
+    "planAssigned": "Plano atribuído com sucesso!",
+    "planAssignError": "Erro ao atribuir o plano.",
+    "noTemplates": "Nenhum template disponível.",
+    "lessonRemoved": "Lição removida do plano.",
+    "lessonRemoveError": "Erro ao remover lição.",
+    "orderSaved": "Ordem das lições salva!",
+    "orderSaveError": "Erro ao salvar a ordem.",
+    "editSequenceTitle": "Editar sequência de lições",
+    "planHasNoLessons": "Este plano não possui lições.",
+    "moveUp": "Mover para cima",
+    "moveDown": "Mover para baixo",
+    "removeLesson": "Remover lição",
+    "saving": "Salvando...",
+    "saveOrder": "Salvar ordem"
   },
   "Practice": {
     "completedDesc": "Revisite lições e planos passados",
@@ -4519,5 +4538,81 @@
     "validation": {
       "titleRequired": "O título é obrigatório."
     }
+  },
+  "TeacherStudentDetailsHelp": {
+    "classes": {
+      "title": "Histórico de aulas",
+      "description": "Acompanhe e registre a presença e o feedback.",
+      "intro": "No painel de <strong>Aulas</strong>, você visualiza o calendário mensal do estudante e gerencia os agendamentos.",
+      "attendance": "<strong>Registrar presença:</strong> marque se o aluno compareceu ou se houve falta/desmarcação.",
+      "feedback": "<strong>Feedback de aula:</strong> escreva um breve resumo pedagógico sobre o desempenho do aluno após cada encontro."
+    },
+    "notebooks": {
+      "title": "Notebooks (anotações)",
+      "description": "Caderno digital compartilhado com o estudante.",
+      "intro": "Os <strong>Notebooks</strong> servem como o diário de bordo e espaço de anotações oficiais de cada aula.",
+      "rich": "Crie anotações ricas com explicações gramaticais, novos vocabulários e observações.",
+      "access": "O aluno tem acesso de leitura instantâneo aos notebooks que você cria, permitindo que ele estude de qualquer lugar.",
+      "search": "<strong>Busca inteligente:</strong> você pode usar a busca dos cadernos para pesquisar palavras-chave contidas tanto no <strong>título</strong> quanto no <strong>conteúdo</strong> das anotações."
+    },
+    "live": {
+      "title": "Aulas ao vivo (vídeo)",
+      "description": "Como realizar e iniciar as chamadas de vídeo.",
+      "intro": "As aulas online são realizadas diretamente de forma integrada à plataforma:",
+      "start": "Acesse o notebook específico da aula e clique no <strong>botão de vídeo</strong> (câmera) no canto inferior direito para abrir a sala.",
+      "noLinks": "Não é necessário enviar links! Assim que você inicia a chamada, ela aparece automaticamente para o aluno quando ele acessa a plataforma."
+    },
+    "roadmap": {
+      "title": "Plano de estudos",
+      "description": "A trilha pedagógica e progresso do aluno.",
+      "intro": "O <strong>Plano de Estudos</strong> define a sequência de lições estruturadas que o aluno irá cursar.",
+      "add": "Adicione lições da biblioteca oficial para criar um roteiro sob medida.",
+      "track": "Acompanhe o status de conclusão de cada lição e o progresso da prática diária do estudante."
+    }
+  },
+  "TeacherStudentsHelp": {
+    "visibility": {
+      "title": "Como os alunos aparecem?",
+      "description": "Entenda o vínculo de alunos com seu perfil.",
+      "intro": "Um aluno é exibido na sua lista de estudantes automaticamente se ele atender a pelo menos um dos seguintes critérios:",
+      "upcoming": "Possui uma aula futura ou recorrente agendada com você.",
+      "past": "Já realizou alguma aula no passado cujo registro de presença ou histórico de agendamento esteja sob sua responsabilidade.",
+      "dynamic": "<strong>💡 Vínculo dinâmico:</strong> não é necessário associar alunos manualmente. Assim que a equipe de suporte ou o sistema agenda uma aula deles com você, eles aparecem aqui instantaneamente."
+    },
+    "disappearance": {
+      "title": "Quando um aluno desaparece?",
+      "description": "Entenda quando um estudante sai da sua listagem.",
+      "intro": "Um aluno deixará de ser listado na sua central se:",
+      "noClasses": "Ele não possuir mais nenhuma aula ativa, pendente ou concluída agendada com você no banco de dados.",
+      "reassigned": "O contrato ou pacote de aulas dele for finalizado e a coordenação reatribuir o aluno inteiramente a outro professor."
+    },
+    "search": {
+      "title": "Como usar a busca?",
+      "description": "Encontre seus alunos de forma rápida.",
+      "intro": "A barra de pesquisa no cabeçalho permite que você encontre qualquer estudante em tempo real.",
+      "byName": "<strong>Busca por nome:</strong> digite parte do nome do aluno para filtrar a lista.",
+      "byEmail": "<strong>Busca por e-mail:</strong> também é possível buscar pelo endereço de e-mail cadastrado do aluno.",
+      "tip": "Dica: se a lista estiver vazia e a busca ativa, clique no \"X\" da barra de pesquisa para redefinir e ver todos os alunos de volta."
+    }
+  },
+  "OverdueClasses": {
+    "statusCompleted": "Aula dada",
+    "statusNoShow": "Aluno faltou",
+    "statusCanceledByMe": "Cancelada por mim",
+    "statusUpdated": "Status da aula atualizado.",
+    "updateError": "Não foi possível atualizar a aula.",
+    "title": "Aulas sem status informado",
+    "blockedDescription": "O acesso à plataforma está travado. Informe o que aconteceu em cada aula para voltar a usar o sistema.",
+    "description": "Informe o que aconteceu em cada aula. Com {count} aulas atrasadas o sistema trava até você informar todas.",
+    "notPaidNote": "Aulas sem status não entram no seu pagamento.",
+    "overdueLabel": "Aulas atrasadas",
+    "progress": "{total} de {max}",
+    "whatHappened": "O que aconteceu?",
+    "backToHub": "Voltar ao hub",
+    "cancelTitle": "Cancelar esta aula?",
+    "cancelDescription": "A aula de <strong>{name}</strong> será marcada como cancelada por você. Ela não será paga e o aluno receberá 1 crédito de reposição e uma notificação.",
+    "back": "Voltar",
+    "processing": "Processando...",
+    "confirmCancel": "Sim, cancelar"
   }
 }

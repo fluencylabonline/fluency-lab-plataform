@@ -2550,7 +2550,26 @@
     "planEditorDescription": "Manage lessons and goals for the learning plan.",
     "save": "Save Changes",
     "searchPlaceholder": "Filter lessons...",
-    "title": "Learning Plan"
+    "title": "Learning Plan",
+    "lessonAdded": "Lesson added to the plan!",
+    "lessonAddError": "Error adding lesson.",
+    "addLessonTitle": "Add lesson to plan",
+    "searchLessonsPlaceholder": "Search lessons...",
+    "noLessonsFound": "No lessons found.",
+    "planAssigned": "Plan assigned successfully!",
+    "planAssignError": "Error assigning the plan.",
+    "noTemplates": "No templates available.",
+    "lessonRemoved": "Lesson removed from the plan.",
+    "lessonRemoveError": "Error removing lesson.",
+    "orderSaved": "Lesson order saved!",
+    "orderSaveError": "Error saving the order.",
+    "editSequenceTitle": "Edit lesson sequence",
+    "planHasNoLessons": "This plan has no lessons.",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "removeLesson": "Remove lesson",
+    "saving": "Saving...",
+    "saveOrder": "Save order"
   },
   "Practice": {
     "completedDesc": "Revisit past lessons and plans",
@@ -4519,5 +4538,81 @@
     "validation": {
       "titleRequired": "Title is required."
     }
+  },
+  "TeacherStudentDetailsHelp": {
+    "classes": {
+      "title": "Class history",
+      "description": "Track and record attendance and feedback.",
+      "intro": "In the <strong>Classes</strong> panel you see the student's monthly calendar and manage bookings.",
+      "attendance": "<strong>Record attendance:</strong> mark whether the student attended, missed or cancelled.",
+      "feedback": "<strong>Class feedback:</strong> write a short teaching summary of the student's performance after each session."
+    },
+    "notebooks": {
+      "title": "Notebooks (notes)",
+      "description": "Digital notebook shared with the student.",
+      "intro": "<strong>Notebooks</strong> are the logbook and official notes space for each class.",
+      "rich": "Create rich notes with grammar explanations, new vocabulary and observations.",
+      "access": "The student gets instant read access to the notebooks you create, so they can study from anywhere.",
+      "search": "<strong>Smart search:</strong> you can search the notebooks for keywords in both the <strong>title</strong> and the <strong>content</strong> of the notes."
+    },
+    "live": {
+      "title": "Live classes (video)",
+      "description": "How to start and run video calls.",
+      "intro": "Online classes run directly inside the platform:",
+      "start": "Open the class's notebook and click the <strong>video button</strong> (camera) in the bottom-right corner to open the room.",
+      "noLinks": "No need to send links! As soon as you start the call, it shows up automatically for the student when they open the platform."
+    },
+    "roadmap": {
+      "title": "Study plan",
+      "description": "The student's learning path and progress.",
+      "intro": "The <strong>Study plan</strong> defines the sequence of structured lessons the student will take.",
+      "add": "Add lessons from the official library to build a tailored path.",
+      "track": "Track the completion status of each lesson and the student's daily practice progress."
+    }
+  },
+  "TeacherStudentsHelp": {
+    "visibility": {
+      "title": "How do students show up?",
+      "description": "Understand how students are linked to your profile.",
+      "intro": "A student appears in your student list automatically if they meet at least one of these criteria:",
+      "upcoming": "They have an upcoming or recurring class booked with you.",
+      "past": "They had a past class whose attendance record or booking history is under your responsibility.",
+      "dynamic": "<strong>💡 Dynamic link:</strong> there's no need to add students manually. As soon as the support team or the system books a class of theirs with you, they show up here instantly."
+    },
+    "disappearance": {
+      "title": "When does a student disappear?",
+      "description": "Understand when a student leaves your list.",
+      "intro": "A student stops being listed in your hub if:",
+      "noClasses": "They no longer have any active, pending or completed class booked with you.",
+      "reassigned": "Their contract or class package ends and the coordination reassigns them entirely to another teacher."
+    },
+    "search": {
+      "title": "How to use search?",
+      "description": "Find your students quickly.",
+      "intro": "The search bar in the header lets you find any student in real time.",
+      "byName": "<strong>Search by name:</strong> type part of the student's name to filter the list.",
+      "byEmail": "<strong>Search by email:</strong> you can also search by the student's registered email address.",
+      "tip": "Tip: if the list is empty with a search active, click the \"X\" in the search bar to reset it and see all students again."
+    }
+  },
+  "OverdueClasses": {
+    "statusCompleted": "Class taught",
+    "statusNoShow": "Student didn't show",
+    "statusCanceledByMe": "Cancelled by me",
+    "statusUpdated": "Class status updated.",
+    "updateError": "Couldn't update the class.",
+    "title": "Classes without a status",
+    "blockedDescription": "Access to the platform is locked. Tell us what happened in each class to use the system again.",
+    "description": "Tell us what happened in each class. With {count} overdue classes the system locks until you report all of them.",
+    "notPaidNote": "Classes without a status aren't included in your payment.",
+    "overdueLabel": "Overdue classes",
+    "progress": "{total} of {max}",
+    "whatHappened": "What happened?",
+    "backToHub": "Back to hub",
+    "cancelTitle": "Cancel this class?",
+    "cancelDescription": "<strong>{name}</strong>'s class will be marked as cancelled by you. It won't be paid and the student will get 1 make-up credit and a notification.",
+    "back": "Back",
+    "processing": "Processing...",
+    "confirmCancel": "Yes, cancel"
   }
 }
