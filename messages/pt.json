@@ -4423,5 +4423,10 @@
     "retry": "Tentar de novo",
     "home": "Ir para o início",
     "reference": "Referência: {digest}"
+  },
+  "Notebook": {
+    "validation": {
+      "titleRequired": "O título é obrigatório."
+    }
   }
 }

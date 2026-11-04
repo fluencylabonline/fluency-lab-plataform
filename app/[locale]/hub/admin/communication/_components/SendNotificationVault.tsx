@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
+import { useValidationMessage } from "@/hooks/use-validation-message";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Vault,
@@ -46,6 +47,7 @@ interface SendNotificationVaultProps {
 }
 
 export function SendNotificationVault({ open, onOpenChange }: SendNotificationVaultProps) {
+  const vm = useValidationMessage();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<AdminUserDTO[]>([]);
 
@@ -115,11 +117,11 @@ export function SendNotificationVault({ open, onOpenChange }: SendNotificationVa
 
         <VaultBody>
           <VaultForm onSubmit={handleSubmit(onSubmit)}>
-            <VaultField label="Título" error={errors.title?.message}>
+            <VaultField label="Título" error={vm(errors.title?.message)}>
               <VaultInput {...register("title")} placeholder="Ex: Nova Aula Disponível" />
             </VaultField>
 
-            <VaultField label="Mensagem" error={errors.body?.message}>
+            <VaultField label="Mensagem" error={vm(errors.body?.message)}>
               <Textarea
                 {...register("body")}
                 placeholder="Descreva o conteúdo da notificação..."
@@ -161,7 +163,7 @@ export function SendNotificationVault({ open, onOpenChange }: SendNotificationVa
             </div>
 
             {targetType === "specific" && (
-              <VaultField label="Destinatários" error={errors.userIds?.message}>
+              <VaultField label="Destinatários" error={vm(errors.userIds?.message)}>
                 <div className="space-y-3">
                   <div className="flex flex-wrap gap-2 min-h-[40px] p-2 rounded-md border border-dashed border-muted-foreground/30">
                     {selectedUsers.length === 0 ? (

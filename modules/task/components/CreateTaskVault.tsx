@@ -3,6 +3,7 @@
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
+import { useValidationMessage } from "@/hooks/use-validation-message";
 import { useState, useEffect, useMemo } from "react";
 import { Vault, VaultContent, VaultHeader, VaultTitle, VaultDescription, VaultFooter, VaultSecondaryButton, VaultPrimaryButton } from "@/components/ui/vault";
 import { User } from "@/modules/user/user.schema";
@@ -32,6 +33,7 @@ interface CreateTaskVaultProps {
 export function CreateTaskVault({ open, onOpenChange, projectId, projects, initialInboxStatuses }: CreateTaskVaultProps) {
   const { mutate } = useSWRConfig();
   const t = useTranslations("Tasks");
+  const vm = useValidationMessage();
   const [assignableUsers, setAssignableUsers] = useState<User[]>([]);
 
   const form = useForm<CreateTaskValues>({
@@ -149,11 +151,11 @@ export function CreateTaskVault({ open, onOpenChange, projectId, projects, initi
           <VaultDescription>{t("newTaskDescription")}</VaultDescription>
         </VaultHeader>
       <div className="space-y-6">
-        <Field label={t("title")} error={form.formState.errors.title?.message} required>
+        <Field label={t("title")} error={vm(form.formState.errors.title?.message)} required>
           <Input placeholder={t("titlePlaceholder")} {...form.register("title")} />
         </Field>
 
-        <Field label={t("description")} error={form.formState.errors.description?.message}>
+        <Field label={t("description")} error={vm(form.formState.errors.description?.message)}>
           <Textarea 
             placeholder={t("descriptionPlaceholder")} 
             className="min-h-[100px]"
@@ -166,7 +168,7 @@ export function CreateTaskVault({ open, onOpenChange, projectId, projects, initi
             control={form.control}
             name="projectId"
             render={({ field }) => (
-              <Field label={t("project")} error={form.formState.errors.projectId?.message}>
+              <Field label={t("project")} error={vm(form.formState.errors.projectId?.message)}>
                 <Select 
                   onValueChange={(val) => {
                     field.onChange(val === "none" ? null : val);
@@ -197,7 +199,7 @@ export function CreateTaskVault({ open, onOpenChange, projectId, projects, initi
             control={form.control}
             name="statusId"
             render={({ field }) => (
-              <Field label={t("status")} error={form.formState.errors.statusId?.message}>
+              <Field label={t("status")} error={vm(form.formState.errors.statusId?.message)}>
                 <Select onValueChange={field.onChange} value={field.value || undefined}>
                   <SelectTrigger>
                     <SelectValue placeholder={t("selectStatus")} />
@@ -223,7 +225,7 @@ export function CreateTaskVault({ open, onOpenChange, projectId, projects, initi
             control={form.control}
             name="dueDate"
             render={({ field }) => (
-              <Field label={t("dueDate")} error={form.formState.errors.dueDate?.message}>
+              <Field label={t("dueDate")} error={vm(form.formState.errors.dueDate?.message)}>
                 <CalendarVault
                   date={field.value ? new Date(field.value) : undefined}
                   onSelect={(date) => field.onChange(date?.toISOString())}
@@ -241,7 +243,7 @@ export function CreateTaskVault({ open, onOpenChange, projectId, projects, initi
             control={form.control}
             name="assigneeIds"
             render={({ field }) => (
-              <Field label={t("assignees")} error={form.formState.errors.assigneeIds?.message}>
+              <Field label={t("assignees")} error={vm(form.formState.errors.assigneeIds?.message)}>
                 <div className="space-y-2">
                   <Select 
                     onValueChange={(userId) => {
@@ -309,7 +311,7 @@ export function CreateTaskVault({ open, onOpenChange, projectId, projects, initi
             control={form.control}
             name="recurringCycle"
             render={({ field }) => (
-              <Field label={t("recurringCycle")} error={form.formState.errors.recurringCycle?.message}>
+              <Field label={t("recurringCycle")} error={vm(form.formState.errors.recurringCycle?.message)}>
                 <Select onValueChange={field.onChange} value={field.value || undefined}>
                   <SelectTrigger>
                     <SelectValue placeholder={t("selectCycle")} />

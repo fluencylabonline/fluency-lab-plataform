@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useValidationMessage } from "@/hooks/use-validation-message";
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createUserAction } from "@/modules/user/user.actions";
@@ -46,6 +47,7 @@ interface CreateUserVaultProps {
 
 export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
   const t = useTranslations("UserManagement");
+  const vm = useValidationMessage();
   const tRoles = useTranslations("UserRoles");
   const { locale } = useParams();
 
@@ -400,7 +402,7 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
                 <VaultField
                   label={t("fullName")}
                   required
-                  error={errors.name?.message ? t(errors.name.message as Parameters<typeof t>[0]) : undefined}
+                  error={vm(errors.name?.message)}
                 >
                   <VaultInput
                     {...form.register("name")}
@@ -411,7 +413,7 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
                 <VaultField
                   label={t("email")}
                   required
-                  error={errors.email?.message ? t(errors.email.message as Parameters<typeof t>[0]) : undefined}
+                  error={vm(errors.email?.message)}
                 >
                   <VaultInput
                     type="email"
@@ -422,7 +424,7 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
 
                 <VaultField
                   label={t("cellphone")}
-                  error={errors.cellphone?.message ? t(errors.cellphone.message as Parameters<typeof t>[0]) : undefined}
+                  error={vm(errors.cellphone?.message)}
                 >
                   <VaultInput
                     {...form.register("cellphone")}
@@ -434,7 +436,7 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
                   <VaultField
                     label={t("displayLanguage") || "Idioma de exibição"}
                     required
-                    error={errors.locale?.message}
+                    error={vm(errors.locale?.message)}
                   >
                     <Select
                       value={localeValue}
@@ -457,7 +459,7 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
                   <VaultField
                     label={t("type")}
                     required
-                    error={errors.role?.message ? t(errors.role.message as Parameters<typeof t>[0]) : undefined}
+                    error={vm(errors.role?.message)}
                   >
                     <Select
                       value={role}
@@ -495,7 +497,7 @@ export function CreateUserVault({ open, onOpenChange }: CreateUserVaultProps) {
                       />
                     </VaultField>
 
-                    <VaultField label={t("assignedPlan")} error={errors.assignedPlanId?.message}>
+                    <VaultField label={t("assignedPlan")} error={vm(errors.assignedPlanId?.message)}>
                       <div className="space-y-2">
                         {assignedPlanId ? (
                           (() => {

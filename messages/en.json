@@ -4424,5 +4424,10 @@
     "retry": "Try again",
     "home": "Go to home",
     "reference": "Reference: {digest}"
+  },
+  "Notebook": {
+    "validation": {
+      "titleRequired": "Title is required."
+    }
   }
 }

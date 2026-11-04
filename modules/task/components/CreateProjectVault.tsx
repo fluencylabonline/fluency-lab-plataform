@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useForm, useWatch, Control, UseFormRegister, UseFormSetValue, FieldArrayWithId } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
+import { useValidationMessage } from "@/hooks/use-validation-message";
 import { useEffect } from "react";
 import { Vault, VaultContent, VaultHeader, VaultTitle, VaultDescription } from "@/components/ui/vault";
 import { Input } from "@/components/ui/input";
@@ -112,6 +113,7 @@ function StatusItem({ index, control, register, setValue, remove, allFields, t }
 
 export function CreateProjectVault({ open, onOpenChange }: CreateProjectVaultProps) {
   const t = useTranslations("Tasks");
+  const vm = useValidationMessage();
 
   const form = useForm<CreateProjectValues>({
     resolver: zodResolver(createProjectSchema),
@@ -181,11 +183,11 @@ export function CreateProjectVault({ open, onOpenChange }: CreateProjectVaultPro
           <VaultDescription>{t("newProjectDescription")}</VaultDescription>
         </VaultHeader>
       <div className="space-y-6">
-        <Field label={t("projectName")} error={form.formState.errors.name?.message} required>
+        <Field label={t("projectName")} error={vm(form.formState.errors.name?.message)} required>
           <Input placeholder={t("projectNamePlaceholder")} {...form.register("name")} />
         </Field>
 
-        <Field label={t("projectColor")} error={form.formState.errors.color?.message}>
+        <Field label={t("projectColor")} error={vm(form.formState.errors.color?.message)}>
           <div className="flex flex-wrap gap-2">
             {COLORS.map((color) => (
               <button
