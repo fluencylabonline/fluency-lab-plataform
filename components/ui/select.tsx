@@ -174,7 +174,7 @@ const SelectTrigger = React.forwardRef<
     const { isMobile } = useSelectContext();
 
     const commonClasses = cn(
-        "input capitalize flex-1",
+        "input flex-1",
         "flex w-full items-center justify-between gap-2 rounded-md border-none px-3 py-2 text-sm transition-all outline-none disabled:cursor-not-allowed disabled:opacity-50",
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
         "data-[size=default]:h-10 data-[size=sm]:h-8",
@@ -320,7 +320,7 @@ const SelectItem = React.forwardRef<
                 transition={{ duration: 0.2 }}
                 type="button"
                 className={cn(
-                    "capitalize! relative flex w-full items-center justify-between rounded-md px-3 py-3.5 text-sm outline-none transition-colors mb-0.5",
+                    "relative flex w-full items-center justify-between rounded-md px-3 py-3.5 text-sm outline-none transition-colors mb-0.5",
                     isSelected
                         ? "bg-accent text-accent-foreground font-medium"
                         : "text-foreground hover:bg-accent/50",
@@ -346,7 +346,7 @@ const SelectItem = React.forwardRef<
             ref={ref}
             value={value}
             className={cn(
-                "capitalize focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+                "focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
                 className
             )}
             {...props}

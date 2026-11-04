@@ -60,6 +60,7 @@ import type { TeacherOptionDTO } from "@/modules/user/user.schema";
 import { LearningPlan, LearningPlanWithLessons, StudentCurriculumGap } from "@/modules/learning/learning.types";
 import { LessonSummary } from "@/modules/curriculum/curriculum.types";
 import type { CallSession } from "@/modules/call/call.schema";
+import { capitalizeFirst } from "@/utils/format";
 
 interface StudentCurriculumTabProps {
   studentId: string;
@@ -371,8 +372,8 @@ export function StudentCurriculumTab({ studentId, isAdmin, callHistory = [] }: S
           <Button variant="outline" size="icon" onClick={() => setCurrentDate(subMonths(currentDate, 1))}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <h2 className="text-xl font-bold min-w-[150px] text-center capitalize">
-            {format(currentDate, "MMMM yyyy", { locale: ptBR })}
+          <h2 className="text-xl font-bold min-w-[150px] text-center">
+            {capitalizeFirst(format(currentDate, "MMMM 'de' yyyy", { locale: ptBR }))}
           </h2>
           <Button variant="outline" size="icon" onClick={() => setCurrentDate(addMonths(currentDate, 1))}>
             <ChevronRight className="h-4 w-4" />

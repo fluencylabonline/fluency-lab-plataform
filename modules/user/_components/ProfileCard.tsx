@@ -119,7 +119,7 @@ export function ProfileCard({ user, isLoading = false }: ProfileCardProps) {
             </button>
           </div>
           <div className="flex flex-col items-start mt-0 sm:mt-2 min-w-0">
-            <p className="font-semibold text-lg capitalize text-foreground truncate w-full" title={displayName}>
+            <p className="font-semibold text-lg text-foreground truncate w-full" title={displayName}>
               {displayName}
             </p>
             <p className="text-sm text-muted-foreground truncate w-full" title={displayUser.email || ""}>

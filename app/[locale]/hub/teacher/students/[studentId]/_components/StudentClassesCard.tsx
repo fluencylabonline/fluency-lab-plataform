@@ -45,6 +45,7 @@ import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { VaultLoadingOverlay } from "@/components/ui/vault-loading-overlay";
 import { VaultLoadingReportOverlay } from "@/components/ui/vault-loading-report-overlay";
+import { capitalizeFirst } from "@/utils/format";
 
 interface StudentClassesCardProps {
   studentId: string;
@@ -298,7 +299,7 @@ export function StudentClassesCard({
 
   const months = Array.from({ length: 12 }, (_, i) => ({
     value: i.toString(),
-    label: format(new Date(2024, i, 1), "MMMM", { locale: dateLocale }),
+    label: capitalizeFirst(format(new Date(2024, i, 1), "MMMM", { locale: dateLocale })),
   }));
 
   const years = [new Date().getFullYear() - 1, new Date().getFullYear(), new Date().getFullYear() + 1];

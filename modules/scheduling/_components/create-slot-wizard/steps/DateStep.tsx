@@ -27,8 +27,8 @@ export function DateStep({ date, locale, onSelect }: DateStepProps) {
         disabled={{ before: startOfDay(new Date()) }}
       />
       <div className="text-center">
-        <p className="text-sm font-semibold capitalize text-foreground">
-          {t("dateWeekday", { day }) || `Dia da semana: ${day}`}
+        <p className="text-sm font-semibold text-foreground">
+          {t("dateWeekday", { day })}
         </p>
         <p className="text-xs text-muted-foreground">
           {t("dateHint", { phrase }) || `Se o horário se repetir, ele cairá ${phrase}.`}
