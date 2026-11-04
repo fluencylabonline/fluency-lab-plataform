@@ -88,3 +88,12 @@ export function maskName(name?: string): string {
   if (parts.length === 1) return parts[0];
   return `${parts[0]} ${parts[parts.length - 1][0]}.`;
 }
+
+/**
+ * Maiúscula só na primeira letra (ex.: "novembro de 2026" → "Novembro de 2026").
+ * Use no lugar da classe CSS `capitalize`, que põe maiúscula em toda palavra
+ * ("Novembro De 2026", "Student De Teste").
+ */
+export function capitalizeFirst(text: string): string {
+  return text ? text.charAt(0).toUpperCase() + text.slice(1) : text;
+}

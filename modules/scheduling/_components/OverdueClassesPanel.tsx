@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { useFormatter } from "next-intl";
+import { capitalizeFirst } from "@/utils/format";
 import { AlertOctagon, Ban, CheckCircle2, Loader2, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { notify } from "@/components/ui/toaster";
@@ -52,6 +52,8 @@ interface OverdueClassesPanelProps {
 
 export function OverdueClassesPanel({ classes, blockThreshold, showBackToHub }: OverdueClassesPanelProps) {
   const router = useRouter();
+  // Fuso fixo America/Sao_Paulo (provider): evita hidratação #418 e dia/hora errados.
+  const fmt = useFormatter();
   const [savingId, setSavingId] = useState<string | null>(null);
   const [confirmCancel, setConfirmCancel] = useState<OverdueClassItem | null>(null);
 
@@ -125,14 +127,14 @@ export function OverdueClassesPanel({ classes, blockThreshold, showBackToHub }: 
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="flex flex-col items-center justify-center w-12 h-12 rounded-lg bg-muted shrink-0 leading-none">
                   <span className="text-[10px] uppercase text-muted-foreground">
-                    {format(start, "MMM", { locale: ptBR })}
+                    {fmt.dateTime(start, { month: "short" }).replace(".", "")}
                   </span>
-                  <span className="text-lg font-semibold">{format(start, "dd")}</span>
+                  <span className="text-lg font-semibold">{fmt.dateTime(start, { day: "2-digit" })}</span>
                 </div>
                 <div className="min-w-0">
                   <p className="font-medium truncate">{c.studentName}</p>
-                  <p className="text-xs text-muted-foreground capitalize">
-                    {format(start, "EEEE 'às' HH:mm", { locale: ptBR })}
+                  <p className="text-xs text-muted-foreground">
+                    {capitalizeFirst(fmt.dateTime(start, { weekday: "long", hour: "2-digit", minute: "2-digit" }))}
                   </p>
                 </div>
               </div>

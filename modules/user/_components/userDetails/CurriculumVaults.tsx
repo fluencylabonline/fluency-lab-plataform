@@ -16,8 +16,8 @@ import {
   CheckCircle2,
   XCircle
 } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { useFormatter } from "next-intl";
+import { capitalizeFirst } from "@/utils/format";
 
 import {
   Vault,
@@ -132,6 +132,12 @@ export function CurriculumVaults({
   onCheckCompatibility,
   onConfirmTransfer,
 }: CurriculumVaultsProps) {
+  // useFormatter usa o fuso America/Sao_Paulo do provider: mesmo texto no servidor
+  // (UTC) e no navegador, sem erro de hidratação nem dia/hora deslocados.
+  const fmt = useFormatter();
+  const weekday = (d: Date | string) => capitalizeFirst(fmt.dateTime(new Date(d), { weekday: "long" }));
+  const dayTime = (d: Date | string) =>
+    fmt.dateTime(new Date(d), { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
@@ -405,7 +411,7 @@ export function CurriculumVaults({
                         {upcomingClasses.map((slot) => (
                           <CommandItem
                             key={slot.id}
-                            value={`${slot.id} ${format(new Date(slot.startAt), "dd/MM 'às' HH:mm", { locale: ptBR })} ${slot.lessonTitle || ""}`.toLowerCase()}
+                            value={`${slot.id} ${dayTime(slot.startAt)} ${slot.lessonTitle || ""}`.toLowerCase()}
                             onSelect={() => setStartClassId(slot.id)}
                             className={cn(
                               "flex items-center justify-between py-3",
@@ -416,7 +422,7 @@ export function CurriculumVaults({
                               <Clock className="h-4 w-4 text-muted-foreground" />
                               <div className="flex flex-col">
                                 <span className="text-sm font-medium">
-                                  {format(new Date(slot.startAt), "dd/MM 'às' HH:mm", { locale: ptBR })}
+                                  {dayTime(slot.startAt)}
                                 </span>
                                 <span className="text-xs text-muted-foreground italic">
                                   {slot.lessonTitle || "Sem lição vinculada"}
@@ -521,7 +527,7 @@ export function CurriculumVaults({
                       <div key={rule.id} className="flex items-center justify-between p-3 bg-accent/20 rounded-lg border">
                         <div className="flex flex-col">
                           <span className="text-sm font-medium">
-                            <span className="capitalize">{format(new Date(rule.startDate), "EEEE", { locale: ptBR })}</span> • {rule.startTime} - {rule.endTime}
+                            <span>{weekday(rule.startDate)}</span> • {rule.startTime} - {rule.endTime}
                           </span>
                           <span className="text-xs text-muted-foreground capitalize">Freq: {rule.frequency}</span>
                         </div>
@@ -579,7 +585,7 @@ export function CurriculumVaults({
                     <CommandGroup>
                       {availableRules.map((rule) => {
                         const teacher = teachers.find(t => t.id === rule.teacherId);
-                        const weekdayStr = format(new Date(rule.startDate), "EEEE", { locale: ptBR });
+                        const weekdayStr = weekday(rule.startDate);
                         return (
                           <CommandItem
                             key={rule.id}
@@ -592,7 +598,7 @@ export function CurriculumVaults({
                           >
                             <div className="flex flex-col">
                               <span className="text-sm font-medium">
-                                <span className="capitalize">{format(new Date(rule.startDate), "EEEE", { locale: ptBR })}</span> • {rule.startTime} - {rule.endTime}
+                                <span>{weekday(rule.startDate)}</span> • {rule.startTime} - {rule.endTime}
                               </span>
                               <span className="text-xs text-muted-foreground">
                                 {teacher?.name || "Professor"} • {rule.frequency}
@@ -733,8 +739,8 @@ export function CurriculumVaults({
 
                 <div className="p-3 bg-accent/20 rounded-lg border">
                   <p className="text-xs text-muted-foreground mb-1">Horário transferido</p>
-                  <p className="text-sm font-semibold capitalize">
-                    {transferRule && format(new Date(transferRule.startDate), "EEEE", { locale: ptBR })} • {transferRule?.startTime}–{transferRule?.endTime}
+                  <p className="text-sm font-semibold">
+                    {transferRule && weekday(transferRule.startDate)} • {transferRule?.startTime}–{transferRule?.endTime}
                   </p>
                 </div>
               </div>
@@ -817,7 +823,7 @@ export function CurriculumVaults({
                           </Badge>
                         </div>
                         <span className="text-xs text-muted-foreground">
-                          {plan.lessons.length} lições • Criado em {format(new Date(plan.createdAt), "dd/MM/yyyy")}
+                          {plan.lessons.length} lições • Criado em {fmt.dateTime(new Date(plan.createdAt), { day: "2-digit", month: "2-digit", year: "numeric" })}
                         </span>
                       </div>
                       <BookOpen className="h-4 w-4 text-muted-foreground" />
