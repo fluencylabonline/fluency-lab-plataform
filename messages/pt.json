@@ -1792,6 +1792,7 @@
     "search_catalog": "Buscar em todas as lições da plataforma por título...",
     "catalog_no_results": "Nenhuma lição da plataforma corresponde à sua busca.",
     "catalog_add_button": "Adicionar ao plano do aluno",
+    "paste_content": "Colar conteúdo",
     "catalog_confirm_title": "Adicionar como lição oficial?",
     "catalog_confirm_desc": "Essa lição será adicionada como lição oficial para o aluno, o que vai gerar práticas diárias para ele. Se o aluno não tiver um plano, um será criado automaticamente.",
     "catalog_confirm": "Confirmar",

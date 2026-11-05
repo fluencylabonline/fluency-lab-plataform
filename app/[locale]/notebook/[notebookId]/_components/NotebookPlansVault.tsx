@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import useSWR from "swr";
 import {
   getStudentLessonsAction,
@@ -74,9 +74,33 @@ export function NotebookPlansVault({ open, onOpenChange, studentId }: NotebookPl
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeAccordion, setActiveAccordion] = useState<string[]>(["active-plan"]);
 
-  const { data: result, isLoading } = useSWR(
+  const { data: result, isLoading, mutate: mutateStudentLessons } = useSWR(
     open && studentId ? ["student-lessons", studentId] : null,
     () => getStudentLessonsAction({ studentId })
+  );
+
+  const [highlightedLessonId, setHighlightedLessonId] = useState<string | null>(null);
+  const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (highlightTimer.current) clearTimeout(highlightTimer.current);
+    };
+  }, []);
+
+  // Lição recém-adicionada ao plano: recarrega os dados, volta para a aba de planos
+  // e destaca a lição por alguns segundos com o botão "Colar conteúdo".
+  const handleCatalogLessonAdded = useCallback(
+    async (lessonId: string) => {
+      await mutateStudentLessons();
+      setSearchQuery("");
+      setTab("plans");
+      setActiveAccordion((prev) => (prev.includes("active-plan") ? prev : [...prev, "active-plan"]));
+      setHighlightedLessonId(lessonId);
+      if (highlightTimer.current) clearTimeout(highlightTimer.current);
+      highlightTimer.current = setTimeout(() => setHighlightedLessonId(null), 10000);
+    },
+    [mutateStudentLessons]
   );
 
   useEffect(() => {
@@ -224,7 +248,7 @@ export function NotebookPlansVault({ open, onOpenChange, studentId }: NotebookPl
                 lessons={catalogLessons}
                 isLoading={isCatalogLoading}
                 studentId={studentId}
-                onAdded={() => onOpenChange(false)}
+                onAdded={handleCatalogLessonAdded}
               />
             ) : isLoading ? (
               renderSkeletons()
@@ -276,10 +300,15 @@ export function NotebookPlansVault({ open, onOpenChange, studentId }: NotebookPl
                     </AccordionTrigger>
                     <AccordionContent className="pt-1 pb-3 px-4 border-t border-muted/30">
                       <div className="flex flex-col space-y-1">
-                        {filteredActivePlan.lessons.map((lesson) => (
+                        {filteredActivePlan.lessons.map((lesson) => {
+                          const isHighlighted = lesson.id === highlightedLessonId;
+                          return (
                           <div
                             key={lesson.id}
-                            className="item flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors group border border-transparent"
+                            ref={isHighlighted ? (el) => el?.scrollIntoView({ block: "center", behavior: "smooth" }) : undefined}
+                            className={`item flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors group border ${
+                              isHighlighted ? "border-primary bg-primary/10 ring-2 ring-primary/40" : "border-transparent"
+                            }`}
                           >
                             <div className="flex items-center gap-3 min-w-0">
                               <div className="p-1.5 bg-primary/10 text-primary rounded shrink-0">
@@ -300,16 +329,28 @@ export function NotebookPlansVault({ open, onOpenChange, studentId }: NotebookPl
                                 )}
                               </div>
                             </div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={() => handleInsertContent(lesson)}
-                            >
-                              <PlusCircle className="w-5 h-5 text-primary" />
-                            </Button>
+                            {isHighlighted ? (
+                              <Button
+                                size="sm"
+                                className="h-8 shrink-0 animate-pulse"
+                                onClick={() => handleInsertContent(lesson)}
+                              >
+                                <PlusCircle className="w-4 h-4" />
+                                {t("paste_content")}
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => handleInsertContent(lesson)}
+                              >
+                                <PlusCircle className="w-5 h-5 text-primary" />
+                              </Button>
+                            )}
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </AccordionContent>
                   </AccordionItem>

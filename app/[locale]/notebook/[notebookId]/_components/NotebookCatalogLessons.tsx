@@ -30,7 +30,7 @@ interface NotebookCatalogLessonsProps {
   lessons: CatalogLesson[];
   isLoading: boolean;
   studentId: string;
-  onAdded: () => void;
+  onAdded: (lessonId: string) => void | Promise<void>;
 }
 
 function CatalogLessonPreview({ lessonId }: { lessonId: string }) {
@@ -96,8 +96,10 @@ export function NotebookCatalogLessons({
       } else {
         toast.success(t("catalog_added"));
       }
+      const addedId = lessonToAdd.id;
       setLessonToAdd(null);
-      onAdded();
+      setExpanded([]);
+      await onAdded(addedId);
     } catch (error) {
       console.error("[NotebookCatalogLessons] Add error:", error);
       toast.error(t("catalog_add_error"));

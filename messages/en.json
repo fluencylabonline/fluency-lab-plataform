@@ -1792,6 +1792,7 @@
     "search_catalog": "Search all platform lessons by title...",
     "catalog_no_results": "No platform lesson matches your search.",
     "catalog_add_button": "Add to student's plan",
+    "paste_content": "Paste content",
     "catalog_confirm_title": "Add as an official lesson?",
     "catalog_confirm_desc": "This lesson will be added as an official lesson for the student, which will generate daily practices for them. If the student has no plan, one will be created automatically.",
     "catalog_confirm": "Confirm",
