@@ -40,6 +40,7 @@ import {
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import type { JSONContent } from "@tiptap/core";
+import { NotebookCatalogLessons, type CatalogLesson } from "./NotebookCatalogLessons";
 
 interface EnrichedLesson {
   id: string;
@@ -57,12 +58,6 @@ interface EnrichedPlan {
 interface StudentLessonsData {
   activePlan: EnrichedPlan | null;
   classLessons: EnrichedLesson[];
-}
-
-interface CatalogLesson {
-  id: string;
-  title: string;
-  difficulty: string;
 }
 
 interface NotebookPlansVaultProps {
@@ -225,43 +220,12 @@ export function NotebookPlansVault({ open, onOpenChange, studentId }: NotebookPl
         <VaultBody className="flex-1 overflow-hidden p-0">
           <ScrollArea className="h-[45vh] w-full px-6 py-4">
             {tab === "catalog" ? (
-              isCatalogLoading && catalogLessons.length === 0 ? (
-                renderSkeletons()
-              ) : catalogLessons.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="bg-muted rounded-full p-4 mb-4">
-                    <BookOpen className="w-8 h-8 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-lg font-bold">{t("no_lessons_found")}</h3>
-                  <p className="text-muted-foreground text-sm max-w-xs mt-1 font-normal">
-                    {t("catalog_no_results")}
-                  </p>
-                </div>
-              ) : (
-                <div className="flex flex-col space-y-1">
-                  {catalogLessons.map((lesson) => (
-                    <div
-                      key={lesson.id}
-                      className="flex items-center justify-between gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="p-1.5 bg-primary/10 text-primary rounded shrink-0">
-                          <FileText className="w-3.5 h-3.5" />
-                        </div>
-                        <span
-                          className="font-semibold text-sm text-foreground truncate"
-                          title={lesson.title}
-                        >
-                          {lesson.title}
-                        </span>
-                      </div>
-                      <Badge variant="secondary" className="shrink-0 text-[10px] font-bold">
-                        {lesson.difficulty}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              )
+              <NotebookCatalogLessons
+                lessons={catalogLessons}
+                isLoading={isCatalogLoading}
+                studentId={studentId}
+                onAdded={() => onOpenChange(false)}
+              />
             ) : isLoading ? (
               renderSkeletons()
             ) : !hasResults ? (

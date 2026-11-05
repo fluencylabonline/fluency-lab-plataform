@@ -61,6 +61,15 @@ const searchCatalogLessonsSchema = z.object({
   query: z.string().max(100),
 });
 
+const catalogLessonPreviewSchema = z.object({
+  lessonId: z.string().uuid(),
+});
+
+const addCatalogLessonSchema = z.object({
+  studentId: z.string(),
+  lessonId: z.string().uuid(),
+});
+
 const reorderLessonsSchema = z.object({
   planId: z.uuid(),
   lessonIds: z.array(z.uuid()),
@@ -637,6 +646,39 @@ export const searchCatalogLessonsAction = permissionAction("material.view")
       return { success: true, data };
     } catch (error) {
       console.error("[searchCatalogLessonsAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+export const getCatalogLessonPreviewAction = permissionAction("material.view")
+  .metadata({ name: "getCatalogLessonPreview" })
+  .schema(catalogLessonPreviewSchema)
+  .action(async ({ parsedInput }) => {
+    try {
+      const data = await learningService.getCatalogLessonPreview(parsedInput.lessonId);
+      return { success: true, data };
+    } catch (error) {
+      console.error("[getCatalogLessonPreviewAction] Error:", error);
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
+/**
+ * Adiciona uma lição do catálogo ao plano do aluno (cria o plano se necessário).
+ */
+export const addCatalogLessonToStudentPlanAction = permissionAction("material.create")
+  .metadata({ name: "addCatalogLessonToStudentPlan" })
+  .schema(addCatalogLessonSchema)
+  .action(async ({ parsedInput }) => {
+    try {
+      const data = await learningService.addCatalogLessonToStudentPlan(
+        parsedInput.studentId,
+        parsedInput.lessonId
+      );
+      refresh();
+      return { success: true, data };
+    } catch (error) {
+      console.error("[addCatalogLessonToStudentPlanAction] Error:", error);
       return { success: false, error: (error as Error).message };
     }
   });

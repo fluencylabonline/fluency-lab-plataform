@@ -1263,6 +1263,92 @@ export const learningService = {
       .limit(50);
     return rows;
   },
+
+  /** Conteúdo de uma lição do catálogo, carregado sob demanda para a pré-visualização. */
+  async getCatalogLessonPreview(lessonId: string) {
+    const lesson = await db.query.lessons.findFirst({
+      where: and(
+        eq(lessons.id, lessonId),
+        eq(lessons.status, "ready"),
+        isNull(lessons.deletedAt),
+        isNull(lessons.teacherId)
+      ),
+      columns: { id: true, title: true, difficulty: true, contentJson: true },
+    });
+    if (!lesson) throw new Error("Lição não encontrada.");
+    return lesson;
+  },
+
+  /**
+   * Adiciona uma lição do catálogo ao plano ativo do aluno (criando o plano se ele não tiver).
+   *
+   * A prática diária usa a primeira lição não concluída do plano (ver getPracticeCycle), então a
+   * lição entra nessa posição para virar a lição atual. As seguintes (inclusive a que estava em
+   * andamento, que mantém seus dias de prática) são empurradas uma posição.
+   */
+  async addCatalogLessonToStudentPlan(studentId: string, lessonId: string) {
+    const student = await db.query.usersTable.findFirst({
+      where: eq(usersTable.id, studentId),
+      columns: { id: true, name: true },
+    });
+    if (!student) throw new Error("Aluno não encontrado.");
+
+    const lesson = await db.query.lessons.findFirst({
+      where: and(
+        eq(lessons.id, lessonId),
+        eq(lessons.status, "ready"),
+        isNull(lessons.deletedAt),
+        isNull(lessons.teacherId)
+      ),
+      columns: { id: true, languageId: true },
+    });
+    if (!lesson) throw new Error("Lição não encontrada.");
+
+    return db.transaction(async (tx) => {
+      let plan = await tx.query.learningPlans.findFirst({
+        where: and(eq(learningPlans.studentId, studentId), eq(learningPlans.status, "active")),
+        with: { lessons: { orderBy: [asc(planLessons.order)] } },
+      });
+      let createdPlan = false;
+
+      if (!plan) {
+        const [created] = await tx
+          .insert(learningPlans)
+          .values({
+            studentId,
+            languageId: lesson.languageId,
+            name: "Plano de Estudos",
+            status: "active",
+          })
+          .returning();
+        plan = { ...created, lessons: [] };
+        createdPlan = true;
+      }
+
+      if (plan.lessons.some((l) => l.lessonId === lessonId)) {
+        return { planId: plan.id, createdPlan, alreadyInPlan: true };
+      }
+
+      const firstPending = plan.lessons.find((l) => !l.isCompleted);
+      const position = firstPending
+        ? firstPending.order
+        : plan.lessons.length > 0
+          ? Math.max(...plan.lessons.map((l) => l.order)) + 1
+          : 0;
+
+      if (firstPending) {
+        await tx
+          .update(planLessons)
+          .set({ order: sql`${planLessons.order} + 1` })
+          .where(and(eq(planLessons.planId, plan.id), gte(planLessons.order, position)));
+      }
+
+      await tx.insert(planLessons).values({ planId: plan.id, lessonId, order: position });
+      await tx.update(learningPlans).set({ updatedAt: new Date() }).where(eq(learningPlans.id, plan.id));
+
+      return { planId: plan.id, createdPlan, alreadyInPlan: false };
+    });
+  },
 };
 
 export function getLocalTimeDetails(date: Date, timeZone: string = "America/Sao_Paulo") {
