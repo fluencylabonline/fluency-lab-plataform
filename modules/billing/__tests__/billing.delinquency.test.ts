@@ -36,6 +36,9 @@ vi.mock("../../user/user.service", () => ({
 vi.mock("../../communication/communication.service", () => ({
   communicationService: {
     sendBillingOverdueEmail: vi.fn(),
+    sendBillingReminderEmail: vi.fn(),
+    sendBillingDueDateEmail: vi.fn(),
+    sendPaymentReminderWhatsApp: vi.fn(),
     sendPaymentOverdueWhatsApp: vi.fn(),
     sendDelinquencyEmail: vi.fn().mockResolvedValue(true),
     sendDelinquencyStudentWhatsApp: vi.fn(),
@@ -75,6 +78,7 @@ function setPolicy(start: string | null, autoCancelEnabled = false) {
 import { billingRepository } from "../billing.repository";
 import { userService } from "../../user/user.service";
 import { communicationService } from "../../communication/communication.service";
+import { notificationService } from "../../notification/notification.service";
 import { contractService } from "../../contract/contract.service";
 
 const student = { id: "student-1", name: "Aluno", email: "aluno@test.com", cellphone: "11999999999", isActive: true, locale: "pt" };
@@ -272,6 +276,62 @@ describe("Billing Service — política de inadimplência", () => {
         expect.objectContaining({ kind: "studentAccountCancelled" }),
         "pt"
       );
+      vi.unstubAllGlobals();
+    });
+  });
+
+  describe("parcela já paga no gateway (webhook perdido)", () => {
+    const stubGateway = (status: string) =>
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: { status } }) }));
+
+    it("vence hoje: dá baixa e não manda email, push nem WhatsApp", async () => {
+      stubGateway("PAID");
+      const markPaid = vi.spyOn(billingService, "markInstallmentAsPaid").mockResolvedValue({ success: true });
+      // Código ainda válido por dias: antes só o gateway sabia que já estava pago.
+      const inst = makeInstallment({ status: "pending", notifiedOverdueAt: null, notifiedDueAt: null });
+      (billingRepository.findInstallmentsInDateRange as any).mockResolvedValueOnce([]).mockResolvedValueOnce([inst]);
+      (billingRepository.findInstallmentWithDetails as any).mockResolvedValue(inst);
+      (billingRepository.findUnpaidInstallmentsDueBefore as any).mockResolvedValue([]);
+
+      await billingService.processBillingNotifications();
+
+      expect(markPaid).toHaveBeenCalledWith("inst-1", "bill_1");
+      expect(communicationService.sendBillingDueDateEmail).not.toHaveBeenCalled();
+      expect(notificationService.sendNotification).not.toHaveBeenCalled();
+      expect(communicationService.sendPaymentReminderWhatsApp).not.toHaveBeenCalled();
+      markPaid.mockRestore();
+      vi.unstubAllGlobals();
+    });
+
+    it("vence hoje e ainda não pagou: avisa normalmente", async () => {
+      stubGateway("PENDING");
+      const inst = makeInstallment({ status: "pending", notifiedOverdueAt: null, notifiedDueAt: null });
+      (billingRepository.findInstallmentsInDateRange as any).mockResolvedValueOnce([]).mockResolvedValueOnce([inst]);
+      (billingRepository.findInstallmentWithDetails as any).mockResolvedValue(inst);
+      (billingRepository.findUnpaidInstallmentsDueBefore as any).mockResolvedValue([]);
+
+      await billingService.processBillingNotifications();
+
+      expect(communicationService.sendBillingDueDateEmail).toHaveBeenCalledTimes(1);
+      expect(communicationService.sendPaymentReminderWhatsApp).toHaveBeenCalledWith(
+        expect.objectContaining({ pixPayload: "000201PIX" }),
+        "pt"
+      );
+      vi.unstubAllGlobals();
+    });
+
+    it("primeiro atraso: não marca como atrasada nem avisa admins quando já foi pago", async () => {
+      stubGateway("PAID");
+      const markPaid = vi.spyOn(billingService, "markInstallmentAsPaid").mockResolvedValue({ success: true });
+      const inst = makeInstallment({ status: "pending", notifiedOverdueAt: null });
+
+      await runOn("2026-11-12", [inst]);
+
+      expect(markPaid).toHaveBeenCalledWith("inst-1", "bill_1");
+      expect(billingRepository.updateInstallment).not.toHaveBeenCalled();
+      expect(communicationService.sendBillingOverdueEmail).not.toHaveBeenCalled();
+      expect(notificationService.sendNotification).not.toHaveBeenCalled();
+      markPaid.mockRestore();
       vi.unstubAllGlobals();
     });
   });

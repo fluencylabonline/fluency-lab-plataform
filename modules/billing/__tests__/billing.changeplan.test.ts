@@ -56,7 +56,7 @@ vi.mock("../billing.repository", () => ({
     findPlanById: vi.fn(),
     updatePlan: vi.fn(),
     updateSubscription: vi.fn(),
-    cancelPendingInstallments: vi.fn(),
+    cancelInstallmentsDueAfter: vi.fn(),
   },
 }));
 
@@ -200,7 +200,7 @@ describe("Billing Service - Plan Modification Logic", () => {
       await billingService.updateSubscription(subscriptionId, { status: "active" });
 
       expect(billingRepository.updateSubscription).toHaveBeenCalledWith(subscriptionId, { status: "active" });
-      expect(billingRepository.cancelPendingInstallments).not.toHaveBeenCalled();
+      expect(billingRepository.cancelInstallmentsDueAfter).not.toHaveBeenCalled();
     });
 
     it("SHOULD update subscription status and cancel pending installments if status is cancelled", async () => {
@@ -208,7 +208,8 @@ describe("Billing Service - Plan Modification Logic", () => {
       await billingService.updateSubscription(subscriptionId, { status: "cancelled" });
 
       expect(billingRepository.updateSubscription).toHaveBeenCalledWith(subscriptionId, { status: "cancelled" });
-      expect(billingRepository.cancelPendingInstallments).toHaveBeenCalledWith(subscriptionId);
+      // Só parcelas futuras: o segundo argumento é o "agora", que deixa as vencidas de fora.
+      expect(billingRepository.cancelInstallmentsDueAfter).toHaveBeenCalledWith(subscriptionId, expect.any(Date));
     });
   });
 });

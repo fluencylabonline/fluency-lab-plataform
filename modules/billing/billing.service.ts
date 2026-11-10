@@ -600,7 +600,9 @@ export const billingService = {
   async updateSubscription(id: string, data: Partial<Subscription>) {
     await billingRepository.updateSubscription(id, data);
     if (data.status === "cancelled") {
-      await billingRepository.cancelPendingInstallments(id);
+      // Só as parcelas futuras deixam de ser cobradas. O que já venceu e não foi
+      // pago segue registrado como dívida (pendente/em atraso).
+      await billingRepository.cancelInstallmentsDueAfter(id, new Date());
     }
   },
 
@@ -1399,7 +1401,10 @@ export const billingService = {
    * Não chama revalidatePath diretamente (exceto via markInstallmentAsPaid);
    * não use durante a renderização de um RSC.
    */
-  async ensureValidPayment(installmentId: string): Promise<
+  async ensureValidPayment(
+    installmentId: string,
+    options: { verifyGateway?: boolean } = {}
+  ): Promise<
     | { status: "paid" }
     | { status: "ready"; pixPayload: string; pixImage: string | null; currency: string }
     | { status: "unavailable" }
@@ -1414,7 +1419,11 @@ export const billingService = {
     const isFresh =
       !!inst.paymentExpiresAt && inst.paymentExpiresAt.getTime() - Date.now() > MIN_PAYMENT_VALIDITY_MS;
 
-    if (hasCharge && isFresh && inst.pixPayload) {
+    // Código ainda válido: só reaproveita sem consultar o gateway quando quem chamou
+    // não precisa saber se já foi pago. Os avisos de cobrança precisam
+    // (verifyGateway): se o webhook falhou, a parcela pode estar paga no gateway e
+    // pendente aqui, e o aluno não pode ser cobrado por algo que já pagou.
+    if (hasCharge && isFresh && inst.pixPayload && !options.verifyGateway) {
       return { status: "ready", pixPayload: inst.pixPayload, pixImage: inst.pixImage, currency };
     }
 
@@ -1423,6 +1432,11 @@ export const billingService = {
       if (gateway.state === "paid") {
         await this.markInstallmentAsPaid(inst.id, gateway.reference);
         return { status: "paid" };
+      }
+      // Verificação pedida, código ainda vale e o gateway não o deu como vencido
+      // (ou não respondeu): segue com o código atual, sem gerar outro.
+      if (options.verifyGateway && isFresh && inst.pixPayload && gateway.state !== "expired") {
+        return { status: "ready", pixPayload: inst.pixPayload, pixImage: inst.pixImage, currency };
       }
       if (isUsd && gateway.state === "open" && inst.stripePaymentIntentId?.startsWith("cs_")) {
         try {
@@ -1740,6 +1754,10 @@ export const billingService = {
       const student = inst.subscription.student;
       const amountStr = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(inst.amount / 100);
 
+      // Já pago no gateway (webhook perdido)? Dá baixa e não cobra por nenhum canal.
+      const payment = await this.ensureValidPayment(inst.id, { verifyGateway: true });
+      if (payment.status === "paid") continue;
+
       // Email
       await communicationService.sendBillingReminderEmail(student.email, {
         studentName: student.name,
@@ -1758,19 +1776,15 @@ export const billingService = {
         actionUrl: "/hub/student/payments",
       });
 
-      // WhatsApp — com o código conferido/renovado antes do envio
-      if (student.cellphone) {
-        const payment = await this.ensureValidPayment(inst.id);
-        if (payment.status === "paid") continue;
-        if (payment.status === "ready") {
-          await communicationService.sendPaymentReminderWhatsApp({
-            cellphone: student.cellphone,
-            studentName: student.name,
-            amount: inst.amount,
-            dueDate: inst.dueDate,
-            pixPayload: payment.pixPayload,
-          }, recipientLocale(student));
-        }
+      // WhatsApp — com o código já conferido/renovado acima
+      if (student.cellphone && payment.status === "ready") {
+        await communicationService.sendPaymentReminderWhatsApp({
+          cellphone: student.cellphone,
+          studentName: student.name,
+          amount: inst.amount,
+          dueDate: inst.dueDate,
+          pixPayload: payment.pixPayload,
+        }, recipientLocale(student));
       }
 
       await billingRepository.updateInstallment(inst.id, { notified2dAt: new Date() });
@@ -1789,6 +1803,10 @@ export const billingService = {
       const student = inst.subscription.student;
       const amountStr = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(inst.amount / 100);
 
+      // Já pago no gateway (webhook perdido)? Dá baixa e não cobra por nenhum canal.
+      const payment = await this.ensureValidPayment(inst.id, { verifyGateway: true });
+      if (payment.status === "paid") continue;
+
       await communicationService.sendBillingDueDateEmail(student.email, {
         studentName: student.name,
         amount: inst.amount,
@@ -1805,17 +1823,14 @@ export const billingService = {
       });
 
       // WhatsApp no dia do vencimento (antes só ia email e push)
-      if (student.cellphone) {
-        const payment = await this.ensureValidPayment(inst.id);
-        if (payment.status === "ready") {
-          await communicationService.sendPaymentReminderWhatsApp({
-            cellphone: student.cellphone,
-            studentName: student.name,
-            amount: inst.amount,
-            dueDate: inst.dueDate,
-            pixPayload: payment.pixPayload,
-          }, recipientLocale(student));
-        }
+      if (student.cellphone && payment.status === "ready") {
+        await communicationService.sendPaymentReminderWhatsApp({
+          cellphone: student.cellphone,
+          studentName: student.name,
+          amount: inst.amount,
+          dueDate: inst.dueDate,
+          pixPayload: payment.pixPayload,
+        }, recipientLocale(student));
       }
 
       await billingRepository.updateInstallment(inst.id, { notifiedDueAt: new Date() });
@@ -1911,6 +1926,11 @@ export const billingService = {
     const amountStr = formatMoney(inst.amount, currency);
     const now = new Date();
 
+    // Já pago no gateway (webhook perdido)? Dá baixa e não marca como atrasada,
+    // nem avisa o aluno ou os admins.
+    const verified = await this.ensureValidPayment(inst.id, { verifyGateway: true });
+    if (verified.status === "paid") return;
+
     await billingRepository.updateInstallment(inst.id, {
       status: "overdue",
       notifiedOverdueAt: inst.notifiedOverdueAt ?? now,
@@ -1947,7 +1967,7 @@ export const billingService = {
     const student = inst.subscription.student!;
     const amountStr = formatMoney(inst.amount, inst.subscription.plan?.currency || "BRL");
 
-    const payment = await this.ensureValidPayment(inst.id);
+    const payment = await this.ensureValidPayment(inst.id, { verifyGateway: true });
     if (payment.status === "paid") return;
 
     await communicationService.sendBillingOverdueEmail(student.email, {
@@ -1995,7 +2015,7 @@ export const billingService = {
     const amountStr = formatMoney(inst.amount, currency);
     const studentLocale = recipientLocale(student);
 
-    const payment = await this.ensureValidPayment(inst.id);
+    const payment = await this.ensureValidPayment(inst.id, { verifyGateway: true });
     if (payment.status === "paid") return;
 
     await communicationService.sendDelinquencyEmail(student.email, {
@@ -2087,7 +2107,7 @@ export const billingService = {
     const currency = inst.subscription.plan?.currency || "BRL";
     const locale = recipientLocale(student);
 
-    const payment = await this.ensureValidPayment(inst.id);
+    const payment = await this.ensureValidPayment(inst.id, { verifyGateway: true });
     if (payment.status === "paid") return;
 
     const cancelDay: CivilDate = { year: today.month === 11 ? today.year + 1 : today.year, month: (today.month + 1) % 12, day: 1 };
@@ -2132,7 +2152,7 @@ export const billingService = {
     const amountStr = formatMoney(inst.amount, currency);
     const locale = recipientLocale(student);
 
-    const payment = await this.ensureValidPayment(inst.id);
+    const payment = await this.ensureValidPayment(inst.id, { verifyGateway: true });
     if (payment.status === "paid") return;
 
     await communicationService.sendDelinquencyEmail(student.email, {
