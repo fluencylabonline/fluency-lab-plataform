@@ -8,7 +8,7 @@ import {
   Subscription, 
   Installment 
 } from "./billing.schema";
-import { eq, and, lte, gt, between, sum, ne, count, inArray } from "drizzle-orm";
+import { eq, and, lte, gt, between, sum, count, inArray } from "drizzle-orm";
 
 export const billingRepository = {
   // Audit
@@ -110,17 +110,9 @@ export const billingRepository = {
   async updateInstallment(id: string, data: Partial<Installment>) {
     await db.update(installmentsTable).set(data).where(eq(installmentsTable.id, id));
   },
-  async cancelPendingInstallments(subscriptionId: string) {
-    await db.update(installmentsTable)
-      .set({ status: "cancelled" })
-      .where(
-        and(
-          eq(installmentsTable.subscriptionId, subscriptionId),
-          ne(installmentsTable.status, "paid")
-        )
-      );
-  },
-  // Cancela as parcelas ainda não vencidas (as vencidas ficam como dívida).
+  // Cancela as parcelas ainda não vencidas. As vencidas e não pagas (pendentes ou
+  // em atraso) NUNCA são tocadas: continuam como dívida do aluno, mesmo depois de
+  // a assinatura ser cancelada.
   async cancelInstallmentsDueAfter(subscriptionId: string, date: Date) {
     await db.update(installmentsTable)
       .set({ status: "cancelled" })

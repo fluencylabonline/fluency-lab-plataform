@@ -600,7 +600,9 @@ export const billingService = {
   async updateSubscription(id: string, data: Partial<Subscription>) {
     await billingRepository.updateSubscription(id, data);
     if (data.status === "cancelled") {
-      await billingRepository.cancelPendingInstallments(id);
+      // Só as parcelas futuras deixam de ser cobradas. O que já venceu e não foi
+      // pago segue registrado como dívida (pendente/em atraso).
+      await billingRepository.cancelInstallmentsDueAfter(id, new Date());
     }
   },
 
