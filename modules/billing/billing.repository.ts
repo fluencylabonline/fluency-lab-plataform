@@ -110,19 +110,35 @@ export const billingRepository = {
   async updateInstallment(id: string, data: Partial<Installment>) {
     await db.update(installmentsTable).set(data).where(eq(installmentsTable.id, id));
   },
-  // Cancela as parcelas ainda não vencidas. As vencidas e não pagas (pendentes ou
-  // em atraso) NUNCA são tocadas: continuam como dívida do aluno, mesmo depois de
-  // a assinatura ser cancelada.
-  async cancelInstallmentsDueAfter(subscriptionId: string, date: Date) {
-    await db.update(installmentsTable)
-      .set({ status: "cancelled" })
-      .where(
-        and(
-          eq(installmentsTable.subscriptionId, subscriptionId),
-          inArray(installmentsTable.status, ["pending", "overdue"]),
-          gt(installmentsTable.dueDate, date)
-        )
-      );
+  // `lastOverdueDate` é o último vencimento que já conta como vencido (ver
+  // lastOverdueDueDate). Parcelas com vencimento depois dele são canceladas. As
+  // vencidas e não pagas NUNCA são canceladas: continuam como dívida do aluno,
+  // mesmo depois de a assinatura ser cancelada. As que ainda estavam "pendentes"
+  // viram "em atraso", porque nenhuma rotina de cobrança as alcança mais (exigem
+  // assinatura ativa) e a cobrança passa a ser manual.
+  async cancelInstallmentsDueAfter(subscriptionId: string, lastOverdueDate: Date) {
+    // As duas atualizações valem juntas ou nenhuma: sem isso uma falha no meio
+    // deixaria dívida vencida ainda como "pendente".
+    await db.transaction(async (tx) => {
+      await tx.update(installmentsTable)
+        .set({ status: "cancelled" })
+        .where(
+          and(
+            eq(installmentsTable.subscriptionId, subscriptionId),
+            inArray(installmentsTable.status, ["pending", "overdue"]),
+            gt(installmentsTable.dueDate, lastOverdueDate)
+          )
+        );
+      await tx.update(installmentsTable)
+        .set({ status: "overdue" })
+        .where(
+          and(
+            eq(installmentsTable.subscriptionId, subscriptionId),
+            eq(installmentsTable.status, "pending"),
+            lte(installmentsTable.dueDate, lastOverdueDate)
+          )
+        );
+    });
   },
   async findSubscriptionsForCron(date: Date) {
     // Subscriptions that have an installment due in exactly 7 days

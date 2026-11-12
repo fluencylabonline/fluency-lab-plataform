@@ -9,6 +9,7 @@ import {
   brtDayRangeUtc,
   isUnderPolicy,
   renewalDueDates,
+  lastOverdueDueDate,
 } from "../billing.dates";
 
 const iso = (dates: Date[]) => dates.map((d) => d.toISOString().slice(0, 10));
@@ -116,5 +117,21 @@ describe("billing.dates — calendário da política de inadimplência", () => {
     expect(isUnderPolicy(new Date("2026-10-31T00:00:00Z"), start)).toBe(false);
     expect(isUnderPolicy(new Date("2026-11-01T00:00:00Z"), start)).toBe(true);
     expect(isUnderPolicy(new Date("2026-11-10T00:00:00Z"), null)).toBe(false);
+  });
+});
+
+describe("billing.dates - lastOverdueDueDate", () => {
+  it("vencimento de hoje em Brasilia ainda nao conta como vencido", () => {
+    // 15:00Z = 12:00 em Brasilia de 11/11: corte e o fim de 10/11 em UTC
+    const cutoff = lastOverdueDueDate(new Date("2026-11-11T15:00:00Z"));
+    expect(cutoff.toISOString()).toBe("2026-11-10T23:59:59.999Z");
+    expect(new Date("2026-11-11T00:00:00Z").getTime()).toBeGreaterThan(cutoff.getTime());
+    expect(new Date("2026-11-10T00:00:00Z").getTime()).toBeLessThanOrEqual(cutoff.getTime());
+  });
+
+  it("22h em Brasilia (ja e o dia seguinte em UTC) usa o dia civil de Brasilia", () => {
+    // 01:00Z de 11/11 = 22:00 de 10/11 em Brasilia
+    const cutoff = lastOverdueDueDate(new Date("2026-11-11T01:00:00Z"));
+    expect(cutoff.toISOString()).toBe("2026-11-09T23:59:59.999Z");
   });
 });

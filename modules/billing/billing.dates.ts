@@ -36,6 +36,16 @@ export function dueCivilDate(dueDate: Date): CivilDate {
   return { year: d.getUTCFullYear(), month: d.getUTCMonth(), day: d.getUTCDate() };
 }
 
+/**
+ * Último vencimento que já conta como vencido em `now`: o instante imediatamente
+ * antes da meia-noite UTC do dia civil de Brasília. Vencimentos são gravados à
+ * meia-noite UTC do dia, então "venceu antes de hoje" é `dueDate <= isto`.
+ */
+export function lastOverdueDueDate(now: Date): Date {
+  const today = brtCivilDate(now);
+  return new Date(Date.UTC(today.year, today.month, today.day) - 1);
+}
+
 /** Índice absoluto do mês, para comparar meses sem se preocupar com virada de ano. */
 export function monthIndex(d: CivilDate): number {
   return d.year * 12 + d.month;
