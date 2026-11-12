@@ -131,10 +131,13 @@ describe("Billing Service — política de inadimplência", () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     setPolicy("2026-11-01");
     (userService.getUser as any).mockImplementation(async (id: string) => (id === teacher.id ? teacher : student));
+    // Gateway responde "ainda não pago" por padrão; cada teste troca quando precisa.
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: { status: "PENDING" } }) }));
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllGlobals();
   });
 
   describe("lembretes de 3 em 3 dias", () => {
@@ -280,6 +283,34 @@ describe("Billing Service — política de inadimplência", () => {
     });
   });
 
+  describe("cancelamento automático com gateway fora do ar", () => {
+    it("há cobrança e o gateway não respondeu: adia o cancelamento", async () => {
+      setPolicy("2026-11-01", true);
+      (contractService.getContractBySubscriptionId as any).mockResolvedValue({ id: "contract-1" });
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) }));
+
+      await runOn("2027-01-01", [makeInstallment({ blockedAt: new Date("2026-12-01T03:00:00Z") })]);
+
+      expect(billingRepository.cancelInstallmentsDueAfter).not.toHaveBeenCalled();
+      expect(contractService.finalizeCancellation).not.toHaveBeenCalled();
+      expect(communicationService.sendDelinquencyEmail).not.toHaveBeenCalled();
+    });
+
+    it("sem cobrança gerada não há o que conferir: cancela normalmente", async () => {
+      setPolicy("2026-11-01", true);
+      (contractService.getContractBySubscriptionId as any).mockResolvedValue({ id: "contract-1" });
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+
+      await runOn("2027-01-01", [makeInstallment({
+        blockedAt: new Date("2026-12-01T03:00:00Z"), abacatePayBillingId: null, pixPayload: null,
+      })]);
+
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(contractService.finalizeCancellation).toHaveBeenCalledWith("contract-1");
+    });
+  });
+
   describe("parcela já paga no gateway (webhook perdido)", () => {
     const stubGateway = (status: string) =>
       vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: { status } }) }));
@@ -363,6 +394,153 @@ describe("Billing Service — política de inadimplência", () => {
       );
       generate.mockRestore();
       vi.unstubAllGlobals();
+    });
+  });
+  describe("gateway sem resposta, erro isolado e conferência única", () => {
+    it("gateway fora do ar: não avisa e não marca atraso (tenta na próxima rodada)", async () => {
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) }));
+      const inst = makeInstallment({ status: "pending", notifiedOverdueAt: null });
+
+      await runOn("2026-11-12", [inst]);
+
+      expect(billingRepository.updateInstallment).not.toHaveBeenCalled();
+      expect(communicationService.sendBillingOverdueEmail).not.toHaveBeenCalled();
+      expect(notificationService.sendNotification).not.toHaveBeenCalled();
+    });
+
+    it("lembrete de 2 dias: gateway fora do ar não avisa nem marca como notificada", async () => {
+      vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("timeout")));
+      const inst = makeInstallment({ status: "pending", notified2dAt: null, notifiedOverdueAt: null });
+      (billingRepository.findInstallmentsInDateRange as any).mockResolvedValueOnce([inst]).mockResolvedValueOnce([]);
+      (billingRepository.findInstallmentWithDetails as any).mockResolvedValue(inst);
+      (billingRepository.findUnpaidInstallmentsDueBefore as any).mockResolvedValue([]);
+
+      await billingService.processBillingNotifications();
+
+      expect(communicationService.sendBillingReminderEmail).not.toHaveBeenCalled();
+      expect(billingRepository.updateInstallment).not.toHaveBeenCalled();
+    });
+
+    it("erro numa parcela não derruba as outras nem a política de inadimplência", async () => {
+      const bad = makeInstallment({ id: "inst-bad", status: "pending", notifiedDueAt: null, notifiedOverdueAt: null });
+      const good = makeInstallment({ id: "inst-good", status: "pending", notifiedDueAt: null, notifiedOverdueAt: null });
+      (billingRepository.findInstallmentsInDateRange as any).mockResolvedValueOnce([]).mockResolvedValueOnce([bad, good]);
+      (billingRepository.findInstallmentWithDetails as any).mockImplementation(async (id: string) => {
+        if (id === "inst-bad") throw new Error("db caiu");
+        return good;
+      });
+      (billingRepository.findUnpaidInstallmentsDueBefore as any).mockResolvedValue([]);
+
+      await expect(billingService.processBillingNotifications()).resolves.toBeUndefined();
+
+      expect(communicationService.sendBillingDueDateEmail).toHaveBeenCalledTimes(1);
+      expect(billingRepository.findUnpaidInstallmentsDueBefore).toHaveBeenCalled();
+    });
+
+    it("mais antiga já paga no gateway: a próxima parcela é avisada como a mais antiga", async () => {
+      const paid = makeInstallment({ id: "inst-a", status: "pending", notifiedOverdueAt: null, abacatePayBillingId: "bill_a" });
+      const next = makeInstallment({
+        id: "inst-b", status: "pending", notifiedOverdueAt: null, abacatePayBillingId: "bill_b",
+        dueDate: new Date("2026-11-11T00:00:00Z"),
+      });
+      vi.stubGlobal("fetch", vi.fn().mockImplementation(async (url: string) => ({
+        ok: true,
+        json: async () => ({ data: { status: url.includes("bill_a") ? "PAID" : "PENDING" } }),
+      })));
+      const markPaid = vi.spyOn(billingService, "markInstallmentAsPaid").mockResolvedValue({ success: true });
+
+      await runOn("2026-11-12", [paid, next]);
+
+      expect(markPaid).toHaveBeenCalledWith("inst-a", "bill_a");
+      expect(communicationService.sendBillingOverdueEmail).toHaveBeenCalledTimes(1);
+      expect(billingRepository.updateInstallment).toHaveBeenCalledWith(
+        "inst-b",
+        expect.objectContaining({ status: "overdue", overdueReminderCount: 2 })
+      );
+      markPaid.mockRestore();
+    });
+
+    it("gateway fora do ar na mais antiga: a parcela seguinte não é cobrada no lugar dela", async () => {
+      const older = makeInstallment({ id: "inst-a", status: "pending", notifiedOverdueAt: null, abacatePayBillingId: "bill_a" });
+      const newer = makeInstallment({
+        id: "inst-b", status: "pending", notifiedOverdueAt: null, abacatePayBillingId: "bill_b",
+        dueDate: new Date("2026-11-11T00:00:00Z"),
+      });
+      vi.stubGlobal("fetch", vi.fn().mockImplementation(async (url: string) =>
+        url.includes("bill_a")
+          ? { ok: false, json: async () => ({}) }
+          : { ok: true, json: async () => ({ data: { status: "PENDING" } }) }
+      ));
+
+      await runOn("2026-11-12", [older, newer]);
+
+      expect(communicationService.sendBillingOverdueEmail).not.toHaveBeenCalled();
+      expect(billingRepository.updateInstallment).not.toHaveBeenCalledWith("inst-a", expect.anything());
+    });
+
+    it("lembrete de 3 dias com gateway fora do ar não conta como enviado", async () => {
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) }));
+
+      await runOn("2026-11-14", [makeInstallment()]);
+
+      expect(communicationService.sendBillingOverdueEmail).not.toHaveBeenCalled();
+      expect(billingRepository.updateInstallment).not.toHaveBeenCalled();
+    });
+
+    it("aviso final sai mesmo com o gateway fora do ar (bloqueio vem amanhã de qualquer jeito)", async () => {
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) }));
+
+      await runOn("2026-11-30", [makeInstallment()]);
+
+      const kinds = (communicationService.sendDelinquencyEmail as any).mock.calls.map((c: any[]) => c[1].kind);
+      expect(kinds).toContain("studentFinalWarning");
+    });
+
+    it("aviso de cancelamento sai mesmo com o gateway fora do ar", async () => {
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) }));
+
+      await runOn("2026-12-31", [makeInstallment({ blockedAt: new Date("2026-12-01T03:00:00Z") })]);
+
+      const kinds = (communicationService.sendDelinquencyEmail as any).mock.calls.map((c: any[]) => c[1].kind);
+      expect(kinds).toEqual(["studentCancelWarning"]);
+    });
+
+    it("primeiro atraso consulta o gateway uma vez só", async () => {
+      const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: { status: "PENDING" } }) });
+      vi.stubGlobal("fetch", fetchMock);
+
+      await runOn("2026-11-12", [makeInstallment({ status: "pending", notifiedOverdueAt: null })]);
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(communicationService.sendBillingOverdueEmail).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("reenvio manual e página de pagamento", () => {
+    it("reenvio manual confere o gateway mesmo com o código ainda válido", async () => {
+      const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: { status: "PAID" } }) });
+      vi.stubGlobal("fetch", fetchMock);
+      const markPaid = vi.spyOn(billingService, "markInstallmentAsPaid").mockResolvedValue({ success: true });
+      const inst = makeInstallment({ status: "pending" });
+      (billingRepository.findInstallmentWithDetails as any).mockResolvedValue(inst);
+
+      await expect(billingService.resendInstallmentReminder("inst-1")).rejects.toThrow(/já consta como paga/);
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(communicationService.sendBillingReminderEmail).not.toHaveBeenCalled();
+      markPaid.mockRestore();
+    });
+
+    it("página de pagamento reaproveita o código válido sem ir ao gateway", async () => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+      const inst = makeInstallment({ status: "pending" });
+      (billingRepository.findInstallmentWithDetails as any).mockResolvedValue(inst);
+
+      const result = await billingService.ensureValidPayment("inst-1", { verifyGateway: false });
+
+      expect(result).toMatchObject({ status: "ready", pixPayload: "000201PIX" });
+      expect(fetchMock).not.toHaveBeenCalled();
     });
   });
 });

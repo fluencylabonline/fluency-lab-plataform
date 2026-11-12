@@ -26,6 +26,7 @@ import {
   monthsPastDue,
   isUnderPolicy,
   dueCivilDate,
+  lastOverdueDueDate,
   renewalDueDates,
   type CivilDate,
   DELINQUENCY_REMINDER_INTERVAL_DAYS,
@@ -37,6 +38,8 @@ import {
 // Sessões do Stripe duram no máximo 24h, então para USD isso quase sempre gera
 // uma sessão nova a cada envio — é o comportamento desejado.
 const MIN_PAYMENT_VALIDITY_MS = 12 * 60 * 60 * 1000;
+/** Tempo máximo de cada consulta ao gateway (AbacatePay/Stripe). */
+const GATEWAY_TIMEOUT_MS = 8000;
 
 /**
  * Política de inadimplência configurada pelo admin (Configurações → Políticas).
@@ -62,6 +65,13 @@ function recipientLocale(user: { locale?: string | null }): "pt" | "en" {
 }
 
 const PAYMENTS_URL = () => `${env.NEXT_PUBLIC_APP_URL}/hub/student/payments`;
+
+/** Resultado de `ensureValidPayment`. */
+type PaymentCheck =
+  | { status: "paid" }
+  | { status: "ready"; pixPayload: string; pixImage: string | null; currency: string }
+  | { status: "unverified" }
+  | { status: "unavailable" };
 
 type GatewayState = { state: "paid"; reference: string } | { state: "open" | "expired" | "unknown" };
 
@@ -600,9 +610,9 @@ export const billingService = {
   async updateSubscription(id: string, data: Partial<Subscription>) {
     await billingRepository.updateSubscription(id, data);
     if (data.status === "cancelled") {
-      // Só as parcelas futuras deixam de ser cobradas. O que já venceu e não foi
-      // pago segue registrado como dívida (pendente/em atraso).
-      await billingRepository.cancelInstallmentsDueAfter(id, new Date());
+      // Só as parcelas que ainda não venceram (hoje em Brasília inclusive) deixam
+      // de ser cobradas. O que já venceu e não foi pago segue como dívida (em atraso).
+      await billingRepository.cancelInstallmentsDueAfter(id, lastOverdueDueDate(new Date()));
     }
   },
 
@@ -1354,7 +1364,7 @@ export const billingService = {
         const id = installment.stripePaymentIntentId;
         if (!id) return { state: "unknown" };
         if (id.startsWith("cs_")) {
-          const session = await stripe.checkout.sessions.retrieve(id);
+          const session = await stripe.checkout.sessions.retrieve(id, {}, { timeout: GATEWAY_TIMEOUT_MS });
           if (session.payment_status === "paid") {
             const ref = typeof session.payment_intent === "string" ? session.payment_intent : session.id;
             return { state: "paid", reference: ref };
@@ -1362,7 +1372,7 @@ export const billingService = {
           if (session.status === "expired") return { state: "expired" };
           return { state: "open" };
         }
-        const intent = await stripe.paymentIntents.retrieve(id);
+        const intent = await stripe.paymentIntents.retrieve(id, {}, { timeout: GATEWAY_TIMEOUT_MS });
         if (intent.status === "succeeded") return { state: "paid", reference: intent.id };
         return intent.status === "canceled" ? { state: "expired" } : { state: "open" };
       }
@@ -1375,6 +1385,8 @@ export const billingService = {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${env.ABACATEPAY_API_KEY}`,
         },
+        // Sem limite, um gateway lento seguraria o cron inteiro. Estourar cai no catch.
+        signal: AbortSignal.timeout(GATEWAY_TIMEOUT_MS),
       });
       if (!res.ok) return { state: "unknown" };
       const result = await res.json();
@@ -1391,12 +1403,20 @@ export const billingService = {
   /**
    * Garante que a parcela tem um código de pagamento válido antes de um envio.
    *
-   * - Código válido por mais de 12h: usa o atual.
-   * - Sem código, vencido ou vencendo: consulta o gateway primeiro. Se já foi
-   *   pago, dá baixa e não cobra. Senão gera um novo, sem disparar mensagens
+   * Consulta o gateway sempre que há cobrança (`verifyGateway`, padrão), porque
+   * se o webhook falhou a parcela pode estar paga lá e pendente aqui, e o aluno
+   * não pode ser cobrado por algo que já pagou.
+   * - Já pago no gateway: dá baixa e devolve "paid".
+   * - Gateway não respondeu: devolve "unverified". Quem chamou NÃO deve enviar
+   *   nada e tenta de novo na próxima rodada.
+   * - Código ainda válido (mais de 12h) e não vencido no gateway: usa o atual.
+   * - Sem código, vencido ou vencendo: gera um novo, sem disparar mensagens
    *   (quem chamou envia o lembrete com o código novo).
    * - Stripe: expira a sessão antiga antes de criar outra, para o aluno não
    *   conseguir pagar duas vezes.
+   *
+   * `verifyGateway: false` é só para quem exibe o código (página de pagamento
+   * obrigatório): com código ainda válido reaproveita sem consultar o gateway.
    *
    * Não chama revalidatePath diretamente (exceto via markInstallmentAsPaid);
    * não use durante a renderização de um RSC.
@@ -1404,11 +1424,8 @@ export const billingService = {
   async ensureValidPayment(
     installmentId: string,
     options: { verifyGateway?: boolean } = {}
-  ): Promise<
-    | { status: "paid" }
-    | { status: "ready"; pixPayload: string; pixImage: string | null; currency: string }
-    | { status: "unavailable" }
-  > {
+  ): Promise<PaymentCheck> {
+    const verifyGateway = options.verifyGateway ?? true;
     const inst = await billingRepository.findInstallmentWithDetails(installmentId);
     if (!inst) return { status: "unavailable" };
     if (inst.status === "paid") return { status: "paid" };
@@ -1418,14 +1435,15 @@ export const billingService = {
     const hasCharge = isUsd ? !!inst.stripePaymentIntentId : !!inst.abacatePayBillingId;
     const isFresh =
       !!inst.paymentExpiresAt && inst.paymentExpiresAt.getTime() - Date.now() > MIN_PAYMENT_VALIDITY_MS;
+    const reusable = hasCharge && isFresh && !!inst.pixPayload;
+    const current = () => ({
+      status: "ready" as const,
+      pixPayload: inst.pixPayload!,
+      pixImage: inst.pixImage,
+      currency,
+    });
 
-    // Código ainda válido: só reaproveita sem consultar o gateway quando quem chamou
-    // não precisa saber se já foi pago. Os avisos de cobrança precisam
-    // (verifyGateway): se o webhook falhou, a parcela pode estar paga no gateway e
-    // pendente aqui, e o aluno não pode ser cobrado por algo que já pagou.
-    if (hasCharge && isFresh && inst.pixPayload && !options.verifyGateway) {
-      return { status: "ready", pixPayload: inst.pixPayload, pixImage: inst.pixImage, currency };
-    }
+    if (reusable && !verifyGateway) return current();
 
     if (hasCharge) {
       const gateway = await this.getGatewayPaymentState(inst, isUsd);
@@ -1433,11 +1451,10 @@ export const billingService = {
         await this.markInstallmentAsPaid(inst.id, gateway.reference);
         return { status: "paid" };
       }
-      // Verificação pedida, código ainda vale e o gateway não o deu como vencido
-      // (ou não respondeu): segue com o código atual, sem gerar outro.
-      if (options.verifyGateway && isFresh && inst.pixPayload && gateway.state !== "expired") {
-        return { status: "ready", pixPayload: inst.pixPayload, pixImage: inst.pixImage, currency };
-      }
+      // Sem resposta do gateway não dá para saber se foi pago: não cobra nem gera outro.
+      if (verifyGateway && gateway.state === "unknown") return { status: "unverified" };
+      // Código ainda vale e o gateway não o deu como vencido: segue com o atual.
+      if (reusable && gateway.state !== "expired") return current();
       if (isUsd && gateway.state === "open" && inst.stripePaymentIntentId?.startsWith("cs_")) {
         try {
           await stripe.checkout.sessions.expire(inst.stripePaymentIntentId);
@@ -1532,7 +1549,8 @@ export const billingService = {
     if (!installments.some((i) => i.id === installmentId)) {
       throw new Error("Parcela não encontrada");
     }
-    return this.ensureValidPayment(installmentId);
+    // A página só exibe o código: com ele ainda válido não precisa ir ao gateway.
+    return this.ensureValidPayment(installmentId, { verifyGateway: false });
   },
 
   /** Alunos que estarão bloqueados no dia informado (usado no cancelamento de aulas). */
@@ -1754,40 +1772,47 @@ export const billingService = {
       const student = inst.subscription.student;
       const amountStr = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(inst.amount / 100);
 
-      // Já pago no gateway (webhook perdido)? Dá baixa e não cobra por nenhum canal.
-      const payment = await this.ensureValidPayment(inst.id, { verifyGateway: true });
-      if (payment.status === "paid") continue;
+      // Uma parcela com erro não pode derrubar as demais nem a política de inadimplência.
+      // Gateway sem resposta ("unverified"): não avisa. O cron é diário e a janela
+      // é de um dia, então este lembrete é perdido; o aviso seguinte cobre.
+      try {
+        // Já pago no gateway (webhook perdido)? Dá baixa e não cobra por nenhum canal.
+        const payment = await this.ensureValidPayment(inst.id, { verifyGateway: true });
+        if (payment.status === "paid" || payment.status === "unverified") continue;
 
-      // Email
-      await communicationService.sendBillingReminderEmail(student.email, {
-        studentName: student.name,
-        amount: inst.amount,
-        dueDate: inst.dueDate,
-        checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/hub/student/payments`,
-      });
-
-      // Push & In-App
-      await notificationService.sendNotification({
-        title: "\u23F3 Sua fatura vence em breve",
-        body: `Lembrete: Sua fatura de ${amountStr} vence em 2 dias. Evite atrasos!`,
-        targetType: "specific",
-        userIds: [student.id],
-        channels: { inApp: true, push: true },
-        actionUrl: "/hub/student/payments",
-      });
-
-      // WhatsApp — com o código já conferido/renovado acima
-      if (student.cellphone && payment.status === "ready") {
-        await communicationService.sendPaymentReminderWhatsApp({
-          cellphone: student.cellphone,
+        // Email
+        await communicationService.sendBillingReminderEmail(student.email, {
           studentName: student.name,
           amount: inst.amount,
           dueDate: inst.dueDate,
-          pixPayload: payment.pixPayload,
-        }, recipientLocale(student));
-      }
+          checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/hub/student/payments`,
+        });
 
-      await billingRepository.updateInstallment(inst.id, { notified2dAt: new Date() });
+        // Push & In-App
+        await notificationService.sendNotification({
+          title: "\u23F3 Sua fatura vence em breve",
+          body: `Lembrete: Sua fatura de ${amountStr} vence em 2 dias. Evite atrasos!`,
+          targetType: "specific",
+          userIds: [student.id],
+          channels: { inApp: true, push: true },
+          actionUrl: "/hub/student/payments",
+        });
+
+        // WhatsApp — com o código já conferido/renovado acima
+        if (student.cellphone && payment.status === "ready") {
+          await communicationService.sendPaymentReminderWhatsApp({
+            cellphone: student.cellphone,
+            studentName: student.name,
+            amount: inst.amount,
+            dueDate: inst.dueDate,
+            pixPayload: payment.pixPayload,
+          }, recipientLocale(student));
+        }
+
+        await billingRepository.updateInstallment(inst.id, { notified2dAt: new Date() });
+      } catch (error) {
+        console.error(`[BillingService.processBillingNotifications] 2-day reminder failed for ${inst.id}:`, error);
+      }
     }
 
     // --- CASE 2: Due Today ---
@@ -1803,37 +1828,44 @@ export const billingService = {
       const student = inst.subscription.student;
       const amountStr = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(inst.amount / 100);
 
-      // Já pago no gateway (webhook perdido)? Dá baixa e não cobra por nenhum canal.
-      const payment = await this.ensureValidPayment(inst.id, { verifyGateway: true });
-      if (payment.status === "paid") continue;
+      // Uma parcela com erro não pode derrubar as demais nem a política de inadimplência.
+      // Gateway sem resposta ("unverified"): não avisa. O cron é diário e a janela
+      // é de um dia, então este lembrete é perdido; o aviso seguinte cobre.
+      try {
+        // Já pago no gateway (webhook perdido)? Dá baixa e não cobra por nenhum canal.
+        const payment = await this.ensureValidPayment(inst.id, { verifyGateway: true });
+        if (payment.status === "paid" || payment.status === "unverified") continue;
 
-      await communicationService.sendBillingDueDateEmail(student.email, {
-        studentName: student.name,
-        amount: inst.amount,
-        checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/hub/student/payments`,
-      });
-
-      await notificationService.sendNotification({
-        title: "\u23F0 Vencimento hoje!",
-        body: `Sua mensalidade de ${amountStr} vence hoje. Clique para pagar via PIX.`,
-        targetType: "specific",
-        userIds: [student.id],
-        channels: { inApp: true, push: true },
-        actionUrl: "/hub/student/payments",
-      });
-
-      // WhatsApp no dia do vencimento (antes só ia email e push)
-      if (student.cellphone && payment.status === "ready") {
-        await communicationService.sendPaymentReminderWhatsApp({
-          cellphone: student.cellphone,
+        await communicationService.sendBillingDueDateEmail(student.email, {
           studentName: student.name,
           amount: inst.amount,
-          dueDate: inst.dueDate,
-          pixPayload: payment.pixPayload,
-        }, recipientLocale(student));
-      }
+          checkoutUrl: `${env.NEXT_PUBLIC_APP_URL}/hub/student/payments`,
+        });
 
-      await billingRepository.updateInstallment(inst.id, { notifiedDueAt: new Date() });
+        await notificationService.sendNotification({
+          title: "\u23F0 Vencimento hoje!",
+          body: `Sua mensalidade de ${amountStr} vence hoje. Clique para pagar via PIX.`,
+          targetType: "specific",
+          userIds: [student.id],
+          channels: { inApp: true, push: true },
+          actionUrl: "/hub/student/payments",
+        });
+
+        // WhatsApp no dia do vencimento (antes só ia email e push)
+        if (student.cellphone && payment.status === "ready") {
+          await communicationService.sendPaymentReminderWhatsApp({
+            cellphone: student.cellphone,
+            studentName: student.name,
+            amount: inst.amount,
+            dueDate: inst.dueDate,
+            pixPayload: payment.pixPayload,
+          }, recipientLocale(student));
+        }
+
+        await billingRepository.updateInstallment(inst.id, { notifiedDueAt: new Date() });
+      } catch (error) {
+        console.error(`[BillingService.processBillingNotifications] due-today reminder failed for ${inst.id}:`, error);
+      }
     }
 
     // --- CASE 3: Atraso, bloqueio e cancelamento (política de inadimplência) ---
@@ -1858,7 +1890,7 @@ export const billingService = {
     const today = brtCivilDate(now);
     const { start: policyStart, autoCancelEnabled } = await getDelinquencyPolicy();
     // Vencimentos são gravados à meia-noite UTC do dia: "venceu antes de hoje".
-    const dueBeforeToday = new Date(Date.UTC(today.year, today.month, today.day) - 1);
+    const dueBeforeToday = lastOverdueDueDate(now);
     const unpaid = await billingRepository.findUnpaidInstallmentsDueBefore(dueBeforeToday);
 
     const handledSubscriptions = new Set<string>();
@@ -1871,13 +1903,15 @@ export const billingService = {
 
       try {
         const isOldest = !handledSubscriptions.has(sub.id);
-        handledSubscriptions.add(sub.id);
 
-        // 1º dia de atraso (comportamento original, agora para todas as parcelas)
+        // 1º dia de atraso (comportamento original, agora para todas as parcelas).
+        // Se a mais antiga estava paga no gateway, nada foi enviado: a próxima
+        // parcela da assinatura passa a ser a "mais antiga".
         if (inst.status === "pending" || !inst.notifiedOverdueAt) {
-          await this.sendFirstOverdueNotice(inst, isOldest);
+          if (await this.sendFirstOverdueNotice(inst, isOldest)) handledSubscriptions.add(sub.id);
           continue;
         }
+        handledSubscriptions.add(sub.id);
         if (!isOldest) continue;
 
         const months = monthsPastDue(inst.dueDate, today);
@@ -1920,7 +1954,7 @@ export const billingService = {
   async sendFirstOverdueNotice(
     inst: Awaited<ReturnType<typeof billingRepository.findUnpaidInstallmentsDueBefore>>[number],
     notifyStudent: boolean
-  ) {
+  ): Promise<boolean> {
     const student = inst.subscription.student!;
     const currency = inst.subscription.plan?.currency || "BRL";
     const amountStr = formatMoney(inst.amount, currency);
@@ -1928,8 +1962,29 @@ export const billingService = {
 
     // Já pago no gateway (webhook perdido)? Dá baixa e não marca como atrasada,
     // nem avisa o aluno ou os admins.
-    const verified = await this.ensureValidPayment(inst.id, { verifyGateway: true });
-    if (verified.status === "paid") return;
+    // Quem vai receber a mensagem precisa do código conferido; as demais parcelas
+    // só precisam saber se foram pagas (não gera cobrança que ninguém vai receber).
+    let payment: PaymentCheck | undefined;
+    if (notifyStudent) {
+      payment = await this.ensureValidPayment(inst.id, { verifyGateway: true });
+      // Paga: nada a cobrar aqui, a próxima parcela passa a ser a mais antiga.
+      if (payment.status === "paid") return false;
+      // Gateway sem resposta: não marca atraso nem avisa, tenta na próxima rodada.
+      // A assinatura conta como tratada, para a parcela seguinte não ser cobrada
+      // do aluno no lugar desta.
+      if (payment.status === "unverified") return true;
+    } else {
+      const isUsd = (inst.subscription.plan?.currency || "BRL") === "USD";
+      const hasCharge = isUsd ? !!inst.stripePaymentIntentId : !!inst.abacatePayBillingId;
+      if (hasCharge) {
+        const gateway = await this.getGatewayPaymentState(inst, isUsd);
+        if (gateway.state === "paid") {
+          await this.markInstallmentAsPaid(inst.id, gateway.reference);
+          return true;
+        }
+        if (gateway.state === "unknown") return true;
+      }
+    }
 
     await billingRepository.updateInstallment(inst.id, {
       status: "overdue",
@@ -1938,7 +1993,7 @@ export const billingService = {
     });
 
     if (notifyStudent) {
-      await this.sendOverdueMessages(inst);
+      await this.sendOverdueMessages(inst, payment);
     }
 
     // Notify Admin & Manager about overdue payment
@@ -1958,17 +2013,23 @@ export const billingService = {
     } catch (err) {
       console.error("[BillingService] Failed to send overdue admin notification:", err);
     }
+    return true;
   },
 
-  /** Email + push + WhatsApp de "mensalidade em atraso", com código válido. */
+  /**
+   * Email + push + WhatsApp de "mensalidade em atraso", com código válido.
+   * `checked` é o resultado de uma conferência recém-feita da mesma parcela, para
+   * não consultar o gateway duas vezes.
+   */
   async sendOverdueMessages(
-    inst: Awaited<ReturnType<typeof billingRepository.findUnpaidInstallmentsDueBefore>>[number]
-  ) {
+    inst: Awaited<ReturnType<typeof billingRepository.findUnpaidInstallmentsDueBefore>>[number],
+    checked?: PaymentCheck
+  ): Promise<boolean> {
     const student = inst.subscription.student!;
     const amountStr = formatMoney(inst.amount, inst.subscription.plan?.currency || "BRL");
 
-    const payment = await this.ensureValidPayment(inst.id, { verifyGateway: true });
-    if (payment.status === "paid") return;
+    const payment = checked ?? await this.ensureValidPayment(inst.id, { verifyGateway: true });
+    if (payment.status === "paid" || payment.status === "unverified") return false;
 
     await communicationService.sendBillingOverdueEmail(student.email, {
       studentName: student.name,
@@ -1993,12 +2054,15 @@ export const billingService = {
         pixPayload: payment.pixPayload,
       }, recipientLocale(student));
     }
+    return true;
   },
 
   async sendOverdueReminder(
     inst: Awaited<ReturnType<typeof billingRepository.findUnpaidInstallmentsDueBefore>>[number]
   ) {
-    await this.sendOverdueMessages(inst);
+    // Nada enviado (paga ou gateway sem resposta): não conta como lembrete, para
+    // a próxima rodada tentar de novo em vez de esperar o intervalo inteiro.
+    if (!(await this.sendOverdueMessages(inst))) return;
     await billingRepository.updateInstallment(inst.id, {
       lastOverdueReminderAt: new Date(),
       overdueReminderCount: inst.overdueReminderCount + 1,
@@ -2015,6 +2079,8 @@ export const billingService = {
     const amountStr = formatMoney(inst.amount, currency);
     const studentLocale = recipientLocale(student);
 
+    // Aviso de um dia só, e a consequência (bloqueio/cancelamento) vem amanhã de
+    // qualquer jeito: se o gateway não respondeu, avisa mesmo assim (sem o código).
     const payment = await this.ensureValidPayment(inst.id, { verifyGateway: true });
     if (payment.status === "paid") return;
 
@@ -2108,7 +2174,7 @@ export const billingService = {
     const locale = recipientLocale(student);
 
     const payment = await this.ensureValidPayment(inst.id, { verifyGateway: true });
-    if (payment.status === "paid") return;
+    if (payment.status === "paid" || payment.status === "unverified") return;
 
     const cancelDay: CivilDate = { year: today.month === 11 ? today.year + 1 : today.year, month: (today.month + 1) % 12, day: 1 };
     await communicationService.sendDelinquencyEmail(student.email, {
@@ -2152,6 +2218,8 @@ export const billingService = {
     const amountStr = formatMoney(inst.amount, currency);
     const locale = recipientLocale(student);
 
+    // Aviso de um dia só, e a consequência (bloqueio/cancelamento) vem amanhã de
+    // qualquer jeito: se o gateway não respondeu, avisa mesmo assim (sem o código).
     const payment = await this.ensureValidPayment(inst.id, { verifyGateway: true });
     if (payment.status === "paid") return;
 
@@ -2236,16 +2304,25 @@ export const billingService = {
     const dueMonth = format(inst.dueDate, "MM/yyyy");
 
     // Última checagem: pode ter sido pago agora há pouco.
-    const gateway = await this.getGatewayPaymentState(inst, currency === "USD");
+    const isUsd = currency === "USD";
+    const hasCharge = isUsd ? !!inst.stripePaymentIntentId : !!inst.abacatePayBillingId;
+    const gateway = await this.getGatewayPaymentState(inst, isUsd);
     if (gateway.state === "paid") {
       await this.markInstallmentAsPaid(inst.id, gateway.reference);
+      return;
+    }
+    // Há cobrança mas o gateway não respondeu: não dá para saber se foi paga.
+    // Cancelar é irreversível para o aluno, então espera a próxima rodada (a
+    // parcela continua elegível amanhã). Sem cobrança gerada não há o que conferir.
+    if (hasCharge && gateway.state === "unknown") {
+      console.warn(`[BillingService.cancelSubscriptionForDelinquency] Gateway sem resposta para ${inst.id}; cancelamento adiado.`);
       return;
     }
 
     // Professores antes de finalizar: o cancelamento libera as regras do aluno.
     const teachers = await this.getTeachersOfStudent(student.id);
 
-    await billingRepository.cancelInstallmentsDueAfter(sub.id, new Date());
+    await billingRepository.cancelInstallmentsDueAfter(sub.id, lastOverdueDueDate(new Date()));
     await billingRepository.createAuditLog({
       installmentId: inst.id,
       actorId: "system",
@@ -2474,6 +2551,9 @@ export const billingService = {
     const payment = await this.ensureValidPayment(installmentId);
     if (payment.status === "paid") {
       throw new Error("Esta parcela já consta como paga no gateway. O status foi atualizado.");
+    }
+    if (payment.status === "unverified") {
+      throw new Error("Não foi possível confirmar o pagamento no gateway agora. Tente novamente em instantes.");
     }
     if (payment.status === "unavailable") {
       throw new Error("Não foi possível gerar um código de pagamento válido para esta parcela.");
