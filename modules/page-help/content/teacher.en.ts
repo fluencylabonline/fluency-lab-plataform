@@ -216,7 +216,7 @@ export const TEACHER_HELP_EN: RoleHelpContent<TeacherHelpRoute> = {
         id: "plan",
         target: "teacher-student-detail.plan",
         title: "Study plan",
-        text: "The student's lesson path. You can add a single lesson, apply a whole plan template and reorder what is already there. This is what the student sees as their path in their Notebook.",
+        text: "The student's lesson path. You can add a single lesson, apply a whole plan template and reorder what is already there. You can also create a plan from scratch with only the lessons you pick, and open View plans to see the student's plan history. This is what the student sees as their path in their Notebook.",
       },
       {
         id: "classes",

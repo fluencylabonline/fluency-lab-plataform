@@ -842,6 +842,7 @@ export function StudentPlanCard({
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [editSession, setEditSession] = useState(0);
 
   const monthNames = [
     tMonths("january"),
@@ -888,6 +889,13 @@ export function StudentPlanCard({
   const handleEditOpenChange = (open: boolean) => {
     setIsVaultOpen(open);
     if (!open) router.refresh();
+  };
+
+  // Each opening remounts the editor so it always starts from the current plan
+  // (otherwise it keeps the lessons of the plan it was first rendered with).
+  const openEditor = () => {
+    setEditSession((s) => s + 1);
+    setIsVaultOpen(true);
   };
 
   // ── No active plan ──────────────────────────────────────────────────────────
@@ -985,7 +993,7 @@ export function StudentPlanCard({
                     size="icon"
                     variant="ghost"
                     className="h-8 w-8 rounded-lg"
-                    onClick={() => setIsVaultOpen(true)}
+                    onClick={openEditor}
                   >
                     <Edit className="h-4 w-4 text-muted-foreground hover:text-primary" />
                   </Button>
@@ -1149,6 +1157,7 @@ export function StudentPlanCard({
 
       {/* Edit Plan Vault */}
       <EditPlanVault
+        key={`${initialData.id}-${editSession}`}
         open={isVaultOpen}
         onOpenChange={handleEditOpenChange}
         planId={initialData.id}
