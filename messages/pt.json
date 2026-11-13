@@ -4709,7 +4709,9 @@
       "description": "A trilha pedagógica e progresso do aluno.",
       "intro": "O <strong>Plano de Estudos</strong> define a sequência de lições estruturadas que o aluno irá cursar.",
       "add": "Adicione lições da biblioteca oficial para criar um roteiro sob medida.",
-      "track": "Acompanhe o status de conclusão de cada lição e o progresso da prática diária do estudante."
+      "track": "Acompanhe o status de conclusão de cada lição e o progresso da prática diária do estudante.",
+      "scratch": "Prefere montar tudo você mesmo? Use <strong>Criar do zero</strong> para começar um plano vazio e adicionar só as lições que achar necessárias.",
+      "history": "Use <strong>Ver planos</strong>, ao lado do ícone de editar, para consultar o histórico de todos os planos que o aluno já teve e criar um novo."
     }
   },
   "TeacherStudentsHelp": {

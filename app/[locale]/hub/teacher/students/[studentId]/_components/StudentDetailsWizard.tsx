@@ -92,6 +92,8 @@ export function StudentDetailsWizard({ open, onOpenChange, onComplete }: Student
           <ul className="space-y-2">
             <Bullet color="bg-emerald-500">{t("roadmap.add")}</Bullet>
             <Bullet color="bg-emerald-500">{t("roadmap.track")}</Bullet>
+            <Bullet color="bg-emerald-500">{t.rich("roadmap.scratch", { strong })}</Bullet>
+            <Bullet color="bg-emerald-500">{t.rich("roadmap.history", { strong })}</Bullet>
           </ul>
         </div>
       ),

@@ -4709,7 +4709,9 @@
       "description": "The student's learning path and progress.",
       "intro": "The <strong>Study plan</strong> defines the sequence of structured lessons the student will take.",
       "add": "Add lessons from the official library to build a tailored path.",
-      "track": "Track the completion status of each lesson and the student's daily practice progress."
+      "track": "Track the completion status of each lesson and the student's daily practice progress.",
+      "scratch": "Prefer to build it yourself? Use <strong>Create from scratch</strong> to start an empty plan and add only the lessons you find necessary.",
+      "history": "Use <strong>View plans</strong>, next to the edit icon, to browse the history of every plan the student has had and to create a new one."
     }
   },
   "TeacherStudentsHelp": {

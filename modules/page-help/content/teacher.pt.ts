@@ -218,7 +218,7 @@ export const TEACHER_HELP_PT: RoleHelpContent<TeacherHelpRoute> = {
         id: "plan",
         target: "teacher-student-detail.plan",
         title: "Plano de estudos",
-        text: "A trilha de lições do aluno. Dá para adicionar uma lição solta, aplicar um modelo de plano inteiro e reordenar o que já existe. É isto que o aluno vê como trilha no Caderno dele.",
+        text: "A trilha de lições do aluno. Dá para adicionar uma lição solta, aplicar um modelo de plano inteiro e reordenar o que já existe. Também dá para criar um plano do zero, só com as lições que você escolher, e abrir Ver planos para consultar o histórico de planos do aluno. É isto que o aluno vê como trilha no Caderno dele.",
       },
       {
         id: "classes",
