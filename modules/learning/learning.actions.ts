@@ -255,6 +255,22 @@ export const assignPlanAction = permissionAction("material.create")
   });
 
 /**
+ * Action to create an empty plan for a student, built from scratch by the teacher.
+ */
+export const createStudentPlanAction = permissionAction("material.create")
+  .metadata({ name: "createStudentPlan" })
+  .schema(z.object({
+    studentId: z.string(),
+    name: z.string().trim().min(3).max(255),
+    languageId: z.uuid(),
+  }))
+  .action(async ({ parsedInput }) => {
+    const plan = await learningService.createBlankStudentPlan(parsedInput);
+    refresh();
+    return { success: true, planId: plan.id };
+  });
+
+/**
  * Action to get plan gap analysis for a student.
  */
 export const getStudentPlanGapAction = permissionAction("material.view")

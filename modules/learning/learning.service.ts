@@ -425,6 +425,29 @@ export const learningService = {
   },
 
   /**
+   * Creates an empty personalized plan for a student (teacher builds the sequence by hand).
+   * Replaces the student's current active plan, like assigning a template does.
+   */
+  async createBlankStudentPlan(params: { studentId: string; name: string; languageId: string }) {
+    return db.transaction(async (tx) => {
+      await tx.update(learningPlans)
+        .set({ status: "completed", updatedAt: new Date() })
+        .where(and(
+          eq(learningPlans.studentId, params.studentId),
+          eq(learningPlans.status, "active")
+        ));
+
+      const [plan] = await tx.insert(learningPlans).values({
+        name: params.name.trim(),
+        languageId: params.languageId,
+        studentId: params.studentId,
+        status: "active",
+      }).returning();
+      return plan;
+    });
+  },
+
+  /**
    * Links a plan's lessons to upcoming scheduled classes in order.
    */
   async linkPlanToUpcomingClasses(studentId: string, planId: string, startClassId?: string) {
