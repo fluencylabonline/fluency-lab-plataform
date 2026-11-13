@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useTransition, useCallback } from "react";
+import { useState, useMemo, useTransition, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
@@ -53,8 +53,13 @@ import {
   reorderLessonsAction,
   removeLessonFromPlanAction,
   addLessonToPlanAction,
+  createStudentPlanAction,
+  getStudentPlansAction,
 } from "@/modules/learning/learning.actions";
-import { getLessonsAction } from "@/modules/curriculum/curriculum.actions";
+import {
+  getLessonsAction,
+  getLanguagesAction,
+} from "@/modules/curriculum/curriculum.actions";
 import type { LessonSummary } from "@/modules/curriculum/curriculum.types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -97,24 +102,21 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 interface AddLessonVaultProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  planId: string;
   languageId: string;
   existingLessonIds: string[];
-  onAdded: () => void;
+  /** Optimistic: the parent adds to its list right away and syncs with the server. */
+  onAdd: (lesson: LessonSummary) => void;
 }
 
 function AddLessonVault({
   open,
   onOpenChange,
-  planId,
   languageId,
   existingLessonIds,
-  onAdded,
+  onAdd,
 }: AddLessonVaultProps) {
   const t = useTranslations("PlanCard");
   const [search, setSearch] = useState("");
-  const [isPending, startTransition] = useTransition();
-  const [addingId, setAddingId] = useState<string | null>(null);
 
   const { data, isLoading } = useSWR(
     open ? ["catalog-lessons", languageId, search] : null,
@@ -122,23 +124,6 @@ function AddLessonVault({
   );
 
   const lessons = (data?.data ?? []) as LessonSummary[];
-
-  const handleAdd = useCallback(
-    (lessonId: string) => {
-      startTransition(async () => {
-        setAddingId(lessonId);
-        const result = await addLessonToPlanAction({ planId, lessonId });
-        if (result?.data?.success) {
-          notify.success(t("lessonAdded"));
-          onAdded();
-        } else {
-          notify.error(result?.serverError ?? t("lessonAddError"));
-        }
-        setAddingId(null);
-      });
-    },
-    [planId, onAdded, t]
-  );
 
   return (
     <Vault open={open} onOpenChange={onOpenChange}>
@@ -188,7 +173,6 @@ function AddLessonVault({
               ) : (
                 lessons.map((lesson) => {
                   const alreadyAdded = existingLessonIds.includes(lesson.id);
-                  const isAdding = addingId === lesson.id;
                   return (
                     <div
                       key={lesson.id}
@@ -215,13 +199,11 @@ function AddLessonVault({
                       </div>
                       <button
                         type="button"
-                        disabled={alreadyAdded || isPending}
-                        onClick={() => handleAdd(lesson.id)}
-                        className="shrink-0 h-8 w-8 rounded-lg flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                        disabled={alreadyAdded}
+                        onClick={() => onAdd(lesson)}
+                        className="shrink-0 h-8 w-8 rounded-lg flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:pointer-events-none"
                       >
-                        {isAdding ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : alreadyAdded ? (
+                        {alreadyAdded ? (
                           <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                         ) : (
                           <Plus className="h-4 w-4" />
@@ -374,6 +356,240 @@ function AssignTemplateVault({
   );
 }
 
+// ─── Sub-vault: Create plan from scratch ─────────────────────────────────────
+
+interface CreatePlanVaultProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  studentId: string;
+  onCreated: () => void;
+}
+
+function CreatePlanVault({
+  open,
+  onOpenChange,
+  studentId,
+  onCreated,
+}: CreatePlanVaultProps) {
+  const t = useTranslations("PlanCard");
+  const [name, setName] = useState("");
+  const [languageId, setLanguageId] = useState<string>("");
+  const [isPending, startTransition] = useTransition();
+
+  const { data } = useSWR(open ? "curriculum-languages" : null, () =>
+    getLanguagesAction({})
+  );
+  const languages = (data?.data ?? []) as { id: string; name: string }[];
+  const selectedLanguageId = languageId || languages[0]?.id || "";
+  const canCreate = name.trim().length >= 3 && !!selectedLanguageId;
+
+  const handleCreate = () => {
+    if (!canCreate) return;
+    startTransition(async () => {
+      const result = await createStudentPlanAction({
+        studentId,
+        name: name.trim(),
+        languageId: selectedLanguageId,
+      });
+      if (result?.data?.success) {
+        notify.success(t("planCreated"));
+        setName("");
+        onCreated();
+        onOpenChange(false);
+      } else {
+        notify.error(result?.serverError ?? t("planCreateError"));
+      }
+    });
+  };
+
+  return (
+    <Vault open={open} onOpenChange={onOpenChange}>
+      <VaultContent className="max-w-lg">
+        <VaultHeader>
+          <VaultTitle>{t("createFromScratchTitle")}</VaultTitle>
+          <VaultDescription>
+            {t("createFromScratchDescription")}
+          </VaultDescription>
+        </VaultHeader>
+        <VaultBody>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                {t("planNameLabel")}
+              </label>
+              <input
+                type="text"
+                value={name}
+                maxLength={255}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={t("planNamePlaceholder")}
+                className="w-full px-3 py-2.5 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                {t("languageLabel")}
+              </label>
+              <Select
+                value={selectedLanguageId}
+                onValueChange={setLanguageId}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {languages.map((lang) => (
+                    <SelectItem key={lang.id} value={lang.id}>
+                      {lang.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </VaultBody>
+        <VaultFooter>
+          <VaultPrimaryButton
+            onClick={handleCreate}
+            disabled={!canCreate || isPending}
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {t("creating")}
+              </>
+            ) : (
+              t("createPlan")
+            )}
+          </VaultPrimaryButton>
+        </VaultFooter>
+      </VaultContent>
+    </Vault>
+  );
+}
+
+// ─── Sub-vault: Plans history ────────────────────────────────────────────────
+
+interface StudentPlanHistoryItem {
+  id: string;
+  name: string;
+  status: string;
+  createdAt: Date | string;
+  language?: { name: string } | null;
+  lessons: { isCompleted: boolean }[];
+}
+
+const STATUS_STYLES: Record<string, string> = {
+  active: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  completed: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  paused: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+};
+
+interface PlansHistoryVaultProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  studentId: string;
+  onCreateFromScratch: () => void;
+}
+
+function PlansHistoryVault({
+  open,
+  onOpenChange,
+  studentId,
+  onCreateFromScratch,
+}: PlansHistoryVaultProps) {
+  const t = useTranslations("PlanCard");
+  const locale = useLocale();
+  const dateLocale = locale === "pt" ? ptBR : enUS;
+
+  const { data, isLoading } = useSWR(
+    open ? ["student-plans-history", studentId] : null,
+    () => getStudentPlansAction({ studentId })
+  );
+
+  const plans = ((data?.data?.success ? data.data.data : null) ??
+    []) as StudentPlanHistoryItem[];
+
+  return (
+    <Vault open={open} onOpenChange={onOpenChange}>
+      <VaultContent className="max-w-xl max-h-[85vh]">
+        <VaultHeader>
+          <VaultTitle>{t("historyTitle")}</VaultTitle>
+          <VaultDescription>{t("historyDescription")}</VaultDescription>
+        </VaultHeader>
+        <VaultBody>
+          <div className="flex flex-col gap-2 overflow-y-auto max-h-[55vh] no-scrollbar">
+            {isLoading ? (
+              [1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="item flex flex-col gap-2 p-4 animate-pulse"
+                >
+                  <div className="h-4 bg-muted rounded w-2/3" />
+                  <div className="h-3 bg-muted rounded w-1/2" />
+                </div>
+              ))
+            ) : plans.length === 0 ? (
+              <div className="py-12 text-center text-muted-foreground">
+                <GraduationCap className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                <p className="text-sm">{t("historyEmpty")}</p>
+              </div>
+            ) : (
+              plans.map((plan) => {
+                const total = plan.lessons.length;
+                const done = plan.lessons.filter((l) => l.isCompleted).length;
+                const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+                return (
+                  <div key={plan.id} className="item flex flex-col gap-2 p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold text-sm truncate">
+                        {plan.name}
+                      </span>
+                      <Badge
+                        className={cn(
+                          "text-[10px] rounded-full shrink-0 border-transparent",
+                          STATUS_STYLES[plan.status] ??
+                            "bg-gray-100 text-gray-600"
+                        )}
+                      >
+                        {t(`status_${plan.status}` as never)}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      {plan.language?.name && <span>{plan.language.name}</span>}
+                      {plan.language?.name && <span>·</span>}
+                      <span>
+                        {t("historyProgress", { done, total })}
+                      </span>
+                      <span>·</span>
+                      <span>
+                        {format(new Date(plan.createdAt), "dd MMM yyyy", {
+                          locale: dateLocale,
+                        })}
+                      </span>
+                    </div>
+                    <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </VaultBody>
+        <VaultFooter>
+          <VaultPrimaryButton onClick={onCreateFromScratch}>
+            {t("createFromScratch")}
+          </VaultPrimaryButton>
+        </VaultFooter>
+      </VaultContent>
+    </Vault>
+  );
+}
+
 // ─── Sub-vault: Edit Plan Lessons ────────────────────────────────────────────
 
 interface EditPlanVaultProps {
@@ -382,7 +598,6 @@ interface EditPlanVaultProps {
   planId: string;
   languageId: string;
   initialLessons: StudentRoadmap["lessons"];
-  onSaved: () => void;
 }
 
 function EditPlanVault({
@@ -391,7 +606,6 @@ function EditPlanVault({
   planId,
   languageId,
   initialLessons,
-  onSaved,
 }: EditPlanVaultProps) {
   const t = useTranslations("PlanCard");
   const [lessons, setLessons] = useState(
@@ -400,6 +614,14 @@ function EditPlanVault({
   const [isPending, startTransition] = useTransition();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
+
+  // Server calls run one at a time so add/remove/reorder never race each other.
+  const queueRef = useRef<Promise<unknown>>(Promise.resolve());
+  const enqueue = <T,>(job: () => Promise<T>): Promise<T> => {
+    const next = queueRef.current.then(job, job);
+    queueRef.current = next.catch(() => undefined);
+    return next;
+  };
 
   // Reset state when vault opens
   const handleOpenChange = (newOpen: boolean) => {
@@ -421,37 +643,66 @@ function EditPlanVault({
     setIsDirty(true);
   };
 
+  // Optimistic: the row disappears immediately; it comes back if the server fails.
   const remove = (lessonId: string) => {
-    startTransition(async () => {
-      const result = await removeLessonFromPlanAction({ planId, lessonId });
-      if (result?.data?.success) {
-        setLessons((prev) => prev.filter((l) => l.id !== lessonId));
-        notify.success(t("lessonRemoved"));
-        onSaved();
-      } else {
-        notify.error(result?.serverError ?? t("lessonRemoveError"));
-      }
-    });
+    const index = lessons.findIndex((l) => l.id === lessonId);
+    if (index === -1) return;
+    const removed = lessons[index];
+    setLessons((prev) => prev.filter((l) => l.id !== lessonId));
+
+    enqueue(() => removeLessonFromPlanAction({ planId, lessonId }))
+      .then((result) => {
+        if (!result?.data?.success) throw new Error(result?.serverError);
+      })
+      .catch((error: Error) => {
+        setLessons((prev) => {
+          if (prev.some((l) => l.id === lessonId)) return prev;
+          const copy = [...prev];
+          copy.splice(Math.min(index, copy.length), 0, removed);
+          return copy;
+        });
+        notify.error(error?.message || t("lessonRemoveError"));
+      });
+  };
+
+  // Optimistic: the lesson shows up in the list (and the + turns into a check) right away.
+  const addLesson = (lesson: LessonSummary) => {
+    if (lessons.some((l) => l.id === lesson.id)) return;
+    setLessons((prev) => [
+      ...prev,
+      {
+        id: lesson.id,
+        title: lesson.title,
+        isCompleted: false,
+        status: "future",
+        order: prev.length,
+        completedPracticeDays: 0,
+      },
+    ]);
+
+    enqueue(() => addLessonToPlanAction({ planId, lessonId: lesson.id }))
+      .then((result) => {
+        if (!result?.data?.success) throw new Error(result?.serverError);
+      })
+      .catch((error: Error) => {
+        setLessons((prev) => prev.filter((l) => l.id !== lesson.id));
+        notify.error(error?.message || t("lessonAddError"));
+      });
   };
 
   const saveOrder = () => {
+    const lessonIds = lessons.map((l) => l.id);
     startTransition(async () => {
-      const lessonIds = lessons.map((l) => l.id);
-      const result = await reorderLessonsAction({ planId, lessonIds });
+      const result = await enqueue(() =>
+        reorderLessonsAction({ planId, lessonIds })
+      );
       if (result?.data?.success) {
         notify.success(t("orderSaved"));
         setIsDirty(false);
-        onSaved();
       } else {
         notify.error(result?.serverError ?? t("orderSaveError"));
       }
     });
-  };
-
-  const handleLessonAdded = () => {
-    onSaved();
-    // Refresh the local lesson list from parent after server revalidates
-    onOpenChange(false);
   };
 
   return (
@@ -560,10 +811,9 @@ function EditPlanVault({
       <AddLessonVault
         open={isAddOpen}
         onOpenChange={setIsAddOpen}
-        planId={planId}
         languageId={languageId}
         existingLessonIds={lessons.map((l) => l.id)}
-        onAdded={handleLessonAdded}
+        onAdd={addLesson}
       />
     </>
   );
@@ -590,6 +840,8 @@ export function StudentPlanCard({
     new Date().getFullYear()
   );
   const [isVaultOpen, setIsVaultOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const monthNames = [
     tMonths("january"),
@@ -632,9 +884,10 @@ export function StudentPlanCard({
     }
   };
 
-  const handleMutated = () => {
-    router.refresh();
-    setIsVaultOpen(false);
+  // Edits are optimistic inside the vault; sync the page when it closes.
+  const handleEditOpenChange = (open: boolean) => {
+    setIsVaultOpen(open);
+    if (!open) router.refresh();
   };
 
   // ── No active plan ──────────────────────────────────────────────────────────
@@ -656,13 +909,29 @@ export function StudentPlanCard({
               "Este aluno ainda não possui um plano de estudos vinculado."}
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsVaultOpen(true)}
-        >
-          {t("createPlan") || "Criar Plano"}
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsVaultOpen(true)}
+          >
+            {t("createPlan") || "Criar Plano"}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsCreateOpen(true)}
+          >
+            {t("createFromScratch")}
+          </Button>
+        </div>
+
+        <CreatePlanVault
+          open={isCreateOpen}
+          onOpenChange={setIsCreateOpen}
+          studentId={studentId}
+          onCreated={() => router.refresh()}
+        />
 
         <AssignTemplateVault
           open={isVaultOpen}
@@ -704,6 +973,14 @@ export function StudentPlanCard({
                   >
                     {initialData.progress}%
                   </Badge>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 rounded-lg text-xs text-muted-foreground hover:text-primary"
+                    onClick={() => setIsHistoryOpen(true)}
+                  >
+                    {t("viewPlans")}
+                  </Button>
                   <Button
                     size="icon"
                     variant="ghost"
@@ -854,14 +1131,29 @@ export function StudentPlanCard({
         </div>
       </div>
 
+      <PlansHistoryVault
+        open={isHistoryOpen}
+        onOpenChange={setIsHistoryOpen}
+        studentId={studentId}
+        onCreateFromScratch={() => {
+          setIsHistoryOpen(false);
+          setIsCreateOpen(true);
+        }}
+      />
+      <CreatePlanVault
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+        studentId={studentId}
+        onCreated={() => router.refresh()}
+      />
+
       {/* Edit Plan Vault */}
       <EditPlanVault
         open={isVaultOpen}
-        onOpenChange={setIsVaultOpen}
+        onOpenChange={handleEditOpenChange}
         planId={initialData.id}
         languageId={initialData.languageId}
         initialLessons={initialData.lessons}
-        onSaved={handleMutated}
       />
     </>
   );
